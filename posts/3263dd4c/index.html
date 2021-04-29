@@ -477,23 +477,23 @@
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">set.seed(<span class="number">1</span>)</span><br><span class="line">g&lt;-<span class="number">9.8</span><span class="comment">##meters per second</span></span><br><span class="line">n&lt;-<span class="number">25</span></span><br><span class="line">tt&lt;-seq(<span class="number">0</span>,<span class="number">3.4</span>,len=n)<span class="comment">##time in secs, note: we use tt because t is a base function</span></span><br><span class="line">d&lt;-<span class="number">56.67</span>-<span class="number">0.5</span>*g*tt^<span class="number">2</span>+rnorm(n,sd=<span class="number">1</span>)<span class="comment">##meters</span></span><br><span class="line"><span class="comment">#rnorm 生成25个服从(0,1) 分布的随机数，模拟随机残差</span></span><br><span class="line"></span><br><span class="line">plot(tt,d,ylab=<span class="string">&quot;Distance in meters&quot;</span>,xlab=<span class="string">&quot;Time in seconds&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>你不知道高度与时间的准确的关系式，但是你根据图片，推断可能符合的模型如下：</p>
-<p><img src="D:\Desktop\markdown\Data_science\falling_objects1.png"></p>
+<p><img src="falling_objects1.png"></p>
 <h3 id="父亲和儿子的身高"><a href="#父亲和儿子的身高" class="headerlink" title="父亲和儿子的身高"></a>父亲和儿子的身高</h3><p>现在假设你是19世纪的Francis Galton ，然后你获得了成对的父亲与儿子的身高数据。你假设身高是受遗传影响的。</p>
 <p>你拿到的数据如下：</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">library(UsingR)</span><br><span class="line">x=father.son$fheight</span><br><span class="line">y=father.son$sheight</span><br><span class="line">plot(x,y,xlab=<span class="string">&quot;Father&#x27;s height&quot;</span>,ylab=<span class="string">&quot;Son&#x27;s height&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>貌似是符合一元线性模型。于是，你设计出的模型如下：</p>
-<p><img src="D:\Desktop\markdown\Data_science\father_son1.png"></p>
+<p><img src="father_son1.png"></p>
 <h3 id="从多个群体中随机抽样"><a href="#从多个群体中随机抽样" class="headerlink" title="从多个群体中随机抽样"></a>从多个群体中随机抽样</h3><p>现在我们重新读取小鼠的体重数据。我们感兴趣的是diet是否对体重有影响。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dat&lt;-read.csv(<span class="string">&quot;femaleMiceWeights.csv&quot;</span>)</span><br><span class="line">stripchart(Bodyweight~Diet,data=dat,vertical=<span class="literal">TRUE</span>,method=<span class="string">&quot;jitter&quot;</span>,pch=<span class="number">1</span>,main=<span class="string">&quot;Mice weights&quot;</span>)</span><br><span class="line"><span class="comment">##stripchart 成串的散点图，当数据量较少时，是箱线图的有效代替</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>我们已经证明了如何使用t检验和置信区间来证明两个群体的平均体重是否有差异。但是，用线性模型也可以做到。</p>
-<p><img src="D:\Desktop\markdown\Data_science\liner_model_mice1.png"></p>
+<p><img src="liner_model_mice1.png"></p>
 <p>这里的β0表示 chow diet 的平均体重，β1 表示两个群体均值的差异，当i 采用 high fat diet 时xi = 1 ；当 i 采用 chow diet 时 xi =0 。</p>
-<h3 id="一般的线性模型"><a href="#一般的线性模型" class="headerlink" title="一般的线性模型"></a>一般的线性模型</h3><p><img src="D:\Desktop\markdown\Data_science\general_linear_model.png"></p>
+<h3 id="一般的线性模型"><a href="#一般的线性模型" class="headerlink" title="一般的线性模型"></a>一般的线性模型</h3><p><img src="general_linear_model.png"></p>
 <h3 id="估计参数"><a href="#估计参数" class="headerlink" title="估计参数"></a>估计参数</h3><p>只有我们能够估计出 β s，线性模型才能起作用。</p>
 <p>一般估计参数的方法都是使用最小二乘法（least squares LS）。</p>
-<p><img src="D:\Desktop\markdown\Data_science\LS.png"></p>
+<p><img src="LS.png"></p>
 <p>一旦我们找到了最小值，我们就称他们为 least squares estimates (LSE) , 表示为β帽。获得最小二乘的统计量称之为 the residual sum of squares (RSS) 。因为这个统计量决定于 Y 这个随机变量。因此 β帽 也是一个随机变量。</p>
 <h3 id="lm-函数"><a href="#lm-函数" class="headerlink" title="lm 函数"></a>lm 函数</h3><figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tt2&lt;-tt^<span class="number">2</span></span><br><span class="line">fit&lt;-lm(d~tt+tt2)</span><br><span class="line">summary(fit)$coef</span><br></pre></td></tr></table></figure>
 
@@ -503,19 +503,19 @@
 
 <p>估计参数这里需要用到微积分。当然，如果参数众多，那么估计起来也很麻烦。</p>
 <h3 id="More-on-Galton-父子身高"><a href="#More-on-Galton-父子身高" class="headerlink" title="More on Galton (父子身高)"></a>More on Galton (父子身高)</h3><h3 id="solving-system-of-equations"><a href="#solving-system-of-equations" class="headerlink" title="solving system of equations"></a>solving system of equations</h3><p>线性代数是被用来解决 systems of linear equations，如下：</p>
-<p><img src="D:\Desktop\markdown\Data_science\linear_equations1.png"></p>
+<p><img src="linear_equations1.png"></p>
 <p>线性代数给我们提供了非常简便的一般方法解决这些问题。比如上例中，可以这么求解</p>
-<p><img src="D:\Desktop\markdown\Data_science\linear_equations2.png"></p>
+<p><img src="linear_equations2.png"></p>
 <h3 id="The-inverse"><a href="#The-inverse" class="headerlink" title="The inverse"></a>The inverse</h3><p>我们可以通过R中的solve()函数求逆。但是注意，solve()函数并不总是numerically stable。</p>
 <p>crossprod(A，B)  = t(A) %*% B</p>
 <p>crossprod(A) = t(A) %*% A</p>
 <h3 id="liner-model"><a href="#liner-model" class="headerlink" title="liner model"></a>liner model</h3><p>我们可以重新定义父子身高的矩阵形式</p>
-<p><img src="D:\Desktop\markdown\Data_science\linear_model_height1.png"></p>
+<p><img src="linear_model_height1.png"></p>
 <p>因此该线性模型为：</p>
-<p><img src="D:\Desktop\markdown\Data_science\linear_model_height2.png"></p>
+<p><img src="linear_model_height2.png"></p>
 <p>最小二乘统计量为</p>
-<p><img src="D:\Desktop\markdown\Data_science\linear_model_height3.png"></p>
-<h3 id="advanced-使用求导求最小二乘"><a href="#advanced-使用求导求最小二乘" class="headerlink" title="advanced:使用求导求最小二乘"></a>advanced:使用求导求最小二乘</h3><p><img src="D:\Desktop\markdown\Data_science\LSE2.png"></p>
+<p><img src="linear_model_height3.png"></p>
+<h3 id="advanced-使用求导求最小二乘"><a href="#advanced-使用求导求最小二乘" class="headerlink" title="advanced:使用求导求最小二乘"></a>advanced:使用求导求最小二乘</h3><p><img src="LSE2.png"></p>
 <p>由于最小二乘也是一个平方值，所以，类似于 f(x)^2^ 的求导为 2f(x)f’(x)</p>
 <p>具体没太搞懂</p>
 <h2 id="Linear-Models"><a href="#Linear-Models" class="headerlink" title="Linear Models"></a>Linear Models</h2><blockquote>
@@ -573,15 +573,15 @@
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">N&lt;-<span class="number">50</span></span><br><span class="line">B&lt;-<span class="number">1000</span></span><br><span class="line">betahat&lt;-replicate(B,&#123;</span><br><span class="line">  index&lt;-sample(n,N)</span><br><span class="line">  sampledat&lt;-father.son[index,]</span><br><span class="line">  x&lt;-sampledat$fheight</span><br><span class="line">  y&lt;-sampledat$sheight</span><br><span class="line">  lm(y~x)$coef</span><br><span class="line">  &#125;)</span><br><span class="line">betahat&lt;-t(betahat) <span class="comment">#have estimates in two columns</span></span><br><span class="line"></span><br><span class="line">mypar(<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line">qqnorm(betahat[,<span class="number">1</span>])</span><br><span class="line">qqline(betahat[,<span class="number">1</span>])</span><br><span class="line">qqnorm(betahat[,<span class="number">2</span>])</span><br><span class="line">qqline(betahat[,<span class="number">2</span>])</span><br><span class="line"><span class="comment">#符合正态</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#lm() 两个参数的相关</span></span><br><span class="line">cor(betahat[,<span class="number">1</span>],betahat[,<span class="number">2</span>])</span><br><span class="line"><span class="comment">## [1] -0.9991099</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="方差-协方差矩阵"><a href="#方差-协方差矩阵" class="headerlink" title="方差-协方差矩阵"></a>方差-协方差矩阵</h3><p>我们用一个类似求和的符号表示协方差矩阵。</p>
-<p><img src="D:\Desktop\markdown\Data_science\variance1.png"></p>
+<p><img src="variance1.png"></p>
 <p>以观测值 Y 向量为例，由于来自于同一个群体，所以我们认为所有Yi 有着共同的方差，而且由于个体间互相独立，因此非对角线元素全为0。因此观测值 Y 向量的方差-协方差矩阵只有两种元素。</p>
-<p><img src="D:\Desktop\markdown\Data_science\variance2.png"></p>
-<p><img src="D:\Desktop\markdown\Data_science\variance3.png"></p>
+<p><img src="variance2.png"></p>
+<p><img src="variance3.png"></p>
 <p>根据上面的公式，我们可以求出LSE的标准误（也就是标准差）</p>
-<p><img src="D:\Desktop\markdown\Data_science\variance4.png"></p>
+<p><img src="variance4.png"></p>
 <p>为了得到参数估计的标准误，我们需要估计群体的标准差。</p>
 <p>这里我们采用下面方法估计群体的标准差（具体推导不了解）</p>
-<p><img src="D:\Desktop\markdown\Data_science\variance5.png"></p>
+<p><img src="variance5.png"></p>
 <p>采用R代码如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">n&lt;-nrow(father.son)</span><br><span class="line">N&lt;-<span class="number">50</span></span><br><span class="line">index&lt;-sample(n,N)</span><br><span class="line">sampledat&lt;-father.son[index,]</span><br><span class="line">x&lt;-sampledat$fheight</span><br><span class="line">y&lt;-sampledat$sheight</span><br><span class="line">X&lt;-model.matrix(~x)</span><br><span class="line"></span><br><span class="line">N&lt;-nrow(X)</span><br><span class="line">p&lt;-ncol(X)</span><br><span class="line"></span><br><span class="line">XtXinv&lt;-solve(crossprod(X))</span><br><span class="line"></span><br><span class="line">resid&lt;-y-X%*%XtXinv%*%crossprod(X,y)</span><br><span class="line"></span><br><span class="line">s&lt;-<span class="built_in">sqrt</span>( <span class="built_in">sum</span>(resid^<span class="number">2</span>)/(N-p))</span><br><span class="line"></span><br><span class="line">ses&lt;-<span class="built_in">sqrt</span>(diag(XtXinv))*s</span><br><span class="line"></span><br><span class="line"><span class="comment">## Let’s compare to whatlmprovides:</span></span><br><span class="line"></span><br><span class="line">summary(lm(y~x))$coef[,<span class="number">2</span>]</span><br><span class="line"><span class="comment">## (Intercept)           x </span></span><br><span class="line"><span class="comment">##   9.1642841   0.1359242 </span></span><br><span class="line"></span><br><span class="line">ses</span><br><span class="line"><span class="comment">## (Intercept)           x </span></span><br><span class="line"><span class="comment">##   9.1642841   0.1359242 </span></span><br></pre></td></tr></table></figure>
 
@@ -593,8 +593,8 @@
 <h3 id="The-QR-Factorization"><a href="#The-QR-Factorization" class="headerlink" title="The QR Factorization"></a>The QR Factorization</h3><p>solve <strong>is numerically unstable</strong></p>
 <p>例如，在求LSE中，需要求（X’X）^-1^ </p>
 <h4 id="分解（）"><a href="#分解（）" class="headerlink" title="分解（）"></a>分解（）</h4><p>任何满秩的 N × p 矩阵X（如果不是方阵，哪来的满秩？？），都可以如下分解：</p>
-<p><img src="D:\Desktop\markdown\Data_science\factorization1.png"></p>
-<h4 id="用QR求LSE"><a href="#用QR求LSE" class="headerlink" title="用QR求LSE"></a>用QR求LSE</h4><p><img src="D:\Desktop\markdown\Data_science\qr1.png"></p>
+<p><img src="factorization1.png"></p>
+<h4 id="用QR求LSE"><a href="#用QR求LSE" class="headerlink" title="用QR求LSE"></a>用QR求LSE</h4><p><img src="qr1.png"></p>
 <p>R 代码如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">n&lt;-<span class="number">50</span>;M&lt;-<span class="number">500</span></span><br><span class="line">x&lt;-seq(<span class="number">1</span>,M,len=n)</span><br><span class="line">X&lt;-cbind(<span class="number">1</span>,x,x^<span class="number">2</span>,x^<span class="number">3</span>)</span><br><span class="line">colnames(X)&lt;-<span class="built_in">c</span>(<span class="string">&quot;Intercept&quot;</span>,<span class="string">&quot;x&quot;</span>,<span class="string">&quot;x2&quot;</span>,<span class="string">&quot;x3&quot;</span>)</span><br><span class="line">beta&lt;-matrix(<span class="built_in">c</span>(<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>),<span class="number">4</span>,<span class="number">1</span>)</span><br><span class="line">set.seed(<span class="number">1</span>)</span><br><span class="line">y&lt;-X%*%beta+rnorm(n,sd=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">QR&lt;-qr(X)</span><br><span class="line">Q&lt;-qr.Q( QR )</span><br><span class="line">R&lt;-qr.R( QR )</span><br><span class="line">(betahat&lt;-backsolve(R, crossprod(Q,y) ) )</span><br><span class="line"></span><br><span class="line"><span class="comment">##也可以直接通过solve函数</span></span><br><span class="line"></span><br><span class="line">QR&lt;-qr(X)</span><br><span class="line">(betahat&lt;-solve.qr(QR, y))</span><br><span class="line"></span><br><span class="line"><span class="comment">##              [,1]</span></span><br><span class="line"><span class="comment">## Intercept 0.9038372</span></span><br><span class="line"><span class="comment">## x         1.0066440</span></span><br><span class="line"><span class="comment">## x2        0.9999622</span></span><br><span class="line"><span class="comment">## x3        1.0000001</span></span><br></pre></td></tr></table></figure>
 
