@@ -98,22 +98,31 @@
   <p>线性回归是最基础的统计模型，也应该是应用最广泛的应用模型。线性回归的因变量必须为连续变量；自变量可以为连续变量，也可以为分类变量（转化为哑变量/虚拟变量）</p>
 <p>这里是我通过看资料对线性回归的总结。</p>
 <span id="more"></span>
-
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.statlearning.com/">An Introduction to Statistical Learning</a></p>
-<h1 id="线性回归的假设"><a href="#线性回归的假设" class="headerlink" title="线性回归的假设"></a>线性回归的假设</h1><h2 id="1-自变量和因变量线性相关"><a href="#1-自变量和因变量线性相关" class="headerlink" title="1 自变量和因变量线性相关"></a>1 自变量和因变量线性相关</h2><p>线性相关的意思是，无论自变量多大，自变量每增加一个单位，因变量都会产生固定的变化。</p>
-<h2 id="2-多个自变量之间具有可加性"><a href="#2-多个自变量之间具有可加性" class="headerlink" title="2 多个自变量之间具有可加性"></a>2 多个自变量之间具有可加性</h2><p>无论 X1 多大，X2 每增加一个单位，因变量都会产生固定的变化。如果满足这个条件，说明 X1和X2 之间具有可加性。否则说明 X1 和 X2 之间存在<strong>互作</strong>效应。用图表示如下（左图两条线平行说明不存在互作，右图不平行说明存在互作）：</p>
+<h1>参考资料</h1>
+<p><a target="_blank" rel="noopener" href="https://www.statlearning.com/">An Introduction to Statistical Learning</a></p>
+<h1>线性回归的假设</h1>
+<h2 id="1-自变量和因变量线性相关">1 自变量和因变量线性相关</h2>
+<p>线性相关的意思是，无论自变量多大，自变量每增加一个单位，因变量都会产生固定的变化。</p>
+<h2 id="2-多个自变量之间具有可加性">2 多个自变量之间具有可加性</h2>
+<p>无论 X1 多大，X2 每增加一个单位，因变量都会产生固定的变化。如果满足这个条件，说明 X1和X2 之间具有可加性。否则说明 X1 和 X2 之间存在<strong>互作</strong>效应。用图表示如下（左图两条线平行说明不存在互作，右图不平行说明存在互作）：</p>
 <p><img src="12.png" alt="1"></p>
-<h2 id="3-多个自变量之间彼此独立"><a href="#3-多个自变量之间彼此独立" class="headerlink" title="3 多个自变量之间彼此独立"></a>3 多个自变量之间彼此独立</h2><p>多个自变量之间不能存在<strong>相关</strong>关系。相关关系分为两种，一种是简单的两两之间的相关，这个通过相关系数矩阵就能看出来是否存在两个变量之间的明显的相关（看绝对值）；第二种是多重线性相关（Multicollinearity），例如 X1 = a + bX2 + cX3，一个自变量可以用其他的多个自变量来解释，就说明存在多重线性相关。</p>
-<h2 id="4-观测值的误差项之间互相独立"><a href="#4-观测值的误差项之间互相独立" class="headerlink" title="4 观测值的误差项之间互相独立"></a>4 观测值的误差项之间互相独立</h2><p>误差项即实际值 - 预测值。如果观测值之间存在我们没有添加到模型中的其他影响因素，那么误差项之间就可能存在相关关系，比如有些样本搜集自同一个家庭的成员，而我们没有把家庭这个因素加入到模型中。</p>
-<h2 id="5-误差项（ε）呈正态分布，期望为0，方差为定值"><a href="#5-误差项（ε）呈正态分布，期望为0，方差为定值" class="headerlink" title="5 误差项（ε）呈正态分布，期望为0，方差为定值"></a>5 误差项（ε）呈正态分布，期望为0，方差为定值</h2><blockquote>
+<h2 id="3-多个自变量之间彼此独立">3 多个自变量之间彼此独立</h2>
+<p>多个自变量之间不能存在<strong>相关</strong>关系。相关关系分为两种，一种是简单的两两之间的相关，这个通过相关系数矩阵就能看出来是否存在两个变量之间的明显的相关（看绝对值）；第二种是多重线性相关（Multicollinearity），例如 X1 = a + bX2 + cX3，一个自变量可以用其他的多个自变量来解释，就说明存在多重线性相关。</p>
+<h2 id="4-观测值的误差项之间互相独立">4 观测值的误差项之间互相独立</h2>
+<p>误差项即实际值 - 预测值。如果观测值之间存在我们没有添加到模型中的其他影响因素，那么误差项之间就可能存在相关关系，比如有些样本搜集自同一个家庭的成员，而我们没有把家庭这个因素加入到模型中。</p>
+<h2 id="5-误差项（ε）呈正态分布，期望为0，方差为定值">5 误差项（ε）呈正态分布，期望为0，方差为定值</h2>
+<blockquote>
 <p>这里其实分为两个假设。第一个假设：误差项服从均值为0的正态分布。第二个假设：误差项的方差为定值（不变）。这两个假设是为了保证回归模型在小样本下能够顺利进行假设检验。正态分布假设仅在小样本的情况下需要，大样本的情况下则不需要，因为有中心极限定理做正态性的支撑。而方差齐性则保证最小二乘法估计出来的统计量具有最小的方差。如果违反了这个假设，置信区间会变宽，这称之为<strong>异方差性（heteroscedasticity）</strong>。当异方差性出现的时候，如果仍采用最小二乘法估计参数，会导致参数的t检验值被高估，可能造成本来不显著的某些参数变为显著，使假设检验失去意义。</p>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/HuZihu/p/10142737.html">https://www.cnblogs.com/HuZihu/p/10142737.html</a></p>
 </blockquote>
-<h2 id="6-自变量和误差项之间互相独立"><a href="#6-自变量和误差项之间互相独立" class="headerlink" title="6 自变量和误差项之间互相独立"></a>6 自变量和误差项之间互相独立</h2><blockquote>
+<h2 id="6-自变量和误差项之间互相独立">6 自变量和误差项之间互相独立</h2>
+<blockquote>
 <p>模型中一个或多个自变量与随机误差项存在相关关系，这称之为<strong>内生性（endogeneity）</strong>。内生性通常由于遗漏变量而导致的，因此是一个普遍存在的问题。内生性会导致模型参数估计不准确。</p>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/HuZihu/p/10142737.html">https://www.cnblogs.com/HuZihu/p/10142737.html</a></p>
 </blockquote>
-<h1 id="简单线性回归"><a href="#简单线性回归" class="headerlink" title="简单线性回归"></a>简单线性回归</h1><h2 id="β0-β1-参数估计-最小二乘法"><a href="#β0-β1-参数估计-最小二乘法" class="headerlink" title="β0, β1 参数估计 - 最小二乘法"></a>β0, β1 参数估计 - 最小二乘法</h2><p>最小二乘的思路是，查找使得<strong>误差平方和</strong>或<strong>均方误差</strong>最小的参数。</p>
+<h1>简单线性回归</h1>
+<h2 id="β0-β1-参数估计-最小二乘法">β0, β1 参数估计 - 最小二乘法</h2>
+<p>最小二乘的思路是，查找使得<strong>误差平方和</strong>或<strong>均方误差</strong>最小的参数。</p>
 <p>我们首先知道，<strong>误差 = 实际值 - 预测值</strong>，我们的目的实际是想要所有观察值的总体的误差最小，因为误差有正有负，如果采用误差项直接相加会互相抵消，因为我们采用误差的平方进行相加，得到误差平方和 (<em>residual sum of squares</em>, RSS)。</p>
 <p><img src="1.png" alt="1"></p>
 <p>或者写成</p>
@@ -122,10 +131,12 @@
 <p><img src="3.png" alt="1"></p>
 <p>画成等高图如下（作图横纵坐标为β0和β1，图中一圈表示相同的RSS，数字即为 RSS 大小），我们可以看到这是向下凹的图形，只有一个点RSS 最小。</p>
 <p><img src="4.png" alt="1"></p>
-<h3 id="为什么不用残差的绝对值？"><a href="#为什么不用残差的绝对值？" class="headerlink" title="为什么不用残差的绝对值？"></a>为什么不用残差的绝对值？</h3><p>我上统计课的时候就有这个问题，就一直有这个疑问，如果因为残差有方向，不能直接求和，那为什么不直接用绝对值呢？这不是更直接的更贴近残差本质的思路吗？</p>
+<h3 id="为什么不用残差的绝对值？">为什么不用残差的绝对值？</h3>
+<p>我上统计课的时候就有这个问题，就一直有这个疑问，如果因为残差有方向，不能直接求和，那为什么不直接用绝对值呢？这不是更直接的更贴近残差本质的思路吗？</p>
 <p>后来上了吴恩达老师的机器学习课，知道了代价函数的概念，寻找代价函数最小值的最简单的方法就是<strong>求导</strong>。最小二乘法的代价函数就是 RSS/MSE，由于这里采用平方和（二次函数），<strong>求导会直接变成一次函数</strong>。而如果使用残差的绝对值的和，根本无法进行简单的求导，就无法简单地得到最优解的公式。</p>
 <p>所以，目前我个人的理解是使用平方和<strong>简化了运算</strong>。</p>
-<h2 id="参数估计准确性"><a href="#参数估计准确性" class="headerlink" title="参数估计准确性"></a>参数估计准确性</h2><p>我们使用的模型为</p>
+<h2 id="参数估计准确性">参数估计准确性</h2>
+<p>我们使用的模型为</p>
 <p><img src="5.png" alt="1"></p>
 <p>这里的<strong>残差项包含了所有我们模型中没有考虑到的地方</strong>，比如Y 和 X 的关系不是线性的，还有其他的影响因素，存在测量误差等等。</p>
 <p>为了估计参数的估计值与真实值之间的误差，我们需要计算两个参数估计值的标准误，使用下列公式（缺证明）</p>
@@ -138,17 +149,21 @@
 <p>我们也可以通过 t 检验得到 P值。构建 t 统计量如下（自由度 n-2）：</p>
 <p><img src="9.png" alt="1"></p>
 <p>同理可以检验β0 估计值的P值（零假设：β0 = 0），但实际上截距的显著性没啥大的意义，主要还是看 β1。如果  β1 的 P值小于 0.05，我们认为  β1 ≠ 0。</p>
-<h2 id="模型准确性"><a href="#模型准确性" class="headerlink" title="模型准确性"></a>模型准确性</h2><p>上面是得到估计的两个参数的准确性，这里我们想知道，我们构建的简单线性模型与数据的契合程度（<em>which the model fits the data</em>）。</p>
+<h2 id="模型准确性">模型准确性</h2>
+<p>上面是得到估计的两个参数的准确性，这里我们想知道，我们构建的简单线性模型与数据的契合程度（<em>which the model fits the data</em>）。</p>
 <p>线性模型一般用两个指标， <em>residual standard error</em>(RSE) ，R^2^ .</p>
-<h3 id="residual-standard-error-RSE"><a href="#residual-standard-error-RSE" class="headerlink" title="residual standard error(RSE)"></a><em>residual standard error</em>(RSE)</h3><p><img src="7.png" alt="1"></p>
+<h3 id="residual-standard-error-RSE"><em>residual standard error</em>(RSE)</h3>
+<p><img src="7.png" alt="1"></p>
 <p>RSE 是<strong>残差的标准误的估计值</strong>，它表示<strong>预测值与真实值的平均偏差量</strong>（这句话需要理解标准误的概念：标准误是样本统计量的标准差，均值为真值，结合标准差的公式，可知标准误就是预测值与真实值的平均偏差量（绝对值），所以一般提供参数估计值的时候，都会写成 参数估计值±<strong>标准误</strong>的形式）。</p>
 <p>RSE 是最直接说明模型准确性的统计量，它的缺点是有单位，是一个绝对值，仅仅是RSE你不知道到底是大还是小，所以你还得和因变量的均值啥的进行比较才知道相对大小。</p>
-<h3 id="R-2"><a href="#R-2" class="headerlink" title="R^2^"></a>R^2^</h3><p>R^2^ 指的是因变量方差能够被线性模型解释的比例，始终在0和1之间，是一个相对值，越大越好。公式如下：</p>
+<h3 id="R-2">R^2^</h3>
+<p>R^2^ 指的是因变量方差能够被线性模型解释的比例，始终在0和1之间，是一个相对值，越大越好。公式如下：</p>
 <p><img src="10.png" alt="1"></p>
 <p>其中 TSS (<em>total sum of squares</em>) 计算如下，表示因变量的总的方差。</p>
 <p><img src="11.png" alt="1"></p>
-<p>R^2^ 比 RSE 更容易解释，因此更常用，但是还是面临一个问题，<strong>R^2^ 多大才算结果很好呢？</strong>这可能得根据实际情况来定，在我们一般的实验中，实际上往往还有很多<strong>未测量的影响因素</strong>，所以 RSS 可能比较大，这时可能 R^2^ 哪怕比较小可能也说明有用。</p>
-<h2 id="复杂线性模型"><a href="#复杂线性模型" class="headerlink" title="复杂线性模型"></a>复杂线性模型</h2><p>未完待续……</p>
+<p>R^2^ 比 RSE 更容易解释，因此更常用，但是还是面临一个问题，<strong>R^2^ 多大才算结果很好呢？<strong>这可能得根据实际情况来定，在我们一般的实验中，实际上往往还有很多</strong>未测量的影响因素</strong>，所以 RSS 可能比较大，这时可能 R^2^ 哪怕比较小可能也说明有用。</p>
+<h2 id="复杂线性模型">复杂线性模型</h2>
+<p>未完待续……</p>
  
       <!-- reward -->
       
@@ -678,6 +693,6 @@
 
     
   </div>
-<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>
