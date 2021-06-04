@@ -113,11 +113,11 @@ map文件由四列组成，第一列为染色体（常染色体从1开始编号�
 但需要输出新文件时（如生成二进制ped），plink通常会保留所有的基因型信息（即保持转换前后实际内容不变）。但是当使用plink进行统计和数据分析是，plink会对基因型数据进行筛选，将一部分基因型数据自动设置为缺失并剔除。</p>
 <p>–file 需要ped和map文件名称相同。如果不加–out选项，默认名称均为plink。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --file hapmap1</span><br></pre></td></tr></table></figure>
-<h2 id="其他芯片文件格式-——-Transposed-filesets">其他芯片文件格式 ——  Transposed filesets</h2>
+<h2 id="其他芯片文件格式-transposed-filesets">其他芯片文件格式 ——  Transposed filesets</h2>
 <p>文档中提到有一种转置的ped文件类型，由tped文件和tfam文件构成。tped文件每一行是一个snp，前4列是map文件的内容，后面每两列是一个个体该SNP的基因型。tfam文件是原ped文件的前六列。<br>
 该文件可通过 --tfile 或 --tped --tfam读取，通过 --transpose 生成.<br>
 <img src="/images/transpose_ped.png" alt=""></p>
-<h2 id="其他芯片文件格式-——-Long-format-filesets">其他芯片文件格式 —— Long-format filesets</h2>
+<h2 id="其他芯片文件格式-long-format-filesets">其他芯片文件格式 —— Long-format filesets</h2>
 <p>该格式包括三个文件lgen文件，map文件（同上），fam文件（原ped文件的前六列）。lgen文件由5列组成，分别为家系ID，个体ID，snp名称，该snp的第一个等位基因，第二个等位基因。<br>
 该文件可以通过 --lfile 命令读取，并使用 --recode 转换为标准的ped文件。根据说明文档，目前plink不支持输出这种格式。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --lfile test --recode</span><br></pre></td></tr></table></figure>
@@ -174,7 +174,7 @@ map文件由四列组成，第一列为染色体（常染色体从1开始编号�
 <h2 id="更新covariate文件">更新covariate文件</h2>
 <p>重新生成covariate文件，当–covar 配合生成文件命令（–recode 或 --make-bed）。好处是当covariate文件包含个体多于芯片，或顺序不一致时，生成的新文件与芯片文件保持一致。(–write-cluster类似,形成新的cluster文件)</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --file data --covar myfile.txt --recode</span><br></pre></td></tr></table></figure>
-<h2 id="翻转部分的SNP-例A变成T-改为等位基因基因型">翻转部分的SNP(例A变成T,改为等位基因基因型)</h2>
+<h2 id="翻转部分的snp-例a变成t-改为等位基因基因型">翻转部分的SNP(例A变成T,改为等位基因基因型)</h2>
 <p>准备一个snp名称文件(只有一列,为需要转换的snp名称),list.txt。flip命令需配合–recode等生成文件命令使用。适用于当芯片出现正反链问题时。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --file data --flip list.txt --recode</span><br></pre></td></tr></table></figure>
 <p>当只对芯片中的一部分个体进行转换时，增加–flip-subset选项。mylist.txt为个体ID。</p>
@@ -192,7 +192,7 @@ map文件由四列组成，第一列为染色体（常染色体从1开始编号�
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --file fA --merge-list allfiles.txt --recode --out mynewdata</span><br></pre></td></tr></table></figure>
 <p>allfiles.txt格式如下图<br>
 <img src="/images/merge_list.png" alt=""></p>
-<h2 id="提取SNPs的子集">提取SNPs的子集</h2>
+<h2 id="提取snps的子集">提取SNPs的子集</h2>
 <h3 id="基于染色体">基于染色体</h3>
 <p>以下命令会默认生成6号染色体的二进制芯片文件。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --file data --chr 6</span><br></pre></td></tr></table></figure>
@@ -203,7 +203,7 @@ map文件由四列组成，第一列为染色体（常染色体从1开始编号�
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --bfile mydata --from rs273744 --to rs89883</span><br></pre></td></tr></table></figure>
 <p>基于某个snp的上下游范围（–snp 和 --window)。以下命令将挑出rs652423上下游20kb的所有snp。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --bfile mydata --snp rs652423 --window 20</span><br></pre></td></tr></table></figure>
-<h3 id="基于染色体的物理位置（–from-kb-to-kb）">基于染色体的物理位置（–from-kb --to-kb）</h3>
+<h3 id="基于染色体的物理位置-from-kb-to-kb">基于染色体的物理位置（–from-kb --to-kb）</h3>
 <p>以下命令为挑选2号染色体上5000kb到10000kb的所有snp。类似选项有–from-bp,–from-mb</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --bfile mydata --chr 2 --from-kb 5000 --to-kb 10000</span><br></pre></td></tr></table></figure>
 <h2 id="随机采样-thin">随机采样 --thin</h2>
@@ -267,7 +267,7 @@ map文件由四列组成，第一列为染色体（常染色体从1开始编号�
 <p><img src="/images/hwe.png" alt=""></p>
 <h2 id="等位基因频率">等位基因频率</h2>
 <p>这个入门部分也有，使用–freq命令，生成frq文件，含有5列，分别为染色体、snp名称、A1(基因频率较小)、A2(等位基因频率较大)、MAF、无缺失的总的等位基因个数（小于等于2n,n为个体数）。</p>
-<h2 id="孟德尔误差（Mendel-errors）">孟德尔误差（Mendel errors）</h2>
+<h2 id="孟德尔误差-mendel-errors">孟德尔误差（Mendel errors）</h2>
 <p>本人对这个概念不是很清晰，从文档说明来看，大概是指根据父母的基因型推断的后代基因型与后代真实的基因型不符的情形，如父母都是AA，后代却是AB。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --file data --mendel</span><br></pre></td></tr></table></figure>
 <h2 id="性别确认">性别确认</h2>
@@ -279,7 +279,7 @@ F如果大于0.8认为性别为公，如果小于0.2认为母（不懂F的概念
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --bfile data --check-sex</span><br></pre></td></tr></table></figure>
 <p>–impute-sex命令可将基于SNP数据的性别修改ped文件中的性别，需要配合输出文件命令使用。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --bfile data --impute-sex --make-bed --out newfile </span><br></pre></td></tr></table></figure>
-<h2 id="PCA分析">PCA分析</h2>
+<h2 id="pca分析">PCA分析</h2>
 <p><a target="_blank" rel="noopener" href="https://www.cog-genomics.org/plink/1.9/strat#pca">https://www.cog-genomics.org/plink/1.9/strat#pca</a></p>
 <p>plink 用于作PCA分析，命令相当简单，就是加一个 --pca 就完事了</p>
 <p>默认会输出20个主成分。</p>
@@ -340,9 +340,9 @@ F如果大于0.8认为性别为公，如果小于0.2认为母（不懂F的概念
 注意：–geno 和 --maf命令执行优先程度低于–mind，也就是同用–mind和–geno时，会先剔除缺失率较高的个体，再计算SNP检出率。</p>
 <h2 id="最小等位基因频率">最小等位基因频率</h2>
 <p>–maf 0.01 剔除MAF小于0.01的SNP</p>
-<h2 id="哈温平衡-2">哈温平衡</h2>
+<h2 id="哈温平衡">哈温平衡</h2>
 <p>–hwe 0.001 如果需要剔除不满足哈温平衡的位点，使用该选项。p值小于0.001的个体被剔除，具体信息可见控制台（屏幕打印出的信息）或log文件。</p>
-<h2 id="孟德尔误差比例（Mendel-error-rate）">孟德尔误差比例（Mendel error rate）</h2>
+<h2 id="孟德尔误差比例-mendel-error-rate">孟德尔误差比例（Mendel error rate）</h2>
 <p>只适用于family-based data。<br>
 –me 0.05 0.1 第一个参数表示孟德尔误差超过5%的家系会被剔除；第二个参数表示孟德尔误差超过10%的SNP会被剔除。目前plink是同时计算家系和SNP的孟德尔误差比例，未来可能有所修改。</p>
 <h1>第五部分 plink群体分层分析（Stratification analysis）和聚类分析（cluster analysis）</h1>
@@ -363,7 +363,7 @@ cluster2文件是用来给plink读取的（使用–within *.cluster2）。格�
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --noweb --bfile plink --cluster --K 2 --out str2</span><br></pre></td></tr></table></figure>
 <p>如果个体比较多，而且需要按不同条件进行多次聚类时，可按如下命令操作，节约时间。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">plink --bfile mydata --genome --out mydata</span><br><span class="line">plink --bfile mydata --read-genome mydata.genome --cluster --ppc 0.01</span><br><span class="line">plink --bfile mydata --read-genome mydata.genome --cluster --mc 2 --ibm 0.01</span><br></pre></td></tr></table></figure>
-<h2 id="IBS-similarity-matrix">IBS similarity matrix</h2>
+<h2 id="ibs-similarity-matrix">IBS similarity matrix</h2>
 <p>添加–matrix命令，生成mibs文件，为方阵形式，内容为所有个体两两之间的同态相同的比例（0-1）。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --file mydata --cluster --matrix</span><br></pre></td></tr></table></figure>
 <p>通过R画图来具体描述群体结构（适合芯片中存在几个群体的情况，手册中是前45个个体是中国人，后44个是日本人）。</p>
@@ -373,7 +373,7 @@ cluster2文件是用来给plink读取的（使用–within *.cluster2）。格�
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">m &lt;- as.matrix(read.table(<span class="string">&quot;ibd_view.mibs&quot;</span>))</span><br><span class="line">mds &lt;- cmdscale(as.dist(<span class="number">1</span>-m))</span><br><span class="line">k &lt;- <span class="built_in">c</span>( <span class="built_in">rep</span>(<span class="string">&quot;green&quot;</span>,<span class="number">100</span>) , <span class="built_in">rep</span>(<span class="string">&quot;blue&quot;</span>,<span class="number">222</span>) )</span><br><span class="line">plot(mds,pch=<span class="number">20</span>,col=k)</span><br></pre></td></tr></table></figure>
 <h1>第六部分 IBS/IBD 估计</h1>
 <p>通过估计芯片个体间的IBS和IBD情况，可以用来检测测序时样品污染，重复样一致性，系谱错误以及发现未知的亲缘关系。</p>
-<h2 id="配对的IBD估计">配对的IBD估计</h2>
+<h2 id="配对的ibd估计">配对的IBD估计</h2>
 <p>上一章说了个体间IBS的估计以及根据IBS划分cluster，我们可以检测个体间的IBD情况。以下命令生成genome文件，文件格式如下图。需要关注的是PI_HAT（这个指标就是两个个体IBD相同的大小），<br>
 使用–Z-genome会生成压缩文件plink.genome.gz，–read-genome也可以直接读取压缩的genome文件。<br>
 注意：IBD分析前需要进行群体分层分析。而且ped文件中的家系ID、父本ID、母本ID应该要完整。</p>
@@ -871,15 +871,6 @@ cluster2文件是用来给plink读取的（使用–within *.cluster2）。格�
 </script>
 
 <!-- Katex -->
-
-
-    
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-        
-    
-
 
 <!-- busuanzi  -->
 

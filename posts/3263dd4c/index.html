@@ -112,13 +112,13 @@
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">library(downloader)</span><br><span class="line">url&lt;-<span class="string">&quot;https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/mice_pheno.csv&quot;</span></span><br><span class="line">filename&lt;-<span class="string">&quot;mice_pheno.csv&quot;</span> </span><br><span class="line">download(url,destfile=filename)</span><br><span class="line">dat&lt;-read.csv(filename) <span class="comment">#这是所有这个小鼠群体的数据</span></span><br><span class="line"></span><br><span class="line">library(dplyr)</span><br><span class="line">controlPopulation &lt;- filter(dat,Sex==<span class="string">&quot;F&quot;</span>&amp;Diet==<span class="string">&quot;chow&quot;</span>) </span><br><span class="line"><span class="built_in">length</span>(controlPopulation$Bodyweight)</span><br><span class="line"></span><br><span class="line">hfPopulation&lt;-filter(dat,Sex==<span class="string">&quot;F&quot;</span>&amp;Diet==<span class="string">&quot;hf&quot;</span>)</span><br><span class="line"><span class="built_in">length</span>(hfPopulation$Bodyweight)</span><br><span class="line"><span class="comment">#此时群体的均值、方差、标准差等就被称为群体参数（population parameters）</span></span><br><span class="line"><span class="comment">#此时回到我们的问题，两个群体的均值是否相等。</span></span><br><span class="line"><span class="comment">#由于我们拿到了两个群体的所有数据，那么用μy-ux（x:control y:hf）,直接看差值是否为0即可。</span></span><br></pre></td></tr></table></figure>
 <p>但是，在实际生活中，我们拿不到群体的所有数据。比如，可能买下一个群体所有的小鼠是很贵的。<br>
 因此，我们需要学会如何从样本数据来回答我们的问题。这就是统计推断的本质。</p>
-<h3 id="Sample-estimates">Sample estimates</h3>
+<h3 id="sample-estimates">Sample estimates</h3>
 <p>在之前的章节中，我们从两个群体中各随机抽取了12只小鼠。我们一般用大写字母来表示抽样个体，以此表明他们是随机抽取的。这也是统计中的一种常规做法。因此抽样个体表示为X~1~ ……X~12~ 和 Y~1~ …… Y~12~。<br>
 而对于上面的群体中的个体，用的是小写数字。因为这些个体是给定的，不是随机的。<br>
 此时，研究目标是两个样本群体均值的差值。<br>
 而这个差值也是一个随机变量（random variable）。前面，我们采用一种从原始数据中重复抽样的手段（10000次）。但是，这在实际中（in practice）是不可实现的，比如在我们这个例子中，就是要不断地买24只小鼠做试验。<br>
 下面会介绍群体均值差与样本均值差的关系。这涉及到了中心极限定理。</p>
-<h3 id="Central-Limit-Theorem-and-t-distribution">Central Limit Theorem and t-distribution</h3>
+<h3 id="central-limit-theorem-and-t-distribution">Central Limit Theorem and t-distribution</h3>
 <p><strong>中心极限定理</strong>：<strong>无论群体总体服从什么分布</strong>，当抽样个体数足够大时（一般认为，每组大于等于30个），抽样群体的均值（Y拔）服从正态分布。其均值为群体均值，其标准差等于群体标准差除以根号N（N 为 simple size）。我们把这个随机变量分布的标准差称为标准误（<em>standard error</em>）。</p>
 <ul>
 <li>对于一个随机变量，加减常数（X+a），则该随机变量的均值也随之变化（u~X~+a）</li>
@@ -163,7 +163,7 @@
 <p>但是在实践中，我们不会只求均值，而是会除以标准差。此时采样个数就重要了</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Ns&lt;-<span class="built_in">c</span>(<span class="number">3</span>,<span class="number">12</span>,<span class="number">25</span>,<span class="number">50</span>)</span><br><span class="line">B&lt;-<span class="number">10000</span><span class="comment">#number of simulations#</span></span><br><span class="line"><span class="comment">#function to compute a t-stat</span></span><br><span class="line">computetstat&lt;-<span class="keyword">function</span>(n) &#123;</span><br><span class="line">  y&lt;-sample(hfPopulation,n)</span><br><span class="line">  x&lt;-sample(controlPopulation,n)</span><br><span class="line">  (mean(y)-mean(x))/<span class="built_in">sqrt</span>(var(y)/n+var(x)/n)</span><br><span class="line">  &#125;</span><br><span class="line">res&lt;-sapply(Ns,<span class="keyword">function</span>(n) &#123;</span><br><span class="line">  replicate(B,computetstat(n))</span><br><span class="line">  &#125;)</span><br><span class="line">op &lt;- par(mfrow=<span class="built_in">c</span>(<span class="number">2</span>,<span class="number">2</span>))</span><br><span class="line"><span class="keyword">for</span>(i <span class="keyword">in</span> seq(along=Ns)) &#123;</span><br><span class="line">  qqnorm(res[,i],main=Ns[i])</span><br><span class="line">  qqline(res[,i],col=<span class="number">2</span>)</span><br><span class="line">  &#125;</span><br><span class="line"><span class="comment">#此时N=3已经有些偏离，而N=12只有轻微偏离</span></span><br><span class="line"><span class="comment">#因此N=12已经够了</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>但是这种模拟在实际中无法做到。这里只用于说明CLT的概念和局限。</p>
-<h3 id="t-tests-in-Partice">t-tests in Partice</h3>
+<h3 id="t-tests-in-partice">t-tests in Partice</h3>
 <p>逻辑线：</p>
 <ol>
 <li>首先我们得到了两个样本群体的均值差，这本身也是一个随机变量。而且根据零假设，这个变量分布的均值为0。</li>
@@ -182,7 +182,7 @@
 </ol>
 <p>R代码如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">dat&lt;-read.csv(<span class="string">&quot;femaleMiceWeights.csv&quot;</span>)<span class="comment">#previously downloaded</span></span><br><span class="line">control&lt;-filter(dat,Diet==<span class="string">&quot;chow&quot;</span>)%&gt;%select(Bodyweight)%&gt;%unlist</span><br><span class="line">treatment&lt;-filter(dat,Diet==<span class="string">&quot;hf&quot;</span>)%&gt;%select(Bodyweight)%&gt;%unlist</span><br><span class="line">diff&lt;-mean(treatment)-mean(control)</span><br><span class="line">print(diff)</span><br><span class="line"><span class="comment">## [1] 3.020833</span></span><br><span class="line"></span><br><span class="line">se&lt;-<span class="built_in">sqrt</span>(</span><br><span class="line">  var(treatment)/<span class="built_in">length</span>(treatment) + </span><br><span class="line">    var(control)/<span class="built_in">length</span>(control)</span><br><span class="line">  )</span><br><span class="line"></span><br><span class="line">tstat&lt;-diff/se</span><br><span class="line"><span class="comment">## [1] 2.055174</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##tstat在标准正态分布中出现的概率(双尾)</span></span><br><span class="line"><span class="comment">##也就是在标准正态分布中出现tstat及比tstat更极端的值的概率</span></span><br><span class="line">righttail&lt;-<span class="number">1</span>-pnorm(<span class="built_in">abs</span>(tstat))</span><br><span class="line">lefttail&lt;-pnorm(-<span class="built_in">abs</span>(tstat))</span><br><span class="line">pval&lt;-lefttail+righttail</span><br><span class="line">print(pval)</span><br><span class="line"></span><br><span class="line"><span class="comment">## [1] 0.0398622</span></span><br></pre></td></tr></table></figure>
-<h3 id="The-t-distribution-in-Practice">The t-distribution in Practice</h3>
+<h3 id="the-t-distribution-in-practice">The t-distribution in Practice</h3>
 <p>根据上面的模拟情况和统计理论。 如果<strong>总体的分布是正态的</strong>，那么我们可以<strong>不通过中心极限定理</strong>，而弄清楚t统计量的确切分布。但是如果抽样个体数很少，很难证明总体分布是否符合正态。但是对于体重这种数据，根据经验，我们一般认为总体分布极可能大致符合正态分布，因此我们可以利用这种近似。另外，我们也可以看一下样本的qq图，如下所示。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">op &lt;- par(mfrow=<span class="built_in">c</span>(<span class="number">2</span>,<span class="number">2</span>))</span><br><span class="line">qqnorm(treatment)</span><br><span class="line">qqline(treatment,col=<span class="number">2</span>)</span><br><span class="line">qqnorm(control)</span><br><span class="line">qqline(control,col=<span class="number">2</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>如果我们近似认为<strong>总体分布符合正态分布</strong>，那么基于统计理论，tstat服从t分布。相较于正态分布，t分布还有一个自由度的参数。我们直接通过下面的函数求解P值。</p>
@@ -193,7 +193,7 @@
 <p>这段话没看太懂，大概理解是：这里用t分布计算出来的p值相较于上面用正态分布计算出来的P值较大。这是因为在CLT中，认为tstat的分母部分是固定的（也就是认为采用了大样本）；而t分布检验中认为tstat的分母部分是随机变量（还不是很懂）。</p>
 <p>这可能会让人困惑，怎么会得到两个P值？但是，这在数据分析中是很常见的。通过不同的假设，不同的方法，我们就会得到不同的结果。</p>
 <p>其实，基于中心极限定理得到的结果更容易出现<strong>假阳性</strong>，而基于t分布的结果更容易出现<strong>假阴性</strong>。</p>
-<h3 id="Confidence-Intervals">Confidence Intervals</h3>
+<h3 id="confidence-intervals">Confidence Intervals</h3>
 <p>在生命科学中，我们总是需要计算P值。但是我们并不推崇把P值当成唯一的统计指标。原因很简单：统计意义上的显著并不保证科学意义上的显著。当抽样个体数很大时，即便两个群体差异很小，你仍可以检测到一个统计意义上的显著差异。但是这有意义吗？如果只看P值，信息是不够的。还需要给出效应大小（这里是两个群体均值差）。<br>
 另一种方法是给出置信区间。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#以control群体均值的置信区间为例</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#先看总体的均值</span></span><br><span class="line">dat&lt;-read.csv(<span class="string">&quot;mice_pheno.csv&quot;</span>)</span><br><span class="line">chowPopulation&lt;-dat[dat$Sex==<span class="string">&quot;F&quot;</span>&amp;dat$Diet==<span class="string">&quot;chow&quot;</span>,<span class="number">3</span>]</span><br><span class="line"></span><br><span class="line">mu_chow&lt;-mean(chowPopulation)</span><br><span class="line">print(mu_chow)</span><br><span class="line"><span class="comment">## [1] 23.89338</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##我们是要估计这个参数，但是我们实际拿不到总体的数据</span></span><br><span class="line"><span class="comment">## 先抽取样本量为30的样本</span></span><br><span class="line"></span><br><span class="line">N&lt;-<span class="number">30</span></span><br><span class="line">chow&lt;-sample(chowPopulation,N)</span><br><span class="line">print(mean(chow))</span><br><span class="line"><span class="comment">## [1] 24.54567</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#我们知道样本均值是一个随机变量</span></span><br><span class="line"><span class="comment">#所以，这个值不是一个完美的估计</span></span><br><span class="line"><span class="comment">#通过置信区间来体现这个随机变量的variability</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#因为样本量为30，我们可以使用CLT。</span></span><br><span class="line"><span class="comment">#中心极限定理告诉我们，样本均值服从一个均值为总体均值，标准差为总体标准差除以根号30的正态分布。</span></span><br><span class="line"></span><br><span class="line">se&lt;-sd(chow)/<span class="built_in">sqrt</span>(N)</span><br><span class="line">print(se)</span><br><span class="line"><span class="comment">## [1] 0.6610814</span></span><br></pre></td></tr></table></figure>
@@ -212,12 +212,12 @@
 <p>我们发现置信区间的宽度增加了，但是没有覆盖真值的情况却多了很多。这是因为这里我们通过CLT错误地认为样本均值符合正态分布，但是实际上相较于正态它两侧的尾巴更大（It has a fatter tail）。这影响到了我们Q值的计算（这里是-2到2）。这种情况下，采用t分布更合适。所以我们只需用qt() 函数来计算Q就可以了，其它不变。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">N &lt;- 5</span><br><span class="line">Q&lt;-qt(<span class="number">1</span>-<span class="number">0.05</span>/<span class="number">2</span>, df=<span class="number">4</span>)</span><br><span class="line">mypar()</span><br><span class="line">plot(mean(chowPopulation)+<span class="built_in">c</span>(-<span class="number">7</span>,<span class="number">7</span>),<span class="built_in">c</span>(<span class="number">1</span>,<span class="number">1</span>),type=<span class="string">&quot;n&quot;</span>,</span><br><span class="line">     xlab=<span class="string">&quot;weight&quot;</span>,ylab=<span class="string">&quot;interval&quot;</span>,ylim=<span class="built_in">c</span>(<span class="number">1</span>,B))</span><br><span class="line">abline(v=mean(chowPopulation))</span><br><span class="line"><span class="keyword">for</span>(i <span class="keyword">in</span> <span class="number">1</span>:B)&#123;</span><br><span class="line">  chow&lt;-sample(chowPopulation,N)</span><br><span class="line">  se&lt;-sd(chow)/<span class="built_in">sqrt</span>(N)</span><br><span class="line">  interval&lt;-<span class="built_in">c</span>(mean(chow)-Q*se, mean(chow)+Q*se)</span><br><span class="line">  covered&lt;- mean(chowPopulation) &lt;=interval[<span class="number">2</span>]&amp;mean(chowPopulation)&gt;=interval[<span class="number">1</span>]</span><br><span class="line">  color &lt;- ifelse(covered,<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line">  lines(interval, <span class="built_in">c</span>(i,i),col=color)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>我们看到置信区间的宽度<strong>进一步</strong>（相较于CLT）增加了（因为t分布尾巴厚，得到的Q值更大），但是基本符合了95%的概率。</p>
-<h3 id="置信区间和P值的关系">置信区间和P值的关系</h3>
+<h3 id="置信区间和p值的关系">置信区间和P值的关系</h3>
 <p>我们推荐在实际中更多的使用置信区间，而不是P值。</p>
 <p>如果你给出P值，我们会问差距是不是真的像你计算或观测出来的值那么大。<strong>因为即便两个群体总体均值为0，得到的样本均值差也有可能出现你计算或观测的结果</strong>。因此，我们可以给出均值差的置信区间，来回答这个问题。</p>
 <p>如果均值差的95%的置信区间中不包含0，那么我们可以说差异不显著（0.05水平下），也就是p值肯定小于0.05。（99%的置信区间类似）</p>
 <p>t.test的结果中包含了95%的置信区间。</p>
-<h3 id="Power-Calculations">Power Calculations</h3>
+<h3 id="power-calculations">Power Calculations</h3>
 <p>由于我们有总体信息，我们从总体信息中可以直接得知，这两个群体确实是有差距的，而且按比例大约是10%。<br>
 但是我们如果从中取样，然后进行t-test，有的时候P值不总是小于0.05。</p>
 <p>所以我们犯错了吗？通过不拒绝原假设，我们要说diet没有影响吗？这个问题的答案是no。All we can say is that we did not reject the null hypothesis. But this does not necessarily imply that the null is true（我们只是说不拒绝原假设，但我们没有说原假设是真的）.</p>
@@ -229,9 +229,9 @@
 </blockquote>
 <p>当我们在进行统计检验时，我们始终需要注意我们很可能会犯错误。这就是为什么我们的p值不是0。在原假设成立的前提下，总是存在一个可能很少，但是可能发生的概率，使得我们拒绝了正确的原假设。如果P值设为0.05，那么这种情况发生的概率也就是0.05。这种错误叫做Ⅰ型错误（typeⅠerror）</p>
 <p>Ⅰ型错误会发生<strong>假阳性</strong>。那么我们为什么只设为0.05？不设定一个非常小的值呢？因为还存在另外一种错误，Ⅱ型错误，即原假设为假，没有拒绝原假设的概率，这会造成<strong>假阴性</strong>。像上面我们提到的那种情况，就是犯了二型错误。如果我们把P值提高到0.25，那么上面的例子就能够显著。但是一般情况下我们愿不愿意提高P值到0.25呢？通常我们不会这么做。</p>
-<h4 id="0-05或0-01-的-p值-是随意划分的（The-0-05-and-0-01-Cut-offs-Are-Arbitrary）">0.05或0.01 的 p值 是随意划分的（The 0.05 and 0.01 Cut-offs Are Arbitrary）</h4>
+<h4 id="0-05或0-01-的-p值-是随意划分的-the-0-05-and-0-01-cut-offs-are-arbitrary">0.05或0.01 的 p值 是随意划分的（The 0.05 and 0.01 Cut-offs Are Arbitrary）</h4>
 <p>很多杂志和监管部门强调要达到0.05或0.01水平的显著。但是这两个数字的设定其实没有特别的，这仅仅是因为最开始的文章用这两个数字作为例子而已。本书的部分目的之一就是让读者对于P值和置信区间有一个更加清晰的认识（受教了）。</p>
-<h4 id="Power-Calculation">Power Calculation</h4>
+<h4 id="power-calculation">Power Calculation</h4>
 <p>Power is the probability of rejecting the null when the null is false（Power 是指当原假设为假时拒绝原假设的概率）。</p>
 <p>下面我们通过R中的实际代码去理解这个概念。</p>
 <p>我们仍然假设样本大小为12，显著水平时0.05。由于我们已经两个群体均值有差异，我们可以重复抽样，看每次抽样t检验是否小于0.05</p>
@@ -249,7 +249,7 @@
 <blockquote>
 <p>There is no “right” power or “right” alpha level, but it is important that you understand what eachmeans.</p>
 </blockquote>
-<h5 id="p-values-are-Arbitrary-under-the-Alternative-Hypothesis">p-values are Arbitrary under the Alternative Hypothesis</h5>
+<h5 id="p-values-are-arbitrary-under-the-alternative-hypothesis">p-values are Arbitrary under the Alternative Hypothesis</h5>
 <blockquote>
 <p>Another consequence of what we have learned about power is that p-values are somewhat arbitrarywhen the null hypothesis is not true and therefore thealternativehypothesis is true (the differencebetween the population means is not zero). When the alternative hypothesis is true, we can make a p-value as small as we want simply by increasing the sample size (supposing that we have an infinitepopulation to sample from). We can show this property of p-values by drawing larger and largersamples from our population and calculating p-values. This works because, in our case, we knowthat the alternative hypothesis is true, since we have access to the populations and can calculate thedifference in their means.</p>
 </blockquote>
@@ -264,7 +264,7 @@
 <blockquote>
 <p>This tells us how many standard deviations of the data the mean of the high-fat diet group is from the control group. Under the alternative hypothesis, unlike the t-statistic which is guaranteed to increase, the effect size and Cohen’s d will become more precise.（看不懂）</p>
 </blockquote>
-<h3 id="Monte-Carlo-Simulation">Monte Carlo Simulation</h3>
+<h3 id="monte-carlo-simulation">Monte Carlo Simulation</h3>
 <p>电脑可以用来产生伪随机数（pseudo-random numbers），一个最大的好处是我们可以通过模拟数据来证明我们的假设或理论。</p>
 <blockquote>
 <p>伪随机性（英语：Pseudorandomness）是一个过程似乎是随机的，但实际上并不是。例如伪随机数是使用一个确定性的算法计算出来的似乎是随机的数序，因此伪随机数实际上并不随机。在计算伪随机数时假如使用的开始值不变的话，那么伪随机数的数序也不变。</p>
@@ -284,13 +284,13 @@
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ps&lt;-(seq(<span class="number">0</span>,<span class="number">999</span>)+<span class="number">0.5</span>)/<span class="number">1000</span> <span class="comment">#0到1的均匀分布</span></span><br><span class="line">qqplot(qt(ps,df=<span class="number">2</span>*<span class="number">3</span>-<span class="number">2</span>),ttests,xlim=<span class="built_in">c</span>(-<span class="number">6</span>,<span class="number">6</span>),ylim=<span class="built_in">c</span>(-<span class="number">6</span>,<span class="number">6</span>))</span><br><span class="line"><span class="comment"># qt获得某t分布累积概率的数值</span></span><br><span class="line"><span class="comment"># qqplot比较两个变量分布是否相同</span></span><br><span class="line">abline(<span class="number">0</span>,<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
 <p>从中我们可以看出，t分布在这种情况下更为近似，但是仍不完美。这是因为<strong>总体并不是很好地符合正态分布</strong>。(从下面总体的QQ图中看出，总体略偏)</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">qqnorm(controlPopulation)</span><br><span class="line">qqline(controlPopulation)</span><br></pre></td></tr></table></figure>
-<h3 id="Parametric-Simulations-for-the-Observations">Parametric Simulations for the Observations</h3>
+<h3 id="parametric-simulations-for-the-observations">Parametric Simulations for the Observations</h3>
 <p>我们再这里使用蒙特卡洛模拟随机变量和假设检验，这是因为我们有总体数据。这是为了教学的作用，但在实际运用中是不可能的。一般采用蒙特卡洛模拟，主要用于参数估计（如均值和标准差）。</p>
 <p>以小鼠体重的例子来说，我们通过先验知识，认识到小鼠的体重均值为24盎司，标准差为3.5盎司，而且小鼠体重近似符合正态分布。通过以上信息，我们可以构建一个总体数据。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">controls&lt;-rnorm(<span class="number">5000</span>, mean=<span class="number">24</span>, sd=<span class="number">3.5</span>)</span><br></pre></td></tr></table></figure>
 <p>由于我们可以重复上述操作。因此我们不需要用到sample()函数了。代码如下</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ttestgenerator&lt;-function(n, mean&#x3D;24, sd&#x3D;3.5) &#123;</span><br><span class="line">  cases&lt;-rnorm(n,mean,sd)</span><br><span class="line">  controls&lt;-rnorm(n,mean,sd)</span><br><span class="line">  tstat&lt;-(mean(cases)-mean(controls))&#x2F;sqrt( var(cases)&#x2F;n+var(controls)&#x2F;n )</span><br><span class="line">  return(tstat)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="Permutation-Tests">Permutation Tests</h3>
+<h3 id="permutation-tests">Permutation Tests</h3>
 <p>假设我们遇到这样一种情况，没有一种标准的统计量能近似模拟我们的数据。</p>
 <p>We have computed a summary statistic, such as the difference in mean, but do not have auseful approximation, such as that provided by the CLT.</p>
 <p>这个时候 Permutation Tests 就派上用场了。</p>
@@ -315,7 +315,7 @@
 </blockquote>
 <p>没看懂，结论是数据量小时，不用这种permutation test</p>
 <p>而且permutation test 也有假设：<strong>:samples are assumed to be independentand “exchangeable”</strong> 。 If there is hidden structure in your data, then permutation tests can result in estimated null distributions that underestimate the size of tails because the permutations may destroy the existing structure in the original data.</p>
-<h3 id="Association-Tests">Association Tests</h3>
+<h3 id="association-tests">Association Tests</h3>
 <p>前面的统计分析中，忽略了一类重要的数据，二元或者说分类数据。举个例子，当你有两种疾病的基因型的群体(AA/Aa 与 aa)作为cases 和 control。我们要提出的问题是，这个基因型与疾病是否有关系。<br>
 这里疾病状况表示为0和1，那么我们为什么不能用t-test？因为数据要么是0要么是1，很明显不会符合正态分布，因此不能使用t-test。</p>
 <p>如果样本数量很大的话，我们可以使用CLT。不然的话，我们就可以使用Association Tests。</p>
@@ -335,7 +335,7 @@
 <li>每次抽取也只有两个互斥的结果</li>
 <li><strong>每次抽取后成功的概率发生改变</strong>（因为是不放回抽样，这也导致了每次抽取事件不独立）</li>
 </ol>
-<h4 id="Lady-Tasting-Tea">Lady Tasting Tea</h4>
+<h4 id="lady-tasting-tea">Lady Tasting Tea</h4>
 <p>R.A.Fisher 的一位熟人宣称她能分辨牛奶是早于或晚于茶放入杯中（就是牛奶和茶混合的顺序）。Fisher 就和她做了一个小实验，4次中对了3次。那么，我们能否说明这位女士存在这种特殊的能力呢？这个例子被称为&quot;Lady tasting tea&quot;。<br>
 按照之前的经验。一个基本的问题是，如果这位女士仅仅靠猜，她能得到3/4或更高的正确率(即3/4+4/4)的概率是多少？<br>
 仍和之前一样，我们需要计算在零假设成立的前提下事情发生的概率。这里的零假设就是这位女士都是猜的。</p>
@@ -359,12 +359,12 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <li>Fisher 精确检验：适合样本小或不平衡数据</li>
 <li>卡方检验：适合样本大、平衡数据</li>
 </ul>
-<h4 id="Two-By-Two-Tables">Two By Two Tables</h4>
+<h4 id="two-by-two-tables">Two By Two Tables</h4>
 <p>The data from the experiment above can be summarized by a 2 by 2 table:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">tab&lt;-matrix(c(3,1,1,3),2,2)</span><br><span class="line">rownames(tab)&lt;-c(&quot;Poured Before&quot;,&quot;Poured After&quot;)</span><br><span class="line">colnames(tab)&lt;-c(&quot;Guessed before&quot;,&quot;Guessed after&quot;)</span><br><span class="line">tab</span><br><span class="line">#The function fisher.test performs the calculations above and can be obtained like this:</span><br><span class="line">fisher.test(tab,alternative&#x3D;&quot;greater&quot;)</span><br><span class="line">##</span><br><span class="line">##Fisher&#39;s Exact Test for Count Data</span><br><span class="line">##</span><br><span class="line">## data:  tab</span><br><span class="line">## p-value &#x3D; 0.2429</span><br><span class="line">## alternative hypothesis: true odds ratio is greater than 1</span><br><span class="line">## 95 percent confidence interval:</span><br><span class="line">##  0.3135693Inf</span><br><span class="line">## sample estimates:</span><br><span class="line">## odds ratio</span><br><span class="line">##   6.408309</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="Fisher-精确检验的争议">Fisher 精确检验的争议</h4>
+<h4 id="fisher-精确检验的争议">Fisher 精确检验的争议</h4>
 <p>很多人争论Fisher 精确检验结果保守。它的真实的拒绝概率低于名义上的显著水平。The apparent contradiction stems from the combination of a discrete statistic with fixed significance levels.（最明显的矛盾在于它计算出的统计量是分散的，但是显著水平是固定的，如0.05）（如上例，可能出现的P值只有5个（0，1，2，3，4杯））。To avoid the problem, many authors discourage the use of fixed significance levels when dealing with discrete problems.</p>
-<h4 id="Chi-square-Test">Chi-square Test</h4>
+<h4 id="chi-square-test">Chi-square Test</h4>
 <p>假设我们有250个个体，其中一部分患有疾病。我们观测到aa基因型的个体中有20%患病；其他基因型的个体中患病比例为10%。如果我们再挑250个个体这种现象会再次发生吗？（这个提问方式等同于问这个位点是否与疾病相关）</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">disease=factor(<span class="built_in">c</span>(<span class="built_in">rep</span>(<span class="number">0</span>,<span class="number">180</span>),<span class="built_in">rep</span>(<span class="number">1</span>,<span class="number">20</span>),<span class="built_in">rep</span>(<span class="number">0</span>,<span class="number">40</span>),<span class="built_in">rep</span>(<span class="number">1</span>,<span class="number">10</span>)),labels=<span class="built_in">c</span>(<span class="string">&quot;control&quot;</span>,<span class="string">&quot;cases&quot;</span>))</span><br><span class="line">genotype=factor(<span class="built_in">c</span>(<span class="built_in">rep</span>(<span class="string">&quot;AA/Aa&quot;</span>,<span class="number">200</span>),<span class="built_in">rep</span>(<span class="string">&quot;aa&quot;</span>,<span class="number">50</span>)),levels=<span class="built_in">c</span>(<span class="string">&quot;AA/Aa&quot;</span>,<span class="string">&quot;aa&quot;</span>))</span><br><span class="line">dat&lt;-data.frame(disease, genotype)</span><br><span class="line">dat&lt;-dat[sample(nrow(dat)),]<span class="comment">#shuffle them up</span></span><br><span class="line">head(dat)</span><br><span class="line"></span><br><span class="line"><span class="comment">###统计频数</span></span><br><span class="line">table(genotype)</span><br><span class="line">table(disease)</span><br><span class="line"></span><br><span class="line"><span class="comment">## 双因素统计频数，建立一个2*2表</span></span><br><span class="line">tab &lt;- table(genotype,disease)</span><br><span class="line">tab</span><br><span class="line"><span class="comment">##disease</span></span><br><span class="line"><span class="comment">## genotype control cases</span></span><br><span class="line"><span class="comment">##    AA/Aa     180    20</span></span><br><span class="line"><span class="comment">##    aa		 40    10</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>这里最典型的统计量就是the odds ratio(OR)。). We compute the oddsof having the disease if you are an “aa”: 10/40, the odds of having the disease if you are an “AA/Aa”:20/180, and take the ratio:(10/40)/(20/180)</p>
@@ -374,37 +374,37 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">p=mean(disease==<span class="string">&quot;cases&quot;</span>)</span><br><span class="line">p</span><br><span class="line"><span class="comment">## [1] 0.12</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>因此，各cell 的期望值为</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">expected&lt;-rbind(<span class="built_in">c</span>(<span class="number">1</span>-p,p)*<span class="built_in">sum</span>(genotype==<span class="string">&quot;AA/Aa&quot;</span>),<span class="built_in">c</span>(<span class="number">1</span>-p,p)*<span class="built_in">sum</span>(genotype==<span class="string">&quot;aa&quot;</span>))</span><br><span class="line"><span class="built_in">dimnames</span>(expected)&lt;-<span class="built_in">dimnames</span>(tab)</span><br><span class="line">expected</span><br><span class="line"><span class="comment">##disease</span></span><br><span class="line"><span class="comment">## genotype control cases</span></span><br><span class="line"><span class="comment">##    AA/Aa     176    24</span></span><br><span class="line"><span class="comment">##    aa		 44     6</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##这里没讲清楚，直接就算出来了</span></span><br><span class="line">chisq.test(tab)$p.value</span><br><span class="line"><span class="comment">## [1] 0.08857435</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="Large-Samples-Small-p-values">Large Samples, Small p-values</h4>
+<h4 id="large-samples-small-p-values">Large Samples, Small p-values</h4>
 <p>如上所述，仅报道P值是不正确的。很多做GWAS的人过于强调P值。他们样本很大，得到的P值很小。但是如果仔细看他们的结果，我们就能看到他们的odds ratios并不高：仅仅比1高一点。在这种情况下，基因型是AA/Aa 或 aa 可能不会改变动物患病的几率，但是这些位点确实是统计意义上显著的。<br>
 <strong>odds ratio 和 p-value 并没有一对一的关系</strong>（这一点很重要，这个在effect size 中也专门提到了，效应大小与是否显著没有因果关系。P值只能判断这个效应是不是出于偶然（随机误差），并不能说明效应大小）</p>
-<h4 id="Confidence-Intervals-For-The-Odd-Ratio">Confidence Intervals For The Odd Ratio</h4>
+<h4 id="confidence-intervals-for-the-odd-ratio">Confidence Intervals For The Odd Ratio</h4>
 <p>计算OR 的置信区间不能直接做到。不像其他统计量，它们都能推导出近似的分布。但是OR仅仅是一个比例。因此，没有简单的方法可以使用，例如CLT。</p>
 <p>One approach is to use the theory ofgeneralized linear models which provides estimates of thelog odds ratio, rather than the OR itself, that can be shown to be asymptotically normal.</p>
 <p>后面的没看</p>
-<h2 id="Exploratory-Data-Analysis">Exploratory Data Analysis</h2>
+<h2 id="exploratory-data-analysis">Exploratory Data Analysis</h2>
 <p>这个探索性数据分析，没太搞懂</p>
-<h3 id="Quantile-Quantile-Plots">Quantile Quantile Plots</h3>
+<h3 id="quantile-quantile-plots">Quantile Quantile Plots</h3>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">library(UsingR)<span class="comment">##available from CRAN</span></span><br><span class="line">library(rafalib)</span><br><span class="line">x&lt;-father.son$fheight</span><br><span class="line"></span><br><span class="line">ps&lt;-( seq(<span class="number">0</span>,<span class="number">99</span>)+<span class="number">0.5</span>)/<span class="number">100</span> <span class="comment">#0.005 0.015 ……</span></span><br><span class="line">qs&lt;-quantile(x, ps) <span class="comment">#获得x中的各分位数</span></span><br><span class="line">normalqs&lt;-qnorm(ps, mean(x), popsd(x)) <span class="comment">#形成以x均值，总体标准差的正态分布的分位数</span></span><br><span class="line">plot(normalqs,qs,xlab=<span class="string">&quot;Normal percentiles&quot;</span>,ylab=<span class="string">&quot;Height percentiles&quot;</span>) </span><br><span class="line"><span class="comment"># 两个分位数向量的散点图即为QQ图</span></span><br><span class="line">abline(<span class="number">0</span>,<span class="number">1</span>)<span class="comment">##identity line</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>简化命令,比上面的手动画图采了更多的点，因此更加准确。<br>
 其中由于x轴为标准正态分布，因此添加的qqline的截距为mean(x) , 斜率为popsd(x)</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">qqnorm(x)</span><br><span class="line">qqline(x)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>当然，我们也可以看看非正态分布的QQ图，比如t分布，样本数越少，尾巴越肥。体现在QQ图上就是左侧的极端值低于identity line，右侧的极端值高于identity line。</p>
-<h3 id="Boxplots">Boxplots</h3>
+<h3 id="boxplots">Boxplots</h3>
 <p>数据也不是都服从正态分布。比如工资，只告诉均值和标准差根本不足以表现真实情况（not neccessarily informative），因为我们没办法通过这两个参数获取工资的分布情况。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">op &lt;- par(mfrow=<span class="built_in">c</span>(<span class="number">1</span>,<span class="number">2</span>))</span><br><span class="line">hist(exec.pay)<span class="comment">##in UsingR package</span></span><br><span class="line">qqnorm(exec.pay)</span><br><span class="line">qqline(exec.pay)</span><br><span class="line"></span><br><span class="line"><span class="comment">#boxplot</span></span><br><span class="line">boxplot(exec.pay, ylab=<span class="string">&quot;10,000s of dollars&quot;</span>, ylim=<span class="built_in">c</span>(<span class="number">0</span>,<span class="number">400</span>))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="Scatterplots-And-Correlation">Scatterplots And Correlation</h3>
+<h3 id="scatterplots-and-correlation">Scatterplots And Correlation</h3>
 <p>上面都是单一变量。我们也经常用到双变量或者更多的变量，比如父亲和儿子的身高。可以先画一个散点图。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">library(UsingR)</span><br><span class="line">data(<span class="string">&quot;father.son&quot;</span>)</span><br><span class="line">x=father.son$fheight</span><br><span class="line">y=father.son$sheight</span><br><span class="line">plot(x,y,xlab=<span class="string">&quot;Father&#x27;s height in inches&quot;</span>,ylab=<span class="string">&quot;Son&#x27;s height in inches&quot;</span>,main=paste(<span class="string">&quot;correlation =&quot;</span>,<span class="built_in">signif</span>(cor(x,y),<span class="number">2</span>)))</span><br></pre></td></tr></table></figure>
 <p>从图中看出一个明显的趋势：父亲的身高越高，儿子的身高也越高。一个定量的统计量就是相关系数。</p>
-<h4 id="Stratification">Stratification</h4>
+<h4 id="stratification">Stratification</h4>
 <p>如果我们要预测身高为72 inches 的父亲的儿子的身高，我们可以看所有身高为72 inches 的父亲的儿子的情况。因此需要对数据按父亲身高进行分层。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">groups&lt;-split(y,<span class="built_in">round</span>(x))</span><br><span class="line">boxplot(groups)</span><br><span class="line">print(mean(y[ <span class="built_in">round</span>(x)==<span class="number">72</span>]))</span><br><span class="line"><span class="comment">## [1] 70.67719</span></span><br></pre></td></tr></table></figure>
-<h3 id="Bi-variate-Normal-Distribution">Bi-variate Normal Distribution</h3>
+<h3 id="bi-variate-normal-distribution">Bi-variate Normal Distribution</h3>
 <p>对于两个均服从正态分布的变量的联合分布，我们一般可以设定当X = x时，Y的条件分布。以身高数据为例，我们给出了以下4个层次。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">groups&lt;-split(y,<span class="built_in">round</span>(x))</span><br><span class="line">op &lt;- par(mfrow=<span class="built_in">c</span>(<span class="number">2</span>,<span class="number">2</span>))</span><br><span class="line"><span class="keyword">for</span>(i <span class="keyword">in</span> <span class="built_in">c</span>(<span class="number">5</span>,<span class="number">8</span>,<span class="number">11</span>,<span class="number">14</span>))&#123;</span><br><span class="line">  qqnorm(groups[[i]],main=paste0(<span class="string">&quot;X=&quot;</span>,<span class="built_in">names</span>(groups)[i],<span class="string">&quot;strata&quot;</span>),</span><br><span class="line">         ylim=<span class="built_in">range</span>(y),xlim=<span class="built_in">c</span>(-<span class="number">2.5</span>,<span class="number">2.5</span>))</span><br><span class="line"><span class="comment"># groups 是一个list，用groups[[i]] 获得的是向量</span></span><br><span class="line"><span class="comment"># range() 返回一个包含最小值和最大值的向量</span></span><br><span class="line"><span class="comment"># range(1:10) ## [1]  1 10</span></span><br><span class="line"></span><br><span class="line">  qqline(groups[[i]])</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
 <p>后面的公式推导没太明白。后面对x,y进行了标准化，然后按x分组求y均值，发现y均值 与 x 呈线性关系，截距为0，斜率为标准化的y与x的相关系数。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x=( x-mean(x) )/sd(x)</span><br><span class="line">y=( y-mean(y) )/sd(y)</span><br><span class="line">means=tapply(y, <span class="built_in">round</span>(x*<span class="number">4</span>)/<span class="number">4</span>, mean) <span class="comment">#按round(x*4)/4 给y 分组求均值</span></span><br><span class="line">fatherheights=<span class="built_in">as.numeric</span>(<span class="built_in">names</span>(means))</span><br><span class="line">mypar(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">plot(fatherheights, means, ylab=<span class="string">&quot;average of strata of son heights&quot;</span>, ylim=<span class="built_in">range</span>(fatherheights))</span><br><span class="line">abline(<span class="number">0</span>, cor(x,y))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="Plots-To-Avoid">Plots To Avoid</h3>
+<h3 id="plots-to-avoid">Plots To Avoid</h3>
 <p>画图的目的是准确而清楚地展示数据。根据 Karl 的说法，不好的画图的标准如下：</p>
 <ol>
 <li>Display as little information as possible.</li>
@@ -414,7 +414,7 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <li>Use a poorly chosen scale.</li>
 <li>Ignore significant figures.</li>
 </ol>
-<h3 id="Pie-charts">Pie charts</h3>
+<h3 id="pie-charts">Pie charts</h3>
 <blockquote>
 <p>“Pie charts are a very bad way of displaying information. The eye is good at judginglinear measures and bad at judging relative areas. A bar chart or dot chart is a preferableway of displaying this type of data.”</p>
 </blockquote>
@@ -424,7 +424,7 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pie(browsers,main=<span class="string">&quot;Browser Usage (August 2013)&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#条形图</span></span><br><span class="line">barplot(browsers, main=<span class="string">&quot;Browser Usage (August 2013)&quot;</span>, ylim=<span class="built_in">c</span>(<span class="number">0</span>,<span class="number">55</span>))</span><br><span class="line">abline(h=<span class="number">1</span>:<span class="number">5</span>*<span class="number">10</span>)</span><br><span class="line">barplot(browsers, add=<span class="literal">TRUE</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>通过条形图和y轴的水平线，我们可以很清楚的看到每个值的比例。</p>
 <p>尽量不要使用3D图像，因为3D图像添加了看图的障碍，使得更难通过肉眼辨别各项比例。</p>
-<h4 id="Barplots-as-data-summaries">Barplots as data summaries</h4>
+<h4 id="barplots-as-data-summaries">Barplots as data summaries</h4>
 <p>当条形图用于展示百分比时，很有用。但是，条形图也会被错误地用于<strong>只有两组</strong>的比较。特别当条形图的高度表示均值，上面的小触角表示标准误（standard errors）。</p>
 <blockquote>
 <p>Much more informative is to summarize with a boxplot. If the number of points is small enough,we might as well add them to the plot. When the number of points is too large for us to see them,just showing a boxplot is preferable. We can even setrange=0inboxplotto avoid drawing manyoutliers when the data is in the range of millions.</p>
@@ -438,24 +438,24 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <p>但仔细看数据，这种区别原来主要是因为有两个很大的离群点。将数据进行log以后，更加明朗。</p>
 <p>如下箱线图所示，左边为原数据，可以看出二者可能区别不大，有两个非常大的离群点。log后基本展示了基本情况。（个人感觉，那两个离群点实在太大，也可以直接剔除）</p>
 <p><img src="boxplot1.png" alt="barplot1"></p>
-<h4 id="Show-the-scatter-plot">Show the scatter plot</h4>
+<h4 id="show-the-scatter-plot">Show the scatter plot</h4>
 <p>很多统计分析都是证明两个变量之间存在关系。相关系数和相应的图可以展示这一点。然而，只展现回归线是不够的，因为这掩饰了散点。</p>
-<h4 id="High-correlation-does-not-imply-replication">High correlation does not imply replication</h4>
+<h4 id="high-correlation-does-not-imply-replication">High correlation does not imply replication</h4>
 <p>相关系数很高，不代表重复性很好，这一部分没看懂。之后补上</p>
-<h4 id="Barplots-for-paired-data">Barplots for paired data</h4>
+<h4 id="barplots-for-paired-data">Barplots for paired data</h4>
 <p>当样本数较少且为配对实验时，通常我们会用两种颜色的条形图表示比如实验前和实验后。</p>
 <p><img src="pairdata1.png" alt="barplot1"></p>
 <p>但是我们有更好的办法。比如散点图，我们可以看到点都是高于identity line（这里应该是y=x）。另一种方法是直接画差值的散点图。</p>
 <p><img src="pairdata2.png" alt="barplot1"></p>
 <p><img src="pairdata3.png" alt="barplot1"></p>
-<h4 id="Gratuitous-3D-（没有必要的3D）">Gratuitous 3D （没有必要的3D）</h4>
+<h4 id="gratuitous-3d-没有必要的3d">Gratuitous 3D （没有必要的3D）</h4>
 <p>以下是一个3D图，你会发现并不清楚。很难去确定其中某一个点对应的数值。</p>
 <p>其实这只要不同的颜色来区分三条线就可以了。</p>
 <p><img src="3D.png" alt="barplot1"></p>
 <p><img src="3D2.png" alt="barplot1"></p>
-<h4 id="Too-many-significant-digits">Too many significant digits</h4>
+<h4 id="too-many-significant-digits">Too many significant digits</h4>
 <p>默认情况下，我们会得到很多重要的数字，但我们不是都要放上去。从R中直接复制粘贴是很愚蠢的，这导致你最后显示的不是一张图，而更像是一张表。</p>
-<h4 id="Displaying-data-well">Displaying data well</h4>
+<h4 id="displaying-data-well">Displaying data well</h4>
 <p>展示数据的一般准则：</p>
 <ul>
 <li>Be accurate and clear.</li>
@@ -466,7 +466,7 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <li>In tables, every digit should be meaningful. Don’t drop ending 0’s.<br>
 （表格中，每一个小数位点都有意义）</li>
 </ul>
-<h3 id="Misunderstanding-Correlation-Advanced">Misunderstanding Correlation (Advanced)</h3>
+<h3 id="misunderstanding-correlation-advanced">Misunderstanding Correlation (Advanced)</h3>
 <p>现在相关系数主要用于体现reproducibility。但是实际上，相关系数不足以体现reproducibility。</p>
 <p>最坏的错误是，计算相关系数的数据不是近似服从<strong>二元正态分布</strong>。上面提到，均值，标准差，相关系数都是基于二元正态分布。但是，有很多数据不符合，如基因表达量数据，通常有很肥的右侧尾巴。</p>
 <p>计算reproducibility 最直接的方式就是计算两个变量的距离。</p>
@@ -474,25 +474,25 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <p><img src="reproducibility1.png" alt="barplot1"></p>
 <p>后面没看，也看不懂。</p>
 <p>我连这里的reproducibility是什么意思都不知道。</p>
-<h3 id="Robust-Summaries">Robust Summaries</h3>
+<h3 id="robust-summaries">Robust Summaries</h3>
 <p>在分析数据的过程中，我们通常假设数据符合正态分布。但是我们收集数据的过程中，总是不可避免地加入了一些错误的数据点（离群点）。类似这种偏离很大的离群点，会导致分析结果出现很大的偏差。</p>
 <p>如下例，我们在0到1之间的数据中，插入一个值为100的离群点。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">set.seed(<span class="number">1</span>)</span><br><span class="line">x=<span class="built_in">c</span>(rnorm(<span class="number">100</span>,<span class="number">0</span>,<span class="number">1</span>))<span class="comment">##real distribution</span></span><br><span class="line">x[<span class="number">23</span>]&lt;-<span class="number">100</span><span class="comment">##mistake made in 23th measurement</span></span><br><span class="line">boxplot(x)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>我们看一下均值和标准差，发现偏离很大</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cat(<span class="string">&quot;The average is&quot;</span>,mean(x),<span class="string">&quot;and the SD is&quot;</span>,sd(x))</span><br><span class="line"></span><br><span class="line"><span class="comment">## The average is 1.108142 and the SD is 10.02938</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="The-median">The median</h4>
+<h4 id="the-median">The median</h4>
 <p>这个中位数，对于离群点，是robust的。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">median(x)</span><br><span class="line">[<span class="number">1</span>] <span class="number">0.1684483</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="The-median-absolute-deviation">The median absolute deviation</h4>
+<h4 id="the-median-absolute-deviation">The median absolute deviation</h4>
 <p>![](The median absolute deviation.png)</p>
-<h4 id="Spearman-correlation">Spearman correlation</h4>
+<h4 id="spearman-correlation">Spearman correlation</h4>
 <p>和前面类似，也是robust 的相关系数。几乎不受离群点的影响。</p>
-<h4 id="Symmetry-of-log-ratios">Symmetry of log ratios</h4>
+<h4 id="symmetry-of-log-ratios">Symmetry of log ratios</h4>
 <p>当涉及比值数据时，数据不是对称的，1/32 比 32/1 更接近1。这时候采用log()函数处理一下，就会对称（log(x/y) = log(x) - log(y) ）</p>
-<h3 id="Wilcoxon-Rank-Sum-Test">Wilcoxon Rank Sum Test</h3>
+<h3 id="wilcoxon-rank-sum-test">Wilcoxon Rank Sum Test</h3>
 <p>从上面知道，样本均值和标准差易受离群点的影响。t检验需要用到这两个数，因此也容易受到影响。这种Wilcoxon Rank Sum Test 就不会受到影响……</p>
 <p>后面没看</p>
-<h2 id="Matrix-Algebra">Matrix Algebra</h2>
+<h2 id="matrix-algebra">Matrix Algebra</h2>
 <h3 id="自由落体实验">自由落体实验</h3>
 <p>假设你是伽利略，你需要描述物体自由下落的速度。通过实验你获得了如下的25个数据，使用R模拟如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">set.seed(<span class="number">1</span>)</span><br><span class="line">g&lt;-<span class="number">9.8</span><span class="comment">##meters per second</span></span><br><span class="line">n&lt;-<span class="number">25</span></span><br><span class="line">tt&lt;-seq(<span class="number">0</span>,<span class="number">3.4</span>,len=n)<span class="comment">##time in secs, note: we use tt because t is a base function</span></span><br><span class="line">d&lt;-<span class="number">56.67</span>-<span class="number">0.5</span>*g*tt^<span class="number">2</span>+rnorm(n,sd=<span class="number">1</span>)<span class="comment">##meters</span></span><br><span class="line"><span class="comment">#rnorm 生成25个服从(0,1) 分布的随机数，模拟随机残差</span></span><br><span class="line"></span><br><span class="line">plot(tt,d,ylab=<span class="string">&quot;Distance in meters&quot;</span>,xlab=<span class="string">&quot;Time in seconds&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
@@ -520,17 +520,17 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <h3 id="lm-函数">lm 函数</h3>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tt2&lt;-tt^<span class="number">2</span></span><br><span class="line">fit&lt;-lm(d~tt+tt2)</span><br><span class="line">summary(fit)$coef</span><br></pre></td></tr></table></figure>
 <p>通过lm()函数，我们可以知道得到LSE，和它的标准误 和 p 值。</p>
-<h3 id="LSE">LSE</h3>
+<h3 id="lse">LSE</h3>
 <p>我们可以写个计算LSE的函数</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">rss&lt;-<span class="keyword">function</span>(Beta0,Beta1,Beta2)&#123;</span><br><span class="line">  r&lt;- d-(Beta0+Beta1*tt+Beta2*tt^<span class="number">2</span>)</span><br><span class="line">  <span class="built_in">return</span>(<span class="built_in">sum</span>(r^<span class="number">2</span>))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#固定两个参数，观察beta2对rss的影响</span></span><br><span class="line">Beta2s&lt;-seq(-<span class="number">10</span>,<span class="number">0</span>,len=<span class="number">100</span>)</span><br><span class="line">plot(Beta2s,sapply(Beta2s,rss,Beta0=<span class="number">55</span>,Beta1=<span class="number">0</span>),ylab=<span class="string">&quot;RSS&quot;</span>,xlab=<span class="string">&quot;Beta2&quot;</span>,type=<span class="string">&quot;l&quot;</span>)</span><br><span class="line"><span class="comment">##Let&#x27;s add another curve fixing another pair:</span></span><br><span class="line">Beta2s&lt;-seq(-<span class="number">10</span>,<span class="number">0</span>,len=<span class="number">100</span>)</span><br><span class="line">lines(Beta2s,sapply(Beta2s,rss,Beta0=<span class="number">65</span>,Beta1=<span class="number">0</span>),col=<span class="number">2</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>估计参数这里需要用到微积分。当然，如果参数众多，那么估计起来也很麻烦。</p>
-<h3 id="More-on-Galton-父子身高">More on Galton (父子身高)</h3>
+<h3 id="more-on-galton-父子身高">More on Galton (父子身高)</h3>
 <h3 id="solving-system-of-equations">solving system of equations</h3>
 <p>线性代数是被用来解决 systems of linear equations，如下：</p>
 <p><img src="linear_equations1.png" alt=""></p>
 <p>线性代数给我们提供了非常简便的一般方法解决这些问题。比如上例中，可以这么求解</p>
 <p><img src="linear_equations2.png" alt=""></p>
-<h3 id="The-inverse">The inverse</h3>
+<h3 id="the-inverse">The inverse</h3>
 <p>我们可以通过R中的solve()函数求逆。但是注意，solve()函数并不总是numerically stable。</p>
 <p>crossprod(A，B)  = t(A) %*% B</p>
 <p>crossprod(A) = t(A) %*% A</p>
@@ -545,7 +545,7 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <p><img src="LSE2.png" alt=""></p>
 <p>由于最小二乘也是一个平方值，所以，类似于 f(x)^2^ 的求导为 2f(x)f’(x)</p>
 <p>具体没太搞懂</p>
-<h2 id="Linear-Models">Linear Models</h2>
+<h2 id="linear-models">Linear Models</h2>
 <blockquote>
 <p>“Linear”” here does not refer to lines, but rather to linear combinations.</p>
 </blockquote>
@@ -555,7 +555,7 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <p>使用model.matrix() 函数前必须<strong>因子化</strong></p>
 <p>所谓因子（factor），它们的具体名称不重要（字符串或者数值），重要的是order（把同一类的归到一组）</p>
 <p>model.matrix() 中 +0 或 -1 不要截距，这样每一个水平都有一个单独的系数。</p>
-<h3 id="Releveling-（实际没什么用）">Releveling （实际没什么用）</h3>
+<h3 id="releveling-实际没什么用">Releveling （实际没什么用）</h3>
 <p>参考水平（reference level，也就是截距所在的水平）一般是<strong>名称按字母排序</strong>的第一个水平，可以通过relevel 改变</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">group &lt;- factor(<span class="built_in">c</span>(<span class="number">1</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>))</span><br><span class="line">group &lt;- relevel(group, <span class="string">&quot;2&quot;</span>)</span><br><span class="line">model.matrix(~ group)</span><br><span class="line"><span class="comment">##   (Intercept) group1</span></span><br><span class="line"><span class="comment">## 1           1      1</span></span><br><span class="line"><span class="comment">## 2           1      1</span></span><br><span class="line"><span class="comment">## 3           1      0</span></span><br><span class="line"><span class="comment">## 4           1      0</span></span><br><span class="line"></span><br><span class="line">model.matrix(~ group-<span class="number">1</span>)</span><br><span class="line"><span class="comment">##          group2 group1</span></span><br><span class="line"><span class="comment">## 1           0      1</span></span><br><span class="line"><span class="comment">## 2           0      1</span></span><br><span class="line"><span class="comment">## 3           1      0</span></span><br><span class="line"><span class="comment">## 4           1      0</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>也可以直接在factor() 函数中说明顺序</p>
@@ -579,7 +579,7 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">fit&lt;-lm(Bodyweight~Diet, data=dat)</span><br><span class="line">summary(fit)$coef</span><br><span class="line"></span><br><span class="line"><span class="comment">##</span></span><br><span class="line">             Estimate Std. Error   t value     Pr(&gt;|t|)</span><br><span class="line">(Intercept) <span class="number">23.813333</span>   <span class="number">1.039353</span> <span class="number">22.911684</span> <span class="number">7.642256e-17</span></span><br><span class="line">Diethf       <span class="number">3.020833</span>   <span class="number">1.469867</span>  <span class="number">2.055174</span> <span class="number">5.192480e-02</span></span><br></pre></td></tr></table></figure>
 <p>t分布，当方差相等时结果一致。t分布的方差（标准差）一致等于线性模型中的残差分布一致。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">t.test(s[[<span class="string">&quot;chow&quot;</span>]],s[[<span class="string">&#x27;hf&#x27;</span>]],var.equal = <span class="built_in">T</span>)$p.value</span><br><span class="line"><span class="comment">## [1] 0.0519248</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="Standard-Errors">Standard Errors</h3>
+<h3 id="standard-errors">Standard Errors</h3>
 <p>实际我们得到的参数估计值仍然是一个<strong>随机变量</strong>，因此需要提供<strong>标准误</strong>才是有效的。</p>
 <p>对于自由落体试验，我们可以采用Monte Carlo simulation</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">set.seed(<span class="number">1</span>)</span><br><span class="line">B&lt;-<span class="number">10000</span></span><br><span class="line">h0&lt;-<span class="number">56.67</span></span><br><span class="line">v0&lt;-<span class="number">0</span></span><br><span class="line">g&lt;-<span class="number">9.8</span><span class="comment">##meters per second</span></span><br><span class="line">n&lt;-<span class="number">25</span></span><br><span class="line">tt&lt;-seq(<span class="number">0</span>,<span class="number">3.4</span>,len=n)<span class="comment">##time in secs, t is a base function</span></span><br><span class="line">X&lt;-cbind(<span class="number">1</span>,tt,tt^<span class="number">2</span>)</span><br><span class="line"><span class="comment">##create X&#x27;X^-1 X&#x27;</span></span><br><span class="line">A&lt;-solve(crossprod(X))%*%t(X)</span><br><span class="line">betahat&lt;-replicate(B,&#123;</span><br><span class="line">  y&lt;-h0+v0*tt-<span class="number">0.5</span>*g*tt^<span class="number">2</span>+rnorm(n,sd=<span class="number">1</span>)</span><br><span class="line">  betahats&lt;-A%*%y</span><br><span class="line">  <span class="built_in">return</span>(betahats[<span class="number">3</span>])</span><br><span class="line">&#125;)</span><br><span class="line">head(betahat)</span><br><span class="line"><span class="comment"># [1] -5.038646 -4.894362 -5.143756 -5.220960 -5.063322</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
@@ -610,13 +610,13 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 <p>They are identical because they are doing the same thing.</p>
 </blockquote>
 <p>192页后面没看</p>
-<h3 id="The-QR-Factorization">The QR Factorization</h3>
+<h3 id="the-qr-factorization">The QR Factorization</h3>
 <p>solve <strong>is numerically unstable</strong></p>
 <p>例如，在求LSE中，需要求（X’X）^-1^</p>
-<h4 id="分解（）">分解（）</h4>
+<h4 id="分解">分解（）</h4>
 <p>任何满秩的 N × p 矩阵X（如果不是方阵，哪来的满秩？？），都可以如下分解：</p>
 <p><img src="factorization1.png" alt=""></p>
-<h4 id="用QR求LSE">用QR求LSE</h4>
+<h4 id="用qr求lse">用QR求LSE</h4>
 <p><img src="qr1.png" alt=""></p>
 <p>R 代码如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">n&lt;-<span class="number">50</span>;M&lt;-<span class="number">500</span></span><br><span class="line">x&lt;-seq(<span class="number">1</span>,M,len=n)</span><br><span class="line">X&lt;-cbind(<span class="number">1</span>,x,x^<span class="number">2</span>,x^<span class="number">3</span>)</span><br><span class="line">colnames(X)&lt;-<span class="built_in">c</span>(<span class="string">&quot;Intercept&quot;</span>,<span class="string">&quot;x&quot;</span>,<span class="string">&quot;x2&quot;</span>,<span class="string">&quot;x3&quot;</span>)</span><br><span class="line">beta&lt;-matrix(<span class="built_in">c</span>(<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>),<span class="number">4</span>,<span class="number">1</span>)</span><br><span class="line">set.seed(<span class="number">1</span>)</span><br><span class="line">y&lt;-X%*%beta+rnorm(n,sd=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">QR&lt;-qr(X)</span><br><span class="line">Q&lt;-qr.Q( QR )</span><br><span class="line">R&lt;-qr.R( QR )</span><br><span class="line">(betahat&lt;-backsolve(R, crossprod(Q,y) ) )</span><br><span class="line"></span><br><span class="line"><span class="comment">##也可以直接通过solve函数</span></span><br><span class="line"></span><br><span class="line">QR&lt;-qr(X)</span><br><span class="line">(betahat&lt;-solve.qr(QR, y))</span><br><span class="line"></span><br><span class="line"><span class="comment">##              [,1]</span></span><br><span class="line"><span class="comment">## Intercept 0.9038372</span></span><br><span class="line"><span class="comment">## x         1.0066440</span></span><br><span class="line"><span class="comment">## x2        0.9999622</span></span><br><span class="line"><span class="comment">## x3        1.0000001</span></span><br></pre></td></tr></table></figure>
@@ -1097,15 +1097,6 @@ Fisher 精确检验使用于<strong>检验两个分类变量是否相关</strong
 </script>
 
 <!-- Katex -->
-
-
-    
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-        
-    
-
 
 <!-- busuanzi  -->
 
