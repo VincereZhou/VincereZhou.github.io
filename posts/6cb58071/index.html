@@ -110,7 +110,7 @@
 <p>多个自变量之间不能存在<strong>相关</strong>关系。相关关系分为两种，一种是简单的两两之间的相关，这个通过相关系数矩阵就能看出来是否存在两个变量之间的明显的相关（看绝对值）；第二种是多重线性相关（Multicollinearity），例如 X1 = a + bX2 + cX3，一个自变量可以用其他的多个自变量来解释，就说明存在多重线性相关。</p>
 <h2 id="4-观测值的误差项之间互相独立">4 观测值的误差项之间互相独立</h2>
 <p>误差项即实际值 - 预测值。如果观测值之间存在我们没有添加到模型中的其他影响因素，那么误差项之间就可能存在相关关系，比如有些样本搜集自同一个家庭的成员，而我们没有把家庭这个因素加入到模型中。</p>
-<h2 id="5-误差项-ε-呈正态分布-期望为0-方差为定值">5 误差项（ε）呈正态分布，期望为0，方差为定值</h2>
+<h2 id="5-误差项（ε）呈正态分布，期望为0，方差为定值">5 误差项（ε）呈正态分布，期望为0，方差为定值</h2>
 <blockquote>
 <p>这里其实分为两个假设。第一个假设：误差项服从均值为0的正态分布。第二个假设：误差项的方差为定值（不变）。这两个假设是为了保证回归模型在小样本下能够顺利进行假设检验。正态分布假设仅在小样本的情况下需要，大样本的情况下则不需要，因为有中心极限定理做正态性的支撑。而方差齐性则保证最小二乘法估计出来的统计量具有最小的方差。如果违反了这个假设，置信区间会变宽，这称之为<strong>异方差性（heteroscedasticity）</strong>。当异方差性出现的时候，如果仍采用最小二乘法估计参数，会导致参数的t检验值被高估，可能造成本来不显著的某些参数变为显著，使假设检验失去意义。</p>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/HuZihu/p/10142737.html">https://www.cnblogs.com/HuZihu/p/10142737.html</a></p>
@@ -152,11 +152,11 @@
 <h2 id="模型准确性">模型准确性</h2>
 <p>上面是得到估计的两个参数的准确性，这里我们想知道，我们构建的简单线性模型与数据的契合程度（<em>which the model fits the data</em>）。</p>
 <p>线性模型一般用两个指标， <em>residual standard error</em>(RSE) 和 R<sup>2</sup> 。</p>
-<h3 id="rse">RSE</h3>
+<h3 id="RSE">RSE</h3>
 <p><img src="7.png" alt="1"></p>
 <p>RSE 是<strong>残差的标准误的估计值</strong>，它表示<strong>预测值与真实值的平均偏差量</strong>（这句话需要理解标准误的概念：标准误是样本统计量的标准差，均值为真值，结合标准差的公式，可知标准误就是预测值与真实值的平均偏差量（绝对值），所以一般提供参数估计值的时候，都会写成 参数估计值±<strong>标准误</strong>的形式）。</p>
 <p>RSE 是最直接说明模型准确性的统计量，它的缺点是有单位，是一个绝对值，仅仅是RSE你不知道到底是大还是小，所以你还得和因变量的均值啥的进行比较才知道相对大小。</p>
-<h3 id="r-sup-2-sup">R<sup>2</sup></h3>
+<h3 id="R-sup-2-sup">R<sup>2</sup></h3>
 <p>R<sup>2</sup> 指的是因变量方差能够被线性模型解释的比例，始终在0和1之间，是一个相对值，越大越好。公式如下：</p>
 <p><img src="10.png" alt="1"></p>
 <p>其中<abbr title="total sum of squares">TSS</abbr> 计算如下，表示因变量的总的方差。</p>
@@ -174,7 +174,7 @@
 <h2 id="决定重要的影响因素">决定重要的影响因素</h2>
 <p>当我们有多个影响因素时，很有可能所有的影响因素都和因变量是有联系的，但是因变量可能仅仅是由其中的一小部分自变量决定的（相关不等于因果，比如上面的冰淇淋销量的例子）。我们把如何挑选自变量的过程称为 <em>variable selection</em>。</p>
 <p>理想情况下，我们可以通过<strong>穷举</strong>所有的模型，每种模型均包含一部分的自变量。通过对比所有模型的表现，我们就可以得到最佳的自变量的集合。例如假如我们手上总共有2个可选的自变量X1 X2，那么总共就有4种可能的模型，（1）不包含任何自变量 ；（2）包含X1 ；（3）包含X2；（4）包含X1和X2。但是我们用什么指标来判断不同模型的优劣呢？<strong>这里有很多的判定模型优劣的统计量，比如<abbr title="Akaike information criterion">AIC</abbr>， <abbr title="Bayesian information criterion">BIC</abbr>  , 校正后R<sup>2</sup> 等。</strong></p>
-<h3 id="为什么使用校正后的r-sup-2-sup">为什么使用校正后的R<sup>2</sup></h3>
+<h3 id="为什么使用校正后的R-sup-2-sup">为什么使用校正后的R<sup>2</sup></h3>
 <p>我们看R<sup>2</sup> 的计算公式，可以看到 TSS 是固定值。如果你增加了变量后（比如原来只包含X1，到包含X1和X2），<strong>残差平方和只会减少</strong>（这就是overfitting的原理，哪怕仅仅是增加了无关变量，也会造成与本次数据的拟合程度“变好”）。这导致增加了变量后，R<sup>2</sup>只会进一步增加。</p>
 <p><img src="10.png" alt="1"></p>
 <p>校正后的R<sup>2</sup>的公式如下，考虑了自变量个数的影响。可以看到，校正后的R<sup>2</sup> 随着自变量个数的增加而降低，并且始终低于未校正的R<sup>2</sup>。</p>
@@ -233,14 +233,14 @@
 <p>线性回归的另一个重要的假设是所有残差项均有一个固定的方差。我们计算标准误、置信区间等都依赖于这个假设。</p>
 <p>但不幸地是，残差项的方差不是固定的，才是通常的情况。比如，残差方差可能会随着因变量值的提高而提高。我们可以通过残差图来发现这一点，比如下图的左图。<strong>当面临这种情况时，一个可能的解决思路是将反应变量Y 转换为 log(Y)  或 √Y</strong> ，这两个函数对于较大的值都会有一个很好的收缩效应，从而导致方差不齐性的改善。下图的右图就展示了转换后的残差图，我们可以看到方差不齐性的结果大大改善了（残差的宽度都差不多了），但是存在轻微的非线性关系。</p>
 <p><img src="20.png" alt="1"></p>
-<h2 id="4-outliers">4 Outliers</h2>
+<h2 id="4-Outliers">4 Outliers</h2>
 <p><strong>Outliers 的定义是这个点的真实值与预测值偏差很大</strong>。Outliers 出现的原因有很多，比如错误记录。</p>
 <p>下图中的红点（观测值为20）就是一个典型的Outlier。左边图中的红线是包含了Outlier的回归线，蓝色虚线是剔除了Outlier的回归线，我们可以看到移除或不移除这个Outlier对参数估计的影响很小。</p>
 <p>但是Outliers 还会造成另外的问题。比如，在这个例子中，如果包括Outlier 计算得到的 RSE 为 1.09 ，如果剔除Outlier 得到的 RSE 为 0.77 。因为 RSE 在计算置信区间和 p值时均会用到，这样因为一个点导致RSE剧增会影响到回归方差拟合效果的解释。相似地，加入这个 Outlier， R<sup>2</sup> 从 0.892 降低到 0.805。</p>
 <p>我们可以通过残差图来找到Outlier。在本例中我们轻松地找到这个Outlier，但是在实际应用中，我们很难决定到底偏离多少才可以视为一个 Outlier。为了解决这个问题，我们可以画图<em><strong>studentized residuals</strong></em> 图，纵坐标时残差除以它的标准误估计值。如果学生残差超过3，我们一般就认为可能是Outlier。在下图的右图中，我们发现这个Outlier的学生残差超过了6，而其他点均在 -2 与 2 之间。</p>
 <p>如果你相信Outlier的出现是由于<strong>数据记录或收集时出错</strong>，那么解决办法就是移除这个观测值。但是你需要担心，Outlier的出现也可能是说明你的<strong>模型不完善</strong>，比如缺了一个影响因子。</p>
 <p><img src="21.png" alt="1"></p>
-<h2 id="5-high-leverage-points">5 High Leverage Points</h2>
+<h2 id="5-High-Leverage-Points">5 High Leverage Points</h2>
 <p><em><strong>High Leverage Points</strong></em> 仅指<strong>拥有异常的 x<sub>i</sub> 的观测值</strong>。例如，下图中的观测值 41 就是一个 <em>High Leverage Point</em>。 左图中的红线为包含这个点的回归直线，蓝色虚线是剔除了这个点的回归直线。我们可以看到， <em>High Leverage Point</em> 的影响很大，因此找 <em>High Leverage Point</em> 很重要。</p>
 <p>对于简单线性回归， <em>High Leverage Point</em> 很容易找到，我们可以直接从 X-Y 图中直接看出。但是多重线性回归存在多个因变量，有可能一个观测值的<strong>所有的自变量单独看都在合理的范围</strong>，但是<strong>这一组自变量的组合是异常的</strong>。下图中间的图就显示了这一点，这是一个有两个自变量(X1, X2)的回归。很多观测值的两个自变量均落在蓝色虚线框定的椭圆中，但是这个红色的点不在这个范围内，虽然这个点的 X1 和 X2 值单独看都不是异常的值。**因此对于多重回归，如果仅仅看单个自变量是否存在 <em>High Leverage Point</em>，我们可能会漏掉一些 <em>High Leverage Point</em>。 ** 但是对于超过2个变量的多重回归模型，如果能够同时查看多个自变量组合的 <em>High Leverage Point</em>  就是一个问题，因为你没法针对2维以上的变量进行画图。</p>
 <p><img src="22.png" alt="1"></p>
@@ -248,7 +248,7 @@
 <p><img src="23.png" alt="1"></p>
 <p>这个统计量的值在 1/n 与 1 之间，而且所有的观测值的  <em>leverage statistic</em> 的均值是 (p+1)/n 。所以如果一个观测值的  <em>leverage statistic</em> 远超均值，我们就可以怀疑这是一个  <em>High Leverage Point</em></p>
 <p>上图 3.13 中的右图是 学生残差 vs h<sub>i</sub>  的散点图。观测值41 的 h<sub>i</sub> 和 学生残差均特别高，说明**这个点即是   <em>High Leverage Point</em>  ，也是一个 outlier ** 。这种情况是非常危险的组合，会对回归结果造成很大的影响，相比之下观测值20 虽然是一个 outlier, 但是 leverage 很低，最起码对回归方程没什么影响。</p>
-<h2 id="6-collinearity">6  Collinearity</h2>
+<h2 id="6-Collinearity">6  Collinearity</h2>
 <p><em>Collinearity</em> 表示<strong>两个或更多个自变量之间具有紧密的相关关系</strong>。<em>Collinearity</em> 可以用下图来表示，左图中的两个变量之间表现出来没有明显的关系，而右图的两个变量之间存在<strong>高度</strong>的相关关系（我不知道这个等高图为什么可以这么解释）。</p>
 <p><img src="24.png" alt="1"></p>
 <p><em>Collinearity</em> 的影响在于无非区分开多个自变量对因变量的影响程度。比如右图中，RSS最低的（β<sub>Limit</sub> , β<sub>Rating</sub>）有很多个，他们在一个狭长的椭圆当中，这导致了参数估计的不确定性。</p>
