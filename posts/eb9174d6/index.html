@@ -71,7 +71,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">12.2k</span>
+            <span class="post-count">11.4k</span>
         </span>
     </span>
 
@@ -80,7 +80,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">48 分钟</span>
+            <span class="post-count">44 分钟</span>
         </span>
     </span>
 </div>
@@ -100,11 +100,8 @@
 <h1>资料</h1>
 <p><a target="_blank" rel="noopener" href="https://www.statlearning.com/">An Introduction to Statistical Learning</a>，下文简称 <strong>ISL</strong></p>
 <h1>概述</h1>
-<p>标准的线性模型如下：<br>
-$$<br>
-Y=\beta_{0}+\beta_{1} X_{1}+\cdots+\beta_{p} X_{p}+\epsilon<br>
-$$<br>
-线性模型在接近实际问题中依然富有竞争力，通过使用别的拟合过程替换最小二乘法，可以改善线性模型的效果（<em>prediction accuracy</em> 和 <em>model interpretability</em> ）。</p>
+<p>标准的线性模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=Y%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20X_%7B1%7D%2B%5Ccdots%2B%5Cbeta_%7Bp%7D%20X_%7Bp%7D%2B%5Cepsilon%0A" /></p><p>线性模型在接近实际问题中依然富有竞争力，通过使用别的拟合过程替换最小二乘法，可以改善线性模型的效果（<em>prediction accuracy</em> 和 <em>model interpretability</em> ）。</p>
 <ul>
 <li><em>Prediction Accuracy</em> :  假设因变量与自变量之间的真实关系就是几乎线性的，那么使用最小二乘法得到的估计值的 bias 会很低。 如果 n &gt;&gt; p ，也就说观测值数目远大于自变量数目，那么最小二乘估计值的 variance 也会很低。因此，如果满足这两个条件，最小二乘方法表现会很好。然而，如果 n 不是远大于 p， 那么最小二乘拟合结果的 variance 很高，容易造成 overfitting，然后在预测新的样本时结果很差。如果 p &gt; n ，那么根本无法得到一个唯一的最小二乘参数估计值，最小二乘法根本无法使用。如果此时我们人为地降低因变量的个数，那么我们的代价就是在降低了 variance 的同时 提高了 bias。</li>
 <li><em>Model Interpretability</em> :  很多情况下，多重回归的一些自变量其实压根和因变量没关系。将这些无关变量添加到模型中会使得模型增加不必要的复杂度。通过移除这些变量 （即将它们的系数估计值设为0），我们可以得到一个更容易解释的模型。但是，使用最小二乘法估计参数是不可能得到正好是0的参数的（可以接近0，但不是0）。</li>
@@ -153,36 +150,15 @@ $$<br>
 <h3 id="C-sub-p-sub-AIC-BIC-and-Adjusted-R-sup-2-sup">C<sub>p</sub>, AIC, BIC, and Adjusted R<sup>2</sup></h3>
 <p>这些参数都是通过调整 training error 来估计  test error ，主要是避免了自变量数目会降低training error 的影响。这里主要考虑四种方法：<strong>C<sub>p</sub>, <abbr title="Akaike information criterion">AIC</abbr>, <abbr title="Bayesian information criterion">BIC</abbr>, and Adjusted R<sup>2</sup></strong> 。下图显示了 best subset selection 方法的四个参数的值的变化。</p>
 <p><img src="6.png" alt="1"></p>
-<p>对于包含了 d 个因子的最小二乘模型， 使用 C<sub>p</sub> 估计 test MSE 的公式如下（下面是MSE的估计公式）：<br>
-$$<br>
-C_{p}=\frac{1}{n}\left(\mathrm{RSS}+2 d \hat{\sigma}^{2}\right)<br>
-$$</p>
-<p>$$<br>
-{Esetimated} \operatorname { training } \operatorname {error}=\frac{1}{n}\left(\mathrm{RSS}\right)<br>
-$$</p>
-<p>这里 σ_hat<sup>2</sup>  是对因变量预测的残差方差的估计值。<br>
-$$<br>
-\text { training } \operatorname{RSS}<br>
-$$<br>
-我们可以 C<sub>p</sub> 添加了一个惩罚项，如下式，来调整 training error 容易低估 test error 的趋势。而且这个惩罚项会随着自变量数目的增加而增加（含有d），从而趋于弥补 training RSS 随着变量增加而降低的趋势。<br>
-$$<br>
-2 d \hat{\sigma}^{2}<br>
-$$<br>
-由于 σ_hat<sup>2</sup> 是 σ<sup>2</sup> 的无偏估计值，因此  C<sub>p</sub> 是 test MSE 的一个无偏估计值（?）。</p>
-<p><strong>AIC</strong> 应用在使用最大似然法来拟合参数的模型中，但是在线性模型中，最大似然法和最小二乘是一回事。在这种情况下，AIC 计算公式如下<br>
-$$<br>
-\mathrm{AIC}=\frac{1}{n \hat{\sigma}^{2}}\left(\mathrm{RSS}+2 d \hat{\sigma}^{2}\right)<br>
-$$<br>
-我们可以看到 AIC 和  C<sub>p</sub>  是一个比例关系，AIC 乘以  σ_hat<sup>2</sup> 就得到了  C<sub>p</sub> ，因此这两个是等价的，所以在上图中只显示了  C<sub>p</sub> 的结果。</p>
-<p>BIC 来源于贝叶斯的观点，但是最终的公式和 AIC/ C<sub>p</sub> 差不多，对于最小二乘模型，公式如下，这里相比较 AIC ，就是把 2 改为了 log(n) （这里其实应该写成 ln(n) , 底为 e,  只要 n &gt; 7, ln(n) 就大于2 ），因此 <strong>BIC 对自变量数目很多的模型的惩罚效应更重</strong>。因此上面的图中 BIC 的最佳变量数目为 4，而 AIC/ C<sub>p</sub>是 6 ，其实在图中我们看到变量数目为4后面的曲线就很平了，变量数为4还是6没啥区别。<br>
-$$<br>
-\mathrm{BIC}=\frac{1}{n \hat{\sigma}^{2}}\left(\mathrm{RSS}+\log (n) d \hat{\sigma}^{2}\right)<br>
-$$<br>
-校正R2 公式如下，也是会对变量数目过多有惩罚效应<br>
-$$<br>
-\text { Adjusted } R^{2}=1-\frac{\operatorname{RSS} /(n-d-1)}{\operatorname{TSS} /(n-1)}<br>
-$$<br>
-这四种方法均有严谨的理论证明，但是ISL没讲，它们的证明均有一定的前提或<strong>假设</strong>（如 n 非常大）。<strong>虽然校正R<sup>2</sup> 很流行，但是从理论上校正R<sup>2</sup> 的效果不如另外三种方法</strong>。</p>
+<p>对于包含了 d 个因子的最小二乘模型， 使用 C<sub>p</sub> 估计 test MSE 的公式如下（下面是MSE的估计公式）：</p>
+<p style=""><img src="https://math.now.sh?from=C_%7Bp%7D%3D%5Cfrac%7B1%7D%7Bn%7D%5Cleft%28%5Cmathrm%7BRSS%7D%2B2%20d%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%5Cright%29%0A" /></p><p style=""><img src="https://math.now.sh?from=%7BEsetimated%7D%20%5Coperatorname%20%7B%20training%20%7D%20%5Coperatorname%20%7Berror%7D%3D%5Cfrac%7B1%7D%7Bn%7D%5Cleft%28%5Cmathrm%7BRSS%7D%5Cright%29%0A" /></p><p>这里 σ_hat<sup>2</sup>  是对因变量预测的残差方差的估计值。</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctext%20%7B%20training%20%7D%20%5Coperatorname%7BRSS%7D%0A" /></p><p>我们可以 C<sub>p</sub> 添加了一个惩罚项，如下式，来调整 training error 容易低估 test error 的趋势。而且这个惩罚项会随着自变量数目的增加而增加（含有d），从而趋于弥补 training RSS 随着变量增加而降低的趋势。</p>
+<p style=""><img src="https://math.now.sh?from=2%20d%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%0A" /></p><p>由于 σ_hat<sup>2</sup> 是 σ<sup>2</sup> 的无偏估计值，因此  C<sub>p</sub> 是 test MSE 的一个无偏估计值（?）。</p>
+<p><strong>AIC</strong> 应用在使用最大似然法来拟合参数的模型中，但是在线性模型中，最大似然法和最小二乘是一回事。在这种情况下，AIC 计算公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BAIC%7D%3D%5Cfrac%7B1%7D%7Bn%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%7D%5Cleft%28%5Cmathrm%7BRSS%7D%2B2%20d%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%5Cright%29%0A" /></p><p>我们可以看到 AIC 和  C<sub>p</sub>  是一个比例关系，AIC 乘以  σ_hat<sup>2</sup> 就得到了  C<sub>p</sub> ，因此这两个是等价的，所以在上图中只显示了  C<sub>p</sub> 的结果。</p>
+<p>BIC 来源于贝叶斯的观点，但是最终的公式和 AIC/ C<sub>p</sub> 差不多，对于最小二乘模型，公式如下，这里相比较 AIC ，就是把 2 改为了 log(n) （这里其实应该写成 ln(n) , 底为 e,  只要 n &gt; 7, ln(n) 就大于2 ），因此 <strong>BIC 对自变量数目很多的模型的惩罚效应更重</strong>。因此上面的图中 BIC 的最佳变量数目为 4，而 AIC/ C<sub>p</sub>是 6 ，其实在图中我们看到变量数目为4后面的曲线就很平了，变量数为4还是6没啥区别。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BBIC%7D%3D%5Cfrac%7B1%7D%7Bn%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%7D%5Cleft%28%5Cmathrm%7BRSS%7D%2B%5Clog%20(n%29%20d%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%5Cright)%0A" /></p><p>校正R2 公式如下，也是会对变量数目过多有惩罚效应</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctext%20%7B%20Adjusted%20%7D%20R%5E%7B2%7D%3D1-%5Cfrac%7B%5Coperatorname%7BRSS%7D%20%2F%28n-d-1%29%7D%7B%5Coperatorname%7BTSS%7D%20%2F(n-1)%7D%0A" /></p><p>这四种方法均有严谨的理论证明，但是ISL没讲，它们的证明均有一定的前提或<strong>假设</strong>（如 n 非常大）。<strong>虽然校正R<sup>2</sup> 很流行，但是从理论上校正R<sup>2</sup> 的效果不如另外三种方法</strong>。</p>
 <h3 id="Validation-and-Cross-Validation">Validation and Cross-Validation</h3>
 <p>除了通过校正 training error 间接估计 test error ，我们也可以通过验证集或交叉验证直接估计 test error ，好处就是需要满足的假设更少，而且可以应用在非常广泛的模型选择任务中（不一定是线性模型）。</p>
 <p>在过去，由于执行交叉验证需要很大的计算量无法实现，从而导致 AIC ，BIC 等方法更加流行。但是如今随着计算机算力的增加，交叉验证的计算量已经不再是问题了，因此交叉验证成为了模型选择更好的方法。</p>
@@ -193,39 +169,18 @@ $$<br>
 <p>上面提到的那些方法是用来挑选变量的方法。作为另外一种备选方法，我们可以同时将 p 个预测因子均包含在模型中，然后 <em>constrain</em> 或者说是 <em>regularize</em> 系数估计值，或者说是，<em>shrinks</em> the coefficient estimates towards zero。</p>
 <p>在这当中，最出名的两个方法就是 <em>ridge  regression</em> 和 <em>lasso</em> 。</p>
 <h2 id="Ridge-Regression">Ridge Regression</h2>
-<p>一般的线性模型估计参数的标准是，使得RSS最小，公式如下：<br>
-$$<br>
-\mathrm{RSS}=\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}<br>
-$$<br>
-岭回归（Ridge regression）类似于最小二乘，但是它拟合参数用的需要最小化的指标不同，公式如下，其中 λ ≥ 0 ， 称之为 <em>tuning parameter</em> 。每设置一个不同的 λ ，就能得到一套不同的模型参数。因此，<strong>选择一个合适的 λ 是至关重要的</strong>。<br>
-$$<br>
-\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}+\lambda \sum_{j=1}^{p} \beta_{j}^{2}=\mathrm{RSS}+\lambda \sum_{j=1}^{p} \beta_{j}^{2}<br>
-$$<br>
-其实就是新增了一部分，称为 <em>shrinkage penalty</em> ， 作用是将所有的参数尽量往0压缩。<br>
-$$<br>
-\lambda \sum_{j=1}^{p} \beta_{j}^{2}<br>
-$$<br>
-注意到， <em>shrinkage penalty</em>  仅仅针对 β<sub>1</sub>, …… ， β<sub>p</sub> ， 但是不会针对截距 β<sub>0</sub> ，理由显而易见。</p>
+<p>一般的线性模型估计参数的标准是，使得RSS最小，公式如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BRSS%7D%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%0A" /></p><p>岭回归（Ridge regression）类似于最小二乘，但是它拟合参数用的需要最小化的指标不同，公式如下，其中 λ ≥ 0 ， 称之为 <em>tuning parameter</em> 。每设置一个不同的 λ ，就能得到一套不同的模型参数。因此，<strong>选择一个合适的 λ 是至关重要的</strong>。</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%3D%5Cmathrm%7BRSS%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%0A" /></p><p>其实就是新增了一部分，称为 <em>shrinkage penalty</em> ， 作用是将所有的参数尽量往0压缩。</p>
+<p style=""><img src="https://math.now.sh?from=%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%0A" /></p><p>注意到， <em>shrinkage penalty</em>  仅仅针对 β<sub>1</sub>, …… ， β<sub>p</sub> ， 但是不会针对截距 β<sub>0</sub> ，理由显而易见。</p>
 <p>岭回归的效果如下图，左边是估计系数随着 λ 的变化的趋势，可以看到随着 λ 的增加，所有因变量的系数均趋向于 0。</p>
 <p><img src="8.png" alt="1"></p>
-<p>右图的横坐标改了，分子/分母的计算方式如下：<br>
-$$<br>
-|\beta|<em>{2}=\sqrt{\sum</em>{j=1}^{p} \beta_{j}{ }^{2}}<br>
-$$<br>
-因此当 λ = 0，岭回就是普通的线性回归，右图横坐标为1；当 λ 趋于 ∞ 时， 右图横坐标趋于0。</p>
+<p>右图的横坐标改了，分子/分母的计算方式如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5C%7C%5Cbeta%5C%7C_%7B2%7D%3D%5Csqrt%7B%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%7B%20%7D%5E%7B2%7D%7D%0A" /></p><p>因此当 λ = 0，岭回就是普通的线性回归，右图横坐标为1；当 λ 趋于 ∞ 时， 右图横坐标趋于0。</p>
 <p>标准的线性回归的系数估计值是 <em>scale equivariant</em> ：如果将自变量 X<sub>j</sub> 乘以一个常数 c ，那么这个自变量的系数的估计值就会乘以常数 1/c 。用另外一句话说，无论自变量的值如何缩放，下面这个式子的值永远不变。</p>
-<p>$$<br>
-X_{j} \hat{\beta}<em>{j}<br>
-$$<br>
-但是，与之相反，<strong>岭回归</strong>的系数估计值会随着<strong>自变量系数乘以一个常数</strong>发生<strong>实质性变化</strong>。例如工资这个变量，单位是美元，如果单位换成千美元，那么标准的线性回归的系数估计就会缩小1000倍。这个时候由于岭回归的代价函数中含有系数估计值的平方项，岭回归系数就不会是正好缩小1000倍。换句话说，下式不仅仅取决于 λ 的大小，而且也取决于自变量的缩放比例，甚至还会受到其他自变量缩放比例的影响。<br>
-$$<br>
-X</em>{j} \hat{\beta}<em>{j, \lambda}^{R}<br>
-$$<br>
-因此，<strong>在进行岭回归前，需要对自变量进行标准化</strong>。公式如下，分母为估计的标准差。这样所有的自变量有相同 的 <em>scale</em>（不知道啥叫 scale） 。经过下面这个公式，所有自变量均拥有值为1的标准差。<br>
-$$<br>
-\tilde{x}</em>{i j}=\frac{x_{i j}}{\sqrt{\frac{1}{n} \sum_{i=1}^{n}\left(x_{i j}-\bar{x}_{j}\right)^{2}}}<br>
-$$<br>
-所以上图6.4 的横坐标是  <strong>standardized ridge regression coefficient estimates</strong>, 也就是说自变量已经经过标准化了。</p>
+<p style=""><img src="https://math.now.sh?from=X_%7Bj%7D%20%5Chat%7B%5Cbeta%7D_%7Bj%7D%0A" /></p><p>但是，与之相反，<strong>岭回归</strong>的系数估计值会随着<strong>自变量系数乘以一个常数</strong>发生<strong>实质性变化</strong>。例如工资这个变量，单位是美元，如果单位换成千美元，那么标准的线性回归的系数估计就会缩小1000倍。这个时候由于岭回归的代价函数中含有系数估计值的平方项，岭回归系数就不会是正好缩小1000倍。换句话说，下式不仅仅取决于 λ 的大小，而且也取决于自变量的缩放比例，甚至还会受到其他自变量缩放比例的影响。</p>
+<p style=""><img src="https://math.now.sh?from=X_%7Bj%7D%20%5Chat%7B%5Cbeta%7D_%7Bj%2C%20%5Clambda%7D%5E%7BR%7D%0A" /></p><p>因此，<strong>在进行岭回归前，需要对自变量进行标准化</strong>。公式如下，分母为估计的标准差。这样所有的自变量有相同 的 <em>scale</em>（不知道啥叫 scale） 。经过下面这个公式，所有自变量均拥有值为1的标准差。</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctilde%7Bx%7D_%7Bi%20j%7D%3D%5Cfrac%7Bx_%7Bi%20j%7D%7D%7B%5Csqrt%7B%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28x_%7Bi%20j%7D-%5Cbar%7Bx%7D_%7Bj%7D%5Cright%29%5E%7B2%7D%7D%7D%0A" /></p><p>所以上图6.4 的横坐标是  <strong>standardized ridge regression coefficient estimates</strong>, 也就是说自变量已经经过标准化了。</p>
 <h3 id="为什么岭回归比最小二乘更好">为什么岭回归比最小二乘更好</h3>
 <p>这还是来自于 <em>bias-variance trade-off</em> 。随着 λ 增加，岭回归的 <em>flexibility</em> 会降低，导致 variance 降低，但是 bias 增加。如下图所示，当 λ = 0 时， variance 很高，但是没有bias；最佳的 λ 值接近于30 。</p>
 <p><img src="9.png" alt="1"></p>
@@ -233,26 +188,14 @@ $$<br>
 <h2 id="The-Lasso">The Lasso</h2>
 <p><strong>岭回归的一个明显的缺点是，它最终的模型中会包含所有p个自变量</strong>。虽然它会将所有的系数向0压缩，但是它不会真的把某些系数设置为0，仅仅是接近0。这对于预测没有影响，但是对于模型解释很有影响。</p>
 <p>lasso 方法是岭回归的一个替代方法，它克服了上面的这个劣势。lasso 的 代价函数如下：</p>
-<p>$$<br>
-\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}+\lambda \sum_{j=1}^{p}\left|\beta_{j}\right|=\mathrm{RSS}+\lambda \sum_{j=1}^{p}\left|\beta_{j}\right|<br>
-$$</p>
-<p>我们可以看到， lasso 和 岭回归公式相似，仅仅是把系数估计值平方改为绝对值。同样，类似于岭回归，lasso 也同样将系数估计值 <em>shrinks towards zero</em> 。但是，<strong>lasso 可以使得某些系数估计值正好是0</strong>。因此，类似于 best subset selection 方法， lasso 方法同时可以实现变量选择的目的。我们一般说，<em>the lasso yields <strong>sparse</strong> models</em> ，也就是说模型仅包含部分向量。同样地，选择一个合适的 λ 值对 lasso 方法也很重要。</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%7C%5Cbeta_%7Bj%7D%5Cright%7C%3D%5Cmathrm%7BRSS%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%7C%5Cbeta_%7Bj%7D%5Cright%7C%0A" /></p><p>我们可以看到， lasso 和 岭回归公式相似，仅仅是把系数估计值平方改为绝对值。同样，类似于岭回归，lasso 也同样将系数估计值 <em>shrinks towards zero</em> 。但是，<strong>lasso 可以使得某些系数估计值正好是0</strong>。因此，类似于 best subset selection 方法， lasso 方法同时可以实现变量选择的目的。我们一般说，<em>the lasso yields <strong>sparse</strong> models</em> ，也就是说模型仅包含部分向量。同样地，选择一个合适的 λ 值对 lasso 方法也很重要。</p>
 <p>下图为 lasso 方法的效果，我们可以只要选择不同的λ值，就可以得到不同的因子数目的模型。</p>
 <p><img src="10.png" alt="1"></p>
 <h3 id="岭回归和-lasso-方法的另一种理解">岭回归和 lasso 方法的另一种理解</h3>
 <p>我们认为 lasso 和 岭回归的系数估计过程，可以视为接近下面这两个问题</p>
-<p>$$<br>
-\underset{\beta}{\operatorname{minimize}}\left{\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}\right} \quad subject \quad to \quad \sum_{j=1}^{p}\left|\beta_{j}\right| \leq s<br>
-$$</p>
-<p>$$<br>
-\underset{\beta}{\operatorname{minimize}}\left{\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}\right} \quad subject \quad to \quad \sum_{j=1}^{p} \beta_{j}^{2} \leq s<br>
-$$</p>
-<p>也就是说，对于任意一个 λ 值，都会有有一个 s 值作为系数估计值绝对值/平方和的最大值，在满足小于 s 的前提下，RSS 最小的系数就是估计的系数。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cunderset%7B%5Cbeta%7D%7B%5Coperatorname%7Bminimize%7D%7D%5Cleft%5C%7B%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%5Cright%5C%7D%20%5Cquad%20subject%20%5Cquad%20to%20%5Cquad%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%7C%5Cbeta_%7Bj%7D%5Cright%7C%20%5Cleq%20s%0A" /></p><p style=""><img src="https://math.now.sh?from=%5Cunderset%7B%5Cbeta%7D%7B%5Coperatorname%7Bminimize%7D%7D%5Cleft%5C%7B%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%5Cright%5C%7D%20%5Cquad%20subject%20%5Cquad%20to%20%5Cquad%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%20%5Cleq%20s%0A" /></p><p>也就是说，对于任意一个 λ 值，都会有有一个 s 值作为系数估计值绝对值/平方和的最大值，在满足小于 s 的前提下，RSS 最小的系数就是估计的系数。</p>
 <p>best subset selection 可以理解为下式，也就是说条件是系数数目要低于 s 。</p>
-<p>$$<br>
-\underset{\beta}{\operatorname{minimize}}\left{\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}\right} \quad subject \quad to \quad \sum_{j=1}^{p} I\left(\beta_{j} \neq 0\right) \leq s<br>
-$$<br>
-<strong>当 p 很大时，best subset selection 方法不可用，这时候必须用岭回归或者 lasso 方法。</strong></p>
+<p style=""><img src="https://math.now.sh?from=%5Cunderset%7B%5Cbeta%7D%7B%5Coperatorname%7Bminimize%7D%7D%5Cleft%5C%7B%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%5Cright%5C%7D%20%5Cquad%20subject%20%5Cquad%20to%20%5Cquad%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20I%5Cleft(%5Cbeta_%7Bj%7D%20%5Cneq%200%5Cright)%20%5Cleq%20s%0A" /></p><p><strong>当 p 很大时，best subset selection 方法不可用，这时候必须用岭回归或者 lasso 方法。</strong></p>
 <h3 id="为什么lasso可以实现变量选择？">为什么lasso可以实现变量选择？</h3>
 <p>下图为p=2时一个解释说明， 红色的圈为RSS等高线，中间的黑点为最小二乘估计值；蓝色图形为 lasso/ 岭回归限制条件的区域，lasso 是一个菱形，岭回归是一个圆形。如果 s 很大，那么lasso/岭回归的限制条件区域就可能包含最小二乘估计值，那么此时解就等于最小二乘估计值。但是我们图中的限制条件区域并不大，左图为 lasso 结果，估计值为RSS等高线与菱形限制区域外边缘刚刚好接触的那个交点，岭回归同理。由于岭回归的限制区域是一个圆形，没有突出点，因此这个交点很难正好在某个轴上；而 lasso 的四个突出点均在轴上，因此交点很有可能就是轴上的突出点，如图中所示。</p>
 <p>在更高的维度上，可能就会有很多的系数估计值都是0。</p>
@@ -265,45 +208,18 @@ $$<br>
 <p>这说明**这两种方法之间在预测准确性上没有绝对的优劣之分。**如果因变量实际与大量的预测因子均有关系，那么岭回归效果更好。但是，<strong>与因变量有关的因子数目在实际项目中是一个未知数</strong>，但是我们可以通过交叉验证来决定哪种方法更好。</p>
 <h3 id="一个说明岭回归和lasso的简单例子">一个说明岭回归和lasso的简单例子</h3>
 <p>为了更好地理解岭回归和 lasso 的特性，我们考虑一个特殊的例子，其中 n = p， 然后 X 是一个单位矩阵。为了进一步简化问题，假设我们正在执行没有截距的回归。根据上面这些假设，最小二乘问题简化为寻找使得下式最小的一组系数</p>
-<p>$$<br>
-\sum_{j=1}^{p}\left(y_{j}-\beta_{j}\right)^{2}<br>
-$$<br>
-在这个例子中，最小二乘解为</p>
-<p>$$<br>
-\hat{\beta}<em>{j}=y</em>{j}<br>
-$$<br>
-在这种情况下，岭回归的解为下式最小的一组系数估计值</p>
-<p>$$<br>
-\sum_{j=1}^{p}\left(y_{j}-\beta_{j}\right)^{2}+\lambda \sum_{j=1}^{p} \beta_{j}^{2}<br>
-$$<br>
-lasso 的公式如下</p>
-<p>$$<br>
-\sum_{j=1}^{p}\left(y_{j}-\beta_{j}\right)^{2}+\lambda \sum_{j=1}^{p}\left|\beta_{j}\right|<br>
-$$<br>
-岭回归的解为</p>
-<p>$$<br>
-\hat{\beta}<em>{j}^{R}=y</em>{j} /(1+\lambda)<br>
-$$<br>
-lasso 的解为</p>
-<p>$$<br>
-\hat{\beta}<em>{j}^{L}=\left{\begin{array}{ll}y</em>{j}-\lambda / 2 &amp; \text { if } y_{j}&gt;\lambda / 2 \ y_{j}+\lambda / 2 &amp; \text { if } y_{j}&lt;-\lambda / 2 \ 0 &amp; \text { if }\left|y_{j}\right| \leq \lambda / 2\end{array}\right.<br>
-$$</p>
-<p>下图展示了这种情况。我们可以看到 岭回归和 lasso 的 <em>shrink</em> 策略不一样。在岭回归中，所有的系数的压缩比例都是相同的；与之相反，lasso  将正负 λ/2 之间的系数都直接压缩为0，其他范围的系数压缩比例相同。</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%28y_%7Bj%7D-%5Cbeta_%7Bj%7D%5Cright%29%5E%7B2%7D%0A" /></p><p>在这个例子中，最小二乘解为</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Cbeta%7D_%7Bj%7D%3Dy_%7Bj%7D%0A" /></p><p>在这种情况下，岭回归的解为下式最小的一组系数估计值</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%28y_%7Bj%7D-%5Cbeta_%7Bj%7D%5Cright%29%5E%7B2%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%0A" /></p><p>lasso 的公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%28y_%7Bj%7D-%5Cbeta_%7Bj%7D%5Cright%29%5E%7B2%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%7C%5Cbeta_%7Bj%7D%5Cright%7C%0A" /></p><p>岭回归的解为</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Cbeta%7D_%7Bj%7D%5E%7BR%7D%3Dy_%7Bj%7D%20%2F%281%2B%5Clambda%29%0A" /></p><p>lasso 的解为</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Cbeta%7D_%7Bj%7D%5E%7BL%7D%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bll%7Dy_%7Bj%7D-%5Clambda%20%2F%202%20%26%20%5Ctext%20%7B%20if%20%7D%20y_%7Bj%7D%3E%5Clambda%20%2F%202%20%5C%5C%20y_%7Bj%7D%2B%5Clambda%20%2F%202%20%26%20%5Ctext%20%7B%20if%20%7D%20y_%7Bj%7D%3C-%5Clambda%20%2F%202%20%5C%5C%200%20%26%20%5Ctext%20%7B%20if%20%7D%5Cleft%7Cy_%7Bj%7D%5Cright%7C%20%5Cleq%20%5Clambda%20%2F%202%5Cend%7Barray%7D%5Cright.%0A" /></p><p>下图展示了这种情况。我们可以看到 岭回归和 lasso 的 <em>shrink</em> 策略不一样。在岭回归中，所有的系数的压缩比例都是相同的；与之相反，lasso  将正负 λ/2 之间的系数都直接压缩为0，其他范围的系数压缩比例相同。</p>
 <p><img src="14.png" alt="1"></p>
 <h3 id="岭回归和-lasso-的贝叶斯解释">岭回归和 lasso 的贝叶斯解释</h3>
 <p>我们现在可以用一个 贝叶斯方法的视角来重新审视岭回归和 lasso 。从贝叶斯方法的角度出发，首先我们需要知道回归系数的先验分布，我们称为 <em>p(β)</em>  。 数据的似然性可以写作 f(Y|X, β) 。 先验分布乘以似然值 ，我们就得到了后验分布，形式如下（?）</p>
-<p>$$<br>
-p(\beta \mid X, Y) \propto f(Y \mid X, \beta) p(\beta \mid X)=f(Y \mid X, \beta) p(\beta)<br>
-$$<br>
-一般的线性模型如下：</p>
-<p>$$<br>
-Y=\beta_{0}+X_{1} \beta_{1}+\ldots+X_{p} \beta_{p}+\epsilon<br>
-$$<br>
-我们假设残差之间是独立的，而且来自于一个相同的正态分布。还有，我们假设下式成立，其中g() 为一个密度函数，岭回归和 lasso 服从两个特殊的密度分布。</p>
-<p>$$<br>
-p(\beta)=\prod_{j=1}^{p} g\left(\beta_{j}\right)<br>
-$$<br>
-我们可以发现岭回归和 lasso 服从两个不同的 g() 函数。</p>
+<p style=""><img src="https://math.now.sh?from=p%28%5Cbeta%20%5Cmid%20X%2C%20Y%29%20%5Cpropto%20f(Y%20%5Cmid%20X%2C%20%5Cbeta)%20p(%5Cbeta%20%5Cmid%20X)%3Df(Y%20%5Cmid%20X%2C%20%5Cbeta)%20p(%5Cbeta)%0A" /></p><p>一般的线性模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=Y%3D%5Cbeta_%7B0%7D%2BX_%7B1%7D%20%5Cbeta_%7B1%7D%2B%5Cldots%2BX_%7Bp%7D%20%5Cbeta_%7Bp%7D%2B%5Cepsilon%0A" /></p><p>我们假设残差之间是独立的，而且来自于一个相同的正态分布。还有，我们假设下式成立，其中g() 为一个密度函数，岭回归和 lasso 服从两个特殊的密度分布。</p>
+<p style=""><img src="https://math.now.sh?from=p%28%5Cbeta%29%3D%5Cprod_%7Bj%3D1%7D%5E%7Bp%7D%20g%5Cleft(%5Cbeta_%7Bj%7D%5Cright)%0A" /></p><p>我们可以发现岭回归和 lasso 服从两个不同的 g() 函数。</p>
 <ul>
 <li>如果 g 是一个均值为0，标准差为 λ 函数的正态分布，那么 β 的 <em>posterior mode</em> （基于给定数据的最可能的 β值）就是岭回归的解。换句话说，岭回归的解就是这个时候的后验分布的均值。</li>
 <li>如果 g 是 一个 双指数分布 (<em>double-exponential</em>)  (也叫<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E5%88%86%E5%B8%83">拉普拉斯分布</a>) ， 均值为0，<em>scale parameter</em>  是 λ 的函数，那么这时的 <em>posterior mode</em> 就是 lasso 的解。</li>
@@ -318,48 +234,27 @@ $$<br>
 <h1>Dimension Reduction Methods</h1>
 <p>上面提到的两种方法，subset selection 和 shrinkage methods ，都还是使用的原来的预测因子，X<sub>1</sub> , X<sub>2</sub> …… X<sub>p</sub> 。 下面会提到如何 <em>transform the predictors</em> ，然后将转换后的预测因子用于最小二乘模型。我们一般将这些方法称为 <em>dimension reduction methods</em>。</p>
 <p>我们假设  Z<sub>1</sub> , Z<sub>2</sub> …… Z<sub>M</sub> 表示 M 个原来 p 个预测因子的线性组合 (<em>linear combinations</em>) ，其中 M &lt; p 。即：</p>
-<p>$$<br>
-Z_{m}=\sum_{j=1}^{p} \phi_{j m} X_{j}<br>
-$$</p>
-<p>其中 <em>Φ<sub>jm</sub></em> 为常数。</p>
+<p style=""><img src="https://math.now.sh?from=Z_%7Bm%7D%3D%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cphi_%7Bj%20m%7D%20X_%7Bj%7D%0A" /></p><p>其中 <em>Φ<sub>jm</sub></em> 为常数。</p>
 <p>把上面转换后的预测因子，带入到线性回归模型中，如下</p>
-<p>$$<br>
-y_{i}=\theta_{0}+\sum_{m=1}^{M} \theta_{m} z_{i m}+\epsilon_{i}, \quad i=1, \ldots, n<br>
-$$</p>
-<p>这样就从估计 <em>p+1</em> 个系数降低至估计 <em>M+1</em> 个系数。根据上面的公式进行推导得到</p>
-<p>$$<br>
-\sum_{m=1}^{M} \theta_{m} z_{i m}=\sum_{m=1}^{M} \theta_{m} \sum_{j=1}^{p} \phi_{j m} x_{i j}=\sum_{j=1}^{p} \sum_{m=1}^{M} \theta_{m} \phi_{j m} x_{i j}=\sum_{j=1}^{p} \beta_{j} x_{i j}<br>
-$$<br>
-因此，</p>
-<p>$$<br>
-\beta_{j}=\sum_{m=1}^{M} \theta_{m} \phi_{j m}<br>
-$$<br>
-通过降维的方法可能会增加系数估计的 bias，但是当相比对 n 而言，p 很大时，通过降维的方法可以显著降低 variance 。</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3D%5Ctheta_%7B0%7D%2B%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20z_%7Bi%20m%7D%2B%5Cepsilon_%7Bi%7D%2C%20%5Cquad%20i%3D1%2C%20%5Cldots%2C%20n%0A" /></p><p>这样就从估计 <em>p+1</em> 个系数降低至估计 <em>M+1</em> 个系数。根据上面的公式进行推导得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20z_%7Bi%20m%7D%3D%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cphi_%7Bj%20m%7D%20x_%7Bi%20j%7D%3D%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20%5Cphi_%7Bj%20m%7D%20x_%7Bi%20j%7D%3D%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%0A" /></p><p>因此，</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbeta_%7Bj%7D%3D%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20%5Cphi_%7Bj%20m%7D%0A" /></p><p>通过降维的方法可能会增加系数估计的 bias，但是当相比对 n 而言，p 很大时，通过降维的方法可以显著降低 variance 。</p>
 <p>所有的降维方法均分为两步。第一步，获得   Z<sub>1</sub> , Z<sub>2</sub> …… Z<sub>M</sub>  这些新的预测因子；第二步，通过这些 M 个因子来拟合模型。但是如何获取新的预测因子，或者说如何得到这些 <em>Φ<sub>jm</sub></em> 的值，这存在很多方法。这里只考虑两个主要的方法：<em>principal components</em> (主成分)  和 <em>partial least squares</em> 。</p>
 <h2 id="Principal-Components-Regression">Principal Components Regression</h2>
 <p>主成分分析 (<em>principal components analysis</em>, PCA) 是一个流行的降维方法。这里只讨论 PCA 在回归分析中的作用。第一主成分是指观测值在这个成分上的变异最丰富的成分。例如下图为两个因子的散点图，横坐标为城市的人口数量，纵坐标为某个特定公司的广告费用，这里总共是100个城市的结果。绿色实线表示第一主成分方向 (<em>first principal component direction</em>)，我们可以如果把所有的点均投影到这条线上，投影到第一主成分上得到的点的方差是最大的。如果我们把这些点投射到别的直线上，得到的变异均会更低。</p>
 <p><img src="18.png" alt="1"></p>
 <p>第一主成分的公式如下，即  <em>Φ<sub>11</sub></em> = 0.839 和  <em>Φ<sub>21</sub></em> = 0.544 。(  <em>Φ<sub>11</sub></em> 等称为 <em>principal component loadings</em> ) （<strong>我不太清楚上面的直线和这个公式之间有什么关系</strong>）</p>
-<p>$$<br>
-Z_{1}=0.839 \times(\mathrm{pop}-\overline{\mathrm{pop}})+0.544 \times(\mathrm{ad}-\overline{\mathrm{ad}})<br>
-$$<br>
-我大致把 Z1 的三维图片画了出来，是一个平面，代码如下</p>
+<p style=""><img src="https://math.now.sh?from=Z_%7B1%7D%3D0.839%20%5Ctimes%28%5Cmathrm%7Bpop%7D-%5Coverline%7B%5Cmathrm%7Bpop%7D%7D%29%2B0.544%20%5Ctimes(%5Cmathrm%7Bad%7D-%5Coverline%7B%5Cmathrm%7Bad%7D%7D)%0A" /></p><p>我大致把 Z1 的三维图片画了出来，是一个平面，代码如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">install.packages(<span class="string">&quot;barsurf&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;barsurf&quot;</span>)</span><br><span class="line"></span><br><span class="line">install.packages(<span class="string">&quot;plotrix&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;plotrix&quot;</span>)</span><br><span class="line"></span><br><span class="line">install.packages(<span class="string">&quot;scatterplot3d&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;scatterplot3d&quot;</span>)</span><br><span class="line"></span><br><span class="line">install.packages(<span class="string">&quot;plot3D&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;plot3D&quot;</span>)</span><br><span class="line"></span><br><span class="line">install.packages(<span class="string">&quot;MBA&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;MBA&quot;</span>)</span><br><span class="line"></span><br><span class="line">x &lt;- seq(<span class="number">10</span>, <span class="number">70</span>)</span><br><span class="line">y &lt;- seq(<span class="number">0</span>,<span class="number">35</span>)</span><br><span class="line">f &lt;- <span class="keyword">function</span>(x, y) &#123;</span><br><span class="line">  r &lt;- 0.839*(x-<span class="number">40</span>) + <span class="number">0.544</span>*(y-<span class="number">15</span>)</span><br><span class="line">  <span class="built_in">return</span>(r)</span><br><span class="line">&#125;</span><br><span class="line">z &lt;- outer(x, y, f)</span><br><span class="line">op &lt;- par(bg = <span class="string">&quot;white&quot;</span>)</span><br><span class="line">nrz &lt;- nrow(z)</span><br><span class="line">ncz &lt;- ncol(z)</span><br><span class="line">jet.colors &lt;- colorRampPalette(<span class="built_in">c</span>(<span class="string">&quot;gray80&quot;</span>, <span class="string">&quot;gray10&quot;</span>))</span><br><span class="line">nbcol &lt;- 100</span><br><span class="line">color &lt;- jet.colors(nbcol)</span><br><span class="line">zfacet &lt;- z[-<span class="number">1</span>, -<span class="number">1</span>] + z[-<span class="number">1</span>, -ncz] + z[-nrz, -<span class="number">1</span>] + z[-nrz, -ncz]</span><br><span class="line">facetcol &lt;- cut(zfacet, nbcol)</span><br><span class="line"></span><br><span class="line">persp(x, y, z,</span><br><span class="line">  theta = <span class="number">30</span>, phi = <span class="number">30</span>,</span><br><span class="line">  expand = <span class="number">0.5</span>, col = color[facetcol]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
 <p>图片如下：</p>
 <p><img src="20.png" alt="1"></p>
 <p>在所有的可能的线性组合中（满足条件， <em>Φ<sub>11</sub><sup>2</sup></em> +  <em>Φ<sub>21</sub><sup>2</sup></em> = 1 ），只有上面的这种线性组合可以产生最高的方差（<strong>Var(Z<sub>1</sub>) 最大</strong>）。</p>
 <p>这里 pop 和 ad 都是长度为100的向量，那么 Z<sub>1</sub> 也是一个长度为100的向量。例如，对于第 i 个样本，公式如下</p>
-<p>$$<br>
-z_{i 1}=0.839 \times\left(\mathrm{pop}<em>{i}-\overline{\mathrm{pop}}\right)+0.544 \times\left(\mathrm{ad}</em>{i}-\overline{\mathrm{ad}}\right)<br>
-$$<br>
-这些值 Z<sub>11</sub>, …… , Z<sub>n1</sub> 称为 <em>principal component scores</em> 。</p>
+<p style=""><img src="https://math.now.sh?from=z_%7Bi%201%7D%3D0.839%20%5Ctimes%5Cleft%28%5Cmathrm%7Bpop%7D_%7Bi%7D-%5Coverline%7B%5Cmathrm%7Bpop%7D%7D%5Cright%29%2B0.544%20%5Ctimes%5Cleft(%5Cmathrm%7Bad%7D_%7Bi%7D-%5Coverline%7B%5Cmathrm%7Bad%7D%7D%5Cright)%0A" /></p><p>这些值 Z<sub>11</sub>, …… , Z<sub>n1</sub> 称为 <em>principal component scores</em> 。</p>
 <p>我们对于 PCA 还有另外一种解释：第一主成分定义的直线是和数据<strong>越近越好</strong>。如下图的左图，数据与第一主成分的距离为直线距离，体现为黑色虚线，<strong>直线距离平方和最小的直线为第一主成分直线</strong>（这不就是最小二乘回归嘛）。右图为将左图向右下方旋转，旋转到第一主成分和横坐标方向一致。</p>
 <p><img src="19.png" alt="1"></p>
 <p>第二主成分 Z<sub>2</sub> 需要和 Z<sub>1</sub> <strong>无关</strong>，如图 6.14 所示（<strong>两条线垂直</strong>）。 第二主成分公式如下：</p>
-<p>$$<br>
-Z_{2}=0.544 \times(\mathrm{pop}-\overline{\mathrm{pop}})-0.839 \times(\mathrm{ad}-\overline{\mathrm{ad}})<br>
-$$</p>
-<p>因为这里我们只有两个预测因子，因此前两个主成分就包含了全部信息。但是，这里第一主成分包含了最多的信息。图 6.15 右图看出，<em>second principal component scores</em> 几乎为0，表示第二主成分几乎没有什么信息了。</p>
+<p style=""><img src="https://math.now.sh?from=Z_%7B2%7D%3D0.544%20%5Ctimes%28%5Cmathrm%7Bpop%7D-%5Coverline%7B%5Cmathrm%7Bpop%7D%7D%29-0.839%20%5Ctimes(%5Cmathrm%7Bad%7D-%5Coverline%7B%5Cmathrm%7Bad%7D%7D)%0A" /></p><p>因为这里我们只有两个预测因子，因此前两个主成分就包含了全部信息。但是，这里第一主成分包含了最多的信息。图 6.15 右图看出，<em>second principal component scores</em> 几乎为0，表示第二主成分几乎没有什么信息了。</p>
 <p>下图为第一主成分与第二主成分与两个性状的相关。</p>
 <p><img src="21.png" alt="1"></p>
 <p><img src="22.png" alt="1"></p>
@@ -374,18 +269,12 @@ $$</p>
 <p>在实际的主成分回归分析中，M 的值通常通过 CV 获得。Credit 数据的PCR分析结果如下图，我们可以看到最佳的M = 10，这就相当于没有进行什么降维，因为 p=11。</p>
 <p><img src="25.png" alt="1"></p>
 <p>当我们进行 PCR 分析时，我们一般建议对预测因子进行 <em>standardizing</em></p>
-<p>$$<br>
-\tilde{x}<em>{i j}=\frac{x</em>{i j}}{\sqrt{\frac{1}{n} \sum_{i=1}^{n}\left(x_{i j}-\bar{x}_{j}\right)^{2}}}<br>
-$$<br>
-如果不进行标准化，那么 <em>high-variance</em> 的变量会在主成分分析中倾向于占据更重要的地位，会对最终的模型结果产生影响。但是，如果所有的变量均采用相同的单位，那么你也可能不选择进行标准化这一步。</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctilde%7Bx%7D_%7Bi%20j%7D%3D%5Cfrac%7Bx_%7Bi%20j%7D%7D%7B%5Csqrt%7B%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28x_%7Bi%20j%7D-%5Cbar%7Bx%7D_%7Bj%7D%5Cright%29%5E%7B2%7D%7D%7D%0A" /></p><p>如果不进行标准化，那么 <em>high-variance</em> 的变量会在主成分分析中倾向于占据更重要的地位，会对最终的模型结果产生影响。但是，如果所有的变量均采用相同的单位，那么你也可能不选择进行标准化这一步。</p>
 <h2 id="Partial-Least-Squares">Partial Least Squares</h2>
 <p>PCR 分析中需要确认线性组合Z<sub>1</sub> , Z<sub>2</sub> …… Z<sub>M</sub>  ，来表示这些预测因子 。这个过程我们认为是 <em>unsupervised</em> ，因为这个过程因变量 Y 不会参与，或者说不会 <em>supervise</em> the identification of the principal components 。因此，PCR 分析有一个问题，<strong>可以很好地解释自变量变异的主成分不见得可以很好地预测因变量</strong>。</p>
 <p>我们这里推出，<abbr title="Partial least squares regression, PLS">偏最小二乘回归</abbr> , 一种替代 PCR 分析的 监督方法。PLS 方法创建新变量的过程时会利用因变量 Y 的值。粗略地说，PLS 方法倾向于找到同时可以解释自变量和因变量的新变量。</p>
-<p>PLS 首先将 p 个自变量和因变量进行标准化。然后PLS 的第一主成分的 <em>Φ<sub>j1</sub></em>  设置为 Y ~ X<sub>j</sub> 的简单线性回归的系数（公式如下）。因此，第一主成分的主要权重给了与因变量高度相关的变量。<br>
-$$<br>
-Z_{1}=\sum_{j=1}^{p} \phi_{j 1} X_{j}<br>
-$$</p>
-<p>下图显示了 p=2 的 PLS 与 PCR 的第一主成分的直线，绿色实线为 PLS 的第一主成分，虚线为 PCR 的第一主成分。PLS 的方向添加了 pop 的权重，降低了ad 的权重，表明 pop 与因变量的关系更强。</p>
+<p>PLS 首先将 p 个自变量和因变量进行标准化。然后PLS 的第一主成分的 <em>Φ<sub>j1</sub></em>  设置为 Y ~ X<sub>j</sub> 的简单线性回归的系数（公式如下）。因此，第一主成分的主要权重给了与因变量高度相关的变量。</p>
+<p style=""><img src="https://math.now.sh?from=Z_%7B1%7D%3D%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cphi_%7Bj%201%7D%20X_%7Bj%7D%0A" /></p><p>下图显示了 p=2 的 PLS 与 PCR 的第一主成分的直线，绿色实线为 PLS 的第一主成分，虚线为 PCR 的第一主成分。PLS 的方向添加了 pop 的权重，降低了ad 的权重，表明 pop 与因变量的关系更强。</p>
 <p><img src="26.png" alt="1"></p>
 <p>PLS 在 <em>chemometrics</em> (化学计量学) 上很流行。实际上，PLS 的效果不见得比 岭回归或 PCR 方法更好。虽然 PLS 可以减少 bias ，但是它可能会增加 variance ，</p>
 <h1>Considerations in High Dimensions</h1>

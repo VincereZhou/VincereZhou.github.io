@@ -71,7 +71,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3.2k</span>
+            <span class="post-count">3k</span>
         </span>
     </span>
 
@@ -115,36 +115,21 @@
 </ol>
 <h2 id="Leave-One-Out-Cross-Validation">Leave-One-Out Cross-Validation</h2>
 <p><em>Leave-One-Out Cross-Validation</em> (LOOCV) 接近于上面的 <em>validation set approach</em> ，但是这种方法尝试来弥补上面这种方法的缺点。</p>
-<p>LOOCV 也是把观测值分为两个群体，但区别在于它只将一个个体划定给验证集，将其他的 n-1 个个体划定给训练集，用于拟合模型，然后预测留出来的一个个体的，计算MSE。由于只有一个个体, MSE 的公式变为<br>
-$$<br>
-\mathrm{MSE}<em>{1}=\left(y</em>{1}-\hat{y}_{1}\right)^{2}<br>
-$$<br>
-虽然MSE<sub>1</sub> 是无偏的，但是它是一个很糟糕的估计值，因为变异太大。</p>
+<p>LOOCV 也是把观测值分为两个群体，但区别在于它只将一个个体划定给验证集，将其他的 n-1 个个体划定给训练集，用于拟合模型，然后预测留出来的一个个体的，计算MSE。由于只有一个个体, MSE 的公式变为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BMSE%7D_%7B1%7D%3D%5Cleft%28y_%7B1%7D-%5Chat%7By%7D_%7B1%7D%5Cright%29%5E%7B2%7D%0A" /></p><p>虽然MSE<sub>1</sub> 是无偏的，但是它是一个很糟糕的估计值，因为变异太大。</p>
 <p>我们可以重复这个过程，让所有个体都做一次验证个体，也就是总共重复n次。图示如下：</p>
 <p><img src="2.png" alt="1"></p>
-<p>然后我们计算这n次的平均MSE<br>
-$$<br>
-\mathrm{CV}<em>{(n)}=\frac{1}{n} \sum</em>{i=1}^{n} \mathrm{MSE}_{i}<br>
-$$<br>
-LOOCV 方法相比于上面的 validation set 方法又很多优势。首先，LOOCV 方法有更小的 bias，因为 LOOCV 方法用了接近所有个体来拟合模型，而 validation set 只用了一半。因此，LOOCV 方法不会高估 <em>test error rate</em> 。其次，validation set 随机划分群体使得多次重复结果的差异较大，而多次重复 LOOCV 也只会产生一个相同的结果，LOOCV 方法根本没有训练集和验证集划分的随意性问题。</p>
+<p>然后我们计算这n次的平均MSE</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCV%7D_%7B%28n%29%7D%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Cmathrm%7BMSE%7D_%7Bi%7D%0A" /></p><p>LOOCV 方法相比于上面的 validation set 方法又很多优势。首先，LOOCV 方法有更小的 bias，因为 LOOCV 方法用了接近所有个体来拟合模型，而 validation set 只用了一半。因此，LOOCV 方法不会高估 <em>test error rate</em> 。其次，validation set 随机划分群体使得多次重复结果的差异较大，而多次重复 LOOCV 也只会产生一个相同的结果，LOOCV 方法根本没有训练集和验证集划分的随意性问题。</p>
 <p>我们对 Auto 数据集采用 LOOCV 方法进行计算，结果如下图左图（右图为9次单独的 10-fold CV结果，每次均随机地将群体分成10份。从这里可以看出 10-fold CV 多次结果之间的差异较小）</p>
 <p><img src="3.png" alt="1"></p>
-<p>LOOCV 的计算量比较大，毕竟需要计算 n 次。如果 n 比较大，那么 可能会非常耗时。<strong>在最小二乘的线性回归或二项式回归分析中</strong>，存在一个简化可以使得 LOOCV 的计算量与单次模型拟合差不多，公式如下。这个式子看上去类似于普通的 MSE 的计算公式，除了分母部分增加了 一个 (1-h<sub>i</sub>)<br>
-$$<br>
-\mathrm{CV}<em>{(n)}=\frac{1}{n} \sum</em>{i=1}^{n}\left(\frac{y_{i}-\hat{y}<em>{i}}{1-h</em>{i}}\right)^{2}<br>
-$$<br>
-这里预测值 y_hat 是采用原始的最小二乘拟合的结果， <em>h<sub>i</sub></em>  是 leverage ，值在1/n 与 1 之间，表示一个观测值对模型拟合的影响程度。因此，对于 high-leverage 的点，1-  <em>h<sub>i</sub></em>  越低，这里相当于放大了残差。<br>
-$$<br>
-h_{i}=\frac{1}{n}+\frac{\left(x_{i}-\bar{x}\right)^{2}}{\sum_{i^{\prime}=1}^{n}\left(x_{i^{\prime}}-\bar{x}\right)^{2}}<br>
-$$<br>
-LOOCV 是一个一般方法，可以用于各种各样的模型，比如用于逻辑回归或LDA分析。</p>
+<p>LOOCV 的计算量比较大，毕竟需要计算 n 次。如果 n 比较大，那么 可能会非常耗时。<strong>在最小二乘的线性回归或二项式回归分析中</strong>，存在一个简化可以使得 LOOCV 的计算量与单次模型拟合差不多，公式如下。这个式子看上去类似于普通的 MSE 的计算公式，除了分母部分增加了 一个 (1-h<sub>i</sub>)</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCV%7D_%7B%28n%29%7D%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(%5Cfrac%7By_%7Bi%7D-%5Chat%7By%7D_%7Bi%7D%7D%7B1-h_%7Bi%7D%7D%5Cright)%5E%7B2%7D%0A" /></p><p>这里预测值 y_hat 是采用原始的最小二乘拟合的结果， <em>h<sub>i</sub></em>  是 leverage ，值在1/n 与 1 之间，表示一个观测值对模型拟合的影响程度。因此，对于 high-leverage 的点，1-  <em>h<sub>i</sub></em>  越低，这里相当于放大了残差。</p>
+<p style=""><img src="https://math.now.sh?from=h_%7Bi%7D%3D%5Cfrac%7B1%7D%7Bn%7D%2B%5Cfrac%7B%5Cleft%28x_%7Bi%7D-%5Cbar%7Bx%7D%5Cright%29%5E%7B2%7D%7D%7B%5Csum_%7Bi%5E%7B%5Cprime%7D%3D1%7D%5E%7Bn%7D%5Cleft(x_%7Bi%5E%7B%5Cprime%7D%7D-%5Cbar%7Bx%7D%5Cright)%5E%7B2%7D%7D%0A" /></p><p>LOOCV 是一个一般方法，可以用于各种各样的模型，比如用于逻辑回归或LDA分析。</p>
 <h2 id="k-fold-Cross-Validation">k-fold Cross-Validation</h2>
 <p>LOOCV 方法的一个备选方法是 k-fold CV 方法。这种方法将所有个体随机分成相同大小的 k groups ，或者说是 k folds。将第一个 fold 视为验证集，然后用其他folds拟合模型，计算得到 MSE<sub>1</sub>。这个过程重复 k 次，每次均拿出一个fold 视为验证集，其他视为训练集，得到多个 MSE。</p>
-<p>然后通过下面这个式子计算平均MSE<br>
-$$<br>
-\mathrm{CV}<em>{(k)}=\frac{1}{k} \sum</em>{i=1}^{k} \mathrm{MSE}_{i}<br>
-$$<br>
-下图便反映了这个过程</p>
+<p>然后通过下面这个式子计算平均MSE</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCV%7D_%7B%28k%29%7D%3D%5Cfrac%7B1%7D%7Bk%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bk%7D%20%5Cmathrm%7BMSE%7D_%7Bi%7D%0A" /></p><p>下图便反映了这个过程</p>
 <p><img src="4.png" alt="1"></p>
 <p>我们很容易看到，LOOCV 方法是 k-fold CV 方法的一个特例，即 k = n。在实际中，一般k会设为5或10，那么k设为5/10 相比于 设为n 的优势在哪里呢？首先最明显的就是<strong>计算量</strong>，因为 LOOCV 需要拟合模型 n 次（通过最小二乘法估计的线性模型除外），而 k-fold CV 只需要拟合 5次或10次。</p>
 <p>但我们使用真实数据时，由于我们不知道真实的 test MSE ，因此我们很难决定CV估计的准确性。但是，如果我们使用模拟数据，我们计算得到真实的 test MSE，因此可以评价CV结果。下图中，我们画出了CV得到的 test error rate 估计值 和 真实的 test error rate，这里蓝线是真实值，黑色虚线是LOOCV估计值，红色线是 10-fold CV 估计值。我们可以看到 10-fold CV 和 LOOCV 结果差不多。</p>
@@ -156,14 +141,8 @@ $$<br>
 <p>但是我们知道，bias 并不是我们关心的估计过程的唯一指标，我们还关心 variance ，结果表明 LOOCV 比 k-fold CV 有更高的 variance 。为什么是这样呢？当我们执行 LOOCV 方法时，我们拟合的n个模型，几乎都是使用相同的数据；因此，这些模型的拟合结果之间具有高度的相关性。但是当我们执行 k-fold CV 时，k 个拟合的模型之间相关较弱，因为训练集数据之间的重合程度较小。因为很多高度相关的数量性状的均值比相关程度较低的数量性状均值的 variance 更小，因此 LOOCV 方法得到的 test error 估计值通常比 k-fold CV 方法有更高的 variance。</p>
 <p>总结一下，综合考虑 bias 和 variance ，我们容易得到 k=5 或 k=10 的 k-fold CV 得到的 test error estimates 最佳，既不会有很高的 bias ，也不会有很高的 variance。</p>
 <h2 id="Cross-Validation-on-Classification-problems">Cross-Validation on Classification problems</h2>
-<p>上面提高的交叉验证的使用均是基于<strong>数量性状</strong>，因此都是用 MSE 来衡量 test error 。但是交叉验证同样可以用于质量性状的分析上，其实大同小异，只是用 test error rate 替换 MSE 来衡量 test error。例如， LOOCV 的公式如下<br>
-$$<br>
-\mathrm{CV}<em>{(n)}=\frac{1}{n} \sum</em>{i=1}^{n} \mathrm{Err}_{i}<br>
-$$</p>
-<p>$$<br>
-\operatorname{Err}<em>{i}=I\left(y</em>{i} \neq \hat{y}_{i}\right)<br>
-$$</p>
-<p>下图为一个模拟数据的逻辑回归结果，p=2，通过多项式回归不断增加自由度。</p>
+<p>上面提高的交叉验证的使用均是基于<strong>数量性状</strong>，因此都是用 MSE 来衡量 test error 。但是交叉验证同样可以用于质量性状的分析上，其实大同小异，只是用 test error rate 替换 MSE 来衡量 test error。例如， LOOCV 的公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCV%7D_%7B%28n%29%7D%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Cmathrm%7BErr%7D_%7Bi%7D%0A" /></p><p style=""><img src="https://math.now.sh?from=%5Coperatorname%7BErr%7D_%7Bi%7D%3DI%5Cleft%28y_%7Bi%7D%20%5Cneq%20%5Chat%7By%7D_%7Bi%7D%5Cright%29%0A" /></p><p>下图为一个模拟数据的逻辑回归结果，p=2，通过多项式回归不断增加自由度。</p>
 <p><img src="6.png" alt="1"></p>
 <p>但是在真实的数据中，真实的决策线和 test error rate 均是未知的。因此我们需要决定上面的四种逻辑回归哪一种比较好。我们可以通过交叉验证来实现这一点。下图的左图显示了十倍交叉验证的结果（黑线），真实的 test error 是棕线，十倍交叉验证的结果很好的预测了真实结果（略低估了真实结果）。右图显示了KNN的结果，我们可以随着 flexibility 的增加，traing error rate 迅速下降，而 test error rate 呈U字型变化，这再次说明了不能用 training error rate 来说明模型的好坏。</p>
 <p><img src="7.png" alt="1"></p>

@@ -6,7 +6,7 @@
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>记录只只和男朋友的日常。</p>
 <span id="more"></span>
 
-    <div id="aplayer-CDVriyfj" class="aplayer aplayer-tag-marker meting-tag-marker"
+    <div id="aplayer-pwWEjTmd" class="aplayer aplayer-tag-marker meting-tag-marker"
          data-id="523817184" data-server="netease" data-type="playlist" data-mode="circulation" data-autoplay="false" data-mutex="true" data-listmaxheight="340px" data-preload="auto" data-theme="#FF4081"
     ></div>
 <h1>我们的时间线</h1>
@@ -126,11 +126,8 @@
 <h1>资料</h1>
 <p><a href="https://www.statlearning.com/">An Introduction to Statistical Learning</a>，下文简称 <strong>ISL</strong></p>
 <h1>概述</h1>
-<p>标准的线性模型如下：<br>
-$$<br>
-Y=\beta_{0}+\beta_{1} X_{1}+\cdots+\beta_{p} X_{p}+\epsilon<br>
-$$<br>
-线性模型在接近实际问题中依然富有竞争力，通过使用别的拟合过程替换最小二乘法，可以改善线性模型的效果（<em>prediction accuracy</em> 和 <em>model interpretability</em> ）。</p>
+<p>标准的线性模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=Y%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20X_%7B1%7D%2B%5Ccdots%2B%5Cbeta_%7Bp%7D%20X_%7Bp%7D%2B%5Cepsilon%0A" /></p><p>线性模型在接近实际问题中依然富有竞争力，通过使用别的拟合过程替换最小二乘法，可以改善线性模型的效果（<em>prediction accuracy</em> 和 <em>model interpretability</em> ）。</p>
 <ul>
 <li><em>Prediction Accuracy</em> :  假设因变量与自变量之间的真实关系就是几乎线性的，那么使用最小二乘法得到的估计值的 bias 会很低。 如果 n &gt;&gt; p ，也就说观测值数目远大于自变量数目，那么最小二乘估计值的 variance 也会很低。因此，如果满足这两个条件，最小二乘方法表现会很好。然而，如果 n 不是远大于 p， 那么最小二乘拟合结果的 variance 很高，容易造成 overfitting，然后在预测新的样本时结果很差。如果 p &gt; n ，那么根本无法得到一个唯一的最小二乘参数估计值，最小二乘法根本无法使用。如果此时我们人为地降低因变量的个数，那么我们的代价就是在降低了 variance 的同时 提高了 bias。</li>
 <li><em>Model Interpretability</em> :  很多情况下，多重回归的一些自变量其实压根和因变量没关系。将这些无关变量添加到模型中会使得模型增加不必要的复杂度。通过移除这些变量 （即将它们的系数估计值设为0），我们可以得到一个更容易解释的模型。但是，使用最小二乘法估计参数是不可能得到正好是0的参数的（可以接近0，但不是0）。</li>
@@ -179,36 +176,15 @@ $$<br>
 <h3 id="C-sub-p-sub-AIC-BIC-and-Adjusted-R-sup-2-sup">C<sub>p</sub>, AIC, BIC, and Adjusted R<sup>2</sup></h3>
 <p>这些参数都是通过调整 training error 来估计  test error ，主要是避免了自变量数目会降低training error 的影响。这里主要考虑四种方法：<strong>C<sub>p</sub>, <abbr title="Akaike information criterion">AIC</abbr>, <abbr title="Bayesian information criterion">BIC</abbr>, and Adjusted R<sup>2</sup></strong> 。下图显示了 best subset selection 方法的四个参数的值的变化。</p>
 <p><img src="6.png" alt="1"></p>
-<p>对于包含了 d 个因子的最小二乘模型， 使用 C<sub>p</sub> 估计 test MSE 的公式如下（下面是MSE的估计公式）：<br>
-$$<br>
-C_{p}=\frac{1}{n}\left(\mathrm{RSS}+2 d \hat{\sigma}^{2}\right)<br>
-$$</p>
-<p>$$<br>
-{Esetimated} \operatorname { training } \operatorname {error}=\frac{1}{n}\left(\mathrm{RSS}\right)<br>
-$$</p>
-<p>这里 σ_hat<sup>2</sup>  是对因变量预测的残差方差的估计值。<br>
-$$<br>
-\text { training } \operatorname{RSS}<br>
-$$<br>
-我们可以 C<sub>p</sub> 添加了一个惩罚项，如下式，来调整 training error 容易低估 test error 的趋势。而且这个惩罚项会随着自变量数目的增加而增加（含有d），从而趋于弥补 training RSS 随着变量增加而降低的趋势。<br>
-$$<br>
-2 d \hat{\sigma}^{2}<br>
-$$<br>
-由于 σ_hat<sup>2</sup> 是 σ<sup>2</sup> 的无偏估计值，因此  C<sub>p</sub> 是 test MSE 的一个无偏估计值（?）。</p>
-<p><strong>AIC</strong> 应用在使用最大似然法来拟合参数的模型中，但是在线性模型中，最大似然法和最小二乘是一回事。在这种情况下，AIC 计算公式如下<br>
-$$<br>
-\mathrm{AIC}=\frac{1}{n \hat{\sigma}^{2}}\left(\mathrm{RSS}+2 d \hat{\sigma}^{2}\right)<br>
-$$<br>
-我们可以看到 AIC 和  C<sub>p</sub>  是一个比例关系，AIC 乘以  σ_hat<sup>2</sup> 就得到了  C<sub>p</sub> ，因此这两个是等价的，所以在上图中只显示了  C<sub>p</sub> 的结果。</p>
-<p>BIC 来源于贝叶斯的观点，但是最终的公式和 AIC/ C<sub>p</sub> 差不多，对于最小二乘模型，公式如下，这里相比较 AIC ，就是把 2 改为了 log(n) （这里其实应该写成 ln(n) , 底为 e,  只要 n &gt; 7, ln(n) 就大于2 ），因此 <strong>BIC 对自变量数目很多的模型的惩罚效应更重</strong>。因此上面的图中 BIC 的最佳变量数目为 4，而 AIC/ C<sub>p</sub>是 6 ，其实在图中我们看到变量数目为4后面的曲线就很平了，变量数为4还是6没啥区别。<br>
-$$<br>
-\mathrm{BIC}=\frac{1}{n \hat{\sigma}^{2}}\left(\mathrm{RSS}+\log (n) d \hat{\sigma}^{2}\right)<br>
-$$<br>
-校正R2 公式如下，也是会对变量数目过多有惩罚效应<br>
-$$<br>
-\text { Adjusted } R^{2}=1-\frac{\operatorname{RSS} /(n-d-1)}{\operatorname{TSS} /(n-1)}<br>
-$$<br>
-这四种方法均有严谨的理论证明，但是ISL没讲，它们的证明均有一定的前提或<strong>假设</strong>（如 n 非常大）。<strong>虽然校正R<sup>2</sup> 很流行，但是从理论上校正R<sup>2</sup> 的效果不如另外三种方法</strong>。</p>
+<p>对于包含了 d 个因子的最小二乘模型， 使用 C<sub>p</sub> 估计 test MSE 的公式如下（下面是MSE的估计公式）：</p>
+<p style=""><img src="https://math.now.sh?from=C_%7Bp%7D%3D%5Cfrac%7B1%7D%7Bn%7D%5Cleft%28%5Cmathrm%7BRSS%7D%2B2%20d%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%5Cright%29%0A" /></p><p style=""><img src="https://math.now.sh?from=%7BEsetimated%7D%20%5Coperatorname%20%7B%20training%20%7D%20%5Coperatorname%20%7Berror%7D%3D%5Cfrac%7B1%7D%7Bn%7D%5Cleft%28%5Cmathrm%7BRSS%7D%5Cright%29%0A" /></p><p>这里 σ_hat<sup>2</sup>  是对因变量预测的残差方差的估计值。</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctext%20%7B%20training%20%7D%20%5Coperatorname%7BRSS%7D%0A" /></p><p>我们可以 C<sub>p</sub> 添加了一个惩罚项，如下式，来调整 training error 容易低估 test error 的趋势。而且这个惩罚项会随着自变量数目的增加而增加（含有d），从而趋于弥补 training RSS 随着变量增加而降低的趋势。</p>
+<p style=""><img src="https://math.now.sh?from=2%20d%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%0A" /></p><p>由于 σ_hat<sup>2</sup> 是 σ<sup>2</sup> 的无偏估计值，因此  C<sub>p</sub> 是 test MSE 的一个无偏估计值（?）。</p>
+<p><strong>AIC</strong> 应用在使用最大似然法来拟合参数的模型中，但是在线性模型中，最大似然法和最小二乘是一回事。在这种情况下，AIC 计算公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BAIC%7D%3D%5Cfrac%7B1%7D%7Bn%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%7D%5Cleft%28%5Cmathrm%7BRSS%7D%2B2%20d%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%5Cright%29%0A" /></p><p>我们可以看到 AIC 和  C<sub>p</sub>  是一个比例关系，AIC 乘以  σ_hat<sup>2</sup> 就得到了  C<sub>p</sub> ，因此这两个是等价的，所以在上图中只显示了  C<sub>p</sub> 的结果。</p>
+<p>BIC 来源于贝叶斯的观点，但是最终的公式和 AIC/ C<sub>p</sub> 差不多，对于最小二乘模型，公式如下，这里相比较 AIC ，就是把 2 改为了 log(n) （这里其实应该写成 ln(n) , 底为 e,  只要 n &gt; 7, ln(n) 就大于2 ），因此 <strong>BIC 对自变量数目很多的模型的惩罚效应更重</strong>。因此上面的图中 BIC 的最佳变量数目为 4，而 AIC/ C<sub>p</sub>是 6 ，其实在图中我们看到变量数目为4后面的曲线就很平了，变量数为4还是6没啥区别。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BBIC%7D%3D%5Cfrac%7B1%7D%7Bn%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%7D%5Cleft%28%5Cmathrm%7BRSS%7D%2B%5Clog%20(n%29%20d%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%5Cright)%0A" /></p><p>校正R2 公式如下，也是会对变量数目过多有惩罚效应</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctext%20%7B%20Adjusted%20%7D%20R%5E%7B2%7D%3D1-%5Cfrac%7B%5Coperatorname%7BRSS%7D%20%2F%28n-d-1%29%7D%7B%5Coperatorname%7BTSS%7D%20%2F(n-1)%7D%0A" /></p><p>这四种方法均有严谨的理论证明，但是ISL没讲，它们的证明均有一定的前提或<strong>假设</strong>（如 n 非常大）。<strong>虽然校正R<sup>2</sup> 很流行，但是从理论上校正R<sup>2</sup> 的效果不如另外三种方法</strong>。</p>
 <h3 id="Validation-and-Cross-Validation">Validation and Cross-Validation</h3>
 <p>除了通过校正 training error 间接估计 test error ，我们也可以通过验证集或交叉验证直接估计 test error ，好处就是需要满足的假设更少，而且可以应用在非常广泛的模型选择任务中（不一定是线性模型）。</p>
 <p>在过去，由于执行交叉验证需要很大的计算量无法实现，从而导致 AIC ，BIC 等方法更加流行。但是如今随着计算机算力的增加，交叉验证的计算量已经不再是问题了，因此交叉验证成为了模型选择更好的方法。</p>
@@ -219,39 +195,18 @@ $$<br>
 <p>上面提到的那些方法是用来挑选变量的方法。作为另外一种备选方法，我们可以同时将 p 个预测因子均包含在模型中，然后 <em>constrain</em> 或者说是 <em>regularize</em> 系数估计值，或者说是，<em>shrinks</em> the coefficient estimates towards zero。</p>
 <p>在这当中，最出名的两个方法就是 <em>ridge  regression</em> 和 <em>lasso</em> 。</p>
 <h2 id="Ridge-Regression">Ridge Regression</h2>
-<p>一般的线性模型估计参数的标准是，使得RSS最小，公式如下：<br>
-$$<br>
-\mathrm{RSS}=\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}<br>
-$$<br>
-岭回归（Ridge regression）类似于最小二乘，但是它拟合参数用的需要最小化的指标不同，公式如下，其中 λ ≥ 0 ， 称之为 <em>tuning parameter</em> 。每设置一个不同的 λ ，就能得到一套不同的模型参数。因此，<strong>选择一个合适的 λ 是至关重要的</strong>。<br>
-$$<br>
-\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}+\lambda \sum_{j=1}^{p} \beta_{j}^{2}=\mathrm{RSS}+\lambda \sum_{j=1}^{p} \beta_{j}^{2}<br>
-$$<br>
-其实就是新增了一部分，称为 <em>shrinkage penalty</em> ， 作用是将所有的参数尽量往0压缩。<br>
-$$<br>
-\lambda \sum_{j=1}^{p} \beta_{j}^{2}<br>
-$$<br>
-注意到， <em>shrinkage penalty</em>  仅仅针对 β<sub>1</sub>, …… ， β<sub>p</sub> ， 但是不会针对截距 β<sub>0</sub> ，理由显而易见。</p>
+<p>一般的线性模型估计参数的标准是，使得RSS最小，公式如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BRSS%7D%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%0A" /></p><p>岭回归（Ridge regression）类似于最小二乘，但是它拟合参数用的需要最小化的指标不同，公式如下，其中 λ ≥ 0 ， 称之为 <em>tuning parameter</em> 。每设置一个不同的 λ ，就能得到一套不同的模型参数。因此，<strong>选择一个合适的 λ 是至关重要的</strong>。</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%3D%5Cmathrm%7BRSS%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%0A" /></p><p>其实就是新增了一部分，称为 <em>shrinkage penalty</em> ， 作用是将所有的参数尽量往0压缩。</p>
+<p style=""><img src="https://math.now.sh?from=%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%0A" /></p><p>注意到， <em>shrinkage penalty</em>  仅仅针对 β<sub>1</sub>, …… ， β<sub>p</sub> ， 但是不会针对截距 β<sub>0</sub> ，理由显而易见。</p>
 <p>岭回归的效果如下图，左边是估计系数随着 λ 的变化的趋势，可以看到随着 λ 的增加，所有因变量的系数均趋向于 0。</p>
 <p><img src="8.png" alt="1"></p>
-<p>右图的横坐标改了，分子/分母的计算方式如下：<br>
-$$<br>
-|\beta|<em>{2}=\sqrt{\sum</em>{j=1}^{p} \beta_{j}{ }^{2}}<br>
-$$<br>
-因此当 λ = 0，岭回就是普通的线性回归，右图横坐标为1；当 λ 趋于 ∞ 时， 右图横坐标趋于0。</p>
+<p>右图的横坐标改了，分子/分母的计算方式如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5C%7C%5Cbeta%5C%7C_%7B2%7D%3D%5Csqrt%7B%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%7B%20%7D%5E%7B2%7D%7D%0A" /></p><p>因此当 λ = 0，岭回就是普通的线性回归，右图横坐标为1；当 λ 趋于 ∞ 时， 右图横坐标趋于0。</p>
 <p>标准的线性回归的系数估计值是 <em>scale equivariant</em> ：如果将自变量 X<sub>j</sub> 乘以一个常数 c ，那么这个自变量的系数的估计值就会乘以常数 1/c 。用另外一句话说，无论自变量的值如何缩放，下面这个式子的值永远不变。</p>
-<p>$$<br>
-X_{j} \hat{\beta}<em>{j}<br>
-$$<br>
-但是，与之相反，<strong>岭回归</strong>的系数估计值会随着<strong>自变量系数乘以一个常数</strong>发生<strong>实质性变化</strong>。例如工资这个变量，单位是美元，如果单位换成千美元，那么标准的线性回归的系数估计就会缩小1000倍。这个时候由于岭回归的代价函数中含有系数估计值的平方项，岭回归系数就不会是正好缩小1000倍。换句话说，下式不仅仅取决于 λ 的大小，而且也取决于自变量的缩放比例，甚至还会受到其他自变量缩放比例的影响。<br>
-$$<br>
-X</em>{j} \hat{\beta}<em>{j, \lambda}^{R}<br>
-$$<br>
-因此，<strong>在进行岭回归前，需要对自变量进行标准化</strong>。公式如下，分母为估计的标准差。这样所有的自变量有相同 的 <em>scale</em>（不知道啥叫 scale） 。经过下面这个公式，所有自变量均拥有值为1的标准差。<br>
-$$<br>
-\tilde{x}</em>{i j}=\frac{x_{i j}}{\sqrt{\frac{1}{n} \sum_{i=1}^{n}\left(x_{i j}-\bar{x}_{j}\right)^{2}}}<br>
-$$<br>
-所以上图6.4 的横坐标是  <strong>standardized ridge regression coefficient estimates</strong>, 也就是说自变量已经经过标准化了。</p>
+<p style=""><img src="https://math.now.sh?from=X_%7Bj%7D%20%5Chat%7B%5Cbeta%7D_%7Bj%7D%0A" /></p><p>但是，与之相反，<strong>岭回归</strong>的系数估计值会随着<strong>自变量系数乘以一个常数</strong>发生<strong>实质性变化</strong>。例如工资这个变量，单位是美元，如果单位换成千美元，那么标准的线性回归的系数估计就会缩小1000倍。这个时候由于岭回归的代价函数中含有系数估计值的平方项，岭回归系数就不会是正好缩小1000倍。换句话说，下式不仅仅取决于 λ 的大小，而且也取决于自变量的缩放比例，甚至还会受到其他自变量缩放比例的影响。</p>
+<p style=""><img src="https://math.now.sh?from=X_%7Bj%7D%20%5Chat%7B%5Cbeta%7D_%7Bj%2C%20%5Clambda%7D%5E%7BR%7D%0A" /></p><p>因此，<strong>在进行岭回归前，需要对自变量进行标准化</strong>。公式如下，分母为估计的标准差。这样所有的自变量有相同 的 <em>scale</em>（不知道啥叫 scale） 。经过下面这个公式，所有自变量均拥有值为1的标准差。</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctilde%7Bx%7D_%7Bi%20j%7D%3D%5Cfrac%7Bx_%7Bi%20j%7D%7D%7B%5Csqrt%7B%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28x_%7Bi%20j%7D-%5Cbar%7Bx%7D_%7Bj%7D%5Cright%29%5E%7B2%7D%7D%7D%0A" /></p><p>所以上图6.4 的横坐标是  <strong>standardized ridge regression coefficient estimates</strong>, 也就是说自变量已经经过标准化了。</p>
 <h3 id="为什么岭回归比最小二乘更好">为什么岭回归比最小二乘更好</h3>
 <p>这还是来自于 <em>bias-variance trade-off</em> 。随着 λ 增加，岭回归的 <em>flexibility</em> 会降低，导致 variance 降低，但是 bias 增加。如下图所示，当 λ = 0 时， variance 很高，但是没有bias；最佳的 λ 值接近于30 。</p>
 <p><img src="9.png" alt="1"></p>
@@ -259,26 +214,14 @@ $$<br>
 <h2 id="The-Lasso">The Lasso</h2>
 <p><strong>岭回归的一个明显的缺点是，它最终的模型中会包含所有p个自变量</strong>。虽然它会将所有的系数向0压缩，但是它不会真的把某些系数设置为0，仅仅是接近0。这对于预测没有影响，但是对于模型解释很有影响。</p>
 <p>lasso 方法是岭回归的一个替代方法，它克服了上面的这个劣势。lasso 的 代价函数如下：</p>
-<p>$$<br>
-\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}+\lambda \sum_{j=1}^{p}\left|\beta_{j}\right|=\mathrm{RSS}+\lambda \sum_{j=1}^{p}\left|\beta_{j}\right|<br>
-$$</p>
-<p>我们可以看到， lasso 和 岭回归公式相似，仅仅是把系数估计值平方改为绝对值。同样，类似于岭回归，lasso 也同样将系数估计值 <em>shrinks towards zero</em> 。但是，<strong>lasso 可以使得某些系数估计值正好是0</strong>。因此，类似于 best subset selection 方法， lasso 方法同时可以实现变量选择的目的。我们一般说，<em>the lasso yields <strong>sparse</strong> models</em> ，也就是说模型仅包含部分向量。同样地，选择一个合适的 λ 值对 lasso 方法也很重要。</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%7C%5Cbeta_%7Bj%7D%5Cright%7C%3D%5Cmathrm%7BRSS%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%7C%5Cbeta_%7Bj%7D%5Cright%7C%0A" /></p><p>我们可以看到， lasso 和 岭回归公式相似，仅仅是把系数估计值平方改为绝对值。同样，类似于岭回归，lasso 也同样将系数估计值 <em>shrinks towards zero</em> 。但是，<strong>lasso 可以使得某些系数估计值正好是0</strong>。因此，类似于 best subset selection 方法， lasso 方法同时可以实现变量选择的目的。我们一般说，<em>the lasso yields <strong>sparse</strong> models</em> ，也就是说模型仅包含部分向量。同样地，选择一个合适的 λ 值对 lasso 方法也很重要。</p>
 <p>下图为 lasso 方法的效果，我们可以只要选择不同的λ值，就可以得到不同的因子数目的模型。</p>
 <p><img src="10.png" alt="1"></p>
 <h3 id="岭回归和-lasso-方法的另一种理解">岭回归和 lasso 方法的另一种理解</h3>
 <p>我们认为 lasso 和 岭回归的系数估计过程，可以视为接近下面这两个问题</p>
-<p>$$<br>
-\underset{\beta}{\operatorname{minimize}}\left{\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}\right} \quad subject \quad to \quad \sum_{j=1}^{p}\left|\beta_{j}\right| \leq s<br>
-$$</p>
-<p>$$<br>
-\underset{\beta}{\operatorname{minimize}}\left{\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}\right} \quad subject \quad to \quad \sum_{j=1}^{p} \beta_{j}^{2} \leq s<br>
-$$</p>
-<p>也就是说，对于任意一个 λ 值，都会有有一个 s 值作为系数估计值绝对值/平方和的最大值，在满足小于 s 的前提下，RSS 最小的系数就是估计的系数。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cunderset%7B%5Cbeta%7D%7B%5Coperatorname%7Bminimize%7D%7D%5Cleft%5C%7B%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%5Cright%5C%7D%20%5Cquad%20subject%20%5Cquad%20to%20%5Cquad%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%7C%5Cbeta_%7Bj%7D%5Cright%7C%20%5Cleq%20s%0A" /></p><p style=""><img src="https://math.now.sh?from=%5Cunderset%7B%5Cbeta%7D%7B%5Coperatorname%7Bminimize%7D%7D%5Cleft%5C%7B%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%5Cright%5C%7D%20%5Cquad%20subject%20%5Cquad%20to%20%5Cquad%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%20%5Cleq%20s%0A" /></p><p>也就是说，对于任意一个 λ 值，都会有有一个 s 值作为系数估计值绝对值/平方和的最大值，在满足小于 s 的前提下，RSS 最小的系数就是估计的系数。</p>
 <p>best subset selection 可以理解为下式，也就是说条件是系数数目要低于 s 。</p>
-<p>$$<br>
-\underset{\beta}{\operatorname{minimize}}\left{\sum_{i=1}^{n}\left(y_{i}-\beta_{0}-\sum_{j=1}^{p} \beta_{j} x_{i j}\right)^{2}\right} \quad subject \quad to \quad \sum_{j=1}^{p} I\left(\beta_{j} \neq 0\right) \leq s<br>
-$$<br>
-<strong>当 p 很大时，best subset selection 方法不可用，这时候必须用岭回归或者 lasso 方法。</strong></p>
+<p style=""><img src="https://math.now.sh?from=%5Cunderset%7B%5Cbeta%7D%7B%5Coperatorname%7Bminimize%7D%7D%5Cleft%5C%7B%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-%5Cbeta_%7B0%7D-%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%5Cright%29%5E%7B2%7D%5Cright%5C%7D%20%5Cquad%20subject%20%5Cquad%20to%20%5Cquad%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20I%5Cleft(%5Cbeta_%7Bj%7D%20%5Cneq%200%5Cright)%20%5Cleq%20s%0A" /></p><p><strong>当 p 很大时，best subset selection 方法不可用，这时候必须用岭回归或者 lasso 方法。</strong></p>
 <h3 id="为什么lasso可以实现变量选择？">为什么lasso可以实现变量选择？</h3>
 <p>下图为p=2时一个解释说明， 红色的圈为RSS等高线，中间的黑点为最小二乘估计值；蓝色图形为 lasso/ 岭回归限制条件的区域，lasso 是一个菱形，岭回归是一个圆形。如果 s 很大，那么lasso/岭回归的限制条件区域就可能包含最小二乘估计值，那么此时解就等于最小二乘估计值。但是我们图中的限制条件区域并不大，左图为 lasso 结果，估计值为RSS等高线与菱形限制区域外边缘刚刚好接触的那个交点，岭回归同理。由于岭回归的限制区域是一个圆形，没有突出点，因此这个交点很难正好在某个轴上；而 lasso 的四个突出点均在轴上，因此交点很有可能就是轴上的突出点，如图中所示。</p>
 <p>在更高的维度上，可能就会有很多的系数估计值都是0。</p>
@@ -291,45 +234,18 @@ $$<br>
 <p>这说明**这两种方法之间在预测准确性上没有绝对的优劣之分。**如果因变量实际与大量的预测因子均有关系，那么岭回归效果更好。但是，<strong>与因变量有关的因子数目在实际项目中是一个未知数</strong>，但是我们可以通过交叉验证来决定哪种方法更好。</p>
 <h3 id="一个说明岭回归和lasso的简单例子">一个说明岭回归和lasso的简单例子</h3>
 <p>为了更好地理解岭回归和 lasso 的特性，我们考虑一个特殊的例子，其中 n = p， 然后 X 是一个单位矩阵。为了进一步简化问题，假设我们正在执行没有截距的回归。根据上面这些假设，最小二乘问题简化为寻找使得下式最小的一组系数</p>
-<p>$$<br>
-\sum_{j=1}^{p}\left(y_{j}-\beta_{j}\right)^{2}<br>
-$$<br>
-在这个例子中，最小二乘解为</p>
-<p>$$<br>
-\hat{\beta}<em>{j}=y</em>{j}<br>
-$$<br>
-在这种情况下，岭回归的解为下式最小的一组系数估计值</p>
-<p>$$<br>
-\sum_{j=1}^{p}\left(y_{j}-\beta_{j}\right)^{2}+\lambda \sum_{j=1}^{p} \beta_{j}^{2}<br>
-$$<br>
-lasso 的公式如下</p>
-<p>$$<br>
-\sum_{j=1}^{p}\left(y_{j}-\beta_{j}\right)^{2}+\lambda \sum_{j=1}^{p}\left|\beta_{j}\right|<br>
-$$<br>
-岭回归的解为</p>
-<p>$$<br>
-\hat{\beta}<em>{j}^{R}=y</em>{j} /(1+\lambda)<br>
-$$<br>
-lasso 的解为</p>
-<p>$$<br>
-\hat{\beta}<em>{j}^{L}=\left{\begin{array}{ll}y</em>{j}-\lambda / 2 &amp; \text { if } y_{j}&gt;\lambda / 2 \ y_{j}+\lambda / 2 &amp; \text { if } y_{j}&lt;-\lambda / 2 \ 0 &amp; \text { if }\left|y_{j}\right| \leq \lambda / 2\end{array}\right.<br>
-$$</p>
-<p>下图展示了这种情况。我们可以看到 岭回归和 lasso 的 <em>shrink</em> 策略不一样。在岭回归中，所有的系数的压缩比例都是相同的；与之相反，lasso  将正负 λ/2 之间的系数都直接压缩为0，其他范围的系数压缩比例相同。</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%28y_%7Bj%7D-%5Cbeta_%7Bj%7D%5Cright%29%5E%7B2%7D%0A" /></p><p>在这个例子中，最小二乘解为</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Cbeta%7D_%7Bj%7D%3Dy_%7Bj%7D%0A" /></p><p>在这种情况下，岭回归的解为下式最小的一组系数估计值</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%28y_%7Bj%7D-%5Cbeta_%7Bj%7D%5Cright%29%5E%7B2%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%5E%7B2%7D%0A" /></p><p>lasso 的公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%28y_%7Bj%7D-%5Cbeta_%7Bj%7D%5Cright%29%5E%7B2%7D%2B%5Clambda%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%5Cleft%7C%5Cbeta_%7Bj%7D%5Cright%7C%0A" /></p><p>岭回归的解为</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Cbeta%7D_%7Bj%7D%5E%7BR%7D%3Dy_%7Bj%7D%20%2F%281%2B%5Clambda%29%0A" /></p><p>lasso 的解为</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Cbeta%7D_%7Bj%7D%5E%7BL%7D%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bll%7Dy_%7Bj%7D-%5Clambda%20%2F%202%20%26%20%5Ctext%20%7B%20if%20%7D%20y_%7Bj%7D%3E%5Clambda%20%2F%202%20%5C%5C%20y_%7Bj%7D%2B%5Clambda%20%2F%202%20%26%20%5Ctext%20%7B%20if%20%7D%20y_%7Bj%7D%3C-%5Clambda%20%2F%202%20%5C%5C%200%20%26%20%5Ctext%20%7B%20if%20%7D%5Cleft%7Cy_%7Bj%7D%5Cright%7C%20%5Cleq%20%5Clambda%20%2F%202%5Cend%7Barray%7D%5Cright.%0A" /></p><p>下图展示了这种情况。我们可以看到 岭回归和 lasso 的 <em>shrink</em> 策略不一样。在岭回归中，所有的系数的压缩比例都是相同的；与之相反，lasso  将正负 λ/2 之间的系数都直接压缩为0，其他范围的系数压缩比例相同。</p>
 <p><img src="14.png" alt="1"></p>
 <h3 id="岭回归和-lasso-的贝叶斯解释">岭回归和 lasso 的贝叶斯解释</h3>
 <p>我们现在可以用一个 贝叶斯方法的视角来重新审视岭回归和 lasso 。从贝叶斯方法的角度出发，首先我们需要知道回归系数的先验分布，我们称为 <em>p(β)</em>  。 数据的似然性可以写作 f(Y|X, β) 。 先验分布乘以似然值 ，我们就得到了后验分布，形式如下（?）</p>
-<p>$$<br>
-p(\beta \mid X, Y) \propto f(Y \mid X, \beta) p(\beta \mid X)=f(Y \mid X, \beta) p(\beta)<br>
-$$<br>
-一般的线性模型如下：</p>
-<p>$$<br>
-Y=\beta_{0}+X_{1} \beta_{1}+\ldots+X_{p} \beta_{p}+\epsilon<br>
-$$<br>
-我们假设残差之间是独立的，而且来自于一个相同的正态分布。还有，我们假设下式成立，其中g() 为一个密度函数，岭回归和 lasso 服从两个特殊的密度分布。</p>
-<p>$$<br>
-p(\beta)=\prod_{j=1}^{p} g\left(\beta_{j}\right)<br>
-$$<br>
-我们可以发现岭回归和 lasso 服从两个不同的 g() 函数。</p>
+<p style=""><img src="https://math.now.sh?from=p%28%5Cbeta%20%5Cmid%20X%2C%20Y%29%20%5Cpropto%20f(Y%20%5Cmid%20X%2C%20%5Cbeta)%20p(%5Cbeta%20%5Cmid%20X)%3Df(Y%20%5Cmid%20X%2C%20%5Cbeta)%20p(%5Cbeta)%0A" /></p><p>一般的线性模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=Y%3D%5Cbeta_%7B0%7D%2BX_%7B1%7D%20%5Cbeta_%7B1%7D%2B%5Cldots%2BX_%7Bp%7D%20%5Cbeta_%7Bp%7D%2B%5Cepsilon%0A" /></p><p>我们假设残差之间是独立的，而且来自于一个相同的正态分布。还有，我们假设下式成立，其中g() 为一个密度函数，岭回归和 lasso 服从两个特殊的密度分布。</p>
+<p style=""><img src="https://math.now.sh?from=p%28%5Cbeta%29%3D%5Cprod_%7Bj%3D1%7D%5E%7Bp%7D%20g%5Cleft(%5Cbeta_%7Bj%7D%5Cright)%0A" /></p><p>我们可以发现岭回归和 lasso 服从两个不同的 g() 函数。</p>
 <ul>
 <li>如果 g 是一个均值为0，标准差为 λ 函数的正态分布，那么 β 的 <em>posterior mode</em> （基于给定数据的最可能的 β值）就是岭回归的解。换句话说，岭回归的解就是这个时候的后验分布的均值。</li>
 <li>如果 g 是 一个 双指数分布 (<em>double-exponential</em>)  (也叫<a href="https://zh.wikipedia.org/wiki/%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E5%88%86%E5%B8%83">拉普拉斯分布</a>) ， 均值为0，<em>scale parameter</em>  是 λ 的函数，那么这时的 <em>posterior mode</em> 就是 lasso 的解。</li>
@@ -344,48 +260,27 @@ $$<br>
 <h1>Dimension Reduction Methods</h1>
 <p>上面提到的两种方法，subset selection 和 shrinkage methods ，都还是使用的原来的预测因子，X<sub>1</sub> , X<sub>2</sub> …… X<sub>p</sub> 。 下面会提到如何 <em>transform the predictors</em> ，然后将转换后的预测因子用于最小二乘模型。我们一般将这些方法称为 <em>dimension reduction methods</em>。</p>
 <p>我们假设  Z<sub>1</sub> , Z<sub>2</sub> …… Z<sub>M</sub> 表示 M 个原来 p 个预测因子的线性组合 (<em>linear combinations</em>) ，其中 M &lt; p 。即：</p>
-<p>$$<br>
-Z_{m}=\sum_{j=1}^{p} \phi_{j m} X_{j}<br>
-$$</p>
-<p>其中 <em>Φ<sub>jm</sub></em> 为常数。</p>
+<p style=""><img src="https://math.now.sh?from=Z_%7Bm%7D%3D%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cphi_%7Bj%20m%7D%20X_%7Bj%7D%0A" /></p><p>其中 <em>Φ<sub>jm</sub></em> 为常数。</p>
 <p>把上面转换后的预测因子，带入到线性回归模型中，如下</p>
-<p>$$<br>
-y_{i}=\theta_{0}+\sum_{m=1}^{M} \theta_{m} z_{i m}+\epsilon_{i}, \quad i=1, \ldots, n<br>
-$$</p>
-<p>这样就从估计 <em>p+1</em> 个系数降低至估计 <em>M+1</em> 个系数。根据上面的公式进行推导得到</p>
-<p>$$<br>
-\sum_{m=1}^{M} \theta_{m} z_{i m}=\sum_{m=1}^{M} \theta_{m} \sum_{j=1}^{p} \phi_{j m} x_{i j}=\sum_{j=1}^{p} \sum_{m=1}^{M} \theta_{m} \phi_{j m} x_{i j}=\sum_{j=1}^{p} \beta_{j} x_{i j}<br>
-$$<br>
-因此，</p>
-<p>$$<br>
-\beta_{j}=\sum_{m=1}^{M} \theta_{m} \phi_{j m}<br>
-$$<br>
-通过降维的方法可能会增加系数估计的 bias，但是当相比对 n 而言，p 很大时，通过降维的方法可以显著降低 variance 。</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3D%5Ctheta_%7B0%7D%2B%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20z_%7Bi%20m%7D%2B%5Cepsilon_%7Bi%7D%2C%20%5Cquad%20i%3D1%2C%20%5Cldots%2C%20n%0A" /></p><p>这样就从估计 <em>p+1</em> 个系数降低至估计 <em>M+1</em> 个系数。根据上面的公式进行推导得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20z_%7Bi%20m%7D%3D%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cphi_%7Bj%20m%7D%20x_%7Bi%20j%7D%3D%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20%5Cphi_%7Bj%20m%7D%20x_%7Bi%20j%7D%3D%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cbeta_%7Bj%7D%20x_%7Bi%20j%7D%0A" /></p><p>因此，</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbeta_%7Bj%7D%3D%5Csum_%7Bm%3D1%7D%5E%7BM%7D%20%5Ctheta_%7Bm%7D%20%5Cphi_%7Bj%20m%7D%0A" /></p><p>通过降维的方法可能会增加系数估计的 bias，但是当相比对 n 而言，p 很大时，通过降维的方法可以显著降低 variance 。</p>
 <p>所有的降维方法均分为两步。第一步，获得   Z<sub>1</sub> , Z<sub>2</sub> …… Z<sub>M</sub>  这些新的预测因子；第二步，通过这些 M 个因子来拟合模型。但是如何获取新的预测因子，或者说如何得到这些 <em>Φ<sub>jm</sub></em> 的值，这存在很多方法。这里只考虑两个主要的方法：<em>principal components</em> (主成分)  和 <em>partial least squares</em> 。</p>
 <h2 id="Principal-Components-Regression">Principal Components Regression</h2>
 <p>主成分分析 (<em>principal components analysis</em>, PCA) 是一个流行的降维方法。这里只讨论 PCA 在回归分析中的作用。第一主成分是指观测值在这个成分上的变异最丰富的成分。例如下图为两个因子的散点图，横坐标为城市的人口数量，纵坐标为某个特定公司的广告费用，这里总共是100个城市的结果。绿色实线表示第一主成分方向 (<em>first principal component direction</em>)，我们可以如果把所有的点均投影到这条线上，投影到第一主成分上得到的点的方差是最大的。如果我们把这些点投射到别的直线上，得到的变异均会更低。</p>
 <p><img src="18.png" alt="1"></p>
 <p>第一主成分的公式如下，即  <em>Φ<sub>11</sub></em> = 0.839 和  <em>Φ<sub>21</sub></em> = 0.544 。(  <em>Φ<sub>11</sub></em> 等称为 <em>principal component loadings</em> ) （<strong>我不太清楚上面的直线和这个公式之间有什么关系</strong>）</p>
-<p>$$<br>
-Z_{1}=0.839 \times(\mathrm{pop}-\overline{\mathrm{pop}})+0.544 \times(\mathrm{ad}-\overline{\mathrm{ad}})<br>
-$$<br>
-我大致把 Z1 的三维图片画了出来，是一个平面，代码如下</p>
+<p style=""><img src="https://math.now.sh?from=Z_%7B1%7D%3D0.839%20%5Ctimes%28%5Cmathrm%7Bpop%7D-%5Coverline%7B%5Cmathrm%7Bpop%7D%7D%29%2B0.544%20%5Ctimes(%5Cmathrm%7Bad%7D-%5Coverline%7B%5Cmathrm%7Bad%7D%7D)%0A" /></p><p>我大致把 Z1 的三维图片画了出来，是一个平面，代码如下</p>
 <figure class="highlight r"><table><tr><td class="code"><pre><span class="line">install.packages(<span class="string">&quot;barsurf&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;barsurf&quot;</span>)</span><br><span class="line"></span><br><span class="line">install.packages(<span class="string">&quot;plotrix&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;plotrix&quot;</span>)</span><br><span class="line"></span><br><span class="line">install.packages(<span class="string">&quot;scatterplot3d&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;scatterplot3d&quot;</span>)</span><br><span class="line"></span><br><span class="line">install.packages(<span class="string">&quot;plot3D&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;plot3D&quot;</span>)</span><br><span class="line"></span><br><span class="line">install.packages(<span class="string">&quot;MBA&quot;</span>)</span><br><span class="line">library(<span class="string">&quot;MBA&quot;</span>)</span><br><span class="line"></span><br><span class="line">x &lt;- seq(<span class="number">10</span>, <span class="number">70</span>)</span><br><span class="line">y &lt;- seq(<span class="number">0</span>,<span class="number">35</span>)</span><br><span class="line">f &lt;- <span class="keyword">function</span>(x, y) &#123;</span><br><span class="line">  r &lt;- 0.839*(x-<span class="number">40</span>) + <span class="number">0.544</span>*(y-<span class="number">15</span>)</span><br><span class="line">  <span class="built_in">return</span>(r)</span><br><span class="line">&#125;</span><br><span class="line">z &lt;- outer(x, y, f)</span><br><span class="line">op &lt;- par(bg = <span class="string">&quot;white&quot;</span>)</span><br><span class="line">nrz &lt;- nrow(z)</span><br><span class="line">ncz &lt;- ncol(z)</span><br><span class="line">jet.colors &lt;- colorRampPalette(<span class="built_in">c</span>(<span class="string">&quot;gray80&quot;</span>, <span class="string">&quot;gray10&quot;</span>))</span><br><span class="line">nbcol &lt;- 100</span><br><span class="line">color &lt;- jet.colors(nbcol)</span><br><span class="line">zfacet &lt;- z[-<span class="number">1</span>, -<span class="number">1</span>] + z[-<span class="number">1</span>, -ncz] + z[-nrz, -<span class="number">1</span>] + z[-nrz, -ncz]</span><br><span class="line">facetcol &lt;- cut(zfacet, nbcol)</span><br><span class="line"></span><br><span class="line">persp(x, y, z,</span><br><span class="line">  theta = <span class="number">30</span>, phi = <span class="number">30</span>,</span><br><span class="line">  expand = <span class="number">0.5</span>, col = color[facetcol]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
 <p>图片如下：</p>
 <p><img src="20.png" alt="1"></p>
 <p>在所有的可能的线性组合中（满足条件， <em>Φ<sub>11</sub><sup>2</sup></em> +  <em>Φ<sub>21</sub><sup>2</sup></em> = 1 ），只有上面的这种线性组合可以产生最高的方差（<strong>Var(Z<sub>1</sub>) 最大</strong>）。</p>
 <p>这里 pop 和 ad 都是长度为100的向量，那么 Z<sub>1</sub> 也是一个长度为100的向量。例如，对于第 i 个样本，公式如下</p>
-<p>$$<br>
-z_{i 1}=0.839 \times\left(\mathrm{pop}<em>{i}-\overline{\mathrm{pop}}\right)+0.544 \times\left(\mathrm{ad}</em>{i}-\overline{\mathrm{ad}}\right)<br>
-$$<br>
-这些值 Z<sub>11</sub>, …… , Z<sub>n1</sub> 称为 <em>principal component scores</em> 。</p>
+<p style=""><img src="https://math.now.sh?from=z_%7Bi%201%7D%3D0.839%20%5Ctimes%5Cleft%28%5Cmathrm%7Bpop%7D_%7Bi%7D-%5Coverline%7B%5Cmathrm%7Bpop%7D%7D%5Cright%29%2B0.544%20%5Ctimes%5Cleft(%5Cmathrm%7Bad%7D_%7Bi%7D-%5Coverline%7B%5Cmathrm%7Bad%7D%7D%5Cright)%0A" /></p><p>这些值 Z<sub>11</sub>, …… , Z<sub>n1</sub> 称为 <em>principal component scores</em> 。</p>
 <p>我们对于 PCA 还有另外一种解释：第一主成分定义的直线是和数据<strong>越近越好</strong>。如下图的左图，数据与第一主成分的距离为直线距离，体现为黑色虚线，<strong>直线距离平方和最小的直线为第一主成分直线</strong>（这不就是最小二乘回归嘛）。右图为将左图向右下方旋转，旋转到第一主成分和横坐标方向一致。</p>
 <p><img src="19.png" alt="1"></p>
 <p>第二主成分 Z<sub>2</sub> 需要和 Z<sub>1</sub> <strong>无关</strong>，如图 6.14 所示（<strong>两条线垂直</strong>）。 第二主成分公式如下：</p>
-<p>$$<br>
-Z_{2}=0.544 \times(\mathrm{pop}-\overline{\mathrm{pop}})-0.839 \times(\mathrm{ad}-\overline{\mathrm{ad}})<br>
-$$</p>
-<p>因为这里我们只有两个预测因子，因此前两个主成分就包含了全部信息。但是，这里第一主成分包含了最多的信息。图 6.15 右图看出，<em>second principal component scores</em> 几乎为0，表示第二主成分几乎没有什么信息了。</p>
+<p style=""><img src="https://math.now.sh?from=Z_%7B2%7D%3D0.544%20%5Ctimes%28%5Cmathrm%7Bpop%7D-%5Coverline%7B%5Cmathrm%7Bpop%7D%7D%29-0.839%20%5Ctimes(%5Cmathrm%7Bad%7D-%5Coverline%7B%5Cmathrm%7Bad%7D%7D)%0A" /></p><p>因为这里我们只有两个预测因子，因此前两个主成分就包含了全部信息。但是，这里第一主成分包含了最多的信息。图 6.15 右图看出，<em>second principal component scores</em> 几乎为0，表示第二主成分几乎没有什么信息了。</p>
 <p>下图为第一主成分与第二主成分与两个性状的相关。</p>
 <p><img src="21.png" alt="1"></p>
 <p><img src="22.png" alt="1"></p>
@@ -400,18 +295,12 @@ $$</p>
 <p>在实际的主成分回归分析中，M 的值通常通过 CV 获得。Credit 数据的PCR分析结果如下图，我们可以看到最佳的M = 10，这就相当于没有进行什么降维，因为 p=11。</p>
 <p><img src="25.png" alt="1"></p>
 <p>当我们进行 PCR 分析时，我们一般建议对预测因子进行 <em>standardizing</em></p>
-<p>$$<br>
-\tilde{x}<em>{i j}=\frac{x</em>{i j}}{\sqrt{\frac{1}{n} \sum_{i=1}^{n}\left(x_{i j}-\bar{x}_{j}\right)^{2}}}<br>
-$$<br>
-如果不进行标准化，那么 <em>high-variance</em> 的变量会在主成分分析中倾向于占据更重要的地位，会对最终的模型结果产生影响。但是，如果所有的变量均采用相同的单位，那么你也可能不选择进行标准化这一步。</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctilde%7Bx%7D_%7Bi%20j%7D%3D%5Cfrac%7Bx_%7Bi%20j%7D%7D%7B%5Csqrt%7B%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28x_%7Bi%20j%7D-%5Cbar%7Bx%7D_%7Bj%7D%5Cright%29%5E%7B2%7D%7D%7D%0A" /></p><p>如果不进行标准化，那么 <em>high-variance</em> 的变量会在主成分分析中倾向于占据更重要的地位，会对最终的模型结果产生影响。但是，如果所有的变量均采用相同的单位，那么你也可能不选择进行标准化这一步。</p>
 <h2 id="Partial-Least-Squares">Partial Least Squares</h2>
 <p>PCR 分析中需要确认线性组合Z<sub>1</sub> , Z<sub>2</sub> …… Z<sub>M</sub>  ，来表示这些预测因子 。这个过程我们认为是 <em>unsupervised</em> ，因为这个过程因变量 Y 不会参与，或者说不会 <em>supervise</em> the identification of the principal components 。因此，PCR 分析有一个问题，<strong>可以很好地解释自变量变异的主成分不见得可以很好地预测因变量</strong>。</p>
 <p>我们这里推出，<abbr title="Partial least squares regression, PLS">偏最小二乘回归</abbr> , 一种替代 PCR 分析的 监督方法。PLS 方法创建新变量的过程时会利用因变量 Y 的值。粗略地说，PLS 方法倾向于找到同时可以解释自变量和因变量的新变量。</p>
-<p>PLS 首先将 p 个自变量和因变量进行标准化。然后PLS 的第一主成分的 <em>Φ<sub>j1</sub></em>  设置为 Y ~ X<sub>j</sub> 的简单线性回归的系数（公式如下）。因此，第一主成分的主要权重给了与因变量高度相关的变量。<br>
-$$<br>
-Z_{1}=\sum_{j=1}^{p} \phi_{j 1} X_{j}<br>
-$$</p>
-<p>下图显示了 p=2 的 PLS 与 PCR 的第一主成分的直线，绿色实线为 PLS 的第一主成分，虚线为 PCR 的第一主成分。PLS 的方向添加了 pop 的权重，降低了ad 的权重，表明 pop 与因变量的关系更强。</p>
+<p>PLS 首先将 p 个自变量和因变量进行标准化。然后PLS 的第一主成分的 <em>Φ<sub>j1</sub></em>  设置为 Y ~ X<sub>j</sub> 的简单线性回归的系数（公式如下）。因此，第一主成分的主要权重给了与因变量高度相关的变量。</p>
+<p style=""><img src="https://math.now.sh?from=Z_%7B1%7D%3D%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20%5Cphi_%7Bj%201%7D%20X_%7Bj%7D%0A" /></p><p>下图显示了 p=2 的 PLS 与 PCR 的第一主成分的直线，绿色实线为 PLS 的第一主成分，虚线为 PCR 的第一主成分。PLS 的方向添加了 pop 的权重，降低了ad 的权重，表明 pop 与因变量的关系更强。</p>
 <p><img src="26.png" alt="1"></p>
 <p>PLS 在 <em>chemometrics</em> (化学计量学) 上很流行。实际上，PLS 的效果不见得比 岭回归或 PCR 方法更好。虽然 PLS 可以减少 bias ，但是它可能会增加 variance ，</p>
 <h1>Considerations in High Dimensions</h1>
@@ -523,36 +412,21 @@ $$</p>
 </ol>
 <h2 id="Leave-One-Out-Cross-Validation">Leave-One-Out Cross-Validation</h2>
 <p><em>Leave-One-Out Cross-Validation</em> (LOOCV) 接近于上面的 <em>validation set approach</em> ，但是这种方法尝试来弥补上面这种方法的缺点。</p>
-<p>LOOCV 也是把观测值分为两个群体，但区别在于它只将一个个体划定给验证集，将其他的 n-1 个个体划定给训练集，用于拟合模型，然后预测留出来的一个个体的，计算MSE。由于只有一个个体, MSE 的公式变为<br>
-$$<br>
-\mathrm{MSE}<em>{1}=\left(y</em>{1}-\hat{y}_{1}\right)^{2}<br>
-$$<br>
-虽然MSE<sub>1</sub> 是无偏的，但是它是一个很糟糕的估计值，因为变异太大。</p>
+<p>LOOCV 也是把观测值分为两个群体，但区别在于它只将一个个体划定给验证集，将其他的 n-1 个个体划定给训练集，用于拟合模型，然后预测留出来的一个个体的，计算MSE。由于只有一个个体, MSE 的公式变为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BMSE%7D_%7B1%7D%3D%5Cleft%28y_%7B1%7D-%5Chat%7By%7D_%7B1%7D%5Cright%29%5E%7B2%7D%0A" /></p><p>虽然MSE<sub>1</sub> 是无偏的，但是它是一个很糟糕的估计值，因为变异太大。</p>
 <p>我们可以重复这个过程，让所有个体都做一次验证个体，也就是总共重复n次。图示如下：</p>
 <p><img src="2.png" alt="1"></p>
-<p>然后我们计算这n次的平均MSE<br>
-$$<br>
-\mathrm{CV}<em>{(n)}=\frac{1}{n} \sum</em>{i=1}^{n} \mathrm{MSE}_{i}<br>
-$$<br>
-LOOCV 方法相比于上面的 validation set 方法又很多优势。首先，LOOCV 方法有更小的 bias，因为 LOOCV 方法用了接近所有个体来拟合模型，而 validation set 只用了一半。因此，LOOCV 方法不会高估 <em>test error rate</em> 。其次，validation set 随机划分群体使得多次重复结果的差异较大，而多次重复 LOOCV 也只会产生一个相同的结果，LOOCV 方法根本没有训练集和验证集划分的随意性问题。</p>
+<p>然后我们计算这n次的平均MSE</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCV%7D_%7B%28n%29%7D%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Cmathrm%7BMSE%7D_%7Bi%7D%0A" /></p><p>LOOCV 方法相比于上面的 validation set 方法又很多优势。首先，LOOCV 方法有更小的 bias，因为 LOOCV 方法用了接近所有个体来拟合模型，而 validation set 只用了一半。因此，LOOCV 方法不会高估 <em>test error rate</em> 。其次，validation set 随机划分群体使得多次重复结果的差异较大，而多次重复 LOOCV 也只会产生一个相同的结果，LOOCV 方法根本没有训练集和验证集划分的随意性问题。</p>
 <p>我们对 Auto 数据集采用 LOOCV 方法进行计算，结果如下图左图（右图为9次单独的 10-fold CV结果，每次均随机地将群体分成10份。从这里可以看出 10-fold CV 多次结果之间的差异较小）</p>
 <p><img src="3.png" alt="1"></p>
-<p>LOOCV 的计算量比较大，毕竟需要计算 n 次。如果 n 比较大，那么 可能会非常耗时。<strong>在最小二乘的线性回归或二项式回归分析中</strong>，存在一个简化可以使得 LOOCV 的计算量与单次模型拟合差不多，公式如下。这个式子看上去类似于普通的 MSE 的计算公式，除了分母部分增加了 一个 (1-h<sub>i</sub>)<br>
-$$<br>
-\mathrm{CV}<em>{(n)}=\frac{1}{n} \sum</em>{i=1}^{n}\left(\frac{y_{i}-\hat{y}<em>{i}}{1-h</em>{i}}\right)^{2}<br>
-$$<br>
-这里预测值 y_hat 是采用原始的最小二乘拟合的结果， <em>h<sub>i</sub></em>  是 leverage ，值在1/n 与 1 之间，表示一个观测值对模型拟合的影响程度。因此，对于 high-leverage 的点，1-  <em>h<sub>i</sub></em>  越低，这里相当于放大了残差。<br>
-$$<br>
-h_{i}=\frac{1}{n}+\frac{\left(x_{i}-\bar{x}\right)^{2}}{\sum_{i^{\prime}=1}^{n}\left(x_{i^{\prime}}-\bar{x}\right)^{2}}<br>
-$$<br>
-LOOCV 是一个一般方法，可以用于各种各样的模型，比如用于逻辑回归或LDA分析。</p>
+<p>LOOCV 的计算量比较大，毕竟需要计算 n 次。如果 n 比较大，那么 可能会非常耗时。<strong>在最小二乘的线性回归或二项式回归分析中</strong>，存在一个简化可以使得 LOOCV 的计算量与单次模型拟合差不多，公式如下。这个式子看上去类似于普通的 MSE 的计算公式，除了分母部分增加了 一个 (1-h<sub>i</sub>)</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCV%7D_%7B%28n%29%7D%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(%5Cfrac%7By_%7Bi%7D-%5Chat%7By%7D_%7Bi%7D%7D%7B1-h_%7Bi%7D%7D%5Cright)%5E%7B2%7D%0A" /></p><p>这里预测值 y_hat 是采用原始的最小二乘拟合的结果， <em>h<sub>i</sub></em>  是 leverage ，值在1/n 与 1 之间，表示一个观测值对模型拟合的影响程度。因此，对于 high-leverage 的点，1-  <em>h<sub>i</sub></em>  越低，这里相当于放大了残差。</p>
+<p style=""><img src="https://math.now.sh?from=h_%7Bi%7D%3D%5Cfrac%7B1%7D%7Bn%7D%2B%5Cfrac%7B%5Cleft%28x_%7Bi%7D-%5Cbar%7Bx%7D%5Cright%29%5E%7B2%7D%7D%7B%5Csum_%7Bi%5E%7B%5Cprime%7D%3D1%7D%5E%7Bn%7D%5Cleft(x_%7Bi%5E%7B%5Cprime%7D%7D-%5Cbar%7Bx%7D%5Cright)%5E%7B2%7D%7D%0A" /></p><p>LOOCV 是一个一般方法，可以用于各种各样的模型，比如用于逻辑回归或LDA分析。</p>
 <h2 id="k-fold-Cross-Validation">k-fold Cross-Validation</h2>
 <p>LOOCV 方法的一个备选方法是 k-fold CV 方法。这种方法将所有个体随机分成相同大小的 k groups ，或者说是 k folds。将第一个 fold 视为验证集，然后用其他folds拟合模型，计算得到 MSE<sub>1</sub>。这个过程重复 k 次，每次均拿出一个fold 视为验证集，其他视为训练集，得到多个 MSE。</p>
-<p>然后通过下面这个式子计算平均MSE<br>
-$$<br>
-\mathrm{CV}<em>{(k)}=\frac{1}{k} \sum</em>{i=1}^{k} \mathrm{MSE}_{i}<br>
-$$<br>
-下图便反映了这个过程</p>
+<p>然后通过下面这个式子计算平均MSE</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCV%7D_%7B%28k%29%7D%3D%5Cfrac%7B1%7D%7Bk%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bk%7D%20%5Cmathrm%7BMSE%7D_%7Bi%7D%0A" /></p><p>下图便反映了这个过程</p>
 <p><img src="4.png" alt="1"></p>
 <p>我们很容易看到，LOOCV 方法是 k-fold CV 方法的一个特例，即 k = n。在实际中，一般k会设为5或10，那么k设为5/10 相比于 设为n 的优势在哪里呢？首先最明显的就是<strong>计算量</strong>，因为 LOOCV 需要拟合模型 n 次（通过最小二乘法估计的线性模型除外），而 k-fold CV 只需要拟合 5次或10次。</p>
 <p>但我们使用真实数据时，由于我们不知道真实的 test MSE ，因此我们很难决定CV估计的准确性。但是，如果我们使用模拟数据，我们计算得到真实的 test MSE，因此可以评价CV结果。下图中，我们画出了CV得到的 test error rate 估计值 和 真实的 test error rate，这里蓝线是真实值，黑色虚线是LOOCV估计值，红色线是 10-fold CV 估计值。我们可以看到 10-fold CV 和 LOOCV 结果差不多。</p>
@@ -564,14 +438,8 @@ $$<br>
 <p>但是我们知道，bias 并不是我们关心的估计过程的唯一指标，我们还关心 variance ，结果表明 LOOCV 比 k-fold CV 有更高的 variance 。为什么是这样呢？当我们执行 LOOCV 方法时，我们拟合的n个模型，几乎都是使用相同的数据；因此，这些模型的拟合结果之间具有高度的相关性。但是当我们执行 k-fold CV 时，k 个拟合的模型之间相关较弱，因为训练集数据之间的重合程度较小。因为很多高度相关的数量性状的均值比相关程度较低的数量性状均值的 variance 更小，因此 LOOCV 方法得到的 test error 估计值通常比 k-fold CV 方法有更高的 variance。</p>
 <p>总结一下，综合考虑 bias 和 variance ，我们容易得到 k=5 或 k=10 的 k-fold CV 得到的 test error estimates 最佳，既不会有很高的 bias ，也不会有很高的 variance。</p>
 <h2 id="Cross-Validation-on-Classification-problems">Cross-Validation on Classification problems</h2>
-<p>上面提高的交叉验证的使用均是基于<strong>数量性状</strong>，因此都是用 MSE 来衡量 test error 。但是交叉验证同样可以用于质量性状的分析上，其实大同小异，只是用 test error rate 替换 MSE 来衡量 test error。例如， LOOCV 的公式如下<br>
-$$<br>
-\mathrm{CV}<em>{(n)}=\frac{1}{n} \sum</em>{i=1}^{n} \mathrm{Err}_{i}<br>
-$$</p>
-<p>$$<br>
-\operatorname{Err}<em>{i}=I\left(y</em>{i} \neq \hat{y}_{i}\right)<br>
-$$</p>
-<p>下图为一个模拟数据的逻辑回归结果，p=2，通过多项式回归不断增加自由度。</p>
+<p>上面提高的交叉验证的使用均是基于<strong>数量性状</strong>，因此都是用 MSE 来衡量 test error 。但是交叉验证同样可以用于质量性状的分析上，其实大同小异，只是用 test error rate 替换 MSE 来衡量 test error。例如， LOOCV 的公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCV%7D_%7B%28n%29%7D%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Cmathrm%7BErr%7D_%7Bi%7D%0A" /></p><p style=""><img src="https://math.now.sh?from=%5Coperatorname%7BErr%7D_%7Bi%7D%3DI%5Cleft%28y_%7Bi%7D%20%5Cneq%20%5Chat%7By%7D_%7Bi%7D%5Cright%29%0A" /></p><p>下图为一个模拟数据的逻辑回归结果，p=2，通过多项式回归不断增加自由度。</p>
 <p><img src="6.png" alt="1"></p>
 <p>但是在真实的数据中，真实的决策线和 test error rate 均是未知的。因此我们需要决定上面的四种逻辑回归哪一种比较好。我们可以通过交叉验证来实现这一点。下图的左图显示了十倍交叉验证的结果（黑线），真实的 test error 是棕线，十倍交叉验证的结果很好的预测了真实结果（略低估了真实结果）。右图显示了KNN的结果，我们可以随着 flexibility 的增加，traing error rate 迅速下降，而 test error rate 呈U字型变化，这再次说明了不能用 training error rate 来说明模型的好坏。</p>
 <p><img src="7.png" alt="1"></p>
@@ -620,11 +488,8 @@ $$</p>
 <p><img src="4.png" alt="1"></p>
 <p>我们可以对这个二变量进行线性回归，如果预测值大于0.5， 我们认为是 drug overdose；反之我们认为 stroke 。在这种情况，<strong>即使颠倒了重编码方法，预测结果还是一样的</strong>。这种情况下，线性回归是有意义的，我们得到的预测值可以理解为 <em>drug overdose</em> 的<strong>可能性</strong>，但是<strong>线性回归的预测值可能会超出 [0,1] 区间</strong>，使得这个结果难以解释。</p>
 <h1>衡量分类变量模型的准确性</h1>
-<p><em><strong>training error rate</strong></em> :  公式如下，其中 <code>I()</code> 为哑变量，如果预测值和真实值不同则为1，相同则为0。这个式子其实就是计算 traing data 有多少比例的预测值预测错了。<br>
-$$<br>
-\frac{1}{n} \sum_{i=1}^{n} I\left(y_{i} \neq \hat{y}_{i}\right)<br>
-$$<br>
-但是，实际上我们更关心的是 <em>test data</em> 的结果，同样的我们计算 <em><strong>test error rate</strong></em> 。一个好的模型，我们得到的  <em><strong>test error rate</strong></em> 应该是很低的。</p>
+<p><em><strong>training error rate</strong></em> :  公式如下，其中 <code>I()</code> 为哑变量，如果预测值和真实值不同则为1，相同则为0。这个式子其实就是计算 traing data 有多少比例的预测值预测错了。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20I%5Cleft%28y_%7Bi%7D%20%5Cneq%20%5Chat%7By%7D_%7Bi%7D%5Cright%29%0A" /></p><p>但是，实际上我们更关心的是 <em>test data</em> 的结果，同样的我们计算 <em><strong>test error rate</strong></em> 。一个好的模型，我们得到的  <em><strong>test error rate</strong></em> 应该是很低的。</p>
 <h1>逻辑回归</h1>
 <p>逻辑回归（logistic 回归）采用的因变量是<strong>某一个水平的概率</strong>。</p>
 <p>线性回归与逻辑回归比对的结果如下：</p>
@@ -675,83 +540,32 @@ $$<br>
 <h2 id="大于2个水平的因变量">大于2个水平的因变量</h2>
 <p>如果有多个水平的话，一般就不用逻辑回归了。我们会用 <abbr title="discriminant analysis"><strong>判别分析</strong></abbr>  方法。</p>
 <h1><abbr title="Linear Discriminant Analysis, LDA">线性判别分析</abbr></h1>
-<p>对于大于2个水平（K&gt;2）的因变量，我们假定我们获取因变量的<strong>先验分布</strong>（即一个随机挑选的观察值来自于其中某个水平的概率），记为下面的符号。<br>
-$$<br>
-\pi_{k}<br>
-$$<br>
-另外一个式子就是基于某个因变量水平的自变量分布，见下式。如果这个值很高，说明当Y=k时，X=x 的概率很大。<br>
-$$<br>
-f_{k}(x) \equiv \operatorname{Pr}(X=x \mid Y=k)<br>
-$$<br>
-我们通过<strong>贝叶斯定理</strong>，就可以得到基于某个X的Y的条件概率，即<strong>后验概率</strong>，我们用 <em><strong>p<sub>k</sub>(x)</strong></em>  来表示<br>
-$$<br>
-\operatorname{Pr}(Y=k \mid X=x)=\frac{\pi_{k} f_{k}(x)}{\sum_{l=1}^{K} \pi_{l} f_{l}(x)}<br>
-$$<br>
-在这个公式里，因变量的先验分布比较容易获得，我们先对总体进行随机抽样，之后算一下每个水平的比例即可。但是 f<sub>k</sub>(x) 就不是很容易获得。<strong>如果我们可以估计  f<sub>k</sub>(x)</strong> ，我们就可以计算不同因变量水平的<strong>后验概率</strong>，我们认为后验概率最大的水平就是预测值。</p>
+<p>对于大于2个水平（K&gt;2）的因变量，我们假定我们获取因变量的<strong>先验分布</strong>（即一个随机挑选的观察值来自于其中某个水平的概率），记为下面的符号。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi_%7Bk%7D%0A" /></p><p>另外一个式子就是基于某个因变量水平的自变量分布，见下式。如果这个值很高，说明当Y=k时，X=x 的概率很大。</p>
+<p style=""><img src="https://math.now.sh?from=f_%7Bk%7D%28x%29%20%5Cequiv%20%5Coperatorname%7BPr%7D(X%3Dx%20%5Cmid%20Y%3Dk)%0A" /></p><p>我们通过<strong>贝叶斯定理</strong>，就可以得到基于某个X的Y的条件概率，即<strong>后验概率</strong>，我们用 <em><strong>p<sub>k</sub>(x)</strong></em>  来表示</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7BPr%7D%28Y%3Dk%20%5Cmid%20X%3Dx%29%3D%5Cfrac%7B%5Cpi_%7Bk%7D%20f_%7Bk%7D(x)%7D%7B%5Csum_%7Bl%3D1%7D%5E%7BK%7D%20%5Cpi_%7Bl%7D%20f_%7Bl%7D(x)%7D%0A" /></p><p>在这个公式里，因变量的先验分布比较容易获得，我们先对总体进行随机抽样，之后算一下每个水平的比例即可。但是 f<sub>k</sub>(x) 就不是很容易获得。<strong>如果我们可以估计  f<sub>k</sub>(x)</strong> ，我们就可以计算不同因变量水平的<strong>后验概率</strong>，我们认为后验概率最大的水平就是预测值。</p>
 <h2 id="p-1的线性判别分析">p=1的线性判别分析</h2>
 <p>如果只有一个自变量，我们需要首先估计  f<sub>k</sub>(x) ，我们需要先做一些假设。</p>
-<p>我们假设  <strong>f<sub>k</sub>(x) 是符合正态分布的</strong> （假设1），在一个自变量的情况下，即符合下面这个式子：<br>
-$$<br>
-f_{k}(x)=\frac{1}{\sqrt{2 \pi} \sigma_{k}} \exp \left(-\frac{1}{2 \sigma_{k}^{2}}\left(x-\mu_{k}\right)^{2}\right)<br>
-$$<br>
-其中 u<sub>k</sub> 和 σ<sup>2</sup><sub>k</sub>  分别为第K个水平的均值和方差。我们进一步假设<strong>所有的水平的方差均相同</strong>（假设2），即如下式，可以简化为 σ<sup>2</sup> 。<br>
-$$<br>
-\sigma_{1}^{2}=\ldots=\sigma_{K}^{2}<br>
-$$<br>
-将这个式子带入到上面计算  <em><strong>p<sub>k</sub>(x)</strong></em> 的式子中，得到<br>
-$$<br>
-p_{k}(x)=\frac{\pi_{k} \frac{1}{\sqrt{2 \pi} \sigma} \exp \left(-\frac{1}{2 \sigma^{2}}\left(x-\mu_{k}\right)^{2}\right)}{\sum_{l=1}^{K} \pi_{l} \frac{1}{\sqrt{2 \pi} \sigma} \exp \left(-\frac{1}{2 \sigma^{2}}\left(x-\mu_{l}\right)^{2}\right)}<br>
-$$<br>
-计算所有水平的后验概率，选择<strong>后验概率最大</strong>的水平。我们可以看到对所有的水平，分母部分都是一样的，因此我们只需要关注分子部分，只要找对分子最大的水平。对分子部分采用 log 函数，剔除常数部分，我们得到下面这个式子。这个式子值最大的水平，就是后验概率最大的水平<br>
-$$<br>
-\delta_{k}(x)=x \cdot \frac{\mu_{k}}{\sigma^{2}}-\frac{\mu_{k}^{2}}{2 \sigma^{2}}+\log \left(\pi_{k}\right)<br>
-$$<br>
-假设 K=2，并且 π<sub>1</sub> = π<sub>2</sub> 。那么如果满足下面这个式子，则最终分配为水平1；否则则为水平2<br>
-$$<br>
-2 x\left(\mu_{1}-\mu_{2}\right)&gt;\mu_{1}^{2}-\mu_{2}^{2}<br>
-$$<br>
-在这种情况下，<abbr title="Bayes decision boundary">贝叶斯决策线</abbr> 为<br>
-$$<br>
-x=\frac{\mu_{1}^{2}-\mu_{2}^{2}}{2\left(\mu_{1}-\mu_{2}\right)}=\frac{\mu_{1}+\mu_{2}}{2} \text { . }<br>
-$$<br>
-但是在实际中， π<sub>k</sub> , μ<sub>k</sub> ， σ<sup>2</sup>  这些参数都是未知的，我们需要先估计这些常数，再估计 <em>p<sub>k</sub>(x)</em><br>
-$$<br>
-\begin{aligned}<br>
-\hat{\mu}<em>{k} &amp;=\frac{1}{n</em>{k}} \sum_{i: y_{i}=k} x_{i} \<br>
-\hat{\sigma}^{2} &amp;=\frac{1}{n-K} \sum_{k=1}^{K} \sum_{i: y_{i}=k}\left(x_{i}-\hat{\mu}<em>{k}\right)^{2}<br>
-\end{aligned}<br>
-$$<br>
-这里 n 是所有的观测值数目，n<sub>k</sub> 是观测值为水平k 时的数目。至于 π<sub>k</sub> ，有先验就用，没有就从 training data 计算一下<br>
-$$<br>
-\hat{\pi}</em>{k}=n_{k} / n<br>
-$$<br>
-将上面的参数估计值带入下式，计算得到值最大的水平<br>
-$$<br>
-\hat{\delta}<em>{k}(x)=x \cdot \frac{\hat{\mu}</em>{k}}{\hat{\sigma}^{2}}-\frac{\hat{\mu}<em>{k}^{2}}{2 \hat{\sigma}^{2}}+\log \left(\hat{\pi}</em>{k}\right)<br>
-$$<br>
-为什么判别分析称为<strong>线性</strong>判别分析呢？因为 <em>discriminant functions</em> δ<sub>k</sub>(x) 是 x 的线性函数。</p>
+<p>我们假设  <strong>f<sub>k</sub>(x) 是符合正态分布的</strong> （假设1），在一个自变量的情况下，即符合下面这个式子：</p>
+<p style=""><img src="https://math.now.sh?from=f_%7Bk%7D%28x%29%3D%5Cfrac%7B1%7D%7B%5Csqrt%7B2%20%5Cpi%7D%20%5Csigma_%7Bk%7D%7D%20%5Cexp%20%5Cleft(-%5Cfrac%7B1%7D%7B2%20%5Csigma_%7Bk%7D%5E%7B2%7D%7D%5Cleft(x-%5Cmu_%7Bk%7D%5Cright)%5E%7B2%7D%5Cright)%0A" /></p><p>其中 u<sub>k</sub> 和 σ<sup>2</sup><sub>k</sub>  分别为第K个水平的均值和方差。我们进一步假设<strong>所有的水平的方差均相同</strong>（假设2），即如下式，可以简化为 σ<sup>2</sup> 。</p>
+<p style=""><img src="https://math.now.sh?from=%5Csigma_%7B1%7D%5E%7B2%7D%3D%5Cldots%3D%5Csigma_%7BK%7D%5E%7B2%7D%0A" /></p><p>将这个式子带入到上面计算  <em><strong>p<sub>k</sub>(x)</strong></em> 的式子中，得到</p>
+<p style=""><img src="https://math.now.sh?from=p_%7Bk%7D%28x%29%3D%5Cfrac%7B%5Cpi_%7Bk%7D%20%5Cfrac%7B1%7D%7B%5Csqrt%7B2%20%5Cpi%7D%20%5Csigma%7D%20%5Cexp%20%5Cleft(-%5Cfrac%7B1%7D%7B2%20%5Csigma%5E%7B2%7D%7D%5Cleft(x-%5Cmu_%7Bk%7D%5Cright)%5E%7B2%7D%5Cright)%7D%7B%5Csum_%7Bl%3D1%7D%5E%7BK%7D%20%5Cpi_%7Bl%7D%20%5Cfrac%7B1%7D%7B%5Csqrt%7B2%20%5Cpi%7D%20%5Csigma%7D%20%5Cexp%20%5Cleft(-%5Cfrac%7B1%7D%7B2%20%5Csigma%5E%7B2%7D%7D%5Cleft(x-%5Cmu_%7Bl%7D%5Cright)%5E%7B2%7D%5Cright)%7D%0A" /></p><p>计算所有水平的后验概率，选择<strong>后验概率最大</strong>的水平。我们可以看到对所有的水平，分母部分都是一样的，因此我们只需要关注分子部分，只要找对分子最大的水平。对分子部分采用 log 函数，剔除常数部分，我们得到下面这个式子。这个式子值最大的水平，就是后验概率最大的水平</p>
+<p style=""><img src="https://math.now.sh?from=%5Cdelta_%7Bk%7D%28x%29%3Dx%20%5Ccdot%20%5Cfrac%7B%5Cmu_%7Bk%7D%7D%7B%5Csigma%5E%7B2%7D%7D-%5Cfrac%7B%5Cmu_%7Bk%7D%5E%7B2%7D%7D%7B2%20%5Csigma%5E%7B2%7D%7D%2B%5Clog%20%5Cleft(%5Cpi_%7Bk%7D%5Cright)%0A" /></p><p>假设 K=2，并且 π<sub>1</sub> = π<sub>2</sub> 。那么如果满足下面这个式子，则最终分配为水平1；否则则为水平2</p>
+<p style=""><img src="https://math.now.sh?from=2%20x%5Cleft%28%5Cmu_%7B1%7D-%5Cmu_%7B2%7D%5Cright%29%3E%5Cmu_%7B1%7D%5E%7B2%7D-%5Cmu_%7B2%7D%5E%7B2%7D%0A" /></p><p>在这种情况下，<abbr title="Bayes decision boundary">贝叶斯决策线</abbr> 为</p>
+<p style=""><img src="https://math.now.sh?from=x%3D%5Cfrac%7B%5Cmu_%7B1%7D%5E%7B2%7D-%5Cmu_%7B2%7D%5E%7B2%7D%7D%7B2%5Cleft%28%5Cmu_%7B1%7D-%5Cmu_%7B2%7D%5Cright%29%7D%3D%5Cfrac%7B%5Cmu_%7B1%7D%2B%5Cmu_%7B2%7D%7D%7B2%7D%20%5Ctext%20%7B%20.%20%7D%0A" /></p><p>但是在实际中， π<sub>k</sub> , μ<sub>k</sub> ， σ<sup>2</sup>  这些参数都是未知的，我们需要先估计这些常数，再估计 <em>p<sub>k</sub>(x)</em></p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Chat%7B%5Cmu%7D_%7Bk%7D%20%26%3D%5Cfrac%7B1%7D%7Bn_%7Bk%7D%7D%20%5Csum_%7Bi%3A%20y_%7Bi%7D%3Dk%7D%20x_%7Bi%7D%20%5C%5C%0A%5Chat%7B%5Csigma%7D%5E%7B2%7D%20%26%3D%5Cfrac%7B1%7D%7Bn-K%7D%20%5Csum_%7Bk%3D1%7D%5E%7BK%7D%20%5Csum_%7Bi%3A%20y_%7Bi%7D%3Dk%7D%5Cleft%28x_%7Bi%7D-%5Chat%7B%5Cmu%7D_%7Bk%7D%5Cright%29%5E%7B2%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>这里 n 是所有的观测值数目，n<sub>k</sub> 是观测值为水平k 时的数目。至于 π<sub>k</sub> ，有先验就用，没有就从 training data 计算一下</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Cpi%7D_%7Bk%7D%3Dn_%7Bk%7D%20%2F%20n%0A" /></p><p>将上面的参数估计值带入下式，计算得到值最大的水平</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Cdelta%7D_%7Bk%7D%28x%29%3Dx%20%5Ccdot%20%5Cfrac%7B%5Chat%7B%5Cmu%7D_%7Bk%7D%7D%7B%5Chat%7B%5Csigma%7D%5E%7B2%7D%7D-%5Cfrac%7B%5Chat%7B%5Cmu%7D_%7Bk%7D%5E%7B2%7D%7D%7B2%20%5Chat%7B%5Csigma%7D%5E%7B2%7D%7D%2B%5Clog%20%5Cleft(%5Chat%7B%5Cpi%7D_%7Bk%7D%5Cright)%0A" /></p><p>为什么判别分析称为<strong>线性</strong>判别分析呢？因为 <em>discriminant functions</em> δ<sub>k</sub>(x) 是 x 的线性函数。</p>
 <h2 id="p-1的线性判别分析-2">p&gt;1的线性判别分析</h2>
 <p>我们现在看多个自变量的情况，并且这些自变量服从<strong>多元正态分布</strong>（每个变量均服从一维正态分布）， 下图为两个变量时服从多元正态分布的概率密度图。</p>
 <p><img src="21.png" alt="1"></p>
-<p>为了表示 p维的随机变量X 服从多元正态分布，我们写作<br>
-$$<br>
-X \sim N(\mu, \boldsymbol{\Sigma})<br>
-$$<br>
-其中，<em>μ</em> 为均值，是一个p维的向量。<br>
-$$<br>
-E(X)=\mu<br>
-$$<br>
-方差分布为 Σ , 为 <em>p × p</em> 的矩阵。</p>
-<p>最后，多元正态分布定义为<br>
-$$<br>
-f(x)=\frac{1}{(2 \pi)^{p / 2}|\Sigma|^{1 / 2}} \exp \left(-\frac{1}{2}(x-\mu)^{T} \mathbf{\Sigma}^{-1}(x-\mu)\right)<br>
-$$<br>
-类似于p=1的判别分析，这里假定因变量所有水平的观测值均服从<strong>方差相同的</strong>多元正态分布。</p>
-<p>p&gt;1的判别函数如下<br>
-$$<br>
-\delta_{k}(x)=x^{T} \boldsymbol{\Sigma}^{-1} \mu_{k}-\frac{1}{2} \mu_{k}^{T} \boldsymbol{\Sigma}^{-1} \mu_{k}+\log \pi_{k}<br>
-$$<br>
-以下图为例，作图是三种水平所有观测值结果，圆圈为95%的概率的范围，虚线为画出的贝叶斯决策线；右图为各随机抽取了20个样本的结果，实线为抽样结果的贝叶斯决策线。</p>
+<p>为了表示 p维的随机变量X 服从多元正态分布，我们写作</p>
+<p style=""><img src="https://math.now.sh?from=X%20%5Csim%20N%28%5Cmu%2C%20%5Cboldsymbol%7B%5CSigma%7D%29%0A" /></p><p>其中，<em>μ</em> 为均值，是一个p维的向量。</p>
+<p style=""><img src="https://math.now.sh?from=E%28X%29%3D%5Cmu%0A" /></p><p>方差分布为 Σ , 为 <em>p × p</em> 的矩阵。</p>
+<p>最后，多元正态分布定义为</p>
+<p style=""><img src="https://math.now.sh?from=f%28x%29%3D%5Cfrac%7B1%7D%7B(2%20%5Cpi)%5E%7Bp%20%2F%202%7D%7C%5CSigma%7C%5E%7B1%20%2F%202%7D%7D%20%5Cexp%20%5Cleft(-%5Cfrac%7B1%7D%7B2%7D(x-%5Cmu)%5E%7BT%7D%20%5Cmathbf%7B%5CSigma%7D%5E%7B-1%7D(x-%5Cmu)%5Cright)%0A" /></p><p>类似于p=1的判别分析，这里假定因变量所有水平的观测值均服从<strong>方差相同的</strong>多元正态分布。</p>
+<p>p&gt;1的判别函数如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cdelta_%7Bk%7D%28x%29%3Dx%5E%7BT%7D%20%5Cboldsymbol%7B%5CSigma%7D%5E%7B-1%7D%20%5Cmu_%7Bk%7D-%5Cfrac%7B1%7D%7B2%7D%20%5Cmu_%7Bk%7D%5E%7BT%7D%20%5Cboldsymbol%7B%5CSigma%7D%5E%7B-1%7D%20%5Cmu_%7Bk%7D%2B%5Clog%20%5Cpi_%7Bk%7D%0A" /></p><p>以下图为例，作图是三种水平所有观测值结果，圆圈为95%的概率的范围，虚线为画出的贝叶斯决策线；右图为各随机抽取了20个样本的结果，实线为抽样结果的贝叶斯决策线。</p>
 <p>个人理解：这张图给了我一个提示，<strong>分类变量的每个水平必须是能几乎截然分开的</strong>，才能进行分析。不然对于判别分析，无法画出决策线。所以我感觉进行分析前有必要先进行一下可视化，看一下分类变量的各个水平的设置是否合理，有没有两个水平实际是差不多同一个水平的情况。</p>
 <p><img src="22.png" alt="1"></p>
 <p>这里我们同样需要估计这些参数，类似于p=1的情况</p>
@@ -766,15 +580,9 @@ $$<br>
 <h3 id="sensitivity-和-specificity">sensitivity 和 specificity</h3>
 <p>有两个概念可以说明一个 <em>classifier</em> 的表现， <em><strong>sensitivity</strong></em> 和 <em><strong>specificity</strong></em> 。在这个例子中，<em>sensitivity</em> 就是违约者被正确预测的概率，这里是24.3%；<em>specificity</em> 就是非违约者被正确预测的概率，这里是 99.8%。</p>
 <p>为什么判别分析在违约个体的表现如此糟糕呢？或者说，为什么 <em>sensitivity</em> 如此低？如我们所见，判别分析会采用贝叶斯方法，会含有最低的 <em>total error rate</em> ，也就是说会产生最少的总的错误分类的数目，无论这些错误分类原本来自于哪个分类。但是基于信用卡公司的角度，肯定是希望尽量避免将会违约的个体判定为不会违约的错误，相比之下，将不会违约的个体判定为违约问题则没有那么严重。因此我们需要需改这个方法，来新建一个 <em>classifier</em> 来更好地符合信用卡公司的需求。</p>
-<p>判别分析会将个体判定为<strong>后验概率最大</strong>的分类。在只有两种分类的情况下，一个观测值会判定为违约的公式如下（后验概率大于0.5）<br>
-$$<br>
-\operatorname{Pr}(\text { default }=\operatorname{Yes} \mid X=x)&gt;0.5<br>
-$$<br>
-这里默认阈值就是0.5，但是，如果我们特别关心将违约个体预测为非违约的情况，那么我们就可以降低这个阈值。例如如果后验概率超过0.2，我们就判定为违约，公式如下<br>
-$$<br>
-\operatorname{Pr}(\text { default }=\operatorname{Yes} \mid X=x)&gt;0.2<br>
-$$</p>
-<p>修改阈值后，预测结果如下，我们可以看到相比于上面的结果，违约个体预测错误下降，但是非违约个体的预测错误上升。总的预测错误轻微上升至3.73%。</p>
+<p>判别分析会将个体判定为<strong>后验概率最大</strong>的分类。在只有两种分类的情况下，一个观测值会判定为违约的公式如下（后验概率大于0.5）</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7BPr%7D%28%5Ctext%20%7B%20default%20%7D%3D%5Coperatorname%7BYes%7D%20%5Cmid%20X%3Dx%29%3E0.5%0A" /></p><p>这里默认阈值就是0.5，但是，如果我们特别关心将违约个体预测为非违约的情况，那么我们就可以降低这个阈值。例如如果后验概率超过0.2，我们就判定为违约，公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7BPr%7D%28%5Ctext%20%7B%20default%20%7D%3D%5Coperatorname%7BYes%7D%20%5Cmid%20X%3Dx%29%3E0.2%0A" /></p><p>修改阈值后，预测结果如下，我们可以看到相比于上面的结果，违约个体预测错误下降，但是非违约个体的预测错误上升。总的预测错误轻微上升至3.73%。</p>
 <p><img src="24.png" alt="1"></p>
 <p>下图说明了修改违约后验概率阈值的 trade-off 结果。如果阈值设定为0.5，那么总的错误概率是最低的，如下图的黑线，但是违约个体的错误概率却是最高的，如蓝色虚线所示。</p>
 <p><img src="25.png" alt="1"></p>
@@ -786,30 +594,15 @@ $$</p>
 <p>根据上面的表格，我们得到一些重要的统计量。</p>
 <p><img src="28.png" alt="1"></p>
 <h1><abbr title="Quadratic Discriminant Analysis,  QDA">二次判别分析</abbr></h1>
-<p>线性判别分析假设所有水平的观测值均假设服从一个<strong>方差矩阵</strong>相同的<strong>多元正态分布</strong>。二次判别分析则假设所有水平的观测值均服从一个正态分布，但是不像线性判别分析，二次判别分析假设<strong>所有水平的方差矩阵各不相同</strong>。即对第k个水平的观测值的分布为：<br>
-$$<br>
-X \sim N\left(\mu_{k}, \Sigma_{k}\right)<br>
-$$<br>
-在这个假设下，判别函数如下。这个函数是 x 的二次函数，这就是二次判别分析名字的来源。<br>
-$$<br>
-\begin{aligned}<br>
-\delta_{k}(x) &amp;=-\frac{1}{2}\left(x-\mu_{k}\right)^{T} \Sigma_{k}^{-1}\left(x-\mu_{k}\right)-\frac{1}{2} \log \left|\Sigma_{k}\right|+\log \pi_{k} \<br>
-&amp;=-\frac{1}{2} x^{T} \Sigma_{k}^{-1} x+x^{T} \Sigma_{k}^{-1} \mu_{k}-\frac{1}{2} \mu_{k}^{T} \Sigma_{k}^{-1} \mu_{k}-\frac{1}{2} \log \left|\Sigma_{k}\right|+\log \pi_{k}<br>
-\end{aligned}<br>
-$$<br>
-我们应该在什么情况下采用线性判别分析，什么情况下采用二次判别分析呢？这个答案在 <code>bias-variance trade-off</code> 中。二次判别分析需要估计的参数比线性判别分析多得多，如果我们有 p 个预测因子，那么估计线性分析的方差矩阵需要 <em>p(p+1)/2</em> 个参数；而二次判别分析需要对每个水平均要估计一个单独的方差矩阵，则总共需要 <em>Kp(p+1)/2</em> 个参数。因此二次判别分析更灵活，bias 比较低，但 variance 比较高。<strong>一般来说，当样本数量比较少时，推荐使用线性判别分析来降低 variance；如果样本数量非常大或者严重偏理所有水平同方差的假设，更推荐使用二次判别分析。</strong></p>
+<p>线性判别分析假设所有水平的观测值均假设服从一个<strong>方差矩阵</strong>相同的<strong>多元正态分布</strong>。二次判别分析则假设所有水平的观测值均服从一个正态分布，但是不像线性判别分析，二次判别分析假设<strong>所有水平的方差矩阵各不相同</strong>。即对第k个水平的观测值的分布为：</p>
+<p style=""><img src="https://math.now.sh?from=X%20%5Csim%20N%5Cleft%28%5Cmu_%7Bk%7D%2C%20%5CSigma_%7Bk%7D%5Cright%29%0A" /></p><p>在这个假设下，判别函数如下。这个函数是 x 的二次函数，这就是二次判别分析名字的来源。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cdelta_%7Bk%7D%28x%29%20%26%3D-%5Cfrac%7B1%7D%7B2%7D%5Cleft(x-%5Cmu_%7Bk%7D%5Cright)%5E%7BT%7D%20%5CSigma_%7Bk%7D%5E%7B-1%7D%5Cleft(x-%5Cmu_%7Bk%7D%5Cright)-%5Cfrac%7B1%7D%7B2%7D%20%5Clog%20%5Cleft%7C%5CSigma_%7Bk%7D%5Cright%7C%2B%5Clog%20%5Cpi_%7Bk%7D%20%5C%5C%0A%26%3D-%5Cfrac%7B1%7D%7B2%7D%20x%5E%7BT%7D%20%5CSigma_%7Bk%7D%5E%7B-1%7D%20x%2Bx%5E%7BT%7D%20%5CSigma_%7Bk%7D%5E%7B-1%7D%20%5Cmu_%7Bk%7D-%5Cfrac%7B1%7D%7B2%7D%20%5Cmu_%7Bk%7D%5E%7BT%7D%20%5CSigma_%7Bk%7D%5E%7B-1%7D%20%5Cmu_%7Bk%7D-%5Cfrac%7B1%7D%7B2%7D%20%5Clog%20%5Cleft%7C%5CSigma_%7Bk%7D%5Cright%7C%2B%5Clog%20%5Cpi_%7Bk%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>我们应该在什么情况下采用线性判别分析，什么情况下采用二次判别分析呢？这个答案在 <code>bias-variance trade-off</code> 中。二次判别分析需要估计的参数比线性判别分析多得多，如果我们有 p 个预测因子，那么估计线性分析的方差矩阵需要 <em>p(p+1)/2</em> 个参数；而二次判别分析需要对每个水平均要估计一个单独的方差矩阵，则总共需要 <em>Kp(p+1)/2</em> 个参数。因此二次判别分析更灵活，bias 比较低，但 variance 比较高。<strong>一般来说，当样本数量比较少时，推荐使用线性判别分析来降低 variance；如果样本数量非常大或者严重偏理所有水平同方差的假设，更推荐使用二次判别分析。</strong></p>
 <p>下图说明了线性判别分析和二次判别分析在两种情况下的表现。</p>
 <p><img src="29.png" alt="1"></p>
 <h1>不同方法的比较</h1>
-<p>逻辑回归和线性判别分析虽然思路不同，但却是紧密相关的。在线性判别分析的框架里，<em>log odds</em> 计算公式可简化如下（就是两个判别函数相减）：<br>
-$$<br>
-\log \left(\frac{p_{1}(x)}{1-p_{1}(x)}\right)=\log \left(\frac{p_{1}(x)}{p_{2}(x)}\right)=c_{0}+c_{1} x<br>
-$$<br>
-根据逻辑回归公式，<em>log odd</em> 可写为：<br>
-$$<br>
-\log \left(\frac{p_{1}}{1-p_{1}}\right)=\beta_{0}+\beta_{1} x<br>
-$$<br>
-这两种方法得到的 <em>log odd</em> 都是 x 的线性函数，因此这两种方法的决策边界均为直线。这两种方法唯一的区别在于 β0 和 β1 是通过最大似然得到的，而 c<sub>0</sub>  和 c<sub>1</sub> 是通过估计正态分布的均值和方差得到的。</p>
+<p>逻辑回归和线性判别分析虽然思路不同，但却是紧密相关的。在线性判别分析的框架里，<em>log odds</em> 计算公式可简化如下（就是两个判别函数相减）：</p>
+<p style=""><img src="https://math.now.sh?from=%5Clog%20%5Cleft%28%5Cfrac%7Bp_%7B1%7D(x%29%7D%7B1-p_%7B1%7D(x)%7D%5Cright)%3D%5Clog%20%5Cleft(%5Cfrac%7Bp_%7B1%7D(x)%7D%7Bp_%7B2%7D(x)%7D%5Cright)%3Dc_%7B0%7D%2Bc_%7B1%7D%20x%0A" /></p><p>根据逻辑回归公式，<em>log odd</em> 可写为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Clog%20%5Cleft%28%5Cfrac%7Bp_%7B1%7D%7D%7B1-p_%7B1%7D%7D%5Cright%29%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20x%0A" /></p><p>这两种方法得到的 <em>log odd</em> 都是 x 的线性函数，因此这两种方法的决策边界均为直线。这两种方法唯一的区别在于 β0 和 β1 是通过最大似然得到的，而 c<sub>0</sub>  和 c<sub>1</sub> 是通过估计正态分布的均值和方差得到的。</p>
 <p>由于这两种方法仅仅是拟合参数的过程有区别，因此这两种方法的结果往往是非常相似的，但偶尔可能情况不一样。线性判别分析由于存在<strong>同方差正态分布</strong>的假设，因此<strong>如果数据符合这个假设，那么结果可能比较好。相反，如果数据不符合这个假设，那么逻辑回归的结果会更好。</strong></p>
 <p>而 KNN 方法但预测 X = x 的值时，会提取x附近的多个观测值，然后分配X为大多数观测值的结果。因此 KNN 方法是一种完全的非参数方法，没有对决策界限的任何假设。因此，如果只有当决策线是高度非线性的情况下，KNN 方法才可能由于线性判别方法和逻辑回归方法。另一方面，KNN 方面没有告诉我们哪些预测是重要的，哪些是不重要的。</p>
 <p>最后，二次判别分析是 KNN 方法 和 LDA/逻辑回归方法 之间的折中方法，它的决策线是二次函数。</p>
@@ -835,11 +628,8 @@ $$<br>
 <h2 id="线性判别分析">线性判别分析</h2>
 <p>我们可以用 MASS 包的 lda() 函数进行LDA分析。</p>
 <figure class="highlight r"><table><tr><td class="code"><pre><span class="line">&gt; library(MASS)</span><br><span class="line">&gt; lda.fit = lda(Direction ~ Lag1 + Lag2, data=Smarket)</span><br><span class="line">&gt; lda.fit</span><br><span class="line">Call:</span><br><span class="line">lda(Direction ~ Lag1 + Lag2, data = Smarket)</span><br><span class="line"></span><br><span class="line">Prior probabilities of groups:</span><br><span class="line">  Down     Up </span><br><span class="line">0.4816 <span class="number">0.5184</span> </span><br><span class="line"></span><br><span class="line">Group means:</span><br><span class="line">            Lag1        Lag2</span><br><span class="line">Down  <span class="number">0.05068605</span>  <span class="number">0.03229734</span></span><br><span class="line">Up   -<span class="number">0.03969136</span> -<span class="number">0.02244444</span></span><br><span class="line"></span><br><span class="line">Coefficients of linear discriminants:</span><br><span class="line">            LD1</span><br><span class="line">Lag1 -<span class="number">0.7567605</span></span><br><span class="line">Lag2 -<span class="number">0.4707872</span></span><br></pre></td></tr></table></figure>
-<p>这里提供了先验概率的估计值，每个水平均值的估计值。最后的 <em>Coefficients of linear discriminants</em> 提供了两个因子的线性组合，用于形成决策线。在本例中，就是下式<br>
-$$<br>
--0.642 \times \operatorname{Lag} 1-0.514 \times \text { Lag } 2<br>
-$$<br>
-如果这个式子很大，那么就会预测为 Up，否则就预测为 down 。</p>
+<p>这里提供了先验概率的估计值，每个水平均值的估计值。最后的 <em>Coefficients of linear discriminants</em> 提供了两个因子的线性组合，用于形成决策线。在本例中，就是下式</p>
+<p style=""><img src="https://math.now.sh?from=-0.642%20%5Ctimes%20%5Coperatorname%7BLag%7D%201-0.514%20%5Ctimes%20%5Ctext%20%7B%20Lag%20%7D%202%0A" /></p><p>如果这个式子很大，那么就会预测为 Up，否则就预测为 down 。</p>
 <h2 id="二次判别分析">二次判别分析</h2>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt; library(MASS)</span><br><span class="line">&gt; qda.fit &#x3D; qda(Direction ~ Lag1 + Lag2, data&#x3D;Smarket)</span><br><span class="line">&gt; qda.fit</span><br><span class="line">Call:</span><br><span class="line">qda(Direction ~ Lag1 + Lag2, data &#x3D; Smarket)</span><br><span class="line"></span><br><span class="line">Prior probabilities of groups:</span><br><span class="line">  Down     Up </span><br><span class="line">0.4816 0.5184 </span><br><span class="line"></span><br><span class="line">Group means:</span><br><span class="line">            Lag1        Lag2</span><br><span class="line">Down  0.05068605  0.03229734</span><br><span class="line">Up   -0.03969136 -0.02244444</span><br></pre></td></tr></table></figure>
 <p>这里没有提供系数。</p>
@@ -1621,7 +1411,7 @@ Select only those lines containing matches that form whole words.  The test is t
 <p>每次输入一行，赋给内部变量 $0</p>
 </li>
 <li>
-<p>按 <strong>空格/制表符</strong> 将每一行分解为字段，赋给 $1-$n</p>
+<p>按 <strong>空格/制表符</strong> 将每一行分解为字段，赋给 <img src="https://math.now.sh?inline=1-" style="display:inline-block;margin: 0;"/>n</p>
 </li>
 <li>
 <p>search pattern 和 action 必选其一</p>
@@ -1927,7 +1717,7 @@ Select only those lines containing matches that form whole words.  The test is t
 <figure class="highlight r"><table><tr><td class="code"><pre><span class="line">foo &lt;- <span class="keyword">function</span>(x) &#123;</span><br><span class="line">  a &lt;- 2  </span><br><span class="line">  <span class="built_in">browser</span>()  </span><br><span class="line">  y &lt;- x + a</span><br><span class="line">  <span class="built_in">return</span>(y)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt; foo(<span class="number">1</span>)</span><br><span class="line">Called from: foo(<span class="number">1</span>)</span><br><span class="line">Browse[<span class="number">1</span>]&gt;</span><br><span class="line">Browse[<span class="number">1</span>]&gt; n</span><br><span class="line">debug at <span class="comment">#4: y &lt;- x + a</span></span><br><span class="line">Browse[<span class="number">2</span>]&gt; n</span><br><span class="line">debug at <span class="comment">#5: return(y)</span></span><br><span class="line">Browse[<span class="number">2</span>]&gt; y</span><br><span class="line">[<span class="number">1</span>] <span class="number">3</span></span><br></pre></td></tr></table></figure>
 <h3 id="8-3-11-Working-with-the-Split-Apply-Combine-Pattern">8.3.11 Working with the Split-Apply-Combine Pattern</h3>
 <p>一种常见的数据分析方法是<strong>先将需要分析的数据分组，对每组数据应用一个函数，然后合并结果</strong>，称之为 <em>split-apply-combine</em>。</p>
-<p>首先我们先使用 <code>split()</code> 函数通过 d$GC.binned （factor）将 d$depth 切分为一个列表：</p>
+<p>首先我们先使用 <code>split()</code> 函数通过 d<img src="https://math.now.sh?inline=GC.binned%20%EF%BC%88factor%EF%BC%89%E5%B0%86%20d" style="display:inline-block;margin: 0;"/>depth 切分为一个列表：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt; d_split &lt;- split(d$depth, d$GC.binned)</span><br><span class="line">&gt; str(d_split)</span><br><span class="line">List of 5</span><br><span class="line"> $ (0.716,17.7]: num [1:6] 4.57 1.12 6.95 2.66 3.69 3.87</span><br><span class="line"> $ (17.7,34.7] : num [1:4976] 8 8.38 9.02 10.31 12.09 ...</span><br><span class="line"> $ (34.7,51.6] : num [1:45784] 6.68 9.06 10.26 8.06 7.05 ...</span><br><span class="line"> $ (51.6,68.5] : num [1:8122] 3.41 7 6.63 7.15 6.97 4.77 5.18 6.6 6.62 5.05 ...</span><br><span class="line"> $ (68.5,85.6] : num [1:252] 8.04 1.96 3.71 1.97 4.82 4.22 3.76 3.84 1.85 1.05 ...</span><br></pre></td></tr></table></figure>
 <p>之后我们可以通过 <code>lapply()</code> 函数对每组数据采用相同的函数处理</p>
 <figure class="highlight r"><table><tr><td class="code"><pre><span class="line">&gt; lapply(d_split, mean)</span><br><span class="line">$`(0.716,17.7]`</span><br><span class="line">[<span class="number">1</span>] <span class="number">3.8</span></span><br><span class="line"></span><br><span class="line">$`(17.7,34.7]`</span><br><span class="line">[<span class="number">1</span>] <span class="number">8.8</span></span><br><span class="line"></span><br><span class="line">$`(34.7,51.6]`</span><br><span class="line">[<span class="number">1</span>] <span class="number">8.3</span></span><br><span class="line"></span><br><span class="line">$`(51.6,68.5]`</span><br><span class="line">[<span class="number">1</span>] <span class="number">7.3</span></span><br><span class="line"></span><br><span class="line">$`(68.5,85.6]`</span><br><span class="line">[<span class="number">1</span>] <span class="number">4</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
@@ -5418,18 +5208,8 @@ True; print the full file name on the standard output, followed by a null charac
 <p>执行结果如下</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">原矩阵</span><br><span class="line"> 1.000  4.000  7.000</span><br><span class="line"> 2.000  5.000  8.000</span><br><span class="line"> 3.000  6.000  8.000</span><br><span class="line">逆矩阵</span><br><span class="line">-2.667  0.000  0.000</span><br><span class="line"> 2.667 -0.333 -0.000</span><br><span class="line">-1.000 -0.000 -1.000</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <h3 id="14-2-6-对角矩阵的运行">14-2-6 对角矩阵的运行</h3>
-<p>所谓的对角矩阵，就是类似下面的情况：只有靠近对角线位置上2个相邻的位置有数值，其他位置为0。<br>
-$$<br>
-\left[<br>
-\begin{matrix}<br>
-2 &amp; 3 &amp; 0 &amp; 0 &amp; 0 \<br>
-0 &amp; 2 &amp; 3 &amp; 0 &amp; 0 \<br>
-0 &amp; 0 &amp; 2 &amp; 3 &amp; 0 \<br>
-0 &amp; 0 &amp; 0 &amp; 2 &amp; 3<br>
-\end{matrix}<br>
-\right]<br>
-$$<br>
-利用这个特性来保存矩阵，可以节省很多空间。原本 N×N 大小的矩阵需要 N×N  的数组来保存，不过如果要保存想上例中的二对角矩阵，只要用N×2大小的数组就足够了，因为只需要记录有数值的部分就行了，数字为0的部分不需要另辟空间来做记录。</p>
+<p>所谓的对角矩阵，就是类似下面的情况：只有靠近对角线位置上2个相邻的位置有数值，其他位置为0。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%5B%0A%20%5Cbegin%7Bmatrix%7D%0A%20%20%202%20%26%203%20%26%200%20%26%200%20%26%200%20%5C%5C%0A%20%20%200%20%26%202%20%26%203%20%26%200%20%26%200%20%5C%5C%0A%20%20%200%20%26%200%20%26%202%20%26%203%20%26%200%20%5C%5C%0A%20%20%200%20%26%200%20%26%200%20%26%202%20%26%203%0A%20%20%5Cend%7Bmatrix%7D%0A%20%20%5Cright%5D%0A" /></p><p>利用这个特性来保存矩阵，可以节省很多空间。原本 N×N 大小的矩阵需要 N×N  的数组来保存，不过如果要保存想上例中的二对角矩阵，只要用N×2大小的数组就足够了，因为只需要记录有数值的部分就行了，数字为0的部分不需要另辟空间来做记录。</p>
 <p>使用这个数据结构来操作矩阵时，与前几个小节的方法比较起来当然是会有一些不同，来看看求解联立方程式要如何运行。</p>
 <p>在此同样使用 Gauss-Jordan 法来解联立方程式。事实上，用对角矩阵会比较简单。因为已经知道矩阵哪些低分为0，这些地方在把矩阵对角线化的时候可以不再去理会。简化后的结果，在每一个循环中，只要把矩阵相邻两行来互相加减就够了，不需要把每一行都拿来操作，可以节省大量的运算。</p>
 <figure class="highlight fortran"><table><tr><td class="code"><pre><span class="line"><span class="comment">!三对角阵求解</span></span><br><span class="line"><span class="function"><span class="keyword">program</span></span> main </span><br><span class="line">    <span class="keyword">implicit</span> <span class="keyword">none</span></span><br><span class="line">    <span class="keyword">integer</span>, <span class="keyword">parameter</span> :: Width = <span class="number">3</span></span><br><span class="line">    <span class="keyword">integer</span>, <span class="keyword">parameter</span> :: Row = <span class="number">5</span> <span class="comment">! size of Matrix</span></span><br><span class="line">    <span class="keyword">real</span> :: A(row, width)=<span class="built_in">reshape</span>((/<span class="number">0</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">1</span>,&amp;</span><br><span class="line">                        <span class="number">1</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">2</span>,&amp;</span><br><span class="line">                        <span class="number">2</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">1</span>,<span class="number">0</span>/),(/row,width/))</span><br><span class="line">    <span class="keyword">real</span> :: S(row)=(/<span class="number">3</span>,<span class="number">9</span>,<span class="number">12</span>,<span class="number">10</span>,<span class="number">3</span>/)</span><br><span class="line">    <span class="keyword">real</span> :: ans(row)</span><br><span class="line">    <span class="keyword">integer</span> :: i</span><br><span class="line">    <span class="comment">! equation:</span></span><br><span class="line">    <span class="comment">! a+2b=3</span></span><br><span class="line">    <span class="comment">! 2b+3c+4d=9</span></span><br><span class="line">    <span class="comment">! 3c+4d+5e=12</span></span><br><span class="line">    <span class="comment">! 4d+5e+f=10</span></span><br><span class="line">    <span class="comment">! e+2f=3</span></span><br><span class="line">    <span class="keyword">call</span> Gauss_Jordan(A,S,ANS,row,width)</span><br><span class="line">    <span class="built_in">write</span>(*,*) <span class="string">&#x27;Ans:&#x27;</span></span><br><span class="line">    <span class="keyword">do</span> i=<span class="number">1</span>,row</span><br><span class="line">        <span class="built_in">write</span>(*, <span class="string">&quot;(1x,a1,&#x27;=&#x27;,f8.4)&quot;</span>) <span class="built_in">char</span>(<span class="number">96</span>+i),ANS(i)</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">do</span></span><br><span class="line">    <span class="keyword">stop</span></span><br><span class="line"><span class="keyword">end</span> <span class="function"><span class="keyword">program</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">! Gauss_Jordan 法的函数</span></span><br><span class="line"><span class="function"><span class="keyword">subroutine</span></span> Gauss_Jordan(A,S,ANS,row,width)</span><br><span class="line">    <span class="keyword">implicit</span> <span class="keyword">none</span></span><br><span class="line">    <span class="keyword">integer</span> :: row, width</span><br><span class="line">    <span class="keyword">real</span> :: A(row, width)</span><br><span class="line">    <span class="keyword">real</span> :: S(row)</span><br><span class="line">    <span class="keyword">real</span> :: ANS(row)</span><br><span class="line">    <span class="keyword">real</span> :: B(row, width)</span><br><span class="line">    <span class="keyword">integer</span> :: i</span><br><span class="line">    </span><br><span class="line">    <span class="comment">! 保存原先的矩阵A及数组S</span></span><br><span class="line">    B=A</span><br><span class="line">    ANS=S</span><br><span class="line">    <span class="comment">! 把B化为对角线矩阵</span></span><br><span class="line">    <span class="keyword">call</span> Upper(B,ANS,row,width) <span class="comment">! 先把B化成上三角矩阵</span></span><br><span class="line">    <span class="keyword">call</span> Lower(B,ANS,row,width) <span class="comment">! 再把B化成下三角矩阵</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">! 求出解</span></span><br><span class="line">    <span class="keyword">do</span> i=<span class="number">1</span>,row</span><br><span class="line">        ANS(i) = ANS(i)/B(i,<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">do</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line"><span class="keyword">end</span> <span class="function"><span class="keyword">subroutine</span></span></span><br><span class="line"><span class="comment">! 求上三角矩阵的子程序</span></span><br><span class="line"><span class="function"><span class="keyword">subroutine</span></span> Upper(M,S,row,width)</span><br><span class="line">    <span class="keyword">implicit</span> <span class="keyword">none</span></span><br><span class="line">    <span class="keyword">integer</span> :: row, width</span><br><span class="line">    <span class="keyword">real</span> :: M(row,width)</span><br><span class="line">    <span class="keyword">real</span> :: S(row)</span><br><span class="line">    <span class="keyword">integer</span> :: i,j</span><br><span class="line">    <span class="keyword">real</span> :: e</span><br><span class="line">    <span class="keyword">do</span> i=<span class="number">1</span>, row-<span class="number">1</span></span><br><span class="line">            j=i+<span class="number">1</span></span><br><span class="line">            e = M(j,<span class="number">1</span>)/M(i,<span class="number">2</span>)</span><br><span class="line">            M(j,<span class="number">1</span>:<span class="number">2</span>) = M(j,<span class="number">1</span>:<span class="number">2</span>)-M(i,<span class="number">2</span>:<span class="number">3</span>)*e</span><br><span class="line">            S(j) = S(j) - S(i)*e <span class="comment">!右手项要随着左手项变化而变化</span></span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">do</span></span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line"><span class="keyword">end</span> <span class="function"><span class="keyword">subroutine</span></span></span><br><span class="line"><span class="comment">!求下三角矩阵的子程序</span></span><br><span class="line"><span class="function"><span class="keyword">subroutine</span></span> Lower(M,S,row,width)</span><br><span class="line">    <span class="keyword">implicit</span> <span class="keyword">none</span></span><br><span class="line">    <span class="keyword">integer</span> :: row, width</span><br><span class="line">    <span class="keyword">real</span> :: M(row,width)</span><br><span class="line">    <span class="keyword">real</span> :: S(row)</span><br><span class="line">    <span class="keyword">integer</span> :: i,j</span><br><span class="line">    <span class="keyword">real</span> :: e</span><br><span class="line">    <span class="keyword">do</span> i=row,<span class="number">2</span>,-<span class="number">1</span></span><br><span class="line">            j=i-<span class="number">1</span></span><br><span class="line">            e = M(j,<span class="number">3</span>)/M(i,<span class="number">2</span>)</span><br><span class="line">            M(j,<span class="number">3</span>) = M(j,<span class="number">3</span>)-M(i,<span class="number">2</span>)*e</span><br><span class="line">            S(j) = S(j) - S(i)*e</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">do</span></span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line"><span class="keyword">end</span> <span class="function"><span class="keyword">subroutine</span></span></span><br></pre></td></tr></table></figure>
@@ -6535,10 +6315,7 @@ pped</p>
 <h1>A</h1>
 <h1>A_inv = solve(A) #solve(A) 即求逆</h1>
 <h1>A_inv</h1>
-<p>A_inv = makeAinv(pped)$Ainv#可直接求A逆<br>
-A_inv<br>
-#结果为list<br>
-#$Ainv为稀疏矩阵<br>
+<p>A_inv = makeAinv(pped)<img src="https://math.now.sh?inline=Ainv%23%E5%8F%AF%E7%9B%B4%E6%8E%A5%E6%B1%82A%E9%80%86%0AA_inv%0A%23%E7%BB%93%E6%9E%9C%E4%B8%BAlist%0A%23" style="display:inline-block;margin: 0;"/>Ainv为稀疏矩阵<br>
 #$listAinv为三列的格式<br>
 #f为近交系数，不计算<br>
 #logDet the log determinant of the A matrix<br>
@@ -6558,8 +6335,8 @@ A_inv_new &lt;- A_inv[new_rowname,new_rowname]<br>
 A_inv_new # 现在与Z_all就一致了。</p>
 <p>str(dat)<br>
 colnames(dat) &lt;- c(‘id’,‘sex’,‘wwg’) #个体号-性别-初生重<br>
-dat$id &lt;- as.factor(dat$id)<br>
-dat$sex &lt;- as.factor(dat$sex)<br>
+dat<img src="https://math.now.sh?inline=id%20%3C-%20as.factor%28dat" style="display:inline-block;margin: 0;"/>id)<br>
+dat<img src="https://math.now.sh?inline=sex%20%3C-%20as.factor%28dat" style="display:inline-block;margin: 0;"/>sex)<br>
 X &lt;- model.matrix(~sex-1,data = dat) #和书上一致<br>
 Z_phe &lt;- model.matrix(~id-1,data = dat) # 5*5的单位阵，一致<br>
 zero_matrix &lt;- matrix(rep(0,15),nrow = 5)<br>
