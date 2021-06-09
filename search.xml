@@ -119,6 +119,48 @@
 ]]></content>
   </entry>
   <entry>
+    <title>Bias Variance Trade-Off</title>
+    <url>/posts/8a41a048/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>模型创建的思想，很大程度上取决于 <em><strong>Bias-Variance Trade-off</strong></em> 。</p>
+<span id="more"></span>
+<h1>资料</h1>
+<p><a href="https://www.statlearning.com/">An Introduction to Statistical Learning</a>，下文简称 <strong>ISL</strong></p>
+<p><a href="https://zhuanlan.zhihu.com/p/38853908">https://zhuanlan.zhihu.com/p/38853908</a></p>
+<p><a href="http://scott.fortmann-roe.com/docs/BiasVariance.html">http://scott.fortmann-roe.com/docs/BiasVariance.html</a></p>
+<h1>Split Test Error</h1>
+<p>对于一个特定的 x<sub>0</sub> 值，它的 test MSE 期望值可以拆分为三部分：方差(the variance) , 偏差（bias）平方 ，和随机残差。</p>
+<p style=""><img src="https://math.now.sh?from=E%5Cleft%28y_%7B0%7D-%5Chat%7Bf%7D%5Cleft(x_%7B0%7D%5Cright%29%5Cright)%5E%7B2%7D%3D%5Coperatorname%7BVar%7D%5Cleft(%5Chat%7Bf%7D%5Cleft(x_%7B0%7D%5Cright)%5Cright)%2B%5Cleft%5B%5Coperatorname%7BBias%7D%5Cleft(%5Chat%7Bf%7D%5Cleft(x_%7B0%7D%5Cright)%5Cright)%5Cright%5D%5E%7B2%7D%2B%5Coperatorname%7BVar%7D(%5Cepsilon)%0A" /></p><p>test MSE 期望值的意思是，如果我们不停地从很多的训练集中拟合模型，然后每次都计算 x0 的 test MSE 的均值。</p>
+<p>上面的公式中，随机残差项是不可减少的，为了最小化 <em>expected test error</em> ，我们需要同时做到 <em>low variance</em> 和 <em>low bias</em> 。</p>
+<h1>Variance</h1>
+<p>方差指的是如果用了一个不一样的 training set ，拟合出来的模型的变化幅度。因为使用的 training set 不同，拟合出来的模型参数肯定不同，但是理想情况下差距不会很大。</p>
+<h1>Bias</h1>
+<blockquote>
+<p><strong>Bias</strong>是用<strong>所有可能的训练数据集</strong>训练出的<strong>所有模型</strong>的输出的<strong>平均值</strong>与<strong>真实模型</strong>的输出值之间的差异。</p>
+</blockquote>
+<p>就是说，如果我们不停地拟合模型，所有拟合模型的均值和真实模型的差异。公式如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Bbias%7D%28%5Cboldsymbol%7Bx%7D%29%3D%5Cbar%7Bf%7D(%5Cboldsymbol%7Bx%7D)-y%0A" /></p><p>举个例子，如果我们用 1000 个 training set 拟合 1000 次线性模型。对这1000次模型的参数求均值，得到一个最终的模型，然后预测 test data 中 x 的预测值，减去真值，这个差值就可以视为 bias。</p>
+<p>这1000次拟合的模型参数的方差，就是方差 variance 。</p>
+<h1>用图形来解释</h1>
+<p><img src="1.png" alt="1"></p>
+<p>假设红色的靶心区域是学习算法完美的正确预测值，蓝色点为训练数据集所训练出的模型对样本的预测值，当我们从靶心逐渐往外移动时，预测效果逐渐变差。</p>
+<p>bias 就是预测值均值与靶心的举例，variance 就是预测值的离散程度。</p>
+<p>上图的个人解释：左上图是理想情况，右上图是过拟合（模型过于复杂，比如采用KNN算法），左下图是欠拟合（比如采用线性模型预测非线性关系），右下图是完全失败的模型（都很差）。</p>
+<h1>Variance-Bias Trade-off</h1>
+<p>模型越复杂，bias 会越来越小，variance 会越来越大。但是模型过于复杂，可能发生过拟合现象（bias 很小，但是 variance，拟合出来的模型对于其他数据的预测效果很差）。</p>
+<p>然后总的 test error 会随着模型复杂度呈现一个 U 字型的变化。这就说明选择一个合适复杂度的模型很重要。</p>
+<p><img src="2.png" alt="1"></p>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>线性模型</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>理论学习</tag>
+        <tag>线性模型</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>线性模型选择与正则化</title>
     <url>/posts/eb9174d6/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>ISL 真是好书！</p>
