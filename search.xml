@@ -119,6 +119,142 @@
 ]]></content>
   </entry>
   <entry>
+    <title>Generalized Additive Models</title>
+    <url>/posts/c49e8948/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>ISL 真是好书！</p>
+<span id="more"></span> 
+<h1>资料</h1>
+<p><a href="https://www.statlearning.com/">An Introduction to Statistical Learning</a>，下文简称 <strong>ISL</strong></p>
+<h1>概述</h1>
+<p>标准的线性回归模型，最大的问题在于线性的假设。实际情况中，这个假设可能不被满足。</p>
+<p>这一章节是描述非线性关系的模型。</p>
+<h1>Polynomial Regression</h1>
+<p>多项式回归模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20x_%7Bi%7D%2B%5Cbeta_%7B2%7D%20x_%7Bi%7D%5E%7B2%7D%2B%5Cbeta_%7B3%7D%20x_%7Bi%7D%5E%7B3%7D%2B%5Cldots%2B%5Cbeta_%7Bd%7D%20x_%7Bi%7D%5E%7Bd%7D%2B%5Cepsilon_%7Bi%7D%0A" /></p><p>一半来说，最高项一般设置为3或4，因为如果项数太高，那么可能会得到非常奇怪的图形。</p>
+<p>下图中的左图为项数为4的多项式回归。</p>
+<p><img src="1.png" alt="1"></p>
+<p>虚线为两个标准误差曲线，或者说置信区间的上下限。这是如何得到的呢？假设我们计算得到某个点 x<sub>0</sub> 的预测值，如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7Bf%7D%5Cleft%28x_%7B0%7D%5Cright%29%3D%5Chat%7B%5Cbeta%7D_%7B0%7D%2B%5Chat%7B%5Cbeta%7D_%7B1%7D%20x_%7B0%7D%2B%5Chat%7B%5Cbeta%7D_%7B2%7D%20x_%7B0%7D%5E%7B2%7D%2B%5Chat%7B%5Cbeta%7D_%7B3%7D%20x_%7B0%7D%5E%7B3%7D%2B%5Chat%7B%5Cbeta%7D_%7B4%7D%20x_%7B0%7D%5E%7B4%7D%20%5Ctext%20%7B%20.%20%7D%0A" /></p><p>那么这个点的预测值的方差等于多少呢？我们通过最小二乘法可以得到所有估计系数的估计方差，我们可以根据这个计算预测值的估计方差，计算方式如下图（ISL 的引用，没说清楚，没有证明）。</p>
+<p><img src="2.png" alt="1"></p>
+<p>我们可以通过这种方法以<strong>逐点</strong>地方式得到所有点的预测方差（开方即可得到标准误估计值），所有点的预测值 + 两倍的标准误即为上方的误差曲线，所有点的预测值 - 两倍的标准误即为下方的误差曲线（2倍的标准误范围正好是95%的置信区间，实际是1.96，差不多）。</p>
+<p>从上面左图可以看出，Wage 这个性状似乎分成了截然分开的两个群体，一部分人的薪资超过了 250,000 美元/年；然后其他人就是低收入群体。因此，Wage 其实可以变成一个二分类的分类变量。这里我们用多项式逻辑回归用于预测薪资大于 250,000 美元/年 的概率。预测结果见上面右图，我们可以看到右侧的置信区间非常大。虽然这里总的样本量很大（n=3000），但是这里其实只有 79个 高收入者，这导致系数估计的方差很高，最终预测结果的置信区间也很大。</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7BPr%7D%5Cleft%28y_%7Bi%7D%3E250%20%5Cmid%20x_%7Bi%7D%5Cright%29%3D%5Cfrac%7B%5Cexp%20%5Cleft(%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20x_%7Bi%7D%2B%5Cbeta_%7B2%7D%20x_%7Bi%7D%5E%7B2%7D%2B%5Cldots%2B%5Cbeta_%7Bd%7D%20x_%7Bi%7D%5E%7Bd%7D%5Cright)%7D%7B1%2B%5Cexp%20%5Cleft(%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20x_%7Bi%7D%2B%5Cbeta_%7B2%7D%20x_%7Bi%7D%5E%7B2%7D%2B%5Cldots%2B%5Cbeta_%7Bd%7D%20x_%7Bi%7D%5E%7Bd%7D%5Cright)%7D%0A" /></p><h1>Step Functions</h1>
+<p>上面的多项式回归是对整个定义域进行拟合，我们可以用 <em>step functions</em> 来把整个定义域分段，对于每一段进行单独的估计，这就将一个连续自变量转变成了一个 <em>ordered categorical variable</em> 。</p>
+<p>更详细地说，我们会在整个定义域创建 K 个断点 (c<sub>1</sub> , c<sub>2</sub> , …… ， c<sub>k</sub>) ，创建 K+1 个新的变量。其中 <code>I()</code> 函数满足条件则为1，不满足条件则为0，因此这 K+1 个新变量中永远只有一个变量的值为1，其他均为0，一般也称为 <strong>哑变量</strong>。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AC_%7B0%7D%28X%29%20%26%3DI%5Cleft(X%3Cc_%7B1%7D%5Cright)%20%5C%5C%0AC_%7B1%7D(X)%20%26%3DI%5Cleft(c_%7B1%7D%20%5Cleq%20X%3Cc_%7B2%7D%5Cright)%2C%20%5C%5C%0AC_%7B2%7D(X)%20%26%3DI%5Cleft(c_%7B2%7D%20%5Cleq%20X%3Cc_%7B3%7D%5Cright)%2C%20%5C%5C%0A%26%20%5Cvdots%20%5C%5C%0AC_%7BK-1%7D(X)%20%26%3DI%5Cleft(c_%7BK-1%7D%20%5Cleq%20X%3Cc_%7BK%7D%5Cright)%2C%20%5C%5C%0AC_%7BK%7D(X)%20%26%3DI%5Cleft(c_%7BK%7D%20%5Cleq%20X%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>我们可以用后面 k个哑变量作为预测因子，拟合回归模型</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20C_%7B1%7D%5Cleft%28x_%7Bi%7D%5Cright%29%2B%5Cbeta_%7B2%7D%20C_%7B2%7D%5Cleft(x_%7Bi%7D%5Cright)%2B%5Cldots%2B%5Cbeta_%7BK%7D%20C_%7BK%7D%5Cleft(x_%7Bi%7D%5Cright)%2B%5Cepsilon_%7Bi%7D%0A" /></p><p>对于某个特定的自变量 x，这k个哑变量最多只有一个不为0。比如如果 x &lt; c<sub>1</sub> ，那么所有的预测因子全是0，因此预测值就是 β<sub>0</sub> 。其他 x 值依次类推。</p>
+<p>同样，我们可以使用 <em>step functions</em> 进行逻辑回归</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7BPr%7D%5Cleft%28y_%7Bi%7D%3E250%20%5Cmid%20x_%7Bi%7D%5Cright%29%3D%5Cfrac%7B%5Cexp%20%5Cleft(%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20C_%7B1%7D%5Cleft(x_%7Bi%7D%5Cright)%2B%5Cldots%2B%5Cbeta_%7BK%7D%20C_%7BK%7D%5Cleft(x_%7Bi%7D%5Cright)%5Cright)%7D%7B1%2B%5Cexp%20%5Cleft(%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20C_%7B1%7D%5Cleft(x_%7Bi%7D%5Cright)%2B%5Cldots%2B%5Cbeta_%7BK%7D%20C_%7BK%7D%5Cleft(x_%7Bi%7D%5Cright)%5Cright)%7D%0A" /></p><p>下图左边是线性回归的 <em>step functions</em> 效果，右边为逻辑回归的效果。</p>
+<p><img src="3.png" alt="1"></p>
+<p>**不幸的是，除非因变量X本身存在自然断点，<em>step function</em> 效果一般不好。**举例而言，上图左图一开始的区间没有体现出wage 随 age 递增的趋势。</p>
+<h1>Basis Functions</h1>
+<p>多项式回归与分段回归其实都是 <em>basis function</em> 方法的特例。<em>basis function</em> 的思路是通过一些熟悉的函数/转换应用到自变量 X 上：b<sub>1</sub>(X), b<sub>2</sub>(X), …… ，b<sub>k</sub>(X) 。</p>
+<p>因此，我们用下面的模型，替换正常的包含X变量的线性模型：</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20b_%7B1%7D%5Cleft%28x_%7Bi%7D%5Cright%29%2B%5Cbeta_%7B2%7D%20b_%7B2%7D%5Cleft(x_%7Bi%7D%5Cright)%2B%5Cbeta_%7B3%7D%20b_%7B3%7D%5Cleft(x_%7Bi%7D%5Cright)%2B%5Cldots%2B%5Cbeta_%7BK%7D%20b_%7BK%7D%5Cleft(x_%7Bi%7D%5Cright)%2B%5Cepsilon_%7Bi%7D%0A" /></p><p>这里的 <em>basis function</em> 除了多项式和分段函数外，还有其他选择，比如下面的 <em>regression splines</em> 。</p>
+<h1>Regression Splines</h1>
+<h2 id="Piecewise-Polynomials">Piecewise Polynomials</h2>
+<p>分段多项式回归对不同的自变量X的区段进行拟合。例如一个分段三次项回归的模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20x_%7Bi%7D%2B%5Cbeta_%7B2%7D%20x_%7Bi%7D%5E%7B2%7D%2B%5Cbeta_%7B3%7D%20x_%7Bi%7D%5E%7B3%7D%2B%5Cepsilon_%7Bi%7D%0A" /></p><p>这里不同区段会拟合得到不同的 β<sub>0</sub> 等系数。系数发生改变的点称为 <em>knots</em>。例如只有一个断点 c 的分段多项式回归模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%0A%5Cbeta_%7B01%7D%2B%5Cbeta_%7B11%7D%20x_%7Bi%7D%2B%5Cbeta_%7B21%7D%20x_%7Bi%7D%5E%7B2%7D%2B%5Cbeta_%7B31%7D%20x_%7Bi%7D%5E%7B3%7D%2B%5Cepsilon_%7Bi%7D%20%26%20%5Ctext%20%7B%20if%20%7D%20x_%7Bi%7D%3Cc%20%5C%5C%0A%5Cbeta_%7B02%7D%2B%5Cbeta_%7B12%7D%20x_%7Bi%7D%2B%5Cbeta_%7B22%7D%20x_%7Bi%7D%5E%7B2%7D%2B%5Cbeta_%7B32%7D%20x_%7Bi%7D%5E%7B3%7D%2B%5Cepsilon_%7Bi%7D%20%26%20%5Ctext%20%7B%20if%20%7D%20x_%7Bi%7D%20%5Cgeq%20c%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>如果 <em>knots</em> 很多，整个模型的 <em>flexibility</em> 会很高，这时候对于每个区段，我们可能不用多项式回归，而是直接用线性回归。例如，上面的 <em>step function</em>s 其实就是这里 自由度为 0 的一个特例。</p>
+<p>下图 7.3 中左上角的图就是一个 <em>knot</em> 的分段三次项回归结果，我们看到有一个问题，整个函数不是连续的（两个分段的模型在断点的预测值不同）。由于每个分段的模型有 4 个参数，因此这里我们整个模型有8个参数，自由度为 8 。</p>
+<p><img src="4.png" alt="1"></p>
+<h2 id="Constrains-and-Splines">Constrains and Splines</h2>
+<p>为了避免上面这个问题，我们可以加一个限制条件，就是最终拟合的函数必须是连续的，即两个分段函数在断点的值是相同的。上图 7.3 右上方就是加了这个限制条件的结果，效果更好了，但是总的函数在断点处呈现 v 字型，这看上去不自然。在左下图中又加了两个限制条件，断点两侧两个函数的<strong>一级导数</strong>和<strong>二级导数</strong>是连续的，因此整个函数更加 <em>smooth</em> 。我们每增加一个限制条件，就会减少一个自由度。因此左下方拟合函数的自由度为 5 （3个限制条件，8-3=5），一般也称为 <em><strong>cubic spline</strong></em> 。一般来说，K 个断点的 <em>cubic spline</em> 的总体自由度为 4+K 。</p>
+<p>图 7.3 的右下图是 <em>linear spline</em> 的结果，它在断点是连续的。一般来说 <em>degree-d spline</em> 定义为分段的 自由度为d 的 多项式回归（最高项为 d），并且在每个断点追到到 d-1 自由度的导数都是连续的。因此，<em>linear spline</em> 只要求断点是连续的。</p>
+<h2 id="The-Spline-Basis-Representation">The Spline Basis Representation</h2>
+<p>上面讨论的 <em>regression splines</em> 看上去有点复杂，我们还是可以通过 <em>basis functions</em> 来带入模型，将上面的 <em>cubic splines</em> 表示为</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20b_%7B1%7D%5Cleft%28x_%7Bi%7D%5Cright%29%2B%5Cbeta_%7B2%7D%20b_%7B2%7D%5Cleft(x_%7Bi%7D%5Cright)%2B%5Ccdots%2B%5Cbeta_%7BK%2B3%7D%20b_%7BK%2B3%7D%5Cleft(x_%7Bi%7D%5Cright)%2B%5Cepsilon_%7Bi%7D%2C%0A" /></p><p>这里可以有多种 <em>basis functions</em> 来描述 <em>cubic splines</em> ，最直接的方法就是从基础的三次型多项式出发 - x, x<sup>2</sup>, x<sup>3</sup>， 然后对于每个 <em>knot</em> 增加一个 <em>truncated power basis function</em> 。</p>
+<p><em>truncated power basis function</em> 定义如下：</p>
+<p style=""><img src="https://math.now.sh?from=h%28x%2C%20%5Cxi%29%3D(x-%5Cxi)_%7B%2B%7D%5E%7B3%7D%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcl%7D%0A(x-%5Cxi)%5E%7B3%7D%20%26%20%5Ctext%20%7B%20if%20%7D%20x%3E%5Cxi%20%5C%5C%0A0%20%26%20%5Ctext%20%7B%20otherwise%20%7D%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>这里的 ξ 就是 knot 。新增这一项只会导致三级导数不连续（一级导数和二级导数左右两侧都是0，而三级导数左侧是0，右侧是6）</p>
+<p>换句话说，对于一个有 K 个 <em>knots</em> 的 <em>cubic spline</em> ，我们的回归模型中除了截距外，还有 K+3 个自变量，分别为</p>
+<p style=""><img src="https://math.now.sh?from=X%2CX%5E%7B2%7D%2CX%5E%7B3%7D%2C%20h%5Cleft%28X%2C%20%5Cxi_%7B1%7D%5Cright%29%2C%20h%5Cleft(X%2C%20%5Cxi_%7B2%7D%5Cright)%E2%80%A6%E2%80%A6%20h%5Cleft(X%2C%20%5Cxi_%7Bk%7D%5Cright)%2C%0A" /></p><p>因此，总共需要估计的参数是 K+4 个（加截距），因此总的自由度为 K+4 。</p>
+<p>不幸地是，<em>splines</em> 针对外围的预测值（X 值很小或很大）会有很高的 variance 。下图显示了 3 个 <em>knots</em> 的结果，我们可以看到两个边界的置信区间明显更大。</p>
+<p>下图中的 <em>natural spline</em> 是含有额外的 <em>boundary constraints</em> （函数要求在 boundary 处是线性的（boundary 指比最小的knot还要小，或比最大的 knot 还要大的区域））的 regression spline 。 <em>natural spline</em> 显示为红线。</p>
+<p><img src="5.png" alt="1"></p>
+<h2 id="Choosing-the-Number-and-Locations-of-the-Knots">Choosing the Number and Locations of the Knots</h2>
+<p>当我们执行 spline 算法时，我们应该在哪里安置 <em>knots</em> 呢？一般来说，变化大的区域安放的 <em>knots</em> 更多，变化小的区域放得少比较合理，但是实际情况一般是，先获取需要安放的 <em>knots</em> 数目，然后按照自变量的百分位点进行选取 <em>knots</em> 。</p>
+<p>下图展示了一个例子，使用 <em>natural cubic spline</em> 进行拟合数据，<em>knots</em> 的位置在 age 自变量的 25th, 50th, 75th 分位点。这里总共有4个自由度[^1]。</p>
+<p><img src="6.png" alt="1"></p>
+<p>那么我们需要使用多少个 knots 呢？或者说我们的 spline 中的自由度应该是多少呢？一个选项是变量不同数目的 knots，然后看哪一种生成的拟合曲线最好。一个更客观的方法是使用交叉验证，计算所有test sets 的 test RSS 均值。下图显示为10倍交叉验证的结果，左边为 <em>natural splines</em> ，右图为 <em>cubic splines</em> ，可以看到这两种方法结果差不多。</p>
+<p><img src="7.png" alt="1"></p>
+<p>[^1]: 这里包括两个边界点，其实总共是 5 个 <em>knots</em> 。正常的 cubic spline 的自由度为 5+4 =9，但是由于 natural cubic spline 在两个边界处有线性限制，因此自由度为 9-4 = 5。下面怎么从5个自由度视为4个自由度没看懂，原话为：Since this includes a constant, which is absorbed in the intercept,we count it as four degrees of freedom.</p>
+<h2 id="Comparison-to-Polynomial-Regression">Comparison to Polynomial Regression</h2>
+<p>Regression spines 通常效果比普通的多项式回归更好。因为多项式回归是通过增加最高项的次数来增加模型的复杂性（例如，X<sup>15</sup>），但是 splines 则是通过增加 <em>knots</em> 的数目来实现这一点，一般来说 splines 结果更稳定。下图为自由度同样为15 的 <em>natural cubic spline</em> 和 多项式回归的结果，可以看出多项式回归在边界处的结果比较诡异。</p>
+<p><img src="8.png" alt="1"></p>
+<h1>Smoothing Splines</h1>
+<p>上面提到的 <em>regression splines</em> 是通过创建 <em>knots</em> 的方式，通过 <em>basis functions</em> ，最终可以应用最小二乘回归来计算系数。这里介绍一种不一样的创建曲线的方式。</p>
+<p>在对一个数据集拟合成一条平滑曲线的过程中，我们实际想要做的是，找到某个函数，比如说是 g(x)，可以有效地拟合训练集的数据：即 RSS 很小。但是存在一个问题在于，如果对于 g(x) 不加任何限制，我们最终一定可以选择一个 g(x) 函数，使得RSS 等于 0 ，这就会出现 overfitting ，这个函数也会非常地 <em>flexible</em> 。</p>
+<p>所以，我们真正想要地函数是，既满足 RSS 很小，同时很<strong>平滑</strong>（<em>smooth</em>）。</p>
+<p>那么我们如何确保 g() 函数是平滑的呢？这里有很多方法可以实现这一点。一个自然的方法是找到一个 g() 函数，使得下式最小：</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28y_%7Bi%7D-g%5Cleft(x_%7Bi%7D%5Cright%29%5Cright)%5E%7B2%7D%2B%5Clambda%20%5Cint%20g%5E%7B%5Cprime%20%5Cprime%7D(t)%5E%7B2%7D%20d%20t%0A" /></p><p>这里 λ 是一个非负的调整参数。满足这个条件的 g() 函数一般称为 <em>smoothing spline</em> 。</p>
+<p>这个式子其实是 “Loss + Penalty&quot; 的形式，就和 lasso/ 岭回归一样。这里的惩罚项时二阶导数的积分。粗略地说，一个函数的二阶导数衡量了函数的 <em>roughness</em> ：二阶导数越大， g(t) 在接近 t 的波动越大，反之则相反（直线的二阶导数是0，因此认为是 <em>perfectly smooth</em> ）。惩罚项是二阶导数的积分，也就是整个定义域内一阶导数的总的变化大小。如果 g() 函数非常平滑，那么这个惩罚项会很小，反而如果 g() 函数是 <em>jumpy  and variable</em> , 那么 g’(t) 变化会很显著，惩罚项会很大。</p>
+<p>当 λ = 0，那么就没有惩罚效应，因此 g() 函数会非常曲折，可以完美解释 training set 中所有的观测值。如果 λ → ∞ ，那么 g() 函数会非常平滑，就是一条直线，实际上这时候 g() 函数就是最小二乘回归直线。</p>
+<p>通过这种方法得到的 g(x) 函数有下面的特性：它是分段三项式回归，其中的 knots 式所有的 x 值 (x<sub>1</sub>, ……, x<sub>n</sub>)，而且每个 knot 的一阶导数和二阶导数都是连续的。另外，g(x) 是一个 <em>natural cubic spline</em> ，但是这里的 <em>natural</em> 是一种 <em>shrunken version</em> ，这里通过调整 λ 值来控制 shrinkage 的水平。</p>
+<h2 id="Choosing-the-Smoothing-Parameter-λ">Choosing the Smoothing Parameter λ</h2>
+<p>由于这里得到的曲线的 knots 是所有的数据点。因此这里不需要考虑挑 <em>knots</em> 的问题，只需要考虑选一个合适的 λ 值。我们很容易想到的方法就是交叉验证。结果证明<strong>留一法</strong>交叉验证（LOOCV）在这里的计算效率很高，就和只拟合一次模型的计算量差不多大，使用公式如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7BRSS%7D_%7Bc%20v%7D%28%5Clambda%29%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(y_%7Bi%7D-%5Chat%7Bg%7D_%7B%5Clambda%7D%5E%7B(-i)%7D%5Cleft(x_%7Bi%7D%5Cright)%5Cright)%5E%7B2%7D%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%5B%5Cfrac%7By_%7Bi%7D-%5Chat%7Bg%7D_%7B%5Clambda%7D%5Cleft(x_%7Bi%7D%5Cright)%7D%7B1-%5Cleft%5C%7B%5Cmathbf%7BS%7D_%7B%5Clambda%7D%5Cright%5C%7D_%7Bi%20i%7D%7D%5Cright%5D%5E%7B2%7D%0A" /></p><p>这里其实是用所有数据拟合模型的预测值代替了留一法拟合模型的预测值，因此不再需要拟合 n 次模型。前面也有提到了最小二乘回归的留一法也有一个类似的公式，如下（分母多了 leverage）。这可以用于 <em>regression splines</em> 中。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCV%7D_%7B%28n%29%7D%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(%5Cfrac%7By_%7Bi%7D-%5Chat%7By%7D_%7Bi%7D%7D%7B1-h_%7Bi%7D%7D%5Cright)%5E%7B2%7D%0A" /></p><p style=""><img src="https://math.now.sh?from=h_%7Bi%7D%3D%5Cfrac%7B1%7D%7Bn%7D%2B%5Cfrac%7B%5Cleft%28x_%7Bi%7D-%5Cbar%7Bx%7D%5Cright%29%5E%7B2%7D%7D%7B%5Csum_%7Bi%5E%7B%5Cprime%7D%3D1%7D%5E%7Bn%7D%5Cleft(x_%7Bi%5E%7B%5Cprime%7D%7D-%5Cbar%7Bx%7D%5Cright)%5E%7B2%7D%7D%0A" /></p><p>下图显示了 <em>smoothing spline</em> 的结果：红线的自由度为16 的结果，蓝线为 LOOCV 挑出的最佳自由度（6.8）的结果。我们可以从预测结果来看，二者相差不大，但是蓝线更平滑，而且效果差不多时我们一般会使用更简单的模型。</p>
+<p><img src="9.png" alt="1"></p>
+<h1>Local Regression</h1>
+<p><strong>局部线性回归</strong>是另外一种拟合非线性关系的方法，这种方法仅仅是目标值 x<sub>0</sub> 附近的点来拟合模型。下图指出了两个点的拟合情况，其中蓝线为生成这些数据的整数函数，橘色线是局部线性回归得到的函数。</p>
+<p><img src="10.png" alt="1"></p>
+<p>每一个点的拟合过程算法如下。</p>
+<p><img src="11.png" alt="1"></p>
+<p>在第3步中，不同 x 值的权重 K<sub>i0</sub> 都是不一样的。因此，每一个点的加权最小二乘回归模型都是不一样的，因为用到的点和权重都不一样。局部线性回归有时又称为 <em>memory-based</em> procedure ，因为就像 KNN 算法一样，预测每个点时我们都需要用到全部训练集的数据。</p>
+<p>在执行局部线性回归的过程中，我们需要做很多决定，比如如何定义权重函数 K ？是拟合成直线、常数还是二次项回归？还有一个最重要的，如何决定 <em>span</em> s ?  这里 span 的作用就像 smoothing splines 中的 λ 值，它控制着拟合的 <em>flexibility</em> ，这里我们同样可以用交叉验证来决定 s 的大小。下图展示了 s = 0.7 和 0.2 的拟合效果，我们可以看到 s = 0.7 拟合的曲线更加平滑。</p>
+<p><img src="12.png" alt="1"></p>
+<p>局部线性回归的思路可以推广到别的地方。比如在有多个自变量的数据集中，一个有用的思路是拟合一个多重线性回归模型，其中一些变量是全局的，一些则是局部的。</p>
+<h1>Generalized Additive Models</h1>
+<p>在前面提到的方法中，我们都是针对一个自变量 X 对 因变量 Y 的预测，可以视为简单线性回归的拓展。这里我们探索多个预测因子的非线性问题，可以视为多重线性回归的拓展。</p>
+<p><em>Generalized additive models</em> (GAMs) 扩展了标准的线性模型，可以允许非线性函数，但是仍保留 <em>additivity</em> 。就像线性模型一样，GAMs 既可以用于数量性状的反应变量，也可以用于质量性状的反应变量。</p>
+<h2 id="GAMs-for-Regression-Porblems">GAMs for Regression Porblems</h2>
+<p>一个标准的多重线性模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20x_%7Bi%201%7D%2B%5Cbeta_%7B2%7D%20x_%7Bi%202%7D%2B%5Ccdots%2B%5Cbeta_%7Bp%7D%20x_%7Bi%20p%7D%2B%5Cepsilon_%7Bi%7D%0A" /></p><p>为了可以允许自变量之间，自变量与因变量之间的非线性关系，我们可以将这里的 β<sub>j</sub>x<sub>ij</sub> 替换为一个非线性函数 <em>f<sub>j</sub></em> (x<sub>ij</sub>) 。即将模型改为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Ay_%7Bi%7D%20%26%3D%5Cbeta_%7B0%7D%2B%5Csum_%7Bj%3D1%7D%5E%7Bp%7D%20f_%7Bj%7D%5Cleft%28x_%7Bi%20j%7D%5Cright%29%2B%5Cepsilon_%7Bi%7D%20%5C%5C%0A%26%3D%5Cbeta_%7B0%7D%2Bf_%7B1%7D%5Cleft(x_%7Bi%201%7D%5Cright)%2Bf_%7B2%7D%5Cleft(x_%7Bi%202%7D%5Cright)%2B%5Ccdots%2Bf_%7Bp%7D%5Cleft(x_%7Bi%20p%7D%5Cright)%2B%5Cepsilon_%7Bi%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>这个其中一个 GAM 的例子，这种模型称为一个<strong>加性模型</strong>的原因是因为，我们对每个 X<sub>j</sub> 分别计算一个单独 的 f<sub>j</sub>  值，然后把所有自变量的影响累加到一块。</p>
+<p>在上面的部分中，我们讨论了很多拟合一个自变量的方法。GAMs 的优点在于我们可以利用上面这些方法来创建 <em>blocks</em> 来拟合一个加性模型。但是这个过程会非常繁琐。例如，以 <em>natural splines</em> 为例，拟合模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctext%20%7B%20wage%20%7D%3D%5Cbeta_%7B0%7D%2Bf_%7B1%7D%28%5Ctext%20%7B%20year%20%7D%29%2Bf_%7B2%7D(%5Ctext%20%7B%20age%20%7D)%2Bf_%7B3%7D(%5Ctext%20%7B%20education%20%7D)%2B%5Cepsilon%0A" /></p><p>这里，year 和 age 是连续变量，而 education 是分类变量（总共5个水平）。我们对前两个性状使用 <em>natural splines</em> 方法；我们对第三个变量的每个水平估计为一个单独的常数，即采用哑变量。</p>
+<p>下图体现了使用最小二乘方法拟合模型的结果，因为 <em>natural splines</em> 可以用一系列 <em>basis functions</em> 来构建。因此整个模型是基于 <em>spline basis functions</em> 和 <em>dummy variables</em> 的 回归模型。左图表示<strong>如果固定 age 和 education</strong>,  wage 倾向于随着 year 的增加而增加。中间的图表示，<strong>如果固定education 和 year</strong>，wage 会随着age 先增加，后降低。右图表示，<strong>如果固定 year 和 age</strong>, wage 会随着学历的提高而提高。</p>
+<p><img src="13.png" alt="1"></p>
+<p>下图中 f<sub>1</sub> 和 f<sub>2</sub> 采用了 <em>smoothing splines</em> 方法。这种情况下更加复杂，因为  <em>smoothing splines</em> 方法无法采用最小二乘方法。但是，像 R 中的 gam() 函数可以用  <em>smoothing splines</em>  方法来拟合 GAMs 。方法就是不停预测某个特征的参数时，在先固定其他特征的值的前提下（没太搞懂）。</p>
+<p><img src="14.png" alt="1"></p>
+<p>这个效果和上面差不多，一般来说使用  <em>natural splines</em>  和   <em>smoothing splines</em> 的 GAMs 结果差距很小。</p>
+<p>我们也可以不通用 splines 来创建 GAMs 的 blocks ：我们也可以用 local regression , polynomial regression 等方法来创建 。</p>
+<h2 id="Pros-and-Cons-of-GAMs">Pros and Cons of GAMs</h2>
+<p>我们这里总结一下 GAM 的优缺点。</p>
+<p>优点如下：</p>
+<ul>
+<li>GAM 允许拟合反应变量与某个特征的非线性关系。</li>
+<li>因为模型是加性的，因此我们可以检验每一个特征的效应（固定其他特征的值不变），因此很适合 <em>inference</em> （哪些特征有作用，作用的大小）。（例如多重线性回归，多重线性回归得到的某个特征的斜率的解释是，<strong>在其他特征不变的前提下</strong>每新增一个单位的X，反应变量的变化期望值。）</li>
+</ul>
+<p>缺点如下：</p>
+<ul>
+<li>GAMs 的最大缺点在于它只限制为<strong>加性</strong>模型。如果存在很多变量，那么可能会忽视<strong>重要的互作效应</strong>。但是，就是线性回归一样，我们可以手动添加互作效应（X<sub>j</sub> × X<sub>k</sub>）。</li>
+</ul>
+<p>GAMs 是线性模型和完全非参数模型之间的一个很好的过度方法。</p>
+<h2 id="GAMs-for-Classification-Problems">GAMs for Classification Problems</h2>
+<p>GAM 也可以用于反应变量为分类变量的情况。这里处于简化，假设 Y 只取 0 和 1 两个值。设定求 Y = 1 的概率。</p>
+<p style=""><img src="https://math.now.sh?from=p%28x%29%20%3D%20Pr(Y%3D1%7CX)%0A" /></p><p>我们记得逻辑回归的公式如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Clog%20%5Cleft%28%5Cfrac%7Bp(X%29%7D%7B1-p(X)%7D%5Cright)%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20X_%7B1%7D%2B%5Cbeta_%7B2%7D%20X_%7B2%7D%2B%5Ccdots%2B%5Cbeta_%7Bp%7D%20X_%7Bp%7D%0A" /></p><p>我们可以很自然地把它拓展成允许非线性关系的模型</p>
+<p style=""><img src="https://math.now.sh?from=%5Clog%20%5Cleft%28%5Cfrac%7Bp(X%29%7D%7B1-p(X)%7D%5Cright)%3D%5Cbeta_%7B0%7D%2Bf_%7B1%7D%5Cleft(X_%7B1%7D%5Cright)%2Bf_%7B2%7D%5Cleft(X_%7B2%7D%5Cright)%2B%5Ccdots%2Bf_%7Bp%7D%5Cleft(X_%7Bp%7D%5Cright)%0A" /></p><p>这就是逻辑回归的 GAM 格式，它同样有上面提到的回归分析的GAM的优缺点。</p>
+<p>还是用上面的 wage 数据集，我们预测薪资超过 $250,000 的概率。GAM 模型如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Clog%20%5Cleft%28%5Cfrac%7Bp(X%29%7D%7B1-p(X)%7D%5Cright)%3D%5Cbeta_%7B0%7D%2B%5Cbeta_%7B1%7D%20%5Ctimes%20%5Ctext%20%7B%20year%20%7D%2Bf_%7B2%7D(%5Ctext%20%7B%20age%20%7D)%2Bf_%7B3%7D(%5Ctext%20%7B%20education%20%7D)%0A" /></p><p style=""><img src="https://math.now.sh?from=p%28X%29%3D%5Coperatorname%7BPr%7D(%5Ctext%20%7B%20wage%20%7D%3E250%20%5Cmid%20%5Ctext%20%7B%20year%2C%20age%2C%20education%20%7D)%0A" /></p><p>这里 f<sub>2</sub> 采用 <em>smoothing spline</em> 算法，f<sub>3</sub> 采用 step function ，通过创建哑变量实现。结果如下图，右图看上去很奇怪，教育水平&lt; HS 的置信区间特别宽：事实上，这个水平没有值，即没有一个学历低于高中的人的薪水超过  $250,000 。</p>
+<p><img src="15.png" alt="1"></p>
+<p>因此，我们剔除了学历低于高中的个体的数据，然后重新拟合了模型，我们看到 age 和 education 对于成为高收入者的影响很大，而 year 影响很小。（剔除个体对 education 这个变量的作用这么大？）</p>
+<p><img src="16.png" alt="1"></p>
+<h1>R 代码</h1>
+<p>略</p>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>线性模型</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>理论学习</tag>
+        <tag>线性模型</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Bias Variance Trade-Off</title>
     <url>/posts/8a41a048/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>模型创建的思想，很大程度上取决于 <em><strong>Bias-Variance Trade-off</strong></em> 。</p>
