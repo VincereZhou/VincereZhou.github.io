@@ -1,6 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>根据芯片号拆分plink文件的代码实现</title>
+    <url>/posts/506fc784/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>这个代码同样是一个处理基因型数据的<strong>入门级别</strong>的 python 脚本。</p>
+<p>目的是根据芯片号，将一对plink文件，提取相应的基因型个体，拆分为一对或多对子文件。</p>
+<span id="more"></span>
+<h1>使用软件</h1>
+<ul>
+<li>python 3.8 及以上版本</li>
+</ul>
+<h1>输入文件格式</h1>
+<h2 id="plink-文件">plink 文件</h2>
+<p>plink格式的基因型文件包含两个文件：基因型文件（以.ped结尾）和图谱文件（以.map结尾），格式如下：</p>
+<p>（1）基因型文件（ped文件）</p>
+<p>FAM001 IND001 0 0 1 2 A A G G A C  …</p>
+<p>FAM001 IND002 0 0 1  2 A A A G 0 0  …</p>
+<p>……</p>
+<p>格式说明：前6列分别是：家系编号，个体编号，父亲编号，母亲编号，性别，表型值；性别编码规则：‘1’代表雄性，‘2’代表雌性，其他字符代表性别未知；从第7列开始是基因型（只支持二等位位点），每个位点2列，默认‘0’代表基因型缺失。</p>
+<p>（2）图谱文件（MAP文件）</p>
+<p>1 rs234567 0 1237793</p>
+<p>1 rs224534 0 1237697</p>
+<p>1 rs233556  0 1337456</p>
+<p>……</p>
+<p>格式说明：包含4列：染色体编号，标记名称，标记遗传图谱，标记物理位置；对于性染色体和线粒体的‘染色体’编号规则：总的常染色体对数加一 表示X染色体，Y染色体、假常染色体和线粒体在此基础上依次加一。</p>
+<p>更加详细说明见<a href="https://www.cog-genomics.org/plink/1.9/data">官网</a></p>
+<h2 id="拆分文件">拆分文件</h2>
+<p>一列或两列，无标题，以空格或制表符分隔。</p>
+<p>如果是一列，则为一列芯片号，程序会将这一列芯片号的基因型提取出来，生成一对子文件，命名为 <code>split_plink.ped</code> 和 <code>split_plink.map</code></p>
+<p>如果是两列，第一列是芯片号，第二列是芯片分类名（例如品种）。此时程序会将不同分类的芯片提取出来，各生成一对plink文件，plink文件前缀即为分类名。</p>
+<h1>输出文件格式</h1>
+<p>一对或多对 plink 文件。</p>
+<h1>运行代码</h1>
+<p>代码文件见：<a href="https://github.com/VincereZhou/code_backup/blob/master/split_plink.py">split_plink.py</a></p>
+<p>将两个输入文件和本程序放在同一文件夹下，运行命令示范如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">python split_plink.py plink_prefix split_plink.txt</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明</strong>：</p>
+<p><code>plink_prefix</code> : 第一个参数为总的plink前缀</p>
+<p><code>split_plink.txt</code>：第二个参数为拆分文件</p>
+<h1>例子</h1>
+<p>举个简单的例子，方便理解。</p>
+<p>总的plink为 1.ped 1.map。</p>
+<p>1.ped 内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">221 30800300 0 0 0 -9 C C T T T T A A C C</span><br><span class="line">222 30800299 0 0 0 -9 T C T T T T G A T C</span><br><span class="line">223 30800298 0 0 0 -9 T C T T T T A A C C</span><br><span class="line">224 30800297 0 0 0 -9 C C T T T T G A T C</span><br><span class="line">225 30800296 0 0 0 -9 T C T T T T A A C C</span><br></pre></td></tr></table></figure>
+<p>1.map 内容如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span>	<span class="number">1_242598</span>	<span class="number">0</span>	<span class="number">242598</span></span><br><span class="line"><span class="number">1</span>	<span class="number">1_10673082</span>	<span class="number">16.99376</span>	<span class="number">10673082</span></span><br><span class="line"><span class="number">1</span>	<span class="number">1_10723065</span>	<span class="number">17.17102</span>	<span class="number">10723065</span></span><br><span class="line"><span class="number">1</span>	<span class="number">1_11407894</span>	<span class="number">19.59961</span>	<span class="number">11407894</span></span><br><span class="line"><span class="number">1</span>	<span class="number">1_11426075</span>	<span class="number">19.66408</span>	<span class="number">11426075</span></span><br></pre></td></tr></table></figure>
+<p>第一个拆分文件为 split_plink1.py ，内容只有一列，为3个芯片号。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="number">30800300</span></span><br><span class="line"><span class="number">30800299</span></span><br><span class="line"><span class="number">30800298</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>运行命令，提取这三个个体的基因型，第一个参数为 1，为总的plink文件前缀；第二个参数为拆分文件名。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">python split_plink.py <span class="number">1</span> split_plink1.txt</span><br></pre></td></tr></table></figure>
+<p>生成 <code>split_plink.ped</code> 和 <code>split_plink.map</code> ，生成的 <code>split_plink.map</code>文件与<code>1.map</code> 一致，<code> split_plink.ped</code>  文件内容如下，为需要的三个芯片号的基因型。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="number">221</span> <span class="number">30800300</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> -<span class="number">9</span> C C T T T T A A C C</span><br><span class="line"><span class="number">222</span> <span class="number">30800299</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> -<span class="number">9</span> T C T T T T G A T C</span><br><span class="line"><span class="number">223</span> <span class="number">30800298</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> -<span class="number">9</span> T C T T T T A A C C</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>第二个拆分文件为 split_plink2.py ，内容为两列，第二列模拟为 3 个物种，分别命名为 DD, LL,  YY</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="number">30800300</span>	DD</span><br><span class="line"><span class="number">30800299</span>	DD</span><br><span class="line"><span class="number">30800298</span>	LL</span><br><span class="line"><span class="number">30800297</span>	YY</span><br><span class="line"><span class="number">30800296</span>	YY</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>运行命令，提取这三个个体的基因型，第一个参数为 1，为总的plink文件前缀；第二个参数为拆分文件名。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">python split_plink.py <span class="number">1</span> split_plink2.txt</span><br></pre></td></tr></table></figure>
+<p>生成了三对 plink 文件，DD.ped/map ，LL.ped/map ,  YY.ped/map ，三个map 文件均与 <code>1.map</code> 一致。三个 ped 文件内容如下：</p>
+<p>DD.ped 内容为</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="number">221</span> <span class="number">30800300</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> -<span class="number">9</span> C C T T T T A A C C</span><br><span class="line"><span class="number">222</span> <span class="number">30800299</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> -<span class="number">9</span> T C T T T T G A T C</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>LL.ped 内容为</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">223 30800298 0 0 0 -9 T C T T T T A A C C</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>YY.ped 内容为</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="number">224</span> <span class="number">30800297</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> -<span class="number">9</span> C C T T T T G A T C</span><br><span class="line"><span class="number">225</span> <span class="number">30800296</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> -<span class="number">9</span> T C T T T T A A C C</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>实现了将不同分类拆分为不同plink文件的需求。</p>
+<h1>代码说明</h1>
+<h2 id="注释说明">注释说明</h2>
+<p>首先是两行注释，第一句以<code>#!</code>开头，后面接着的是我在linux系统中安装的python路径。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/mnt/data/zhouziwen/bin/miniConda/miniconda3/bin/python</span></span><br></pre></td></tr></table></figure>
+<p>添加这句话的目的是指定解释器，就是说用什么去执行这个脚本。添加这个命令后，在给这个程序添加<strong>执行权限</strong>后（如何添加执行权限见<a href="https://www.runoob.com/linux/linux-comm-chmod.html">linux 的 chmod命令</a> ），可以将这个脚本视为正常的shell脚本执行，例子如下（<strong>需要先修改为你自己的python路径</strong>）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">./pick0.py <span class="built_in">id</span>.txt bigfile.txt out.txt</span><br></pre></td></tr></table></figure>
+<p>如果你没看懂，不要紧，这个不重要，你就还是按照上面的<code>运行代码</code>部分写的运行命令去运行即可。</p>
+<p>第二行注释是指定字符编码为 <code>utf-8</code>（字符编码的内容可以看看这篇博客，<a href="https://juejin.cn/post/6844903623474806792">字符编码那点事</a>） ，不然写中文注释会报错。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br></pre></td></tr></table></figure>
+<p>后面是我自己写的两行注释，说明代码功能</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 按照一个芯片号文件拆分plink文件</span></span><br><span class="line"><span class="comment"># 如果芯片号文件只有一列，默认输出文件为 split_plink.ped split_plink.map</span></span><br></pre></td></tr></table></figure>
+<h2 id="导入模块和参数">导入模块和参数</h2>
+<p>这里只导入了三个内置模块。</p>
+<p>导入 <code>defaultdict</code> 函数的作用是可以指定字典的值为一种默认的数据类型，比如列表，下面会用到。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os,sys</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict</span><br></pre></td></tr></table></figure>
+<p>接下来，导入参数并读取文件。这里将第一个参数 (<code>sys.argv[1]</code>) 命名为 <code>plink_prefix</code> ，即 plink 文件前缀。第二个参数为拆分文件，打开文件，命名为 <code>split_file</code> 。打开 <code>ped</code> 文件，命名为 <code>plink_file</code> 。 最后一句将map文件名命名为 <code>map_file_name</code></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plink_prefix = sys.argv[<span class="number">1</span>] <span class="comment"># plink文件前缀</span></span><br><span class="line">split_file = <span class="built_in">open</span>(sys.argv[<span class="number">2</span>],<span class="string">&#x27;r&#x27;</span>) <span class="comment"># 拆分信息文件，无标题，一列（芯片号）或两列（芯片号-分类名）</span></span><br><span class="line">plink_file = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix&#125;</span>.ped&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">map_file_name = <span class="string">f&quot;<span class="subst">&#123;plink_prefix&#125;</span>.map&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="获取拆分文件列数">获取拆分文件列数</h2>
+<p>这里是通过 <code>readline()</code> 读取拆分文件的第一行内容，然后使用 <code>split()</code> 函数对第一行内容按空白字符拆分为列表，最后用 <code>len()</code> 函数求列表元素的个数。通过这种方法，实际获取的是拆分文件第一行的列数，命名为 <code>column_num</code>。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">column_num = <span class="built_in">len</span>(split_file.readline().split())</span><br></pre></td></tr></table></figure>
+<p>之后记得通过 <code>seek(0)</code> 函数将指针复原，不然下面对文件进行循环就是从第二行开始了，相当于剔除了第一行。使用了 <code>seek(0)</code> ，下面对文件进行循环，就依然是从第一行开始。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">split_file.seek(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="读取拆分文件内容">读取拆分文件内容</h2>
+<p>先创建一个空列表和 一个值默认为列表的字典</p>
+<p>注意，使用 <code>defaultdict(list)</code> 必须先从<code>collections</code> 包中导入<code>defaultdict</code> 函数。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">set1 = <span class="built_in">set</span>()</span><br><span class="line">dick = defaultdict(<span class="built_in">list</span>)</span><br></pre></td></tr></table></figure>
+<p>遍历拆分文件内容，形成 <code>dick</code> 字典的内容。这里分了两种情况，拆分文件为一列和两列的情况，但是内容大同小异。</p>
+<p>此处代码对于拆分文件的每一行首先判断列数是否均符合要求（是不是都是一列或两列），存在不符合要求的行，则报错 (<code>sys.exit(1)</code>) ；之后判断不同行之间的芯片号是否出现重复（通过 set1 进行判断），如果重复，则报错；最后将文件内容放入 <code>dick</code> 字典中，字典的键为分类名（如果拆分文件只有一列，则所有芯片号的分类名均设置为 <code>split_plink</code>），值为属于该分类名的所有芯片号组成的列表。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">j=<span class="number">0</span></span><br><span class="line"><span class="keyword">if</span> column_num == <span class="number">1</span>: <span class="comment"># 只有一列</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> split_file:</span><br><span class="line">        j += <span class="number">1</span></span><br><span class="line">        f = i.split()</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(f) == <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">if</span> f[<span class="number">0</span>] <span class="keyword">not</span> <span class="keyword">in</span> set1:</span><br><span class="line">                set1.add(f[<span class="number">0</span>])</span><br><span class="line">                dick[<span class="string">&quot;split_plink&quot;</span>].append(f[<span class="number">0</span>]) <span class="comment"># 品种：芯片号的列表</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Error: duplicated chipid <span class="subst">&#123;f[<span class="number">0</span>]&#125;</span> in <span class="subst">&#123;sys.argv[<span class="number">1</span>]&#125;</span>\n&quot;</span>)</span><br><span class="line">                sys.exit(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Error:<span class="subst">&#123;j&#125;</span> row in <span class="subst">&#123;sys.argv[<span class="number">1</span>]&#125;</span> is not 1 columns\n&quot;</span>)</span><br><span class="line">            sys.exit(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">elif</span> column_num == <span class="number">2</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> split_file:</span><br><span class="line">        j += <span class="number">1</span></span><br><span class="line">        f = i.split()</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(f) == <span class="number">2</span>:</span><br><span class="line">            <span class="keyword">if</span> f[<span class="number">0</span>] <span class="keyword">not</span> <span class="keyword">in</span> set1:</span><br><span class="line">                set1.add(f[<span class="number">0</span>])</span><br><span class="line">                dick[f[<span class="number">1</span>]].append(f[<span class="number">0</span>]) <span class="comment"># 品种：芯片号的列表</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Error: duplicated chipid <span class="subst">&#123;f[<span class="number">0</span>]&#125;</span> in <span class="subst">&#123;sys.argv[<span class="number">1</span>]&#125;</span>\n&quot;</span>)</span><br><span class="line">                sys.exit(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Error:<span class="subst">&#123;j&#125;</span> row in <span class="subst">&#123;sys.argv[<span class="number">1</span>]&#125;</span> is not 2 columns\n&quot;</span>)</span><br><span class="line">            sys.exit(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Error: first row in <span class="subst">&#123;sys.argv[<span class="number">1</span>]&#125;</span> is not 1 or 2 columns\n&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="读取-ped-文件内容">读取 ped 文件内容</h2>
+<p>先创建一个空集合和空字典</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">set2=<span class="built_in">set</span>()</span><br><span class="line">dick2 = &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>遍历 ped 文件，只做是否存在重复芯片号的判断，如果存在则报错，程序中止。</p>
+<p>生成键为芯片号，值为整行内容的字典 <code>dick2</code></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> plink_file:</span><br><span class="line">    f = i.split()</span><br><span class="line">    <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">not</span> <span class="keyword">in</span> set2:</span><br><span class="line">        set2.add(f[<span class="number">1</span>])</span><br><span class="line">        dick2[f[<span class="number">1</span>]] = i <span class="comment"># 芯片号：芯片信息的行</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Error: duplicated chipid <span class="subst">&#123;f[<span class="number">1</span>]&#125;</span> in <span class="subst">&#123;sys.argv[<span class="number">2</span>]&#125;</span>.ped\n&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="写入结果文件">写入结果文件</h2>
+<p>这里我们遍历 dick 的所有键，即遍历所有的分类名。首先这里先将原始的map文件复制为当前的分类名的map文件；之后我们创建<code>out_plink_list</code> 这个列表，作为拆分的<code>ped</code>文件内容的临时存储的地方；然后遍历该分类名下的所有芯片号，将这些芯片号的基因型信息存放在<code>out_plink_list</code> 列表中（这里会判断这些芯片号是否均在 plink 文件中，如果不在则程序报错中）。最后创建以分类号为前缀的 <code>ped</code> 文件，将  <code>out_plink_list</code>  中的全部内容写入其中。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> dick: <span class="comment"># 所有品种</span></span><br><span class="line">    <span class="comment"># 复制map文件</span></span><br><span class="line">    os.system(<span class="string">f&quot;cp <span class="subst">&#123;map_file_name&#125;</span> <span class="subst">&#123;i&#125;</span>.map&quot;</span>) </span><br><span class="line">    out_plink_list = []</span><br><span class="line">    <span class="keyword">for</span> i2 <span class="keyword">in</span> dick[i]:</span><br><span class="line">        <span class="comment"># 如果芯片号不在plink文件中报错</span></span><br><span class="line">        <span class="keyword">if</span> i2 <span class="keyword">not</span> <span class="keyword">in</span> dick2:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Error: <span class="subst">&#123;i2&#125;</span> in <span class="subst">&#123;sys.argv[<span class="number">1</span>]&#125;</span> not in <span class="subst">&#123;sys.argv[<span class="number">2</span>]&#125;</span>\n&quot;</span>)</span><br><span class="line">            sys.exit(<span class="number">1</span>)</span><br><span class="line">        out_plink_list.append(dick2[i2])</span><br><span class="line">    <span class="comment"># 生成plink 文件</span></span><br><span class="line">    out_plink_file = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;i&#125;</span>.ped&quot;</span>,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">    out_plink_file.writelines(out_plink_list)</span><br><span class="line">    out_plink_file.close()</span><br></pre></td></tr></table></figure>
+<p>这里，如果拆分文件只有一列，那么 <code>dick</code> 中只有一种分类号，即<code>split_plink</code> ，因此最终只会生成一对plink文件，即 <code>split_plink.ped/map</code> 。</p>
+<h2 id="关闭文件">关闭文件</h2>
+<p>所有打开的文件记得关闭，由于写入的文件已经在循环中关闭了，最后只需要关闭读取的两个文件。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">split_file.close()</span><br><span class="line">plink_file.close()</span><br></pre></td></tr></table></figure>
+<h1>小结</h1>
+<p>这个脚本其实和上一篇<a href="https://vincere.fun/posts/a3902eec/">根据ID提取文件中相应行的python脚本实现与详细讲解</a> 有异曲同工之处，说白了都是根据某一列从提取需要的特定行，像这种需求用 python 很容易实现，而且可以再加一些判断，可以做到比较稳健。</p>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>根据ID提取文件中相应行的python脚本实现与详细讲解</title>
     <url>/posts/a3902eec/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>这个代码是一个处理数据<strong>入门级别</strong>的 python 脚本，我尽可能详细地解释一下，方便小白入门。</p>
@@ -265,6 +382,56 @@ faculty n 天赋，能力，系，全体教员<br>
 -fac- 做——做事的能力——教育<br>
 facultative adj.  授权的<br>
 faculty-student n. 学生教师</p>
+<h1>第52节课</h1>
+<p>artifact n. 人工制品<br>
+artifactual adj.<br>
+olfactory adj. 嗅觉的<br>
+-ol- 嗅<br>
+olfaction n.<br>
+refectory n. 食堂<br>
+manufacture n. 制造 vt.<br>
+manufacturer  n. 制造者，工厂主<br>
+manufactory n. 工厂<br>
+benefactor n. 施恩人<br>
+benefaction n. 施恩，行善<br>
+benefactress n. 女施主；女恩人<br>
+malefactor n. 作恶者<br>
+malefaction n. 恶行<br>
+perfect adj. 完美的 vt. 使完美<br>
+perfective adj. 完成的，完成式的 n. 完成式<br>
+perfectly adv .<br>
+perfection n. 完善；完美<br>
+perfectionism n. 完美主义<br>
+perfectionist n. 完美主义者<br>
+perfectionistic adj.<br>
+perfectibility n. 完全性；可改造性；可完美性<br>
+imperfect adj. 有缺点的；未完成的 n. 未完成体<br>
+imperfection n. 不完美<br>
+imperfectly adv.</p>
+<p>prefecture n. 县；管区，辖区；地方官的任期<br>
+prefectural adj.</p>
+<p>effect n. 影响；效果；作用 vt. 产生；达到目的<br>
+effector n. 效应器<br>
+effective adj.<br>
+ineffective adj.<br>
+effectively adv.<br>
+ineffectively adv.<br>
+effectiveness n.<br>
+ineffectiveness n.<br>
+effectual adj.<br>
+ineffectual adj.<br>
+effectually adv.<br>
+ineffectually adv.<br>
+effectuate vt. 实行；完成<br>
+effectuation n.<br>
+aftereffect n. 后果<br>
+cost-effect adj. 划算的<br>
+cause-effect n. 因果效应<br>
+defect n. 缺点<br>
+defective adj. 有缺陷的；不完美的<br>
+defection n. 背叛，缺点<br>
+defector n. 背叛者</p>
+<p>affect vt.</p>
 ]]></content>
       <categories>
         <category>杂学旁收</category>
@@ -759,13 +926,13 @@ faculty-student n. 学生教师</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">134</span>]: arr = np.arange(<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">135</span>]: arr</span><br><span class="line">Out[<span class="number">135</span>]: array([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line"></span><br><span class="line">In [<span class="number">136</span>]: arr * <span class="number">4</span></span><br><span class="line">Out[<span class="number">136</span>]: array([ <span class="number">0</span>,  <span class="number">4</span>,  <span class="number">8</span>, <span class="number">12</span>, <span class="number">16</span>])</span><br></pre></td></tr></table></figure>
 <p>看一个，对矩阵的<strong>列</strong>进行<strong>中心化</strong>（均值为0）。代码如下：</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">137</span>]: arr = np.random.randn(<span class="number">4</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">138</span>]: np.mean(arr,axis=<span class="number">0</span>)</span><br><span class="line">Out[<span class="number">138</span>]: array([ <span class="number">0.13832533</span>, -<span class="number">0.47971553</span>,  <span class="number">0.52635801</span>])</span><br><span class="line"></span><br><span class="line">In [<span class="number">139</span>]: col_center_arr = arr - np.mean(arr,axis=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">140</span>]: col_center_arr</span><br><span class="line">Out[<span class="number">140</span>]:</span><br><span class="line">array([[-<span class="number">0.55713481</span>, -<span class="number">0.55726651</span>,  <span class="number">1.24535274</span>],</span><br><span class="line">       [-<span class="number">1.55961791</span>,  <span class="number">0.66395791</span>, -<span class="number">0.55885849</span>],</span><br><span class="line">       [ <span class="number">0.63712699</span>, -<span class="number">0.22694898</span>,  <span class="number">0.44549285</span>],</span><br><span class="line">       [ <span class="number">1.47962573</span>,  <span class="number">0.12025757</span>, -<span class="number">1.13198709</span>]])</span><br><span class="line"></span><br><span class="line">In [<span class="number">141</span>]: np.mean(col_center_arr, axis=<span class="number">0</span>)</span><br><span class="line">Out[<span class="number">141</span>]: array([-<span class="number">5.55111512e-17</span>,  <span class="number">1.38777878e-17</span>,  <span class="number">0.00000000e+00</span>])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>下图为图示说明</p>
+<p>下图为图示说明（只有一维的数组实际是一行多列，即下面的 (3,) 应该理解为 (1,3) ）</p>
 <p><img src="6.png" alt="6"></p>
 <p>假如我们要对<strong>行</strong>进行中心化，较小的那个数组的形状必须为 (4,1)，因此需要 <code>reshape</code></p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">142</span>]: arr</span><br><span class="line">Out[<span class="number">142</span>]:</span><br><span class="line">array([[-<span class="number">0.41880948</span>, -<span class="number">1.03698204</span>,  <span class="number">1.77171074</span>],</span><br><span class="line">       [-<span class="number">1.42129258</span>,  <span class="number">0.18424238</span>, -<span class="number">0.03250049</span>],</span><br><span class="line">       [ <span class="number">0.77545233</span>, -<span class="number">0.70666451</span>,  <span class="number">0.97185086</span>],</span><br><span class="line">       [ <span class="number">1.61795106</span>, -<span class="number">0.35945796</span>, -<span class="number">0.60562908</span>]])</span><br><span class="line"></span><br><span class="line">In [<span class="number">143</span>]: row_means = np.mean(arr,axis=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">144</span>]: row_means.shape</span><br><span class="line">Out[<span class="number">144</span>]: (<span class="number">4</span>,)</span><br><span class="line"></span><br><span class="line">In [<span class="number">145</span>]: row_means.reshape((<span class="number">4</span>,<span class="number">1</span>)) <span class="comment">#改变形状为(4,1)</span></span><br><span class="line">Out[<span class="number">145</span>]:</span><br><span class="line">array([[ <span class="number">0.10530641</span>],</span><br><span class="line">       [-<span class="number">0.42318356</span>],</span><br><span class="line">       [ <span class="number">0.34687956</span>],</span><br><span class="line">       [ <span class="number">0.21762134</span>]])</span><br><span class="line"></span><br><span class="line">In [<span class="number">146</span>]: row_center_arr = arr - row_means.reshape((<span class="number">4</span>,<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">In [<span class="number">147</span>]: np.mean(row_center_arr, axis=<span class="number">1</span>)</span><br><span class="line">Out[<span class="number">147</span>]: array([<span class="number">0.</span>, <span class="number">0.</span>, <span class="number">0.</span>, <span class="number">0.</span>])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>图示如下：</p>
 <p><img src="7.png" alt="6"></p>
-<p>测试了一下 <code>(4,3) - (2,3)</code> 和 <code>(4,3) - (2,1)</code> 这种情况，即较小的数组总共是2行，报错了，很合理。</p>
+<p>测试了一下 <code>(4,3) - (2,3)</code> 和 <code>(4,3) - (2,1)</code> 这种情况，即较小的数组总共是2行，报错了，很合理，<strong>每个维度的值要么相同，要么有一个是1</strong>。</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">152</span>]: arr</span><br><span class="line">Out[<span class="number">152</span>]:</span><br><span class="line">array([[-<span class="number">0.41880948</span>, -<span class="number">1.03698204</span>,  <span class="number">1.77171074</span>],</span><br><span class="line">       [-<span class="number">1.42129258</span>,  <span class="number">0.18424238</span>, -<span class="number">0.03250049</span>],</span><br><span class="line">       [ <span class="number">0.77545233</span>, -<span class="number">0.70666451</span>,  <span class="number">0.97185086</span>],</span><br><span class="line">       [ <span class="number">1.61795106</span>, -<span class="number">0.35945796</span>, -<span class="number">0.60562908</span>]])</span><br><span class="line"></span><br><span class="line">In [<span class="number">154</span>]: test</span><br><span class="line">Out[<span class="number">154</span>]:</span><br><span class="line">array([[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">       [<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line">In [<span class="number">155</span>]: arr - test</span><br><span class="line">---------------------------------------------------------------------------</span><br><span class="line">ValueError                                Traceback (most recent call last)</span><br><span class="line">&lt;ipython-<span class="built_in">input</span>-<span class="number">155</span>-85d32d9f06c6&gt; <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">----&gt; 1 arr - test</span><br><span class="line"></span><br><span class="line">ValueError: operands could <span class="keyword">not</span> be broadcast together <span class="keyword">with</span> shapes (<span class="number">4</span>,<span class="number">3</span>) (<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">156</span>]: test = np.array([[<span class="number">0</span>],[<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line">In [<span class="number">157</span>]: test</span><br><span class="line">Out[<span class="number">157</span>]:</span><br><span class="line">array([[<span class="number">0</span>],</span><br><span class="line">       [<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line">In [<span class="number">158</span>]: arr - test</span><br><span class="line">---------------------------------------------------------------------------</span><br><span class="line">ValueError                                Traceback (most recent call last)</span><br><span class="line">&lt;ipython-<span class="built_in">input</span>-<span class="number">158</span>-85d32d9f06c6&gt; <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">----&gt; 1 arr - test</span><br><span class="line"></span><br><span class="line">ValueError: operands could <span class="keyword">not</span> be broadcast together <span class="keyword">with</span> shapes (<span class="number">4</span>,<span class="number">3</span>) (<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <h3 id="广播规则">广播规则</h3>
