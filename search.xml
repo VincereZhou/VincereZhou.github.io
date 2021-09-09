@@ -1,6 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>规整某类基因型数据R代码与python代码实现</title>
+    <url>/posts/2c9b1be7/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>这个是规整某类格式”不规范“的基因型数据的脚本实现说明，同时采用了 R 和 python 进行实现。</p>
+<p>这个需求实现起来说难不难，说易不易，仅是为了将下面我要提到的这类下机的基因型数据转变为常用的plink格式。这里的两个代码可能本身对其他人无法直接使用，但是还是有些借鉴作用。</p>
+<span id="more"></span>
+<h1>使用软件</h1>
+<ul>
+<li>python 3.8 及以上版本</li>
+<li>plink 软件 v1.90，并且提前加到环境变量中。</li>
+</ul>
+<h1>输入文件格式</h1>
+<h2 id="下机基因型数据">下机基因型数据</h2>
+<p>示例数据见 <a href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink/rawdata.xlsx">rawdata.xlsx</a> ，是一个 Excel 表，内容见下表。第一列是样本名称，后面每一列表示一个SNP，标题是SNP的名称。也就是说，一行表示一个样本，一列表示一个SNP。如果基因型为两个字符，说明是杂合子，例如GA；如果基因型是一个字符，说明是纯合子，例如T (正常应该记为TT，这里省略了一个字符)；如果单元格内容为空，说明此处基因型缺失。</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>seq-rs319899733</th>
+<th>seq-rs320947633</th>
+<th>seq-rs326926754</th>
+<th>seq-rs327695512</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>24</td>
+<td>T</td>
+<td>A</td>
+<td></td>
+<td>CT</td>
+</tr>
+<tr>
+<td>31</td>
+<td>T</td>
+<td>GA</td>
+<td>C</td>
+<td>C</td>
+</tr>
+<tr>
+<td>23</td>
+<td>CT</td>
+<td>GA</td>
+<td>C</td>
+<td>C</td>
+</tr>
+<tr>
+<td>29</td>
+<td>T</td>
+<td>GA</td>
+<td></td>
+<td>T</td>
+</tr>
+</tbody>
+</table>
+<h2 id="参考map文件">参考map文件</h2>
+<p>包含下机基因型所有SNP的 map 文件，根据这个文件来生成下机基因型数据的map文件，示例数据见 <a href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink/raw.map">raw.map</a></p>
+<p>map 文件格式说明见<a href="https://vincere.fun/posts/506fc784/">根据芯片号拆分plink文件的代码实现</a></p>
+<h1>输出文件格式</h1>
+<p>一对 plink 文件，文件格式说明见<a href="https://vincere.fun/posts/506fc784/">根据芯片号拆分plink文件的代码实现</a></p>
+<h1>运行代码</h1>
+<h2 id="运行R代码">运行R代码</h2>
+<p>R 代码文件见：<a href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink/mass_to_plink.R">mass_to_plink.R</a></p>
+<p>将两个输入文件和本程序放在同一文件夹下，运行命令示范如下。运行结束后，会生成规整后的 plink 文件 <code>new.ped/map</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Rscript mass_to_plink.R rawdata.xlsx raw.map</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明</strong>：</p>
+<p><code>rawdata.xlsx</code>: 第一个参数为下机基因型数据</p>
+<p><code>raw.map</code>：第二个参数为参考map文件。</p>
+<h2 id="运行python代码">运行python代码</h2>
+<p>python 代码文件见：<a href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink/mass_to_plink.py">mass_to_plink.py</a></p>
+<p>将两个输入文件和本程序放在同一文件夹下，运行命令示范如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python mass_to_plink.py rawdata.xlsx raw.map new2</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明</strong>：</p>
+<p><code>rawdata.xlsx</code>: 第一个参数为下机基因型数据</p>
+<p><code>raw.map</code>：第二个参数为参考map文件。</p>
+<p><code>new2</code> : 输出plink文件前缀</p>
+<p>运行结束后，生成以第三个参数为前缀的plink 文件。</p>
+<h2 id="示例">示例</h2>
+<p>示例数据和代码我都放到了一个文件夹内 <a href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink">mass_to_plink</a> ，有兴趣可以自己跑一下。</p>
+<h1>代码说明</h1>
+<p>这两个代码内部我都有比较详细的注释，这里就不再贴代码了。</p>
+<p>两个代码的实现思路是一样的，首先要对基因型数据进行规整，缺失要替换为00，纯合子要改为两个字符，生成 compound 格式的 ped  文件（正常的ped文件一个SNP占两列，compound 格式则是一个SNP占一列，一个SNP的两个碱基之间无分隔符）。之后从参考map中提取相应的SNP的行，生成需要的map文件。最后通过 plink 软件将 compound 格式的文件转化为正常的plink格式。</p>
+<h1>后续</h1>
+<p>R 本身就有 <code>dataframe</code> 这种数据类型，而 python 是需要借助 pandas 模块进行处理。其实我第一次是用 R 实现的，后面又用 python 写了一遍。分别用 R 和 python 跑了一遍以后，我又用之前提到的比对基因型的代码，比较了两个生成的plink文件，基因型完全一致（具体参考 <a href="https://vincere.fun/posts/fa9e0b0e/">两个Plink文件样本间基因型比对代码实现</a> 和 <a href="https://vincere.fun/posts/6897c9bb/">两个Plink文件同一SNP基因型比对代码实现</a>）。</p>
+<p>这里也有一个简单的办法，就是通过 sha1sum 或 md5sum 进行文件校验，你会发现两个 ped 文件 或 map 文件都是一样的。但是这种做法并不稳健，如果校验码不一致，不一定说明两个plink文件基因型不一致，还有很多原因导致校验码不同，比如 SNP 顺序不同，性染色体编码不同，杂合子显示顺序不同（如 A G 与 G A）等等。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sha1sum new*.ped</span></span><br><span class="line">5150663442126f2f4e5b57e9d2d58118bf1f90f3  new1.ped</span><br><span class="line">5150663442126f2f4e5b57e9d2d58118bf1f90f3  new2.ped</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> sha1sum new*.map</span></span><br><span class="line">f899867a1d9f762b7a3d7fb231d5fc13fdc44aa4  new1.map</span><br><span class="line">f899867a1d9f762b7a3d7fb231d5fc13fdc44aa4  new2.map</span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>根据芯片号拆分plink文件的代码实现</title>
     <url>/posts/506fc784/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>这个代码同样是一个处理基因型数据的<strong>入门级别</strong>的 python 脚本。</p>
