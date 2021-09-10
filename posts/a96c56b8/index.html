@@ -9,7 +9,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    规整某类基因型数据R代码与python代码实现 |  VincereZhou&#39;s blog
+    提取FASTA文件描述行中含有特定字符记录的python代码实现 |  VincereZhou&#39;s blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -41,7 +41,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-规整某类基因型数据R代码与python代码实现"
+  id="post-提取FASTA文件描述行中含有特定字符记录的python代码实现"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -52,15 +52,15 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  规整某类基因型数据R代码与python代码实现
+  提取FASTA文件描述行中含有特定字符记录的python代码实现
 </h1>
  
 
     </header>
      
     <div class="article-meta">
-      <a href="/posts/2c9b1be7/" class="article-date">
-  <time datetime="2021-09-09T01:55:18.000Z" itemprop="datePublished">2021-09-09</time>
+      <a href="/posts/a96c56b8/" class="article-date">
+  <time datetime="2021-09-10T08:51:53.000Z" itemprop="datePublished">2021-09-10</time>
 </a> 
   <div class="article-category">
     <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a> / <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/python/">python</a>
@@ -71,7 +71,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.1k</span>
+            <span class="post-count">859</span>
         </span>
     </span>
 
@@ -80,7 +80,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">4 分钟</span>
+            <span class="post-count">3 分钟</span>
         </span>
     </span>
 </div>
@@ -95,89 +95,44 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>这个是规整某类格式”不规范“的基因型数据的脚本实现说明，同时采用了 R 和 python 进行实现。</p>
-<p>这个需求实现起来说难不难，说易不易，仅是为了将下面我要提到的这类下机的基因型数据转变为常用的plink格式。这里的两个代码可能本身对其他人无法直接使用，但是还是有些借鉴作用。</p>
+  <p>这个代码是提取FASTA文件描述行中含有特定字符的记录。</p>
+<p>这个脚本代码量很少，但是需要动一下脑子，难点在于序列部分的行数是不固定的。</p>
 <span id="more"></span>
 <h1>使用软件</h1>
 <ul>
 <li>python 3.8 及以上版本</li>
-<li>plink 软件 v1.90，并且提前加到环境变量中。</li>
 </ul>
-<h1>输入文件格式</h1>
-<h2 id="下机基因型数据">下机基因型数据</h2>
-<p>示例数据见 <a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink/rawdata.xlsx">rawdata.xlsx</a> ，是一个 Excel 表，内容见下表。第一列是样本名称，后面每一列表示一个SNP，标题是SNP的名称。也就是说，一行表示一个样本，一列表示一个SNP。如果基因型为两个字符，说明是杂合子，例如GA；如果基因型是一个字符，说明是纯合子，例如T (正常应该记为TT，这里省略了一个字符)；如果单元格内容为空，说明此处基因型缺失。</p>
-<table>
-<thead>
-<tr>
-<th>id</th>
-<th>seq-rs319899733</th>
-<th>seq-rs320947633</th>
-<th>seq-rs326926754</th>
-<th>seq-rs327695512</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>24</td>
-<td>T</td>
-<td>A</td>
-<td></td>
-<td>CT</td>
-</tr>
-<tr>
-<td>31</td>
-<td>T</td>
-<td>GA</td>
-<td>C</td>
-<td>C</td>
-</tr>
-<tr>
-<td>23</td>
-<td>CT</td>
-<td>GA</td>
-<td>C</td>
-<td>C</td>
-</tr>
-<tr>
-<td>29</td>
-<td>T</td>
-<td>GA</td>
-<td></td>
-<td>T</td>
-</tr>
-</tbody>
-</table>
-<h2 id="参考map文件">参考map文件</h2>
-<p>包含下机基因型所有SNP的 map 文件，根据这个文件来生成下机基因型数据的map文件，示例数据见 <a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink/raw.map">raw.map</a></p>
-<p>map 文件格式说明见<a target="_blank" rel="noopener" href="https://vincere.fun/posts/506fc784/">根据芯片号拆分plink文件的代码实现</a></p>
-<h1>输出文件格式</h1>
-<p>一对 plink 文件，文件格式说明见<a target="_blank" rel="noopener" href="https://vincere.fun/posts/506fc784/">根据芯片号拆分plink文件的代码实现</a></p>
+<h1>输入输出文件格式</h1>
+<p>输入文件为一个FASTA文件，示例数据见 <a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/tiao_Sus/1_fa.txt">1_fa.txt</a>。输出数据为提取特定记录后生成的FASTA文件，示例结果文件见 <a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/tiao_Sus/out_fa.txt">out_fa.txt</a></p>
+<p>FASTA 可以存储任何的序列数据，比如参考基因组文件，蛋白质序列，coding DNA sequence (CDS) , 转录序列等。</p>
+<p>FASTA 文件的每条记录包含两个部分：一个是描述部分（&gt; 开始，包含序列名称和其他信息），一个是序列数据部分（第二行直至到描述行，<strong>可占据多行</strong>）。</p>
+<p>FASTA 文件的灵活性导致它的结构定义很宽泛，结构不严谨，运行程序可能会遭遇未知的错误。</p>
+<p>举个例子，示例数据的第一条记录见下，第一行是描述行，第二行和第三行是序列（应该是RNA序列）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;cel-let-7 MI0000001 Caenorhabditis elegans let-7 stem-loop</span><br><span class="line">UACACUGUGGAUCCGGUGAGGUAGUAGGUUGUAUAGUUUGGAAUAUUACCACCGGUGAAC</span><br><span class="line">UAUGCAAUUUUCUACCUUACCGGAGACAGAACUCUUCGA</span><br></pre></td></tr></table></figure>
 <h1>运行代码</h1>
-<h2 id="运行R代码">运行R代码</h2>
-<p>R 代码文件见：<a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink/mass_to_plink.R">mass_to_plink.R</a></p>
-<p>将两个输入文件和本程序放在同一文件夹下，运行命令示范如下。运行结束后，会生成规整后的 plink 文件 <code>new.ped/map</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Rscript mass_to_plink.R rawdata.xlsx raw.map</span><br></pre></td></tr></table></figure>
-<p><strong>参数说明</strong>：</p>
-<p><code>rawdata.xlsx</code>: 第一个参数为下机基因型数据</p>
-<p><code>raw.map</code>：第二个参数为参考map文件。</p>
-<h2 id="运行python代码">运行python代码</h2>
-<p>python 代码文件见：<a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink/mass_to_plink.py">mass_to_plink.py</a></p>
-<p>将两个输入文件和本程序放在同一文件夹下，运行命令示范如下</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python mass_to_plink.py rawdata.xlsx raw.map new2</span><br></pre></td></tr></table></figure>
-<p><strong>参数说明</strong>：</p>
-<p><code>rawdata.xlsx</code>: 第一个参数为下机基因型数据</p>
-<p><code>raw.map</code>：第二个参数为参考map文件。</p>
-<p><code>new2</code> : 输出plink文件前缀</p>
-<p>运行结束后，生成以第三个参数为前缀的plink 文件。</p>
-<h2 id="示例">示例</h2>
-<p>示例数据和代码我都放到了一个文件夹内 <a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/mass_to_plink">mass_to_plink</a> ，有兴趣可以自己跑一下。</p>
+<p>代码文件见：<a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/tiao_Sus/tiao_Sus.py">tiao_Sus.py</a></p>
+<p>将输入文件和本程序放在同一文件夹下，运行命令示范如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python tiao_Sus.py 1_fa.txt Sus out_fa.txt</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明：</strong></p>
+<p><code>1_fa.txt</code>: 第一个参数为输入 FASTA 文件名称</p>
+<p><code>Sus</code>:  第二个参数为提取的描述部分字段</p>
+<p><code>out_fa.txt</code>: 第三个参数为输出文件名称</p>
 <h1>代码说明</h1>
-<p>这两个代码内部我都有比较详细的注释，这里就不再贴代码了。</p>
-<p>两个代码的实现思路是一样的，首先要对基因型数据进行规整，缺失要替换为00，纯合子要改为两个字符，生成 compound 格式的 ped  文件（正常的ped文件一个SNP占两列，compound 格式则是一个SNP占一列，一个SNP的两个碱基之间无分隔符）。之后从参考map中提取相应的SNP的行，生成需要的map文件。最后通过 plink 软件将 compound 格式的文件转化为正常的plink格式。</p>
-<h1>后续</h1>
-<p>R 本身就有 <code>dataframe</code> 这种数据类型，而 python 是需要借助 pandas 模块进行处理。其实我第一次是用 R 实现的，后面又用 python 写了一遍。分别用 R 和 python 跑了一遍以后，我又用之前提到的比对基因型的代码，比较了两个生成的plink文件，基因型完全一致（具体参考 <a target="_blank" rel="noopener" href="https://vincere.fun/posts/fa9e0b0e/">两个Plink文件样本间基因型比对代码实现</a> 和 <a target="_blank" rel="noopener" href="https://vincere.fun/posts/6897c9bb/">两个Plink文件同一SNP基因型比对代码实现</a>）。</p>
-<p>这里也有一个简单的办法，就是通过 sha1sum 或 md5sum 进行文件校验，你会发现两个 ped 文件 或 map 文件都是一样的。但是这种做法并不稳健，如果校验码不一致，不一定说明两个plink文件基因型不一致，还有很多原因导致校验码不同，比如 SNP 顺序不同，性染色体编码不同，杂合子显示顺序不同（如 A G 与 G A）等等。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sha1sum new*.ped</span></span><br><span class="line">5150663442126f2f4e5b57e9d2d58118bf1f90f3  new1.ped</span><br><span class="line">5150663442126f2f4e5b57e9d2d58118bf1f90f3  new2.ped</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> sha1sum new*.map</span></span><br><span class="line">f899867a1d9f762b7a3d7fb231d5fc13fdc44aa4  new1.map</span><br><span class="line">f899867a1d9f762b7a3d7fb231d5fc13fdc44aa4  new2.map</span><br><span class="line"></span><br></pre></td></tr></table></figure> 
+<h2 id="输入参数，打开文件">输入参数，打开文件</h2>
+<p>导入 sys 模块，输入参数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="comment">#挑不规则行数据</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">in_file = <span class="built_in">open</span>(sys.argv[<span class="number">1</span>],<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">field = sys.argv[<span class="number">2</span>]</span><br><span class="line">out_file = <span class="built_in">open</span>(sys.argv[<span class="number">3</span>],<span class="string">&#x27;w&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="遍历输入文件">遍历输入文件</h2>
+<p>先创建一个空字典，然后遍历输入FASTA文件，字典 <code>dick</code> 的键是行索引 (从0开始)，值为该行的内容</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dick = &#123;&#125;</span><br><span class="line"></span><br><span class="line">j=<span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> in_file:</span><br><span class="line">    dick[j] = i <span class="comment">#行：内容 从0开始</span></span><br><span class="line">    j+=<span class="number">1</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="遍历字典">遍历字典</h2>
+<p>这里是<strong>重点</strong>。遍历字典 <code>dick</code> ，这里其实是 <code>j</code> 的递增来实现文件内容的换行；<code>j</code> 每增加1，相当于文件跳到下一行。通过第一个while 循环 (<code>while j &lt; len(dick)</code>) 保证迭代到文件的最后一行。之后就是一个判断，需要同时满足两个条件：<code>&gt;</code> 在这一行中并且需要查找的特定字符也在这一行中。如果满足这个条件，将这一行内容写入到输出文件中，跳到下一行，再通过 while 循环将后面跟着的序列行也写入到输出文件中（这里用 while 循环是解决序列行数不固定的问题）。如果不满足上面的判断，那么直接跳到下一行。</p>
+<p>上面说了一堆逻辑，有点啰嗦，其实你看着输入文件和脚本，<strong>在脑子里运行一遍</strong>就清楚了。我写这个脚本的时候，也是在脑子里运行一遍才明确没有问题的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">j=<span class="number">0</span> </span><br><span class="line"><span class="keyword">while</span> j &lt; <span class="built_in">len</span>(dick): <span class="comment">#不是&lt;=</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="string">&#x27;&gt;&#x27;</span> <span class="keyword">in</span> dick[j]) <span class="keyword">and</span> (field <span class="keyword">in</span> dick[j]):</span><br><span class="line">        out_file.write(dick[j])</span><br><span class="line">        j+=<span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> (<span class="string">&#x27;&gt;&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> dick[j]):</span><br><span class="line">            out_file.write(dick[j])</span><br><span class="line">            j+=<span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        j+=<span class="number">1</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="关闭文件">关闭文件</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">in_file.close()</span><br><span class="line">out_file.close()</span><br></pre></td></tr></table></figure>
+<h1>闲话</h1>
+<p>这是几年前给涛哥写的小代码，虽然代码很短，但是确实花了心思。</p>
+ 
       <!-- reward -->
       
     </div>
@@ -241,7 +196,7 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://yoursite.com/posts/2c9b1be7/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://yoursite.com/posts/a96c56b8/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -254,19 +209,10 @@
    
   <nav class="article-nav">
     
-      <a href="/posts/a96c56b8/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            提取FASTA文件描述行中含有特定字符记录的python代码实现
-          
-        </div>
-      </a>
     
-    
-      <a href="/posts/506fc784/" class="article-nav-link">
+      <a href="/posts/2c9b1be7/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">根据芯片号拆分plink文件的代码实现</div>
+        <div class="article-nav-title">规整某类基因型数据R代码与python代码实现</div>
       </a>
     
   </nav>

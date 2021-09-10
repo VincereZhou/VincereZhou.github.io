@@ -1,6 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>提取FASTA文件描述行中含有特定字符记录的python代码实现</title>
+    <url>/posts/a96c56b8/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>这个代码是提取FASTA文件描述行中含有特定字符的记录。</p>
+<p>这个脚本代码量很少，但是需要动一下脑子，难点在于序列部分的行数是不固定的。</p>
+<span id="more"></span>
+<h1>使用软件</h1>
+<ul>
+<li>python 3.8 及以上版本</li>
+</ul>
+<h1>输入输出文件格式</h1>
+<p>输入文件为一个FASTA文件，示例数据见 <a href="https://github.com/VincereZhou/code_backup/blob/master/tiao_Sus/1_fa.txt">1_fa.txt</a>。输出数据为提取特定记录后生成的FASTA文件，示例结果文件见 <a href="https://github.com/VincereZhou/code_backup/blob/master/tiao_Sus/out_fa.txt">out_fa.txt</a></p>
+<p>FASTA 可以存储任何的序列数据，比如参考基因组文件，蛋白质序列，coding DNA sequence (CDS) , 转录序列等。</p>
+<p>FASTA 文件的每条记录包含两个部分：一个是描述部分（&gt; 开始，包含序列名称和其他信息），一个是序列数据部分（第二行直至到描述行，<strong>可占据多行</strong>）。</p>
+<p>FASTA 文件的灵活性导致它的结构定义很宽泛，结构不严谨，运行程序可能会遭遇未知的错误。</p>
+<p>举个例子，示例数据的第一条记录见下，第一行是描述行，第二行和第三行是序列（应该是RNA序列）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;cel-let-7 MI0000001 Caenorhabditis elegans let-7 stem-loop</span><br><span class="line">UACACUGUGGAUCCGGUGAGGUAGUAGGUUGUAUAGUUUGGAAUAUUACCACCGGUGAAC</span><br><span class="line">UAUGCAAUUUUCUACCUUACCGGAGACAGAACUCUUCGA</span><br></pre></td></tr></table></figure>
+<h1>运行代码</h1>
+<p>代码文件见：<a href="https://github.com/VincereZhou/code_backup/blob/master/tiao_Sus/tiao_Sus.py">tiao_Sus.py</a></p>
+<p>将输入文件和本程序放在同一文件夹下，运行命令示范如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python tiao_Sus.py 1_fa.txt Sus out_fa.txt</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明：</strong></p>
+<p><code>1_fa.txt</code>: 第一个参数为输入 FASTA 文件名称</p>
+<p><code>Sus</code>:  第二个参数为提取的描述部分字段</p>
+<p><code>out_fa.txt</code>: 第三个参数为输出文件名称</p>
+<h1>代码说明</h1>
+<h2 id="输入参数，打开文件">输入参数，打开文件</h2>
+<p>导入 sys 模块，输入参数</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="comment">#挑不规则行数据</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">in_file = <span class="built_in">open</span>(sys.argv[<span class="number">1</span>],<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">field = sys.argv[<span class="number">2</span>]</span><br><span class="line">out_file = <span class="built_in">open</span>(sys.argv[<span class="number">3</span>],<span class="string">&#x27;w&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="遍历输入文件">遍历输入文件</h2>
+<p>先创建一个空字典，然后遍历输入FASTA文件，字典 <code>dick</code> 的键是行索引 (从0开始)，值为该行的内容</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">dick = &#123;&#125;</span><br><span class="line"></span><br><span class="line">j=<span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> in_file:</span><br><span class="line">    dick[j] = i <span class="comment">#行：内容 从0开始</span></span><br><span class="line">    j+=<span class="number">1</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="遍历字典">遍历字典</h2>
+<p>这里是<strong>重点</strong>。遍历字典 <code>dick</code> ，这里其实是 <code>j</code> 的递增来实现文件内容的换行；<code>j</code> 每增加1，相当于文件跳到下一行。通过第一个while 循环 (<code>while j &lt; len(dick)</code>) 保证迭代到文件的最后一行。之后就是一个判断，需要同时满足两个条件：<code>&gt;</code> 在这一行中并且需要查找的特定字符也在这一行中。如果满足这个条件，将这一行内容写入到输出文件中，跳到下一行，再通过 while 循环将后面跟着的序列行也写入到输出文件中（这里用 while 循环是解决序列行数不固定的问题）。如果不满足上面的判断，那么直接跳到下一行。</p>
+<p>上面说了一堆逻辑，有点啰嗦，其实你看着输入文件和脚本，<strong>在脑子里运行一遍</strong>就清楚了。我写这个脚本的时候，也是在脑子里运行一遍才明确没有问题的。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">j=<span class="number">0</span> </span><br><span class="line"><span class="keyword">while</span> j &lt; <span class="built_in">len</span>(dick): <span class="comment">#不是&lt;=</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="string">&#x27;&gt;&#x27;</span> <span class="keyword">in</span> dick[j]) <span class="keyword">and</span> (field <span class="keyword">in</span> dick[j]):</span><br><span class="line">        out_file.write(dick[j])</span><br><span class="line">        j+=<span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> (<span class="string">&#x27;&gt;&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> dick[j]):</span><br><span class="line">            out_file.write(dick[j])</span><br><span class="line">            j+=<span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        j+=<span class="number">1</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="关闭文件">关闭文件</h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">in_file.close()</span><br><span class="line">out_file.close()</span><br></pre></td></tr></table></figure>
+<h1>闲话</h1>
+<p>这是几年前给涛哥写的小代码，虽然代码很短，但是确实花了心思。</p>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>规整某类基因型数据R代码与python代码实现</title>
     <url>/posts/2c9b1be7/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>这个是规整某类格式”不规范“的基因型数据的脚本实现说明，同时采用了 R 和 python 进行实现。</p>
