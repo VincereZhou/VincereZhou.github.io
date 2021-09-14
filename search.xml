@@ -1,6 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>基于两个plink文件共同样本共同位点的基因型比对代码实现</title>
+    <url>/posts/9ad0a746/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>比对两个plink文件共同样本共同位点的基因型，合并了 <a href="https://vincere.fun/posts/fa9e0b0e/">两个Plink文件样本间基因型比对代码实现</a> 和 <a href="https://vincere.fun/posts/6897c9bb/">两个Plink文件同一SNP基因型比对代码实现</a> 的内容。</p>
+<span id="more"></span>
+<h1>前言</h1>
+<p>整理文档的时候突然想到，既然比对两个plink文件时从共同样本角度和从共同SNP角度比对都需要进行，那为什么不合并成一个脚本呢？</p>
+<p>是的，这里需要合并成一个脚本，因此就有了这个脚本。这个脚本是在<a href="https://github.com/VincereZhou/code_backup/blob/master/compair_snps.py">compair_snps.py</a>基础上新增了一些代码得到的，同时从共同样本和共同SNP角度去比较基因型。</p>
+<h1>使用软件</h1>
+<ul>
+<li>python 3.8 及以上版本</li>
+<li>plink 软件 v1.90 版本</li>
+</ul>
+<h1>输入文件格式</h1>
+<h2 id="plink-文本文件">plink 文本文件</h2>
+<p>格式说明见<a href="https://vincere.fun/posts/506fc784/">根据芯片号拆分plink文件的代码实现</a></p>
+<h1>输出文件说明</h1>
+<p>两个输出文件名称前面相同，后面分别为 <code>_snp.txt</code> 和 <code>_sample.txt</code> ，分别为从SNP角度和样本角度的比对结果。</p>
+<p><code>*_snp.txt</code> :  第一列为SNP名称，第二列为两个plink文件中共同样本中不一致的样本数目，第三列为共同样本总数，第四列为前两列相除得到的不一致率。</p>
+<p>示例如下：</p>
+<table>
+<thead>
+<tr>
+<th>8_118011832</th>
+<th>3508</th>
+<th>3529</th>
+<th>0.994</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5_39432167</td>
+<td>3459</td>
+<td>3524</td>
+<td>0.9816</td>
+</tr>
+<tr>
+<td>14_133523132</td>
+<td>3428</td>
+<td>3518</td>
+<td>0.9744</td>
+</tr>
+</tbody>
+</table>
+<p><code>*_sample.txt</code> :  第一列为样本名称，第二列为两个plink文件中该样本的共同位点中不一致的样本数目，第三列为共同位点总数，第四列为前两列相除得到的不一致率。</p>
+<table>
+<thead>
+<tr>
+<th>202888800026_R03C02</th>
+<th>0</th>
+<th>51315</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>202888800026_R03C03</td>
+<td>0</td>
+<td>51315</td>
+<td>0</td>
+</tr>
+<tr>
+<td>202888800026_R03C04</td>
+<td>0</td>
+<td>51315</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h1>运行代码</h1>
+<p>代码文件见：<a href="https://github.com/VincereZhou/code_backup/blob/master/compair_two_plinks.py">compair_two_plinks.py</a></p>
+<p>将输入文件和本程序放在同一文件夹下，运行命令示范为</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">python compair_two_plinks.py --plink1 plink1 --plink2 plink2</span><br></pre></td></tr></table></figure>
+<p><strong>可用参数说明</strong>：</p>
+<p><code>--plink1</code>: 第一个plink文件前缀，必选。</p>
+<p><code>--plink2</code>: 第二个plink文件前缀，可选。</p>
+<p><code>--exclude-miss</code> : 基因型比对是否先剔除缺失值，可选，只能为yes和no，默认为yes。如果该选项设置为no，比对时不会剔除缺失样本对，如果存在同一个样本，在一个基因型文件中有基因型，另一个基因型文件中则为缺失，该样本同样会被视为不一致位点；如果该选项设置为 yes ，比对时会剔除至少一个样本为缺失的位点，只比对两个样本均不为缺失的位点。</p>
+<p><code>--save-temp</code> :  是否保留中间文件，可选，只能为yes和no，默认为 no。</p>
+<p><code>--out-prefix</code> : 结果文件前缀，可选，默认为 <code>cmp_two_plinks</code></p>
+<h1>代码说明</h1>
+<p>由于这个脚本是基于 <a href="https://github.com/VincereZhou/code_backup/blob/master/compair_snps.py">compair_snps.py</a> 的基础修改的，前面的内容基本没变，只看后面修改的地方。</p>
+<h2 id="计算不一致率">计算不一致率</h2>
+<p>这里新增了从样本角度比对的代码</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#计算不一致率</span></span><br><span class="line">out_sample_list = []</span><br><span class="line">out_snp_list = []</span><br><span class="line">  </span><br><span class="line"><span class="keyword">if</span> args.exclude_miss == <span class="string">&#x27;yes&#x27;</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(snp_num):</span><br><span class="line">        first_index = <span class="built_in">range</span>(<span class="number">0</span>,common_sample_num)</span><br><span class="line">        second_index = <span class="built_in">range</span>(common_sample_num,total_sample_num)</span><br><span class="line">        v1 = array1[first_index,i]</span><br><span class="line">        v2 = array1[second_index,i]</span><br><span class="line">        non_miss_index = np.where((v1!=<span class="number">3</span>) &amp; (v2!=<span class="number">3</span>))</span><br><span class="line">        total_num = non_miss_index[<span class="number">0</span>].shape[<span class="number">0</span>]</span><br><span class="line">        v1_new = v1[non_miss_index]</span><br><span class="line">        v2_new = v2[non_miss_index]</span><br><span class="line">        no_match_num = np.count_nonzero(v1_new!=v2_new)</span><br><span class="line">        <span class="keyword">if</span> total_num &gt; <span class="number">0</span>:</span><br><span class="line">            no_match_rate = no_match_num/total_num</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            no_match_rate = <span class="number">0</span></span><br><span class="line">        out_snp_list.append([snp_list[i],<span class="string">f&quot;<span class="subst">&#123;no_match_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;total_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;no_match_rate:<span class="number">.4</span>f&#125;</span>&quot;</span>])</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(common_sample_list)):</span><br><span class="line">        first_index = i</span><br><span class="line">        second_index = i+common_sample_num</span><br><span class="line">        v1 = array1[first_index,:]</span><br><span class="line">        v2 = array1[second_index,:]</span><br><span class="line">        non_miss_index = np.where((v1!=<span class="number">3</span>) &amp; (v2!=<span class="number">3</span>))</span><br><span class="line">        total_num = non_miss_index[<span class="number">0</span>].shape[<span class="number">0</span>]</span><br><span class="line">        v1_new = v1[non_miss_index]</span><br><span class="line">        v2_new = v2[non_miss_index]</span><br><span class="line">        no_match_num = np.count_nonzero(v1_new!=v2_new)</span><br><span class="line">        <span class="keyword">if</span> total_num &gt; <span class="number">0</span>:</span><br><span class="line">            no_match_rate = no_match_num/total_num</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            no_match_rate = <span class="number">0</span></span><br><span class="line">        out_sample_list.append([common_sample_list[i],<span class="string">f&quot;<span class="subst">&#123;no_match_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;total_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;no_match_rate:<span class="number">.4</span>f&#125;</span>&quot;</span>])</span><br><span class="line">        </span><br><span class="line"><span class="keyword">elif</span> args.exclude_miss == <span class="string">&#x27;no&#x27;</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(snp_num):</span><br><span class="line">        first_index = <span class="built_in">range</span>(<span class="number">0</span>,common_sample_num)</span><br><span class="line">        second_index = <span class="built_in">range</span>(common_sample_num,total_sample_num)</span><br><span class="line">        v1 = array1[first_index,i]</span><br><span class="line">        v2 = array1[second_index,i]</span><br><span class="line">        total_num = common_sample_num</span><br><span class="line">        no_match_num = np.count_nonzero(v1!=v2)</span><br><span class="line">        no_match_rate = no_match_num/total_num</span><br><span class="line">        out_snp_list.append([snp_list[i],<span class="string">f&quot;<span class="subst">&#123;no_match_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;total_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;no_match_rate:<span class="number">.4</span>f&#125;</span>&quot;</span>])</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(common_sample_list)):</span><br><span class="line">        first_index = i</span><br><span class="line">        second_index = i+common_sample_num</span><br><span class="line">        v1 = array1[first_index,:]</span><br><span class="line">        v2 = array1[second_index,:]</span><br><span class="line">        total_num = snp_num</span><br><span class="line">        no_match_num = np.count_nonzero(v1!=v2)</span><br><span class="line">        no_match_rate = no_match_num/total_num</span><br><span class="line">        out_sample_list.append([common_sample_list[i],<span class="string">f&quot;<span class="subst">&#123;no_match_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;total_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;no_match_rate:<span class="number">.4</span>f&#125;</span>&quot;</span>])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="将比对结果按从不一致率从大到小">将比对结果按从不一致率从大到小</h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">sorted_out_snp_list = <span class="built_in">sorted</span>(out_snp_list, key = <span class="keyword">lambda</span> s:<span class="built_in">float</span>(s[<span class="number">3</span>]), reverse = <span class="literal">True</span>) <span class="comment">#不一致率从大到小</span></span><br><span class="line">sorted_out_sample_list = <span class="built_in">sorted</span>(out_sample_list, key = <span class="keyword">lambda</span> s:<span class="built_in">float</span>(s[<span class="number">3</span>]), reverse = <span class="literal">True</span>) <span class="comment">#不一致率从大到小</span></span><br></pre></td></tr></table></figure>
+<h2 id="写入结果文件，统计不一致的SNP数目和样本数目。">写入结果文件，统计不一致的SNP数目和样本数目。</h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">unconsistent_snp_num = <span class="number">0</span> <span class="comment"># 不一致的SNP数目</span></span><br><span class="line">unconsistent_sample_num = <span class="number">0</span> <span class="comment"># 不一致的样本数目</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> sorted_out_snp_list:</span><br><span class="line">    out_snp_file.write(<span class="string">&#x27;\t&#x27;</span>.join(i)+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">int</span>(i[<span class="number">1</span>]) &gt; <span class="number">0</span>:</span><br><span class="line">        unconsistent_snp_num += <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> sorted_out_sample_list:</span><br><span class="line">    out_sample_file.write(<span class="string">&#x27;\t&#x27;</span>.join(i)+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">int</span>(i[<span class="number">1</span>]) &gt; <span class="number">0</span>:</span><br><span class="line">        unconsistent_sample_num += <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;unconsistent sample number: <span class="subst">&#123;unconsistent_sample_num&#125;</span>\n&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;unconsistent  snp   number: <span class="subst">&#123;unconsistent_snp_num&#125;</span>\n&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h1>闲话</h1>
+<p>定期整理文档，梳理之前写的代码是有益的。</p>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>生物信息</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>通过比对bim文件查找有问题基因型文件代码实现</title>
     <url>/posts/58fe67f5/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>当你用 plink 软件合并同一款芯片的多对plink文件时，出现了下述报错，提示有些位点不是二等位基因型。</p>
@@ -853,10 +953,9 @@ defector n. 背叛者</p>
 <h1>输入文件格式</h1>
 <ul>
 <li>plink 文件 ：前缀相同的一对文件，后缀分别为<code>.ped</code> ，<code>.map</code> 。</li>
-<li>映射文件： 两列，所有基因型个体的芯片号与个体号，空格或 tab分隔，无标题。</li>
 </ul>
 <h1>输出文件说明</h1>
-<p><code>cmp_common_samples.txt</code> :  第一列为SNP名称，第二列为两个plink文件中共同样本中不一致的样本数目，第三列为共同样本总数，第五列为前两列相除得到的不一致率。</p>
+<p><code>cmp_common_samples.txt</code> :  第一列为SNP名称，第二列为两个plink文件中共同样本中不一致的样本数目，第三列为共同样本总数，第四列为前两列相除得到的不一致率。</p>
 <p>示例如下：</p>
 <table>
 <thead>
