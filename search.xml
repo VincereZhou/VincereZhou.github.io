@@ -1,6 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>通过比对bim文件查找有问题基因型文件代码实现</title>
+    <url>/posts/58fe67f5/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>当你用 plink 软件合并同一款芯片的多对plink文件时，出现了下述报错，提示有些位点不是二等位基因型。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Error: Variant <span class="string">&#x27;1_242598&#x27;</span> <span class="keyword">is</span> <span class="keyword">not</span> biallelic.</span><br></pre></td></tr></table></figure>
+<p>这时候你就需要找到有问题的plink文件</p>
+<span id="more"></span>
+<h1>前言</h1>
+<p>这种情况比较罕见，正常情况下不会发生，最可能的原因有两个</p>
+<ol>
+<li>虽然是同一款芯片，但是可能存在更换了注释文件，导致同一个位点分型出来的两个碱基不同。</li>
+<li>弄混了 Top 链 和 Forward 链的 plink 文件</li>
+</ol>
+<h1>使用软件</h1>
+<ul>
+<li>python 3.8 及以上版本</li>
+<li>plink 软件 v1.90 版本</li>
+</ul>
+<h1>输入文件格式</h1>
+<h2 id="plink-文本文件">plink 文本文件</h2>
+<p>格式说明见<a href="https://vincere.fun/posts/506fc784/">根据芯片号拆分plink文件的代码实现</a></p>
+<h2 id="plink-二进制文件">plink 二进制文件</h2>
+<p>通过 plink 软件的 <code>--make-bed</code> 命令生成的二进制基因型文件，具体格式说明见<a href="https://vincere.fun/posts/def937d0/">plink学习笔记</a>。这里我们需要的就是后缀为<code>.bim</code> 的文件，这个文件在map文件的基础上新增了两列，为该SNP的两个碱基。</p>
+<p>举个例子，下表为 bim 文件中的内容，第一行中的SNP的第一个碱基为 0 ，说明这个SNP均为一种分型（GG）。</p>
+<table>
+<thead>
+<tr>
+<th>1</th>
+<th>CNCB10000545</th>
+<th>0</th>
+<th>119120907</th>
+<th>0</th>
+<th>G</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>CNC10012269</td>
+<td>0</td>
+<td>119133853</td>
+<td>A</td>
+<td>G</td>
+</tr>
+<tr>
+<td>1</td>
+<td>CNC10012270</td>
+<td>0</td>
+<td>119144804</td>
+<td>G</td>
+<td>C</td>
+</tr>
+</tbody>
+</table>
+<h1>比对多对plink文件代码</h1>
+<h2 id="运行代码">运行代码</h2>
+<p>代码文件见: <a href="https://github.com/VincereZhou/code_backup/blob/master/cmp_bims.py">cmp_bims.py</a></p>
+<p>将所有需要检验的plink文本文件和本程序放在一个文件夹内，运行命令示范如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python cmp_bims.py in_path</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明</strong>：</p>
+<p><code>in_path</code> ：需要检验的多对plink文本文件所在的文件夹路径，注意一对<code>ped</code>文件和<code>map</code>文件的前缀必须相同。</p>
+<h2 id="代码说明">代码说明</h2>
+<h3 id="每对plink文件生成同名二进制文件">每对plink文件生成同名二进制文件</h3>
+<p>首先导入需要的模块</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> sys,os</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict</span><br></pre></td></tr></table></figure>
+<p>唯一的一个参数命名为 <code>work_path</code>，即工作路径</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">work_path = sys.argv[<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+<p>创建一个报错提示逻辑值<code>total_error_status</code> ，初始化为 <code>False</code> 。如果值为 <code>True</code> ，表示存在报错。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">total_error_status = <span class="literal">False</span></span><br></pre></td></tr></table></figure>
+<p>切换目录</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 切换目录</span></span><br><span class="line">os.chdir(work_path) </span><br></pre></td></tr></table></figure>
+<p>每对plink文件生成 <code>bim</code> 文件。这里是遍历输入路径下的所有文件，找到后缀为<code>.ped</code> 的文件，查找是否存在相应前缀的<code>.map</code> 文件，如果不存在则报错；之后使用 plink 软件生成二进制文件，将退出码赋给 <code>exit_code</code> ，如果退出码不为0，说明plink 软件生成二进制文件存在报错。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 每对plink文件生成 bim 文件</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> os.listdir(<span class="string">&quot;.&quot;</span>):</span><br><span class="line">    <span class="keyword">if</span> os.path.isfile(i): <span class="comment">#判断是文件</span></span><br><span class="line">        <span class="keyword">if</span> i[-<span class="number">4</span>:] == <span class="string">&quot;.ped&quot;</span>: <span class="comment">#判断后缀是.ped</span></span><br><span class="line">            prefix = i[:-<span class="number">4</span>]   <span class="comment">#去除.ped</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;prefix&#125;</span>.map&quot;</span>):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Error: have <span class="subst">&#123;prefix&#125;</span>.ped but not have <span class="subst">&#123;prefix&#125;</span>.map\n&quot;</span>)</span><br><span class="line">                total_error_status = <span class="literal">True</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                exit_code = os.system(<span class="string">f&quot;plink --allow-extra-chr --chr-set 95 --file <span class="subst">&#123;prefix&#125;</span> --out <span class="subst">&#123;prefix&#125;</span> &amp;&gt; /dev/null&quot;</span>)</span><br><span class="line">                <span class="keyword">if</span> exit_code != <span class="number">0</span>:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">f&quot;Error: plink file <span class="subst">&#123;prefix&#125;</span> has problems and can&#x27;t go through plink software, please see <span class="subst">&#123;prefix&#125;</span>.log\n&quot;</span>)</span><br><span class="line">                    total_error_status = <span class="literal">True</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在上面一步中，只要存在报错，<code>total_error_status</code> 的值就会改为<code>True</code> 。如果有问题，程序中止。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> total_error_status:</span><br><span class="line">    sys.exit(<span class="number">1</span>) </span><br></pre></td></tr></table></figure>
+<h3 id="遍历所有bim文件，查找有问题的plink文件">遍历所有bim文件，查找有问题的plink文件</h3>
+<p>这里首先是遍历输入文件的 <code>bim</code> 文件，将第一个<code>bim</code>文件所有SNP的碱基信息存入到<code>dict1</code> 字典中，键为SNP名称，值为该SNP的碱基的集合（包含 “0”）。</p>
+<p>然后以第一个<code>bim</code>文件为模块，比对其他<code>bim</code> 文件。如果其他<code>bim</code> 文件的位点不再第一个<code>bim</code> 文件中，或者某个SNP的两个碱基与第一个<code>bim</code>文件不匹配，则打印报错信息，否则就打印<code>***.bim is well</code> ，说明<strong>与第一个<code>bim</code>文件相比较</strong>，这个<code>bim</code>文件没问题。</p>
+<p>注意，由于这里第一个<code>bim</code>文件是随机选择的，因此如果恰好第一个<code>bim</code>文件就是有问题的，那么可能出现其他<code>bim</code> 文件均报错的情况。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#遍历所有的bim文件</span></span><br><span class="line">j = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> os.listdir(<span class="string">&quot;.&quot;</span>):</span><br><span class="line">    <span class="keyword">if</span> (os.path.isfile(i)) <span class="keyword">and</span> (i[-<span class="number">4</span>:] == <span class="string">&quot;.bim&quot;</span>): <span class="comment">#判断是文件，后缀为bim</span></span><br><span class="line">        <span class="comment"># prefix = i[:-4]   #去除.bim</span></span><br><span class="line">        j += <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> j == <span class="number">1</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;i&#125;</span> is first bim&quot;</span>) <span class="comment"># 打印第一个文件</span></span><br><span class="line">            bim_file = <span class="built_in">open</span>(i,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">            <span class="keyword">for</span> i2 <span class="keyword">in</span> bim_file:</span><br><span class="line">                f2 = i2.split()</span><br><span class="line">                temp_alleles_set = dict1[f2[<span class="number">1</span>]] <span class="comment"># 该SNP的碱基集合</span></span><br><span class="line">                temp_alleles_set.add(<span class="string">&quot;0&quot;</span>) <span class="comment"># 先添加0</span></span><br><span class="line">                temp_alleles_set.add(f2[-<span class="number">2</span>])</span><br><span class="line">                temp_alleles_set.add(f2[-<span class="number">1</span>])</span><br><span class="line">            bim_file.close()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># 以第一个bim为模板，比对其他bim文件。</span></span><br><span class="line">            bim_file = <span class="built_in">open</span>(i,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">            <span class="keyword">for</span> i2 <span class="keyword">in</span> bim_file:</span><br><span class="line">                f2 = i2.split()</span><br><span class="line">                <span class="keyword">if</span> f2[<span class="number">1</span>] <span class="keyword">in</span> dict1:</span><br><span class="line">                    temp_alleles_set = dict1[f2[<span class="number">1</span>]].copy() <span class="comment"># 第一个文件该SNP碱基集合的拷贝</span></span><br><span class="line">                    temp_alleles_set.add(f2[-<span class="number">2</span>])</span><br><span class="line">                    temp_alleles_set.add(f2[-<span class="number">1</span>])</span><br><span class="line">                    <span class="keyword">if</span> <span class="built_in">len</span>(temp_alleles_set) &gt; <span class="number">3</span>: <span class="comment"># 如果超过了两个碱基</span></span><br><span class="line">                        <span class="built_in">print</span>(<span class="string">f&quot;Error: SNP <span class="subst">&#123;f2[<span class="number">1</span>]&#125;</span> in <span class="subst">&#123;i&#125;</span> is not consistent with first bim\n&quot;</span>) <span class="comment">#打印错误文件的错误碱基</span></span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">f&quot;Error: SNP <span class="subst">&#123;f2[<span class="number">1</span>]&#125;</span> in <span class="subst">&#123;i&#125;</span> not in first bim\n&quot;</span>)</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;i&#125;</span> is well&quot;</span>) <span class="comment">#没有问题则打印没问题</span></span><br><span class="line">            bim_file.close()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1>比对两个bim文件代码</h1>
+<h2 id="前言">前言</h2>
+<p>假如你在上一步找到有问题的plink文件，你先看看这个plink文件与所谓的正常的plink文件到底是哪些位点的等位基因不一样，你就可以接着运行这个脚本。</p>
+<p>或者你总共就只有两对plink文件，合并报错，你也可以直接运行这个脚本。</p>
+<h2 id="运行代码-2">运行代码</h2>
+<p>代码文件见: <a href="https://github.com/VincereZhou/code_backup/blob/master/cmp_two_bims.py">cmp_two_bims.py</a></p>
+<p>将需要检验的bim文件和本程序放在一个文件夹内，运行命令示范如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python cmp_two_bims.py 1.bim 2.bim cmp_two_bims.txt</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明</strong>：</p>
+<p><code>1.bim</code>: 第一个<code>bim</code>文件名称</p>
+<p><code>2.bim</code>: 第二个<code>bim</code>文件名称</p>
+<p><code>cmp_two_bims.txt</code> : 结果文件名称</p>
+<p>注意：这里直接用的是<code>bim</code>文件，如果没有生成就先用plink软件生成一下。</p>
+<h2 id="输出文件格式">输出文件格式</h2>
+<p>输出文件为<strong>不一致</strong>位点的碱基信息，总共5列，第一列为SNP名称，第二列和第三列为该SNP在第一个<code>bim</code>文件的两个碱基，第四列和第五列为该SNP在第二个<code>bim</code>文件的两个碱基。示例如下</p>
+<table>
+<thead>
+<tr>
+<th>CNC10012269</th>
+<th>A</th>
+<th>G</th>
+<th>A</th>
+<th>C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CNC10012270</td>
+<td>G</td>
+<td>C</td>
+<td>A</td>
+<td>T</td>
+</tr>
+</tbody>
+</table>
+<h2 id="代码说明-2">代码说明</h2>
+<h3 id="读取文件">读取文件</h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">bim1 = <span class="built_in">open</span>(sys.argv[<span class="number">1</span>],<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">bim2 = <span class="built_in">open</span>(sys.argv[<span class="number">2</span>],<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">out_file = <span class="built_in">open</span>(sys.argv[<span class="number">3</span>],<span class="string">&#x27;w&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>输出文件写入标题</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">out_file.write(<span class="string">&quot;\t&quot;</span>.join([<span class="string">&quot;snp&quot;</span>,<span class="string">&quot;bim1_A1&quot;</span>,<span class="string">&quot;bim1_A2&quot;</span>,<span class="string">&quot;bim2_A1&quot;</span>,<span class="string">&quot;bim2_A2&quot;</span>])+<span class="string">&#x27;\n&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="遍历第一个bim文件">遍历第一个bim文件</h3>
+<p>将第一个<code>bim</code>文件SNP的两个碱基信息写入一个字典中</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">dick = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> bim1:</span><br><span class="line">    f = i.split()</span><br><span class="line">    dick[f[<span class="number">1</span>]] = f[-<span class="number">2</span>:] <span class="comment">#snp名称：倒数第二列</span></span><br></pre></td></tr></table></figure>
+<h3 id="遍历第二个bim文件，比对SNP">遍历第二个bim文件，比对SNP</h3>
+<p>首先判断第二个<code>bim</code>文件的SNP是否均在第一个<code>bim</code>文件中，如果不是则报错中止程序。</p>
+<p>之后检查每个SNP在两个<code>bim</code>文件中的碱基数目是否超过 2 (加上 “0” 超过3) ，超过了就说明有问题，将该SNP数据的信息写入输出文件，不一致位点数 <code>error_base_num </code> 加1。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">error_base_num = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> bim2:</span><br><span class="line">    f = i.split()</span><br><span class="line">    <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">not</span> <span class="keyword">in</span> dick:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Error: &#123;&#125; in bim2 not in bim1&quot;</span>.<span class="built_in">format</span>(f[<span class="number">1</span>]))</span><br><span class="line">        sys.exit()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        bim1_alleles_set = <span class="built_in">set</span>(dick[f[<span class="number">1</span>]])</span><br><span class="line">        bim1_alleles_set.add(<span class="string">&quot;0&quot;</span>)</span><br><span class="line">        bim1_alleles_set.add(f[-<span class="number">2</span>])</span><br><span class="line">        bim1_alleles_set.add(f[-<span class="number">1</span>])</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(bim1_alleles_set) &gt; <span class="number">3</span>: <span class="comment">#如果包括0，两个bim合并的等位基因数目大于3，就有问题</span></span><br><span class="line">            error_base_num += <span class="number">1</span></span><br><span class="line">            bim1_alleles = <span class="string">&#x27;\t&#x27;</span>.join(dick[f[<span class="number">1</span>]])</span><br><span class="line">            out_file.write(<span class="string">f&quot;<span class="subst">&#123;f[<span class="number">1</span>]&#125;</span>\t<span class="subst">&#123;bim1_alleles&#125;</span>\t<span class="subst">&#123;f[-<span class="number">2</span>]&#125;</span>\t<span class="subst">&#123;f[-<span class="number">1</span>]&#125;</span>\n&quot;</span>)</span><br><span class="line">            <span class="comment"># print(&quot;Error: &#123;&#125; in bim2 file has more than 2 alleles&quot;.format(f[1]))</span></span><br><span class="line">            <span class="comment"># sys.exit()</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="打印提示信息">打印提示信息</h3>
+<p>如果不一致位点数为0，那么打印祝贺信息；反之提示有几个不一致位点。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> error_base_num == <span class="number">0</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Congradulation: two bim fils is consistent&quot;</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Error: <span class="subst">&#123;error_base_num&#125;</span> bases has more than 2 alleles&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="关闭文件">关闭文件</h3>
+<p>用完记得关闭文件，这是个好习惯</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">bim1.close()</span><br><span class="line">bim2.close()</span><br><span class="line">out_file.close()</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>调整plink文件SNP顺序代码实现</title>
     <url>/posts/c9697aaa/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>一般来说 Plink 文件中的SNP顺序并不影响任何操作，如果有必要的话，可以通过下面这个代码以指定SNP顺序调整plink文件。</p>

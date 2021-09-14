@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    通过比对bim文件查找有问题基因型文件代码实现 |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-通过比对bim文件查找有问题基因型文件代码实现"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  通过比对bim文件查找有问题基因型文件代码实现
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/58fe67f5/" class="article-date">
+  <time datetime="2021-09-14T06:15:53.000Z" itemprop="datePublished">2021-09-14</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a> / <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/python/">python</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">8 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>当你用 plink 软件合并同一款芯片的多对plink文件时，出现了下述报错，提示有些位点不是二等位基因型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error: Variant <span class="string">&#x27;1_242598&#x27;</span> <span class="keyword">is</span> <span class="keyword">not</span> biallelic.</span><br></pre></td></tr></table></figure>
+<p>这时候你就需要找到有问题的plink文件</p>
+<span id="more"></span>
+<h1>前言</h1>
+<p>这种情况比较罕见，正常情况下不会发生，最可能的原因有两个</p>
+<ol>
+<li>虽然是同一款芯片，但是可能存在更换了注释文件，导致同一个位点分型出来的两个碱基不同。</li>
+<li>弄混了 Top 链 和 Forward 链的 plink 文件</li>
+</ol>
+<h1>使用软件</h1>
+<ul>
+<li>python 3.8 及以上版本</li>
+<li>plink 软件 v1.90 版本</li>
+</ul>
+<h1>输入文件格式</h1>
+<h2 id="plink-文本文件">plink 文本文件</h2>
+<p>格式说明见<a target="_blank" rel="noopener" href="https://vincere.fun/posts/506fc784/">根据芯片号拆分plink文件的代码实现</a></p>
+<h2 id="plink-二进制文件">plink 二进制文件</h2>
+<p>通过 plink 软件的 <code>--make-bed</code> 命令生成的二进制基因型文件，具体格式说明见<a target="_blank" rel="noopener" href="https://vincere.fun/posts/def937d0/">plink学习笔记</a>。这里我们需要的就是后缀为<code>.bim</code> 的文件，这个文件在map文件的基础上新增了两列，为该SNP的两个碱基。</p>
+<p>举个例子，下表为 bim 文件中的内容，第一行中的SNP的第一个碱基为 0 ，说明这个SNP均为一种分型（GG）。</p>
+<table>
+<thead>
+<tr>
+<th>1</th>
+<th>CNCB10000545</th>
+<th>0</th>
+<th>119120907</th>
+<th>0</th>
+<th>G</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>CNC10012269</td>
+<td>0</td>
+<td>119133853</td>
+<td>A</td>
+<td>G</td>
+</tr>
+<tr>
+<td>1</td>
+<td>CNC10012270</td>
+<td>0</td>
+<td>119144804</td>
+<td>G</td>
+<td>C</td>
+</tr>
+</tbody>
+</table>
+<h1>比对多对plink文件代码</h1>
+<h2 id="运行代码">运行代码</h2>
+<p>代码文件见: <a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/cmp_bims.py">cmp_bims.py</a></p>
+<p>将所有需要检验的plink文本文件和本程序放在一个文件夹内，运行命令示范如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python cmp_bims.py in_path</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明</strong>：</p>
+<p><code>in_path</code> ：需要检验的多对plink文本文件所在的文件夹路径，注意一对<code>ped</code>文件和<code>map</code>文件的前缀必须相同。</p>
+<h2 id="代码说明">代码说明</h2>
+<h3 id="每对plink文件生成同名二进制文件">每对plink文件生成同名二进制文件</h3>
+<p>首先导入需要的模块</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys,os</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict</span><br></pre></td></tr></table></figure>
+<p>唯一的一个参数命名为 <code>work_path</code>，即工作路径</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">work_path = sys.argv[<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+<p>创建一个报错提示逻辑值<code>total_error_status</code> ，初始化为 <code>False</code> 。如果值为 <code>True</code> ，表示存在报错。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">total_error_status = <span class="literal">False</span></span><br></pre></td></tr></table></figure>
+<p>切换目录</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 切换目录</span></span><br><span class="line">os.chdir(work_path) </span><br></pre></td></tr></table></figure>
+<p>每对plink文件生成 <code>bim</code> 文件。这里是遍历输入路径下的所有文件，找到后缀为<code>.ped</code> 的文件，查找是否存在相应前缀的<code>.map</code> 文件，如果不存在则报错；之后使用 plink 软件生成二进制文件，将退出码赋给 <code>exit_code</code> ，如果退出码不为0，说明plink 软件生成二进制文件存在报错。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每对plink文件生成 bim 文件</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> os.listdir(<span class="string">&quot;.&quot;</span>):</span><br><span class="line">    <span class="keyword">if</span> os.path.isfile(i): <span class="comment">#判断是文件</span></span><br><span class="line">        <span class="keyword">if</span> i[-<span class="number">4</span>:] == <span class="string">&quot;.ped&quot;</span>: <span class="comment">#判断后缀是.ped</span></span><br><span class="line">            prefix = i[:-<span class="number">4</span>]   <span class="comment">#去除.ped</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;prefix&#125;</span>.map&quot;</span>):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Error: have <span class="subst">&#123;prefix&#125;</span>.ped but not have <span class="subst">&#123;prefix&#125;</span>.map\n&quot;</span>)</span><br><span class="line">                total_error_status = <span class="literal">True</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                exit_code = os.system(<span class="string">f&quot;plink --allow-extra-chr --chr-set 95 --file <span class="subst">&#123;prefix&#125;</span> --out <span class="subst">&#123;prefix&#125;</span> &amp;&gt; /dev/null&quot;</span>)</span><br><span class="line">                <span class="keyword">if</span> exit_code != <span class="number">0</span>:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">f&quot;Error: plink file <span class="subst">&#123;prefix&#125;</span> has problems and can&#x27;t go through plink software, please see <span class="subst">&#123;prefix&#125;</span>.log\n&quot;</span>)</span><br><span class="line">                    total_error_status = <span class="literal">True</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在上面一步中，只要存在报错，<code>total_error_status</code> 的值就会改为<code>True</code> 。如果有问题，程序中止。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> total_error_status:</span><br><span class="line">    sys.exit(<span class="number">1</span>) </span><br></pre></td></tr></table></figure>
+<h3 id="遍历所有bim文件，查找有问题的plink文件">遍历所有bim文件，查找有问题的plink文件</h3>
+<p>这里首先是遍历输入文件的 <code>bim</code> 文件，将第一个<code>bim</code>文件所有SNP的碱基信息存入到<code>dict1</code> 字典中，键为SNP名称，值为该SNP的碱基的集合（包含 “0”）。</p>
+<p>然后以第一个<code>bim</code>文件为模块，比对其他<code>bim</code> 文件。如果其他<code>bim</code> 文件的位点不再第一个<code>bim</code> 文件中，或者某个SNP的两个碱基与第一个<code>bim</code>文件不匹配，则打印报错信息，否则就打印<code>***.bim is well</code> ，说明<strong>与第一个<code>bim</code>文件相比较</strong>，这个<code>bim</code>文件没问题。</p>
+<p>注意，由于这里第一个<code>bim</code>文件是随机选择的，因此如果恰好第一个<code>bim</code>文件就是有问题的，那么可能出现其他<code>bim</code> 文件均报错的情况。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#遍历所有的bim文件</span></span><br><span class="line">j = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> os.listdir(<span class="string">&quot;.&quot;</span>):</span><br><span class="line">    <span class="keyword">if</span> (os.path.isfile(i)) <span class="keyword">and</span> (i[-<span class="number">4</span>:] == <span class="string">&quot;.bim&quot;</span>): <span class="comment">#判断是文件，后缀为bim</span></span><br><span class="line">        <span class="comment"># prefix = i[:-4]   #去除.bim</span></span><br><span class="line">        j += <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> j == <span class="number">1</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;i&#125;</span> is first bim&quot;</span>) <span class="comment"># 打印第一个文件</span></span><br><span class="line">            bim_file = <span class="built_in">open</span>(i,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">            <span class="keyword">for</span> i2 <span class="keyword">in</span> bim_file:</span><br><span class="line">                f2 = i2.split()</span><br><span class="line">                temp_alleles_set = dict1[f2[<span class="number">1</span>]] <span class="comment"># 该SNP的碱基集合</span></span><br><span class="line">                temp_alleles_set.add(<span class="string">&quot;0&quot;</span>) <span class="comment"># 先添加0</span></span><br><span class="line">                temp_alleles_set.add(f2[-<span class="number">2</span>])</span><br><span class="line">                temp_alleles_set.add(f2[-<span class="number">1</span>])</span><br><span class="line">            bim_file.close()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># 以第一个bim为模板，比对其他bim文件。</span></span><br><span class="line">            bim_file = <span class="built_in">open</span>(i,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">            <span class="keyword">for</span> i2 <span class="keyword">in</span> bim_file:</span><br><span class="line">                f2 = i2.split()</span><br><span class="line">                <span class="keyword">if</span> f2[<span class="number">1</span>] <span class="keyword">in</span> dict1:</span><br><span class="line">                    temp_alleles_set = dict1[f2[<span class="number">1</span>]].copy() <span class="comment"># 第一个文件该SNP碱基集合的拷贝</span></span><br><span class="line">                    temp_alleles_set.add(f2[-<span class="number">2</span>])</span><br><span class="line">                    temp_alleles_set.add(f2[-<span class="number">1</span>])</span><br><span class="line">                    <span class="keyword">if</span> <span class="built_in">len</span>(temp_alleles_set) &gt; <span class="number">3</span>: <span class="comment"># 如果超过了两个碱基</span></span><br><span class="line">                        <span class="built_in">print</span>(<span class="string">f&quot;Error: SNP <span class="subst">&#123;f2[<span class="number">1</span>]&#125;</span> in <span class="subst">&#123;i&#125;</span> is not consistent with first bim\n&quot;</span>) <span class="comment">#打印错误文件的错误碱基</span></span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">f&quot;Error: SNP <span class="subst">&#123;f2[<span class="number">1</span>]&#125;</span> in <span class="subst">&#123;i&#125;</span> not in first bim\n&quot;</span>)</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;i&#125;</span> is well&quot;</span>) <span class="comment">#没有问题则打印没问题</span></span><br><span class="line">            bim_file.close()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1>比对两个bim文件代码</h1>
+<h2 id="前言">前言</h2>
+<p>假如你在上一步找到有问题的plink文件，你先看看这个plink文件与所谓的正常的plink文件到底是哪些位点的等位基因不一样，你就可以接着运行这个脚本。</p>
+<p>或者你总共就只有两对plink文件，合并报错，你也可以直接运行这个脚本。</p>
+<h2 id="运行代码-2">运行代码</h2>
+<p>代码文件见: <a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/cmp_two_bims.py">cmp_two_bims.py</a></p>
+<p>将需要检验的bim文件和本程序放在一个文件夹内，运行命令示范如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python cmp_two_bims.py 1.bim 2.bim cmp_two_bims.txt</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明</strong>：</p>
+<p><code>1.bim</code>: 第一个<code>bim</code>文件名称</p>
+<p><code>2.bim</code>: 第二个<code>bim</code>文件名称</p>
+<p><code>cmp_two_bims.txt</code> : 结果文件名称</p>
+<p>注意：这里直接用的是<code>bim</code>文件，如果没有生成就先用plink软件生成一下。</p>
+<h2 id="输出文件格式">输出文件格式</h2>
+<p>输出文件为<strong>不一致</strong>位点的碱基信息，总共5列，第一列为SNP名称，第二列和第三列为该SNP在第一个<code>bim</code>文件的两个碱基，第四列和第五列为该SNP在第二个<code>bim</code>文件的两个碱基。示例如下</p>
+<table>
+<thead>
+<tr>
+<th>CNC10012269</th>
+<th>A</th>
+<th>G</th>
+<th>A</th>
+<th>C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CNC10012270</td>
+<td>G</td>
+<td>C</td>
+<td>A</td>
+<td>T</td>
+</tr>
+</tbody>
+</table>
+<h2 id="代码说明-2">代码说明</h2>
+<h3 id="读取文件">读取文件</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">bim1 = <span class="built_in">open</span>(sys.argv[<span class="number">1</span>],<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">bim2 = <span class="built_in">open</span>(sys.argv[<span class="number">2</span>],<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">out_file = <span class="built_in">open</span>(sys.argv[<span class="number">3</span>],<span class="string">&#x27;w&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>输出文件写入标题</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">out_file.write(<span class="string">&quot;\t&quot;</span>.join([<span class="string">&quot;snp&quot;</span>,<span class="string">&quot;bim1_A1&quot;</span>,<span class="string">&quot;bim1_A2&quot;</span>,<span class="string">&quot;bim2_A1&quot;</span>,<span class="string">&quot;bim2_A2&quot;</span>])+<span class="string">&#x27;\n&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="遍历第一个bim文件">遍历第一个bim文件</h3>
+<p>将第一个<code>bim</code>文件SNP的两个碱基信息写入一个字典中</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dick = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> bim1:</span><br><span class="line">    f = i.split()</span><br><span class="line">    dick[f[<span class="number">1</span>]] = f[-<span class="number">2</span>:] <span class="comment">#snp名称：倒数第二列</span></span><br></pre></td></tr></table></figure>
+<h3 id="遍历第二个bim文件，比对SNP">遍历第二个bim文件，比对SNP</h3>
+<p>首先判断第二个<code>bim</code>文件的SNP是否均在第一个<code>bim</code>文件中，如果不是则报错中止程序。</p>
+<p>之后检查每个SNP在两个<code>bim</code>文件中的碱基数目是否超过 2 (加上 “0” 超过3) ，超过了就说明有问题，将该SNP数据的信息写入输出文件，不一致位点数 <code>error_base_num </code> 加1。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">error_base_num = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> bim2:</span><br><span class="line">    f = i.split()</span><br><span class="line">    <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">not</span> <span class="keyword">in</span> dick:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Error: &#123;&#125; in bim2 not in bim1&quot;</span>.<span class="built_in">format</span>(f[<span class="number">1</span>]))</span><br><span class="line">        sys.exit()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        bim1_alleles_set = <span class="built_in">set</span>(dick[f[<span class="number">1</span>]])</span><br><span class="line">        bim1_alleles_set.add(<span class="string">&quot;0&quot;</span>)</span><br><span class="line">        bim1_alleles_set.add(f[-<span class="number">2</span>])</span><br><span class="line">        bim1_alleles_set.add(f[-<span class="number">1</span>])</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(bim1_alleles_set) &gt; <span class="number">3</span>: <span class="comment">#如果包括0，两个bim合并的等位基因数目大于3，就有问题</span></span><br><span class="line">            error_base_num += <span class="number">1</span></span><br><span class="line">            bim1_alleles = <span class="string">&#x27;\t&#x27;</span>.join(dick[f[<span class="number">1</span>]])</span><br><span class="line">            out_file.write(<span class="string">f&quot;<span class="subst">&#123;f[<span class="number">1</span>]&#125;</span>\t<span class="subst">&#123;bim1_alleles&#125;</span>\t<span class="subst">&#123;f[-<span class="number">2</span>]&#125;</span>\t<span class="subst">&#123;f[-<span class="number">1</span>]&#125;</span>\n&quot;</span>)</span><br><span class="line">            <span class="comment"># print(&quot;Error: &#123;&#125; in bim2 file has more than 2 alleles&quot;.format(f[1]))</span></span><br><span class="line">            <span class="comment"># sys.exit()</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="打印提示信息">打印提示信息</h3>
+<p>如果不一致位点数为0，那么打印祝贺信息；反之提示有几个不一致位点。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> error_base_num == <span class="number">0</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Congradulation: two bim fils is consistent&quot;</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Error: <span class="subst">&#123;error_base_num&#125;</span> bases has more than 2 alleles&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="关闭文件">关闭文件</h3>
+<p>用完记得关闭文件，这是个好习惯</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bim1.close()</span><br><span class="line">bim2.close()</span><br><span class="line">out_file.close()</span><br></pre></td></tr></table></figure>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://yoursite.com/posts/58fe67f5/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/c9697aaa/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">调整plink文件SNP顺序代码实现</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2021
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和周周在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/posts/ac7827ff">我的只只</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
