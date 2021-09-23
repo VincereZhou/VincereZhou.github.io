@@ -71,7 +71,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">9.7k</span>
+            <span class="post-count">10.6k</span>
         </span>
     </span>
 
@@ -80,7 +80,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">39 分钟</span>
+            <span class="post-count">41 分钟</span>
         </span>
     </span>
 </div>
@@ -133,8 +133,26 @@
 <p><img src="4.png" alt="1"></p>
 <h3 id="为什么不用残差的绝对值？">为什么不用残差的绝对值？</h3>
 <p>我上统计课的时候就有这个问题，就一直有这个疑问，如果因为残差有方向，不能直接求和，那为什么不直接用绝对值呢？这不是更直接的更贴近残差本质的思路吗？</p>
-<p>后来上了吴恩达老师的机器学习课，知道了代价函数的概念，寻找代价函数最小值的最简单的方法就是<strong>求导</strong>。最小二乘法的代价函数就是 RSS/MSE，由于这里采用平方和（二次函数），<strong>求导会直接变成一次函数</strong>。而如果使用残差的绝对值的和，根本无法进行简单的求导，就无法简单地得到最优解的公式。</p>
-<p>所以，目前我个人的理解是使用平方和<strong>简化了运算</strong>。</p>
+<p>使用残差绝对值作为代价函数，在统计的历史上是存在的，称为<strong>最小一乘法</strong>。查看了很多网页的回答，感觉这个回答比较全 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/104391088">为什么是“最小二乘”而不是“最小一乘”？</a></p>
+<h4 id="最小一乘法的解不一定唯一">最小一乘法的解不一定唯一</h4>
+<p>举个简单的例子，根据下图中的四个点，可以构建出无数条回归直线，只要这些直线同时与 AB, CD 相交即可。</p>
+<p><img src="29.png" alt="1"></p>
+<h4 id="最小二乘求解方便">最小二乘求解方便</h4>
+<p>后来上了吴恩达老师的机器学习课，知道了代价函数的概念，寻找代价函数最小值的最简单的方法就是<strong>求导</strong>。最小二乘法的代价函数就是 RSS/MSE，由于这里采用平方和（二次函数），<strong>求导会直接变成一次函数</strong>。而如果使用残差的绝对值的和，根本无法进行简单的求导，就无法简单地得到最优解的公式（而且绝对值在 x = 0 处不可导）。</p>
+<h4 id="最小二乘假定了误差服从正态分布的前提">最小二乘假定了误差服从正态分布的前提</h4>
+<p>可以证明，当误差服从正态分布时，最大似然法估计结果和最小二乘相同。下方证明参考<a target="_blank" rel="noopener" href="https://rayleizhu.github.io/2018/12/16/%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E5%B9%B3%E6%96%B9%E8%AF%AF%E5%B7%AE/">最小二乘法为什么使用平方误差</a> 。</p>
+<p>当你用线性回归拟合数据时，其实模型包括了两部分，回归项和残差项：</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%3Dw%5E%7BT%7D%20x_%7Bi%7D%2B%5Cepsilon_%7Bi%7D%0A" /></p><p>之后我们用<strong>最大似然方法</strong>来估计参数，假设样本数目为n，似然函数表达式如下 (给定一组参数下得到这些观测值的似然值，等于得到这些残差的似然值)：</p>
+<p style=""><img src="https://math.now.sh?from=p%28y%20%5Cmid%20w%2C%20b%29%3D%5Cprod_%7Bi%3D1%7D%5E%7Bn%7D%20p%5Cleft(y_%7Bi%7D%20%5Cmid%20w%2C%20b%5Cright)%3D%5Cprod_%7Bi%3D1%7D%5E%7Bn%7D%20p%5Cleft(%5Cepsilon_%7Bi%7D%3Dy_%7Bi%7D-%5Cleft(w%5E%7BT%7D%20x_%7Bi%7D%2Bb%5Cright)%5Cright)%0A" /></p><p>我们需要找到使得似然函数最大的一组参数。</p>
+<p>假设残差独立同分布于正态分布 N(0, σ<sup>2</sup>) ，单个残差的概率密度函数如下：</p>
+<p style=""><img src="https://math.now.sh?from=f%28%5Cepsilon_i%20%3D%20y_i%20-%20(w%5ETx_i%20%2B%20b%29)%20%3D%20%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%20%5Csigma%7D%20exp(-%5Cfrac%7B%5Cepsilon_i%5E2%7D%7B2%5Csigma%20%5E%202%7D)%0A" /></p><p>多个残差服从多元正态分布，联合概率密度函数如下：（我看很多人把这个式子称为这些残差出现的概率，这是错误的。这是概率密度函数，得到的函数值不是概率。再说了，连续变量在某一点的概率为0）</p>
+<p style=""><img src="https://math.now.sh?from=f%28%5Cepsilon%29%3D%5Cprod_%7Bi%3D1%7D%5E%7Bn%7D%20%5Cfrac%7B1%7D%7B%5Csqrt%7B2%20%5Cpi%7D%20%5Csigma%7D%20%5Cexp%20%5Cleft(-%5Cfrac%7B%5Cepsilon_i%5E2%7D%7B2%5Csigma%5E%7B2%7D%7D%5Cright)%0A" /></p><p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Af%28%5Cvarepsilon%29%20%26%3D%5Cprod_%7Bi%3D1%7D%5E%7Bn%7D%20%5Cfrac%7B1%7D%7B%5Csqrt%7B2%20%5Cpi%7D%20%5Csigma%7D%20%5Cexp%20%5Cleft(-%5Cfrac%7B%5Cvarepsilon_%7Bi%7D%5E%7B2%7D%7D%7B2%20%5Csigma%5E%7B2%7D%7D%5Cright)%20%5C%5C%0A%26%3D%5Cleft(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%20%5Cpi%7D%5Csigma%7D%5Cright)%5E%7Bn%7D%20%5Cexp%20%5Cleft(-%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cfrac%7B%5Cvarepsilon_%7Bi%7D%5E%7B2%7D%7D%7B2%20%5Csigma%5E%7B2%7D%7D%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>个人理解，这里计算所谓的&quot;某个观测值/残差出现的概率“，应该是要套用 P值的概念，即<strong>出现比这个残差相同或更极端情况的概率</strong>。这里我们用单个正态分布，画出图像如下：</p>
+<p><img src="30.png" alt="1"></p>
+<p>我们很轻松地可以看到出现这个残差或更极端情况的概率，与<strong>该残差的概率密度函数的值的大小成正比</strong>。这应该可以推广到多元正态分布，虽然我无法证明。</p>
+<p>因此这个问题就转换成了求使得**联合概率密度函数<code>f(ε)</code>最大 **的一组参数，这组参数就是最大似然法的估计参数。仔细查看 **联合概率密度函数<code>f(ε)</code> **的式子，不难发现该式最大时，即误差平方和最小。</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Cepsilon_%7Bi%7D%5E%7B2%7D%0A" /></p><p>因此当<strong>残差符合正态分布</strong>时，最小二乘法的参数估计值与最大似然法一致，最小二乘法的参数估计值就是最可能的参数估计值。</p>
+<h3 id="为什么不用三次方，平方和？">为什么不用三次方，平方和？</h3>
+<p>为什么最小二乘法要用最小误差平方和来拟合（为什么不用立方和，或者开方和）?  首先你要保证误差项永远是正数，因此三次方和其他奇数次方不成立。对于四次项及更高的偶数次项，效果还没有最小二乘好，因为会<strong>放大极端值的影响</strong>。开方更不可能了，因为残差可能是负数，无法求开方。</p>
 <h2 id="参数估计准确性">参数估计准确性</h2>
 <p>我们使用的模型为</p>
 <p><img src="5.png" alt="1"></p>
