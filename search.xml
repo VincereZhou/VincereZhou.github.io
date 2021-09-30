@@ -1,6 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>为什么样本方差分母为n-1</title>
+    <url>/posts/c8ae5def/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>在学习吴恩达老师的机器学习课上，碰到了一个旧知识点：在统计上，样本方差的分母应该是 n-1 ，这样才是对总体方差的无偏估计。在网上查了很多资料，根据自己的理解总结了一下，水平有限，如有不当之处敬请指正。</p>
+<span id="more"></span>
+<h1>问题</h1>
+<p>首先我们要理清楚问题是什么，假设我们拿到了一组数据，样本数为 n，我们认为这些数据服从<strong>独立同分布</strong>的正态分布，我们想知道它们服从的正态分布的均值和方差是多少，或者说想估计它们服从的正态分布的均值和方差。</p>
+<h1>最大似然估计</h1>
+<p>这种从已有数据推断参数的事情，第一时间我想的就是最大似然估计。首先，一维正态分布的概率密度函数长这样：</p>
+<p style=""><img src="https://math.now.sh?from=f%28x%29%3D%5Cfrac%7B1%7D%7B%5Csqrt%7B2%20%5Cpi%7D%20%5Csigma%7D%20%5Cexp%20%5Cleft(-%5Cfrac%7B(x-%5Cmu)%5E%7B2%7D%7D%7B2%20%5Csigma%5E%7B2%7D%7D%5Cright)%0A" /></p><p>由于不同的样本服从独立同分布，因此所有样本的联合概率密度函数如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Af%28%5Ctextbf%7Bx%7D%7C%CE%BC%2C%5Csigma%5E%7B2%7D%29%20%26%3D%5Cprod_%7Bi%3D1%7D%5E%7Bn%7D%20%5Cfrac%7B1%7D%7B%5Csqrt%7B2%20%5Cpi%7D%20%5Csigma%7D%20%5Cexp%20%5Cleft(-%5Cfrac%7B(x-%5Cmu)%5E%7B2%7D%7D%7B2%20%5Csigma%5E%7B2%7D%7D%5Cright)%20%5C%5C%0A%26%3D%5Cleft(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%20%5Cpi%7D%5Csigma%7D%5Cright)%5E%7Bn%7D%20%5Cexp%20%5Cleft(-%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cfrac%7B(x-%5Cmu)%5E%7B2%7D%7D%7B2%20%5Csigma%5E%7B2%7D%7D%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>我们获得了联合概率密度函数，我们怎么计算给定某个 μ 和 σ<sup>2</sup> 时这组数据出现的似然值呢？根据我之前博客<a href="https://vincere.fun/posts/6cb58071/">线性回归与R代码实现</a>说过的观点，我认为这里的准确描述应该是计算出现这组数据或更极端数据的概率，这个概率值与上面的联合概率密度的大小成正比。</p>
+<p>因此，我们要求出现这组数据或更极端数据出现的似然值<strong>最大</strong>，也就是求使上式的联合概率密度函数最大的一组参数。我们对联合概率密度函数采用对数函数，可以简化运算：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cln%20f%5Cleft%28%5Cmathbf%7Bx%7D%20%5Cmid%20%5Cmu%2C%20%5Csigma%5E%7B2%7D%5Cright%29%3D-%5Cfrac%7B1%7D%7B2%20%5Csigma%5E%7B2%7D%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(x_%7Bi%7D-%5Cmu%5Cright)%5E%7B2%7D-%5Cfrac%7Bn%7D%7B2%7D%20%5Cln%20%5Csigma%5E%7B2%7D-%5Cfrac%7Bn%7D%7B2%7D%20%5Cln%20(2%20%5Cpi)%0A" /></p><p>为了方便查看，这里我们将 σ<sup>2</sup> 替换为 v 。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cln%20f%5Cleft%28%5Cmathbf%7Bx%7D%20%5Cmid%20%5Cmu%2C%20v%5Cright%29%3D-%5Cfrac%7B1%7D%7B2%20v%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(x_%7Bi%7D-%5Cmu%5Cright)%5E%7B2%7D-%5Cfrac%7Bn%7D%7B2%7D%20%5Cln%20v-%5Cfrac%7Bn%7D%7B2%7D%20%5Cln%20(2%20%5Cpi)%0A" /></p><p>这里要求该式的极值，想到了对该式求偏导，计算两个偏导等于 0 时的参数值。首先对参数 μ 求偏导。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20%5Cmu%7D%20%26%3D-%5Cfrac%7B1%7D%7B2%20v%7D%20%5Ccdot%202%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28x_%7Bi%7D-%5Cmu%5Cright%29(-1)%20%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7Bv%7D%5Cleft(%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20X_%7Bi%7D-n%20%5Cmu%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>求该式为 0 ，得到参数 μ 的最大似然值如下，就是样本均值</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmu%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20X_%7Bi%7D%0A" /></p><p>再对参数 v (即σ<sup>2</sup>) 求偏导</p>
+<p style=""><img src="https://math.now.sh?from=%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20v%7D%3D%5Cfrac%7B1%7D%7B2%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28x_%7Bi%7D-%5Cmu%5Cright%29%5E%7B2%7D%20v%5E%7B-2%7D-%5Cfrac%7Bn%7D%7B2%7D%20v%5E%7B-1%7D%0A" /></p><p>求该式为 0 ，得到参数 v  (即σ<sup>2</sup>)  的最大似然值如下。</p>
+<p style=""><img src="https://math.now.sh?from=%5Csigma%5E%7B2%7D%20%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28x_%7Bi%7D-%5Cmu%5Cright%29%5E%7B2%7D%0A" /></p><p>这个式子是没有问题的。但是注意，<strong>这里得到的方差估计值的公式中含有总体均值 μ</strong>。看我们的问题，我们并不知道总体均值，我们上面得到了总体均值的最大似然估计值就是样本均值，我们能不能直接将总体均值替换为样本均值呢？就是下式：</p>
+<p style=""><img src="https://math.now.sh?from=%5Csigma%5E%7B2%7D%20%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28x_%7Bi%7D-%5Cbar%7BX%7D%5Cright%29%5E%7B2%7D%0A" /></p><p>这里可以证明这样做会<strong>低估</strong>总体方差。</p>
+<h1>证明分母为n的样本方差会低估总体方差</h1>
+<p>我们这里构建一个函数 f(a)</p>
+<p style=""><img src="https://math.now.sh?from=f%28a%29%20%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(x_%7Bi%7D-a%5Cright)%5E%7B2%7D%0A" /></p><p>求导得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Af'%28a%29%20%26%3D%5Cfrac%7B2%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(x_%7Bi%7D-a%5Cright)(-1)%20%5C%5C%0A%26%3D%5Cfrac%7B2%7D%7Bn%7D%5Cleft(n%20a-%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20x_%7Bi%7D%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>当导数为 0 时，a 等于</p>
+<p style=""><img src="https://math.now.sh?from=a%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20x_%7Bi%7D%3D%5Cbar%7BX%7D%0A" /></p><p>易知，当 a 等于样本均值时，该式最小。因此，下式成立</p>
+<p style=""><img src="https://math.now.sh?from=%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28X_%7Bi%7D-%5Cbar%7BX%7D%5Cright%29%5E%7B2%7D%20%5Cleq%20%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(X_%7Bi%7D-%5Cmu%5Cright)%5E%7B2%7D%0A" /></p><p>证明分母为n的样本方差会低估总体方差估计值。</p>
+<p>具体小多少，可以计算一下（下面的证明引自<a href="https://www.zhihu.com/question/20099757">为什么样本方差（sample variance）的分母是 n-1？</a> ）：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AE%5Cleft%28S_%7B1%7D%5E%7B2%7D%5Cright%29%20%26%3D%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20E%5Cleft(%5Cleft(X_%7Bi%7D-%5Cbar%7BX%7D%5Cright)%5E%7B2%7D%5Cright)%3D%5Cfrac%7B1%7D%7Bn%7D%20E%5Cleft(%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(X_%7Bi%7D-%5Cmu%2B%5Cmu-%5Cbar%7BX%7D%5Cright)%5E%7B2%7D%5Cright)%20%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7Bn%7D%20E%5Cleft(%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(%5Cleft(X_%7Bi%7D-%5Cmu%5Cright)%5E%7B2%7D-2%5Cleft(X_%7Bi%7D-%5Cmu%5Cright)(%5Cbar%7BX%7D-%5Cmu)%2B(%5Cbar%7BX%7D-%5Cmu)%5E%7B2%7D%5Cright)%5Cright)%20%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7Bn%7D%20E%5Cleft(%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(X_%7Bi%7D-%5Cmu%5Cright)%5E%7B2%7D-2%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(X_%7Bi%7D-%5Cmu%5Cright)(%5Cbar%7BX%7D-%5Cmu)%2Bn(%5Cbar%7BX%7D-%5Cmu)%5E%7B2%7D%5Cright)%20%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7Bn%7D%20E%5Cleft(%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(X_%7Bi%7D-%5Cmu%5Cright)%5E%7B2%7D-2%20n(%5Cbar%7BX%7D-%5Cmu)(%5Cbar%7BX%7D-%5Cmu)%2Bn(%5Cbar%7BX%7D-%5Cmu)%5E%7B2%7D%5Cright)%20%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7Bn%7D%20E%5Cleft(%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft(X_%7Bi%7D-%5Cmu%5Cright)%5E%7B2%7D-n(%5Cbar%7BX%7D-%5Cmu)%5E%7B2%7D%5Cright)%20%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7Bn%7D%5Cleft(%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20E%5Cleft(%5Cleft(X_%7Bi%7D-%5Cmu%5Cright)%5E%7B2%7D%5Cright)-n%20E%5Cleft((%5Cbar%7BX%7D-%5Cmu)%5E%7B2%7D%5Cright)%5Cright)%20%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7Bn%7D(n%20%5Coperatorname%7BVar%7D(X)-n%20%5Coperatorname%7BVar%7D(%5Cbar%7BX%7D))%20%5C%5C%0A%26%3D%5Coperatorname%7BVar%7D(X)-%5Coperatorname%7BVar%7D(%5Cbar%7BX%7D)%3D%5Csigma%5E%7B2%7D-%5Cfrac%7B%5Csigma%5E%7B2%7D%7D%7Bn%7D%3D%5Cfrac%7Bn-1%7D%7Bn%7D%20%5Csigma%5E%7B2%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>因此，为了避免使用有偏差的估计值，我们使用下式：</p>
+<p style=""><img src="https://math.now.sh?from=S%5E%7B2%7D%3D%5Cfrac%7B1%7D%7Bn-1%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%28X_%7Bi%7D-%5Cbar%7BX%7D%5Cright%29%5E%7B2%7D%0A" /></p><h1>参考资料</h1>
+<p><a href="https://zhuanlan.zhihu.com/p/40582964">https://zhuanlan.zhihu.com/p/40582964</a></p>
+<p><a href="https://www.zhihu.com/question/20099757">https://www.zhihu.com/question/20099757</a></p>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>统计</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>统计</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>以某列作为主键比对两个文件内容代码实现</title>
     <url>/posts/705b018f/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>有的时候，你可能需要比较两个文件的<strong>实质内容</strong>是否一样，或者某一个文件的内容是否均包含在另一个文件，你可以看看本代码。</p>
