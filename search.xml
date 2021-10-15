@@ -1,6 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>统计SNP基因型频率及MAF代码实现</title>
+    <url>/posts/636ff051/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>最近准备一些材料时需要计算每个SNP三种分型的基因型频率和MAF，plink 软件只给出 MAF，因此写了一个简单的代码实现它。</p>
+<span id="more"></span>
+<h1>使用软件</h1>
+<ul>
+<li>python 3.8 及以上版本，事先安装好 Numpy 模块</li>
+</ul>
+<h1>背景知识</h1>
+<p>假设一个SNP，它有两种碱基 A 和 T，那么就有三种可能的基因型 AA, AT, TT。</p>
+<p>假设某个群体样本数目为 100 ，在这个SNP 中有 5 个样本分型失败，有 20 个样本分型为 AA, 有 30 个样本分型为 AT，有45 个样本分型为 TT，计算三种分型的基因型频率如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AP%28AA%29%20%3D%20%5Cfrac%7BAA%7D%7BAA%2BAT%2BTT%7D%20%3D%20%5Cfrac%7B20%7D%7B95%7D%20%3D%200.211%20%5C%5C%0AP(AT)%20%3D%20%5Cfrac%7BAT%7D%7BAA%2BAT%2BTT%7D%20%3D%20%5Cfrac%7B30%7D%7B95%7D%20%3D%200.316%20%5C%5C%0AP(TT)%20%3D%20%5Cfrac%7BTT%7D%7BAA%2BAT%2BTT%7D%20%3D%20%5Cfrac%7B45%7D%7B95%7D%20%3D%200.474%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>注意，分母计算总数时需要剔除分型失败的样本，三种基因型频率相加为1。</p>
+<p>现在再看MAF计算方式，MAF 是最小等位基因频率的缩写。因此，我们可以将 P(A) 和 P(T) 都计算出来，看看哪个数值更小，那就是MAF</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AP%28A%29%20%3D%20%5Cfrac%7B2*P(AA)%2BP(AT)%7D%7B2%7D%20%3D%200.368%20%5C%5C%0AP(T)%20%3D%20%5Cfrac%7B2*P(TT)%2BP(AT)%7D%7B2%7D%20%3D%200.632%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>从上面三种基因型频率结果可以看出，A 是较小的等位基因，而 T 是较大的等位基因。判断理由很简单，因为 P(AT) 不影响 P(A) 和 P(T) 的相对大小，只要看 P(AA) 和 P(TT) 哪个更小，哪个就是最小等位基因了。</p>
+<h1>输入文件</h1>
+<p>使用 plink 软件的 <code>recodeA</code> 命令生成的 raw 文件。这里每个SNP占据一列，值为最小等位基因的数目（0 1 2），缺失值记为 NA。</p>
+<h1>输出文件</h1>
+<p>输出文件共5列，第一列为SNP名称，第二列为较小等位基因纯和子的基因型频率，第三列为杂合子基因型频率，第四列为另一类纯和子基因型频率，第五列为MAF。</p>
+<table>
+<thead>
+<tr>
+<th>seq-rs80960919</th>
+<th>0.119152</th>
+<th>0.497401</th>
+<th>0.383447</th>
+<th>0.367853</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>seq-rs81350349</td>
+<td>0.195922</td>
+<td>0.530588</td>
+<td>0.273491</td>
+<td>0.461216</td>
+</tr>
+<tr>
+<td>seq-rs81349911</td>
+<td>0.2088</td>
+<td>0.5384</td>
+<td>0.2528</td>
+<td>0.478</td>
+</tr>
+</tbody>
+</table>
+<h1>运行代码</h1>
+<p>代码文件见：<a href="https://github.com/VincereZhou/code_backup/blob/master/genotype_frequency.py">genotype_frequency.py</a></p>
+<p>将输入文件和本程序放在同一文件夹下，运行命令示范如下。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python genotype_frequency.py A.raw A_frequency.txt</span><br></pre></td></tr></table></figure>
+<p><strong>参数说明：</strong></p>
+<p><code>A.raw</code>: 输入文件名称</p>
+<p><code>A_frequency.txt</code>: 结果文件名称</p>
+<p>运行结束后，生成以第二个参数为名称的结果文件</p>
+<h1>代码说明</h1>
+<h2 id="替换分型缺失值">替换分型缺失值</h2>
+<p>首先我用 linux 的 sed 命令来精准查找 NA，替换为 3，生成中间文件 temp.raw。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os,sys</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">raw_file_name = sys.argv[<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">os.system(<span class="string">f&quot;sed &#x27;s/\&lt;NA\&gt;/3/g&#x27; <span class="subst">&#123;raw_file_name&#125;</span> &gt; temp.raw&quot;</span>) <span class="comment"># 改为精准匹配</span></span><br></pre></td></tr></table></figure>
+<h2 id="读取raw文件">读取raw文件</h2>
+<p>首先从标题中提取 SNP 名称</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_file = <span class="built_in">open</span>(<span class="string">&quot;temp.raw&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">raw_file_title = raw_file.readline().split() <span class="comment">#剔除标题</span></span><br><span class="line">title_list = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> raw_file_title[<span class="number">6</span>:]:</span><br><span class="line">    title_list.append(i[:-<span class="number">2</span>]) <span class="comment"># snp 名称列表</span></span><br></pre></td></tr></table></figure>
+<p>之后将基因型信息存在到一个二维数组 array1 中，每一行表示一个样本，每一列表示一个SNP</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_list=[]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> raw_file:</span><br><span class="line">    f = i.split()</span><br><span class="line">    raw_list.append(f[<span class="number">6</span>:])</span><br><span class="line">    </span><br><span class="line">raw_file.close()</span><br><span class="line"></span><br><span class="line">array1 = np.array(raw_list, dtype=np.int8)</span><br></pre></td></tr></table></figure>
+<h2 id="统计基因型频率和MAF">统计基因型频率和MAF</h2>
+<p>首先统计每列SNP中 2,1, 0 三种分型的数目，各自除以三种分型总数，便得到了三种基因型频率。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 统计三种基因型数据</span></span><br><span class="line"></span><br><span class="line">p_array = (array1==<span class="number">2</span>).<span class="built_in">sum</span>(axis=<span class="number">0</span>) <span class="comment"># 按列求和, 较小等位基因的纯合子</span></span><br><span class="line">h_array = (array1==<span class="number">1</span>).<span class="built_in">sum</span>(axis=<span class="number">0</span>) <span class="comment"># 按列求和</span></span><br><span class="line">r_array = (array1==<span class="number">0</span>).<span class="built_in">sum</span>(axis=<span class="number">0</span>) <span class="comment"># 按列求和</span></span><br><span class="line"></span><br><span class="line">p_rate = p_array/(p_array+h_array+r_array)</span><br><span class="line">h_rate = h_array/(p_array+h_array+r_array)</span><br><span class="line">r_rate = r_array/(p_array+h_array+r_array)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>根据基因型频率，计算MAF</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">maf_rate = (<span class="number">2</span>*p_rate + h_rate)/<span class="number">2</span></span><br></pre></td></tr></table></figure>
+<h2 id="写入结果文件">写入结果文件</h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 写入结果文件</span></span><br><span class="line">out_file = <span class="built_in">open</span>(sys.argv[<span class="number">2</span>],<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line"></span><br><span class="line">snp_num = <span class="built_in">len</span>(title_list)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(snp_num):</span><br><span class="line">    out_file.write(title_list[i]+<span class="string">&quot;\t&quot;</span>+<span class="built_in">str</span>(p_rate[i])+<span class="string">&quot;\t&quot;</span>+<span class="built_in">str</span>(h_rate[i])+<span class="string">&quot;\t&quot;</span>+<span class="built_in">str</span>(r_rate[i])+<span class="string">&quot;\t&quot;</span>+<span class="built_in">str</span>(maf_rate[i])+<span class="string">&quot;\n&quot;</span>)</span><br><span class="line"></span><br><span class="line">out_file.close()</span><br></pre></td></tr></table></figure>
+<p>最后，剔除中间文件</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">os.system(<span class="string">&quot;rm temp.raw&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h1>小结</h1>
+<p>这个代码中计算的MAF 和 Plink 软件计算的 MAF 比对过，是一样的。</p>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>吴恩达机器学习笔记</title>
     <url>/posts/a473f09a/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>吴恩达老师的课确实详细易懂，就是感觉 SVM 部分没太听清楚。</p>
