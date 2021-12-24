@@ -9,7 +9,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    证明AB的秩小于等于A的秩 |  VincereZhou&#39;s blog
+    正定矩阵都是对称矩阵吗 |  VincereZhou&#39;s blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -41,7 +41,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-证明AB的秩小于等于A的秩"
+  id="post-正定矩阵都是对称矩阵吗"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -52,26 +52,22 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  证明AB的秩小于等于A的秩
+  正定矩阵都是对称矩阵吗
 </h1>
  
 
     </header>
      
     <div class="article-meta">
-      <a href="/posts/6c72beb0/" class="article-date">
-  <time datetime="2021-12-23T06:38:56.000Z" itemprop="datePublished">2021-12-23</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/">线性代数</a>
-  </div>
-  
+      <a href="/posts/37a2cb0/" class="article-date">
+  <time datetime="2021-12-24T02:02:33.000Z" itemprop="datePublished">2021-12-24</time>
+</a>   
 <div class="word_count">
     <span class="post-time">
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">764</span>
+            <span class="post-count">937</span>
         </span>
     </span>
 
@@ -80,7 +76,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">2 分钟</span>
+            <span class="post-count">3 分钟</span>
         </span>
     </span>
 </div>
@@ -95,44 +91,40 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>矩阵秩的性质的证明比较少，看到了一个很好的回答，简单地记录一下。</p>
-<p>本文内容基本来自于 <a target="_blank" rel="noopener" href="https://yutsumura.com/rank-of-the-product-of-matrices-ab-is-less-than-or-equal-to-the-rank-of-a/">Rank of the Product of Matrices ABAB is Less than or Equal to the Rank of A</a> ，感兴趣的可以自己去看一下。</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>正定矩阵的概念来自于二次型，在定义正定矩阵时，就已经明确了<strong>正定矩阵是 Hermitian 矩阵的一种</strong> (对于实数矩阵，就是指对称矩阵)。</p>
 <span id="more"></span>
-<h1>问题</h1>
-<p>如果 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 是一个 <img src="https://math.now.sh?inline=m%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 的矩阵，<img src="https://math.now.sh?inline=B" style="display:inline-block;margin: 0;"/> 是一个 <img src="https://math.now.sh?inline=n%20%5Ctimes%20q" style="display:inline-block;margin: 0;"/> 的矩阵，证明下面两个性质：</p>
-<p>(a) <img src="https://math.now.sh?inline=%5Coperatorname%7Brank%7D%28A%20B%29%20%5Cleq%20%5Coperatorname%7Brank%7D(A)" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=%5Coperatorname%7Brank%7D%28A%20B%29%20%5Cleq%20%5Coperatorname%7Brank%7D(B)" style="display:inline-block;margin: 0;"/></p>
-<p>(b) 如果 <img src="https://math.now.sh?inline=B" style="display:inline-block;margin: 0;"/> 非奇异，<img src="https://math.now.sh?inline=%5Coperatorname%7Brank%7D%28A%20B%29%20%3D%20%5Coperatorname%7Brank%7D(A)" style="display:inline-block;margin: 0;"/></p>
-<p>解决这个问题前，首先我们要先看看矩阵<strong>列空间</strong>的定义和性质。</p>
-<h1>矩阵的列空间</h1>
-<p>下面这段话来自于吴恩达老师 CS229 课程的讲义。</p>
-<p>一个向量集合的<strong>张成空间 (span)</strong> 定义为这些向量的线性组合，即为：</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Bspan%7D%5Cleft%28%5Cleft%5C%7Bx_%7B1%7D%2C%20%5Cldots%20x_%7Bn%7D%5Cright%5C%7D%5Cright%29%3D%5Cleft%5C%7Bv%3A%20v%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Calpha_%7Bi%7D%20x_%7Bi%7D%2C%20%5Calpha_%7Bi%7D%20%5Cin%20%5Cmathbb%7BR%7D%5Cright%5C%7D%0A" /></p><p>如果 <img src="https://math.now.sh?inline=%5Cleft%5C%7Bx_%7B1%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5Cright%5C%7D" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 个线性无关的向量，那么其张成空间就是 <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> 。</p>
-<p>一个向量 <img src="https://math.now.sh?inline=y%20%5Cin%20%5Cmathbb%7BR%7D%5E%7Bm%7D" style="display:inline-block;margin: 0;"/> 在 <img src="https://math.now.sh?inline=%5Cleft%5C%7Bx_%7B1%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5Cright%5C%7D" style="display:inline-block;margin: 0;"/> 的张成空间的<strong>投影 (projection)</strong> ，定义为在张成空间中与 <img src="https://math.now.sh?inline=y" style="display:inline-block;margin: 0;"/> 距离最近的一个点 (向量)，写作：</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7BProj%7D%5Cleft%28y%20%3B%5Cleft%5C%7Bx_%7B1%7D%2C%20%5Cldots%20x_%7Bn%7D%5Cright%5C%7D%5Cright%29%3D%5Coperatorname%7Bargmin%7D_%7Bv%20%5Cin%20%5Coperatorname%7Bspan%7D%5Cleft(%5Cleft%5C%7Bx_%7B1%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5Cright%5C%7D%5Cright)%7D%5C%7Cy-v%5C%7C_%7B2%7D%0A" /></p><p>一个矩阵 <img src="https://math.now.sh?inline=A%20%5Cin%20%5Cmathbb%7BR%7D%5E%7Bm%20%5Ctimes%20n%7D" style="display:inline-block;margin: 0;"/> 的<strong>列空间 (range, column space)</strong> 是它的列张成的空间，即为 <img src="https://math.now.sh?inline=%5Cmathcal%7BR%7D%28A%29" style="display:inline-block;margin: 0;"/> （好像也有人写作 <img src="https://math.now.sh?inline=C%28A%29" style="display:inline-block;margin: 0;"/>  或 <img src="https://math.now.sh?inline=Col%28A%29" style="display:inline-block;margin: 0;"/> ），即：</p>
-<p style=""><img src="https://math.now.sh?from=%5Cmathcal%7BR%7D%28A%29%3D%5Cleft%5C%7Bv%20%5Cin%20%5Cmathbb%7BR%7D%5E%7Bm%7D%3A%20v%3DA%20x%2C%20x%20%5Cin%20%5Cmathbb%7BR%7D%5E%7Bn%7D%5Cright%5C%7D%0A" /></p><p>为什么可以写成 <img src="https://math.now.sh?inline=Ax" style="display:inline-block;margin: 0;"/> 呢，我们可以将 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 写成列向量的形式，得到下式，因此  <img src="https://math.now.sh?inline=Ax" style="display:inline-block;margin: 0;"/> 就是 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的列的张成空间。</p>
-<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AA%20x%20%26%3D%5Cleft%5Ba_%7B1%7D%20a_%7B2%7D%20%5Ccdots%20a_%7Bn%7D%5Cright%5D%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0Ax_%7B1%7D%20%5C%5C%0A%5Cvdots%20%5C%5C%0Ax_%7Bn%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3Dx_%7B1%7D%20a_%7B1%7D%2Bx_%7B2%7D%20a_%7B2%7D%2B%5Ccdots%2Bx_%7Bn%7D%20a_%7Bn%7D%0A%5Cend%7Baligned%7D%0A" /></p><h2 id="列空间的维度">列空间的维度</h2>
-<p>矩阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的列空间的维度等于矩阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的秩，即存在</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Bdim%7D%20%5Cmathcal%7BR%7D%28%5Cmathbf%7BA%7D%29%3D%5Coperatorname%7Brank%7D(%5Cmathbf%7BA%7D)%0A" /></p><p>这个很好，假设矩阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 有 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 个线性无关的列，即 <img src="https://math.now.sh?inline=%5Coperatorname%7Brank%7D%28%5Cmathbf%7BA%7D%29%20%3D%20k" style="display:inline-block;margin: 0;"/> ，那么矩阵  <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的所有列张成的空间就是其 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 个线性无关的列张成的空间（因为其他列都是这 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 列的线性组合），而  <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 个线性无关的列张成的空间就是  <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7Bk%7D" style="display:inline-block;margin: 0;"/> ，即  <img src="https://math.now.sh?inline=%5Coperatorname%7Bdim%7D%20%5Cmathcal%7BR%7D%28%5Cmathbf%7BA%7D%29%3D%20k" style="display:inline-block;margin: 0;"/> ，因此得证矩阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的列空间的维度等于矩阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的秩。</p>
-<h1>证明 AB 的秩小于等于 A</h1>
-<p>根据列空间的性质，我们有：</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Brank%7D%28A%20B%29%3D%5Coperatorname%7Bdim%7D(%5Cmathcal%7BR%7D(A%20B))%2C%20%5Cquad%20%5Coperatorname%7Brank%7D(A)%3D%5Coperatorname%7Bdim%7D(%5Cmathcal%7BR%7D(A))%0A" /></p><p>我们知道，如果一个向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 是向量空间 <img src="https://math.now.sh?inline=W" style="display:inline-block;margin: 0;"/> 的子空间，那么必然存在：</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Bdim%7D%28V%29%20%5Cleq%20%5Coperatorname%7Bdim%7D(W)%0A" /></p><p>因此，我们只需要证明 <img src="https://math.now.sh?inline=%5Cmathcal%7BR%7D%28A%20B%29" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=%5Cmathcal%7BR%7D%28A%29" style="display:inline-block;margin: 0;"/> 的子空间即可。</p>
-<p>现在假定对于任意一个向量 <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D%20%5Cin%20%5Cmathcal%7BR%7D%28A%20B%29" style="display:inline-block;margin: 0;"/> ，因此存在一个相应的 <img src="https://math.now.sh?inline=%5Cmathbf%7Bx%7D%20%5Cin%20R%5E%7Bq%7D" style="display:inline-block;margin: 0;"/>，使得  <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D%3D%28A%20B%29%20%5Cmathbf%7Bx%7D" style="display:inline-block;margin: 0;"/> ，以符合列空间的定义。</p>
-<p>此时，我们设 <img src="https://math.now.sh?inline=%5Cmathbf%7Bz%7D%3DB%20%5Cmathbf%7Bx%7D%20%5Cin%20%5Cmathbb%7BR%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> ，因此我们有</p>
-<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7By%7D%3DA%28B%20%5Cmathbf%7Bx%7D%29%3DA%20%5Cmathbf%7Bz%7D%0A" /></p><p>因此， <img src="https://math.now.sh?inline=%5Cmathcal%7BR%7D%28AB%29" style="display:inline-block;margin: 0;"/> 中的任何一个向量 <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D" style="display:inline-block;margin: 0;"/> 均同样在  <img src="https://math.now.sh?inline=%5Cmathcal%7BR%7D%28A%29" style="display:inline-block;margin: 0;"/> 中，也就是说， <img src="https://math.now.sh?inline=%5Cmathcal%7BR%7D%28AB%29" style="display:inline-block;margin: 0;"/> 是  <img src="https://math.now.sh?inline=%5Cmathcal%7BR%7D%28A%29" style="display:inline-block;margin: 0;"/> 的一个子空间，因此，我们有</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Brank%7D%28A%20B%29%3D%5Coperatorname%7Bdim%7D(%5Cmathcal%7BR%7D(A%20B))%20%5Cleq%20%5Coperatorname%7Bdim%7D(%5Cmathcal%7BR%7D(A))%3D%5Coperatorname%7Brank%7D(A)%0A" /></p><p>得证。</p>
-<h1>证明 AB 的秩小于等于 B</h1>
-<p>首先，我们知道矩阵的转置与原矩阵的秩相同（矩阵线性无关的列数=线性无关的行数）。因此我们有</p>
-<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Coperatorname%7Brank%7D%28AB%29%20%26%3D%20%5Coperatorname%7Brank%7D(B%5E%7BT%7DA%5E%7BT%7D)%20%5C%5C%0A%26%20%5Cleq%20%5Coperatorname%7Brank%7D(B%5E%7BT%7D)%20%5C%5C%0A%26%20%3D%20%5Coperatorname%7Brank%7D(B)%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>这里第二行采用了上面的结论，AB 的秩小于等于 A。</p>
-<p>因此，我们得证 <img src="https://math.now.sh?inline=%5Coperatorname%7Brank%7D%28A%20B%29%20%5Cleq%20%5Coperatorname%7Brank%7D(B)" style="display:inline-block;margin: 0;"/> ，联合这两个性质，则有</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Brank%7D%28A%20B%29%20%5Cleq%20%5Cmin%5C%7B%5Coperatorname%7Brank%7D(A)%2C%5Coperatorname%7Brank%7D(B)%5C%7D%0A" /></p><h1>证明如果 B​ 非奇异, AB 的秩等于 A</h1>
-<p>我们已知 <img src="https://math.now.sh?inline=%5Coperatorname%7Brank%7D%28A%20B%29%20%5Cleq%20%5Coperatorname%7Brank%7D(A)" style="display:inline-block;margin: 0;"/> ，因此存在：</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Brank%7D%5Cleft%28(A%20B%29%20B%5E%7B-1%7D%5Cright)%20%5Cleq%20%5Coperatorname%7Brank%7D(A%20B)%0A" /></p><p>再采用这个性质，因此我们有：</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Brank%7D%28A%29%3D%5Coperatorname%7Brank%7D%5Cleft((A%20B)%20B%5E%7B-1%7D%5Cright)%20%5Cleq%20%5Coperatorname%7Brank%7D(A%20B)%20%5Cleq%20%5Coperatorname%7Brank%7D(A)%0A" /></p><p>如果一系列不等式的两头相等，那么中间的所有不等式就一定为等式，因此此时，我们有：</p>
-<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Brank%7D%28A%20B%29%20%3D%20%5Coperatorname%7Brank%7D(A)%0A" /></p><h1>闲话</h1>
-<p>从这个帖子的网站主页来看，这个网站貌似就是解决数学问题的，或者证明数学公式的，有时间可以看看，网址见下方。</p>
-<p><a target="_blank" rel="noopener" href="https://yutsumura.com/">https://yutsumura.com/</a></p>
- 
+<h1>矩阵的二次型</h1>
+<p>下面的内容来自于张贤达老师的《矩阵分析与应用》书中。</p>
+<p>任意一个<strong>方阵</strong> <img src="https://math.now.sh?inline=%5Cboldsymbol%7BA%7D" style="display:inline-block;margin: 0;"/> 的二次型定义为 <img src="https://math.now.sh?inline=x%5E%7B%5Cmathrm%7BH%7D%7D%20%5Cboldsymbol%7BA%7D%20%5Cboldsymbol%7Bx%7D" style="display:inline-block;margin: 0;"/>, 其中 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bx%7D" style="display:inline-block;margin: 0;"/> 可以是任意的<strong>非零复向量</strong>。 以实矩阵为例, 考查二次型</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BA%7D%20%5Cboldsymbol%7Bx%7D%20%26%3D%5Cleft%5Bx_%7B1%7D%2C%20x_%7B2%7D%2C%20x_%7B3%7D%5Cright%5D%5Cleft%5B%5Cbegin%7Barray%7D%7Bccc%7D%0A1%20%26%204%20%26%202%20%5C%5C%0A-1%20%26%207%20%26%205%20%5C%5C%0A-1%20%26%206%20%26%203%0A%5Cend%7Barray%7D%5Cright%5D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0Ax_%7B1%7D%20%5C%5C%0Ax_%7B2%7D%20%5C%5C%0Ax_%7B3%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3Dx_%7B1%7D%5E%7B2%7D%2B7%20x_%7B2%7D%5E%7B2%7D%2B3%20x_%7B3%7D%5E%7B2%7D%2B3%20x_%7B1%7D%20x_%7B2%7D%2Bx_%7B1%7D%20x_%7B3%7D%2B11%20x_%7B2%7D%20x_%7B3%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>这是变元 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 的二次型函数, 故称 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BA%7D%20%5Cboldsymbol%7Bx%7D" style="display:inline-block;margin: 0;"/> 为矩阵 <img src="https://math.now.sh?inline=%5Cboldsymbol%7BA%7D" style="display:inline-block;margin: 0;"/> 的二次型。<br>
+推而广之, 若 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bx%7D%3D%5Cleft%5Bx_%7B1%7D%2C%20%5Ccdots%2C%20x_%7Bn%7D%5Cright%5D%5E%7B%5Cmathrm%7BT%7D%7D" style="display:inline-block;margin: 0;"/>, 且 <img src="https://math.now.sh?inline=n%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 矩阵 <img src="https://math.now.sh?inline=%5Cboldsymbol%7BA%7D" style="display:inline-block;margin: 0;"/> 的元素为 <img src="https://math.now.sh?inline=a_%7Bi%20j%7D" style="display:inline-block;margin: 0;"/>, 则二次型</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BA%7D%20%5Cboldsymbol%7Bx%7D%20%26%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Csum_%7Bj%3D1%7D%5E%7Bn%7D%20x_%7Bi%7D%20x_%7Bj%7D%20a_%7Bi%20j%7D%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20a_%7Bi%20i%7D%20x_%7Bi%7D%5E%7B2%7D%2B%5Csum_%7Bi%3D1%2C%20i%20%5Cneq%20j%7D%5E%7Bn%7D%20%5Csum_%7Bj%3D1%7D%5E%7Bn%7D%20a_%7Bi%20j%7D%20x_%7Bi%7D%20x_%7Bj%7D%20%5C%5C%0A%26%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20a_%7Bi%20i%7D%20x_%7Bi%7D%5E%7B2%7D%2B%5Csum_%7Bi%3D1%7D%5E%7Bn-1%7D%20%5Csum_%7Bj%3Di%2B1%7D%5E%7Bn%7D%5Cleft%28a_%7Bi%20j%7D%2Ba_%7Bj%20i%7D%5Cright%29%20x_%7Bi%7D%20x_%7Bj%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>根据这一公式, 显然</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cboldsymbol%7BA%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Brrr%7D%0A1%20%26%204%20%26%202%20%5C%5C%0A-1%20%26%207%20%26%205%20%5C%5C%0A-1%20%26%206%20%26%203%0A%5Cend%7Barray%7D%5Cright%5D%2C%20%5Cquad%20%5Cboldsymbol%7BB%7D%3D%5Cboldsymbol%7BA%7D%5E%7B%5Cmathrm%7BT%7D%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Brrr%7D%0A1%20%26%20-1%20%26%20-1%20%5C%5C%0A4%20%26%207%20%26%206%20%5C%5C%0A2%20%26%205%20%26%203%0A%5Cend%7Barray%7D%5Cright%5D%2C%20%5Cquad%20%5Cboldsymbol%7BC%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Blll%7D%0A1.0%20%26%201.5%20%26%200.5%20%5C%5C%0A1.5%20%26%207.0%20%26%205.5%20%5C%5C%0A0.5%20%26%205.5%20%26%203.0%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%5Cboldsymbol%7BD%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Brrr%7D%0A1%20%26%20114%20%26%2052%20%5C%5C%0A-111%20%26%207%20%26%202%20%5C%5C%0A-51%20%26%209%20%26%203%0A%5Cend%7Barray%7D%5Cright%5D%2C%20%5Cquad%20%5Cboldsymbol%7BF%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Brrr%7D%0A1%20%26%20114%20%26%2052%20%5C%5C%0A-111%20%26%207%20%26%204%20%5C%5C%0A-51%20%26%207%20%26%203%0A%5Cend%7Barray%7D%5Cright%5D%2C%20%5Cquad%20%5Ccdots%0A%5Cend%7Baligned%7D%0A" /></p><p>具有相同的二次型, 即</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BA%7D%20%5Cboldsymbol%7Bx%7D%20%26%3D%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BB%7D%20%5Cboldsymbol%7Bx%7D%3D%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BC%7D%20%5Cboldsymbol%7Bx%7D%3D%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BD%7D%20%5Cboldsymbol%7Bx%7D%3D%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BF%7D%20%5Cboldsymbol%7Bx%7D%20%5C%5C%0A%26%3Dx_%7B1%7D%5E%7B2%7D%2B7%20x_%7B2%7D%5E%7B2%7D%2B3%20x_%7B3%7D%5E%7B2%7D%2B3%20x_%7B1%7D%20x_%7B2%7D%2Bx_%7B1%7D%20x_%7B3%7D%2B11%20x_%7B2%7D%20x_%7B3%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>这就是说, 对于任何一个二次型函数</p>
+<p style=""><img src="https://math.now.sh?from=f%5Cleft%28x_%7B1%7D%2C%20%5Ccdots%2C%20x_%7Bn%7D%5Cright%29%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Calpha_%7Bi%20i%7D%20x_%7Bi%7D%5E%7B2%7D%2B%5Csum_%7Bi%3D1%2C%20i%20%5Cneq%20j%7D%5E%7Bn%7D%20%5Csum_%7Bj%3D1%7D%5E%7Bn%7D%20%5Calpha_%7Bi%20j%7D%20x_%7Bi%7D%20x_%7Bj%7D%0A" /></p><p>而言, 存在许多矩阵 <img src="https://math.now.sh?inline=%5Cboldsymbol%7BA%7D" style="display:inline-block;margin: 0;"/>, 它们的二次型 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BA%7D%20%5Cboldsymbol%7Bx%7D%3Df%5Cleft%28x_%7B1%7D%2C%20%5Ccdots%2C%20x_%7Bn%7D%5Cright%29" style="display:inline-block;margin: 0;"/> 相同。但是, 只有<strong>一个唯一的对称矩阵</strong> <img src="https://math.now.sh?inline=%5Cboldsymbol%7BA%7D" style="display:inline-block;margin: 0;"/> 满足 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bx%7D%5E%7B%5Cmathrm%7BT%7D%7D%20%5Cboldsymbol%7BA%7D%20%5Cboldsymbol%7Bx%7D%3Df%5Cleft%28x_%7B1%7D%2C%20%5Ccdots%2C%20x_%7Bn%7D%5Cright%29" style="display:inline-block;margin: 0;"/>, 其元素为 <img src="https://math.now.sh?inline=a_%7Bi%20j%7D%3Da_%7Bj%20i%7D%3D%5Cfrac%7B1%7D%7B2%7D%5Cleft%28%5Calpha_%7Bi%20j%7D%2B%5Calpha_%7Bj%20i%7D%5Cright%29" style="display:inline-block;margin: 0;"/>, 其 中, <img src="https://math.now.sh?inline=i%3D1%2C%20%5Ccdots%2C%20n%2C%20j%3D1%2C%20%5Ccdots%2C%20n" style="display:inline-block;margin: 0;"/> 。因此, 为了保证定义的唯一性, <strong>在讨论矩阵 <img src="https://math.now.sh?inline=%5Cboldsymbol%7BA%7D" style="display:inline-block;margin: 0;"/> 的二次型 时, 有必要假定 <img src="https://math.now.sh?inline=%5Cboldsymbol%7BA%7D" style="display:inline-block;margin: 0;"/> 为实对称矩阵或复共轭对称 (即 Hermitian) 矩阵</strong>。</p>
+<p>因此，在二次型的概念中，我们不严格要求矩阵 <img src="https://math.now.sh?inline=%5Cboldsymbol%7BA%7D" style="display:inline-block;margin: 0;"/> 为实对称矩阵或复共轭对称 (即 Hermitian) 矩阵，仅仅要求 其为方阵，但是通常我们还是假定其为实对称矩阵或复共轭对称 (即 Hermitian) 矩阵。</p>
+<h1>正定矩阵定义</h1>
+<p>下面这几段话来自于维基百科<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="https://www.wikiwand.com/zh/%E6%AD%A3%E5%AE%9A%E7%9F%A9%E9%98%B5
+">[1]</span></a></sup>。</p>
+<blockquote>
+<p>在线性代数裡，正定矩阵 (英語: positive-definite matrix) 是<strong>埃尔米特矩阵</strong>的一种，有时会简称为正定阵。在线性代数中，正定矩阵的性质類似复数中的正实数。</p>
+<p>一个 <img src="https://math.now.sh?inline=n%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 的<strong>实对称矩阵</strong> <img src="https://math.now.sh?inline=M" style="display:inline-block;margin: 0;"/> 是正定的，当且仅当对于所有的非零实系数向量 <img src="https://math.now.sh?inline=z" style="display:inline-block;margin: 0;"/> ，都有 <img src="https://math.now.sh?inline=z%5E%7B%5Cmathrm%7BT%7D%7D%20M%20z%3E0" style="display:inline-block;margin: 0;"/> 。其 中 <img src="https://math.now.sh?inline=z%5E%7B%5Ctop%7D" style="display:inline-block;margin: 0;"/> 表示 <img src="https://math.now.sh?inline=z" style="display:inline-block;margin: 0;"/> 的转置。<br>
+对于复数的情况，定义则为: 一个 <img src="https://math.now.sh?inline=n%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 的埃尔米特矩阵(或厄米矩阵) <img src="https://math.now.sh?inline=M" style="display:inline-block;margin: 0;"/> 是正定的当且仅当对于每个非零的禎向量 <img src="https://math.now.sh?inline=Z" style="display:inline-block;margin: 0;"/> ，都有 <img src="https://math.now.sh?inline=z%5E%7B*%7D%20M%20z%3E0" style="display:inline-block;margin: 0;"/> 。其中 <img src="https://math.now.sh?inline=z%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 表示 <img src="https://math.now.sh?inline=Z" style="display:inline-block;margin: 0;"/> 的共轭转置。由于 <img src="https://math.now.sh?inline=M" style="display:inline-block;margin: 0;"/> 是埃尔米特矩阵，经计算可知，对于任意的複向量 <img src="https://math.now.sh?inline=z%20%EF%BC%8C%20z%5E%7B*%7D%20M%20z" style="display:inline-block;margin: 0;"/> 必然是实数，从而可以与比较大小。因此这个定义是自洽的。</p>
+</blockquote>
+<p>我们可以看到，对于实数矩阵而言，正定矩阵定义时就要求其为<strong>对称矩阵</strong>。</p>
+<h1>非埃尔米特矩阵的情况</h1>
+<p>下面这段话主要来自于维基百科<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="https://www.wikiwand.com/zh/%E6%AD%A3%E5%AE%9A%E7%9F%A9%E9%98%B5
+">[1]</span></a></sup>。</p>
+<blockquote>
+<p>如果一个非对称的实数矩阵<strong>M</strong>满足对所有非零实向量 <em>x</em>，有 <img src="https://math.now.sh?inline=x%5E%7BT%7DMx%20%3E%200" style="display:inline-block;margin: 0;"/> ，当且仅当对称矩阵 <img src="https://math.now.sh?inline=%5Cfrac%7B1%7D%7B2%7D%20%28M%20%2B%20M%5E%7BT%7D%29" style="display:inline-block;margin: 0;"/> 是正定矩阵。</p>
+<p>对于复系数矩阵，情况可能不太一样。主要看的是怎样扩展 <img src="https://math.now.sh?inline=z%5E%7B*%7D%20%5Cmathbf%7BM%7D%20z%3E0" style="display:inline-block;margin: 0;"/> 这一性质。要使 <img src="https://math.now.sh?inline=z%5E%7B*%7D%20%5Cmathbf%7BM%7D%20z" style="display:inline-block;margin: 0;"/> 总为实数，矩阵 <img src="https://math.now.sh?inline=M" style="display:inline-block;margin: 0;"/> 必须是埃尔米特矩阵。因此，若 <img src="https://math.now.sh?inline=Z%5E%7B*%7D%20M%20Z" style="display:inline-block;margin: 0;"/> 总是正实数， <img src="https://math.now.sh?inline=M" style="display:inline-block;margin: 0;"/> 必然是正定的埃尔米特矩 阵。如果将 <img src="https://math.now.sh?inline=z%5E%7B*%7D%20%5Cmathbf%7BM%7D%20z%3E0" style="display:inline-block;margin: 0;"/> 扩展为 <img src="https://math.now.sh?inline=%5Coperatorname%7BRe%7D%5Cleft%28z%5E%7B*%7D%20%5Cmathbf%7BM%7D%20z%5Cright%29%3E0" style="display:inline-block;margin: 0;"/> ，则等价于 <img src="https://math.now.sh?inline=%5Cleft%28%5Cmathbf%7BM%7D%2B%5Cmathbf%7BM%7D%5E%7B*%7D%5Cright%29%20%2F%202" style="display:inline-block;margin: 0;"/> 为正定阵。</p>
+</blockquote>
+<p>然后从知乎找到了一个回答<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label=" 正定矩阵一定是对称阵吗？ - 益者三友的回答 - 知乎 https://www.zhihu.com/question/66922790/answer/1463342936">[2]</span></a></sup>。其证明了一个非对称的实数矩阵<img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的二次型等于对称矩阵 <img src="https://math.now.sh?inline=%5Cfrac%7B1%7D%7B2%7D%28A%20%2B%20A%5E%7BT%7D%29" style="display:inline-block;margin: 0;"/> 的二次型。</p>
+<p>对于任何一个方阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> ，我们都可以将其分解为：</p>
+<p style=""><img src="https://math.now.sh?from=A%20%3D%20%5Cfrac%7B1%7D%7B2%7D%28A%20%2B%20A%5E%7BT%7D%29%20%2B%20%5Cfrac%7B1%7D%7B2%7D(A%20-%20A%5E%7BT%7D)%0A" /></p><p>这里 <img src="https://math.now.sh?inline=%5Cfrac%7B1%7D%7B2%7D%28A%20%2B%20A%5E%7BT%7D%29" style="display:inline-block;margin: 0;"/> 是对称矩阵，前面已经提到了。后面 <img src="https://math.now.sh?inline=%5Cfrac%7B1%7D%7B2%7D%28A%20-%20A%5E%7BT%7D%29" style="display:inline-block;margin: 0;"/> 为反对称矩阵，下面来证明</p>
+<p style=""><img src="https://math.now.sh?from=%28A-A%5E%7BT%7D%29_%7Bij%7D%20%3D%20A_%7Bij%7D-A%7Bji%7D%5C%5C%0A(A-A%5E%7BT%7D)_%7Bji%7D%20%3D%20A_%7Bji%7D-A%7Bij%7D%5C%5C%0A%5Ctherefore%20(A-A%5E%7BT%7D)_%7Bij%7D%20%3D%20-%20(A-A%5E%7BT%7D)_%7Bji%7D%0A" /></p><p>因此，易得 <img src="https://math.now.sh?inline=%5Cfrac%7B1%7D%7B2%7D%28A%20-%20A%5E%7BT%7D%29" style="display:inline-block;margin: 0;"/> 的二次型为 0 。方阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的二次型为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Ax%5E%7BT%7DAx%20%26%3D%20x%5E%7BT%7D%28%5Cfrac%7B1%7D%7B2%7D(A%20%2B%20A%5E%7BT%7D%29%20%2B%20%5Cfrac%7B1%7D%7B2%7D(A%20-%20A%5E%7BT%7D))x%20%5C%5C%0A%26%20%3D%20%20x%5E%7BT%7D(%5Cfrac%7B1%7D%7B2%7D(A%20%2B%20A%5E%7BT%7D)%20)x%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>因此，从个人理解来说，由于所有非对称方阵的二次型均可以转化为对称方阵，再加上对称矩阵的诸多优良性质，那就不如直接将正定矩阵定义在对称矩阵的基础上。</p>
+<div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">https://www.wikiwand.com/zh/%E6%AD%A3%E5%AE%9A%E7%9F%A9%E9%98%B5<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">正定矩阵一定是对称阵吗？ - 益者三友的回答 - 知乎 https://www.zhihu.com/question/66922790/answer/1463342936<a href="#fnref:2" rev="footnote"> ↩</a></span></li></ol></div></div> 
       <!-- reward -->
       
     </div>
@@ -196,32 +188,21 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://yoursite.com/posts/6c72beb0/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://yoursite.com/posts/37a2cb0/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a></li></ul>
-
     </footer>
   </div>
 
    
   <nav class="article-nav">
     
-      <a href="/posts/37a2cb0/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            正定矩阵都是对称矩阵吗
-          
-        </div>
-      </a>
     
-    
-      <a href="/posts/7bc46342/" class="article-nav-link">
+      <a href="/posts/6c72beb0/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">计算trios的孟德尔错误率</div>
+        <div class="article-nav-title">证明AB的秩小于等于A的秩</div>
       </a>
     
   </nav>
