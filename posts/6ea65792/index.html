@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    矩阵乘法的内涵和本质 |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-矩阵乘法的内涵和本质"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  矩阵乘法的内涵和本质
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/6ea65792/" class="article-date">
+  <time datetime="2021-12-29T04:00:28.000Z" itemprop="datePublished">2021-12-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/">线性代数</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">6 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>理解矩阵乘法的内涵和本质。</p>
+<p>下面的内容主要来自于《Linear Algebra with Applications》的第三章 向量空间和第四章 线性变换。<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="《Linear Algebra with Applications》 Ninth Edition
+">[1]</span></a></sup></p>
+<span id="more"></span>
+<h1>向量空间</h1>
+<h2 id="子空间与张成-空间">子空间与张成(空间)</h2>
+<p>我们先看子空间的概念。</p>
+<p><strong>定义</strong> 若 <img src="https://math.now.sh?inline=S" style="display:inline-block;margin: 0;"/> 为向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 的非空子集, 且 <img src="https://math.now.sh?inline=S" style="display:inline-block;margin: 0;"/> 满足如下条件：</p>
+<ul>
+<li>对任意标量 <img src="https://math.now.sh?inline=%5Calpha" style="display:inline-block;margin: 0;"/>, 若 <img src="https://math.now.sh?inline=x%20%5Cin%20S" style="display:inline-block;margin: 0;"/>, 则 <img src="https://math.now.sh?inline=%5Calpha%20x%20%5Cin%20S" style="display:inline-block;margin: 0;"/>.</li>
+<li>若 <img src="https://math.now.sh?inline=x%20%5Cin%20S" style="display:inline-block;margin: 0;"/> 且 <img src="https://math.now.sh?inline=y%20%5Cin%20S" style="display:inline-block;margin: 0;"/>, 则 <img src="https://math.now.sh?inline=x%2By%20%5Cin%20S" style="display:inline-block;margin: 0;"/>.</li>
+</ul>
+<p>则 <img src="https://math.now.sh?inline=S" style="display:inline-block;margin: 0;"/> 称为 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 的<strong>子空间</strong> (subspace).</p>
+<p>也就是说子空间  <img src="https://math.now.sh?inline=S" style="display:inline-block;margin: 0;"/>  在标量乘法和向量加法的意义上应该是封闭的。</p>
+<p>我们再看向量集合的<strong>张成</strong>的概念，如下：</p>
+<p><strong>定义</strong> 令 <img src="https://math.now.sh?inline=v_%7B1%7D%2C%20v_%7B2%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/> 为向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 中的向量. <img src="https://math.now.sh?inline=%5Calpha_%7B1%7D%20v_%7B1%7D%2B%5Calpha_%7B2%7D%20v_%7B2%7D%2B%5Ccdots%2B%5Calpha_%7Bn%7D%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/> (其中 <img src="https://math.now.sh?inline=%5Calpha_%7B1%7D" style="display:inline-block;margin: 0;"/>, <img src="https://math.now.sh?inline=%5Calpha_%7B2%7D%2C%20%5Ccdots%2C%20%5Calpha_%7Bn%7D" style="display:inline-block;margin: 0;"/> 为标量) 称为向量 <img src="https://math.now.sh?inline=v_%7B1%7D%2C%20v_%7B2%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/> 的<strong>线性组合</strong> (linear combination).  向量 <img src="https://math.now.sh?inline=v_%7B1%7D" style="display:inline-block;margin: 0;"/>, <img src="https://math.now.sh?inline=v_%7B2%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/> 的所有线性组合构成的集合称为 <img src="https://math.now.sh?inline=v_%7B1%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/> 的<strong>张成</strong> (span). 向量 <img src="https://math.now.sh?inline=v_%7B1%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/> 的张成记 为 <img src="https://math.now.sh?inline=%5Coperatorname%7BSpan%7D%5Cleft%28v_%7B1%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D%5Cright%29" style="display:inline-block;margin: 0;"/>.</p>
+<p>易证明，向量组合的张成是向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/>  的一个子空间。如果张成空间等于向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/>  ，此时我们称向量集合 <img src="https://math.now.sh?inline=v_%7B1%7D" style="display:inline-block;margin: 0;"/>, <img src="https://math.now.sh?inline=v_%7B2%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/>  是  <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 的一个<strong>张集</strong>。</p>
+<p>举个例子，**基向量 <img src="https://math.now.sh?inline=e_1%2C%20e_2%2C%20e_3" style="display:inline-block;margin: 0;"/> ** 就是 <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7B3%7D" style="display:inline-block;margin: 0;"/> 的一个张集， <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7B3%7D" style="display:inline-block;margin: 0;"/> 中任何一个向量 <img src="https://math.now.sh?inline=%28a%2C%20b%2C%20c%29%5E%7BT%7D" style="display:inline-block;margin: 0;"/> 均可以表示为</p>
+<p style=""><img src="https://math.now.sh?from=%28a%2C%20b%2C%20c%29%5E%7BT%7D%20%3D%20a%5Cmathbf%7Be_1%7D%20%2B%20b%5Cmathbf%7Be_2%7D%20%2B%20%20c%5Cmathbf%7Be_3%7D%0A" /></p><p>再举个例子，<img src="https://math.now.sh?inline=%5Cleft%5C%7B%281%2C1%2C1%29%5E%7B%5Cmathrm%7BT%7D%7D%2C(1%2C1%2C0)%5E%7B%5Cmathrm%7BT%7D%7D%2C(1%2C0%2C0)%5E%7B%5Cmathrm%7BT%7D%7D%5Cright%5C%7D" style="display:inline-block;margin: 0;"/>  是不是 <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7B3%7D" style="display:inline-block;margin: 0;"/> 的一个张集呢？这个问题等价于，对于<img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7B3%7D" style="display:inline-block;margin: 0;"/> 中任何一个向量 <img src="https://math.now.sh?inline=%28a%2C%20b%2C%20c%29%5E%7BT%7D" style="display:inline-block;margin: 0;"/>  是不是都可以表示为这三个向量的线性组合？即总能找到相应的 <img src="https://math.now.sh?inline=%5Calpha_1%2C%20%5Calpha_2%2C%20%5Calpha_3" style="display:inline-block;margin: 0;"/> ，使得下式成立</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0Aa%20%5C%5C%0Ab%20%5C%5C%0Ac%0A%5Cend%7Barray%7D%5Cright%5D%3D%5Calpha_%7B1%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A1%20%5C%5C%0A1%0A%5Cend%7Barray%7D%5Cright%5D%2B%5Calpha_%7B2%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A1%20%5C%5C%0A0%0A%5Cend%7Barray%7D%5Cright%5D%2B%5Calpha_%7B3%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A0%20%5C%5C%0A0%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>你可以轻松证明，这三个向量是 <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7B3%7D" style="display:inline-block;margin: 0;"/> 的一个张集。</p>
+<h2 id="线性相关和线性无关">线性相关和线性无关</h2>
+<p><strong>定义</strong> 如果向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 中的向量 <img src="https://math.now.sh?inline=v_%7B1%7D%2C%20v_%7B2%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/> 满足 <img src="https://math.now.sh?inline=c_%7B1%7D%20v_%7B1%7D%2Bc_%7B2%7D%20v_%7B2%7D%2B%5Ccdots%2Bc_%7Bn%7D%20v_%7Bn%7D%3D0" style="display:inline-block;margin: 0;"/> 就可推出所有标量 <img src="https://math.now.sh?inline=c_%7B1%7D%2C%20%5Ccdots%2C%20c_%7Bn%7D" style="display:inline-block;margin: 0;"/> 必为 0 , 则称它们为<strong>线性无关</strong>的 (linearly independent)，反之则称它们是<strong>线性相关</strong>的。</p>
+<p>如果一组向量线性相关，那就说明<strong>至少</strong>有一个向量可以表示为其他向量的线性组合。</p>
+<h2 id="基和维数">基和维数</h2>
+<p><strong>定义</strong> 当且仅当向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 中的向量 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bv%7D_%7B1%7D%2C%20%5Cboldsymbol%7Bv%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Bv%7D_%7Bn%7D" style="display:inline-block;margin: 0;"/> 满足</p>
+<ul>
+<li><img src="https://math.now.sh?inline=v_%7B1%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/> 线性无关,</li>
+<li><img src="https://math.now.sh?inline=v_%7B1%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D" style="display:inline-block;margin: 0;"/> 张成 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/></li>
+</ul>
+<p>时, 称它们是向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 的<strong>基</strong> (basis)，如果  <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 的一组基含有 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 个向量，那么我们称  <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 的**维数 (dimension) **为 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 。</p>
+<p>我们称 <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> 的<strong>标准基</strong>为 <img src="https://math.now.sh?inline=%5C%7Be_1%2C%20e_2%2C%20%5Ccdots%2C%20e_n%5C%7D" style="display:inline-block;margin: 0;"/> ，之所以称这个基为标准基，是因为使用这个基表示向量空间  <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> 最为自然。</p>
+<p>举个例子， <img src="https://math.now.sh?inline=e_1%2C%20e_2%2C%20e_3" style="display:inline-block;margin: 0;"/> 就是 <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7B3%7D" style="display:inline-block;margin: 0;"/> 的<strong>标准基</strong>，但是实际上 <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7B3%7D" style="display:inline-block;margin: 0;"/> 的基有无穷多种取法，比如上面例子中的 <img src="https://math.now.sh?inline=%5Cleft%5C%7B%281%2C1%2C1%29%5E%7B%5Cmathrm%7BT%7D%7D%2C(1%2C1%2C0)%5E%7B%5Cmathrm%7BT%7D%7D%2C(1%2C0%2C0)%5E%7B%5Cmathrm%7BT%7D%7D%5Cright%5C%7D" style="display:inline-block;margin: 0;"/>  也是 <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7B3%7D" style="display:inline-block;margin: 0;"/> 的基。</p>
+<p>这里定义基时要求线性无关，是因为只有  <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bv%7D_%7B1%7D%2C%20%5Cboldsymbol%7Bv%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Bv%7D_%7Bn%7D" style="display:inline-block;margin: 0;"/>  线性无关时，张集中的向量数目最小，并且向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 才可以<strong>唯一地</strong>用  <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bv%7D_%7B1%7D%2C%20%5Cboldsymbol%7Bv%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Bv%7D_%7Bn%7D" style="display:inline-block;margin: 0;"/> 的 线性组合来表示。反过来说，如果张集的向量之间存在线性相关，那么对于向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/>的每一个向量，你都可以找到张集的多个线性组合来表示这个向量。</p>
+<p><strong>定理</strong> 若 <img src="https://math.now.sh?inline=%5Cleft%5C%7Bv_%7B1%7D%2C%20v_%7B2%7D%2C%20%5Ccdots%2C%20v_%7Bn%7D%5Cright%5C%7D" style="display:inline-block;margin: 0;"/> 为向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 的一个张集, 则 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 中的任何 <img src="https://math.now.sh?inline=m" style="display:inline-block;margin: 0;"/> ( <img src="https://math.now.sh?inline=m%3En" style="display:inline-block;margin: 0;"/>) 个向量必线性相关.</p>
+<p>证 令 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bu%7D_%7B1%7D%2C%20%5Cboldsymbol%7Bu%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Bu%7D_%7Bm%7D" style="display:inline-block;margin: 0;"/> 为 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 中的 <img src="https://math.now.sh?inline=m" style="display:inline-block;margin: 0;"/> 个向量, 其中 <img src="https://math.now.sh?inline=m%3En" style="display:inline-block;margin: 0;"/>. 那么, 由于 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bv%7D_%7B1%7D%2C%20%5Cboldsymbol%7Bv%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Bv_%7Bn%7D%7D" style="display:inline-block;margin: 0;"/> 张成 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/>, 我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7Bu%7D_%7Bi%7D%3Da_%7Bi%201%7D%20%5Cboldsymbol%7Bv%7D_%7B1%7D%2Ba_%7Bi%202%7D%20%5Cboldsymbol%7Bv%7D_%7B2%7D%2B%5Ccdots%2Ba_%7Bi%20n%7D%20%5Cboldsymbol%7Bv%7D_%7Bn%7D%2C%20%5Cquad%20i%3D1%2C2%2C%20%5Ccdots%2C%20m%0A" /></p><p>线性组合 <img src="https://math.now.sh?inline=c_%7B1%7D%20%5Cboldsymbol%7Bu%7D_%7B1%7D%2Bc_%7B2%7D%20%5Cboldsymbol%7Bu%7D_%7B2%7D%2B%5Ccdots%2Bc_%7Bm%7D%20%5Cboldsymbol%7Bu%7D_%7Bm%7D" style="display:inline-block;margin: 0;"/> 可写为</p>
+<p style=""><img src="https://math.now.sh?from=c_%7B1%7D%20%5Csum_%7Bj%3D1%7D%5E%7Bn%7D%20a_%7B1%20j%7D%20%5Cboldsymbol%7Bv%7D_%7Bj%7D%2Bc_%7B2%7D%20%5Csum_%7Bj%3D1%7D%5E%7Bn%7D%20a_%7B2%20j%7D%20%5Cboldsymbol%7Bv%7D_%7Bj%7D%2B%5Ccdots%2Bc_%7Bm%7D%20%5Csum_%7Bj%3D1%7D%5E%7Bn%7D%20a_%7Bm%20j%7D%20%5Cboldsymbol%7Bv%7D_%7Bj%7D%0A" /></p><p>重新排列各项, 我们看到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Ac_%7B1%7D%20%5Cboldsymbol%7Bu%7D_%7B1%7D%2Bc_%7B2%7D%20%5Cboldsymbol%7Bu%7D_%7B2%7D%2B%5Ccdots%2Bc_%7Bm%7D%20%5Cboldsymbol%7Bu%7D_%7Bm%7D%20%26%3D%5Csum_%7Bi%3D1%7D%5E%7Bm%7D%5Cleft%5Bc_%7Bi%7D%5Cleft%28%5Csum_%7Bj%3D1%7D%5E%7Bn%7D%20a_%7Bi%20j%7D%20%5Cboldsymbol%7Bv%7D_%7Bj%7D%5Cright%29%5Cright%5D%20%5C%5C%0A%26%3D%5Csum_%7Bj%3D1%7D%5E%7Bn%7D%5Cleft(%5Csum_%7Bi%3D1%7D%5E%7Bm%7D%20a_%7Bi%20j%7D%20c_%7Bi%7D%5Cright)%20%5Cboldsymbol%7Bv%7D_%7Bj%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>现在我们看下面这个方程组</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7Bm%7D%20a_%7Bi%20j%7D%20c_%7Bi%7D%3D0%2C%20%5Cquad%20j%3D1%2C2%2C%20%5Ccdots%2C%20n%0A" /></p><p>这个齐次方程组的变量个数 (<img src="https://math.now.sh?inline=c_%7Bi%7D" style="display:inline-block;margin: 0;"/> 个数为 <img src="https://math.now.sh?inline=m" style="display:inline-block;margin: 0;"/> ) 多于方程个数 ( <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> ). 因此,  方程组必有非平凡解 <img src="https://math.now.sh?inline=%5Cleft%28%5Chat%7Bc%7D_%7B1%7D%2C%20%5Chat%7Bc%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Chat%7Bc%7D_%7Bm%7D%5Cright%29%5E%7B%5Cmathrm%7BT%7D%7D" style="display:inline-block;margin: 0;"/>. 而将其代入到上式中我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7Bc%7D_%7B1%7D%20%5Cboldsymbol%7Bu%7D_%7B1%7D%2B%5Chat%7Bc%7D_%7B2%7D%20%5Cboldsymbol%7Bu%7D_%7B2%7D%2B%5Ccdots%2B%5Chat%7Bc%7D_%7Bm%7D%20%5Cboldsymbol%7Bu%7D_%7Bm%7D%3D%5Csum_%7Bj%3D1%7D%5E%7Bn%7D%200%20%5Cboldsymbol%7Bv%7D_%7Bj%7D%3D%5Cmathbf%7B0%7D%0A" /></p><p>于是 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bu%7D_%7B1%7D%2C%20%5Cboldsymbol%7Bu%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Bu%7D_%7Bm%7D" style="display:inline-block;margin: 0;"/> 为线性相关的。</p>
+<p>根据这个定理，我们可以很容易推导出一个向量空间的维数是固定的，也就是说同一个向量空间的不同基的向量数目相同。另外，对于维数为 <img src="https://math.now.sh?inline=n%20%3E%200" style="display:inline-block;margin: 0;"/> 的向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/>，任意 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 个线性无关的向量张成 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 。</p>
+<h2 id="基变换">基变换</h2>
+<p>很多应用问题可以通过从一个坐标转化为另一坐标系而得到简化。<strong>在一个向量空间中转换坐标系，等同于从一组基转换为另外一组基</strong>。</p>
+<p>当我们从一组基转换为另一组基时，可以通过将给定的<strong>坐标向量 (coordinate vector) <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/></strong> （定义为由有序基的基向量的长度组成的向量）  左乘一个**非奇异矩阵 <img src="https://math.now.sh?inline=S" style="display:inline-block;margin: 0;"/> **来实现，即新坐标为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7By%7D%20%3D%20%5Cmathbf%7BS%7D%5Cmathbf%7Bx%7D%0A" /></p><p>我们以最简单也是最常用的情况为例，假如我们希望用一组不同的基替代  <img src="https://math.now.sh?inline=%5Cmathbb%7BR%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 的标准基，我们设新的基</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7B%5Cmu_%7B1%7D%7D%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A3%20%5C%5C%0A2%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%2C%20%5Cquad%20%0A%5Cmathbf%7B%5Cmu_%7B2%7D%7D%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A1%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>给定一个向量在新的基中的坐标向量为 <img src="https://math.now.sh?inline=%5Bc_%7B1%7D%2C%20c_%7B2%7D%5D" style="display:inline-block;margin: 0;"/> ，我们可以计算得到其在标准基中的坐标</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Ac_1%5Cmathbf%7B%5Cmu_1%7D%20%2B%20c_2%5Cmathbf%7B%5Cmu_2%7D%20%26%3D%20c_1%283%5Cmathbf%7Be_1%7D%2B2%5Cmathbf%7Be_2%7D%29%2Bc_2(1%5Cmathbf%7Be_1%7D%2B1%5Cmathbf%7Be_2%7D)%5C%5C%0A%26%3D(3c_1%2Bc_2)%20%5Cmathbf%7Be_1%7D%20%2B%20(2c_1%2Bc_2)%20%5Cmathbf%7Be_2%7D%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>如果令</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BU%7D%3D%20%28%5Cmathbf%7B%5Cmu_1%2C%20%5Cmu_2%7D%29%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A3%20%26%201%20%5C%5C%0A2%20%26%201%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>上面的坐标转换等同于</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bx%7D%20%3D%20%5Cmathbf%7BU%7D%20%5Cmathbf%7Bc%7D%0A" /></p><p>我们称矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BU%7D" style="display:inline-block;margin: 0;"/> 为从基 <img src="https://math.now.sh?inline=%5B%5Cmathbf%7B%5Cmu_%7B1%7D%7D%2C%20%5Cmathbf%7B%5Cmu_%7B2%7D%7D%5D" style="display:inline-block;margin: 0;"/> 转换到基  <img src="https://math.now.sh?inline=%5B%5Cmathbf%7Be_%7B1%7D%7D%2C%20%5Cmathbf%7Be_%7B2%7D%7D%5D" style="display:inline-block;margin: 0;"/> 的<strong>转移矩阵 (transition matrix)</strong> ，其为非奇异矩阵，因此反过来有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bc%7D%20%3D%20%5Cmathbf%7BU%7D%5E%7B-1%7D%20%5Cmathbf%7Bx%7D%0A" /></p><p>即矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BU%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 为从基 <img src="https://math.now.sh?inline=%5B%5Cmathbf%7Be_%7B1%7D%7D%2C%20%5Cmathbf%7Be_%7B2%7D%7D%5D" style="display:inline-block;margin: 0;"/> 转换到基  <img src="https://math.now.sh?inline=%5B%5Cmathbf%7B%5Cmu_%7B1%7D%7D%2C%20%5Cmathbf%7B%5Cmu_%7B2%7D%7D%5D" style="display:inline-block;margin: 0;"/>  的<strong>转移矩阵 (transition matrix)</strong> 。</p>
+<p>我们可以轻松推广多任意两个基的转换，如果我们设两个基为  <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bv%7D_%7B1%7D%2C%20%5Cboldsymbol%7Bv%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Bv%7D_%7Bn%7D" style="display:inline-block;margin: 0;"/> 和  <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bw%7D_%7B1%7D%2C%20%5Cboldsymbol%7Bw%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Bw%7D_%7Bn%7D" style="display:inline-block;margin: 0;"/> ，关键在于如何将 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bv%7D" style="display:inline-block;margin: 0;"/> 中的每一个基向量  <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bv_%7Bi%7D%7D" style="display:inline-block;margin: 0;"/> 表示为  <img src="https://math.now.sh?inline=%5Cboldsymbol%7Bw%7D_%7B1%7D%2C%20%5Cboldsymbol%7Bw%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Bw%7D_%7Bn%7D" style="display:inline-block;margin: 0;"/> ，然后我们就可以像上面一样构建转移矩阵。</p>
+<h2 id="小结">小结</h2>
+<p>这里我们看到一种矩阵乘法的情况，当一个非奇异矩阵乘以一组坐标向量时，其本质是基变换。两组基之间的转换是可逆的，二者的转移矩阵互为逆矩阵。</p>
+<h1>线性变换</h1>
+<p>在向量空间的学习中, 最重要的一类映射为线性变换.<br>
+<strong>定义</strong> 一个将向量空间 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 映射到向量空间 <img src="https://math.now.sh?inline=W" style="display:inline-block;margin: 0;"/> 的映射 <img src="https://math.now.sh?inline=L" style="display:inline-block;margin: 0;"/>, 如果对所有 <img src="https://math.now.sh?inline=v_%7B1%7D%2C%20v_%7B2%7D%20%5Cin%20V" style="display:inline-block;margin: 0;"/> 及所有的标量 <img src="https://math.now.sh?inline=%5Calpha" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cbeta" style="display:inline-block;margin: 0;"/>,</p>
+<p style=""><img src="https://math.now.sh?from=L%5Cleft%28%5Calpha%20v_%7B1%7D%2B%5Cbeta%20v_%7B2%7D%5Cright%29%3D%5Calpha%20L%5Cleft(v_%7B1%7D%5Cright)%2B%5Cbeta%20L%5Cleft(v_%7B2%7D%5Cright)%0A" /></p><p>我们将该线性变换标记为：</p>
+<p style=""><img src="https://math.now.sh?from=L%3AV%20%5Crightarrow%20W%0A" /></p><p>我们称线性变换 <img src="https://math.now.sh?inline=L%3AV%20%5Crightarrow%20V" style="display:inline-block;margin: 0;"/> 为 <img src="https://math.now.sh?inline=V" style="display:inline-block;margin: 0;"/> 上的<strong>线性算子 (linear operator)</strong> （翻译成函数或者映射不行吗，非要整一个新名词，算子）。</p>
+<p>事实上，我们可以将每一个线性变换均表示为一个矩阵，存在以下定理：</p>
+<p><strong>定理</strong> 若 <img src="https://math.now.sh?inline=L" style="display:inline-block;margin: 0;"/> 为一从 <img src="https://math.now.sh?inline=%5Cmathbf%7BR%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> 到 <img src="https://math.now.sh?inline=%5Cmathbf%7BR%7D%5E%7Bm%7D" style="display:inline-block;margin: 0;"/> 的线性变换, 则存在一个 <img src="https://math.now.sh?inline=m%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 矩阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/>, 使得对 每一 <img src="https://math.now.sh?inline=x%20%5Cin%20%5Cmathbf%7BR%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/>, 有</p>
+<p style=""><img src="https://math.now.sh?from=L%28x%29%3DA%20x%0A" /></p><p>事实上, <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/> 个列向量为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7Ba%7D_%7Bj%7D%3DL%5Cleft%28%5Cboldsymbol%7Be%7D_%7Bj%7D%5Cright%29%20%5Cquad%20j%3D1%2C2%2C%20%5Ccdots%2C%20n%0A" /></p><p><strong>证明</strong>：</p>
+<p>若</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7Bx%7D%3Dx_%7B1%7D%20%5Cboldsymbol%7Be%7D_%7B1%7D%2Bx_%7B2%7D%20%5Cboldsymbol%7Be%7D_%7B2%7D%2B%5Ccdots%2Bx_%7Bn%7D%20%5Cboldsymbol%7Be%7D_%7Bn%7D%0A" /></p><p>为 <img src="https://math.now.sh?inline=%5Cmathrm%7BR%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> 中的任意元素, 则</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AL%28%5Cboldsymbol%7Bx%7D%29%20%26%20%3D%20Ax%20%5C%5C%0A%26%3D%5Cleft(%5Cboldsymbol%7Ba%7D_%7B1%7D%2C%20%5Cboldsymbol%7Ba%7D_%7B2%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7Ba%7D_%7Bn%7D%5Cright)%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0Ax_%7B1%7D%20%5C%5C%0Ax_%7B2%7D%20%5C%5C%0A%5Cvdots%20%5C%5C%0Ax_%7Bn%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3Dx_%7B1%7D%20%5Cboldsymbol%7Ba%7D_%7B1%7D%2Bx_%7B2%7D%20%5Cboldsymbol%7Ba%7D_%7B2%7D%2B%5Ccdots%2Bx_%7Bn%7D%20%5Cboldsymbol%7Ba%7D_%7Bn%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>易得 <img src="https://math.now.sh?inline=%5Cboldsymbol%7Ba%7D_%7Bj%7D%3DL%5Cleft%28%5Cboldsymbol%7Be%7D_%7Bj%7D%5Cright%29" style="display:inline-block;margin: 0;"/></p>
+<p>因此，我们可以通过这个特性对每一个特定的线性变换 <img src="https://math.now.sh?inline=L" style="display:inline-block;margin: 0;"/> 构建矩阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 。举个例子，定义线性变换 <img src="https://math.now.sh?inline=L%3A%20%5Cmathbb%7BR%7D%5E%7B3%7D%20%5Crightarrow%20%5Cmathbb%7BR%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 为</p>
+<p style=""><img src="https://math.now.sh?from=L%28%5Cboldsymbol%7Bx%7D%29%3D%5Cleft(x_%7B1%7D%2Bx_%7B2%7D%2C%20x_%7B2%7D%2Bx_%7B3%7D%5Cright)%5E%7B%5Cmathrm%7BT%7D%7D%0A" /></p><p>容易验证 <img src="https://math.now.sh?inline=L" style="display:inline-block;margin: 0;"/> 为一线性变换. 我们希望求一个矩阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/>, 使得对每一 <img src="https://math.now.sh?inline=x%20%5Cin%20%5Cmathbf%7BR%7D%5E%7B2%7D%2C%20L%28x%29%3DA%20x" style="display:inline-block;margin: 0;"/>. 用 做到这一点, 我们必须求 <img src="https://math.now.sh?inline=L%5Cleft%28e_%7B1%7D%5Cright%29%2C%20L%5Cleft(e_%7B2%7D%5Cright)" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=L%5Cleft%28e_%7B3%7D%5Cright%29" style="display:inline-block;margin: 0;"/> :</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26L%5Cleft%28%5Cboldsymbol%7Be%7D_%7B1%7D%5Cright%29%3DL%5Cleft((1%2C0%2C0)%5E%7B%5Cmathrm%7BT%7D%7D%5Cright)%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A0%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26L%5Cleft(%5Cboldsymbol%7Be%7D_%7B2%7D%5Cright)%3DL%5Cleft((0%2C1%2C0)%5E%7B%5Cmathrm%7BT%7D%7D%5Cright)%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A1%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26L%5Cleft(%5Cboldsymbol%7Be%7D_%7B3%7D%5Cright)%3DL%5Cleft((0%2C0%2C1)%5E%7B%5Cmathrm%7BT%7D%7D%5Cright)%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A0%20%5C%5C%0A1%0A%5Cend%7Barray%7D%5Cright%5D%0A%5Cend%7Baligned%7D%0A" /></p><p>选择这些向量作为矩阵 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的列向量:</p>
+<p style=""><img src="https://math.now.sh?from=A%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Blll%7D%0A1%20%26%201%20%26%200%20%5C%5C%0A0%20%26%201%20%26%201%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>为验证结果, 计算 <img src="https://math.now.sh?inline=A%20x" style="display:inline-block;margin: 0;"/>;</p>
+<p style=""><img src="https://math.now.sh?from=A%20x%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Blll%7D%0A1%20%26%201%20%26%200%20%5C%5C%0A0%20%26%201%20%26%201%0A%5Cend%7Barray%7D%5Cright%5D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0Ax_%7B1%7D%20%5C%5C%0Ax_%7B2%7D%20%5C%5C%0Ax_%7B3%7D%0A%5Cend%7Barray%7D%5Cright%5D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0Ax_%7B1%7D%2Bx_%7B2%7D%20%5C%5C%0Ax_%7B2%7D%2Bx_%7B3%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>我们注意到在线性转换前后的<strong>坐标轴</strong>往往发生了改变，在这个例子中转换之前的坐标轴为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7Be%7D_%7B1%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A0%20%5C%5C%0A0%0A%5Cend%7Barray%7D%5Cright%5D%2C%0A%5Cboldsymbol%7Be%7D_%7B2%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A0%20%5C%5C%0A1%20%5C%5C%0A0%0A%5Cend%7Barray%7D%5Cright%5D%2C%0A%5Cboldsymbol%7Be%7D_%7B3%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A0%20%5C%5C%0A0%20%5C%5C%0A1%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>转换之后的坐标轴为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7Be%7D_%7B1%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A0%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%2C%0A%5Cboldsymbol%7Be%7D_%7B2%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A0%20%5C%5C%0A1%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><h2 id="小结-2">小结</h2>
+<p>矩阵乘法 <img src="https://math.now.sh?inline=Ax" style="display:inline-block;margin: 0;"/> 是一个函数，其本质是一个<strong>线性变换</strong>。如果 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 是一个  <img src="https://math.now.sh?inline=m%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 的矩阵，那么就对应着一个 <img src="https://math.now.sh?inline=L%3A%5Cmathbb%7BR%7D%5E%7Bn%7D%20%5Crightarrow%20%5Cmathbb%7BR%7D%5E%7Bm%7D" style="display:inline-block;margin: 0;"/> 的线性变换，在线性变换的过程中向量空间发生了改变。</p>
+<h1>总结</h1>
+<p>一般的矩阵乘法 <img src="https://math.now.sh?inline=y%20%3D%20Ax" style="display:inline-block;margin: 0;"/> 对应着一个线性变换，一般来说这种线性变换不可逆，也就是一般找不到逆函数。</p>
+<p>但是存在一种特殊情况，当 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 是一个<strong>非奇异矩阵</strong>时，此时  <img src="https://math.now.sh?inline=y%20%3D%20Ax" style="display:inline-block;margin: 0;"/>  可以理解为基变换，即在两个坐标系中转换坐标，此时的线性变换可逆。</p>
+<div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">《Linear Algebra with Applications》 Ninth Edition<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://www.matongxue.com/madocs/555/">如何理解矩阵乘法？- 马同学</a><a href="#fnref:2" rev="footnote"> ↩</a></span></li></ol></div></div> 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/e627bd97/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            证明皮尔逊相关系数绝对值小于1
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/54f5dedf/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">AB的每一列均为A的列的线性组合</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2022
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/posts/ac7827ff">只只</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    使用自助法估计MAF标准误 |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-使用自助法估计MAF标准误"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  使用自助法估计MAF标准误
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/c3c06dcb/" class="article-date">
+  <time datetime="2021-07-07T03:15:03.000Z" itemprop="datePublished">2021-07-07</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a> / <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/python/">python</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">6 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>如果需要估计某个群体的某个参数的标准误，最好的办法就是直接对这个群体进行多次抽样，每次抽样得到一个参数估计值，计算所有参数估计值的标准差就是标准误的估计值。但是实际情况下，这是做不到的，我们往往手上只有一套数据。</p>
+<p>自助法的思路就是每次对我们手上的数据（假设总数为n）进行<strong>有放回抽样</strong>，每次抽样就能得到一个同样总数为 n 的抽样群体（由于是有放回抽样，抽样群体里可能有重复值），每次对抽样群体进行参数估计，最终对所有抽样群体的参数估计值计算标准差，即作为标准误的估计值。这个思路其实很简单，而且没有什么假设和前提，很多场景下都可以使用。</p>
+<p>这里我是用于基因型数据的最小等位基因频率（MAF）的标准误估计过程和代码，用于位点挖掘工作。</p>
+ <span id="more"></span>
+<h1>使用软件和文件格式</h1>
+<h2 id="软件">软件</h2>
+<p>plink 软件:  目前主流的处理SNP基因型数据的软件，具体说明可见我之前的博客 <a target="_blank" rel="noopener" href="https://vincere.fun/posts/def937d0/">plink学习笔记</a></p>
+<p>我的代码是基于 linux 系统运行的，需要事先装有 plink 软件并添加到环境变量中。</p>
+<h1>输入文件格式</h1>
+<p>plink 文本格式：一对文件，后缀为 <code>.ped</code> 和 <code>.map</code> ，文件说明见  <a target="_blank" rel="noopener" href="https://vincere.fun/posts/def937d0/">plink学习笔记</a></p>
+<p>frq 文件：使用 plink 软件的 <code>--freq</code> 选项生成的等位基因频率统计文件，后缀为 <code>.frq</code> 。这个文件是对原始plink数据进行统计的结果文件。</p>
+<h1>输出文件说明</h1>
+<p>结果文件是在 原始的 frq 文件后面新增了 3 列，示例如下。</p>
+<p>倒数第3列是多次抽样的MAF均值，倒数第2列是偏差（多次抽样的MAF均值 - 真实MAF），倒数第1列为估计的标准误。</p>
+<table>
+<thead>
+<tr>
+<th>CHR</th>
+<th>SNP</th>
+<th>A1</th>
+<th>A2</th>
+<th>MAF</th>
+<th>NCHROBS</th>
+<th>bootstrap_mean</th>
+<th>bootstrap_bias</th>
+<th>bootstrap_se</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>chr1:62226</td>
+<td>T</td>
+<td>C</td>
+<td>0.4583</td>
+<td>4366</td>
+<td>0.4585</td>
+<td>0.000196</td>
+<td>0.02893</td>
+</tr>
+<tr>
+<td>1</td>
+<td>chr1:105661</td>
+<td>A</td>
+<td>G</td>
+<td>0.3204</td>
+<td>4366</td>
+<td>0.3206</td>
+<td>0.000157</td>
+<td>0.00852</td>
+</tr>
+<tr>
+<td>1</td>
+<td>chr1:119034</td>
+<td>A</td>
+<td>T</td>
+<td>0.3326</td>
+<td>4366</td>
+<td>0.3328</td>
+<td>0.000164</td>
+<td>0.012665</td>
+</tr>
+</tbody>
+</table>
+<h1>运行代码</h1>
+<p>代码文件见：<a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/bootstrap_maf.py">bootstrap_maf.py</a></p>
+<p>将输入文件和本程序放在同一文件夹下，运行命令示范为</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python bootstrap_maf.py snp_pick snp_pick.frq 1000 bootstra_maf.txt</span><br></pre></td></tr></table></figure>
+<p>总共 4 个参数：</p>
+<ol>
+<li>初始 plink 文件前缀，这里是 <code>snp_pick</code></li>
+<li><code>frq</code> 文件名，这里是 <code>snp_pick.frq</code></li>
+<li>抽样次数，这里是 1000 次</li>
+<li>结果文件名称，这里是 <code>bootstra_maf.txt</code></li>
+</ol>
+<h1>代码说明</h1>
+<h2 id="打开文件">打开文件</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os,sys</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">plink_prefix = sys.argv[<span class="number">1</span>] <span class="comment"># plink文件前缀</span></span><br><span class="line">yuan_frq_file = <span class="built_in">open</span>(sys.argv[<span class="number">2</span>],<span class="string">&#x27;r&#x27;</span>) <span class="comment"># 原始的 freq 文件</span></span><br><span class="line">run_times = <span class="built_in">int</span>(sys.argv[<span class="number">3</span>]) <span class="comment"># 重复抽样次数，如 1000</span></span><br><span class="line">out_file = <span class="built_in">open</span>(sys.argv[<span class="number">4</span>],<span class="string">&#x27;w&#x27;</span>) <span class="comment"># 输出文件，在原始的freq文件上新增3列。</span></span><br></pre></td></tr></table></figure>
+<h2 id="提取原始-ped，-map-文件信息">提取原始 ped， map 文件信息</h2>
+<p>打印样本数目和位点数目。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">os.system(<span class="string">f&quot;cp <span class="subst">&#123;plink_prefix&#125;</span>.map temp.map&quot;</span>) <span class="comment">#复制map文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取原ped，map信息</span></span><br><span class="line">list1 = []</span><br><span class="line">yuan_ped_file = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix&#125;</span>.ped&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">yuan_map_file = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix&#125;</span>.map&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">sample_num = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> yuan_ped_file:</span><br><span class="line">    f = i.split()</span><br><span class="line">    sample_num += <span class="number">1</span></span><br><span class="line">    list1.append(<span class="string">&#x27;\t&#x27;</span>.join(f[<span class="number">2</span>:])) <span class="comment">#第三列之后的数据</span></span><br><span class="line"></span><br><span class="line">snp_num = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> yuan_map_file:</span><br><span class="line">    snp_num += <span class="number">1</span></span><br><span class="line">    </span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Sample num：<span class="subst">&#123;sample_num&#125;</span>\n&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;SNP num：<span class="subst">&#123;snp_num&#125;</span>\n&quot;</span>)</span><br><span class="line"></span><br><span class="line">yuan_ped_file.close()</span><br><span class="line">yuan_map_file.close()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="重复抽样">重复抽样</h2>
+<p>每次抽样均随机抽取 n 个个体，之后重新生成 <code>temp.ped</code> 。  这里，<code>temp.ped</code> 的第二列均为抽样次数。之后对  <code>temp.ped/map</code> 文件计算 MAF。重复此过程，直至达到设定的抽样次数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 重复抽样，得到maf</span></span><br><span class="line">total_maf_list = []</span><br><span class="line"><span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, run_times+<span class="number">1</span>):</span><br><span class="line">    random_array =  np.random.choice(sample_num,sample_num) <span class="comment"># 有放回抽样</span></span><br><span class="line">    <span class="comment"># 生成新的ped文件</span></span><br><span class="line">    new_ped_file = <span class="built_in">open</span>(<span class="string">&quot;temp.ped&quot;</span>,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> random_array:</span><br><span class="line">        new_ped_file.write(<span class="string">&#x27;0&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>+<span class="built_in">str</span>(j)+<span class="string">&#x27;\t&#x27;</span>+list1[i]+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">    new_ped_file.close()</span><br><span class="line">    <span class="comment"># 统计maf</span></span><br><span class="line">    os.system(<span class="string">&quot;plink --allow-extra-chr --chr-set 95 --file temp --freq --out temp &gt; /dev/null&quot;</span>)</span><br><span class="line">    frq_file = <span class="built_in">open</span>(<span class="string">&quot;temp.frq&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">    title = frq_file.readline() <span class="comment"># 去除标题</span></span><br><span class="line">    maf_list = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> frq_file:</span><br><span class="line">        f = i.split()</span><br><span class="line">        <span class="keyword">if</span> f[<span class="number">4</span>] == <span class="string">&#x27;NA&#x27;</span>: <span class="comment">#如果maf为NA，替换为0，此时缺失率为1</span></span><br><span class="line">            f[<span class="number">4</span>] = <span class="string">&#x27;0&#x27;</span></span><br><span class="line">        maf_list.append(f[<span class="number">4</span>])</span><br><span class="line">    frq_file.close()</span><br><span class="line">    <span class="comment"># 查看maf结果是否正常</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(maf_list) != snp_num:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Error: snp num in temp.frq is not same with <span class="subst">&#123;plink_prefix&#125;</span>.map\n&quot;</span>)</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        total_maf_list.append(<span class="string">&#x27;\t&#x27;</span>.join(maf_list))</span><br></pre></td></tr></table></figure>
+<h2 id="统计所有抽样结果，写入结果文件">统计所有抽样结果，写入结果文件</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 统计所有maf结果的均值与标准误</span></span><br><span class="line"><span class="comment"># 每一行是一次抽样，每一列是一个SNP</span></span><br><span class="line">array1 = np.genfromtxt(total_maf_list, dtype=np.float16, missing_values=<span class="string">&quot;NA&quot;</span>, filling_values=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">snp_mean_list = np.mean(array1, axis=<span class="number">0</span>)</span><br><span class="line">snp_se_list = np.std(array1, axis=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并结果</span></span><br><span class="line">title = yuan_frq_file.readline().split() <span class="comment"># 去除标题</span></span><br><span class="line">out_file.write(<span class="string">&#x27;\t&#x27;</span>.join(title)+<span class="string">&#x27;\t&#x27;</span>+<span class="string">&#x27;bootstrap_mean&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>+<span class="string">&#x27;bootstrap_bias&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>+<span class="string">&#x27;bootstrap_se&#x27;</span>+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line"></span><br><span class="line">j = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> yuan_frq_file:</span><br><span class="line">    f = i.split()</span><br><span class="line">    <span class="keyword">if</span> f[<span class="number">4</span>] == <span class="string">&#x27;NA&#x27;</span>: <span class="comment">#如果maf为NA，替换为0，此时缺失率为1</span></span><br><span class="line">        f[<span class="number">4</span>] = <span class="string">&#x27;0&#x27;</span></span><br><span class="line">    yuan_maf = <span class="built_in">float</span>(f[<span class="number">4</span>])</span><br><span class="line">    bias = snp_mean_list[j] - yuan_maf <span class="comment"># bias = 自助法均值 - 真值</span></span><br><span class="line">    out_file.write(<span class="string">&#x27;\t&#x27;</span>.join(f)+<span class="string">&#x27;\t&#x27;</span>+<span class="built_in">str</span>(snp_mean_list[j])+<span class="string">&#x27;\t&#x27;</span>+<span class="built_in">str</span>(bias)+<span class="string">&#x27;\t&#x27;</span>+<span class="built_in">str</span>(snp_se_list[j])+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">    j += <span class="number">1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">yuan_frq_file.close()</span><br><span class="line">out_file.close()</span><br></pre></td></tr></table></figure>
+<h2 id="缺点">缺点</h2>
+<p>这里重复1000次是按顺序运行，即先做第一次抽样，做完再做第二次，之后再做第三次……等等。其实抽样过程完全可以改为用<strong>并行计算</strong>的方式，这样可以提高效率，减少时间。由于我在我的项目中计算时间还可以接受，就没有修改代码。</p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF/" rel="tag">生物信息</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/e4032b5c/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            词霸天下上
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/da92ff49/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Unsupervised Learning</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2022
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/posts/ac7827ff">只只</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

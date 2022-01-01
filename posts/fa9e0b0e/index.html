@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    两个Plink文件样本间基因型比对代码实现 |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-两个Plink文件样本间基因型比对代码实现"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  两个Plink文件样本间基因型比对代码实现
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/fa9e0b0e/" class="article-date">
+  <time datetime="2021-08-16T09:06:45.000Z" itemprop="datePublished">2021-08-16</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a> / <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/python/">python</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">16 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>本软件对两个plink文件中的样本的共同的SNP位点进行比对，可以应用于同一群体不同处理之后得到的基因型文件的比对（例如比较不同的填充方式得到的plink文件）。</p>
+<p>前提条件为，两个map的染色体、SNP名称及物理位置必须保持一致。</p>
+<span id="more"></span>
+<h1>使用软件</h1>
+<ul>
+<li>python 3.0以上版本，事先安装 numpy 模块。</li>
+<li>plink 1.9 , 并将 plink 添加到环境变量中。</li>
+</ul>
+<h1>输入文件格式</h1>
+<ul>
+<li>plink 文件 ：前缀相同的一对文件，后缀分别为<code>.ped</code> ，<code>.map</code> 。</li>
+<li>映射文件： 两列，所有基因型个体的芯片号与个体号，空格或 tab分隔，无标题。</li>
+</ul>
+<h1>输出文件说明</h1>
+<ul>
+<li>
+<p><code>cmp_two_plinks.txt</code> :  第一列为第一个plink文件某个个体的个体号，第二列为第二个plink文件某个个体的个体号，第三列为两个样本不一致的位点数目，第四列为位点总数，第五列为前两列相除得到的不一致率。</p>
+<p>示例如下：</p>
+<table>
+<thead>
+<tr>
+<th>202309870171_R01C01</th>
+<th>202309870171_R01C01</th>
+<th>0</th>
+<th>43279</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>202309870171_R01C02</td>
+<td>202309870171_R01C02</td>
+<td>0</td>
+<td>43289</td>
+<td>0</td>
+</tr>
+<tr>
+<td>202309870171_R02C01</td>
+<td>202309870171_R02C01</td>
+<td>0</td>
+<td>43268</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<h1>运行代码</h1>
+<p>代码文件见：<a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/compair_samples.py">compair_samples.py</a></p>
+<p>将输入文件和本程序放在同一文件夹下，运行命令示范为</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python compair_samples.py --plink1 plink1 --plink2 plink2</span><br></pre></td></tr></table></figure>
+<p><strong>可用参数说明</strong>：</p>
+<p><code>--plink1</code>: 第一个plink文件前缀，必选。</p>
+<p><code>--plink2</code>: 第二个plink文件前缀，可选。</p>
+<p><code>--chipid1</code> : 第一个基因型个体映射文件名，芯片和个体号均不能出现重复，可选。如果提供这个文件，那么基因型样本会使用映射文件的个体号。</p>
+<p><code>--chipid2</code> : 第二个基因型个体映射文件名，芯片和个体号均不能出现重复，可选。如果提供这个文件，那么基因型样本会使用映射文件的个体号。</p>
+<p><code>--cmp-all</code> : 是否需要所有配对两两遍历，可选，只能为yes和no，默认为no。如果该选项设置为yes，则会对两个plink文件中所有样本之间所有可能的组合进行比较，输出所有配对结果；如果设置为no, 则仅针对两个plink文件的共同样本进行基因型比对，输出两个plink文件的同名的样本间的基因型比对结果。</p>
+<p><code>--exclude-miss</code> : 基因型比对是否先剔除缺失值，可选，只能为yes和no，默认为yes。如果该选项设置为no，比对时不会剔除缺失位点，如果存在同一个SNP，一个样本有基因型，一个样本为缺失，该SNP同样会被视为不一致位点；如果该选项设置为 yes ，比对时会剔除至少一个样本为缺失的位点，只比对两个样本均不为缺失的位点。</p>
+<p><code>--save-temp</code> :  是否保留中间文件，可选，只能为yes和no，默认为 no。</p>
+<p><code>--out</code> : 结果文件名称，可选，默认为 cmp_two_plinks.txt</p>
+<h1>流程说明</h1>
+<p>先对两个ped文件中的芯片号进行重编码，并获取两个ped文件相同的芯片号信息。之后从两个map中提取相同的SNP位点，使用plink软件提取共同位点并合并两个plink文件，得到012编码的raw文件。最后默认对raw文件中两个plink文件中的共同样本进行基因型比对。</p>
+<h1>代码说明</h1>
+<h2 id="检验参数">检验参数</h2>
+<p>检验输入的各个参数是否合规</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#检验参数</span></span><br><span class="line">legal_argument_set = <span class="built_in">set</span>([<span class="string">&quot;yes&quot;</span>, <span class="string">&quot;no&quot;</span>])</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">is_number</span>(<span class="params">s</span>):</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="built_in">float</span>(s)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    <span class="keyword">except</span> ValueError:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;args.plink1&#125;</span>.ped&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Error: not exist <span class="subst">&#123;args.plink1&#125;</span>.ped\n\n&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;args.plink1&#125;</span>.map&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Error: not exist <span class="subst">&#123;args.plink1&#125;</span>.map\n\n&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> args.chipid1 <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;args.chipid1&#125;</span>&quot;</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Error: not exist <span class="subst">&#123;args.chipid1&#125;</span>\n\n&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;args.plink2&#125;</span>.ped&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Error: not exist <span class="subst">&#123;args.plink2&#125;</span>.ped\n\n&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;args.plink2&#125;</span>.map&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Error: not exist <span class="subst">&#123;args.plink2&#125;</span>.map\n\n&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> args.chipid2 <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;args.chipid2&#125;</span>&quot;</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Error: not exist <span class="subst">&#123;args.chipid2&#125;</span>\n\n&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> args.cmp_all <span class="keyword">not</span> <span class="keyword">in</span> legal_argument_set:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Error: illegal input, --cmp-all must be yes or no\n\n&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> args.exclude_miss <span class="keyword">not</span> <span class="keyword">in</span> legal_argument_set:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Error: illegal input, --exclude-miss must be yes or no\n\n&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> args.save_temp <span class="keyword">not</span> <span class="keyword">in</span> legal_argument_set:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Error: illegal input, --save-temp must be yes or no\n\n&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="复制文件">复制文件</h2>
+<p>这里根据原始plink文件重新生成两套新的plink文件，其中芯片号使用数字代替。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#开始流程</span></span><br><span class="line"></span><br><span class="line">plink_prefix1 = args.plink1</span><br><span class="line">plink_prefix2 = args.plink2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 复制 map</span></span><br><span class="line">os.system(<span class="string">f&quot;cp <span class="subst">&#123;plink_prefix1&#125;</span>.map <span class="subst">&#123;plink_prefix1&#125;</span>_temp.map&quot;</span>)</span><br><span class="line">os.system(<span class="string">f&quot;cp <span class="subst">&#123;plink_prefix2&#125;</span>.map <span class="subst">&#123;plink_prefix2&#125;</span>_temp.map&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新生成plink 文件</span></span><br><span class="line">ped1 = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix1&#125;</span>.ped&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">map1 = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix1&#125;</span>.map&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line"></span><br><span class="line">ped2 = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix2&#125;</span>.ped&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">map2 = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix2&#125;</span>.map&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line"></span><br><span class="line">re_ped1 = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix1&#125;</span>_temp.ped&quot;</span>,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">re_ped2 = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix2&#125;</span>_temp.ped&quot;</span>,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">rename_chipid_file = <span class="built_in">open</span>(<span class="string">&#x27;rename_chipid_temp.txt&#x27;</span>,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">common_snp_file = <span class="built_in">open</span>(<span class="string">f&#x27;<span class="subst">&#123;plink_prefix1&#125;</span>_<span class="subst">&#123;plink_prefix2&#125;</span>_common_snp_temp.txt&#x27;</span>,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="提取共同位点">提取共同位点</h2>
+<p>读入两个 map 文件，提取共同的 snp 名称。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">error_status = <span class="literal">False</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">#提取共同位点</span></span><br><span class="line">j = <span class="number">0</span></span><br><span class="line">temp_id_set = <span class="built_in">set</span>()</span><br><span class="line">temp_line_set = <span class="built_in">set</span>()</span><br><span class="line">map1_dick = &#123;&#125;  <span class="comment"># SNP名称：染色体_物理位置</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> map1:</span><br><span class="line">    j += <span class="number">1</span></span><br><span class="line">    f = i.split()</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">len</span>(f) == <span class="number">4</span>):</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;\t&#x27;</span>.join(f) <span class="keyword">not</span> <span class="keyword">in</span> temp_line_set:</span><br><span class="line">            temp_line_set.add(<span class="string">&#x27;\t&#x27;</span>.join(f))</span><br><span class="line">            <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">not</span> <span class="keyword">in</span> temp_id_set:</span><br><span class="line">                temp_id_set.add(f[<span class="number">1</span>])</span><br><span class="line">                map1_dick[f[<span class="number">1</span>]] = f[<span class="number">0</span>]+<span class="string">&quot;_&quot;</span>+f[<span class="number">3</span>] <span class="comment"># SNP名称：“染色体_物理位置”</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Error: duplicated id <span class="subst">&#123;f[<span class="number">1</span>]&#125;</span> in different rows in <span class="subst">&#123;plink_prefix1&#125;</span>.map\n&quot;</span>) </span><br><span class="line">                error_status = <span class="literal">True</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Error: duplicted row <span class="subst">&#123;j&#125;</span> in <span class="subst">&#123;plink_prefix1&#125;</span>.map\n&quot;</span>)</span><br><span class="line">            error_status = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Error: <span class="subst">&#123;j&#125;</span> row in <span class="subst">&#123;plink_prefix1&#125;</span>.map has less or more than 4 coloums\n&quot;</span>)</span><br><span class="line">        error_status = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">j = <span class="number">0</span></span><br><span class="line">temp_id_set = <span class="built_in">set</span>()</span><br><span class="line">temp_line_set = <span class="built_in">set</span>()</span><br><span class="line">common_snp_num = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> map2:</span><br><span class="line">    j += <span class="number">1</span></span><br><span class="line">    f = i.split()</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">len</span>(f) == <span class="number">4</span>):</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;\t&#x27;</span>.join(f) <span class="keyword">not</span> <span class="keyword">in</span> temp_line_set:</span><br><span class="line">            temp_line_set.add(<span class="string">&#x27;\t&#x27;</span>.join(f))</span><br><span class="line">            <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">not</span> <span class="keyword">in</span> temp_id_set:</span><br><span class="line">                temp_id_set.add(f[<span class="number">1</span>])</span><br><span class="line">                <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">in</span> map1_dick:</span><br><span class="line">                    common_snp_num += <span class="number">1</span></span><br><span class="line">                    common_snp_file.write(f[<span class="number">1</span>]+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Error: duplicated id <span class="subst">&#123;f[<span class="number">1</span>]&#125;</span> in different rows in <span class="subst">&#123;plink_prefix2&#125;</span>.map\n&quot;</span>) </span><br><span class="line">                error_status = <span class="literal">True</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Error: duplicted row <span class="subst">&#123;j&#125;</span> in <span class="subst">&#123;plink_prefix2&#125;</span>.map\n&quot;</span>)</span><br><span class="line">            error_status = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Error: <span class="subst">&#123;j&#125;</span> row in <span class="subst">&#123;plink_prefix2&#125;</span>.map has less or more than 4 coloums\n&quot;</span>)</span><br><span class="line">        error_status = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;\nNumber of common SNPs in two plink files: &#123;&#125;\n&quot;</span>.<span class="built_in">format</span>(common_snp_num))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="ped文件芯片号重编码">ped文件芯片号重编码</h2>
+<p>将ped文件中的芯片号改为重编码的数字，如果有映射文件，在此处读取映射文件。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建一个函数，得到芯片号-个体号的字典(chipid_sampleid_dick 提前创建)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Chipid_Sampleid</span>(<span class="params">chipid_file_name</span>):</span></span><br><span class="line">    chipid_file = <span class="built_in">open</span>(chipid_file_name,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">    <span class="keyword">global</span> error_status</span><br><span class="line">    j = <span class="number">0</span></span><br><span class="line">    temp_id_set = <span class="built_in">set</span>()</span><br><span class="line">    temp_id_set2 = <span class="built_in">set</span>()</span><br><span class="line">    temp_line_set = <span class="built_in">set</span>()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> chipid_file:</span><br><span class="line">        j += <span class="number">1</span></span><br><span class="line">        f = i.split()</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">len</span>(f) &gt;= <span class="number">2</span>):</span><br><span class="line">            <span class="keyword">if</span> <span class="string">&#x27;\t&#x27;</span>.join(f) <span class="keyword">not</span> <span class="keyword">in</span> temp_line_set:</span><br><span class="line">                temp_line_set.add(<span class="string">&#x27;\t&#x27;</span>.join(f))</span><br><span class="line">                <span class="keyword">if</span> f[<span class="number">0</span>] <span class="keyword">not</span> <span class="keyword">in</span> temp_id_set:</span><br><span class="line">                    temp_id_set.add(f[<span class="number">0</span>])</span><br><span class="line">                    <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">not</span> <span class="keyword">in</span> temp_id_set2:</span><br><span class="line">                        temp_id_set2.add(f[<span class="number">1</span>])</span><br><span class="line">                        chipid_sampleid_dick[f[<span class="number">0</span>]] = f[<span class="number">1</span>] <span class="comment">#芯片号：个体号</span></span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        <span class="built_in">print</span>(<span class="string">f&quot;Error: duplicated sample id <span class="subst">&#123;f[<span class="number">1</span>]&#125;</span> in different rows in <span class="subst">&#123;chipid_file_name&#125;</span>\n&quot;</span>) </span><br><span class="line">                        error_status = <span class="literal">True</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">f&quot;Error: duplicated chip id <span class="subst">&#123;f[<span class="number">0</span>]&#125;</span> in different rows in <span class="subst">&#123;chipid_file_name&#125;</span>\n&quot;</span>) </span><br><span class="line">                    error_status = <span class="literal">True</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Warinning: duplicted row <span class="subst">&#123;j&#125;</span> in <span class="subst">&#123;chipid_file_name&#125;</span>\n&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Error: <span class="subst">&#123;j&#125;</span> row in <span class="subst">&#123;chipid_file_name&#125;</span> has less than 2 coloums\n&quot;</span>)</span><br><span class="line">            error_status = <span class="literal">True</span></span><br><span class="line">    chipid_file.close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"><span class="comment">#重命名</span></span><br><span class="line">newid_dick = &#123;&#125; <span class="comment">#chipid/sampleid:newid</span></span><br><span class="line">sampleid_dick = &#123;&#125; <span class="comment">#newid:chipid/sampleid</span></span><br><span class="line"></span><br><span class="line">j = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#ped重编码为数字(1-indexed)，家系号设定为0。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看是否存在chipid1</span></span><br><span class="line"><span class="keyword">if</span> args.chipid1 <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">    chipid_sampleid_dick = &#123;&#125;</span><br><span class="line">    Chipid_Sampleid(args.chipid1) <span class="comment">#运行函数</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> ped1:</span><br><span class="line">        f = i.split()</span><br><span class="line">        <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">in</span> chipid_sampleid_dick:</span><br><span class="line">            j += <span class="number">1</span></span><br><span class="line">            newid_dick[chipid_sampleid_dick[f[<span class="number">1</span>]]] = j</span><br><span class="line">            sampleid_dick[j] = chipid_sampleid_dick[f[<span class="number">1</span>]]</span><br><span class="line">            rename_chipid_file.write(<span class="string">f&quot;<span class="subst">&#123;chipid_sampleid_dick[f[<span class="number">1</span>]]&#125;</span>\t<span class="subst">&#123;j&#125;</span>\n&quot;</span>)</span><br><span class="line">            f[<span class="number">1</span>] = <span class="built_in">str</span>(j)</span><br><span class="line">            re_ped1.write(<span class="string">&#x27;0&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>.join(f[<span class="number">1</span>:])+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Warning: <span class="subst">&#123;f[<span class="number">1</span>]&#125;</span> in <span class="subst">&#123;args.plink1&#125;</span>.ped not in chpid file&quot;</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> ped1:</span><br><span class="line">        f = i.split()</span><br><span class="line">        j += <span class="number">1</span></span><br><span class="line">        newid_dick[f[<span class="number">1</span>]] = j</span><br><span class="line">        sampleid_dick[j] = f[<span class="number">1</span>]</span><br><span class="line">        rename_chipid_file.write(<span class="string">f&quot;<span class="subst">&#123;f[<span class="number">1</span>]&#125;</span>\t<span class="subst">&#123;j&#125;</span>\n&quot;</span>)            </span><br><span class="line">        f[<span class="number">1</span>] = <span class="built_in">str</span>(j)</span><br><span class="line">        re_ped1.write(<span class="string">&#x27;0&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>.join(f[<span class="number">1</span>:])+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">        </span><br><span class="line">sample1_num = j</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Number of records present in plink1 ped file: &#123;&#125;\n&quot;</span>.<span class="built_in">format</span>(sample1_num))</span><br><span class="line"></span><br><span class="line">common_sample_list = []</span><br><span class="line">common_sample_num = <span class="number">0</span></span><br><span class="line"><span class="comment">#查看是否存在chipid2</span></span><br><span class="line"><span class="keyword">if</span> args.chipid2 <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">    chipid_sampleid_dick = &#123;&#125;</span><br><span class="line">    Chipid_Sampleid(args.chipid2) <span class="comment">#运行函数</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> ped2:</span><br><span class="line">        f = i.split()</span><br><span class="line">        <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">in</span> chipid_sampleid_dick:</span><br><span class="line">            j += <span class="number">1</span> <span class="comment">#接着上面递增</span></span><br><span class="line">            sampleid_dick[j] = chipid_sampleid_dick[f[<span class="number">1</span>]]</span><br><span class="line">            <span class="keyword">if</span> chipid_sampleid_dick[f[<span class="number">1</span>]] <span class="keyword">in</span> newid_dick: <span class="comment">#提取相同样本</span></span><br><span class="line">                common_sample_num += <span class="number">1</span></span><br><span class="line">                common_sample_list.append([newid_dick[chipid_sampleid_dick[f[<span class="number">1</span>]]],j]) <span class="comment">#两个重编号  </span></span><br><span class="line">            rename_chipid_file.write(<span class="string">f&quot;<span class="subst">&#123;chipid_sampleid_dick[f[<span class="number">1</span>]]&#125;</span>\t<span class="subst">&#123;j&#125;</span>\n&quot;</span>)</span><br><span class="line">            f[<span class="number">1</span>] = <span class="built_in">str</span>(j)</span><br><span class="line">            re_ped2.write(<span class="string">&#x27;0&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>.join(f[<span class="number">1</span>:])+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Warning: <span class="subst">&#123;f[<span class="number">1</span>]&#125;</span> in <span class="subst">&#123;args.plink2&#125;</span>.ped not in chpid file&quot;</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> ped2:</span><br><span class="line">        f = i.split()</span><br><span class="line">        j += <span class="number">1</span></span><br><span class="line">        sampleid_dick[j] = f[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> f[<span class="number">1</span>] <span class="keyword">in</span> newid_dick:</span><br><span class="line">                common_sample_num += <span class="number">1</span></span><br><span class="line">                common_sample_list.append([newid_dick[f[<span class="number">1</span>]],j]) <span class="comment">#两个重编号  </span></span><br><span class="line">        rename_chipid_file.write(<span class="string">f&quot;<span class="subst">&#123;f[<span class="number">1</span>]&#125;</span>\t<span class="subst">&#123;j&#125;</span>\n&quot;</span>)            </span><br><span class="line">        f[<span class="number">1</span>] = <span class="built_in">str</span>(j)</span><br><span class="line">        re_ped2.write(<span class="string">&#x27;0&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>+<span class="string">&#x27;\t&#x27;</span>.join(f[<span class="number">1</span>:])+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">        </span><br><span class="line">sample2_num = j - sample1_num</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Number of records present in plink2 ped file: &#123;&#125;\n&quot;</span>.<span class="built_in">format</span>(sample2_num))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Number of common samples in two plink file: &#123;&#125;\n&quot;</span>.<span class="built_in">format</span>(common_sample_num))</span><br><span class="line">    </span><br><span class="line">ped1.close()</span><br><span class="line">map1.close()</span><br><span class="line">ped2.close()</span><br><span class="line">map2.close()</span><br><span class="line">re_ped1.close()</span><br><span class="line">re_ped2.close()</span><br><span class="line">rename_chipid_file.close()</span><br><span class="line">common_snp_file.close()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>如果上面出现错误，报错，中止程序</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如果输入文件出现错误</span></span><br><span class="line"><span class="keyword">if</span> error_status:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Please check your file again!&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="提取共同位点，合并基因型">提取共同位点，合并基因型</h2>
+<p>提取两个plink文件的共同位点，合并基因型，生成 012 编码的 raw 文件。如果合并的过程中出现报错，程序中止，一般这种报错都是由于非二等位基因造成的，即两个plink文件中某个位点的两个碱基不一样。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#extract merge recodeA</span></span><br><span class="line"></span><br><span class="line">merge_status = os.system(<span class="string">f&quot;plink --allow-extra-chr --chr-set 95 --file <span class="subst">&#123;plink_prefix1&#125;</span>_temp --merge <span class="subst">&#123;plink_prefix2&#125;</span>_temp --extract <span class="subst">&#123;plink_prefix1&#125;</span>_<span class="subst">&#123;plink_prefix2&#125;</span>_common_snp_temp.txt --recodeA --out <span class="subst">&#123;plink_prefix1&#125;</span>_<span class="subst">&#123;plink_prefix2&#125;</span>_merge_temp &gt; /dev/null&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> merge_status != <span class="number">0</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Error in merge two plink data\n&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Maybe some common SNP from Complementary strands,check your data again&quot;</span>)</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>将缺失位点替换为3，将合并基因型读取为二维数组</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#raw文件处理</span></span><br><span class="line">os.system(<span class="string">f&quot;sed &#x27;s/NA/3/g&#x27; <span class="subst">&#123;plink_prefix1&#125;</span>_<span class="subst">&#123;plink_prefix2&#125;</span>_merge_temp.raw &gt; <span class="subst">&#123;plink_prefix1&#125;</span>_<span class="subst">&#123;plink_prefix2&#125;</span>_merge_temp_sed.raw&quot;</span>)</span><br><span class="line">raw_file = <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;plink_prefix1&#125;</span>_<span class="subst">&#123;plink_prefix2&#125;</span>_merge_temp_sed.raw&quot;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">out_file = <span class="built_in">open</span>(args.out,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line"></span><br><span class="line">gene_list=[]</span><br><span class="line">raw_list=[]</span><br><span class="line">title = raw_file.readline() <span class="comment">#剔除标题</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> raw_file:</span><br><span class="line">    f = i.split()</span><br><span class="line">    gene_list.append(<span class="built_in">int</span>(f[<span class="number">1</span>]))</span><br><span class="line">    raw_list.append(f[<span class="number">6</span>:])</span><br><span class="line"></span><br><span class="line">gene_id_array1 = np.array(gene_list)</span><br><span class="line"></span><br><span class="line">array1 = np.array(raw_list, dtype=np.int8)</span><br><span class="line"></span><br><span class="line">total_sample_num = array1.shape[<span class="number">0</span>]</span><br><span class="line">snp_num = array1.shape[<span class="number">1</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Number of records present in merged ped file: &#123;&#125;\n&quot;</span>.<span class="built_in">format</span>(total_sample_num))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Number of SNPs in merged plink files: &#123;&#125;\n&quot;</span>.<span class="built_in">format</span>(snp_num))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="比对两个样本的基因型">比对两个样本的基因型</h2>
+<p>创建了两个比对函数（是否剔除缺失值）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建比对函数（是否剔除缺失值）</span></span><br><span class="line"><span class="comment">#这个函数定死了使用 array1 first_index second index</span></span><br><span class="line"><span class="comment">#创建两个函数，这样只要判断一次，而不要每个pair都要判断是否剔除缺失值</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Exclude_Miss_Yes</span>():</span></span><br><span class="line">    <span class="comment">#输出变量设置为全局变量</span></span><br><span class="line">    <span class="keyword">global</span> total_num,no_match_num,no_match_rate</span><br><span class="line">    v1 = array1[first_index,:]</span><br><span class="line">    v2 = array1[second_index,:]</span><br><span class="line">    non_miss_index = np.where((v1!=<span class="number">3</span>) &amp; (v2!=<span class="number">3</span>))</span><br><span class="line">    total_num = non_miss_index[<span class="number">0</span>].shape[<span class="number">0</span>]</span><br><span class="line">    v1_new = v1[non_miss_index]</span><br><span class="line">    v2_new = v2[non_miss_index]</span><br><span class="line">    no_match_num = np.count_nonzero(v1_new!=v2_new)</span><br><span class="line">    no_match_rate = no_match_num/total_num</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Exclude_Miss_No</span>():</span></span><br><span class="line">    <span class="comment">#输出变量设置为全局变量</span></span><br><span class="line">    <span class="keyword">global</span> total_num,no_match_num,no_match_rate</span><br><span class="line">    v1 = array1[first_index,:]</span><br><span class="line">    v2 = array1[second_index,:]</span><br><span class="line">    total_num = v1.shape[<span class="number">0</span>]</span><br><span class="line">    no_match_num = np.count_nonzero(v1!=v2)</span><br><span class="line">    no_match_rate = no_match_num/total_num</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>计算两个样本的不一致，分两种情况，比较所有配对和只比较同名样本。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#计算不一致率</span></span><br><span class="line">out_list = []</span><br><span class="line"><span class="keyword">if</span> args.cmp_all == <span class="string">&#x27;yes&#x27;</span>: <span class="comment">#计算所有pairs</span></span><br><span class="line">    <span class="keyword">if</span> args.exclude_miss == <span class="string">&#x27;yes&#x27;</span>:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(sample1_num):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(sample1_num, total_sample_num):</span><br><span class="line">                first_index = i</span><br><span class="line">                second_index = j</span><br><span class="line">                <span class="comment">#计算去除缺失后的不一致位点数</span></span><br><span class="line">                Exclude_Miss_Yes()</span><br><span class="line">                <span class="comment">#newid = index + 1</span></span><br><span class="line">                out_list.append([sampleid_dick[first_index+<span class="number">1</span>],sampleid_dick[second_index+<span class="number">1</span>],<span class="string">f&quot;<span class="subst">&#123;no_match_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;total_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;no_match_rate:<span class="number">.4</span>f&#125;</span>&quot;</span>])</span><br><span class="line">    <span class="keyword">elif</span> args.exclude_miss == <span class="string">&#x27;no&#x27;</span>:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(sample1_num):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(sample1_num, total_sample_num):</span><br><span class="line">                first_index = i</span><br><span class="line">                second_index = j</span><br><span class="line">                <span class="comment">#计算去除缺失后的不一致位点数</span></span><br><span class="line">                Exclude_Miss_No()</span><br><span class="line">                <span class="comment">#newid = index + 1</span></span><br><span class="line">                out_list.append([sampleid_dick[first_index+<span class="number">1</span>],sampleid_dick[second_index+<span class="number">1</span>],<span class="string">f&quot;<span class="subst">&#123;no_match_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;total_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;no_match_rate:<span class="number">.4</span>f&#125;</span>&quot;</span>])                             </span><br><span class="line"><span class="keyword">elif</span> args.cmp_all == <span class="string">&#x27;no&#x27;</span>: <span class="comment">#只计算个体号相同的pairs</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(common_sample_list) == <span class="number">0</span>: <span class="comment">#如果没有共同个体，报错</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Error: two ped file has no same samples, check your data again!&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">if</span> args.exclude_miss == <span class="string">&#x27;yes&#x27;</span>:</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> common_sample_list:</span><br><span class="line">                <span class="comment">#index = newid - 1</span></span><br><span class="line">                first_index = i[<span class="number">0</span>] - <span class="number">1</span></span><br><span class="line">                second_index = i[<span class="number">1</span>] -<span class="number">1</span> </span><br><span class="line">                <span class="comment">#计算去除缺失后的不一致位点数</span></span><br><span class="line">                Exclude_Miss_Yes()</span><br><span class="line">                out_list.append([sampleid_dick[i[<span class="number">0</span>]],sampleid_dick[i[<span class="number">1</span>]],<span class="string">f&quot;<span class="subst">&#123;no_match_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;total_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;no_match_rate:<span class="number">.4</span>f&#125;</span>&quot;</span>])</span><br><span class="line">        <span class="keyword">elif</span> args.exclude_miss == <span class="string">&#x27;no&#x27;</span>:</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> common_sample_list:</span><br><span class="line">                <span class="comment">#index = newid - 1</span></span><br><span class="line">                first_index = i[<span class="number">0</span>] - <span class="number">1</span></span><br><span class="line">                second_index = i[<span class="number">1</span>] -<span class="number">1</span> </span><br><span class="line">                <span class="comment">#计算去除缺失后的不一致位点数</span></span><br><span class="line">                Exclude_Miss_No()</span><br><span class="line">                out_list.append([sampleid_dick[i[<span class="number">0</span>]],sampleid_dick[i[<span class="number">1</span>]],<span class="string">f&quot;<span class="subst">&#123;no_match_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;total_num&#125;</span>&quot;</span>,<span class="string">f&quot;<span class="subst">&#123;no_match_rate:<span class="number">.4</span>f&#125;</span>&quot;</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">sorted_out_list = <span class="built_in">sorted</span>(out_list, key = <span class="keyword">lambda</span> s:(<span class="built_in">float</span>(s[<span class="number">4</span>]),s[<span class="number">0</span>])) <span class="comment">#不一致率从小到大</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> sorted_out_list:</span><br><span class="line">    out_file.write(<span class="string">&#x27;\t&#x27;</span>.join(i)+<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line"></span><br><span class="line">raw_file.close()</span><br><span class="line">out_file.close()</span><br></pre></td></tr></table></figure>
+<h2 id="删除中间文件">删除中间文件</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> args.save_temp == <span class="string">&quot;yes&quot;</span>:</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"><span class="keyword">elif</span> args.save_temp == <span class="string">&quot;no&quot;</span>:</span><br><span class="line">    os.system(<span class="string">f&quot;rm *temp*&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF/" rel="tag">生物信息</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/6897c9bb/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            两个Plink文件同一SNP基因型比对代码实现
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/428cb22d/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Numpy和Pandas模块学习</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2022
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/posts/ac7827ff">只只</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
