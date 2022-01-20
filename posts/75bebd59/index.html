@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    18位身份证号的编码规则 |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-18位身份证号的编码规则"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  18位身份证号的编码规则
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/75bebd59/" class="article-date">
+  <time datetime="2022-01-19T08:24:01.000Z" itemprop="datePublished">2022-01-19</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">13 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>突然有一个疑问，身份证号码是如何编码的？最主要是如何避免身份证号重复的（同一个行政区域内的同年同月同日生的同性别的新生儿）？</p>
+<span id="more"></span>
+<h1>18位身份证号编码规则</h1>
+<p>知乎的一篇博文<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/21286417">实名认证前传之身份证号码编码规则</a> 感觉已经说得很清楚了，用我自己的身份证号测试了一下，最后一位的校验码的规则应该是对的。</p>
+<p>下面的内容均来自这一篇博文。</p>
+<blockquote>
+<p><strong>一、身份证号码结构</strong></p>
+<p>早期‘身份证号码’叫‘社会保障号’，为15位，1999年开始更名为公民身份证号码，即第二代身份证，为18位，且终身不变。</p>
+<p>430512198908131367</p>
+<p>公民身份号码是特征组合码，由前十七位数字本体码和最后一位数字校验码组成。排列顺序从左至右依次为六位数字地址码，八位数字出生日期码，三位数字顺序码和一位数字校验码。</p>
+<p><strong>地址码</strong>： 6位，表示编码对象常住户口所在县(市、旗、区)的行政区划代码。对于新生儿，该地址码为户口登记地行政区划代码。需要没说明的是，随着行政区划的调整，同一个地方进行户口登记的可能存在地址码不一致的情况。行政区划代码按GB/T2260的规定执行。</p>
+<p><strong>出生日期码</strong>：8位，表示编码对象出生的年、月、日，年、月、日代码之间不用分隔符，格式为YYYYMMDD，如19880328。按GB/T 7408的规定执行。原15位身份证号码中出生日期码还有对百岁老人特定的标识，其中999、998、997、996分配给百岁老人。</p>
+<p><strong>顺序码</strong>： 3位，表示在同一地址码所标识的区域范围内，对同年、同月、同日出生的人编定的顺序号，顺序码的奇数分配给男性，偶数分配给女性。</p>
+<p><strong>校验码</strong>： 1位，根据本体码，通过采用ISO 7064:1983,MOD 11-2校验码系统计算出校验码。算法可参考下文。前面有提到数字校验码，我们知道校验码也有X的，实质上为罗马字符X，相当于10.</p>
+</blockquote>
+<h2 id="校验码算法">校验码算法</h2>
+<p>校验码是通过前 17 位数字通过下面这个算法进行计算得到的，也就是说前 17 位数字确定了，第 18 位数字也就确定了。</p>
+<p>举个例子，假设本体码为  11010519491231002</p>
+<p>第一步：根据下表，将本体码的前17位数字乘以相应的加权因子，求和，按上面的例子，就是 $1 \times 7+1 \times 9+ \cdots +2 \times 2 = 167 $</p>
+<table>
+<thead>
+<tr>
+<th>身份证位置序号</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+<th>11</th>
+<th>12</th>
+<th>13</th>
+<th>14</th>
+<th>15</th>
+<th>16</th>
+<th>17</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>加权因子</td>
+<td>7</td>
+<td>9</td>
+<td>10</td>
+<td>5</td>
+<td>8</td>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+<td>6</td>
+<td>3</td>
+<td>7</td>
+<td>9</td>
+<td>10</td>
+<td>5</td>
+<td>8</td>
+<td>4</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>第二步，对上面的和除以11计算余数，这里就是 <img src="https://math.now.sh?inline=167%5C%2511%20%3D%202" style="display:inline-block;margin: 0;"/></p>
+<p>第三步，根据余数对照下面，最终得到校验码为  X</p>
+<table>
+<thead>
+<tr>
+<th>余数</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>校验码</td>
+<td>1</td>
+<td>0</td>
+<td>X</td>
+<td>9</td>
+<td>8</td>
+<td>7</td>
+<td>6</td>
+<td>5</td>
+<td>4</td>
+<td>3</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>因此，本例的完整身份证号为 11010519491231002X</p>
+<h1>如何避免重复呢？</h1>
+<p>我的问题是，同一个县同一天肯定不只是一个人出生（顺序码从 000 到 999 一共是1000个数，也就是一个县同一天能落户的新生儿数目的最大值是 1000 ），同一个县可以用于落户的派出所应该有多个，那么同一天同一性别的多个初生儿同时分别去多个派出所落户，是如何确保他们分配得到的身份证号是唯一的呢？</p>
+<p>这个问题我不知道，但是我感觉这应该是数据库的一个操作。我能想到的是，可能在同一个县里如果有人新建记录的时候就锁住数据库，不允许其他人再往数据库里插入记录，这样就可以避免身份证号的重复问题。</p>
+<p>然后我咨询了一下小强，他和我说这就是数据库的一个基本特性，如果有多个人同时往数据库里插入了主键相同的一行，那么应该有一个人会插入成功，其他人会显示失败。</p>
+<h2 id="数据库事务">数据库事务</h2>
+<p>下面的内容主要来自维基百科 <a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1">数据库事务</a> 。</p>
+<blockquote>
+<p><strong>数据库事务</strong>（简称：<strong>事务</strong>）是<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F">数据库管理系统</a>执行过程中的一个逻辑单位，由一个有限的<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93">数据库</a>操作序列构成。</p>
+<h2 id="概要">概要</h2>
+<p>数据库事务通常包含了一个序列的对数据库的读/写操作。包含有以下两个目的：</p>
+<ol>
+<li>为数据库操作序列提供了一个从失败中恢复到正常状态的方法，同时提供了数据库即使在异常状态下仍能保持一致性的方法。</li>
+<li>当多个<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F">应用程序</a>在<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E5%B9%B6%E5%8F%91">并发</a>访问数据库时，可以在这些应用程序之间提供一个隔离方法，以防止彼此的操作互相干扰。</li>
+</ol>
+<p>当事务被提交给了<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F">数据库管理系统</a>（DBMS），则<strong>DBMS需要确保该事务中的所有操作都成功完成且其结果被永久保存在数据库中，如果事务中有的操作没有成功完成，则事务中的所有操作都需要<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E5%9B%9E%E6%BB%9A_(%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86)">回滚</a>，回到事务执行前的状态；同时，该事务对数据库或者其他事务的执行无影响，所有的事务都好像在独立的运行</strong>。</p>
+<h3 id="例子">例子</h3>
+<p>某人要在商店使用<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E9%9B%BB%E5%AD%90%E8%B2%A8%E5%B9%A3">电子货币</a>购买100元的东西，当中至少包括两个操作：</p>
+<ol>
+<li>该人帐户减少100元</li>
+<li>商店帐户增加100元</li>
+</ol>
+<p><strong>支援交易的资料库管理系统</strong>（<strong>transactional DBMS</strong>）就是要确保以上两个操作（整个“交易”）都能完成，或一起取消；否则就会出现100元平白消失或出现的情况。</p>
+<p>但在现实情况下，失败的风险很高。在一个数据库事务的执行过程中，有可能会遇上事务操作失败、<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F">数据库系统</a>／<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F">操作系统</a>出错，甚至是存储介质出错等情况。这便需要DBMS对一个执行失败的事务执行恢复操作，将其数据库状态恢复到一致状态（数据的<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E4%B8%80%E8%87%B4%E6%80%A7">一致性</a>得到保证的状态）。为了实现将数据库状态恢复到一致状态的功能，DBMS通常需要维护事务日志（英语：<a target="_blank" rel="noopener" href="https://www.wikiwand.com/en/Transaction_log">Transaction log</a>）以追踪事务中所有影响数据库数据的操作[<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1#citenote1">1]</a>[<a target="_blank" rel="noopener" href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1#citenote2">2]</a>。</p>
+</blockquote>
+<h2 id="ACID-性质">ACID 性质</h2>
+<p>下文内容主要来自于 <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39521554/article/details/80240841">数据库的ACID（原子性、一致性、隔离性与持久性）</a></p>
+<p>数据库管理系统中**事务(transaction)**的四个特性（分析时根据首字母缩写依次解释）：<strong>原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）</strong></p>
+<p>详解</p>
+<ol>
+<li>原子性</li>
+</ol>
+<blockquote>
+<p>原子性是指事务是一个不可再分割的工作单元，事务中的操作要么都发生，要么都不发生。</p>
+<p>可采用“A向B转账”这个例子来说明解释</p>
+<p>在DBMS中，默认情况下一条SQL就是一个单独事务，事务是自动提交的。只有显式的使用start transaction开启一个事务，才能将一个代码块放在事务中执行。</p>
+</blockquote>
+<p>新增解释，根据 <a target="_blank" rel="noopener" href="https://www.zhihu.com/question/30272728/answer/72476703">数据库事务原子性、一致性是怎样实现的？ - 左轻侯的回答 - 知乎</a></p>
+<blockquote>
+<p>为了实现原子性，需要通过<strong>日志</strong>：将所有对数据的更新操作都写入日志，如果一个事务中的一部分 操作已经成功，但以后的操作，由于断电/系统崩溃/其它的软硬件错误而无法继续，则通过回溯日志，将已经执行成功的操作撤销，从而达到 “全部操作失败&quot; 的目的。最常见的场景是，<strong>数据库系统崩溃后重启，此时数据库处于不一致的状态，必须先执行一个crash recovery的过程：读取日志 进行REDO</strong>（重演将所有已经执行成功但尚末写入到磁盘的操作，保证持久性），再对所有到崩溃 时尚末成功提交的事务进行UNDO (撤销所有执行了一部分但尚末提交的操作，保证原子性)。 crash recovery结束后，数据库恢复到一致性状态，可以继续被使用。</p>
+</blockquote>
+<ol start="2">
+<li>一致性</li>
+</ol>
+<blockquote>
+<p>一致性是指在事务开始之前和事务结束以后，数据库的完整性约束没有被破坏。这是说数据库事务不能破坏关系数据的完整性以及业务逻辑上的一致性。</p>
+<p>如A给B转账，不论转账的事务操作是否成功，其两者的存款总额不变（这是业务逻辑的一致性，至于数据库关系约束的完整性就更好理解了）。</p>
+<p>保障机制（也从两方面着手）：数据库层面会在一个事务执行之前和之后，数据会符合你设置的约束（唯一约束，外键约束,check约束等)和触发器设置；此外，数据库的内部数据结构（如 B 树索引或双向链表）都必须是正确的。业务的一致性一般由开发人员进行保证，亦可转移至数据库层面。</p>
+</blockquote>
+<ol start="3">
+<li>隔离性</li>
+</ol>
+<blockquote>
+<p>多个事务并发访问时，事务之间是隔离的，一个事务不应该影响其它事务运行效果。</p>
+<p>在并发环境中，当不同的事务同时操纵相同的数据时，每个事务都有各自的完整数据空间。由并发事务所做的修改必须与任何其他并发事务所做的修改隔离。事务查看数据更新时，数据所处的状态要么是另一事务修改它之前的状态，要么是另一事务修改它之后的状态，事务不会查看到中间状态的数据。</p>
+<p>事务最复杂问题都是由事务隔离性引起的。完全的隔离性是不现实的，完全的隔离性要求数据库同一时间只执行一条事务，这样会严重影响性能。关于隔离性中的事务隔离等级（事务之间影响），参见相应博文</p>
+</blockquote>
+<p>这里解释的还不够细，当存在并发操作时，原子性并不能保证一致性，因此引入了隔离性。详细回答见  <a target="_blank" rel="noopener" href="https://www.zhihu.com/question/30272728/answer/72476703">数据库事务原子性、一致性是怎样实现的？ - 左轻侯的回答 - 知乎</a></p>
+<p>下面最核心的话是，<strong>多个事务并发执行后的状态，和它们串行执行后的状态是等价的</strong>。如何实现隔离性很复杂，但是我也不太关心。</p>
+<blockquote>
+<p>但是，原子性并不能完全保证一致性。在多个事务并行进行的情况下，即使保证了每一个事务的原 子性，仍然可能导致数据不一致的结果。例如，事务1需要将100元转入帐号A: 先读取帐号A的 值，然后在这个值上加上 100 。但是，在这两个操作之间，另一个事务 2 修改了帐号 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的值，为它增 加了100元。那么最后的结果应该是A增加了200元。但事实上，事务1最终完成后，帐号A只增加 了100元，因为事务2的修改结果被事务1覆盖掉了。<br>
+为了保证并发情况下的一致性，引入了隔离性，即保证每一个事务能够看到的数据总是一致的，就好象其它并发事务并不存在一样。用术语来说，就是<strong>多个事务并发执行后的状态，和它们串行执行后的状态是等价的</strong>。怎样实现隔离性，已经有很多人回答过了，原则上无非是两种类型的锁:<br>
+一种是悲观锁 <img src="https://math.now.sh?inline=%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，即当前事务将所有涉及操作的对象加锁，操作完成后释放给其它对象使用。为了尽 可能提高性能，发明了各种粒度（数据库级/表级/行级…)/各种性质（共享钓/排他锁/共享意向 锁/排他意向锁/共享排他意向锁…) 的锁。为了解决死锁问题，又发明了两阶段锁协议/死锁检测 等一系列的技术。<br>
+一种是乐观锁，即不同的事务可以同时看到同一对象 (一般是数据行) 的不同历史版本。如果有两 个事务同时修改了同一数据行，那么在较晩的事务提交时进行冲突检测。实现也有两种，一种是通 过日志UND <img src="https://math.now.sh?inline=%5E%7B%5Ccirc%7D" style="display:inline-block;margin: 0;"/> O的方式来获取数据行的历史版本，一种是简单地在内存中保存同一数据行的多个历 史版本，通过时间濯 <img src="https://math.now.sh?inline=%5E%7B%5Cmathrm%7Ba%7D%7D" style="display:inline-block;margin: 0;"/> 来区分。<br>
+锁也是数据库实现中最复杂的部分之一。同样，如果涉及到分布式系统（分布式锁和两阶段提交是 分布式事务的基础)，会比上述场景还要复杂得多。</p>
+</blockquote>
+<ol start="4">
+<li>持久性</li>
+</ol>
+<blockquote>
+<p>这是最好理解的一个特性：持久性，意味着在事务完成以后，该事务所对数据库所作的更改便持久的保存在数据库之中，并不会被回滚。（完成的事务是系统永久的部分，对系统的影响是永久性的，该修改即使出现致命的系统故障也将一直保持）</p>
+<p><code>write ahead logging</code>：SQL Server中使用了WAL（Write-Ahead Logging）技术来保证事务日志的ACID特性，在数据写入到数据库之前，先写入到日志，再将日志记录变更到存储器中。</p>
+</blockquote>
+<blockquote>
+<p>————————————————<br>
+版权声明：本文为CSDN博主「图灵的猫i」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br>
+原文链接：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39521554/article/details/80240841">https://blog.csdn.net/qq_39521554/article/details/80240841</a></p>
+</blockquote>
+<h2 id="身份证号码重复与隔离性">身份证号码重复与隔离性</h2>
+<p>上面的身份证号码避免重复的问题就是用到了隔离性，如果我们把身份证号码设置位主键，那么往数据库中同时插入多个相同主键的行这一并发操作，按照隔离性的性质，和它们<strong>串行执行后的状态是等价的</strong>，也就是说最终应该是<strong>有一个插入操作成功，其他插入操作应该会报错</strong>，从而避免违背一致性，即数据库中出现重复的主键。</p>
+<p>所以我的担心是多余的，数据库系统的基本特性本身就可以避免身份证号码重复这个问题的发生。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%9D%82%E5%AD%A6%E6%97%81%E6%94%B6/" rel="tag">杂学旁收</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/c98e6ad5/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">特征值的乘积与和</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2022
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/posts/ac7827ff">只只</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

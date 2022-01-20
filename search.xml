@@ -1,6 +1,247 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>18位身份证号的编码规则</title>
+    <url>/posts/75bebd59/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>突然有一个疑问，身份证号码是如何编码的？最主要是如何避免身份证号重复的（同一个行政区域内的同年同月同日生的同性别的新生儿）？</p>
+<span id="more"></span>
+<h1>18位身份证号编码规则</h1>
+<p>知乎的一篇博文<a href="https://zhuanlan.zhihu.com/p/21286417">实名认证前传之身份证号码编码规则</a> 感觉已经说得很清楚了，用我自己的身份证号测试了一下，最后一位的校验码的规则应该是对的。</p>
+<p>下面的内容均来自这一篇博文。</p>
+<blockquote>
+<p><strong>一、身份证号码结构</strong></p>
+<p>早期‘身份证号码’叫‘社会保障号’，为15位，1999年开始更名为公民身份证号码，即第二代身份证，为18位，且终身不变。</p>
+<p>430512198908131367</p>
+<p>公民身份号码是特征组合码，由前十七位数字本体码和最后一位数字校验码组成。排列顺序从左至右依次为六位数字地址码，八位数字出生日期码，三位数字顺序码和一位数字校验码。</p>
+<p><strong>地址码</strong>： 6位，表示编码对象常住户口所在县(市、旗、区)的行政区划代码。对于新生儿，该地址码为户口登记地行政区划代码。需要没说明的是，随着行政区划的调整，同一个地方进行户口登记的可能存在地址码不一致的情况。行政区划代码按GB/T2260的规定执行。</p>
+<p><strong>出生日期码</strong>：8位，表示编码对象出生的年、月、日，年、月、日代码之间不用分隔符，格式为YYYYMMDD，如19880328。按GB/T 7408的规定执行。原15位身份证号码中出生日期码还有对百岁老人特定的标识，其中999、998、997、996分配给百岁老人。</p>
+<p><strong>顺序码</strong>： 3位，表示在同一地址码所标识的区域范围内，对同年、同月、同日出生的人编定的顺序号，顺序码的奇数分配给男性，偶数分配给女性。</p>
+<p><strong>校验码</strong>： 1位，根据本体码，通过采用ISO 7064:1983,MOD 11-2校验码系统计算出校验码。算法可参考下文。前面有提到数字校验码，我们知道校验码也有X的，实质上为罗马字符X，相当于10.</p>
+</blockquote>
+<h2 id="校验码算法">校验码算法</h2>
+<p>校验码是通过前 17 位数字通过下面这个算法进行计算得到的，也就是说前 17 位数字确定了，第 18 位数字也就确定了。</p>
+<p>举个例子，假设本体码为  11010519491231002</p>
+<p>第一步：根据下表，将本体码的前17位数字乘以相应的加权因子，求和，按上面的例子，就是 $1 \times 7+1 \times 9+ \cdots +2 \times 2 = 167 $</p>
+<table>
+<thead>
+<tr>
+<th>身份证位置序号</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+<th>11</th>
+<th>12</th>
+<th>13</th>
+<th>14</th>
+<th>15</th>
+<th>16</th>
+<th>17</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>加权因子</td>
+<td>7</td>
+<td>9</td>
+<td>10</td>
+<td>5</td>
+<td>8</td>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+<td>6</td>
+<td>3</td>
+<td>7</td>
+<td>9</td>
+<td>10</td>
+<td>5</td>
+<td>8</td>
+<td>4</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>第二步，对上面的和除以11计算余数，这里就是 <img src="https://math.now.sh?inline=167%5C%2511%20%3D%202" style="display:inline-block;margin: 0;"/></p>
+<p>第三步，根据余数对照下面，最终得到校验码为  X</p>
+<table>
+<thead>
+<tr>
+<th>余数</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>校验码</td>
+<td>1</td>
+<td>0</td>
+<td>X</td>
+<td>9</td>
+<td>8</td>
+<td>7</td>
+<td>6</td>
+<td>5</td>
+<td>4</td>
+<td>3</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>因此，本例的完整身份证号为 11010519491231002X</p>
+<h1>如何避免重复呢？</h1>
+<p>我的问题是，同一个县同一天肯定不只是一个人出生（顺序码从 000 到 999 一共是1000个数，也就是一个县同一天能落户的新生儿数目的最大值是 1000 ），同一个县可以用于落户的派出所应该有多个，那么同一天同一性别的多个初生儿同时分别去多个派出所落户，是如何确保他们分配得到的身份证号是唯一的呢？</p>
+<p>这个问题我不知道，但是我感觉这应该是数据库的一个操作。我能想到的是，可能在同一个县里如果有人新建记录的时候就锁住数据库，不允许其他人再往数据库里插入记录，这样就可以避免身份证号的重复问题。</p>
+<p>然后我咨询了一下小强，他和我说这就是数据库的一个基本特性，如果有多个人同时往数据库里插入了主键相同的一行，那么应该有一个人会插入成功，其他人会显示失败。</p>
+<h2 id="数据库事务">数据库事务</h2>
+<p>下面的内容主要来自维基百科 <a href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1">数据库事务</a> 。</p>
+<blockquote>
+<p><strong>数据库事务</strong>（简称：<strong>事务</strong>）是<a href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F">数据库管理系统</a>执行过程中的一个逻辑单位，由一个有限的<a href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93">数据库</a>操作序列构成。</p>
+<h2 id="概要">概要</h2>
+<p>数据库事务通常包含了一个序列的对数据库的读/写操作。包含有以下两个目的：</p>
+<ol>
+<li>为数据库操作序列提供了一个从失败中恢复到正常状态的方法，同时提供了数据库即使在异常状态下仍能保持一致性的方法。</li>
+<li>当多个<a href="https://www.wikiwand.com/zh-hans/%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F">应用程序</a>在<a href="https://www.wikiwand.com/zh-hans/%E5%B9%B6%E5%8F%91">并发</a>访问数据库时，可以在这些应用程序之间提供一个隔离方法，以防止彼此的操作互相干扰。</li>
+</ol>
+<p>当事务被提交给了<a href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F">数据库管理系统</a>（DBMS），则<strong>DBMS需要确保该事务中的所有操作都成功完成且其结果被永久保存在数据库中，如果事务中有的操作没有成功完成，则事务中的所有操作都需要<a href="https://www.wikiwand.com/zh-hans/%E5%9B%9E%E6%BB%9A_(%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86)">回滚</a>，回到事务执行前的状态；同时，该事务对数据库或者其他事务的执行无影响，所有的事务都好像在独立的运行</strong>。</p>
+<h3 id="例子">例子</h3>
+<p>某人要在商店使用<a href="https://www.wikiwand.com/zh-hans/%E9%9B%BB%E5%AD%90%E8%B2%A8%E5%B9%A3">电子货币</a>购买100元的东西，当中至少包括两个操作：</p>
+<ol>
+<li>该人帐户减少100元</li>
+<li>商店帐户增加100元</li>
+</ol>
+<p><strong>支援交易的资料库管理系统</strong>（<strong>transactional DBMS</strong>）就是要确保以上两个操作（整个“交易”）都能完成，或一起取消；否则就会出现100元平白消失或出现的情况。</p>
+<p>但在现实情况下，失败的风险很高。在一个数据库事务的执行过程中，有可能会遇上事务操作失败、<a href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F">数据库系统</a>／<a href="https://www.wikiwand.com/zh-hans/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F">操作系统</a>出错，甚至是存储介质出错等情况。这便需要DBMS对一个执行失败的事务执行恢复操作，将其数据库状态恢复到一致状态（数据的<a href="https://www.wikiwand.com/zh-hans/%E4%B8%80%E8%87%B4%E6%80%A7">一致性</a>得到保证的状态）。为了实现将数据库状态恢复到一致状态的功能，DBMS通常需要维护事务日志（英语：<a href="https://www.wikiwand.com/en/Transaction_log">Transaction log</a>）以追踪事务中所有影响数据库数据的操作[<a href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1#citenote1">1]</a>[<a href="https://www.wikiwand.com/zh-hans/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1#citenote2">2]</a>。</p>
+</blockquote>
+<h2 id="ACID-性质">ACID 性质</h2>
+<p>下文内容主要来自于 <a href="https://blog.csdn.net/qq_39521554/article/details/80240841">数据库的ACID（原子性、一致性、隔离性与持久性）</a></p>
+<p>数据库管理系统中**事务(transaction)**的四个特性（分析时根据首字母缩写依次解释）：<strong>原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）</strong></p>
+<p>详解</p>
+<ol>
+<li>原子性</li>
+</ol>
+<blockquote>
+<p>原子性是指事务是一个不可再分割的工作单元，事务中的操作要么都发生，要么都不发生。</p>
+<p>可采用“A向B转账”这个例子来说明解释</p>
+<p>在DBMS中，默认情况下一条SQL就是一个单独事务，事务是自动提交的。只有显式的使用start transaction开启一个事务，才能将一个代码块放在事务中执行。</p>
+</blockquote>
+<p>新增解释，根据 <a href="https://www.zhihu.com/question/30272728/answer/72476703">数据库事务原子性、一致性是怎样实现的？ - 左轻侯的回答 - 知乎</a></p>
+<blockquote>
+<p>为了实现原子性，需要通过<strong>日志</strong>：将所有对数据的更新操作都写入日志，如果一个事务中的一部分 操作已经成功，但以后的操作，由于断电/系统崩溃/其它的软硬件错误而无法继续，则通过回溯日志，将已经执行成功的操作撤销，从而达到 “全部操作失败&quot; 的目的。最常见的场景是，<strong>数据库系统崩溃后重启，此时数据库处于不一致的状态，必须先执行一个crash recovery的过程：读取日志 进行REDO</strong>（重演将所有已经执行成功但尚末写入到磁盘的操作，保证持久性），再对所有到崩溃 时尚末成功提交的事务进行UNDO (撤销所有执行了一部分但尚末提交的操作，保证原子性)。 crash recovery结束后，数据库恢复到一致性状态，可以继续被使用。</p>
+</blockquote>
+<ol start="2">
+<li>一致性</li>
+</ol>
+<blockquote>
+<p>一致性是指在事务开始之前和事务结束以后，数据库的完整性约束没有被破坏。这是说数据库事务不能破坏关系数据的完整性以及业务逻辑上的一致性。</p>
+<p>如A给B转账，不论转账的事务操作是否成功，其两者的存款总额不变（这是业务逻辑的一致性，至于数据库关系约束的完整性就更好理解了）。</p>
+<p>保障机制（也从两方面着手）：数据库层面会在一个事务执行之前和之后，数据会符合你设置的约束（唯一约束，外键约束,check约束等)和触发器设置；此外，数据库的内部数据结构（如 B 树索引或双向链表）都必须是正确的。业务的一致性一般由开发人员进行保证，亦可转移至数据库层面。</p>
+</blockquote>
+<ol start="3">
+<li>隔离性</li>
+</ol>
+<blockquote>
+<p>多个事务并发访问时，事务之间是隔离的，一个事务不应该影响其它事务运行效果。</p>
+<p>在并发环境中，当不同的事务同时操纵相同的数据时，每个事务都有各自的完整数据空间。由并发事务所做的修改必须与任何其他并发事务所做的修改隔离。事务查看数据更新时，数据所处的状态要么是另一事务修改它之前的状态，要么是另一事务修改它之后的状态，事务不会查看到中间状态的数据。</p>
+<p>事务最复杂问题都是由事务隔离性引起的。完全的隔离性是不现实的，完全的隔离性要求数据库同一时间只执行一条事务，这样会严重影响性能。关于隔离性中的事务隔离等级（事务之间影响），参见相应博文</p>
+</blockquote>
+<p>这里解释的还不够细，当存在并发操作时，原子性并不能保证一致性，因此引入了隔离性。详细回答见  <a href="https://www.zhihu.com/question/30272728/answer/72476703">数据库事务原子性、一致性是怎样实现的？ - 左轻侯的回答 - 知乎</a></p>
+<p>下面最核心的话是，<strong>多个事务并发执行后的状态，和它们串行执行后的状态是等价的</strong>。如何实现隔离性很复杂，但是我也不太关心。</p>
+<blockquote>
+<p>但是，原子性并不能完全保证一致性。在多个事务并行进行的情况下，即使保证了每一个事务的原 子性，仍然可能导致数据不一致的结果。例如，事务1需要将100元转入帐号A: 先读取帐号A的 值，然后在这个值上加上 100 。但是，在这两个操作之间，另一个事务 2 修改了帐号 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的值，为它增 加了100元。那么最后的结果应该是A增加了200元。但事实上，事务1最终完成后，帐号A只增加 了100元，因为事务2的修改结果被事务1覆盖掉了。<br>
+为了保证并发情况下的一致性，引入了隔离性，即保证每一个事务能够看到的数据总是一致的，就好象其它并发事务并不存在一样。用术语来说，就是<strong>多个事务并发执行后的状态，和它们串行执行后的状态是等价的</strong>。怎样实现隔离性，已经有很多人回答过了，原则上无非是两种类型的锁:<br>
+一种是悲观锁 <img src="https://math.now.sh?inline=%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，即当前事务将所有涉及操作的对象加锁，操作完成后释放给其它对象使用。为了尽 可能提高性能，发明了各种粒度（数据库级/表级/行级…)/各种性质（共享钓/排他锁/共享意向 锁/排他意向锁/共享排他意向锁…) 的锁。为了解决死锁问题，又发明了两阶段锁协议/死锁检测 等一系列的技术。<br>
+一种是乐观锁，即不同的事务可以同时看到同一对象 (一般是数据行) 的不同历史版本。如果有两 个事务同时修改了同一数据行，那么在较晩的事务提交时进行冲突检测。实现也有两种，一种是通 过日志UND <img src="https://math.now.sh?inline=%5E%7B%5Ccirc%7D" style="display:inline-block;margin: 0;"/> O的方式来获取数据行的历史版本，一种是简单地在内存中保存同一数据行的多个历 史版本，通过时间濯 <img src="https://math.now.sh?inline=%5E%7B%5Cmathrm%7Ba%7D%7D" style="display:inline-block;margin: 0;"/> 来区分。<br>
+锁也是数据库实现中最复杂的部分之一。同样，如果涉及到分布式系统（分布式锁和两阶段提交是 分布式事务的基础)，会比上述场景还要复杂得多。</p>
+</blockquote>
+<ol start="4">
+<li>持久性</li>
+</ol>
+<blockquote>
+<p>这是最好理解的一个特性：持久性，意味着在事务完成以后，该事务所对数据库所作的更改便持久的保存在数据库之中，并不会被回滚。（完成的事务是系统永久的部分，对系统的影响是永久性的，该修改即使出现致命的系统故障也将一直保持）</p>
+<p><code>write ahead logging</code>：SQL Server中使用了WAL（Write-Ahead Logging）技术来保证事务日志的ACID特性，在数据写入到数据库之前，先写入到日志，再将日志记录变更到存储器中。</p>
+</blockquote>
+<blockquote>
+<p>————————————————<br>
+版权声明：本文为CSDN博主「图灵的猫i」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br>
+原文链接：<a href="https://blog.csdn.net/qq_39521554/article/details/80240841">https://blog.csdn.net/qq_39521554/article/details/80240841</a></p>
+</blockquote>
+<h2 id="身份证号码重复与隔离性">身份证号码重复与隔离性</h2>
+<p>上面的身份证号码避免重复的问题就是用到了隔离性，如果我们把身份证号码设置位主键，那么往数据库中同时插入多个相同主键的行这一并发操作，按照隔离性的性质，和它们<strong>串行执行后的状态是等价的</strong>，也就是说最终应该是<strong>有一个插入操作成功，其他插入操作应该会报错</strong>，从而避免违背一致性，即数据库中出现重复的主键。</p>
+<p>所以我的担心是多余的，数据库系统的基本特性本身就可以避免身份证号码重复这个问题的发生。</p>
+]]></content>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>杂学旁收</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>特征值的乘积与和</title>
+    <url>/posts/c98e6ad5/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>证明特征值的乘积为行列式，特征值的和为迹。</p>
+<span id="more"></span>
+<h1>特征值和特征向量</h1>
+<p>这一小节的内容主要来自于吴恩达老师的讲义。</p>
+<p><img src="https://math.now.sh?inline=n%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的特征值和特征向量满足关系：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BA%7D%20x%3D%5Clambda%20x%2C%20%5Cquad%20x%20%5Cneq%200%0A" /></p><p>我们注意到对于任何特征向量 <img src="https://math.now.sh?inline=x%20%5Cin%20%5Cmathbb%7BC%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> ，和特征值 <img src="https://math.now.sh?inline=t%20%5Cin%20%5Cmathbb%7BC%7D" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D%28c%20x%29%3Dc%20%5Cmathbf%7BA%7D%20x%3Dc%20%5Clambda%20x%3D%5Clambda(c%20x)" style="display:inline-block;margin: 0;"/> ，因此 <img src="https://math.now.sh?inline=c%20x" style="display:inline-block;margin: 0;"/> 一样是 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的特征向量。因此，当我们提到与特征值 <img src="https://math.now.sh?inline=%5Clambda" style="display:inline-block;margin: 0;"/> 的特征向量 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 时，<strong>我们一般假定特征向量 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 是标准化的</strong>，即 <img src="https://math.now.sh?inline=%5C%7Cx%5C%7C%20%3D%201" style="display:inline-block;margin: 0;"/> 。但是，我们注意到，<img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=-x" style="display:inline-block;margin: 0;"/> 都是特征向量，因此我们无法保证特征向量的符号。</p>
+<p>我们可以将上式改写为：</p>
+<p style=""><img src="https://math.now.sh?from=%7C%28%5Clambda%20I-%5Cmathbf%7BA%7D%29%7C%3D0%0A" /></p><p>如果我们将上式中的行列式展开，我们得到一个变量为 <img src="https://math.now.sh?inline=%5Clambda" style="display:inline-block;margin: 0;"/> 的 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 次多项式。</p>
+<p style=""><img src="https://math.now.sh?from=p%28%5Clambda%29%20%3D%20%7C(%5Clambda%20I-%5Cmathbf%7BA%7D)%7C%0A" /></p><p>这个多项式称为<strong>特征多项式</strong> (<em>characteristic polynomial</em>) ，而 <img src="https://math.now.sh?inline=%7C%28%5Clambda%20I-%5Cmathbf%7BA%7D%29%7C%3D0" style="display:inline-block;margin: 0;"/> 这个方程称为矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的<strong>特征方程</strong>  (<em>characteristic equation</em>) 。特征多项式的根即为 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的特征值，如果对重根也计数，那么 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 将有 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 个特征值，但是某些特征值可能会是复数，这一点可以通过<strong>代数基本定理</strong>证明。</p>
+<p>举个例子，假设  <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%203%20%26%202%20%5C%5C%203%20%26%20-2%20%5Cend%7Barray%7D%20%5Cright%5D" style="display:inline-block;margin: 0;"/> ，那么其特征方程为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%7C%5Cbegin%7Barray%7D%7Bc%7D%203-%5Clambda%20%26%202%20%5C%5C%203%20%26%20-2-%5Clambda%20%5Cend%7Barray%7D%20%5Cright%7C%20%3D%200%20%5Cquad%20%5Ctext%7B%20%E6%88%96%20%7D%20%5Cquad%20%5Clambda%5E%7B2%7D-%5Clambda%2B12%3D0%0A" /></p><p>那么<img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的特征值为 <img src="https://math.now.sh?inline=%5Clambda_%7B1%7D%20%3D%204" style="display:inline-block;margin: 0;"/> 和  <img src="https://math.now.sh?inline=%5Clambda_%7B2%7D%20%3D%20-3" style="display:inline-block;margin: 0;"/></p>
+<h1>代数基本定理</h1>
+<p>维基百科的说明如下</p>
+<blockquote>
+<p><strong>代数基本定理</strong>说明，任何一个一元复系数<a href="https://www.wikiwand.com/zh-hans/%E5%A4%9A%E9%A1%B9%E5%BC%8F%E6%96%B9%E7%A8%8B">多项式方程</a>都至少有一个复数<a href="https://www.wikiwand.com/zh-hans/%E6%A0%B9_(%E6%95%B0%E5%AD%A6)">根</a>。也就是说，<a href="https://www.wikiwand.com/zh-hans/%E8%A4%87%E6%95%B8_(%E6%95%B8%E5%AD%B8)">复数</a><a href="https://www.wikiwand.com/zh-hans/%E4%BD%93_(%E6%95%B0%E5%AD%A6)">域</a>是<a href="https://www.wikiwand.com/zh-hans/%E4%BB%A3%E6%95%B0%E5%B0%81%E9%97%AD%E5%9F%9F">代数封闭</a>的。</p>
+<p>有时这个定理表述为：任何一个非零的一元n次复系数多项式，都正好有n个复数根（重根视为多个根）。这似乎是一个更强的命题，但实际上是“至少有一个根”的直接结果，因为不断把多项式除以它的线性因子，即可从有一个根推出有n个根。也就是说，<strong>任何一个n次多项式，都可以因式分解为n个复系数一次多项式的乘积</strong>。</p>
+</blockquote>
+<p>代数基本定理是高斯发现的，高斯总共给出了四个证明，但是我看维基百科后面的证明过程都看不懂。</p>
+<p>有一个<a href="https://www.shuxuele.com">数学乐</a>的网址，更简单直观地解释了代数基本定理，感兴趣可以去看一下这里 <a href="https://www.shuxuele.com/algebra/fundamental-theorem-algebra.html">代数基本定理</a> 。</p>
+<p>简单地说，就是任何一个一元 <strong>n</strong> 次多项式均有 <strong>n</strong> 个根（包括重根），但是可能是复数。任何一元 <strong>n</strong> 次多项式可以因式分解为下面地形式，其中 <img src="https://math.now.sh?inline=r_1%2Cr_2%2C%5Ccdots%2Cr_n" style="display:inline-block;margin: 0;"/> 为 <strong>n</strong> 个根 ，并且易得 <img src="https://math.now.sh?inline=a" style="display:inline-block;margin: 0;"/> 为多项式第一项 <img src="https://math.now.sh?inline=x%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> 的系数。</p>
+<p style=""><img src="https://math.now.sh?from=a%28x-r_%7B1%7D%29(x-r_%7B2%7D)%5Ccdots(x-r_%7Bn%7D)%0A" /></p><p>如果多项式有复数根，它所有的复数根必然为共轭对 (<img src="https://math.now.sh?inline=a%2Bb%5Cmathbf%7Bi%7D" style="display:inline-block;margin: 0;"/>  和 <img src="https://math.now.sh?inline=a-b%5Cmathbf%7Bi%7D" style="display:inline-block;margin: 0;"/>)。</p>
+<h1>特征值的乘积与和</h1>
+<p>这一节内容主要来自于《linear algebra with applications》 的第六章特征值。</p>
+<p>若 <img src="https://math.now.sh?inline=p%28%5Clambda%29" style="display:inline-block;margin: 0;"/> 为矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的特征多项式，则</p>
+<p style=""><img src="https://math.now.sh?from=p%28%5Clambda%29%3D%5Coperatorname%7Bdet%7D(%5Cmathbf%7BA%7D-%5Clambda%20I)%3D%5Cleft%7C%5Cbegin%7Barray%7D%7Bcccc%7D%0Aa_%7B11%7D-%5Clambda%20%26%20a_%7B12%7D%20%26%20%5Ccdots%20%26%20a_%7B1%20n%7D%20%5C%5C%0Aa_%7B21%7D%20%26%20a_%7B22%7D-%5Clambda%20%26%20%5Ccdots%20%26%20a_%7B2%20n%7D%20%5C%5C%0A%5Cvdots%20%26%20%26%20%26%20%5C%5C%0Aa_%7Bn%201%7D%20%26%20a_%7Bn%202%7D%20%26%20%5Ccdots%20%26%20a_%7Bn%20n%7D-%5Clambda%0A%5Cend%7Barray%7D%5Cright%7C%0A" /></p><p>按照第一列展开，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Bdet%7D%28%5Cmathbf%7BA%7D-%5Clambda%20I%29%3D%5Cleft(a_%7B11%7D-%5Clambda%5Cright)%20%5Coperatorname%7Bdet%7D%5Cleft(%5Cmathbf%7BM%7D_%7B11%7D%5Cright)%2B%5Csum_%7Bi%3D2%7D%5E%7Bn%7D%20a_%7Bi%201%7D(-1)%5E%7Bi%2B1%7D%20%5Coperatorname%7Bdet%7D%5Cleft(%5Cmathbf%7BM%7D_%7Bi%201%7D%5Cright)%0A" /></p><p>我们注意到，子式 <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D_%7B11%7D" style="display:inline-block;margin: 0;"/> 不包含一个对角线元素 (<img src="https://math.now.sh?inline=a_%7B11%7D-%5Clambda" style="display:inline-block;margin: 0;"/>) ，而其他子式 <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D_%7Bi1%7D" style="display:inline-block;margin: 0;"/> (<img src="https://math.now.sh?inline=i%3D2%2C%5Ccdots%2Cn" style="display:inline-block;margin: 0;"/>)  不包含两个对角线元素 <img src="https://math.now.sh?inline=%5Cleft%28a_%7B11%7D-%5Clambda%5Cright%29" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cleft%28a_%7Bii%7D-%5Clambda%5Cright%29" style="display:inline-block;margin: 0;"/> 。</p>
+<p>将子式 <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D_%7B11%7D" style="display:inline-block;margin: 0;"/>  采用相同的方法展开，我们得到下式是 <img src="https://math.now.sh?inline=%5Coperatorname%7Bdet%7D%28%5Cmathbf%7BA%7D-%5Clambda%20I%29" style="display:inline-block;margin: 0;"/>  的展开式中<strong>唯一包含超过 <img src="https://math.now.sh?inline=n-2" style="display:inline-block;margin: 0;"/> 个对角线元素</strong>的项（不好直接证明，在草稿上继续展开，就可以看出规律，其他项应该都是包括了<img src="https://math.now.sh?inline=n-2" style="display:inline-block;margin: 0;"/> 个对角线元素 ）。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%28a_%7B11%7D-%5Clambda%5Cright%29%5Cleft(a_%7B22%7D-%5Clambda%5Cright)%20%5Ccdots%5Cleft(a_%7Bn%20n%7D-%5Clambda%5Cright)%0A" /></p><p>我们把这个式子展开后，易得 <img src="https://math.now.sh?inline=%5Clambda%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> 的系数为 <img src="https://math.now.sh?inline=%28-1%29%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> ，因此  <img src="https://math.now.sh?inline=p%28%5Clambda%29" style="display:inline-block;margin: 0;"/>  的首系数为  <img src="https://math.now.sh?inline=%28-1%29%5E%7Bn%7D" style="display:inline-block;margin: 0;"/>  。根据代数基本定理，如果  <img src="https://math.now.sh?inline=%5Clambda_1%2C%5Clambda_2%2C%5Ccdots%2C%5Clambda_n" style="display:inline-block;margin: 0;"/> 为方阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的特征根，那么  <img src="https://math.now.sh?inline=p%28%5Clambda%29" style="display:inline-block;margin: 0;"/> 可以因式分解为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Ap%28%5Clambda%29%20%26%3D(-1)%5E%7Bn%7D%5Cleft(%5Clambda-%5Clambda_%7B1%7D%5Cright)%5Cleft(%5Clambda-%5Clambda_%7B2%7D%5Cright)%20%5Ccdots%5Cleft(%5Clambda-%5Clambda_%7Bn%7D%5Cright)%20%5C%5C%0A%26%3D%5Cleft(%5Clambda_%7B1%7D-%5Clambda%5Cright)%5Cleft(%5Clambda_%7B2%7D-%5Clambda%5Cright)%20%5Ccdots%5Cleft(%5Clambda_%7Bn%7D-%5Clambda%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>因此，我们得到下式，证明方阵的所有特征值之积为其行列式。</p>
+<p style=""><img src="https://math.now.sh?from=p%280%29%20%3D%20%5Clambda_%7B1%7D%20%5Clambda_%7B2%7D%5Ccdots%20%5Clambda_%7Bn%7D%20%3D%20%5Cdet(%5Cmathbf%7BA%7D)%20%0A" /></p><p>由 <img src="https://math.now.sh?inline=%5Cleft%28a_%7B11%7D-%5Clambda%5Cright%29%5Cleft(a_%7B22%7D-%5Clambda%5Cright)%20%5Ccdots%5Cleft(a_%7Bn%20n%7D-%5Clambda%5Cright)" style="display:inline-block;margin: 0;"/> ，我们同样可以看出 <img src="https://math.now.sh?inline=%28-%5Clambda%29%5E%7Bn-1%7D" style="display:inline-block;margin: 0;"/> 的系数为  <img src="https://math.now.sh?inline=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20a_%7Bii%7D" style="display:inline-block;margin: 0;"/> 。如果对 <img src="https://math.now.sh?inline=p%28%5Clambda%29%3D%5Cleft(%5Clambda_%7B1%7D-%5Clambda%5Cright)%5Cleft(%5Clambda_%7B2%7D-%5Clambda%5Cright)%20%5Ccdots%5Cleft(%5Clambda_%7Bn%7D-%5Clambda%5Cright)" style="display:inline-block;margin: 0;"/> 同样求 <img src="https://math.now.sh?inline=%28-%5Clambda%29%5E%7Bn-1%7D" style="display:inline-block;margin: 0;"/> 的系数，可以得到其为  <img src="https://math.now.sh?inline=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Clambda_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Clambda_%7Bi%7D%20%3D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20a_%7Bii%7D%0A" /></p><p>因此我们证明所有特征值之和为矩阵的迹。</p>
+<h1>相似矩阵</h1>
+<p>这一节内容主要来自于《linear algebra with applications》 的第六章特征值。</p>
+<p>对于矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 和矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> ，若存在一个非奇异矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7BS%7D" style="display:inline-block;margin: 0;"/>，使得  <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D%20%3D%20%5Cmathbf%7BS%5E%7B-1%7DAS%7D" style="display:inline-block;margin: 0;"/> ，那么我们称矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> <strong>相似于</strong>矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/>  。</p>
+<p><strong>定理</strong>：令矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 和矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 为 <img src="https://math.now.sh?inline=n%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 矩阵，若 <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 相似于 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/>，则这两个矩阵有相同的特征多项式，且相应地有相同的特征值。</p>
+<p>证明：令 <img src="https://math.now.sh?inline=p_%7BA%7D%28%5Clambda%29" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=p_%7BB%7D%28%5Clambda%29" style="display:inline-block;margin: 0;"/> 分别为 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 的特征多项式。因为 <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 相似于 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/>，则存在一个非奇异矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7BS%7D" style="display:inline-block;margin: 0;"/>，使得  <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D%20%3D%20%5Cmathbf%7BS%5E%7B-1%7DAS%7D" style="display:inline-block;margin: 0;"/> 。因此</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Ap_%7BB%7D%28%5Clambda%29%20%26%3D%5Coperatorname%7Bdet%7D(%5Cmathbf%7BB%7D-%5Clambda%20%5Cmathbf%7BI%7D)%20%5C%5C%0A%26%3D%5Coperatorname%7Bdet%7D%5Cleft(%5Cmathbf%7BS%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D%20%5Cmathbf%7BS%7D-%5Clambda%20%5Cmathbf%7BI%7D%5Cright)%20%5C%5C%0A%26%3D%5Coperatorname%7Bdet%7D%5Cleft(%5Cmathbf%7BS%7D%5E%7B-1%7D(%5Cmathbf%7BA%7D-%5Clambda%20%5Cmathbf%7BI%7D)%20%5Cmathbf%7BS%7D%5Cright)%20%5C%5C%0A%26%3D%5Coperatorname%7Bdet%7D%5Cleft(%5Cmathbf%7BS%7D%5E%7B-1%7D%5Cright)%20%5Coperatorname%7Bdet%7D(%5Cmathbf%7BA%7D-%5Clambda%20%5Cmathbf%7BI%7D)%20%5Coperatorname%7Bdet%7D(%5Cmathbf%7BS%7D)%20%5C%5C%0A%26%3Dp_%7BA%7D(%5Clambda)%0A%5Cend%7Baligned%7D%0A" /></p><p>一个矩阵的特征值为特征多项式的根。因为两个矩阵有相同的特征多项式，所以它们必有相同的特征值。</p>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>线性代数</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>线性代数</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>最小二乘的几何含义</title>
     <url>/posts/e4aae57/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>我不知道有多少人认为自己对最小二乘法的思想理解不够清晰，其实如果从几何的角度，可以轻松掌握最小二乘的内涵。</p>
