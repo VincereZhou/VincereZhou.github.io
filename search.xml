@@ -1,6 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>混合线性模型二之选择指数法</title>
+    <url>/posts/c9ff3048/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>混合线性模型理论的第二篇，如何估计随机效应的值（假设不存在固定效应或者已知固定效应）。上一篇见<a href="https://vincere.fun/posts/5e674d74/">混合线性模型一之广义最小二乘</a> 。</p>
+<span id="more"></span>
+<h1>代价函数</h1>
+<p>这里运行机器学习的思想，不同的预测函数的好坏需要通过代价函数来计算比较，或者说我们需要通过最小化代价函数来确定一个合适的预测函数，因此首要的问题是确定一个合适的代价函数，也就是说我们如何定义“最佳”。</p>
+<p>本节内容主要参考 Henderson 1973年的论文。</p>
+<h2 id="最佳预测">最佳预测</h2>
+<p>假设 <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D" style="display:inline-block;margin: 0;"/> 是观测值向量，我们想要预测 <img src="https://math.now.sh?inline=%5Cmathbf%7Bw%7D" style="display:inline-block;margin: 0;"/> 向量， <img src="https://math.now.sh?inline=%5Cmathbf%7Bw%7D" style="display:inline-block;margin: 0;"/> 向量的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 个元素的预测值为</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7Bw%7D_%7Bi%7D%20%3D%20f%28%5Cmathbf%7By%7D%29%0A" /></p><p>这里的 <img src="https://math.now.sh?inline=f" style="display:inline-block;margin: 0;"/> 是某个关于观测值的函数，不一定要是线性函数。</p>
+<p>此时我们的问题是，我们如何定义“最佳”的预测函数？ 一种方式是我们想尽可能地减少预测误差 (<em>prediction error</em>) ，即 <img src="https://math.now.sh?inline=%5Chat%7Bw%7D_%7Bi%7D%20-%20w_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，那么我们如何去衡量预测误差的大小呢？从理论上，预测误差的大小可以用下式表示（等价于 <img src="https://math.now.sh?inline=L_%7Bp%7D" style="display:inline-block;margin: 0;"/> 范数）</p>
+<p style=""><img src="https://math.now.sh?from=E%7C%5Chat%7Bw%7D_%7Bi%7D%20-%20w_%7Bi%7D%7C%5E%7Bp%7D%0A" /></p><p>即预测误差<strong>绝对值</strong>的 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 次方的期望值。那么 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 应该选多少呢？最普遍的选择是 2 ，因为 <img src="https://math.now.sh?inline=L_2" style="display:inline-block;margin: 0;"/> 范数计算简便，并且有其它优良性质。</p>
+<p>我们将最小化 <img src="https://math.now.sh?inline=E%7C%5Chat%7Bw%7D_%7Bi%7D%20-%20w_%7Bi%7D%7C%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 的方法称为<strong>最小均方误差预测</strong> (Minimum Mean Square Error Prediction) ，有时也称为<strong>最佳预测</strong> (Best Prediction, <strong>BP</strong>) 。我们可以证明此时的估计值等价于下式 (<em>Cochran</em> , 1951 或 Rao 1965 )</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7Bw%7D_%7Bi%7D%20%3D%20%20E%28w_%7Bi%7D%20%7C%20%5Cmathbf%7By%7D%20%29%0A" /></p><p>也就是说等同于给定 $ \mathbf{y}$ 的 <img src="https://math.now.sh?inline=w_%7Bi%7D" style="display:inline-block;margin: 0;"/> 的条件期望。</p>
+<p>证明 (来自于 <a href="https://zh-cn.lambdageeks.com/conditional-variance-and-predictions/">条件方差和预测 | 其重要属性与 5+ 示例</a>) ：这里证明根据一个随机变量的观测值来预测另一个随机变量，假设我们有一个随机变量 X 的观测值，我们需要预测随机变量 Y ，证明最好的预测值为 <img src="https://math.now.sh?inline=E%28Y%7CX%29" style="display:inline-block;margin: 0;"/> 。假设 <img src="https://math.now.sh?inline=g%28X%29" style="display:inline-block;margin: 0;"/> 是任意一个预测函数，因此我们要证明</p>
+<p style=""><img src="https://math.now.sh?from=E%5Cleft%5B%28Y-g(X%29)%5E%7B2%7D%5Cright%5D%20%5Cgeq%20E%5Cleft%5B(Y-E%5BY%20%5Cmid%20X%5D)%5E%7B2%7D%5Cright.%0A" /></p><p>我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AE%5Cleft%5B%28Y-g(X%29)%5E%7B2%7D%20%5Cmid%20X%5Cright%5D%3D%26%20E%5Cleft%5B(Y-E%5BY%20%5Cmid%20X%5D%2BE%5BY%20%5Cmid%20X%5D-g(X))%5E%7B2%7D%20%5Cmid%20X%5Cright%5D%20%5C%5C%0A%3D%26%20E%5Cleft%5B(Y-E%5BY%20%5Cmid%20X%5D)%5E%7B2%7D%20%5Cmid%20X%5Cright%5D%20%5C%5C%0A%26%2BE%5Cleft%5B(E%5BY%20%5Cmid%20X%5D-g(X))%5E%7B2%7D%20%5Cmid%20X%5Cright%5D%20%5C%5C%0A%26%2B2%20E%5B(Y-E%5BY%20%5Cmid%20X%5D)(E%5BY%20%5Cmid%20X%5D-g(X))%20%5Cmid%20X%5D%0A%5Cend%7Baligned%7D%0A" /></p><p>在给定 X 的前提下，<img src="https://math.now.sh?inline=%5Cmathrm%7BE%7D%5B%5Cmathrm%7BY%7D%20%5Cmid%20%5Cmathrm%7BX%7D%5D-%5Cmathrm%7Bg%7D%28%5Cmathrm%7BX%7D%29" style="display:inline-block;margin: 0;"/> 是一个常数，因此上式的最后一项为 0 ，证明如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26E%5B%28Y-E%5BY%20%5Cmid%20X%5D%29(E%5BY%20%5Cmid%20X%5D-g(X))%20%5Cmid%20X%5D%20%20%5C%5C%0A%26%3D(E%5BY%20%5Cmid%20X%5D-g(X))%20E%5BY-E%5BY%20%5Cmid%20X%5D%20%5Cmid%20X%5D%20%5C%5C%0A%26%3D(E%5BY%20%5Cmid%20X%5D-g(X))(E%5BY%20%5Cmid%20X%5D-E%5BY%20%5Cmid%20X%5D)%20%5C%5C%0A%26%3D0%0A%5Cend%7Baligned%7D%0A" /></p><p>因此下式成立</p>
+<p style=""><img src="https://math.now.sh?from=E%5Cleft%5B%28Y-g(X%29)%5E%7B2%7D%20%5Cmid%20X%5Cright%5D%3D%20E%5Cleft%5B(Y-E%5BY%20%5Cmid%20X%5D)%5E%7B2%7D%20%5Cmid%20X%5Cright%5D%20%0A%2BE%5Cleft%5B(E%5BY%20%5Cmid%20X%5D-g(X))%5E%7B2%7D%20%5Cmid%20X%5Cright%5D%20%5C%5C%0A" /></p><p>其中右手第二项是一个非负数，因此下式成立</p>
+<p style=""><img src="https://math.now.sh?from=E%5Cleft%5B%28Y-g(X%29)%5E%7B2%7D%5Cright%5D%20%5Cgeq%20E%5Cleft%5B(Y-E%5BY%20%5Cmid%20X%5D)%5E%7B2%7D%5Cright.%0A" /></p><p>得证。</p>
+<p>因此我们必须先已知 <img src="https://math.now.sh?inline=%5B%5Cmathbf%7By%7D%2C%20%5Cmathbf%7Bw%7D%5D" style="display:inline-block;margin: 0;"/> 的联合分布，然后再推导条件分布。</p>
+<p><strong>BP</strong> 的一些性质如下：</p>
+<ol>
+<li>$ E(\hat{w}<em>{i}) =  E(w</em>{i})$</li>
+<li><img src="https://math.now.sh?inline=Var%28%5Chat%7B%5Cmathbf%7Bw%7D%7D-%20%5Cmathbf%7Bw%7D%20%29%20%3D%20%5Ctext%7B%20average%20conditional%20%7D%20Var(%5Cmathbf%7Bw%20%7C%20y%7D)" style="display:inline-block;margin: 0;"/> 。这个没看懂，感觉怪怪的。</li>
+<li>在所有可能的预测值中，<img src="https://math.now.sh?inline=%5Chat%7Bw%7D_%7Bi%7D%20%3D%20%20E%28w_%7Bi%7D%20%7C%20%5Cmathbf%7By%7D%20%29" style="display:inline-block;margin: 0;"/> 最大化了 <img src="https://math.now.sh?inline=%5Chat%7Bw%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=w_%7Bi%7D" style="display:inline-block;margin: 0;"/> 的相关</li>
+</ol>
+<h1>最佳线性预测</h1>
+<p>通常在实践中，我们不知道 <img src="https://math.now.sh?inline=%5B%5Cmathbf%7By%7D%2C%20%5Cmathbf%7Bw%7D%5D" style="display:inline-block;margin: 0;"/> 的联合分布 ，我们就也没有办法计算条件分布。那么此时我们怎么办呢？我们可以将预测值的范围限制为<strong>线性</strong>预测值，这样我们可以极大地简化问题。我们称这种方法为 <strong>最佳线性预测</strong> (Best Linear Prediction, <strong>BLP</strong>)，也就是育种值估计方法中的<strong>选择指数法</strong> (Selection Index) 。</p>
+<p>下面的内容来自于张沅老师的 《畜禽育种中的线性模型》</p>
+<p>选择指数法需要满足三个条件或者假设：</p>
+<ol>
+<li>不存在系统环境效应，或者所有系统环境效应均已知</li>
+<li>被选择的个体间不存在固定的遗传差异</li>
+<li>误差和育种值的方差，协方差矩阵均已知</li>
+</ol>
+<p>其实前两个条件可以合并为不存在固定效应或者已知固定效应，也就是说此时的模型对应为<strong>随机模型</strong>。</p>
+<p>根据定义，选择指数的公式为</p>
+<p style=""><img src="https://math.now.sh?from=I%20%3D%20%5Csum%20b_%7Bi%7D%28y_%7Bi%7D%20-%20%5Cmu_%7Bi%7D%29%0A" /></p><p>其中：</p>
+<p><img src="https://math.now.sh?inline=I" style="display:inline-block;margin: 0;"/> = 某个体一个性状的选择指数</p>
+<p><img src="https://math.now.sh?inline=b_%7Bi%7D" style="display:inline-block;margin: 0;"/> = 与该个体有关的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 个信息的加权系数（偏回归系数）</p>
+<p><img src="https://math.now.sh?inline=y_%7Bi%7D" style="display:inline-block;margin: 0;"/> = 第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 个信息来源的表型值</p>
+<p><img src="https://math.now.sh?inline=u_%7Bi%7D" style="display:inline-block;margin: 0;"/> = 与该表型值对应的总体均数</p>
+<p>上式可以用矩阵形式表示：</p>
+<p style=""><img src="https://math.now.sh?from=I%3D%5Cmathbf%7Bb'd%7D%0A" /></p><p>其中：</p>
+<p><img src="https://math.now.sh?inline=%5Cmathbf%7Bb%7D" style="display:inline-block;margin: 0;"/> = 加权系数向量</p>
+<p>$\mathbf{d=y- \boldsymbol{\mu}} $ ，即各信息来源的表型值与各自的群体平均数离差向量</p>
+<p>我们确定了选择指数的公式之后，我们需要找一组合适的加权系数，设该个体的真实育种值为 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> ，则代价函数为  <img src="https://math.now.sh?inline=E%28I-A%29%5E%7B2%7D" style="display:inline-block;margin: 0;"/>  ，根据协方差公式，我们有 $ Var(I-A) = E(I-A)^{2} -  (E(I-A))^{2} = E(I-A)^{2}$ ，因此等价于需要一个 <img src="https://math.now.sh?inline=%5Cmathbf%7Bb%7D" style="display:inline-block;margin: 0;"/> 向量使得误差方差  $ Var(I-A) $ 最小，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Coperatorname%7BVar%7D%28I-A%29%20%26%3D%5Coperatorname%7BVar%7D(I)%2B%5Coperatorname%7BVar%7D(A)-2%20%5Coperatorname%7BCov%7D(I%2C%20A)%20%5C%5C%0A%26%3D%5Coperatorname%7BVar%7D%5Cleft(%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7Bd%7D%5Cright)%2B%5Csigma_%7BA%7D%5E%7B2%7D-2%20%5Coperatorname%7BCov%7D%5Cleft(%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7Bd%7D%2C%20A%5Cright)%20%5C%5C%0A%26%3D%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D%20%5Coperatorname%7B%5Cmathbf%7BVb%7D%7D%2B%5Csigma_%7BA%7D%5E%7B2%7D-2%20%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7Bc%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>其中</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BV%7D%3D%5Coperatorname%7BVar%7D%28%5Cmathbf%7Bd%7D%29%3D%5Coperatorname%7BVar%7D(%5Cmathbf%7By%7D-%5Cboldsymbol%7B%5Cmu%7D)%3D%5Coperatorname%7BVar%7D(%5Cmathbf%7By%7D)%0A" /></p><p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bc%7D%3D%5Coperatorname%7BCov%7D%28%5Cmathbf%7Bd%7D%2C%20%5Cmathrm%7BA%7D%29%3D%5Coperatorname%7BCov%7D(%5Cmathbf%7By%7D%2C%20%5Cmathrm%7BA%7D)%0A" /></p><p>求上式关于 <img src="https://math.now.sh?inline=%5Cmathbf%7Bb%7D" style="display:inline-block;margin: 0;"/> 的最小值，我们求偏导数，使之为 <img src="https://math.now.sh?inline=%5Cmathbf%7B0%7D" style="display:inline-block;margin: 0;"/> 得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20b%7D%20%5Coperatorname%7BVar%7D%28I-A%29%3D2%20%5Cmathbf%7BVb%7D-2%20%5Cmathbf%7B%20c%7D%3D%5Cmathbf%7B0%7D%0A" /></p><p>我们得到 <img src="https://math.now.sh?inline=%5Cmathbf%7BVb%20%3D%20c%7D" style="display:inline-block;margin: 0;"/> ，因此我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bb%20%3D%20V%5E%7B-1%7D%20c%7D%0A" /></p><p>如果我们根据单一表型来预测育种值，即此时 <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D" style="display:inline-block;margin: 0;"/> 是一个标量，那么有</p>
+<p style=""><img src="https://math.now.sh?from=b%20%3D%20%5Cmathbf%7B%20%20V%5E%7B-1%7D%20c%20%7D%20%3D%20%28Cov(y%29)%5E%7B-1%7D%20Cov(y%2CA)%20%3D%20%5Cfrac%7BCov(y%2CA)%7D%7BCov(y)%7D%0A" /></p><p>根据数量遗传学理论，我们知道两个个体的加性遗传相关等于两个个体的育种值之间的相关，即</p>
+<p style=""><img src="https://math.now.sh?from=a_%7BXY%7D%20%3D%20%5Cfrac%7BCov%28A_%7BX%7D%2CA_%7BY%7D%29%7D%7B%5Csigma_%7BX%7D%5Csigma_%7BY%7D%7D%0A" /></p><p>这里由于所有个体属于同一群体，因此我们有  <img src="https://math.now.sh?inline=%5Csigma_%7BX%7D%20%3D%20%5Csigma_%7BY%7D%20%3D%20%5Csigma_%7BA%7D" style="display:inline-block;margin: 0;"/> ，因此 <img src="https://math.now.sh?inline=a_%7BXY%7D%20%3D%20%5Cfrac%7BCov%28A_%7BX%7D%2CA_%7BY%7D%29%7D%7B%5Csigma_%7BA%7D%5E%7B2%7D%7D" style="display:inline-block;margin: 0;"/> 。假设我们的目标个体称为 <img src="https://math.now.sh?inline=X" style="display:inline-block;margin: 0;"/> ，因此<img src="https://math.now.sh?inline=%5Cmathbf%7Bc%7D" style="display:inline-block;margin: 0;"/> 向量中的元素 $c_{i} =\operatorname{Cov}(y_{i}, \mathrm{A_{X}})  =\operatorname{Cov}(\mathrm{A_{i}+e_{i}}, \mathrm{A_{X}}) =\operatorname{Cov}(\mathrm{A_{i}}, \mathrm{A_{X}}) = a_{iX} \sigma_{A}^{2}  $  ，即等于相应的加性遗传相关乘以加性遗传方差。设 <img src="https://math.now.sh?inline=%5Cmathbf%7Ba%7D" style="display:inline-block;margin: 0;"/> 为个体与各信息来源的个体间加性遗传相关的向量，因此我们有 <img src="https://math.now.sh?inline=%5Cmathbf%7Bc%20%3D%20a%20%5Csigma_%7BA%7D%5E%7B2%7D%7D" style="display:inline-block;margin: 0;"/> ，因此 <img src="https://math.now.sh?inline=%5Cmathbf%7Bb%7D" style="display:inline-block;margin: 0;"/> 的计算公式可以写为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bb%20%3D%20V%5E%7B-1%7D%20%20a%20%5Csigma_%7BA%7D%5E%7B2%7D%7D%0A" /></p><p>因此，选择指数的基本公式可以写为：</p>
+<p style=""><img src="https://math.now.sh?from=I%20%3D%20%5Cmathbf%7Bc'V%5E%7B-1%7D%28y-%5Cboldsymbol%7B%5Cmu%7D%29%7D%20%3D%20%5Csigma_%7BA%7D%5E%7B2%7D%20%5Cmathbf%7Ba'V%5E%7B-1%7D(y-%5Cboldsymbol%7B%5Cmu%7D)%7D%0A" /></p><p>选择指数估计的准确性的高低，直接取决于信息来源的种类和数量。而准确度的高低又直接关系到将获得的遗传进展的大小，所以这是一个非常重要的指标。<strong>准确性通常用真实育种值与估计育种值的相关系数来表示</strong>，即：</p>
+<p style=""><img src="https://math.now.sh?from=r_%7BAI%7D%20%3D%20%5Cfrac%7BCov%28A%2CI%29%7D%7B%5Csigma_%7BA%7D%20%5Csigma_%7BI%7D%7D%0A" /></p><p>因为 <img src="https://math.now.sh?inline=%5Csigma_%7BI%7D%5E%7B2%7D%3D%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%20b%7D%20%3D%20%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7Bc%7D%2C%5Cquad%20%20%5Coperatorname%7BCov%7D%28A%2C%20I%29%3D%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7Bc%7D%3D%5Csigma_%7BI%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，所以</p>
+<p style=""><img src="https://math.now.sh?from=r_%7BAI%7D%20%3D%20%5Cfrac%7B%20%5Csigma_%7BI%7D%5E%7B2%7D%7D%7B%5Csigma_%7BA%7D%20%5Csigma_%7BI%7D%7D%20%3D%20%5Cfrac%7B%20%5Csigma_%7BI%7D%7D%7B%5Csigma_%7BA%7D%20%7D%20%3D%20%5Cfrac%7B%5Cmathbf%7B%28b'c%29%7D%5E%7B0.5%7D%7D%7B%5Csigma_%7BA%7D%20%7D%20%3D%20%5Cfrac%7B(%5Cmathbf%7Bb'a%20%7D%5Csigma%5E%7B2%7D_%7BA%7D)%5E%7B0.5%7D%7D%7B%5Csigma_%7BA%7D%20%7D%20%3D%20(%5Cmathbf%7Bb'a%20%7D)%5E%7B0.5%7D%0A" /></p><p>BLP 的一些性质为</p>
+<ol>
+<li>在所有关于 <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D" style="display:inline-block;margin: 0;"/> 的线性组合中，<strong>BLP</strong>  最大化了 <img src="https://math.now.sh?inline=I" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 的相关</li>
+<li><strong>BLP</strong> 具有不变性，即 <img src="https://math.now.sh?inline=%5Ctext%7BBLP%20of%20%7D%5Cmathbf%7Bm%5E%7B%5Cprime%7Dw%7D%20%3D%20%5Cmathbf%7Bm%5E%7B%5Cprime%7D%5Chat%7Bw%7D%7D" style="display:inline-block;margin: 0;"/></li>
+<li>当  <img src="https://math.now.sh?inline=%5B%5Cmathbf%7By%7D%2C%20%5Cmathbf%7Bw%7D%5D" style="display:inline-block;margin: 0;"/> 服从多变量正态分布是，此时的 <strong>BLP</strong>  就是 <strong>BP</strong></li>
+</ol>
+<h1>参考文献</h1>
+<ol>
+<li>Henderson，1973，SIRE EVALUATION AND GENETIC  TRENDS</li>
+<li>Henderson，《Applications_of_Linear_Models_in_Animal_Breeding》, 1984</li>
+<li>张沅，张勤，《畜禽育种中的线性模型》</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>线性模型</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>线性模型</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>混合线性模型一之广义最小二乘</title>
     <url>/posts/5e674d74/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是混合线性模型理论系列的第一篇，内容为概述及广义最小二乘（固定效应的估计）。</p>
