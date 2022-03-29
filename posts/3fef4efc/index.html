@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    GWAS分析中的多重校正方法 |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-GWAS分析中的多重校正方法"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  GWAS分析中的多重校正方法
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/3fef4efc/" class="article-date">
+  <time datetime="2022-03-29T15:00:02.000Z" itemprop="datePublished">2022-03-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">8 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>根据一些资料，整理一下GWAS分析中可能用到的多重校正方法。</p>
+<span id="more"></span>
+<h1>多重比较问题</h1>
+<p>首先我们看什么是多重比较问题，下面的内容来自于维基百科。</p>
+<blockquote>
+<p>当统计分析涉及多个同时进行的统计测试时，就会出现多重比较，每个测试都有可能产生相同数据集或相关数据集的“发现”。规定的置信水平通常仅适用于单独考虑的每个测试，但通常希望对整个系列的同时测试都有一个置信水平。未能对多重比较进行补偿可能会产生重要的现实后果，如以下示例所示：</p>
+<ul>
+<li>假设治疗是一种新的写作教学方式，而控制是写作教学的标准方式。两组学生可以在语法、拼写、组织、内容等方面进行比较。随着更多的属性被比较，处理组和控制组由于随机抽样误差而在至少一个属性上出现差异的可能性越来越大。</li>
+<li>假设我们从减轻多种疾病症状中的任何一种来考虑药物的功效。随着更多症状被考虑，就至少一种症状而言，该药物似乎比现有药物有所改善的可能性越来越大。</li>
+</ul>
+<p>在这两个示例中，随着比较次数的增加，被比较的组更有可能在至少一个属性方面出现差异。如果将结果作为涉及多重比较的分析的一部分而不是仅涉及单一比较的分析进行观察，我们对结果将推广到独立数据的信心通常会减弱。 例如，如果在 5% 的水平上执行一项测试并且相应的原假设为真，则错误拒绝原假设的可能性只有 5%。但是，如果进行了 100 次测试并且所有相应的零假设都为真，则错误拒绝（也称为误报或 I 类错误）的预期数量为 5。如果测试在统计上彼此独立，则至少一个错误的拒绝是 <img src="https://math.now.sh?inline=1-0.95%5E%7B100%7D%20%3D%2099.4%5C%25" style="display:inline-block;margin: 0;"/> （当且仅当 <img src="https://math.now.sh?inline=P%28AB%29%3DP(A)P(B)" style="display:inline-block;margin: 0;"/> ，事件 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=B" style="display:inline-block;margin: 0;"/> 独立）。 请注意，多重比较问题当然不会出现在经验检验多个假设的每种情况下，无论是顺序还是并行（发）；粗略地说，每当在同一数据集（或不独立的数据集）上测试多个假设或在多个数据集中测试同一个假设时，就会出现多重比较问题。 多重比较问题也适用于置信区间。具有 95% 覆盖概率水平的单个置信区间将包含 95% 实验中的总体参数。但是，如果同时考虑 100 个置信区间，每个区间的覆盖概率为 95%，则非覆盖区间的预期数量为 5。如果区间在统计上彼此独立，则至少一个区间不包含总体的概率参数为 99.4%。 已经开发了一些技术来防止多重统计测试中出现的假阳性率和未覆盖率的膨胀。 - <a target="_blank" rel="noopener" href="https://cn.wikiterhal.com/558787-multiple-testing-correction-IUCOPW">https://cn.wikiterhal.com/558787-multiple-testing-correction-IUCOPW</a></p>
+</blockquote>
+<p>简单地理解一下，假设你想比较的两个分组实际上没有区别（即来自于同一个总体），但是只要你比较的属性/水平足够多，你总能在某个属性/水平找到所谓的显著性差别。但是，此时实际上造成这种“显著性差别”的原因是<strong>抽样误差</strong>。</p>
+<h1>多重校正标准</h1>
+<h2 id="FWER">FWER</h2>
+<p><strong>族错误率</strong> (Family-wise error rate, FWER) 指这多次检验中至少出现一次假阳性的概率，设 <img src="https://math.now.sh?inline=f" style="display:inline-block;margin: 0;"/> 为出现假阳性的次数，则有</p>
+<p style=""><img src="https://math.now.sh?from=FWER%20%3D%20P%28f%20%5Cgeq%201%29%0A" /></p><h2 id="FDR">FDR</h2>
+<p><strong>错误发现率</strong> (false discovery rate, FDR) 指在所有<strong>显著的检验</strong>中假阳性所占比例的期望，设 <img src="https://math.now.sh?inline=f" style="display:inline-block;margin: 0;"/> 为出现假阳性的次数，<img src="https://math.now.sh?inline=d" style="display:inline-block;margin: 0;"/> 为检验方法得到的显著性位点数目，则有</p>
+<p style=""><img src="https://math.now.sh?from=FDR%20%3D%20E%28f%2Fd%29%0A" /></p><p>不同的多重校正方法都是通过控制整理的 FWER 或 FDR 低于给定水平，从而减少假阳性。可以证明，只要控制 <img src="https://math.now.sh?inline=%5Ctext%7BFWER%7D%20%5Cleq%20%5Calpha" style="display:inline-block;margin: 0;"/> ，就能保证  <img src="https://math.now.sh?inline=%5Ctext%7BFDR%7D%20%5Cleq%20%5Calpha" style="display:inline-block;margin: 0;"/> 。也就是说，基于 FWER 标准的方法比基于 FDR 标准的方法更加严格。</p>
+<h1>GWAS的多重校正</h1>
+<h2 id="多重检验问题">多重检验问题</h2>
+<p>GWAS 分析中，我们是逐个SNP进行检验，假设SNP数目为 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> ，那么我们就做了 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 次检验。假设其中真正与性状有关联的 SNP 数目为 <img src="https://math.now.sh?inline=a%20%5Cll%20n" style="display:inline-block;margin: 0;"/>  ， 每次检验显著性水平我们定为 <img src="https://math.now.sh?inline=%5Calpha" style="display:inline-block;margin: 0;"/> ，那么在 <img src="https://math.now.sh?inline=n-a" style="display:inline-block;margin: 0;"/> 个无关联位点的检验中 (原假设为真) 出现假阳性的次数为 <img src="https://math.now.sh?inline=%5Calpha%20%5Ctimes%20%28n-a%29" style="display:inline-block;margin: 0;"/> ，约等于 <img src="https://math.now.sh?inline=%5Calpha%20n" style="display:inline-block;margin: 0;"/> 。比如假设总位点数目为 100 万，<img src="https://math.now.sh?inline=%5Calpha%20%3D%200.05" style="display:inline-block;margin: 0;"/> ，那么出现假阳性的位点数目约为 5 万，很显然这是不可接受的。这就是GWAS研究中的多重检验问题。为了解决这一问题，提出了以下几种方法。</p>
+<h2 id="Bonferroni-校正法">Bonferroni 校正法</h2>
+<p>首先，Bonferroni 校正是一种基于 FWER 标准的方法。假设真正关联的 SNP 的集合为 <img src="https://math.now.sh?inline=A" style="display:inline-block;margin: 0;"/> ，所有 SNP 的集合为 <img src="https://math.now.sh?inline=B" style="display:inline-block;margin: 0;"/> ，其中某个位点 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 出现假阳性的事件为 <img src="https://math.now.sh?inline=B_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，基于事件集合，FWER 可以写为</p>
+<p style=""><img src="https://math.now.sh?from=F%20W%20E%20R%3DP%5Cleft%28%5Cbigcup_%7BB_%7Bi%7D%20%5Cnotin%20A%7D%20B_%7Bi%7D%5Cright%29%0A" /></p><p>根据 Bonferroni 不等式，我们有</p>
+<p style=""><img src="https://math.now.sh?from=P%5Cleft%28%5Cbigcup_%7BB_%7Bi%7D%20%5Cnotin%20A%7D%20B_%7Bi%7D%5Cright%29%20%5Cleqslant%20%5Csum_%7BB_%7Bi%7D%20%5Cnotin%20A%7D%20P(B_%7Bi%7D)%0A" /></p><p>这个不等式可以根据 <img src="https://math.now.sh?inline=P%28A%20%5Ccup%20B%29%3DP(A)%2BP(B)-P(A%20%5Ccap%20B)" style="display:inline-block;margin: 0;"/> 来证明。</p>
+<p>可以得出，只要把单次检验的显著性水平设为 <img src="https://math.now.sh?inline=%5Calpha%2Fn" style="display:inline-block;margin: 0;"/> ，就可以使得整体检验的 <img src="https://math.now.sh?inline=%5Cmathrm%7BFWER%7D%20%5Cleq%28%5Cmathrm%7Bn%7D-%5Cmathrm%7Ba%7D%29%20%5Calpha%20%2F%20%5Cmathrm%7Bn%7D%20%3C%20%5Calpha" style="display:inline-block;margin: 0;"/> 。因此该方法只需要将单次检验的显著性水平设为  <img src="https://math.now.sh?inline=%5Calpha%2Fn" style="display:inline-block;margin: 0;"/> ，就能控制整体检验出现假阳性的概率低于 <img src="https://math.now.sh?inline=%5Calpha" style="display:inline-block;margin: 0;"/> 。</p>
+<p>Bonferroni 校正是最严格的多重校正方法，由于不同的位点间存在连锁不平衡 (LD)，即很多位点之间不是独立的，因此Bonferroni 校正可能过于保守，导致出现假阴性的概率增加。</p>
+<h2 id="置换检验法">置换检验法</h2>
+<p><strong>置换检验法</strong> (Permutation test) 也采用 FWER 标准，不同的是，它可以很好的处理不同检验之间存在的相关。置换检验法是Fisher于20世纪30年代提出的一种基于大量计算（computationally intensive），利用样本数据的全（或随机）排列，进行统计推断的方法，因其对总体分布自由，应用较为广泛，特别适用于总体分布未知的小样本资料，以及某些难以用常规方法分析资料的假设检验问题。</p>
+<p>在GWAS分析中，由于不同的位点间存在连锁不平衡 (LD)，使得等效的独立SNP数目低于位点总数 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> ，置换检验法可以给出一个控制假阳性的合理的标准。其做法是将基因型和表型的对应关系随机打乱，<strong>我们认为随机打乱之后的基因型和表型之间不存在关联，也就是说此时所有的SNP均满足零假设</strong>。然后我们用打乱后的数据做GWAS，每次记录下最小的 P 值。重复此过程多次，比如1000次，我们就得到了原假设成立下最小 P 值的一个经验分布。如果我们将这些最小P值从小到大排序，如果我们选择显著性水平α=0.05，则将排序P值的0.05分位数作为校正后的显著性水平。这里用的最小 P 值也可换成最大统计量。</p>
+<p>我们来直观解释一下其中的原理，FWER 标准是至少出现一次假阳性的概率，等价于零假设成立下至少有一个位点的 P 值小于校正后的显著性水平的概率，进而等价于零假设成立下最小 P 值小于校正后的显著性水平的概率。当我们将上面例子中 1000 次抽样排序P值的0.05分位数作为校正后的显著性水平时，此时 FWER ，即零假设成立下最小 P 值小于校正后的显著性水平的概率就是 0.05 ，满足要求。</p>
+<p>置换检验法的每次随机打乱的过程中考虑到了 SNP 之间的连锁不平衡关系，因此相比于Bonferroni 校正可能更符合实际情况，其最主要的问题是计算量太大，短时间内几乎不可能实现。</p>
+<h2 id="FDR-的-BH-法">FDR 的 BH 法</h2>
+<p>FDR 标准下最常用的方法就是 BH 法，其原理如下。</p>
+<p>我们先将所有 SNPs 检验的 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 值从小到大排列,  假设我们找到的显著位点数目为 <img src="https://math.now.sh?inline=d" style="display:inline-block;margin: 0;"/> ， <img src="https://math.now.sh?inline=p_%7B%5Cmathrm%7Bd%7D%7D" style="display:inline-block;margin: 0;"/> 表示最后一个显著的 SNP 的 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 值 。设 FDR 下的显著水平为 <img src="https://math.now.sh?inline=%5Calpha" style="display:inline-block;margin: 0;"/>,  因为报告显著的 SNPs 有 <img src="https://math.now.sh?inline=%5Cmathrm%7Bd%7D" style="display:inline-block;margin: 0;"/> 个, 所以按 FDR 标准, 允许错误发现的 SNPs 个数为 <img src="https://math.now.sh?inline=%5Calpha%20%5Ctimes%20%5Cmathrm%7Bd%7D" style="display:inline-block;margin: 0;"/> ，而此时理论上假阳性的位点数目约等于 <img src="https://math.now.sh?inline=%5Cmathrm%7Bn%7D%20%5Ctimes%20p_%7B%5Cmathrm%7Bd%7D%7D" style="display:inline-block;margin: 0;"/>  (实际为  <img src="https://math.now.sh?inline=%5Cmathrm%7B%28n-a%29%7D%20%5Ctimes%20p_%7B%5Cmathrm%7Bd%7D%7D" style="display:inline-block;margin: 0;"/>)。为了把假阳性数目控制在允许错误发现数以内, 即 <img src="https://math.now.sh?inline=%5Cmathrm%7Bn%7D%20%5Ctimes%20p_%7B%5Cmathrm%7Bd%7D%7D%20%5Cleq%20%5Calpha%20%5Ctimes%20%5Cmathrm%7B~d%7D" style="display:inline-block;margin: 0;"/>,  等价于把 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 值校正为 <img src="https://math.now.sh?inline=%28%5Cmathrm%7Bn%7D%20%2F%20%5Cmathrm%7Bd%7D%29%20%5Ctimes%20p_%7B%5Cmathrm%7Bd%7D%7D" style="display:inline-block;margin: 0;"/>, 再和 <img src="https://math.now.sh?inline=%5Calpha" style="display:inline-block;margin: 0;"/> 比较。 <img src="https://math.now.sh?inline=%5Cmathrm%7BBH%7D" style="display:inline-block;margin: 0;"/> 法就是确定 <img src="https://math.now.sh?inline=%5Cmathrm%7Bd%7D" style="display:inline-block;margin: 0;"/> 的过程，具体步骤如下：</p>
+<ol>
+<li>把 <img src="https://math.now.sh?inline=%5Cmathrm%7Bn%7D" style="display:inline-block;margin: 0;"/> 个 SNPs 的 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 值按从小到大排列;</li>
+<li>把排在第 1 的 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 值乘以 <img src="https://math.now.sh?inline=%5Cmathrm%7Bn%7D" style="display:inline-block;margin: 0;"/>, 排在第 <img src="https://math.now.sh?inline=%5Cmathrm%7Bi%7D" style="display:inline-block;margin: 0;"/> 的 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 值 乘以 <img src="https://math.now.sh?inline=%5Cmathrm%7Bn%7D%20%2F%20%5Cmathrm%7Bi%7D" style="display:inline-block;margin: 0;"/>, 依次类推, 排在最后的 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 值乘以 <img src="https://math.now.sh?inline=%5Cmathrm%7Bn%7D%20%2F%20%5Cmathrm%7Bn%7D" style="display:inline-block;margin: 0;"/>, 得到校正后的  <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 值 (有人也称为 <img src="https://math.now.sh?inline=q" style="display:inline-block;margin: 0;"/> 值)</li>
+<li>从排在最后的 SNP 开始, 按从后往前的顺序, 首次发现校正后 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 值小于 <img src="https://math.now.sh?inline=%5Calpha" style="display:inline-block;margin: 0;"/> 的 SNP (设序号为 d)后, 报告序号为 1 到 <img src="https://math.now.sh?inline=%5Cmathrm%7Bd%7D" style="display:inline-block;margin: 0;"/> 的 SNPs 显著。</li>
+</ol>
+<p>我们可以简单证明一下，BH 法比Bonferroni 校正法要宽松，也就是上面说的基于 FDR 标准的方法比基于  FWER 标准的方法更加宽松。Bonferroni 校正法的判定标准是 <img src="https://math.now.sh?inline=p%20%3C%20%5Calpha%2Fn" style="display:inline-block;margin: 0;"/> ，即 <img src="https://math.now.sh?inline=np%20%3C%20%5Calpha" style="display:inline-block;margin: 0;"/> ，我们可以理解为其校正后的 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/>  值为 <img src="https://math.now.sh?inline=np" style="display:inline-block;margin: 0;"/> ，而 BH 法的校正后的 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/>  值为 <img src="https://math.now.sh?inline=np%2Fd%20%5Cleq%20np" style="display:inline-block;margin: 0;"/> ，因此 BH 法得到的校正后的  <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/>  值更小，得到的显著位点数目只会更多，即该方法比Bonferroni 校正法宽松。</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>BENJAMINI, 1995, Controlling the False Discovery Rate: a Practical and Powerful Approach to Multiple Testing</p>
+</li>
+<li>
+<p>黄杨岳，2013，全基因组关联研究中的多重校正方法比较</p>
+</li>
+<li>
+<p>[<a target="_blank" rel="noopener" href="https://www.cnblogs.com/Dzhouqi/p/3440902.html">Permutation Test 置换检验(转）</a>](<a target="_blank" rel="noopener" href="https://www.cnblogs.com/Dzhouqi/p/3440902.html">https://www.cnblogs.com/Dzhouqi/p/3440902.html</a>)</p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="http://blog.sina.com.cn/s/blog_14cce7aed0102vqsq.html">GWAS中的多重假设检验</a></p>
+</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/de96141/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">TOP与BOT链的划分</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2022
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/posts/ac7827ff">只只</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
