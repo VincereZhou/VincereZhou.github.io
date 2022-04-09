@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    基因组选择模型介绍上 |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-基因组选择模型介绍上"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  基因组选择模型介绍上
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/97b48478/" class="article-date">
+  <time datetime="2022-04-09T06:28:49.000Z" itemprop="datePublished">2022-04-09</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.9k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">10 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>基因组选择方法，大体上可以分为两类，第一类方法是通过参考群数据获得标记效应从而间接<br>
+获得基因组估计育种值；第二类方法是通过使用基因组数据构建新的关系矩阵加<br>
+入到混合模型方程组中直接获得基因组估计育种值，如 GBLUP方法。</p>
+<p>本篇主要介绍第一类方法。</p>
+<span id="more"></span>
+<h1>单标记选择</h1>
+<p>我们先看单个标记的模型，再扩展到全基因组的基因组选择。</p>
+<p>假设存在一个标记与某个 QTL 处于完全连锁状态，那么我们可以将这个标记当作固定效应加入到模型中，即</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%20%3D%20%5Ctext%7Bmarker%20effect%20in%20animal%20%7Di%20%2B%20e_%7Bi%7D%0A" /></p><p>我们也可以往模型中添加一个<strong>剩余多基因效应</strong> (<em>additional polygenic genetic value</em>) 。</p>
+<p style=""><img src="https://math.now.sh?from=y_%7Bi%7D%20%3D%20%5Ctext%7Bmarker%20effect%20in%20animal%20%7D%20i%20%2B%20%5Ctext%7Bpolygenic%20genetic%20value%20of%20animal%20%7D%20i%20%2B%20e_%7Bi%7D%0A" /></p><p>我们下面看一些例子，首先假设我们有一个 4 等位基因 (A,B,C,D)的标，三个个体的基因型分别为 BC, AA, BD。那么我们可以估计每个等位基因的效应，建立矩阵如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BZ%7D%20%5Cboldsymbol%7Ba%7D%3D%5Cleft%28%5Cbegin%7Barray%7D%7Bllll%7D%0A0%20%26%201%20%26%201%20%26%200%20%5C%5C%0A2%20%26%200%20%26%200%20%26%200%20%5C%5C%0A0%20%26%201%20%26%200%20%26%201%0A%5Cend%7Barray%7D%5Cright%29%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Aa_%7BA%7D%20%5C%5C%0Aa_%7BB%7D%20%5C%5C%0Aa_%7BC%7D%20%5C%5C%0Aa_%7BD%7D%0A%5Cend%7Barray%7D%5Cright)%0A" /></p><p>假设三个基因型个体的表型为 (12,35,6) ，则可以构建一个模型如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Bgathered%7D%0A%5Cboldsymbol%7By%7D%3D%5Cboldsymbol%7BX%7D%20%5Cboldsymbol%7Bb%7D%2B%5Cboldsymbol%7BZ%7D%20%5Cboldsymbol%7Ba%7D%2B%5Cboldsymbol%7Be%7D%20%5C%5C%0A%5Cleft%28%5Cbegin%7Barray%7D%7Bc%7D%0A12%20%5C%5C%0A35%20%5C%5C%0A6%0A%5Cend%7Barray%7D%5Cright%29%3D%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A1%20%5C%5C%0A1%0A%5Cend%7Barray%7D%5Cright)%20%5Cmu%2B%5Cleft(%5Cbegin%7Barray%7D%7Bllll%7D%0A0%20%26%201%20%26%201%20%26%200%20%5C%5C%0A2%20%26%200%20%26%200%20%26%200%20%5C%5C%0A0%20%26%201%20%26%200%20%26%201%0A%5Cend%7Barray%7D%5Cright)%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Aa_%7BA%7D%20%5C%5C%0Aa_%7BB%7D%20%5C%5C%0Aa_%7BC%7D%20%5C%5C%0Aa_%7BD%7D%0A%5Cend%7Barray%7D%5Cright)%2B%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Ae_%7B1%7D%20%5C%5C%0Ae_%7B2%7D%20%5C%5C%0Ae_%7B3%7D%0A%5Cend%7Barray%7D%5Cright)%0A%5Cend%7Bgathered%7D%0A" /></p><p>这个模型是一个固定模型，可以通过最小二乘法进行求解。</p>
+<p>如果我们考虑剩余多基因效应，则模型为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Bgathered%7D%0A%5Cboldsymbol%7By%7D%3D%5Cboldsymbol%7BX%7D%20%5Cboldsymbol%7Bb%7D%2B%5Cboldsymbol%7BZ%7D%20%5Cboldsymbol%7Ba%7D%2B%5Cboldsymbol%7BW%7D%20%5Cboldsymbol%7Bu%7D%2B%5Cboldsymbol%7Be%7D%20%5C%5C%0A%5Cleft%28%5Cbegin%7Barray%7D%7Bc%7D%0A12%20%5C%5C%0A35%20%5C%5C%0A6%0A%5Cend%7Barray%7D%5Cright%29%3D%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A1%20%5C%5C%0A1%0A%5Cend%7Barray%7D%5Cright)%20%5Cmu%2B%5Cleft(%5Cbegin%7Barray%7D%7Bllll%7D%0A0%20%26%201%20%26%201%20%26%200%20%5C%5C%0A2%20%26%200%20%26%200%20%26%200%20%5C%5C%0A0%20%26%201%20%26%200%20%26%201%0A%5Cend%7Barray%7D%5Cright)%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Aa_%7BA%7D%20%5C%5C%0Aa_%7BB%7D%20%5C%5C%0Aa_%7BC%7D%20%5C%5C%0Aa_%7BD%7D%0A%5Cend%7Barray%7D%5Cright)%2B%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Au_%7B1%7D%20%5C%5C%0Au_%7B2%7D%20%5C%5C%0Au_%7B3%7D%0A%5Cend%7Barray%7D%5Cright)%2B%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Ae_%7B1%7D%20%5C%5C%0Ae_%7B2%7D%20%5C%5C%0Ae_%7B3%7D%0A%5Cend%7Barray%7D%5Cright)%0A%5Cend%7Bgathered%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Coperatorname%7BVar%7D%28%5Cboldsymbol%7Bu%7D%29%3D%5Cboldsymbol%7BA%7D%20%5Csigma_%7Bu%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，此时模型为混合线性模型，可以用 BLUP 方法求解。</p>
+<p>我们可以轻松扩展到 2 个标记的模型，即</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7By%3DX%20b%2BZ_%7B1%7D%20a_%7B1%7D%2BZ_%7B2%7D%20a_%7B2%7D%2BW%20u%2Be%7D%5C%5C%0A%0A%5Cbegin%7Baligned%7D%0A%26%5Cleft%28%5Cbegin%7Barray%7D%7Bc%7D%0A12%20%5C%5C%0A35%20%5C%5C%0A6%0A%5Cend%7Barray%7D%5Cright%29%3D%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0A1%20%5C%5C%0A1%20%5C%5C%0A1%0A%5Cend%7Barray%7D%5Cright)%20%5Cmu%2B%5Cleft(%5Cbegin%7Barray%7D%7Bllll%7D%0A0%20%26%201%20%26%201%20%26%200%20%5C%5C%0A2%20%26%200%20%26%200%20%26%200%20%5C%5C%0A0%20%26%201%20%26%200%20%26%201%0A%5Cend%7Barray%7D%5Cright)%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Aa_%7BA%201%7D%20%5C%5C%0Aa_%7BB%201%7D%20%5C%5C%0Aa_%7BC%201%7D%20%5C%5C%0Aa_%7BD%201%7D%0A%5Cend%7Barray%7D%5Cright)%2B%5Cleft(%5Cbegin%7Barray%7D%7Bll%7D%0A1%20%26%201%20%5C%5C%0A0%20%26%202%20%5C%5C%0A2%20%26%200%0A%5Cend%7Barray%7D%5Cright)%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Aa_%7BC%202%7D%20%5C%5C%0Aa_%7BG%202%7D%0A%5Cend%7Barray%7D%5Cright)%2B%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Au_%7B1%7D%20%5C%5C%0Au_%7B2%7D%20%5C%5C%0Au_%7B3%7D%0A%5Cend%7Barray%7D%5Cright)%2B%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Ae_%7B1%7D%20%5C%5C%0Ae_%7B2%7D%20%5C%5C%0Ae_%7B3%7D%0A%5Cend%7Barray%7D%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>然后到 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 个标记的模型</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7By%3DX%20b%2BZ_%7B1%7D%20a_%7B1%7D%2BZ_%7B2%7D%20a_%7B2%7D%2B%5Ccdots%20W%20u%2Be%7D%0A" /></p><p>如果所有标记只有 2 个等位基因，例如 SNP ，假设两个 SNP 的碱基分别为 A/B, E/F ，按照上面的表示方式，我们需要将三个个体的标记效应表示为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BZ%7D%20%5Cboldsymbol%7Ba%7D%3D%5Cleft%28%5Cbegin%7Barray%7D%7Bccccc%7D%0A1%20%26%201%20%26%20%5Cvdots%20%26%202%20%26%200%20%5C%5C%0A2%20%26%200%20%26%20%5Cvdots%20%26%201%20%26%201%20%5C%5C%0A0%20%26%202%20%26%20%5Cvdots%20%26%200%20%26%202%0A%5Cend%7Barray%7D%5Cright%29%5Cleft(%5Cbegin%7Barray%7D%7Bc%7D%0Aa_%7BA%7D%20%5C%5C%0Aa_%7BB%7D%20%5C%5C%0A%5Ccdots%20%5C%5C%0Aa_%7BE%7D%20%5C%5C%0Aa_%7BF%7D%0A%5Cend%7Barray%7D%5Cright)%0A" /></p><p>但是由于标记只有 2 个碱基，此时这种表达方式存在冗余，一个标记可以只估计一个效应，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BZ%20a%7D%3D%5Cleft%28%5Cbegin%7Barray%7D%7Bccc%7D%0A1%20%26%20%5Cvdots%20%26%202%20%5C%5C%0A2%20%26%20%5Cvdots%20%26%201%20%5C%5C%0A0%20%26%20%5Cvdots%20%26%200%0A%5Cend%7Barray%7D%5Cright%29%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Aa_%7BA%7D%20%5C%5C%0A%5Ccdots%20%5C%5C%0Aa_%7BE%7D%0A%5Cend%7Barray%7D%5Cright)%0A" /></p><p>或者 （可以任意挑选某个碱基进行计数）</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BZ%7D%20%5Cboldsymbol%7Ba%7D%3D%5Cleft%28%5Cbegin%7Barray%7D%7Bccc%7D%0A1%20%26%20%5Cvdots%20%26%200%20%5C%5C%0A0%20%26%20%5Cvdots%20%26%201%20%5C%5C%0A2%20%26%20%5Cvdots%20%26%202%0A%5Cend%7Barray%7D%5Cright%29%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0Aa_%7BB%7D%20%5C%5C%0A%5Ccdots%20%5C%5C%0Aa_%7BF%7D%0A%5Cend%7Barray%7D%5Cright)%0A" /></p><p>此时我们面临下面几个问题</p>
+<ul>
+<li>我们应该放多少个标记到模型中？</li>
+<li>基因组中总共有多少个 QTL ？</li>
+<li>我们已经发现并通过验证的 QTL 有多少个？</li>
+</ul>
+<p>根据之前的研究结果，我们发现只用发现的 QTL，我们会遗漏很多的遗传变异。例如在 GWAS 分析中，当样本数为 1000 ，位点数为 50k ，经过 Bonferroni 校正后，找到的解释遗传方差比例超过 1% 的 QTL 只有 4% ，换句话说，如果群体中存在 100 个 QTL ，GWAS 只能找到 4 个显著的 QTL。</p>
+<p>另外，我们发现的 QTL 效应一般都是夸大的，即其真实效应小于估计效应 (<em>Beavis effect</em>)。因为估计效应等于真实效应加上估计噪音，为了选择估计效应很大的 QTL ，我们就很容易选中实际是估计噪音很大的 QTL 。如果真实情况是只有少数几个QTL的效应很大，那么此时 <em>Beavis effect</em> 是可以忽略的，但是实际情况往往不是这样。当位点数目很多，就会出现某些位点的估计噪音很大，使得这些位点的估计效应比真实效应大得多，这个问题在 GWAS 分析中很严重。</p>
+<h1>全基因组选择</h1>
+<h1>贝叶斯估计，或标记效应的最佳估计</h1>
+<p>我们已知标记辅助选择会导致选择出现偏差，那么如果我们不对 QTL 区域进行选择，我们就可以避免这个偏差。因此此时的估计育种值就是整个基因组所有区域的效应之和，即我们认为基因组的所有区域可能都有效应，这种思想就是全基因组选择。那么我们如何估计整个基因组所有区域的效应呢？</p>
+<p>最简单的方法就是扩展单标记选择扩展为多标记选择，估计每一个标记的效应。但是由于此时我们采用覆盖全基因组的标记，问题在于标记数目太多了（标记数目很可能大于样本数目），此时用最小二乘法估计标记效应是很糟糕的。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7By%7D%3D%5Cboldsymbol%7BX%7D%20%5Cboldsymbol%7Bb%7D%2B%5Cboldsymbol%7BZ%7D%20%5Cboldsymbol%7Ba%7D%2B%5Cboldsymbol%7Be%7D%20%5C%5C%0A" /></p><p>另外，即便我们有非常多的样本，我们还没有用上一个先验信息，即大部分的 SNP 效应都不大。那么我们如何进行改善呢？</p>
+<p>我们可以利用 <em>Best Prediction</em> 的理论（最小化估计值和真实值的举例）， <em>Best Prediction</em>  也可以视为一个贝叶斯估计值，我们需要知道标记效应的先验分布 <img src="https://math.now.sh?inline=p%28%5Cmathbf%7Ba%7D%29" style="display:inline-block;margin: 0;"/> ，给定标记效应的表型数据的似然值 <img src="https://math.now.sh?inline=p%28%5Cmathbf%7By%7Ca%7D%29" style="display:inline-block;margin: 0;"/> ，此时估计的标记效应值为</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Cmathbf%7Ba%7D%7D%3DE%28%5Cmathbf%7Ba%7D%20%5Cmid%20%5Cmathbf%7By%7D%29%3D%5Cfrac%7B%5Cint%20%5Cmathbf%7Ba%7D%20p(%5Cmathbf%7By%7D%20%5Cmid%20%5Cmathbf%7Ba%7D)%20p(%5Cmathbf%7Ba%7D)%20d%20%5Cmathbf%7Ba%7D%7D%7B%5Cint%20p(%5Cmathbf%7By%7D%20%5Cmid%20%5Cmathbf%7Ba%7D)%20p(%5Cmathbf%7Ba%7D)%20d%20%5Cmathbf%7Ba%7D%7D%0A" /></p><p>第二个等号推导如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AE%28%5Cmathbf%7Ba%7D%20%5Cmid%20%5Cmathbf%7By%7D%29%20%26%3D%20%5Cint%20%20%5Cmathbf%7Ba%7D%20p(%5Cmathbf%7Ba%7D%20%5Cmid%20%5Cmathbf%7By%7D)%20d%20%5Cmathbf%7Ba%7D%20%5Cquad%20%26%20%5Cbecause%20p(%5Cmathbf%7Ba%7D%20%5Cmid%20%5Cmathbf%7By%7D)%20%3D%20%5Cfrac%7Bp(%5Cmathbf%7Ba%7D%20%2C%20%5Cmathbf%7By%7D)%20%7D%7Bp(%5Cmathbf%7By%7D)%7D%20%3D%20%5Cfrac%7Bp(%5Cmathbf%7By%7Ca%7D)%20p(%20%5Cmathbf%7Ba%7D)%20%7D%7B%20%5Cint%20p(%5Cmathbf%7By%2Ca%7D)%20d%20%5Cmathbf%7Ba%7D%7D%20%3D%20%5Cfrac%7Bp(%5Cmathbf%7By%7Ca%7D)%20p(%20%5Cmathbf%7Ba%7D)%20%7D%7B%20%5Cint%20p(%5Cmathbf%7By%7Ca%7D)%20p(%5Cmathbf%7Ba%7D)%20d%20%5Cmathbf%7Ba%7D%7D%20%20%20%5C%5C%0A%26%3D%20%5Cfrac%7B%5Cint%20%5Cmathbf%7Ba%7D%20p(%5Cmathbf%7By%7D%20%5Cmid%20%5Cmathbf%7Ba%7D)%20p(%5Cmathbf%7Ba%7D)%20d%20%5Cmathbf%7Ba%7D%7D%7B%5Cint%20p(%5Cmathbf%7By%7D%20%5Cmid%20%5Cmathbf%7Ba%7D)%20p(%5Cmathbf%7Ba%7D)%20d%20%5Cmathbf%7Ba%7D%7D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p><em>Best Prediction</em> 方法相比于最小二乘方法具有更大的优势，是一个最优解，因为它用了所有可用的信息 (Gianola and Fernando 1986) 。先验分布  <img src="https://math.now.sh?inline=p%28%5Cmathbf%7Ba%7D%29" style="display:inline-block;margin: 0;"/> 可以使得估计值向我们的先验值（通常为0）进行回归，这个过程称为 <em>shrinkage</em> 。</p>
+<p>贝叶斯回归方法中，一般普遍假设残差的分布为正态分布，即 <img src="https://math.now.sh?inline=p%28%5Cboldsymbol%7Be%7D%29%20%5Csim%20%5Cmathbf%7BN%7D(%5Cmathbf%7B0%7D%2C%20%5Cboldsymbol%7BR%7D)" style="display:inline-block;margin: 0;"/> ，似然函数 <img src="https://math.now.sh?inline=p%28%5Cmathbf%7By%7D%20%5Cmid%20%5Cmathbf%7Ba%7D%29%20%5Csim%20M%20V%20N(%5Cmathbf%7BX%7D%20%5Cmathbf%7Bb%7D%2B%5Cmathbf%7BZ%7D%20%5Cmathbf%7Ba%7D%2C%20%5Cmathbf%7BR%7D)" style="display:inline-block;margin: 0;"/> 。但是不同的人对于标记效应的先验分布 <img src="https://math.now.sh?inline=p%28%5Cboldsymbol%7Ba%7D%29" style="display:inline-block;margin: 0;"/> 的假设不一样，从而得到不同的贝叶斯方法，如 (Bayes A, B, C, R, S… Bayesian Lasso……)   。因此，贝叶斯回归的效果很大程度上受到标记效应的先验分布的影响，我们需要找到一个合适的先验分布，不然估计的标记效应就可能 <code>too much shrunken</code> (所有标记的效应估计值都非常小)，又或者 <code>too little shrunken</code> ，以至于标记效应的估计值中包含了太多的错误甚至是完全错误的。</p>
+<h2 id="加性方差和标记方差">加性方差和标记方差</h2>
+<p>假设个体育种值的加性方差为 <img src="https://math.now.sh?inline=%5Coperatorname%7BVar%7D%28u%29%3D%5Csigma_%7Bu%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 。如果一个标记的效应为 <img src="https://math.now.sh?inline=a_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，即每增加一个参考碱基的效应为  <img src="https://math.now.sh?inline=a_%7Bi%7D" style="display:inline-block;margin: 0;"/>  ，因此我们有 <img src="https://math.now.sh?inline=p%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 个个体在这个标记的效应为 <img src="https://math.now.sh?inline=u%3D%2B2%20a_%7Bi%7D" style="display:inline-block;margin: 0;"/> ， <img src="https://math.now.sh?inline=q%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 个个体在这个标记的效应为 <img src="https://math.now.sh?inline=u%3D%200" style="display:inline-block;margin: 0;"/> ， <img src="https://math.now.sh?inline=2pq" style="display:inline-block;margin: 0;"/> 个个体在这个标记的效应为 <img src="https://math.now.sh?inline=u%3D%20a_%7Bi%7D" style="display:inline-block;margin: 0;"/> （假设哈温平衡）。根据方差公式 <img src="https://math.now.sh?inline=%5Coperatorname%7BVar%7D%28u%29%3DE%5Cleft(u%5E%7B2%7D%5Cright)-E(u)%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，我们得到下表</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Barray%7D%7Bllll%7D%0A%5Chline%20%5Ctext%20%7B%20Genotype%20%7D%20%26%20%5Ctext%20%7B%20Frequency%20%7D%20%26%20u%5E%7B2%7D%20%26%20u%20%5C%5C%0A%5Chline%20%5Ctext%20%7B%20AA%20%7D%20%26%20p%5E%7B2%7D%20%26%204%20a_%7Bi%7D%5E%7B2%7D%20%26%202%20a_%7Bi%7D%20%5C%5C%0A%5Ctext%20%7B%20Aa%20%7D%20%26%202%20p%20q%20%26%20a_%7Bi%7D%5E%7B2%7D%20%26%20a_%7Bi%7D%20%5C%5C%0A%5Ctext%20%7B%20aa%20%7D%20%26%20q%5E%7B2%7D%20%26%200%20%26%200%20%5C%5C%0A%5Ctext%20%7B%20Average%20%7D%20%26%20%26%204%20p%5E%7B2%7D%20a_%7Bi%7D%5E%7B2%7D%2B2%20p%20q%20a_%7Bi%7D%5E%7B2%7D%20%26%202%20p%20a_%7Bi%7D%20%5C%5C%0A%5Chline%0A%5Cend%7Barray%7D%0A" /></p><p>因此，单个标记解释的方差为 <img src="https://math.now.sh?inline=4%20p%5E%7B2%7D%20a_%7Bi%7D%5E%7B2%7D%2B2%20p%20q%20a_%7Bi%7D%5E%7B2%7D-%5Cleft%282%20p%20%20a_%7Bi%7D%5Cright%29%5E%7B2%7D%3D2%20p%20q%20a_%7Bi%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 。由于 <img src="https://math.now.sh?inline=2pq" style="display:inline-block;margin: 0;"/> 在 <img src="https://math.now.sh?inline=p%20%3D%200.5" style="display:inline-block;margin: 0;"/> 时最大，因此 MAF 越大的标记解释的遗传方差一般也越大，因此这解释了可以忽略MAF比较低的标记的原因。</p>
+<p>假设我们只有两个标记并且知道它们的效应大小，因此一个个体的育种值可以表示为 <img src="https://math.now.sh?inline=u%3Dz_%7B1%7D%20a_%7B1%7D%2Bz_%7B2%7D%20a_%7B2%7D" style="display:inline-block;margin: 0;"/> ，那么 $\operatorname{Var}(u)=\operatorname{Var}\left(z_{1}\right) a_{1}^{2}+\operatorname{Var}\left(z_{2}\right) a_{2}^{2}+2 \operatorname{Cov}\left(z_{1}, z_{2}\right) a_{1} a_{2} $ 。<strong>假设哈维平衡</strong>，易得 <img src="https://math.now.sh?inline=%5Coperatorname%7BVar%7D%5Cleft%28z_%7B1%7D%5Cright%29%3D2%20p_%7B1%7D%20q_%7B1%7D" style="display:inline-block;margin: 0;"/> ， <img src="https://math.now.sh?inline=%5Coperatorname%7BVar%7D%5Cleft%28z_%7B2%7D%5Cright%29%3D2%20p_%7B2%7D%20q_%7B2%7D" style="display:inline-block;margin: 0;"/> 。<img src="https://math.now.sh?inline=%5Coperatorname%7BCov%7D%5Cleft%28z_%7B1%7D%2C%20z_%7B2%7D%5Cright%29" style="display:inline-block;margin: 0;"/> 这一项证明为 <img src="https://math.now.sh?inline=2%20r%20%5Csqrt%7Bp_%7B1%7D%20q_%7B1%7D%20p_%7B2%7D%20q_%7B2%7D%7D" style="display:inline-block;margin: 0;"/> ，其中 <img src="https://math.now.sh?inline=r" style="display:inline-block;margin: 0;"/> 为衡量连锁不平衡的相关系数（这里 <img src="https://math.now.sh?inline=r" style="display:inline-block;margin: 0;"/> 应该就是两列基因型的相关系数），另外这里的 <img src="https://math.now.sh?inline=a_%7B1%7Da_%7B2%7D" style="display:inline-block;margin: 0;"/> 项表示两个位点的效应必须方向一致，这样 <img src="https://math.now.sh?inline=2%20%5Coperatorname%7BCov%7D%5Cleft%28z_%7B1%7D%2C%20z_%7B2%7D%5Cright%29%20a_%7B1%7D%20a_%7B2%7D" style="display:inline-block;margin: 0;"/> 才是一个正数。因此我们一般不考虑协方差这一项，即<strong>假设连锁平衡</strong>。</p>
+<p>假设连锁平衡，或者说假设位点间彼此不相关，此时 <img src="https://math.now.sh?inline=%5Coperatorname%7BVar%7D%28u%29%3D%5Coperatorname%7BVar%7D%5Cleft(z_%7B1%7D%5Cright)%20a_%7B1%7D%5E%7B2%7D%2B%5Coperatorname%7BVar%7D%5Cleft(z_%7B2%7D%5Cright)%20a_%7B2%7D%5E%7B2%7D%3D2%20p_%7B1%7D%20q_%7B1%7D%20a_%7B1%7D%5E%7B2%7D%2B2%20p_%7B2%7D%20q_%7B2%7D%20a_%7B2%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，也就是说每一个标记的方差是可以累加的。我们将这个结论一般化，得到加性方差用标记方差表达的公式：</p>
+<p style=""><img src="https://math.now.sh?from=%5Csigma_%7Bu%7D%5E%7B2%7D%3D%5Coperatorname%7BVar%7D%28u%29%3D2%20%5Csum_%7Bi%7D%5E%7B%5Cmathrm%7Bnsnp%7D%7D%20p_%7Bi%7D%20q_%7Bi%7D%20a_%7Bi%7D%5E%7B2%7D%0A" /></p><p>但是在很多情况下，我们不知道标记效应大小。但是我们可能对标记效应有一些先验知识，比如我们一般认为其均值为0，有一个先验的方差。在这种情况下，我们可以将 <img src="https://math.now.sh?inline=a_%7Bi%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 替换为其先验的期望值，即 <img src="https://math.now.sh?inline=%5Csigma_%7B%5Cmathrm%7Bai%7D%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，因此我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Csigma_%7Bu%7D%5E%7B2%7D%3D%5Coperatorname%7BVar%7D%28u%29%3D2%20%5Csum_%7Bi%7D%5E%7B%5Cmathrm%7Bnsnp%7D%7D%20p_%7Bi%7D%20q_%7Bi%7D%20%5Csigma_%7B%5Cmathrm%7Bai%7D%7D%5E%7B2%7D%0A" /></p><p>如果我们假设所有的标记具有相同的先验方差 <img src="https://math.now.sh?inline=%5Csigma_%7B%5Cmathrm%7Ba0%7D%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，那么 <img src="https://math.now.sh?inline=%5Csigma_%7Bu%7D%5E%7B2%7D%3D2%20%5Csum_%7Bi%7D%5E%7B%5Cmathrm%7Bnsnp%7D%7D%20p_%7Bi%7D%20q_%7Bi%7D%20%5Csigma_%7Ba0%7D%5E%7B2%7D%3D2%20%5Csigma_%7Ba0%7D%5E%7B2%7D%20%5Csum_%7Bi%7D%5E%7B%5Cmathrm%7Bnsnp%7D%7D%20p_%7Bi%7D%20q_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Csigma_%7Ba%200%7D%5E%7B2%7D%3D%5Cfrac%7B%5Csigma_%7Bu%7D%5E%7B2%7D%7D%7B2%20%5Csum_%7Bi%7D%5E%7B%5Cmathrm%7Bnsnp%7D%7D%20p_%7Bi%7D%20q_%7Bi%7D%7D%0A" /></p><h2 id="SNP-BLUP">SNP-BLUP</h2>
+<p>如果假设标记效应的先验分布为正态分布，即 <img src="https://math.now.sh?inline=a_%7Bi%7D%20%5Csim%20N%5Cleft%280%2C%20%5Csigma_%7Ba%7D%5E%7B2%7D%5Cright%29" style="display:inline-block;margin: 0;"/> ， <img src="https://math.now.sh?inline=p%28%5Cmathbf%7Ba%7D%29%3DM%20V%20N(%5Cmathbf%7B0%7D%2C%20%5Cmathbf%7BD%7D)%20%3B%20%5Coperatorname%7BVar%7D(%5Cmathbf%7Ba%7D)%3D%5Cmathbf%7BD%7D%3D%5Cmathbf%7BI%7D%20%5Csigma_%7Ba%20%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/>(即假设标记之间彼此独立)，此时我们假设绝大部分标记的效应均很小，这种方法我们称为 SNP-BLUP 方法 (等价于频率学派中的岭回归方法，<em>ridge regression</em> ，即在最小二乘中添加 <img src="https://math.now.sh?inline=%5Clambda%20%5Csum%20a_%7Bi%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 的惩罚项 ) 。此时绝大部分标记的效应在 0 附近，只有少量标记的效应可能比较大。</p>
+<p>在假设标记效应的先验分布为正态分布的前提下，下面的三个方法实际内容相同：</p>
+<ul>
+<li>SNP-BLUP</li>
+<li>GBLUP</li>
+<li>ridge regression</li>
+</ul>
+<p>也就是说估计SNP效应的方法中的岭回归和SNP-BLUP，和构建基因组关系矩阵 (G阵) 来估计育种值的 GBLUP 方法，这三者其实是等价的。</p>
+<p>SNP-BLUP 的估计值就是 BLUP 值，其混合模型方程组如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%20%5C%5C%0A%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%2B%5Cmathbf%7BD%7D%5E%7B-1%7D%0A%5Cend%7Barray%7D%5Cright%5D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A%5Chat%7B%5Cmathbf%7Bb%7D%7D%20%5C%5C%0A%5Chat%7B%5Cmathbf%7Ba%7D%7D%0A%5Cend%7Barray%7D%5Cright%5D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7By%7D%20%5C%5C%0A%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7By%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BD%7D%20%3D%20%5Cmathbf%7BI%7D%20%5Csigma_%7Ba%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 。通常我们假设 <img src="https://math.now.sh?inline=%5Coperatorname%7BVar%7D%28%5Cmathbf%7Be%7D%29%3D%5Cmathbf%7BR%7D%3D%5Cmathbf%7BI%7D%20%5Csigma_%7Be%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，因此可以进一步简化为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%28%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BZ%7D%20%5C%5C%0A%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BZ%7D%2B%5Cmathbf%7BI%7D%20%5Clambda%0A%5Cend%7Barray%7D%5Cright%29%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0A%5Cwidehat%7B%5Cmathbf%7Bb%7D%7D%20%5C%5C%0A%5Cwidehat%7B%5Cmathbf%7Ba%7D%7D%0A%5Cend%7Barray%7D%5Cright)%3D%5Cleft(%5Cbegin%7Barray%7D%7Bl%7D%0A%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7By%7D%20%5C%5C%0A%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7By%7D%0A%5Cend%7Barray%7D%5Cright)%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Clambda%3D%5Csigma_%7Be%7D%5E%7B2%7D%20%2F%20%5Csigma_%7Ba%20%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 。这里的系数矩阵的行数或列数是<strong>固定效应数目+位点数目</strong>，与样本数目无关。第二，这里的系数矩阵是稠密的，因为 <img src="https://math.now.sh?inline=%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BZ%7D" style="display:inline-block;margin: 0;"/> 是稠密的（<img src="https://math.now.sh?inline=%5Cmathbf%7BZ%7D" style="display:inline-block;margin: 0;"/> 矩阵是由012编码或-101编码组成的）。</p>
+<p>这里我们需要已知 <img src="https://math.now.sh?inline=%5Csigma_%7Be%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Csigma_%7Ba%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，我们有两种策略来得到这两个方差组分，最常用的方法是根据加性方差和先验的标记方差的关系，利用下面的公式得到  <img src="https://math.now.sh?inline=%5Csigma_%7Ba%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/></p>
+<p style=""><img src="https://math.now.sh?from=%5Csigma_%7Ba%200%7D%5E%7B2%7D%3D%5Cfrac%7B%5Csigma_%7Bu%7D%5E%7B2%7D%7D%7B2%20%5Csum_%7Bi%7D%5E%7B%5Cmathrm%7Bnsnp%7D%7D%20p_%7Bi%7D%20q_%7Bi%7D%7D%0A" /></p><p>这里的  <img src="https://math.now.sh?inline=%5Csigma_%7Bu%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 是加性方差估计值，可以通过对系谱表型用REML方法估计得到；<img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> 是等位基因频率（注意，这里的等位基因频率必须是估计加性方差的群体的基因频率，比如<strong>系谱中的基础群体</strong>）。但是，我们直接用当前数据的基因频率 <img src="https://math.now.sh?inline=p" style="display:inline-block;margin: 0;"/> ，因此这里存在一些误差（虽然经常可以忽略）。至于残差方差  <img src="https://math.now.sh?inline=%5Csigma_%7Be%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，我们可以从之前的研究得到（应该是对系谱表型用REML方法估计得到的残差方差）。</p>
+<p>第二种方法我们可以直接从标记数据中来估计方差组分，典型方法是 GREML 。</p>
+<h2 id="贝叶斯回归方法简介">贝叶斯回归方法简介</h2>
+<p>Bayes A 方法的先验分布为 <code>Scaled-t density</code>，见下式。相比于正态分布的先验分布， 这种方法的先验分布有两条”肥尾巴“，即认为效应很大的标记出现概率更大。</p>
+<p style=""><img src="https://math.now.sh?from=p%5Cleft%28a_%7Bi%7D%20%5Cmid%20%5Csigma_%7Ba%200%7D%5E%7B2%7D%2C%20%5Cnu_%7Ba%7D%5Cright%29%3D%5Csigma_%7Ba%200%7D%20t%5Cleft(0%2C%20%5Cnu_%7Ba%7D%5Cright)%0A" /></p><p>Bayes B 方法在 Bayes A 方法的基础上进一步认为基因组上并没有很多 QTLs ，因此很多标记由于并不和 QTL 连锁，因此其效应为 0。即设定比例为 <img src="https://math.now.sh?inline=%5Cpi" style="display:inline-block;margin: 0;"/> 的位点的效应为0 ，其他位点的效应服从 <code>Scaled-t density</code> ， 即此时 <img src="https://math.now.sh?inline=a_%7Bi%7D%20%5Csim%20%5Cpi%280%29%2B(1-%5Cpi)%20t%5Cleft(0%2C%20v%2C%20%5Csigma_%7Ba%7D%5E%7B2%7D%5Cright)" style="display:inline-block;margin: 0;"/>  。</p>
+<p>Bayes C(Pi) 方法认为比例为 <img src="https://math.now.sh?inline=%5Cpi" style="display:inline-block;margin: 0;"/> 的位点的效应为0 ，其他位点的效应服从正态分布，即 <img src="https://math.now.sh?inline=a_%7Bi%7D%20%5Csim%20%5Cpi%280%29%2B(1-%5Cpi)%20N%5Cleft(0%2C%20%5Csigma_%7Ba%7D%5E%7B2%7D%5Cright)" style="display:inline-block;margin: 0;"/> 。</p>
+<p>Bayes Lasso 方法的先验分布为 <code>Double-Exponential</code> 分布，即 <img src="https://math.now.sh?inline=a_%7Bi%7D%20%5Csim%20%5Cfrac%7B%5Clambda%7D%7B2%7D%20%5Cexp%20%5Cleft%28-%5Clambda%5Cleft%7Ca_%7Bi%7D%5Cright%7C%5Cright%29" style="display:inline-block;margin: 0;"/>   (等价于频率学派中的Lasso方法，即在最小二乘中添加 <img src="https://math.now.sh?inline=%5Clambda%20%5Csum%20%7Ca_%7Bi%7D%7C" style="display:inline-block;margin: 0;"/> 的惩罚项 ) 。</p>
+<p>不同方法的先验分布总结如下：</p>
+<blockquote>
+<ol>
+<li>Normal distribution: Random regression BLUP (RR-BLUP), SNP-BLUP, GBLUP</li>
+<li>Normal distribution with unknown variances: BayesC, GREML, GGibbs</li>
+<li>Student (t) distribution : BayesA</li>
+<li>Mixture of Student ( <img src="https://math.now.sh?inline=%5Cmathrm%7Bt%7D" style="display:inline-block;margin: 0;"/> ) distribution and spike at 0 : BayesB</li>
+<li>Mixture of Normal distribution and spike at 0 : BayesCPi</li>
+<li>Double exponential: Bayesian Lasso</li>
+<li>Mixture of a large and small normal distribution: Stochastic Search Variable Selection (SSVS)</li>
+</ol>
+</blockquote>
+<p>贝叶斯回归方法的缺点是计算缓慢。根据大量实验，假设标记效应的先验分布为正态分布是一个好的假设。</p>
+<h1>参考文献</h1>
+<ol>
+<li><a target="_blank" rel="noopener" href="http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=gsip.pdf">http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=gsip.pdf</a></li>
+<li><a target="_blank" rel="noopener" href="http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=andres_part2.pdf">http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=andres_part2.pdf</a></li>
+<li>de Los Campos G, Hickey J M, Pong-Wong R, et al. Whole-genome regression and prediction methods applied to plant and animal breeding[J]. Genetics, 2013, 193(2): 327-345.</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/e0b3b4ee/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            基因组选择模型介绍下
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/3fef4efc/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">GWAS分析中的多重校正方法</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2022
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/posts/ac7827ff">只只</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
