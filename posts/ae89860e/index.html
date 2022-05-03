@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    MCMC算法 |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-MCMC算法"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  MCMC算法
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/ae89860e/" class="article-date">
+  <time datetime="2022-05-01T09:53:39.000Z" itemprop="datePublished">2022-05-01</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">5.6k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">19 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>马尔科夫链蒙特卡罗方法（Markov Chain Monte Carlo，以下简称MCMC），是用于得到服从某一特定分布的随机采样的方法。很多复杂算法求解的基础，都使用到了 MCMC 算法。</p>
+<p>本文内容主要参考张勤老师的《动物遗传育种中的计算方法》和刘建平的博客<a target="_blank" rel="noopener" href="https://www.cnblogs.com/pinard/p/6625739.html">MCMC(一)蒙特卡罗方法</a></p>
+<span id="more"></span>
+<h1>随机数产生方法</h1>
+<p>服从某一特定分布的随机变量的抽样值称为随机数，我们通常采用数学方法来产生随机数。</p>
+<p>这种方法是利用一定的数学递推公式来产生随机数，即在给定一个任意的初值后，就可由此递推公式产生任意多的随机数，这种方法非常容易在计算机上实现。这种方法最大的缺陷在于给定初值后，以后所有的随机数便被唯一地确定下来了，而且这些随机数还存在<strong>周期现象</strong>，即随机序列达到一定长度后会出现重复，因此严格来说这些随机数并不是真正的随机数，故一般称之为<strong>伪随机数</strong> (pseudo random number)。但由于初值可随机确定，因此其后的一系列数也可看作是随机的。</p>
+<h2 id="0-1-均匀随机数的产生">[0,1]均匀随机数的产生</h2>
+<p>[0,1]均匀随机数是在[0,1]区间上均匀分布随机变量的抽样值，其是产生其他一切分布随机数的基础。也就是说，任何其他分布的随机数都可通过对[0,1]均匀随机数进行某种转换得到。</p>
+<p>目前产生[0,1]均匀随机数的最广泛的方法是<strong>线性同余法</strong>，也称为<strong>线性同余发生器</strong> (linear congruential generator) 。</p>
+<h3 id="线性同余法">线性同余法</h3>
+<p>Lehmer (1951) 提出这种方法，它利用数论中的同余运算原理产生随机数，其递推公式为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Ax_%7Bi%7D%20%26%3D%20%28ax_%7Bi-1%7D%20%2Bc%29(%5Cmathrm%7BMOD%7D%20%5Cquad%20m)%5C%5C%0Ar_%7Bi%7D%20%26%3D%20x_%7Bi%7D%2Fm%2C%20%5Cquad%20i%3D1%2C2%2C%5Ccdots%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=a%2Cc%2Cm" style="display:inline-block;margin: 0;"/> 是事先给定的参数，均为非负整数；<img src="https://math.now.sh?inline=x_%7Bi%7D" style="display:inline-block;margin: 0;"/> 是在 [0,m] 区间取值的一个随机整数；<img src="https://math.now.sh?inline=r_%7Bi%7D" style="display:inline-block;margin: 0;"/> 是在 [0,1] 区间取值的一个随机实数。</p>
+<p>在给定一个任意非负整数的初值 <img src="https://math.now.sh?inline=x_%7B0%7D" style="display:inline-block;margin: 0;"/> 后，由上式求出整数序列 <img src="https://math.now.sh?inline=x_%7B1%7D%2Cx_%7B2%7D%2C%5Ccdots" style="display:inline-block;margin: 0;"/> 和实数序列 <img src="https://math.now.sh?inline=r_%7B1%7D%2Cr_%7B2%7D%2C%5Ccdots" style="display:inline-block;margin: 0;"/> 。</p>
+<p>若 <img src="https://math.now.sh?inline=c%3D0" style="display:inline-block;margin: 0;"/> ，则称为<strong>乘同余法</strong>；若 <img src="https://math.now.sh?inline=c%3E0" style="display:inline-block;margin: 0;"/> ，则称为<strong>混同余法</strong>。</p>
+<h2 id="其他分布随机数的产生">其他分布随机数的产生</h2>
+<p>任何其他分布的随机数都可以通过[0,1]均匀进行某种转换得到，例如正态分布可以通过著名的 Box-Muller 变换得到，根据下面公式通过两个[0,1]均匀随机数，我们可以得到两个彼此独立的标准正态分布随机数（缺证明，下式中的 <img src="https://math.now.sh?inline=X_%7B1%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=X_%7B2%7D" style="display:inline-block;margin: 0;"/> 为两个独立的[0,1]均匀随机数）。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26Z_%7B1%7D%3D%5Csqrt%7B-2%20%5Cln%20X_%7B1%7D%7D%20%5Ccos%20%5Cleft%282%20%5Cpi%20X_%7B2%7D%5Cright%29%20%5C%5C%0A%26Z_%7B2%7D%3D%5Csqrt%7B-2%20%5Cln%20X_%7B1%7D%7D%20%5Csin%20%5Cleft(2%20%5Cpi%20X_%7B2%7D%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>下面介绍两种基本方法，反函数法与接受-拒绝采样法。</p>
+<h3 id="反函数法">反函数法</h3>
+<p>假设我们已知某个分布的累积分布函数 <img src="https://math.now.sh?inline=F%28x%29" style="display:inline-block;margin: 0;"/> ，那么抽样值可以通过下式得到</p>
+<p style=""><img src="https://math.now.sh?from=x%20%3D%20F%5E%7B-1%7D%28u%29%0A" /></p><p>其中，<img src="https://math.now.sh?inline=u" style="display:inline-block;margin: 0;"/> 为[0,1]均匀随机数。</p>
+<p>证明：因为 <img src="https://math.now.sh?inline=u" style="display:inline-block;margin: 0;"/> 服从[0,1]均匀分布，所以 <img src="https://math.now.sh?inline=P%28u%20%5Cleq%20t%29%20%3Dt" style="display:inline-block;margin: 0;"/> ，因此，我们有</p>
+<p style=""><img src="https://math.now.sh?from=P%5Cleft%28F%5E%7B-1%7D(u%29%20%5Cleqslant%20x%5Cright)%3D%5Cmathrm%7BP%7D%5Cleft(F%5Cleft(F%5E%7B-1%7D(u)%5Cright)%20%5Cleqslant%20F(x)%5Cright)%3D%5Cmathrm%7BP%7D(u%20%5Cleqslant%20F(x))%3D%5Cmathrm%7BF%7D(x)%0A" /></p><p>所以 <img src="https://math.now.sh?inline=F%5E%7B-1%7D%28u%29" style="display:inline-block;margin: 0;"/> 的累积分布函数就是 <img src="https://math.now.sh?inline=F%28x%29" style="display:inline-block;margin: 0;"/> ，因此 <img src="https://math.now.sh?inline=x%20%3D%20F%5E%7B-1%7D%28u%29" style="display:inline-block;margin: 0;"/> 就是 <img src="https://math.now.sh?inline=F%28x%29" style="display:inline-block;margin: 0;"/> 的一个抽样值。</p>
+<p>这种方法非常简单，但是要求随机变量累积分布函数的反函数存在，而且容易计算。在很多情况下，累积分布函数的反函数不存在，或者虽然存在但其计算却非常困难，此时这种方法并不适用。</p>
+<h3 id="接受-拒绝采样法">接受-拒绝采样法</h3>
+<p>对于概率分布不常见的分布，假设我们已知其概率密度分布为 <img src="https://math.now.sh?inline=p%28x%29" style="display:inline-block;margin: 0;"/> ，此时我们用一个程序可采样的分布 <img src="https://math.now.sh?inline=q%28x%29" style="display:inline-block;margin: 0;"/> ，比如正态分布。具体过程如下：</p>
+<ol>
+<li>
+<p>首先我们找到一个常数 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> ,  使得 <img src="https://math.now.sh?inline=p%28x%29%20%5Cleq%20kq(x)" style="display:inline-block;margin: 0;"/> 恒成立，即 <img src="https://math.now.sh?inline=p%28x%29" style="display:inline-block;margin: 0;"/> 恒在 <img src="https://math.now.sh?inline=kq%28x%29" style="display:inline-block;margin: 0;"/> 下方。</p>
+</li>
+<li>
+<p>采样得到 <img src="https://math.now.sh?inline=q%28x%29" style="display:inline-block;margin: 0;"/> 的一个样本 <img src="https://math.now.sh?inline=x_%7B0%7D" style="display:inline-block;margin: 0;"/> ，然后从均匀分布 <img src="https://math.now.sh?inline=%5B0%2Ckq%28x_%7B0%7D%29%5D" style="display:inline-block;margin: 0;"/> 中采样得到一个值 <img src="https://math.now.sh?inline=u" style="display:inline-block;margin: 0;"/> 。如果 <img src="https://math.now.sh?inline=u%20%3E%20p%28x_%7B0%7D%29" style="display:inline-block;margin: 0;"/> ，则拒绝这一次抽样，否则则接受这次抽样。</p>
+</li>
+<li>
+<p>重复以上过程，直到得到 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 个抽样值。</p>
+</li>
+</ol>
+<p>整个过程从直观理解来看，就是从  <img src="https://math.now.sh?inline=kq%28x%29" style="display:inline-block;margin: 0;"/> 曲线下方的二维图形中随机抽取一个点，如果这个点正好落在  <img src="https://math.now.sh?inline=p%28x%29" style="display:inline-block;margin: 0;"/> 的曲线下方，则接受这个抽样，否则就拒绝这个抽样。</p>
+<p>因此使用接受-拒绝采样法时，只有当   <img src="https://math.now.sh?inline=kq%28x%29" style="display:inline-block;margin: 0;"/> 与 <img src="https://math.now.sh?inline=p%28x%29" style="display:inline-block;margin: 0;"/> 曲线图形越接近时，抽样接受率越高，抽样效率越高。</p>
+<h1>蒙特卡罗方法</h1>
+<p>蒙特卡罗方法 (Monte Carlo) 是指使用随机数来解决很多计算问题的方法。</p>
+<p>总的来说，蒙特卡罗方法处理的问题可以分为两大类：</p>
+<p>第一类是确定性的数学问题。如计算定积分、解线性和非线性方程组，解积分方程和某些偏积分方程等。在这类问题中，因不含时间因素，故常将相应的模拟模型称为静态模型。</p>
+<p>第二类是随机性问题，例如中子在介质中的扩散问题，运筹学中的库存问题等。</p>
+<h2 id="用蒙特卡罗方法计算定积分">用蒙特卡罗方法计算定积分</h2>
+<p>用蒙特卡罗方法计算定积分是其最典型的应用，这里有两种算法，一是随机投点法，二是平均值法。下面以单重积分为例，分别进行介绍。</p>
+<h3 id="随机投点法">随机投点法</h3>
+<p>假设所求定积分为</p>
+<p style=""><img src="https://math.now.sh?from=I%3D%20%5Cint_%7B0%7D%5E%7B1%7D%20g%28x%29%20dx%2C%20%5Cquad%200%20%5Cleq%20g(x)%20%5Cleq%201%0A" /></p><p>因此，如果我们向 (0,0) (0,1) (1,1) (1,0) 这四个点构成的单位正方形均匀地投点，落在曲线 <img src="https://math.now.sh?inline=g%28x%29" style="display:inline-block;margin: 0;"/> 下方的概率就是我们要求的定积分，证明如下：</p>
+<p style=""><img src="https://math.now.sh?from=P%28y%20%5Cleq%20g(x%29)%20%3D%20%5Cint_%7B0%7D%5E%7B1%7D%20%5Cint_%7B0%7D%5E%7Bg(x)%7D%20dydx%20%3D%20%5Cint_%7B0%7D%5E%7B1%7D%20g(x)%20dx%0A" /></p><p>因此，我们可以按照以下步骤计算这个积分：</p>
+<ol>
+<li>独立地产生两个 [0,1]均匀随机数 <img src="https://math.now.sh?inline=x_%7Bi%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=y_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，则 <img src="https://math.now.sh?inline=%28x_%7Bi%7D%2C%20y_%7Bi%7D%29" style="display:inline-block;margin: 0;"/> 就构成了在单位正方形中地一个均匀分布的随机点</li>
+<li>检验该随机点是否落在曲线 <img src="https://math.now.sh?inline=g%28x%29" style="display:inline-block;margin: 0;"/> 下方</li>
+</ol>
+<p>重复上面两个步骤 <img src="https://math.now.sh?inline=N" style="display:inline-block;margin: 0;"/> 次，设有 <img src="https://math.now.sh?inline=m" style="display:inline-block;margin: 0;"/> 次随机点落在曲线 <img src="https://math.now.sh?inline=g%28x%29" style="display:inline-block;margin: 0;"/> 下方，则当 <img src="https://math.now.sh?inline=N" style="display:inline-block;margin: 0;"/> 足够大时，我们有</p>
+<p style=""><img src="https://math.now.sh?from=I%20%5Capprox%20m%2FN%0A" /></p><p>我们可以将上面的方法一般化，假设我们所求的定积分为</p>
+<p style=""><img src="https://math.now.sh?from=I%3D%20%5Cint_%7Ba%7D%5E%7Bb%7D%20g%28x%29%20dx%2C%20%5Cquad%20L%20%5Cleq%20g(x)%20%5Cleq%20M%0A" /></p><p>我们需要先对这个积分进行变换。由 <img src="https://math.now.sh?inline=L%20%5Cleq%20g%28x%29%20%5Cleq%20M" style="display:inline-block;margin: 0;"/> 可得 <img src="https://math.now.sh?inline=0%20%5Cleqslant%20%5Cfrac%7Bg%28x%29-L%7D%7BM-L%7D%20%5Cleqslant%201" style="display:inline-block;margin: 0;"/> ，因此我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AI%20%26%3D%5Cint_%7Ba%7D%5E%7Bb%7D%20g%28x%29%20%5Cmathrm%7Bd%7D%20x%20%5C%5C%0A%26%3D%5Cint_%7Ba%7D%5E%7Bb%7D(M-L)%20%5Cfrac%7Bg(x)-L%2BL%7D%7BM-L%7D%20%5Cmathrm%7B~d%7D%20x%20%5C%5C%0A%26%3D(M-L)%20%5Cint_%7Ba%7D%5E%7Bb%7D%20%5Cfrac%7Bg(x)-L%7D%7BM-L%7D%20%5Cmathrm%7B~d%7D%20x%2BL(b-a)%0A%5Cend%7Baligned%7D%0A" /></p><p>令 <img src="https://math.now.sh?inline=x%20%3D%20a%2B%28b-a%29z" style="display:inline-block;margin: 0;"/> ，有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26I%3D%28M-L%29%20%5Cint_%7B0%7D%5E%7B1%7D%20%5Cfrac%7Bg(a%2B(b-a)%20z)-L%7D%7BM-L%7D(b-a)%20d%20z%2BL(b-a)%20%5C%5C%0A%26%20%5C%5C%0A%26%3D(M-L)(b-a)%20%5Cint_%7B0%7D%5E%7B1%7D%20g%5E%7B*%7D(z)%20d%20z%2BL(b-a)%0A%5Cend%7Baligned%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=g%5E%7B*%7D%28z%29%20%3D%20%5Cfrac%7Bg(a%2B(b-a)%20z)-L%7D%7BM-L%7D" style="display:inline-block;margin: 0;"/> ，它满足 <img src="https://math.now.sh?inline=0%20%5Cleq%20g%5E%7B*%7D%28x%29%20%5Cleq%201" style="display:inline-block;margin: 0;"/> ，因此积分 $ \int_{0}^{1} g^{*}(z) d z$ 可以按照上面的方法进行计算。</p>
+<h3 id="平均值法">平均值法</h3>
+<p>假设我们所求的定积分为</p>
+<p style=""><img src="https://math.now.sh?from=I%3D%20%5Cint_%7Ba%7D%5E%7Bb%7D%20g%28x%29%20dx%0A" /></p><p>设 <img src="https://math.now.sh?inline=R" style="display:inline-block;margin: 0;"/> 是 [a,b] 区间上的均匀分布随机变量，则</p>
+<p style=""><img src="https://math.now.sh?from=E%28g(R%29)%3D%5Cint_%7Ba%7D%5E%7Bb%7D%20g(x)%20p(x)%20%5Cmathrm%7Bd%7D%20x%3D%5Cint_%7Ba%7D%5E%7Bb%7D%20g(x)%20%5Cfrac%7B1%7D%7Bb-a%7D%20%5Cmathrm%7B~d%7D%20x%3D%5Cfrac%7B1%7D%7Bb-a%7D%20I%0A" /></p><p>于是，我们有</p>
+<p style=""><img src="https://math.now.sh?from=I%20%3D%28b-a%29E(g(R))%0A" /></p><p>因此，我们可以用以下方法计算积分的近似解</p>
+<ol>
+<li>产生 [a,b] 区间上的均匀分布随机数 <img src="https://math.now.sh?inline=r_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=i%3D1%2C2%2C%5Ccdots%2CN" style="display:inline-block;margin: 0;"/></li>
+<li>计算 <img src="https://math.now.sh?inline=g%28r_%7Bi%7D%29" style="display:inline-block;margin: 0;"/></li>
+</ol>
+<p>当 <img src="https://math.now.sh?inline=N" style="display:inline-block;margin: 0;"/> 足够大时，我们有</p>
+<p style=""><img src="https://math.now.sh?from=I%20%5Capprox%20%5Cfrac%7Bb-a%7D%7BN%7D%20%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20g%28r_%7Bi%7D%29%0A" /></p><p>其实这种做法就是在 [a,b] 区间上随机采样 <img src="https://math.now.sh?inline=N" style="display:inline-block;margin: 0;"/> 个点，用这 <img src="https://math.now.sh?inline=N" style="display:inline-block;margin: 0;"/> 个点的函数值均值代表 [a,b] 区间上的所有函数值，即用一个矩形的面积代表原来的曲线下方的面积。</p>
+<p>这里我们有一个隐藏的假设是 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 在 [a,b] 区间是均匀分布的，而大多数时候这个假设均不成立。此时我们进一步假设 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 在 [a,b] 区间上的概率密度函数为 <img src="https://math.now.sh?inline=p%28x%29" style="display:inline-block;margin: 0;"/> ，此时我们有蒙特卡罗方法的一般形式 ：</p>
+<p style=""><img src="https://math.now.sh?from=I%3D%5Cint_%7Ba%7D%5E%7Bb%7D%20g%28x%29%20d%20x%3D%5Cint_%7Ba%7D%5E%7Bb%7D%20%5Cfrac%7Bg(x)%7D%7Bp(x)%7D%20p(x)%20d%20x%20%3D%20E(%5Cfrac%7Bg(x)%7D%7Bp(x)%7D)%20%20%5Capprox%20%5Cfrac%7B1%7D%7BN%7D%20%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20%5Cfrac%7Bg%5Cleft(x_%7Bi%7D%5Cright)%7D%7Bp%5Cleft(x_%7Bi%7D%5Cright)%7D%0A" /></p><p>因此，平均值法计算积分的一般过程如下：</p>
+<ol>
+<li>从概率密度函数为 <img src="https://math.now.sh?inline=p%28x%29" style="display:inline-block;margin: 0;"/> 的分布中生成随机数  $ x_{i}$ ，<img src="https://math.now.sh?inline=i%3D1%2C2%2C%5Ccdots%2CN" style="display:inline-block;margin: 0;"/></li>
+<li>计算 <img src="https://math.now.sh?inline=g%5Cleft%28x_%7Bi%7D%5Cright%29%2Fp%5Cleft(x_%7Bi%7D%5Cright)" style="display:inline-block;margin: 0;"/></li>
+</ol>
+<p>当 <img src="https://math.now.sh?inline=N" style="display:inline-block;margin: 0;"/> 足够大时，我们有</p>
+<p style=""><img src="https://math.now.sh?from=I%20%5Capprox%20%5Cfrac%7B1%7D%7BN%7D%20%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20%5Cfrac%7Bg%5Cleft%28x_%7Bi%7D%5Cright%29%7D%7Bp%5Cleft(x_%7Bi%7D%5Cright)%7D%0A" /></p><p>可以看出当我们假设<img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 在 [a,b] 区间满足均匀分布时，我们将 <img src="https://math.now.sh?inline=p%28x%29%20%3D%20%5Cfrac%7B1%7D%7Bb-a%7D" style="display:inline-block;margin: 0;"/> 带入上式，得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cfrac%7B1%7D%7BN%7D%20%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20%5Cfrac%7Bg%5Cleft%28x_%7Bi%7D%5Cright%29%7D%7Bp%5Cleft(x_%7Bi%7D%5Cright)%7D%0A%26%3D%20%5Cfrac%7B1%7D%7BN%7D%20%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20%5Cfrac%7Bg%5Cleft(x_%7Bi%7D%5Cright)%7D%7B1%2F(b-a)%7D%20%5C%5C%0A%26%3D%20%5Cfrac%7Bb-a%7D%7BN%7D%20%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20g(x_%7Bi%7D)%0A%5Cend%7Baligned%7D%0A" /></p><p>我们得到了均匀分布的估计公式，即均匀分布是上式的一个特列。</p>
+<h2 id="小结">小结</h2>
+<p>蒙特卡罗方法的核心在于生成特定分布的随机数，常用的分布可以通过对于 [0,1] 均匀随机数进行转换得到。通过采用接受-拒绝采样，我们也可以得到一些不常见分布的随机数。</p>
+<p>但是在很多时候，有一些分布我们还是很难得到其随机数，比如：</p>
+<blockquote>
+<p>1）对于一些二维分布<img src="https://math.now.sh?inline=p%28x%2Cy%29" style="display:inline-block;margin: 0;"/>，这个函数本身计算困难，但是我们能得到其条件分布 <img src="https://math.now.sh?inline=p%28x%7Cy%29" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=p%28y%7Cx%29" style="display:inline-block;margin: 0;"/> ，这时我们无法用接受-拒绝采样得到其样本集。</p>
+<p>2）对于一些高维的分布 <img src="https://math.now.sh?inline=p%28x_%7B1%7D%2Cx_%7B2%7D%2C...%2Cx_%7Bn%7D%29" style="display:inline-block;margin: 0;"/> ，我们要找到一个合适的 <img src="https://math.now.sh?inline=q%28x%29" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 非常困难。</p>
+</blockquote>
+<p>此时我们需要马尔科夫链的方法帮助我们进行采样。</p>
+<h1>马尔科夫链</h1>
+<p>马尔科夫链 (Markov chain) 是一种最简单，应用最多的随机过程。随机过程是依赖于时间的一组随机变量。马尔科夫链要求具备“无记忆”的性质：下一状态的概率分布只能由当前状态决定，在时间序列中它前面的事件均与之无关，表示为</p>
+<p style=""><img src="https://math.now.sh?from=P%5Cleft%28X_%7Bt%2B1%7D%3Dx%20%5Cmid%20X_%7Bt%7D%2C%20X_%7Bt-1%7D%2C%20%5Ccdots%5Cright%29%3DP%5Cleft(X_%7Bt%2B1%7D%3Dx%20%5Cmid%20X_%7Bt%7D%5Cright)%0A" /></p><p>我们将系统随着时间的变化而发生的状态改变称为系统状态的<strong>转移</strong>，将已知在时刻 <img src="https://math.now.sh?inline=t" style="display:inline-block;margin: 0;"/> 系统处于状态 <img src="https://math.now.sh?inline=s_%7Bi%7D" style="display:inline-block;margin: 0;"/> 的条件下，在下一时刻处于状态 <img src="https://math.now.sh?inline=s_%7Bj%7D" style="display:inline-block;margin: 0;"/> 的概率称为<strong>转移概率</strong>，表示为 <img src="https://math.now.sh?inline=P_%7Bij%7D%28t%2C%20t%2B1%29" style="display:inline-block;margin: 0;"/> ，即</p>
+<p style=""><img src="https://math.now.sh?from=P_%7Bij%7D%28t%2C%20t%2B1%29%20%3D%20P%5C%7B%20X(t%2B1)%20%3D%20s_%7Bj%7D%20%7C%20X(t)%20%3D%20s_%7Bi%7D%5C%7D%0A" /></p><p>如果系统由状态 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 在下一时刻转移为状态 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/> 的概率与系统当前所处的时刻无关，则称其为<strong>齐次的</strong> (homogeneous) 。对于齐次的马尔科夫链，我们可以将转移概率简单地表示为 <img src="https://math.now.sh?inline=P_%7Bij%7D" style="display:inline-block;margin: 0;"/> 。一般来说，我们涉及到的马尔科夫链均为齐次的，因此下文均默认为齐次的马尔科夫链。</p>
+<p>此时我们将所有的转移概率放到一个矩阵中，称为<strong>转移概率矩阵</strong>，如下。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BP%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0AP_%7B11%7D%20%26%20P_%7B12%7D%20%26%20P_%7B13%7D%20%26%20%5Ccdots%20%5C%5C%0AP_%7B21%7D%20%26%20P_%7B22%7D%20%26%20P_%7B23%7D%20%26%20%5Ccdots%20%5C%5C%0AP_%7B31%7D%20%26%20P_%7B32%7D%20%26%20P_%7B33%7D%20%26%20%5Ccdots%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cvdots%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>转移概率矩阵的<strong>每一行之和为1</strong>，即</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bj%7D%20P_%7Bij%7D%20%3D%201%0A" /></p><p>举个例子，假设天气变化是一个随机过程，假设天气的状态空间为 (有雨，晴天，多云)，再假设天气变化是一个马尔科夫链过程，即明天出现何种天气的概率仅与今天的天气有关。设状态转移矩阵为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BP%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bccc%7D%0A0.5%20%26%200.25%20%26%200.25%20%5C%5C%0A0.5%20%26%200%20%26%200.5%20%5C%5C%0A0.25%20%26%200.25%20%26%200.5%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>其中，第一行表示如果今天有雨，则明天为有雨，晴天，多云的概率分别为 0.5，0.25 和 0.25 。</p>
+<p>假设系统初始的概率分布向量为 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D_%7B0%7D%3D%5Cleft%5B%5Cpi_%7B0%7D%281%29%2C%20%5Cpi_%7B0%7D(2)%2C%20%5Cpi_%7B0%7D(3)%5Cright%5D" style="display:inline-block;margin: 0;"/> ，那么第一天的天气概率分布向量为 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D_%7B1%7D%20%3D%20%5Cboldsymbol%7B%5Cpi%7D_%7B0%7D%20%20%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> ，第二天的分布向量为 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D_%7B2%7D%20%3D%20%5Cboldsymbol%7B%5Cpi%7D_%7B0%7D%20%20%5Cmathbf%7BP%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/>，依次类推，第 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 天的分布向量为 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D_%7Bn%7D%20%3D%20%5Cboldsymbol%7B%5Cpi%7D_%7B0%7D%20%20%5Cmathbf%7BP%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> .</p>
+<p>我们发现随着天数的增加，<img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D_%7Bn%7D" style="display:inline-block;margin: 0;"/> 会逐渐变成一个稳定不变的分布，此时我们称马尔科夫链<strong>收敛</strong>，收敛时系统状态空间的概率分布称为<strong>平稳分布</strong> (stationary distribution)，表示为 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>在本例中为 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D%20%3D%20%280.4%20%2C0.2%2C%200.4%29" style="display:inline-block;margin: 0;"/> ，而且与初始值无关。进一步发现其原因是由于 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D%5E%7Bn%7D" style="display:inline-block;margin: 0;"/> 在 <img src="https://math.now.sh?inline=n%20%3D7" style="display:inline-block;margin: 0;"/> 之后就变成了一个稳定不变的矩阵，即</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bp%7D%5E%7B7%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Blll%7D%0A0.4%20%26%200.2%20%26%200.4%20%5C%5C%0A0.4%20%26%200.2%20%26%200.4%20%5C%5C%0A0.4%20%26%200.2%20%26%200.4%0A%5Cend%7Barray%7D%5Cright%5D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A%5Cboldsymbol%7B%5Cpi%7D%20%5C%5C%0A%5Cboldsymbol%7B%5Cpi%7D%20%5C%5C%0A%5Cboldsymbol%7B%5Cpi%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>但是不是所有的马尔科夫链都能达到平稳分布。</p>
+<h2 id="性质">性质</h2>
+<p><strong>不可约</strong>：如果从马尔科夫链中的任一状态出发，都能以大于零的概率经过有限次转移变为其他任一状态，则称该马尔科夫链是<strong>不可约的</strong> (irreducible) 。假设 <img src="https://math.now.sh?inline=P_%7Bij%7D%28k%29" style="display:inline-block;margin: 0;"/> 为从状态 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 经过 k 次 (<img src="https://math.now.sh?inline=k%5Cgeq%201" style="display:inline-block;margin: 0;"/>) 转移变成状态 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/> 的概率，不可约是说对于任意的 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/> ，必定存在一个正整数 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> ，使得 <img src="https://math.now.sh?inline=P_%7Bij%7D%28k%29%20%3E%200" style="display:inline-block;margin: 0;"/> 。换句话说，如果马尔科夫链是不可约的，那么它的任何两个状态是<strong>连通</strong>的（两个状态彼此均可以通过有限次转移变为另一种状态，记为 <img src="https://math.now.sh?inline=s_%7Bi%7D%20%5Cleftrightarrow%20s_%7Bj%7D" style="display:inline-block;margin: 0;"/> ），即可以经过一次或多次转移从某一种状态转移到任意一种状态。</p>
+<p><strong>非周期</strong>：如果所有满足  <img src="https://math.now.sh?inline=P_%7Bii%7D%28k%29%20%3E%200" style="display:inline-block;margin: 0;"/> 的 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 中没有大于1的公因子，则称状态 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 是<strong>非周期的</strong> (aperiodic)。举个例子，假设存在一个马尔科夫链，其状态空间为 (1,2,3)， 而状态之间的转移只能是 1-2-3-1-2-3 ，即系统状态每经过三次转移就会发生重复，假设我们从状态 2 开始，则经过 3,6,9… 次转移之后会重复出现状态 2 ，因此我们说状态 2 是周期性的，其周期为3。由周期性的定义存在一下推论：</p>
+<ol>
+<li><em>推论</em>：若状态A与状态B连通，则A与B周期相同。</li>
+<li><em>推论</em>：若不可约的马尔科夫链有周期性状态A，则该马尔科夫链的所有状态为周期性状态</li>
+</ol>
+<p>只有<strong>不可约</strong>和<strong>非周期</strong>的马尔科夫链才能收敛于<strong>平衡状态</strong>，并且存在以下性质</p>
+<ol>
+<li>
+<p style=""><img src="https://math.now.sh?from=%5Clim%20_%7Bn%20%5Crightarrow%20%5Cinfty%7D%20P%5E%7Bn%7D%3D%5Cleft%28%5Cbegin%7Barray%7D%7Bccccc%7D%0A%5Cpi(1%29%20%26%20%5Cpi(2)%20%26%20%5Ccdots%20%26%20%5Cpi(j)%20%26%20%5Ccdots%20%5C%5C%0A%5Cpi(1)%20%26%20%5Cpi(2)%20%26%20%5Cldots%20%26%20%5Cpi(j)%20%26%20%5Ccdots%20%5C%5C%0A%5Ccdots%20%26%20%5Ccdots%20%26%20%5Ccdots%20%26%20%5Ccdots%20%26%20%5Ccdots%20%5C%5C%0A%5Cpi(1)%20%26%20%5Cpi(2)%20%26%20%5Cldots%20%26%20%5Cpi(j)%20%26%20%5Ccdots%20%5C%5C%0A%5Ccdots%20%26%20%5Cldots%20%26%20%5Ccdots%20%26%20%5Ccdots%20%26%20%5Cldots%0A%5Cend%7Barray%7D%5Cright)%0A" /></p></li>
+<li>
+<p>平稳分布 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D%20%5Cmathbf%7BP%7D%20%3D%20%5Cboldsymbol%7B%5Cpi%7D" style="display:inline-block;margin: 0;"/> 的唯一非负解。</p>
+</li>
+</ol>
+<h2 id="基于马尔科夫链采样">基于马尔科夫链采样</h2>
+<p>假如我们想得到某个马尔科夫链的平稳分布的随机数，如果我们得到了其转移概率矩阵，那么我们就可以轻松做到这一点。</p>
+<p>我们可以从任意一个初始概率分布 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D_%7B0%7D" style="display:inline-block;margin: 0;"/>  ，假设我们认为经过 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 轮后马尔科夫链收敛于平稳分布，那么之后采样得到的随机数就是我们需要服从平稳分布的随机数，其过程如下：</p>
+<ol>
+<li>输入转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> ，设定状态转移次数阈值为 <img src="https://math.now.sh?inline=n_%7B1%7D" style="display:inline-block;margin: 0;"/> ，需要的样本数为 <img src="https://math.now.sh?inline=n_%7B2%7D" style="display:inline-block;margin: 0;"/></li>
+<li>从任意简单概率分布采样得到初始状态值 <img src="https://math.now.sh?inline=x_%7B0%7D" style="display:inline-block;margin: 0;"/></li>
+<li>从条件概率分布 <img src="https://math.now.sh?inline=P%28x%7Cx_%7Bt%7D%29" style="display:inline-block;margin: 0;"/> 采用得到 <img src="https://math.now.sh?inline=x_%7Bt%2B1%7D" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=t%20%3D%200%2C1%2C%5Ccdots%2C%20n_%7B1%7D%2Bn_%7B2%7D-1" style="display:inline-block;margin: 0;"/> 。</li>
+</ol>
+<p>最终，样本集合 (<img src="https://math.now.sh?inline=x_%7Bn_%7B1%7D%2B1%7D%2Cx_%7Bn_%7B1%7D%2B2%7D%2C%5Ccdots%2Cx_%7Bn_%7B1%7D%2Bn_%7B2%7D%7D" style="display:inline-block;margin: 0;"/> ) 即为我们需要的满足平稳分布的随机数。</p>
+<p>但是随意给定一个平稳分布 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D" style="display:inline-block;margin: 0;"/> ，我们如何得到其相应的转移概率矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 呢？此时我们就需要将马尔科夫链和蒙特卡洛方法结合起来，即MCMC 方法。</p>
+<h1>MCMC 算法</h1>
+<p>在解决如果得到某个平稳分布相应的转移概率矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 这个问题之前，我们需要先看马尔科夫链的细致平稳条件</p>
+<h2 id="马尔科夫链的细致平稳条件">马尔科夫链的细致平稳条件</h2>
+<p>如果非周期马尔科夫链的转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 和概率分布 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D%28x%29" style="display:inline-block;margin: 0;"/> 对于所有的 <img src="https://math.now.sh?inline=i%2Cj" style="display:inline-block;margin: 0;"/>  ，均满足</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20P(i%2C%20j)%3D%5Cpi(j)%20P(j%2C%20i)%0A" /></p><p>则  <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D%28x%29" style="display:inline-block;margin: 0;"/> 就是转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 的平稳分布。</p>
+<p>证明如下，由细致平稳条件有</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7B%5Cinfty%7D%20%5Cpi%28i%29%20P(i%2C%20j)%3D%5Csum_%7Bi%3D1%7D%5E%7B%5Cinfty%7D%20%5Cpi(j)%20P(j%2C%20i)%0A" /></p><p>其中我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7B%5Cinfty%7D%20%5Cpi%28j%29%20P(j%2C%20i)%3D%5Cpi(j)%20%5Csum_%7Bi%3D1%7D%5E%7B%5Cinfty%7D%20P(j%2C%20i)%3D%5Cpi(j)%0A" /></p><p>因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Csum_%7Bi%3D1%7D%5E%7B%5Cinfty%7D%20%5Cpi%28i%29%20P(i%2C%20j)%3D%20%5Cpi(j)%0A" /></p><p>即</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5Cpi%7D%20%5Cmathbf%7BP%7D%20%3D%20%5Cboldsymbol%7B%5Cpi%7D%0A" /></p><p>因此，  <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D%28x%29" style="display:inline-block;margin: 0;"/> 就是转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 的平稳分布，证明完毕。</p>
+<h2 id="MCMC-采样">MCMC 采样</h2>
+<p>一般情况下，我们的目标平稳分布 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D%28x%29" style="display:inline-block;margin: 0;"/> 和我们随机找的某一个马尔科夫链转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> 不满足细致平稳条件，即</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20Q(i%2C%20j)%20%5Cneq%20%5Cpi(j)%20Q(j%2C%20i)%0A" /></p><p>我们可以对上式做一个改造，使得细致平稳条件成立，方法式引入 <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Calpha%28j%2C%20i%29" style="display:inline-block;margin: 0;"/> ，使得</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20Q(i%2C%20j)%20%5Calpha(i%2C%20j)%3D%5Cpi(j)%20Q(j%2C%20i)%20%5Calpha(j%2C%20i)%0A" /></p><p>那么什么样的 <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Calpha%28j%2C%20i%29" style="display:inline-block;margin: 0;"/> 可以使得上式成立呢？最简单的就是只要满足下面两个式子即可：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Calpha%28i%2C%20j%29%3D%5Cpi(j)%20Q(j%2C%20i)%20%5C%5C%0A%26%5Calpha(j%2C%20i)%3D%5Cpi(i)%20Q(i%2C%20j)%0A%5Cend%7Baligned%7D%0A" /></p><p>这样，我们就得到了我们的目标平稳分布 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D%28x%29" style="display:inline-block;margin: 0;"/> 对应的转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> ，其元素满足</p>
+<p style=""><img src="https://math.now.sh?from=P%28i%2C%20j%29%3DQ(i%2C%20j)%20%5Calpha(i%2C%20j)%0A" /></p><p>也就是说，我们的目标矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 可以通过任意一个转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> 构建得到，这里的 <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29" style="display:inline-block;margin: 0;"/> 我们一般称为<strong>接受率</strong>，这个思路很像上面的接受-拒绝采样。</p>
+<p>MCMC 采样的步骤如下：</p>
+<ol>
+<li>输入任意的转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> ，平稳分布  <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D%28x%29" style="display:inline-block;margin: 0;"/> ，设定状态转移次数阈值  <img src="https://math.now.sh?inline=n_%7B1%7D" style="display:inline-block;margin: 0;"/> ，需要的样本个数 <img src="https://math.now.sh?inline=n_%7B2%7D" style="display:inline-block;margin: 0;"/></li>
+<li>从任意简单概率分布采样得到初始状态值 <img src="https://math.now.sh?inline=x_%7B0%7D" style="display:inline-block;margin: 0;"/></li>
+<li><img src="https://math.now.sh?inline=%5Ctext%7Bfor%20%7Dt%20%3D%200%2C1%2C%5Ccdots%2C%20n_%7B1%7D%2Bn_%7B2%7D-1" style="display:inline-block;margin: 0;"/> 。
+<ol>
+<li>从条件概率分布 <img src="https://math.now.sh?inline=Q%28x%7Cx_%7Bt%7D%29" style="display:inline-block;margin: 0;"/> 采用得到 <img src="https://math.now.sh?inline=x_%7B*%7D" style="display:inline-block;margin: 0;"/></li>
+<li>从[0,1]均匀分布采样 <img src="https://math.now.sh?inline=u" style="display:inline-block;margin: 0;"/></li>
+<li>如果<img src="https://math.now.sh?inline=u%3C%5Calpha%5Cleft%28x_%7Bt%7D%2C%20x_%7B*%7D%5Cright%29%3D%5Cpi%5Cleft(x_%7B*%7D%5Cright)%20Q%5Cleft(x_%7B*%7D%2C%20x_%7Bt%7D%5Cright)" style="display:inline-block;margin: 0;"/> ，则接受转移，即 <img src="https://math.now.sh?inline=x_%7Bt%2B1%7D%3Dx_%7B*%7D" style="display:inline-block;margin: 0;"/>  ；否则不接受转移，即 <img src="https://math.now.sh?inline=x_%7Bt%2B1%7D%3Dx_%7Bt%7D" style="display:inline-block;margin: 0;"/></li>
+</ol>
+</li>
+</ol>
+<p>最终，样本集合 (<img src="https://math.now.sh?inline=x_%7Bn_%7B1%7D%2B1%7D%2Cx_%7Bn_%7B1%7D%2B2%7D%2C%5Ccdots%2Cx_%7Bn_%7B1%7D%2Bn_%7B2%7D%7D" style="display:inline-block;margin: 0;"/> ) 即为我们需要的满足平稳分布的随机数。</p>
+<p>但是这个采样算法很难在实践中应用，因为这里的接受率  <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29" style="display:inline-block;margin: 0;"/> 可能非常的小，这样导致大部分的采样值都被拒绝转移，采样效率很低。</p>
+<p>我们采用M-H 采样方法可以提高采样效率。</p>
+<h2 id="M-H-采样">M-H 采样</h2>
+<p>M-H采样是Metropolis-Hastings采样的简称，这个算法首先由Metropolis提出，被Hasting扩展，其解决了接受率过低的问题。</p>
+<p>我们回到MCMC采样的细致平稳条件：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20Q(i%2C%20j)%20%5Calpha(i%2C%20j)%3D%5Cpi(j)%20Q(j%2C%20i)%20%5Calpha(j%2C%20i)%0A" /></p><p>我们的问题是接受率  <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29" style="display:inline-block;margin: 0;"/> 太小了，比如  <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29%3D0.1" style="display:inline-block;margin: 0;"/> ，  <img src="https://math.now.sh?inline=%5Calpha%28j%2C%20i%29%3D0.2" style="display:inline-block;margin: 0;"/>  ，此时如果等式的两边同时扩大 5 倍，此时接受率提高到了 0.5，但是细致平稳条件依然是满足的。</p>
+<p>因此，我们的接受率可以改为</p>
+<p style=""><img src="https://math.now.sh?from=%5Calpha%28i%2C%20j%29%3D%5Cmin%20%5Cleft%5C%7B%5Cfrac%7B%5Cpi(j)%20Q(j%2C%20i)%7D%7B%5Cpi(i)%20Q(i%2C%20j)%7D%2C%201%5Cright%5C%7D%0A" /></p><p>其实这种做法可以换种方式解释，我们回到一开始我们说  <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/>  不满足细致平稳条件，即</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20Q(i%2C%20j)%20%5Cneq%20%5Cpi(j)%20Q(j%2C%20i)%0A" /></p><p>这可以分为两种情况</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20Q(i%2C%20j)%20%3E%20%5Cpi(j)%20Q(j%2C%20i)%0A" /></p><p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20Q(i%2C%20j)%20%3C%20%5Cpi(j)%20Q(j%2C%20i)%0A" /></p><p>对于第一种情况，我们可以在左侧乘以概率 <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29%3D%20%5Cfrac%7B%5Cpi(j)%20Q(j%2C%20i)%7D%7B%5Cpi(i)%20Q(i%2C%20j)%7D%20%3C%201" style="display:inline-block;margin: 0;"/> ，使得细致平稳条件成立</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20Q(i%2C%20j)%5Calpha(i%2C%20j)%20%3D%20%20%5Cpi(j)%20Q(j%2C%20i)%0A" /></p><p>对于第二种情况，我们可以在右侧乘以概率 <img src="https://math.now.sh?inline=%5Calpha%28j%2C%20i%29%3D%20%5Cfrac%7B%5Cpi(i)%20Q(i%2C%20j)%7D%7B%5Cpi(j)%20Q(j%2C%20i)%7D%20%3C%201" style="display:inline-block;margin: 0;"/> ，使得细致平稳条件成立</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20Q(i%2C%20j)%20%3D%20%20%5Cpi(j)%20Q(j%2C%20i)%5Calpha(j%2C%20i)%0A" /></p><p>第一种情况的接受率为 <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29%3D%20%5Cfrac%7B%5Cpi(j)%20Q(j%2C%20i)%7D%7B%5Cpi(i)%20Q(i%2C%20j)%7D" style="display:inline-block;margin: 0;"/> ，第二种情况的接受率为 <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29%3D%201" style="display:inline-block;margin: 0;"/> ，因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Calpha%28i%2C%20j%29%3D%5Cmin%20%5Cleft%5C%7B%5Cfrac%7B%5Cpi(j)%20Q(j%2C%20i)%7D%7B%5Cpi(i)%20Q(i%2C%20j)%7D%2C%201%5Cright%5C%7D%0A" /></p><p>通过这个微小的改造，M-H采样算法过程如下</p>
+<ol>
+<li>输入任意的转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> ，平稳分布  <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cpi%7D%28x%29" style="display:inline-block;margin: 0;"/> ，设定状态转移次数阈值  <img src="https://math.now.sh?inline=n_%7B1%7D" style="display:inline-block;margin: 0;"/> ，需要的样本个数 <img src="https://math.now.sh?inline=n_%7B2%7D" style="display:inline-block;margin: 0;"/></li>
+<li>从任意简单概率分布采样得到初始状态值 <img src="https://math.now.sh?inline=x_%7B0%7D" style="display:inline-block;margin: 0;"/></li>
+<li><img src="https://math.now.sh?inline=%5Ctext%7Bfor%20%7Dt%20%3D%200%2C1%2C%5Ccdots%2C%20n_%7B1%7D%2Bn_%7B2%7D-1" style="display:inline-block;margin: 0;"/> 。
+<ol>
+<li>从条件概率分布 <img src="https://math.now.sh?inline=Q%28x%7Cx_%7Bt%7D%29" style="display:inline-block;margin: 0;"/> 采用得到 <img src="https://math.now.sh?inline=x_%7B*%7D" style="display:inline-block;margin: 0;"/></li>
+<li>从[0,1]均匀分布采样 <img src="https://math.now.sh?inline=u" style="display:inline-block;margin: 0;"/></li>
+<li>如果<img src="https://math.now.sh?inline=u%3C%5Calpha%5Cleft%28x_%7Bt%7D%2C%20x_%7B*%7D%5Cright%29%20%3D%20%5Cmin%20%5Cleft%5C%7B%5Cfrac%7B%5Cpi(j)%20Q(j%2C%20i)%7D%7B%5Cpi(i)%20Q(i%2C%20j)%7D%2C%201%5Cright%5C%7D" style="display:inline-block;margin: 0;"/> ，则接受转移，即 <img src="https://math.now.sh?inline=x_%7Bt%2B1%7D%3Dx_%7B*%7D" style="display:inline-block;margin: 0;"/>  ；否则不接受转移，即 <img src="https://math.now.sh?inline=x_%7Bt%2B1%7D%3Dx_%7Bt%7D" style="display:inline-block;margin: 0;"/></li>
+</ol>
+</li>
+</ol>
+<p>最终，样本集合 (<img src="https://math.now.sh?inline=x_%7Bn_%7B1%7D%2B1%7D%2Cx_%7Bn_%7B1%7D%2B2%7D%2C%5Ccdots%2Cx_%7Bn_%7B1%7D%2Bn_%7B2%7D%7D" style="display:inline-block;margin: 0;"/> ) 即为我们需要的满足平稳分布的随机数。</p>
+<p>很多时候，我们选择的转移概率矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> 都是对称矩阵，即 <img src="https://math.now.sh?inline=Q%28i%2C%20j%29%3DQ(j%2C%20i)" style="display:inline-block;margin: 0;"/> ，此时我们的接受率可以进一步简化为</p>
+<p style=""><img src="https://math.now.sh?from=%5Calpha%28i%2C%20j%29%3D%5Cmin%20%5Cleft%5C%7B%5Cfrac%7B%5Cpi(j)%7D%7B%5Cpi(i)%7D%2C%201%5Cright%5C%7D%0A" /></p><h3 id="小结-2">小结</h3>
+<p>M-H算法有下面几个问题：</p>
+<ol>
+<li>对于高维度数据，由于每一次抽样均需要计算 <img src="https://math.now.sh?inline=%5Cfrac%7B%5Cpi%28j%29%20Q(j%2C%20i)%7D%7B%5Cpi(i)%20Q(i%2C%20j)%7D" style="display:inline-block;margin: 0;"/> ，计算效率低</li>
+<li>由于 <img src="https://math.now.sh?inline=%5Calpha%28i%2C%20j%29%20%3C%201" style="display:inline-block;margin: 0;"/>，仍然有可能拒绝一部分抽样。</li>
+<li>有时，对于高纬度数据，我们可能不知道其联合分布，但是可以方便计算各个特征之间的条件概率分布，此时无法使用 M-H 抽样。</li>
+</ol>
+<p>吉布斯抽样 (Gibbs) 解决了上面的几个问题，其接受概率为1，即不拒绝任何采样，而且其抽样过程中只计算条件分布。</p>
+<h1>Gibbs 抽样</h1>
+<h2 id="二维抽样">二维抽样</h2>
+<p>我们回到细致平稳条件，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28i%29%20P(i%2C%20j)%3D%5Cpi(j)%20P(j%2C%20i)%0A" /></p><p>我们假设我们的数据是二维数据，平稳分布为 <img src="https://math.now.sh?inline=%5Cpi%5Cleft%28x_%7B1%7D%2C%20x_%7B2%7D%5Cright%29" style="display:inline-block;margin: 0;"/> ，观测第一个特征相同的两个点 <img src="https://math.now.sh?inline=A%5Cleft%28x_%7B1%7D%5E%7B(1%29%7D%2C%20x_%7B2%7D%5E%7B(1)%7D%5Cright)" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=B%5Cleft%28x_%7B1%7D%5E%7B(1%29%7D%2C%20x_%7B2%7D%5E%7B(2)%7D%5Cright)" style="display:inline-block;margin: 0;"/> ，根据概率论的知识，容易发现下面两个式子成立</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cpi%5Cleft%28x_%7B1%7D%5E%7B(1%29%7D%2C%20x_%7B2%7D%5E%7B(1)%7D%5Cright)%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(2)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%3D%5Cpi%5Cleft(x_%7B1%7D%5E%7B(1)%7D%5Cright)%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(1)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(2)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%20%5C%5C%0A%26%5Cpi%5Cleft(x_%7B1%7D%5E%7B(1)%7D%2C%20x_%7B2%7D%5E%7B(2)%7D%5Cright)%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(1)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%3D%5Cpi%5Cleft(x_%7B1%7D%5E%7B(1)%7D%5Cright)%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(2)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(1)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>由于两个等式的右手项相等，因此我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%5Cleft%28x_%7B1%7D%5E%7B(1%29%7D%2C%20x_%7B2%7D%5E%7B(1)%7D%5Cright)%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(2)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%3D%5Cpi%5Cleft(x_%7B1%7D%5E%7B(1)%7D%2C%20x_%7B2%7D%5E%7B(2)%7D%5Cright)%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(1)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%0A" /></p><p>也就是说</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28A%29%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(2)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%3D%5Cpi(B)%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(1)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%0A" /></p><p>联合上面的细致平稳条件，我们发现在 $ x_{1}=x_{1}^{(1)}$ 这条直线上，我们只需要选择 <img src="https://math.now.sh?inline=P%28A%2CB%29%20%3D%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(B)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)" style="display:inline-block;margin: 0;"/> ，则任意两个点均满足细致平稳条件。</p>
+<p>同样的道理，在在 $ x_{2}=x_{2}^{(1)}$ 这条直线上，我们只需要选择 <img src="https://math.now.sh?inline=P%28A%2CC%29%20%3D%20%5Cpi%5Cleft(x_%7B1%7D%5E%7B(C)%7D%20%5Cmid%20x_%7B2%7D%5E%7B(1)%7D%5Cright)" style="display:inline-block;margin: 0;"/> ，则任意两个点也满足细致平稳条件。</p>
+<p>基于上面的发现，我们可以构建 <img src="https://math.now.sh?inline=%5Cpi%5Cleft%28x_%7B1%7D%2C%20x_%7B2%7D%5Cright%29" style="display:inline-block;margin: 0;"/>  的转移概率矩阵为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AP%28A%20%5Crightarrow%20B%29%3D%26%20%5Cpi%5Cleft(x_%7B2%7D%5E%7B(B)%7D%20%5Cmid%20x_%7B1%7D%5E%7B(1)%7D%5Cright)%20%5Ctext%20%7B%20if%20%7D%20x_%7B1%7D%5E%7B(A)%7D%3Dx_%7B1%7D%5E%7B(B)%7D%3Dx_%7B1%7D%5E%7B(1)%7D%20%5C%5C%0AP(A%20%5Crightarrow%20C)%3D%26%20%5Cpi%5Cleft(x_%7B1%7D%5E%7B(C)%7D%20%5Cmid%20x_%7B2%7D%5E%7B(1)%7D%5Cright)%20%5Ctext%20%7B%20if%20%7D%20x_%7B2%7D%5E%7B(A)%7D%3Dx_%7B2%7D%5E%7B(C)%7D%3Dx_%7B2%7D%5E%7B(1)%7D%20%5C%5C%0A%26%20P(A%20%5Crightarrow%20D)%3D0%20%5Ctext%20%7B%20else%20%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>我们可以轻松验证对于二维平面上的任意两点 <img src="https://math.now.sh?inline=E%2CF" style="display:inline-block;margin: 0;"/> ，细致平稳条件均成立，即：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpi%28E%29%20P(E%20%5Crightarrow%20F)%3D%5Cpi(F)%20P(F%20%5Crightarrow%20E)%0A" /></p><p>于是这个二维空间的马尔科夫链将收敛到平稳分布  <img src="https://math.now.sh?inline=%5Cpi%5Cleft%28x_%7B1%7D%2C%20x_%7B2%7D%5Cright%29" style="display:inline-block;margin: 0;"/></p>
+<p>二维 Gibbs 抽样具体过程如下：</p>
+<ol>
+<li>输入平稳分布 <img src="https://math.now.sh?inline=%5Cpi%5Cleft%28x_%7B1%7D%2C%20x_%7B2%7D%5Cright%29" style="display:inline-block;margin: 0;"/> ，设定状态转移次数阈值  <img src="https://math.now.sh?inline=n_%7B1%7D" style="display:inline-block;margin: 0;"/> ，需要的样本个数 <img src="https://math.now.sh?inline=n_%7B2%7D" style="display:inline-block;margin: 0;"/></li>
+<li>从任意简单概率分布采样得到初始状态值 <img src="https://math.now.sh?inline=x_%7B1%7D%5E%7B%280%29%7D" style="display:inline-block;margin: 0;"/> 和   <img src="https://math.now.sh?inline=x_%7B2%7D%5E%7B%280%29%7D" style="display:inline-block;margin: 0;"/></li>
+<li><img src="https://math.now.sh?inline=%5Ctext%7Bfor%20%7Dt%20%3D%200%2C1%2C%5Ccdots%2C%20n_%7B1%7D%2Bn_%7B2%7D-1" style="display:inline-block;margin: 0;"/> 。
+<ol>
+<li>从条件概率分布 <img src="https://math.now.sh?inline=P%28x_%7B1%7D%7Cx_%7B2%7D%5E%7B(t%29%7D)%3D%5Cpi(x_%7B1%7D%7Cx_%7B2%7D%5E%7B(t)%7D)" style="display:inline-block;margin: 0;"/> 采样得到 <img src="https://math.now.sh?inline=x%5E%7B%28t%2B1%29%7D_%7B1%7D" style="display:inline-block;margin: 0;"/></li>
+<li>从条件概率分布 <img src="https://math.now.sh?inline=P%28x_%7B2%7D%7Cx_%7B1%7D%5E%7B(t%2B1%29%7D)%20%3D%20%5Cpi(x_%7B2%7D%7Cx_%7B1%7D%5E%7B(t%2B1)%7D)" style="display:inline-block;margin: 0;"/> 采样得到 <img src="https://math.now.sh?inline=x%5E%7B%28t%2B1%29%7D_%7B2%7D" style="display:inline-block;margin: 0;"/></li>
+</ol>
+</li>
+</ol>
+<p>最终，样本集合 <img src="https://math.now.sh?inline=%5Cleft%5C%7B%5Cleft%28x_%7B1%7D%5E%7B%5Cleft(n_%7B1%7D%2B1%5Cright%29%7D%2C%20x_%7B2%7D%5E%7B%5Cleft(n_%7B1%7D%2B1%5Cright)%7D%5Cright)%2C%5Cleft(x_%7B1%7D%5E%7B%5Cleft(n_%7B1%7D%2B2%5Cright)%7D%2C%20x_%7B2%7D%5E%7B%5Cleft(n_%7B1%7D%2B2%5Cright)%7D%5Cright)%2C%20%5Cldots%2C%5Cleft(x_%7B1%7D%5E%7B%5Cleft(n_%7B1%7D%2Bn_%7B2%7D%5Cright)%7D%2C%20x_%7B2%7D%5E%7B%5Cleft(n_%7B1%7D%2Bn_%7B2%7D%5Cright)%7D%5Cright)%5Cright%5C%7D" style="display:inline-block;margin: 0;"/> 即为我们需要的满足平稳分布的随机数。</p>
+<p>整个采样过程中，我们不停轮换坐标轴，即</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%28x_%7B1%7D%5E%7B(1%29%7D%2C%20x_%7B2%7D%5E%7B(1)%7D%5Cright)%20%5Crightarrow%5Cleft(x_%7B1%7D%5E%7B(2)%7D%2C%20x_%7B2%7D%5E%7B(1)%7D%5Cright)%20%5Crightarrow%5Cleft(x_%7B1%7D%5E%7B(2)%7D%2C%20x_%7B2%7D%5E%7B(2)%7D%5Cright)%20%5Crightarrow%20%5Cldots%20%5Crightarrow%5Cleft(x_%7B1%7D%5E%7B%5Cleft(n_%7B1%7D%2Bn_%7B2%7D%5Cright)%7D%2C%20x_%7B2%7D%5E%7B%5Cleft(n_%7B1%7D%2Bn_%7B2%7D%5Cright)%7D%5Cright)%0A" /></p><h2 id="多维抽样">多维抽样</h2>
+<p>我们从二维扩展到多维，假设我们有一个 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 维的平稳分布 <img src="https://math.now.sh?inline=%5Cpi%5Cleft%28x_%7B1%7D%2C%20x_%7B2%7D%2C%20%5Cldots%20x_%7Bn%7D%5Cright%29" style="display:inline-block;margin: 0;"/> ，我们可以通过对 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 个坐标轴轮换采样，来得到新的样本。具体的抽样过程如下：</p>
+<ol>
+<li>输入平稳分布 <img src="https://math.now.sh?inline=%5Cpi%5Cleft%28x_%7B1%7D%2C%20x_%7B2%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5Cright%29" style="display:inline-block;margin: 0;"/> 或者对应的所有特征的条件概率分布，设定状态转移次数阈值 <img src="https://math.now.sh?inline=n_%7B1%7D" style="display:inline-block;margin: 0;"/> ，需要的样本个数 <img src="https://math.now.sh?inline=n_%7B2%7D" style="display:inline-block;margin: 0;"/></li>
+<li>随机初始化初始状态值 <img src="https://math.now.sh?inline=%5Cleft%28x_%7B1%7D%5E%7B(0%29%7D%2C%20x_%7B2%7D%5E%7B(0)%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5E%7B(0)%7D%5Cright)" style="display:inline-block;margin: 0;"/></li>
+<li>for <img src="https://math.now.sh?inline=t%3D0" style="display:inline-block;margin: 0;"/> to <img src="https://math.now.sh?inline=n_%7B1%7D%2Bn_%7B2%7D-1" style="display:inline-block;margin: 0;"/> :
+<ol>
+<li>从条件概率分布 <img src="https://math.now.sh?inline=P%5Cleft%28x_%7B1%7D%20%5Cmid%20x_%7B2%7D%5E%7B(t%29%7D%2C%20x_%7B3%7D%5E%7B(t)%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5E%7B(t)%7D%5Cright)" style="display:inline-block;margin: 0;"/> 中采样得到样本 <img src="https://math.now.sh?inline=x_%7B1%7D%5E%7Bt%2B1%7D" style="display:inline-block;margin: 0;"/></li>
+<li>从条件概率分布 <img src="https://math.now.sh?inline=P%5Cleft%28x_%7B2%7D%20%5Cmid%20x_%7B1%7D%5E%7B(t%2B1%29%7D%2C%20x_%7B3%7D%5E%7B(t)%7D%2C%20x_%7B4%7D%5E%7B(t)%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5E%7B(t)%7D%5Cright)" style="display:inline-block;margin: 0;"/> 中采样得到样本 <img src="https://math.now.sh?inline=x_%7B2%7D%5E%7Bt%2B1%7D" style="display:inline-block;margin: 0;"/></li>
+<li>…</li>
+<li>从条件概率分布 <img src="https://math.now.sh?inline=P%5Cleft%28x_%7Bj%7D%20%5Cmid%20x_%7B1%7D%5E%7B(t%2B1%29%7D%2C%20x_%7B2%7D%5E%7B(t%2B1)%7D%2C%20%5Cldots%2C%20x_%7Bj-1%7D%5E%7B(t%2B1)%7D%2C%20x_%7Bj%2B1%7D%5E%7B(t)%7D%20%5Cldots%2C%20x_%7Bn%7D%5E%7B(t)%7D%5Cright)" style="display:inline-block;margin: 0;"/> 中采样得到样本 <img src="https://math.now.sh?inline=x_%7Bj%7D%5E%7Bt%2B1%7D" style="display:inline-block;margin: 0;"/></li>
+<li>…</li>
+<li>从条件概率分布 <img src="https://math.now.sh?inline=P%5Cleft%28x_%7Bn%7D%20%5Cmid%20x_%7B1%7D%5E%7B(t%2B1%29%7D%2C%20x_%7B2%7D%5E%7B(t%2B1)%7D%2C%20%5Cldots%2C%20x_%7Bn-1%7D%5E%7B(t%2B1)%7D%5Cright)" style="display:inline-block;margin: 0;"/> 中采样得到样本 <img src="https://math.now.sh?inline=x_%7Bn%7D%5E%7Bt%2B1%7D" style="display:inline-block;margin: 0;"/></li>
+</ol>
+</li>
+</ol>
+<p>样本集 <img src="https://math.now.sh?inline=%5Cleft%5C%7B%5Cleft%28x_%7B1%7D%5E%7B%5Cleft(n_%7B1%7D%2B1%5Cright%29%7D%2C%20x_%7B2%7D%5E%7B%5Cleft(n_%7B1%7D%2B1%5Cright)%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5E%7B%5Cleft(n_%7B1%7D%2B1%5Cright)%7D%5Cright)%2C%20%5Cldots%2C%5Cleft(x_%7B1%7D%5E%7B%5Cleft(n_%7B1%7D%2Bn_%7B2%7D%5Cright)%7D%2C%20x_%7B2%7D%5E%7B%5Cleft(n_%7B1%7D%2Bn_%7B2%7D%5Cright)%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5E%7B%5Cleft(n_%7B1%7D%2Bn_%7B2%7D%5Cright)%7D%5Cright)%5Cright%5C%7D" style="display:inline-block;margin: 0;"/> 即为我们需要的平稳分布对应的样本集。</p>
+<h2 id="小结-3">小结</h2>
+<p>由于 Gibbs 抽样对于高维度特征具有优势，因此一般所说的 MCMC 采样都是用的 Gibbs 抽样。但是 Gibbs 抽样要求至少有两个维度，因此一维的数据采样只能采用 M-H 采样。</p>
+<h1>收敛性判断</h1>
+<p>在MCMC 算法中，无论是 M-H 算法还是 Gibbs 算法，我们均认为随着马尔科夫链的延长，它就越接近其平稳分布，我们称其为收敛。而收敛前的所有迭代是要被舍弃的，这些被舍弃的抽样称为 burn-in 期。但是我们如何判断一条链是否收敛呢？也就是说，上面的 <img src="https://math.now.sh?inline=n_%7B1%7D" style="display:inline-block;margin: 0;"/> 应该设定为多少了？</p>
+<p>这似乎没有一个统一的答案，目前常用的有两种方法。</p>
+<h2 id="图式法">图式法</h2>
+<p>我们将 MCMC 链上的轨迹点进行可视化，横坐标是迭代次数，纵坐标是抽样值。如果经过一段时间的剧烈波动之后逐渐趋于平稳，则意味着这条链可能收敛了。</p>
+<p>更为合理的做法是，用不同的参数初值构建两个甚至多个独立的链，观察不同链的轨迹点，随着链的延长，不同链开始发生重叠，甚至几乎完全重合，此时可以认为收敛。</p>
+<p>需要说明的是，图式法不能保证所观察的链一定收敛了，为稳妥起见， burn-in 期稍微设大一点较好。</p>
+<h2 id="Geweke-检验">Geweke 检验</h2>
+<p>首先假定一个burn-in 期，在其后的抽样值按一定间隔取2个样本，如前 10% 和 后 10% 的抽样值的平均数之间不存在显著差异，则可认为链收敛了。否则，需要延长burn-in 期，再重新进行检验。</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>张勤. 动物遗传育种中的计算方法[M]. 科学出版社, 2007.</p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/pinard/p/6625739.html">MCMC(一)蒙特卡罗方法</a></p>
+</li>
+<li>
+<p>Brémaud P. Markov chains: Gibbs fields, Monte Carlo simulation, and queues[M]. Springer Science &amp; Business Media, 2013.</p>
+</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/a6f7095/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">方差组分估计的普遍观点与启发</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2022
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
