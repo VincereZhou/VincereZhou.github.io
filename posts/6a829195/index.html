@@ -9,7 +9,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    Tag: 理论学习 |  VincereZhou&#39;s blog
+    H逆矩阵的推导 |  VincereZhou&#39;s blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -40,186 +40,164 @@
       
     <main class="content on">
       <section class="outer">
-  
-  
-  <article class="articles">
+  <article
+  id="post-H逆矩阵的推导"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
     
-    
-    <h1 class="page-type-title">#&nbsp理论学习</h1>
-    
-    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  H逆矩阵的推导
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/6a829195/" class="article-date">
+  <time datetime="2022-07-02T09:37:26.000Z" itemprop="datePublished">2022-07-02</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
   
-  
-  
-  
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2021" class="archive-year">2021</a>
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">207</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">1 分钟</span>
+        </span>
+    </span>
+</div>
+ 
     </div>
-    <div class="archives">
       
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/7532e592/" class="archive-article-date">
-  <time datetime="2021-06-22T02:01:07.000Z" itemprop="datePublished">06/22</time>
-</a>
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
        
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/7532e592/"
-    >Tree Based Methods</a> 
-</h2>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在<a target="_blank" rel="noopener" href="https://vincere.fun/posts/e0b3b4ee/">基因组选择模型介绍下</a>提到了H逆矩阵，这里是补上证明。</p>
+<h1>H逆证明</h1>
+<p>首先，按照无基因型个体在前，有基因型个体在后的顺序，H 阵的公式为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BH%7D%20%26%3D%5Cleft%28%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Coperatorname%7Bvar%7D%5Cleft(%5Cmathbf%7Bu%7D_%7B1%7D%5Cright%29%20%26%20%5Coperatorname%7Bcov%7D%5Cleft(%5Cmathbf%7Bu%7D_%7B1%7D%2C%20%5Cmathbf%7Bu%7D_%7B2%7D%5Cright)%20%5C%5C%0A%5Coperatorname%7Bcov%7D%5Cleft(%5Cmathbf%7Bu%7D_%7B2%7D%2C%20%5Cmathbf%7Bu%7D_%7B1%7D%5Cright)%20%26%20%5Coperatorname%7Bvar%7D%5Cleft(%5Cmathbf%7Bu%7D_%7B2%7D%5Cright)%0A%5Cend%7Barray%7D%5Cright)%20%5C%5C%0A%26%3D%5Cleft(%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BA%7D_%7B11%7D%2B%5Cmathbf%7BA%7D_%7B12%7D%20%5Cmathbf%7BA%7D_%7B22%7D%5E%7B-1%7D%5Cleft(%5Cmathbf%7BG%7D-%5Cmathbf%7BA%7D_%7B22%7D%5Cright)%20%5Cmathbf%7BA%7D_%7B22%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B21%7D%20%26%20%5Cmathbf%7BA%7D_%7B12%7D%20%5Cmathbf%7BA%7D_%7B22%7D%5E%7B-1%7D%20%5Cmathbf%7BG%7D%20%5C%5C%0A%5Cmathbf%7BG%7D%20%5Cmathbf%7BA%7D_%7B22%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B21%7D%20%26%20%5Cmathbf%7BG%7D%0A%5Cend%7Barray%7D%5Cright)%20%5C%5C%0A%26%3D%5Cmathbf%7BA%7D%2B%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BA%7D_%7B12%7D%20%5Cmathbf%7BA%7D_%7B22%7D%5E%7B-1%7D%5Cleft(%5Cmathbf%7BG%7D-%5Cmathbf%7BA%7D_%7B22%7D%5Cright)%20%5Cmathbf%7BA%7D_%7B22%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B21%7D%20%26%20%5Cmathbf%7BA%7D_%7B12%7D%20%5Cmathbf%7BA%7D_%7B22%7D%5E%7B-1%7D%5Cleft(%5Cmathbf%7BG%7D-%5Cmathbf%7BA%7D_%7B22%7D%5Cright)%20%5C%5C%0A%5Cleft(%5Cmathbf%7BG%7D-%5Cmathbf%7BA%7D_%7B22%7D%5Cright)%20%5Cmathbf%7BA%7D_%7B22%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B21%7D%20%26%20%5Cmathbf%7BG%7D-%5Cmathbf%7BA%7D_%7B22%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A%5Cend%7Baligned%7D%0A" /></p><p>如果我们按照有基因型个体在前，无基因型个体在后的顺序，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BH%7D%20%26%3D%5Cleft%28%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Coperatorname%7Bvar%7D%5Cleft(%5Cmathbf%7Bu%7D_%7B1%7D%5Cright%29%20%26%20%5Coperatorname%7Bcov%7D%5Cleft(%5Cmathbf%7Bu%7D_%7B1%7D%2C%20%5Cmathbf%7Bu%7D_%7B2%7D%5Cright)%20%5C%5C%0A%5Coperatorname%7Bcov%7D%5Cleft(%5Cmathbf%7Bu%7D_%7B2%7D%2C%20%5Cmathbf%7Bu%7D_%7B1%7D%5Cright)%20%26%20%5Coperatorname%7Bvar%7D%5Cleft(%5Cmathbf%7Bu%7D_%7B2%7D%5Cright)%0A%5Cend%7Barray%7D%5Cright)%20%5C%5C%0A%26%3D%5Cleft(%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BG%7D%20%26%20%5Cmathbf%7BG%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%20%20%20%5C%5C%0A%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BG%7D%20%26%20%5Cmathbf%7BA%7D_%7B22%7D%2B%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%5Cleft(%5Cmathbf%7BG%7D-%5Cmathbf%7BA%7D_%7B11%7D%5Cright)%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%0A%5Cend%7Barray%7D%5Cright)%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>相应的 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 阵分块为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BA%7D%20%3D%20%5Cleft%28%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BA%7D_%7B11%7D%20%26%20%5Cmathbf%7BA%7D_%7B12%7D%20%5C%5C%0A%5Cmathbf%7BA%7D_%7B21%7D%20%26%20%5Cmathbf%7BA%7D_%7B22%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%29%0A" /></p><p>根据分块矩阵求逆的一般规则 (<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/47760591/answer/331976386">分块矩阵求逆公式</a> ，如果 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D_%7B11%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D_%7B22%7D-%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D" style="display:inline-block;margin: 0;"/> 可逆，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BA%7D%5E%7B-1%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%2B%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cleft%28%5Cmathbf%7BA%7D_%7B22%7D-%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cright%29%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%26%20-%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cleft(%5Cmathbf%7BA%7D_%7B22%7D-%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cright)%5E%7B-1%7D%20%5C%5C%0A-%5Cleft(%5Cmathbf%7BA%7D_%7B22%7D-%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cright)%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%26%20%5Cleft(%5Cmathbf%7BA%7D_%7B22%7D-%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cright)%5E%7B-1%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>同样地，对于 <img src="https://math.now.sh?inline=%5Cmathbf%7BH%7D" style="display:inline-block;margin: 0;"/> 矩阵，应用相同的规则，化简后得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7BH%7D%5E%7B-1%7D%20%5C%5C%0A%26%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BG%7D%5E%7B-1%7D%2B%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cleft%28%5Cmathbf%7BA%7D_%7B22%7D-%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cright%29%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%26%20-%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cleft(%5Cmathbf%7BA%7D_%7B22%7D-%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cright)%5E%7B-1%7D%20%5C%5C%0A-%5Cleft(%5Cmathbf%7BA%7D_%7B22%7D-%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cright)%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%26%20%5Cleft(%5Cmathbf%7BA%7D_%7B22%7D-%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%5Cmathbf%7BA%7D_%7B12%7D%5Cright)%5E%7B-1%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BG%7D%5E%7B-1%7D-%5Cmathbf%7BA%7D_%7B11%7D%5E%7B-1%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%0A%5Cend%7Barray%7D%5Cright%5D%2B%5Cmathbf%7BA%7D%5E%7B-1%7D%20%0A%5Cend%7Baligned%7D%0A" /></p><h1>参考文献</h1>
+<ol>
+<li>Christensen O F, Lund M S. Genomic prediction when some animals are not genotyped[J]. Genetics Selection Evolution, 2010, 42(1): 1-8.</li>
+<li>Aguilar I, Misztal I, Johnson D L, et al. Hot topic: a unified approach to utilize phenotypic, full pedigree, and genomic information for genetic evaluation of Holstein final score[J]. Journal of dairy science, 2010, 93(2): 743-752.</li>
+</ol>
  
-
-    </header>
-    
-    
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
-
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/c49e8948/" class="archive-article-date">
-  <time datetime="2021-06-10T02:50:42.000Z" itemprop="datePublished">06/10</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/c49e8948/"
-    >Generalized Additive Models</a> 
-</h2>
- 
-
-    </header>
-    
-    
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
-
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/8a41a048/" class="archive-article-date">
-  <time datetime="2021-06-09T08:25:24.000Z" itemprop="datePublished">06/09</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/8a41a048/"
-    >Bias Variance Trade-Off</a> 
-</h2>
- 
-
-    </header>
-    
-    
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
-
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/eb9174d6/" class="archive-article-date">
-  <time datetime="2021-06-04T03:32:42.000Z" itemprop="datePublished">06/04</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/eb9174d6/"
-    >线性模型选择与正则化</a> 
-</h2>
- 
-
-    </header>
-    
-    
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
-
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/c54c0f20/" class="archive-article-date">
-  <time datetime="2021-05-26T05:43:31.000Z" itemprop="datePublished">05/26</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/c54c0f20/"
-    >重复抽样方法</a> 
-</h2>
- 
-
-    </header>
-    
-    
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
-
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/749a327e/" class="archive-article-date">
-  <time datetime="2021-05-25T03:01:18.000Z" itemprop="datePublished">05/25</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/749a327e/"
-    >逻辑回归及其他分类变量分析方法</a> 
-</h2>
- 
-
-    </header>
-    
-    
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
-
-    
-  </div>
-</article>
-      
+      <!-- reward -->
       
     </div>
-  </div>
-  
-  
-
-  
-  <nav class="page-nav">
     
-    <a class="extend prev" rel="prev" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/page/4/">上一页</a><a class="page-number" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">1</a><span class="space">&hellip;</span><a class="page-number" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/page/3/">3</a><a class="page-number" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/page/4/">4</a><span class="page-number current">5</span>
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/abc85283/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">最小二乘中的可估计函数</div>
+      </a>
+    
   </nav>
-  
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
 </section>
       <footer class="footer">
   <div class="outer">
@@ -380,6 +358,23 @@
 <script src="/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
