@@ -1,6 +1,368 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>稀疏矩阵算法Envelope方法三之Cholesky分解</title>
+    <url>/posts/57869f4c/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节是介绍 George and Liu 书中 Envelope Method 的应用</p>
+<span id="more"></span>
+<h1>ESFCT</h1>
+<h1>原理</h1>
+<p>ESFCT，用于计算 Cholesky 分解 <img src="https://math.now.sh?inline=%5Cmathbf%7BLL%5E%7BT%7D%7D" style="display:inline-block;margin: 0;"/> ，将 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 矩阵按照 <em>envelope storage scheme</em> 格式存储。</p>
+<p>Cholesky 分解的方法是 bordering method ，假设矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 可以分块为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BA%7D%3D%5Cleft%28%5Cbegin%7Barray%7D%7Bll%7D%0A%5Cboldsymbol%7BM%7D%20%26%20%5Cboldsymbol%7Bu%7D%20%5C%5C%0A%5Cboldsymbol%7Bu%7D%5E%7BT%7D%20%26%20s%0A%5Cend%7Barray%7D%5Cright%29%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D" style="display:inline-block;margin: 0;"/> 可以分解为 <img src="https://math.now.sh?inline=%5Cmathbf%7BL_%7BM%7DL_%7BM%7D%5E%7BT%7D%7D" style="display:inline-block;margin: 0;"/> ，因此 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的分解因子为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BL%7D%3D%5Cleft%28%5Cbegin%7Barray%7D%7Bll%7D%0A%5Cboldsymbol%7BL_%7BM%7D%7D%20%26%20%5Cboldsymbol%7B0%7D%20%5C%5C%0A%5Cboldsymbol%7Bw%7D%5E%7BT%7D%20%26%20t%0A%5Cend%7Barray%7D%5Cright%29%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BL_%7BM%7Dw%20%3D%20u%7D" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=%5Cmathbf%7Bt%20%3D%20%28s%20-%20w%5E%7BT%7Dw%29%5E%7B1%2F2%7D%7D" style="display:inline-block;margin: 0;"/> ，因此 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的分解因子 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 可以<strong>逐行</strong>计算。以下图为例，假设我们已经完成了前 <img src="https://math.now.sh?inline=i-1" style="display:inline-block;margin: 0;"/> 步的分解，因此 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的左上角的 <img src="https://math.now.sh?inline=%28i-1%29%20%5Ctimes%20(i-1)" style="display:inline-block;margin: 0;"/> 的子矩阵已经完成了分解。为了计算 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 矩阵的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行，我们需要计算  <img src="https://math.now.sh?inline=%5Cmathbf%7BL_%7BM%7Dw%20%3D%20u%7D" style="display:inline-block;margin: 0;"/> 。但是，实际上 <img src="https://math.now.sh?inline=%5Cmathbf%7Bu%7D" style="display:inline-block;margin: 0;"/> 只有一部分 envelope 区域需要计算，因此实际使用和计算的 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cbar%7BL%7D%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cbar%7Bu%7D%5E%7BT%7D%7D" style="display:inline-block;margin: 0;"/> 如右图，因此此时 <strong>ELSLV</strong> 可以对这个 <strong>IBAND</strong> 大小的三角方程组进行求解</p>
+<p><img src="52.png" alt="1"></p>
+<h1>脚本</h1>
+<p>具体脚本如下：</p>
+<p><img src="53.png" alt="1"></p>
+<p><img src="54.png" alt="1"></p>
+<p><img src="55.png" alt="1"></p>
+<p>现在开始逐行解析。</p>
+<p>首先对第一行进行分解，如果对角线元素小于等于0则程序中止</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">IF ( DIAG(1) .LE. 0.0E0) GO TO 400</span><br><span class="line">DIAG(1) &#x3D; SQRT(DIAG(1))</span><br><span class="line">IF( NEQNS .EQ. 1) RETURN</span><br></pre></td></tr></table></figure>
+<p>对第二行及之后的行进行分解，IXENV 是 ENV 向量中第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行第一个元素的位置，TEMP 是矩阵第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行的对角线元素，如果 IBAND 等于 0，则跳过三角方程组求解这一步，<code>GO TO 200</code> 。</p>
+<p>IFIRST 是第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行第一个元素所在列。</p>
+<p>之后调用 ELSLV 求解得到 <img src="https://math.now.sh?inline=%5Cmathbf%7Bw%7D" style="display:inline-block;margin: 0;"/> 。 这里就用到了子矩阵求解的方法，方程数目为 IBAND，<code>XENV(IFIRST)</code> 表示其第一个未知数是 IFIRST所在行/列的未知数，<code>DIAG(IFIRST)</code>，其右手项是本行的非零元素，第一个元素为 <code>ENV(IXENV)</code> 。</p>
+<p>因此调用结束后会更新右手项的值，即更新 ENV 向量</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DO 300 I &#x3D; 2, NEQNS</span><br><span class="line">  IXENV &#x3D; XENV(I)</span><br><span class="line">  IBAND &#x3D; XENV(I+1) - IXENV</span><br><span class="line">  TEMP &#x3D; DIAG(I)</span><br><span class="line">  IF (IBAND .EQ. 0) GO TO 200</span><br><span class="line">    IFIRST &#x3D; I - IBAND</span><br><span class="line">    CALL ELSLV( IBAND, XENV(IFIRST), ENV, DIAG(IFIRST), ENV(IXENV))</span><br></pre></td></tr></table></figure>
+<p>下一步，我们计算 t ，首先我们从对角线元素中减去  <img src="https://math.now.sh?inline=%5Cmathbf%7Bw%7D" style="display:inline-block;margin: 0;"/> 的内积。</p>
+<p>JSTOP 是 ENV 向量中第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行最后一个元素的位置，<code>DO 100</code> 循环遍历了ENV 向量中第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行的全部位置，<code>TEMP = TEMP - S * S</code> 便是对角线元素减去了   <img src="https://math.now.sh?inline=%5Cmathbf%7Bw%7D" style="display:inline-block;margin: 0;"/> 的内积</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	      JSTOP &#x3D; XENV(I+1) - 1</span><br><span class="line">	      DO 100 J &#x3D; IXENV, JSTOP</span><br><span class="line">	      	S &#x3D; ENV(J)</span><br><span class="line">	      	TEMP &#x3D; TEMP - S * S</span><br><span class="line">100	      CONTINUE</span><br></pre></td></tr></table></figure>
+<p>然后求开方，如果 TEMP 小于等于0，程序中止。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">200    	IF(TEMP .LE.  0.0E0) GO TO 400</span><br><span class="line">		  DIAG(I) &#x3D; SQRT(TEMP)</span><br><span class="line">		  COUNT &#x3D; IBAND </span><br><span class="line">		  OPS &#x3D; OPS + COUNT </span><br><span class="line">300	  CONTINUE</span><br><span class="line">	  RETURN </span><br></pre></td></tr></table></figure>
+<p>如果存在对角线元素小于等于0的情况，程序中止，IFLAG 设为 1</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">400   IFLAG &#x3D; 1</span><br><span class="line">	  RETURN</span><br><span class="line">	  END</span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>稀疏矩阵</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>稀疏矩阵</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>稀疏矩阵算法Envelope方法二之三角方程组求解</title>
+    <url>/posts/f06c6ce7/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节是介绍 George and Liu 书中 Envelope Method 的应用</p>
+<span id="more"></span>
+<p>在这一章节中，我们利用上面章节提到的 envelope storage scheme，描述执行 Cholesky 分解和求解的子程序。我们会先介绍三角方程组求解子程序 <strong>ELSLV (Envelope-Lower-Solve)</strong> 和  <strong>EUSLV (Envelope-Upper-Solve)</strong> ，再介绍矩阵分解的子程序 <strong>ESFCT (Envelope-Symmetric-Factorization)</strong> 。</p>
+<h1>ELSLV</h1>
+<p>这些子程序用于求解下面的下三角方程组和上三角方程组</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7BLy%3Db%7D%20%5C%5C%0A%26%5Cmathbf%7BL%5E%7BT%7Dx%3Dy%7D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 是一个下三角矩阵，其存储方式就是之前提到的 envelope storage scheme 。</p>
+<p><strong>ELSLV</strong> 脚本如下，该流程首先查找右手项 RHS 中的第一个非零元素 (<strong>IFIRST</strong>) ，之前的未知数就全部是 0。然后从 <strong>IFIRST</strong> 行循环至最后一行，采用内积原理，逐个计算 <img src="https://math.now.sh?inline=x_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，覆盖 RHS 相应元素的值。</p>
+<p>变量 <strong>LAST</strong> 记录上一次计算的<strong>非零</strong>解的索引，这样如果本方程计算时左手项第一个非零元素大于 <strong>LAST</strong> ，那么就可以直接采用 <img src="https://math.now.sh?inline=RHS%28I%29%20%3D%20S%2FDIAG(I)" style="display:inline-block;margin: 0;"/> 计算解。</p>
+<p>最终输出 <strong>RHS</strong> 和 <strong>OPS</strong>，这里 RHS 就是最终的解，OPS 是执行的算术操作的次数（乘法和除法）。我感觉OPS 应该采用长整型，而不是用双精度浮点数。</p>
+<p>注意，下面脚本中的 <img src="https://math.now.sh?inline=OPS%20%3D%20OPS%20%2B%201.0D0" style="display:inline-block;margin: 0;"/> ，其中的 <code>1.0D0</code> 就是 <img src="https://math.now.sh?inline=1.0%20%5Ctimes%2010%5E%7B0%7D" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=D" style="display:inline-block;margin: 0;"/> 是双精度的意思。</p>
+<p><img src="44.png" alt="1"></p>
+<p><img src="45.png" alt="1"></p>
+<p><img src="46.png" alt="1"></p>
+<p><img src="47.png" alt="1"></p>
+<p>下面我们开始逐行解析脚本，定义变量时将 OPS 定义成了  SPKOPS 组的第一个<strong>全局变量</strong>，用于记录乘除法的操作次数。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">COMMON &#x2F;SPKOPS&#x2F; OPS</span><br></pre></td></tr></table></figure>
+<p>第一步，我们查找右手项中第一个非零元素的位置</p>
+<p>如果右手项全部元素均为0，则程序终止，全为0的 RHS 就是方程组的解</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  IFIRST &#x3D; 0</span><br><span class="line">100	  IFIRST &#x3D; IFIRST + 1</span><br><span class="line">	    IF( RHS(IFIRST) .NE. 0.0E0 ) GO TO 200</span><br><span class="line">	    IF ( IFIRST .LT. NEQNS ) GO TO 100</span><br><span class="line">	    RETURN</span><br><span class="line">200	  LAST &#x3D; 0</span><br></pre></td></tr></table></figure>
+<p>从 IFIRST 行开始逐行求解 (之前的行解也全部为0)，采用内积原理进行求解。</p>
+<p>IBAND 是这一行的 <em>bandwidth</em> ，<code> IF ( IBAND .GE. I) IBAND = I - 1</code> 这句目前看是废话，之后会有进一步的解释。</p>
+<p><code> L = I - IBAND</code> 是这一行第一个非零元素的位置；<code>RHS(I) = 0.0E0</code> 将对应的解首先设置为 0 ，之后再覆盖。</p>
+<p><code>LAST</code> 记录的是上一次计算的非零解的位置。</p>
+<p><code>IF (IBAND .EQ. 0 .OR. LAST .LT. L) GO TO 400</code> ，这句话第一个条件很容易理解，如果 IBAND 等于 0 ，那么就只需要考虑对角线元素；第二个条件是 LAST 小于 L ，LAST 是上一次计算的非零解的位置，那就说明从 LAST + 1 到 I - 1，这些位置的解均为 0；而这一行第一个非零元素的位置 L 大于 LAST ，说明这一行非对角线元素对应的解均为0，因此也只需要考虑对角线元素。</p>
+<p>如果不满足上面两个条件，接着往下走，KSTRT 和 KSTOP 是 IBAND 的第一个和最后一个元素，<code>DO 300</code> 循环根据内积原理从 S 中减去非对角线元素的乘积 (<code>S = S - ENV(K)*RHS(L)</code>) 。</p>
+<p>最后，COUNT 是本次的乘除法计算次数，加入到 OPS 中</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  DO 500 I &#x3D; IFIRST, NEQNS</span><br><span class="line">	    IBAND &#x3D; XENV(I+1) - XENV(I)</span><br><span class="line">	    IF ( IBAND .GE. I) IBAND &#x3D; I - 1</span><br><span class="line">	    S &#x3D; RHS(I)</span><br><span class="line">	    L &#x3D; I - IBAND</span><br><span class="line">	    RHS(I) &#x3D; 0.0E0</span><br><span class="line">	    </span><br><span class="line">	    IF (IBAND .EQ. 0 .OR. LAST .LT. L) GO TO 400</span><br><span class="line">	      KSTRT &#x3D; XENV(I+1) - IBAND</span><br><span class="line">	      KSTOP &#x3D; XENV(I+1) - 1</span><br><span class="line">	      DO 300 K &#x3D; KSTRT, KSTOP</span><br><span class="line">	        S &#x3D; S - ENV(K)*RHS(L)</span><br><span class="line">	        L &#x3D; L + 1</span><br><span class="line">300	      CONTINUE</span><br><span class="line">	      COUNT &#x3D; IBAND</span><br><span class="line">	      OPS &#x3D; OPS + COUNT</span><br></pre></td></tr></table></figure>
+<p>最后计算 RHS(I) ，如果此时 S 已经等于 0 ，那么 RHS(I) = 0 , 这就是我们预设的值，不用做任何事情，直接求解下一个未知数；否则的话，<code>RHS(I) = S/DIAG(I)</code> ，OPS 加1，LAST 更新为 I 。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">400     IF( S .EQ. 0.0E0) GO TO 500</span><br><span class="line">		  RHS(I) &#x3D; S&#x2F;DIAG(I)</span><br><span class="line">		  OPS &#x3D; OPS + 1.0D0</span><br><span class="line">		  LAST &#x3D; I</span><br><span class="line">500   CONTINUE</span><br><span class="line">      RETURN</span><br><span class="line">    END</span><br></pre></td></tr></table></figure>
+<p>下图描述了本子程序的计算逻辑，其中圆圈圈起来的元素是ELSLV 实际使用的元素，可以按照上面的子程序手动模拟一下计算流程，看看是不是只用了圆圈圈起来的元素。</p>
+<p>注意，在这个子流程中，我们在 <code>DO 300</code> 循环中可能执行了 一些乘以 0 的乘法，但是在大部分机器中通过做一个检查来避免这种乘法可能比不管它更加耗时。</p>
+<p><img src="48.png" alt="1"></p>
+<p>子程序中 54 行对 <strong>IBAND</strong> 的处理（<code> IF ( IBAND .GE. I) IBAND = I - 1</code> ）解释如下，在某些环境中，<strong>ELSLV</strong> 子程序只用于求解导入的系数矩阵**(XADJ, ADJNCY)<strong>的</strong>子矩阵**的解，如下图所示，<img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 实际是一个 <img src="https://math.now.sh?inline=16%20%5Ctimes%2016" style="display:inline-block;margin: 0;"/> 的矩阵，而我们想要求解的方程组是框起来的 <img src="https://math.now.sh?inline=11%20%5Ctimes%2011" style="display:inline-block;margin: 0;"/> 的子矩阵，伴随着其相应的右手项 RHS ，我们求解的脚本为</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctext%7BCALL%20%20ELSLV%28%2011%2C%20XENV(5%29%2C%20ENV%2C%20DIAG(5)%2C%20RHS)%7D%0A" /></p><p>在这个子程序中，XENV(5) 被解释为 XENV(1)， XENV(6) 被解释为 XENV(2)，依此类推。</p>
+<p><img src="49.png" alt="1"></p>
+<h1>EUSLV</h1>
+<h2 id="原理">原理</h2>
+<p>我们现在查看子程序 <strong>EUSLV</strong> ，其求解 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%5E%7BT%7Dx%20%3D%20y%7D" style="display:inline-block;margin: 0;"/> ，其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 就是 <strong>ELSLV</strong> 中的系数矩阵，这就意味着我们可以获取 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%5E%7BT%7D%7D" style="display:inline-block;margin: 0;"/> 的<strong>列</strong>，此时我们采用 <em>outer product form</em>，该方法描述如下</p>
+<p>假设 <img src="https://math.now.sh?inline=n%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 的方程组 <img src="https://math.now.sh?inline=%5Cmathbf%7BTx%20%3D%20b%7D" style="display:inline-block;margin: 0;"/> ，其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BT%7D" style="display:inline-block;margin: 0;"/> 是一个<strong>非奇异的</strong>下三角矩阵，并且按列存储，其计算公式如下</p>
+<p><img src="3.png" alt="1"></p>
+<p>这种算法适用于 <img src="https://math.now.sh?inline=%5Cmathbf%7Bx%7D" style="display:inline-block;margin: 0;"/> 向量很稀疏的情况，如果在第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 步一开始 <img src="https://math.now.sh?inline=b_%7Bi%7D" style="display:inline-block;margin: 0;"/> 就等于 0 ，那么 <img src="https://math.now.sh?inline=x_%7Bi%7D" style="display:inline-block;margin: 0;"/> 等于 0，我们可以整个跳过这一步。</p>
+<p>同样类似于 <strong>ELSLV</strong> ，我们可以对提供的系数矩阵的子矩阵进行计算求解。</p>
+<p>其求解顺序是反的，从 <img src="https://math.now.sh?inline=x_%7Bn%7D" style="display:inline-block;margin: 0;"/> 到 <img src="https://math.now.sh?inline=x_%7B1%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<h2 id="脚本">脚本</h2>
+<p><img src="50.png" alt="1"></p>
+<p><img src="51.png" alt="1"></p>
+<p>现在对该脚本逐行解析如下，首先这个是按照从ｎ到１的顺序，设 I 的初值设为 NEQNS + 1，进入循环。</p>
+<p>如果 RHS(I) 等于0，直接跳过，进入下一个循环</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  I &#x3D; NEQNS + 1</span><br><span class="line">100   I &#x3D; I - 1</span><br><span class="line">	  IF (I .EQ. 0) RETURN</span><br><span class="line">	    IF (RHS(I) .EQ. 0.0E0) GO TO 100</span><br></pre></td></tr></table></figure>
+<p>不然的话，按照上面的公式进行处理，下面这两行将 RHS(I) 赋值为 RHS(I)/DIAG(I) ，OPS 加1</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">S &#x3D; RHS(I)&#x2F;DIAG(I)</span><br><span class="line">RHS(I) &#x3D; S</span><br><span class="line">OPS &#x3D; OPS + 1.0D0</span><br></pre></td></tr></table></figure>
+<p>接下来处理第二步， <img src="https://math.now.sh?inline=%5Cmathbf%7BL%5E%7BT%7D%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列，就是 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 矩阵的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行，而且只需要针对第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/>  行的非零元素。</p>
+<p>IBAND 是第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行的 <em>bandwidth</em> ，KSTRT 和 KSTOP 是第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行相对于 IBAND 的第一个位置和最后一个位置。</p>
+<p><code>L = XENV(I+1) - IBAND</code> 其实就是 <code>XENV(I)</code>，就是 ENV 向量中第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行的第一个元素位置 。</p>
+<p><code>DO 200</code> 循环中，<code>RHS(K) = RHS(K) - S*ENV(L)</code> ，就是右手项相应元素减去 RHS(I) 乘以 第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行的相应元素。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  IBAND &#x3D; XENV(I+1) - XENV(I)</span><br><span class="line">	  IF (IBAND .GE. I) IBAND &#x3D; I-1</span><br><span class="line">	  IF (IBAND .EQ. 0) GO TO 100</span><br><span class="line">	    KSTRT &#x3D; I - IBAND</span><br><span class="line">	    KSTOP &#x3D; I - 1</span><br><span class="line">	    L &#x3D; XENV(I+1) - IBAND</span><br><span class="line">	    DO 200 K &#x3D; KSTRT, KSTOP</span><br><span class="line">	      RHS(K) &#x3D; RHS(K) - S*ENV(L)</span><br><span class="line">	      L &#x3D; L + 1</span><br><span class="line">	    CONTINUE</span><br><span class="line">	    COUNT &#x3D; IBAND</span><br><span class="line">	    OPS &#x3D; OPS + COUNT</span><br><span class="line">	  GO TO 100</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<p>一直遍历到 <img src="https://math.now.sh?inline=i%20%3D%201" style="display:inline-block;margin: 0;"/> 为止，便得到了所有未知数的解。</p>
+<h1>参考文献</h1>
+<ol>
+<li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>稀疏矩阵</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>稀疏矩阵</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>稀疏矩阵算法Envelope方法一之存储格式</title>
+    <url>/posts/e5ac741a/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节是介绍 George and Liu 书中 Envelope Method 的应用</p>
+<span id="more"></span>
+<h1>Envelope 存储格式</h1>
+<p>这个存储格式中，数组 <strong>ENV</strong> 包含矩阵中每一行的 <em>envelope entries</em> ，一个长度为 <img src="https://math.now.sh?inline=n%2B1" style="display:inline-block;margin: 0;"/> 的索引向量 <strong>XENV</strong> ，其用于指示每一行的开始位置，而 <img src="https://math.now.sh?inline=XENV%28n%2B1%29%20%3D%20%7CEnv(%5Cmathbf%7BA%7D)%7C%20%2B%201" style="display:inline-block;margin: 0;"/> ，如同之前的索引向量。</p>
+<p><img src="https://math.now.sh?inline=Env%28%5Cmathbf%7BA%7D%29" style="display:inline-block;margin: 0;"/> 中的 <img src="https://math.now.sh?inline=%5C%7B%20i%2Cj%5C%7D" style="display:inline-block;margin: 0;"/> 元素对应关系如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5C%7B%20i%2Cj%5C%7D%20%5Crightarrow%20%5Cmathrm%7BXENV%7D%28i%2B1%29%20-%20(i-j)%0A" /></p><p>换句话说，矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的 <em>envelope</em> 区域的某个元素 <img src="https://math.now.sh?inline=a_%7Bij%7D" style="display:inline-block;margin: 0;"/> 可以表示为 <img src="https://math.now.sh?inline=ENV%28XENV(i%2B1%29%20-%20(i-j))" style="display:inline-block;margin: 0;"/> 。下图是一个例子，对于其中的 <img src="https://math.now.sh?inline=a_%7B64%7D" style="display:inline-block;margin: 0;"/> ，我们有 <img src="https://math.now.sh?inline=ENV%28%5Cmathrm%7BXENV%7D(7%29%20-%20(6-4))%20%3D%20ENV(8)%20%3D%20a_%7B64%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p><img src="41.png" alt="1"></p>
+<p>更一般的操作是提取 <em>envelope</em> 区域的一行，这个可以按照下面的方式进行</p>
+<h3 id="The-Storage-Allocation-Subroutine-FNENV">The Storage Allocation Subroutine FNENV</h3>
+<p>在这一章节中我们讨论子程序 <strong>FNENV (FiNd ENVelope)</strong> ，这个子程序输入为矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 的图，存储在数组对**(XADJ, ADJNCY)** 中，伴随着其置换矩阵 <strong>PERM</strong> 以及其逆向量 <strong>INVP</strong> 。假如 <img src="https://math.now.sh?inline=%5Cmathrm%7BPERM%7D%28i%29%20%3D%20k" style="display:inline-block;margin: 0;"/> ，那么就说明原始编号 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 在新顺序中其编号是 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/>  。我们通常会用一个相应的长度为 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 的置换向量 <strong>INVP</strong> (<em>the inverse permutation</em>) ，其满足 <img src="https://math.now.sh?inline=%5Cmathrm%7BINVP%28PERM(i%29)%20%3D%20i%7D" style="display:inline-block;margin: 0;"/> 。也就是说，INVP(k) 表示原始编号 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 在新顺序中的位置。</p>
+<p>这个子程序的目的是计算上面讨论的数组 <strong>XENV</strong> ，这可以用于存储 <img src="https://math.now.sh?inline=%5Cmathbf%7BPAP%5E%7BT%7D%7D" style="display:inline-block;margin: 0;"/> 的 Cholesky 分解因子 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> ；同时返回 <strong>ENVSZE</strong>，这是 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 的 <em>envelope size</em> ，等于<img src="https://math.now.sh?inline=XENV%28NEQNS%20%2B1%29-1" style="display:inline-block;margin: 0;"/> ，其中 <strong>NEQNS</strong> 为节点或者方程的数目。</p>
+<p>这里是说，<img src="https://math.now.sh?inline=%5Cmathbf%7BPAP%5E%7BT%7D%7D" style="display:inline-block;margin: 0;"/> 和  <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 的 <em>envelope</em> 的结构是一样的（证明略）。</p>
+<p>这个子程序的内容很简单，循环 <code>DO 200 I= ...</code> 对每一行进行处理，其中循环 <code>DO 100 I= ...</code> 会找到  <img src="https://math.now.sh?inline=%5Cmathbf%7BPAP%5E%7BT%7D%7D" style="display:inline-block;margin: 0;"/> 第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行的第一个非零元素的索引 (<strong>IFIRST</strong>) 。</p>
+<p><img src="42.png" alt="1"></p>
+<p><img src="43.png" alt="1"></p>
+<p>下面开始逐行解析脚本，首先初始化 BANDW=0, ENVSZE=1，注意这里的 ENVSZE 其实就是每行的初始位置。</p>
+<p>对于每一行进行循环，<code>XENV(I) = ENVSZE</code>  设置每一行的 XENV 的元素，这一行对应的置换矩阵的原始节点编号为 <code>IPERM = PERM(I)</code>，设这一行第一个非零元素位置为 IFIRST ，初始值设为 <code>i</code></p>
+<p>通过 <code>DO 100</code> 遍历其相邻的原始节点，<code>NABOR = ADJNCY(J)</code> 得到其原始编号，<code>NABOR = INVP(NABOR)</code> 进一步得到其在置换矩阵中的新编号，如果新编号低于 IFIRST ，则用这个编号覆盖 IFIRST ，最终得到 IFIRST 的真实值。</p>
+<p>通过 <code>I - IFIRST</code> 得到这一行的 <em>bandwidth</em> ，记为 <code>IBAND</code> ，下一行的初始位置更新为 <code>ENVSZE = ENVSZE + IBAND</code> ，如果 <code>BANDW</code> 小于  <code>IBAND</code> ，则 <code>BANDW = IBAND</code> ，最终得到矩阵的 <em>bandwidth</em> 。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  BANDW &#x3D; 0</span><br><span class="line">	  ENVSZE &#x3D; 1</span><br><span class="line">	  DO 200 I&#x3D;1, NEQNS</span><br><span class="line">	    XENV(I) &#x3D; ENVSZE</span><br><span class="line">	    IPERM &#x3D; PERM(I)</span><br><span class="line">	    JSTRT &#x3D; XADJ(IPERM)</span><br><span class="line">	    JSTOP &#x3D; XADJ(IPERM + 1) - 1</span><br><span class="line">	    IF (JSTOP .LT. JSTRT) GO TO 200</span><br><span class="line">          IFIRST &#x3D; I</span><br><span class="line">          DO 100 J &#x3D; JSTRT, JSTOP</span><br><span class="line">            NABOR &#x3D; ADJNCY(J)</span><br><span class="line">            NABOR &#x3D; INVP(NABOR)</span><br><span class="line">            IF ( NABOR .LT. IFIRST ) IFIRST &#x3D; NABOR</span><br><span class="line">100       CONTINUE</span><br><span class="line">          IBAND &#x3D; I - IFIRST</span><br><span class="line">          ENVSZE &#x3D; ENVSZE + IBAND</span><br><span class="line">          IF (BANDW .LT. IBAND) BANDW &#x3D; IBAND</span><br><span class="line">200   CONTINUE</span><br></pre></td></tr></table></figure>
+<p>最后，XENV 需要补上最后一个元素 <code>NEQNS+1</code></p>
+<p>实际的 <code>ENVSZE</code> 需要减1，程序终止</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  XENV(NEQNS+1) &#x3D; ENVSZE</span><br><span class="line">  ENVSZE &#x3D; ENVSZE - 1</span><br><span class="line">  RETURN</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>稀疏矩阵</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>稀疏矩阵</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>稀疏矩阵算法RCM算法三之RCM算法</title>
+    <url>/posts/23fd2749/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节是介绍 George and Liu 书中 RCM 算法脚本的第三篇，介绍RCM的完整算法。</p>
+<span id="more"></span>
+<h1>程序结构</h1>
+<p>在这一章节中，我们会介绍三个子程序 <strong>DEGREE, RCM, GENRCM</strong> ，再加上之前提到的子程序，就构成了 RCM 算法的所有脚本。其输入为 ROOT, MASK, XADJ, ADJNCY 和 PERM 。不同子程序之间的关系见下图：</p>
+<p><img src="32.png" alt="1"></p>
+<h1>DEGREE</h1>
+<p>这个子程序会计算一个连通组分中所有节点的度数。其输入为 ROOT, MASK, XADJ, ADJNCY 。</p>
+<p>这个子程序会从第一层 (只包含 ROOT ) 开始，同时计算每一层的所有节点的度数，然后产生下一层的所有节点，加入到 LS 数组中。当一个节点加入到 LS 数组中，其在 XADJ 数组中的符号会改变，从而确保这个节点只会被记录一次（这个功能之前在 ROOTLS 中是通过修改 MASK 数组实现的，但是这里 MASK 必须保持不变，以保证所有节点的度数可以正确计算）。</p>
+<p>变量 CCSIZE 包含了当前在 LS 中的节点数目。当所有的节点均被发现之后，所有节点的度数也计算完毕，此时 LS 数组中的节点在 XADJ 中的元素会改回原来的符号。</p>
+<p>输出的 LS 的结构是一个节点，后面接着这个节点的所有相邻节点，而不是按照上面的那种层次结构。</p>
+<p>脚本如下（**IABS()**是 fortran 内置的对整数求绝对值的函数）</p>
+<p><img src="33.png" alt="1"></p>
+<p><img src="34.png" alt="1"></p>
+<p><img src="35.png" alt="1"></p>
+<p>下面我们开始逐行分析脚本。</p>
+<p>首先是初始化过程，从 ROOT 节点开始，将其加入到 LS 向量中，并将其 XADJ 中的值改为负数。</p>
+<p>凡是加入到 LS 向量中的节点，其 XADJ 中的值均要改为相应的负数，防止重复添加到 LS 向量中。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">LS(1) &#x3D; ROOT</span><br><span class="line">XADJ(ROOT) &#x3D; -XADJ(ROOT)</span><br><span class="line">LVLEND &#x3D; 0</span><br><span class="line">CCSIZE &#x3D; 1</span><br></pre></td></tr></table></figure>
+<p>开始进入循环，其中 LBEGIN 是当前层的起点，LVLEND 是当前层的终点</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">100   LBEGIN &#x3D; LVLEND + 1</span><br><span class="line">	  LVLEND &#x3D; CCSIZE</span><br></pre></td></tr></table></figure>
+<p>查找当前层的所有节点的度数，注意这里已经是加入到 LS 向量中的节点，<code>XADJ(NODE)</code> 本身就是负数，而 <code>XADJ(NODE + 1)</code> 不确定是否是负数，因此采用 <code>IABS()</code> 函数取绝对值。</p>
+<p><code>IDEG</code> 记录度数，其中的节点必须满足 MASK 值不为0的条件；如果这些节点进一步满足其 XADJ 值不为负数，则加入到 LS 向量中，LS 向量长度 CCSIZE 加1，其 XADJ 值改为负数，这些节点作为下一层次的节点。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  DO 400 I &#x3D; LBEGIN, LVLEND</span><br><span class="line">	    NODE &#x3D; LS(I)</span><br><span class="line">	    JSTRT &#x3D; -XADJ(NODE)</span><br><span class="line">	    JSTOP &#x3D; IABS(XADJ(NODE + 1)) - 1</span><br><span class="line">	    IDEG &#x3D; 0</span><br><span class="line">	    </span><br><span class="line">	    IF (JSTOP .LT. JSTRT) GO TO 300</span><br><span class="line">	      DO 200 J &#x3D; JSTRT, JSTOP</span><br><span class="line">	        NBR &#x3D; ADJNCY(J)</span><br><span class="line">	        IF (MASK(NBR) .EQ. 0) GO TO 200</span><br><span class="line">	          IDEG &#x3D; IDEG + 1</span><br><span class="line">	          IF (XADJ(NBR) .LT. 0) GO TO 200</span><br><span class="line">	          	XADJ(NBR) &#x3D; -XADJ(NBR)</span><br><span class="line">	          	CCSIZE &#x3D; CCSIZE + 1</span><br><span class="line">	          	LS(CCIZE) &#x3D; NBR</span><br><span class="line">200	      CONTINUE</span><br><span class="line">300	    DEG(NODE) &#x3D; IDEG</span><br><span class="line">400   CONTINUE</span><br></pre></td></tr></table></figure>
+<p>我们计算当前层次的节点数目，如果不为0，则继续循环。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">LVSIZE &#x3D; CCSIZE - LVLEND</span><br><span class="line">IF (LVSIZE .GT. 0) GO TO 100</span><br></pre></td></tr></table></figure>
+<p>最后我们将 XADJ 向量“复原”</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  DO 500 I &#x3D; 1,CCSIZE</span><br><span class="line">	  	NODE &#x3D; LS(I)</span><br><span class="line">	  	XADJ(NODE) &#x3D; -XADJ(NODE)</span><br><span class="line">500     CONTINUE</span><br><span class="line">      RETURN</span><br><span class="line">    END</span><br></pre></td></tr></table></figure>
+<h1>RCM</h1>
+<p><strong>Reverse Cuthill-McKee</strong>, 这个子程序就是对一个<strong>连通组分</strong>执行 RCM 算法，其输入为  ROOT, MASK, XADJ, ADJNCY 。</p>
+<p>因为这个算法要求知道连通组分中所有节点的度数，因此其第一步就是通过调用 <strong>DEGREE</strong> 子程序计算所有节点的度数，所有节点会按照一层接着一层的顺序排列在 LS 数组中（这里是 PERM 数组），但是每一层的节点之间没有按照度数从低到高排序；因此我们通过 <code>DO 600 I = ...</code> 对每一层的节点按照度数排序或者说编码，生成一个新的顺序的层；通过循环 <code>DO 200 I = ...</code> 查找某个节点的所有未编码的所有临近节点，按照度数从低到高的顺序排序。最终新的排序会记录在 <strong>PERM</strong> 数组中，最后再翻转这个顺序，得到我们最终想要的顺序。</p>
+<p>注意，这里就像 ROOTLS 子程序，当节点 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 编码了之后，MASK(i) 会设为0；但是不像  ROOTLS 子程序， RCM 子程序不会将 MASK 数组恢复如初，其编码后的节点始终为 0 。</p>
+<p><img src="36.png" alt="1"></p>
+<p><img src="37.png" alt="1"></p>
+<p><img src="38.png" alt="1"></p>
+<p>下面我们开始逐行查看这个脚本</p>
+<p>首先我们调用 DEGREE 子程序，找到连通组分中所有节点的度数，注意这里的 LS 向量替换为 PERM 向量</p>
+<figure class="highlight fortran"><table><tr><td class="code"><pre><span class="line">  <span class="keyword">CALL</span> DEGREE( ROOT, XADJ, ADJNCY, MASK, DEG, </span><br><span class="line"><span class="number">1</span>	CCSIZE, PERM)</span><br></pre></td></tr></table></figure>
+<p>然后我们从 ROOT 出发，将其 MASK 值设为 0</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MASK(ROOT) &#x3D; 0</span><br><span class="line">IF(CCSIZE .LE. 1) RETURN</span><br><span class="line">LVLEND &#x3D; 0</span><br><span class="line">LNBR &#x3D; 1</span><br></pre></td></tr></table></figure>
+<p>LBEGIN 和 LVLEND 指向当前层次的初始和结束位置，进入循环。</p>
+<p>FNBR 和 LNBR 指向这个节点的所有未排序的相邻节点的初始和结束位置（由于是连通子图，每个节点至少有一个相邻节点；但是考虑到 MASK 值为0的情况，因此可能有0个相邻节点）。并且将相应的节点重新赋值给 PERM 向量（这些节点之间还没有排序）。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">100	  LBEGIN &#x3D; LVLEND + 1</span><br><span class="line">	  LVLEND &#x3D; LNBR</span><br><span class="line">	  DO 600 I &#x3D; LBEGIN, LVLEND</span><br><span class="line">	  	NODE &#x3D; PERM(I)</span><br><span class="line">	  	JSTRT &#x3D; XADJ(NODE)</span><br><span class="line">	  	JSTOP &#x3D; XADJ(NODE+1)-1</span><br><span class="line">	  	</span><br><span class="line">	  	FNBR &#x3D; LNBR + 1</span><br><span class="line">	  	DO 200 J &#x3D; JSTRT, JSTOP</span><br><span class="line">	  		NBR &#x3D; ADJNCY(J)</span><br><span class="line">	  		IF (MASK(NBR) .EQ. 0) GO TO 200</span><br><span class="line">	  			LNBR &#x3D; LNBR + 1</span><br><span class="line">	  			MASK(NBR) &#x3D; 0</span><br><span class="line">	  			PERM(LNBR) &#x3D; NBR</span><br><span class="line">200     CONTINUE	  	</span><br></pre></td></tr></table></figure>
+<p>如果没有MASK 不为0的相邻节点，则 FNBR = LNBR + 1；如果只有一个MASK 值不为0的相邻节点，此时 FNBR = LNBR。这两种情况下，相邻节点不需要排序，<code>GO TO 600</code>，查找下一个节点。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">IF (FNBR .GE. LNBR) GO TO 600</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>正常情况下，我们要对刚刚加入到 PERM 向量中的向量节点进行排序（注意这里还在 <code>DO 600</code> 的循环内部）。</p>
+<p>下面这段脚本的可读性太差了。看了半天大概看懂了，第 K 个位置和节点 NBR 相当于新增的节点，而之前的 FNBR 到  K-1 默认是已经排好序的节点。首先将第 K 个位置的节点与 K-1 位置的节点比较，如果左边大于等于右边则不用重排；否则将 K-1 位置的节点放到 K 位置，将 NBR 再和 K-2 位置的节点比较，依次比下去，直到找到 NBR 节点合适的<strong>插入</strong>位置。</p>
+<p>其实就是看新增的 NBR 节点适合插入哪个位置，其实就是<a href="https://www.runoob.com/w3cnote/insertion-sort.html"><strong>插入排序</strong>算法</a>。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">		  K&#x3D; FNBR</span><br><span class="line">300		  L &#x3D; K</span><br><span class="line">		    K &#x3D; K + 1</span><br><span class="line">		    NBR &#x3D; PERM(K)</span><br><span class="line">400		    IF (L .LT. FNBR) GO TO 500</span><br><span class="line">		      LPERM &#x3D; PERM(L)</span><br><span class="line">		      IF ( DEG(LPERM) .LE. DEG(NBR) ) GO TO 500</span><br><span class="line">		        PERM(L+1) &#x3D; LPERM</span><br><span class="line">		        L &#x3D; L-1</span><br><span class="line">		        GO TO 400</span><br><span class="line">500		    PERM(L+1) &#x3D; NBR</span><br><span class="line">		    IF( K .LT. LNBR ) GO TO 300</span><br><span class="line">600	  CONTINUE</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>对这一层的所有节点的相邻节点进行排序，加入到 PERM 中后，判断是否新增了节点，即 LNBR 是否大于 LVLEND ，LNBR 是此时 PERM 的长度，LVLEND 是之前 PERM 的长度。如果新增了节点，则继续循环</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">IF (LNBR .GT. LVLEND) GO TO 100</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>最后我们对 PERM 向量进行翻转，K 是总数除以2取整，然后第一个数和最后一个数互换，第二个数和倒数第二个数互换，以此类推。</p>
+<p>举个例子，假设 CCSIZE = 5，那么 K = 5/2=2，那么就是位置1和位置5的数互换，位置2和位置4的数互换，位置3不动。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  K &#x3D; CCSIZE&#x2F;2</span><br><span class="line">	  L &#x3D; CCSIZE</span><br><span class="line">	  DO 700 I &#x3D; 1, K</span><br><span class="line">	    LPERM &#x3D; PERM(L)</span><br><span class="line">	    PERM(L) &#x3D; PERM(I)</span><br><span class="line">	    PERM(I) &#x3D; LPERM</span><br><span class="line">	    L &#x3D; L - 1</span><br><span class="line">700	  CONTINUE</span><br><span class="line">	  RETURN</span><br><span class="line">	END</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1>GENRCM</h1>
+<p><strong>(GENeral RCM)</strong> ，这个子程序用于找到一个<strong>不连通的图</strong>的 RCM 顺序，这个子程序会对每一个连通组分运行子程序 RCM 。这个子程序的输入为 <strong>NEQNS</strong> (the number of nodes or equations)，<strong>(XADJ, ADJNCY)</strong>。中间数据为 <strong>MASK</strong> 和 <strong>XLS</strong> ，作为中间子程序 FNROOT 和 RCM 的输入。</p>
+<p>这个子程序一开始将 <strong>MASK</strong> 中的所有值均设为 1，之后对 MASK 进行循环知道其发现一个节点 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> ，其 MASK(i) = 1;  节点 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 和 <strong>MASK</strong>, <strong>(XADJ, ADJNCY)</strong> 便可以指定一个连通子图，之后调用子程序 <strong>FNROOT</strong> 和 <strong>RCM</strong> 来确定这个子图中所有节点的顺序（注意运行完 RCM 之后，所有排序号的节点其 MASK 值会设为 0）。</p>
+<p>注意 <strong>NUM</strong> 指向数组 <strong>PERM</strong> 中的第一个自由的位置 (<em>first free position</em>) ，每次运行完 RCM 子程序后就会更新。<strong>GENRCM</strong> 程序中运行 RCM 中关于 <strong>PERM</strong> 的实际参数为 <strong>PERM(NUM)</strong> ，也就是说在 RCM 中的 PERM(NUM) 参数是 GENRCM 中 PERM 数据的最后 <strong>NEQNS - NUM + 1</strong> 个元素。</p>
+<p>最后当一个连通组分排好序后，<strong>GENRCM</strong> 程序会查找下一个 <img src="https://math.now.sh?inline=MASK%28i%29%20%3D%201" style="display:inline-block;margin: 0;"/> 的节点，对下一个连通组分进行排序，直到终止。</p>
+<p><img src="39.png" alt="1"><img src="40.png" alt="1"></p>
+<p>下面我们开始逐行解析脚本</p>
+<p>首先将 MASK 向量的元素均初始化为 1，NUM 初始设为 1</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  DO 100 I &#x3D; 1, NEQNS</span><br><span class="line">  	    MASK(I) &#x3D; 1</span><br><span class="line">100   CONTINUE</span><br><span class="line">	  NUM &#x3D; 1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>开始循环，找到第一个 MASK 值不为 0 个节点，设为 ROOT</p>
+<p>然后调用 FNROOT 查找一个合适的初始节点，然后调用 RCM 算法查找合适的顺序，其中 NUM 表示 PERM 第一额可用的位置。</p>
+<p>FNROOT 子程序中的 LS 向量用 PERM(NUM) 替代，RCM 子程序中的 DEG 向量用 XLS 替代，应该是出于节省内存的作用。这两个都只是中间向量，没有必要再创建两个数组。</p>
+<p>调用完这两个子程序之后，已经排序的节点的 MASK 值已经设为 0 了。</p>
+<p>之后对 NUM 进行更新，如果 NUM 大于 NEQNS ，说明所有节点已经排序，退出程序 (<code>RETURN</code>) ；否则继续对下一个连通组分进行排序，直至所有节点均被排序。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  DO 200 I &#x3D; 1, NEQNS</span><br><span class="line">	  IF (MASK(I) .EQ. 0) GO TO 200</span><br><span class="line">	    ROOT &#x3D; I</span><br><span class="line">	    CALL FNROOT( ROOT, XADJ, ADJNCY, MASK,</span><br><span class="line">	 1   	NLVL, XLS, PERM(NUM))</span><br><span class="line">	 	CALL RCM( ROOT, XADJ, ADJNCY, MASK,</span><br><span class="line">	 1		PERM(NUM), CCSIZE, XLS)</span><br><span class="line">	 	</span><br><span class="line">	 	NUM &#x3D; NUM + CCSIZE</span><br><span class="line">	 	IF (NUM .GT. NEQNS) RETURN</span><br><span class="line">200   CONTINUE</span><br><span class="line">      RETURN</span><br><span class="line">    END</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>稀疏矩阵</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>稀疏矩阵</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>稀疏矩阵算法RCM算法二之查找初始位点程序</title>
+    <url>/posts/7fa16310/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节是介绍 George and Liu 书中 RCM 算法脚本的第二篇，介绍查找初始节点的算法。</p>
+<span id="more"></span>
+<h1>ROOTLS</h1>
+<p>(<strong>ROOTed Level Structure</strong>) 这个子程序的目的是产生一个<strong>连通组分</strong>的 <em>level structure</em> 。</p>
+<p>其输入参数为 <strong>ROOT</strong>, <strong>MASK</strong>, <strong>XADJ</strong>, <strong>ADJNCY</strong>。<strong>(XADJ, ADJNCY)</strong> 为整个图的相邻结构，  <strong>MASK</strong> 和  <strong>ROOT</strong> 指定了连通子图，MASK(i)=0 的节点会直接忽略，ROOT 为起始节点。</p>
+<p>其输出的以<strong>ROOT</strong>为根的  <em>level structure</em> ，保存在数组对 <strong>(XLS, LS)</strong> 中，其第 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 层的节点为 <img src="https://math.now.sh?inline=LS%28j%29%2C%20XLS(k)%20%5Cleq%20j%20%3C%20XLS(k%2B1)" style="display:inline-block;margin: 0;"/> 。总层数存储在 <strong>NLVL</strong> 。</p>
+<p>注意由于 Fortran 是 1-index ，因此算法中 0 水平在代码中是 1，因此这里的 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 其实是上面算法里的 <img src="https://math.now.sh?inline=k-1" style="display:inline-block;margin: 0;"/> 层 <img src="https://math.now.sh?inline=L_%7Bk-1%7D" style="display:inline-block;margin: 0;"/> ，而 <img src="https://math.now.sh?inline=NLVL%20%3D%20%5Cell%28x%29%20%2B%201" style="display:inline-block;margin: 0;"/> 。</p>
+<p>这个子程序会逐层查找节点，所有找到的节点会存储在数组 <strong>LS</strong> 中，然后其相应的 <strong>MASK</strong> 的值设置为 0 ，因此这些节点不会再出现在 <strong>LS</strong> 中。当所有的水平都找完，MASK 中所有 level structure 中的节点的值会重新设置为 1 。</p>
+<p><img src="27.png" alt="1"></p>
+<p><img src="28.png" alt="1"></p>
+<p><img src="29.png" alt="1"></p>
+<p>下面逐行进行解析，根据注释，首先是一个初始化过程，第一层就是 ROOT 节点本身，加入到 LS 中，并将其 MASK 值设为0。总层数 NLVL 初始化为 0，LVLEND 设为0 (这个变量的含义下面会提到)，CCSIZE 设为 1 (CCSIZE 为当前 LS 向量的长度)</p>
+<figure class="highlight fortran"><table><tr><td class="code"><pre><span class="line">MASK(ROOT) = <span class="number">0</span></span><br><span class="line">LS(<span class="number">1</span>) = ROOT</span><br><span class="line">NLVL = <span class="number">0</span></span><br><span class="line">LVLEND = <span class="number">0</span></span><br><span class="line">CCSIZE = <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>下一步，我们获得当前层次在 LS 的初始位置 LBEGIN 和结束位置 LVLEND，由于第一层只有 ROOT 这个节点，因此目前 LBEGIN =  LVLEND = 1。总层数 NLVL 加一，将本层次的初始位置加入到 XLS 中。</p>
+<figure class="highlight fortran"><table><tr><td class="code"><pre><span class="line"><span class="number">200</span>	  LBEGIN = LVLEND + <span class="number">1</span></span><br><span class="line">	  LVLEND = CCSIZE</span><br><span class="line">	  NLVL = NLVL + <span class="number">1</span></span><br><span class="line">	  XLS(NLVL) = LBEGIN</span><br></pre></td></tr></table></figure>
+<p>对本层次的所有节点逐一查找相邻节点，其中如果某一个节点的相邻节点数目为 0 ，那么存在 <code>XADJ(NODE +1) = XADJ(NODE)</code>，即 <code>JSTOP = JSTRT - 1</code> ，满足 <code>JSTOP &lt; JSTRT</code> ，此时直接跳过这个节点（<code>GO TO 400</code>）。</p>
+<p>对于下一层的向量节点，其必须满足 MASK 值不为 0 的条件，这样做有两个作用，一是找到的节点是我们需要的连通组分内的节点，二是避免 LS 向量中出现重复节点。对于满足 MASK 值不为 0 的相邻节点，CCSIZE 加1，将其加入到 LS 向量中，其 MASK 值设为 0。</p>
+<p>因此，运行完这一步之后，LS 向量中加入了下一层次的节点，其长度 CCSIZE 同样更新为当前 LS 向量的长度。</p>
+<figure class="highlight fortran"><table><tr><td class="code"><pre><span class="line">	  <span class="keyword">DO</span> <span class="number">400</span> I = LBEGIN, LVLEND</span><br><span class="line">	    NODE = LS(I)</span><br><span class="line">	    JSTRT = XADJ(NODE)</span><br><span class="line">	    JSTOP = XADJ(NODE+<span class="number">1</span>) - <span class="number">1</span></span><br><span class="line">	    <span class="keyword">IF</span> (JSTOP .LT. JSTRT) GO TO <span class="number">400</span></span><br><span class="line">	    <span class="keyword">DO</span> <span class="number">300</span> J = JSTRT, JSTOP</span><br><span class="line">	      NBR = ADJNCY(J)</span><br><span class="line">	      <span class="keyword">IF</span> (MASK(NBR) .EQ. <span class="number">0</span>) GO TO <span class="number">300</span></span><br><span class="line">	      CCSIZE = CCSIZE + <span class="number">1</span></span><br><span class="line">	      LS(CCSIZE) = NBR</span><br><span class="line">	      MASK(NBR) = <span class="number">0</span></span><br><span class="line"><span class="number">300</span>	    <span class="keyword">CONTINUE</span></span><br><span class="line"><span class="number">400</span>	  <span class="keyword">CONTINUE</span></span><br></pre></td></tr></table></figure>
+<p>下面我们查看添加的节点数目是否为 0，如果为 0，那就说明找到头了；不为0，则 <code>GO TO 200</code> ，接着循环，查找下一层次的节点。</p>
+<p>这里 LVLEND 是上一次循环中 LS 向量的长度，CCSIZE 是当前 LS 向量的长度，二者一相减就是本次循环新增的节点数目。</p>
+<figure class="highlight fortran"><table><tr><td class="code"><pre><span class="line">LVSIZE = CCSIZE - LVLEND</span><br><span class="line"><span class="keyword">IF</span> (LVSIZE .GT. <span class="number">0</span>) GO TO <span class="number">200</span></span><br></pre></td></tr></table></figure>
+<p>因此，当循环结束后，我们就找到了 <em>level structure</em>  中的所有节点，因此此时 LS 向量就是最终的 LS 向量。</p>
+<p>但是 XLS 向量还缺少一个元素，就是 LS 长度 + 1，即下面的 LVLEND + 1 (此时 LVLEND = CCSIZE, 也是 LS 向量长度)。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">XLS(NLVL + 1) &#x3D; LVLEND + 1</span><br></pre></td></tr></table></figure>
+<p>最后，我们将  LS 向量中的所有节点的 MASK 重新设为 1，也就是说 “还原” MASK 向量。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">	  DO 500 I &#x3D; 1,CCSIZE</span><br><span class="line">	    NODE &#x3D; LS(I)</span><br><span class="line">	    MASK(NODE) &#x3D; 1</span><br><span class="line">500	  CONTINUE</span><br><span class="line">	  RETURN</span><br><span class="line">	  END</span><br></pre></td></tr></table></figure>
+<h1>FNROOT</h1>
+<p><strong>(FiNd ROOT)</strong> 这个子程序用于查找一个<strong>连通组分</strong>的 <em>pseudo-peripheral node</em> 。</p>
+<p>其输入与上一个子程序相同，首先调用 ROOTLS 这个子程序，如果这个连通组分只有 ROOT 这一个节点或者只包含以 ROOT 为终点的一条链，那么 ROOT 就是要找的  <em>pseudo-peripheral node</em> ， LS 就是其相应的 rooted level structure ，程序终止 。</p>
+<p>否则，程序会找到最后一个水平的度数最小的一个节点，针对这个节点生成其相应的新的 level structure ，我们会检查是否 <img src="https://math.now.sh?inline=%5Cell%28x%29%20%3E%20%5Cell(r)" style="display:inline-block;margin: 0;"/> ，如果不满足则程序终止，否则则重复上述流程。</p>
+<p>当程序终止的时候，ROOT 就是我们想要找的 <em>pseudo-peripheral node</em> ，而数组对 (XLS, LS) 包含了相应的 rooted level structure 。</p>
+<p><img src="30.png" alt="1"></p>
+<p><img src="31.png" alt="1"></p>
+<p>下面我们进行逐句解析</p>
+<p>第一步，调用 ROOTLS 找到 ROOT 的 level structure，然后同样将 CCSIZE 设为 level structure 中节点数目。注意，由于我们是在一个<strong>连通组分</strong>中查找节点，因此所有可用的节点互相都是连通的，CCSIZE 就是这个连通组分的所有节点的数目，是一个固定值，也是所有可能的节点集合的节点数目的<strong>最大值</strong>。</p>
+<p>然后我们做一个判断，如果总层数为1，或者总层数等于总节点数，则直接退出程序，输入节点 ROOT 就是我们要找的节点。总节点数为1，说明<strong>连通组分</strong>中只有 ROOT 这一个节点；总层数等于总节点数，说明每一层只有一个节点，也就是连通组分中只有一条链，而 ROOT 是这条链的一个起点/终点。因此，这两种情况下，输入节点 ROOT 就是我们要找的节点。</p>
+<figure class="highlight fortran"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CALL</span> ROOTLS( ROOT, XADJ, ADJNCY, MASK, NLVL, XLS, LS)</span><br><span class="line">CCSIZE = XLS(NLVL+<span class="number">1</span>) - <span class="number">1</span></span><br><span class="line"><span class="keyword">IF</span>( NLVL .EQ. <span class="number">1</span> .OR. NLVL .EQ. CCSIZE) <span class="keyword">RETURN</span></span><br></pre></td></tr></table></figure>
+<p>如果不是上面的两种特殊情况，那么我们接着往下走。</p>
+<p>下面这一段脚本的意思，就是从 ROOT 的 level structure 的最后一层中，找到一个度数最小的节点，然后覆盖 ROOT 。</p>
+<p>JSTRT 是最后一层的初始节点位置。采用一个中间变量 MINDEG，存储最小的度数，其初始值设置为可能的最大值 CCSIZE 。ROOT 首先设为最后一层的第一个节点。</p>
+<p>如果 CCSIZE 等于 JSTRT ，那就说明最后一层只有一个节点，此时 ROOT 就是我们要找的节点，直接 <code>GO TO 400</code> ，跳过下面这一段。</p>
+<p>不然地话，采用 <code>DO 300</code> 循环便利最后一层的所有节点，对于每一个节点采用 <code>DO 200</code> 循环计算该节点的度数，存储在 NDEG 中。</p>
+<p>如果 NDEG 小于  MINDEG ，则将 ROOT 赋值为 NOTE ，MINDEG 赋值为 NDEG 。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">100	  JSTRT &#x3D; XLS(NLVL)</span><br><span class="line">	  MINDEG &#x3D; CCSIZE</span><br><span class="line">	  ROOT &#x3D; LS(JSTRT)</span><br><span class="line">	  IF ( CCSIZE .EQ. JSTRT) GO TO 400</span><br><span class="line">	    DO 300 J &#x3D; JSTRT, CCSIZE</span><br><span class="line">	      NODE &#x3D; LS(J)</span><br><span class="line">	      NDEG &#x3D; 0</span><br><span class="line">	      KSTRT &#x3D; XADJ(NODE)</span><br><span class="line">	      KSTOP &#x3D; XADJ(NODE+1) - 1</span><br><span class="line">	      DO 200 K &#x3D; KSTRT, KSTOP</span><br><span class="line">	        NABOR &#x3D; ADJNCY(K)</span><br><span class="line">	        IF (MASK(NABOR) .GT. 0) NDEG &#x3D; NDEG + 1</span><br><span class="line">200	      CONTINUE</span><br><span class="line">	      IF (NDEG .GE. MINDEG) GO TO 300</span><br><span class="line">	        ROOT &#x3D; NODE</span><br><span class="line">	        MINDEG &#x3D; NDEG</span><br><span class="line">300	    CONTINUE</span><br></pre></td></tr></table></figure>
+<p>下面，我们对找到的最后一层度数最小的节点 ROOT ，再运行一遍 ROOTLS 子程序，唯一区别是总层数存储在变量 NUNLVL 中。</p>
+<p>首先 NUNLVL 不可能小于 NLVL ，因为按照 level structure 的结构，NLVL - 1 就是初始节点到最后一层节点的<strong>最短</strong>路径长度， 因此反过来从最后一层的最小度数节点出发，其 level structure 的最后一层如果包含了初始节点，那么 NUNLVL = NLVL ；如果不包含初始节点，那么 NUNLVL &gt; NLVL ，因此不存在 NUNLVL  &lt; NLVL 的可能。</p>
+<p>因此这里的 <code>IF (NUNLVL .LE. NLVL) RETURN</code> 等价于<code>IF (NUNLVL .EQ. NLVL) RETURN</code>，也就是说如果 NUNLVL 等于 NLVL ，子程序终止 (<code>RETURN</code>) 。</p>
+<p>否则的话，将 NUNLVL 的值赋值给 NLVL，判断  NLVL 是否小于 CCSIZE ，如果 NLVL小于 CCSIZE， <code>GOTO 100</code>，重新进入循环；如果  NLVL等于 CCSIZE (不可能大于)，那么说明总层数等于总位点数，说明连通组分中只有这一条链，而 ROOT 是这条链的起点/终点，此时 ROOT 就是要找的结果，程序终止。</p>
+<figure class="highlight fortran"><table><tr><td class="code"><pre><span class="line"><span class="number">400</span>	  <span class="keyword">CALL</span> ROOTLS( ROOT, XADJ, ADJNCY, MASK, NUNLVL, XLS, LS) </span><br><span class="line">	  <span class="keyword">IF</span> (NUNLVL .LE. NLVL) <span class="keyword">RETURN</span></span><br><span class="line">	  NLVL = NUNLVL</span><br><span class="line">	  <span class="keyword">IF</span> (NLVL .LT. CCSIZE) GO TO <span class="number">100</span></span><br><span class="line">	  <span class="keyword">RETURN</span></span><br><span class="line">	  <span class="keyword">END</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>稀疏矩阵</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>稀疏矩阵</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>稀疏矩阵算法RCM算法一之理论基础</title>
+    <url>/posts/4339589f/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节是介绍 George and Liu 书中 RCM 算法脚本的第一篇。</p>
+<span id="more"></span>
+<h1>RCM理论简介</h1>
+<p>The Reverse Cuthill-McKee Algorithm，简称 RCM 算法，是对于稀疏矩阵进行排序的算法，其目的是希望将所有非零元素聚集在对角线附近，这样之后进行 Cholesky 分解得到的 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 矩阵也会有类似性质</p>
+<p>其对于一个<strong>连通图</strong>的步骤如下：</p>
+<p><img src="18.png" alt="18"></p>
+<p>如果 <img src="https://math.now.sh?inline=%5Cmathcal%7BG%7D%5E%7B%5Cmathbf%7BA%7D%7D" style="display:inline-block;margin: 0;"/> 是不连通的，我们可以对其每一个连通组分采用上面的算法。对于一个给定的起始节点，这个算法很简单。举例见下图，假设我们将节点 “g” 选为起始节点，即 <img src="https://math.now.sh?inline=x_%7B1%7D%20%3D%20g" style="display:inline-block;margin: 0;"/> 。</p>
+<p><img src="19.png" alt="1"></p>
+<p>下图说明了算法第二步中所有节点是如何排序的</p>
+<p><img src="20.png" alt="1"></p>
+<p>下图说明了第三步的结果（翻转顺序），最终 envelope size (右图框起来的元素数目)等于 22</p>
+<p><img src="21.png" alt="1"></p>
+<p>起始节点的选择会显著影响这个排序算法的效果，在这个例子中，如果我们选择 “a” 作为起始节点，效果会更好， envelope size 等于 18。</p>
+<h1>查找初始位点</h1>
+<p>我们现在看如何查找 RCM 算法的起始节点。</p>
+<p>回顾一下，一条长度为 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> ，从节点 <img src="https://math.now.sh?inline=x_%7B0%7D" style="display:inline-block;margin: 0;"/> 到 <img src="https://math.now.sh?inline=x_%7Bk%7D" style="display:inline-block;margin: 0;"/> 的通路是由不同的节点组成的有序集合 <img src="https://math.now.sh?inline=%28x_%7B0%7D%2Cx_%7B1%7D%2C%5Ccdots%2Cx_%7Bk%7D%29" style="display:inline-block;margin: 0;"/> ，其中 <img src="https://math.now.sh?inline=x_%7Bi%7D%20%5Cin%20Adj%28x_%7Bi%2B1%7D%29" style="display:inline-block;margin: 0;"/> 。两个节点 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=y" style="display:inline-block;margin: 0;"/> 的距离 <img src="https://math.now.sh?inline=d%28x%2Cy%29" style="display:inline-block;margin: 0;"/> 定义为二者最短通路的长度。我们进一步定义节点 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 的 <em><strong>eccentricity</strong></em> 为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cell%28x%29%3D%5Cmax%20%5C%7Bd(x%2C%20y)%20%5Cmid%20y%20%5Cin%20X%5C%7D%0A" /></p><p><em><strong>diameter</strong></em> <em>of <img src="https://math.now.sh?inline=%5Cmathcal%7BG%7D" style="display:inline-block;margin: 0;"/></em> 为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cdelta%28%5Cmathcal%7BG%7D%29%3D%5Cmax%20%5C%7B%5Cell(x)%20%5Cmid%20x%20%5Cin%20X%5C%7D%0A" /></p><p>或者等价于</p>
+<p style=""><img src="https://math.now.sh?from=%5Cdelta%28%5Cmathcal%7BG%7D%29%3D%5Cmax%20%5C%7Bd(x%2C%20y)%20%5Cmid%20x%2Cy%20%5Cin%20X%5C%7D%0A" /></p><p>如果一个节点 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 的 <em>eccentricity</em> 等于 图的 <em>diameter</em> ，即 <img src="https://math.now.sh?inline=%5Cell%28x%29%20%3D%20%5Cdelta(%5Cmathcal%7BG%7D)" style="display:inline-block;margin: 0;"/> ，那么我们称其为一个 <em><strong>peripheral</strong></em> <em>node</em> 。</p>
+<p>下图中的图有 8 个节点，其 <em>diameter</em> 等于 5，节点 <img src="https://math.now.sh?inline=x_%7B2%7D%2Cx_%7B5%7D%2Cx_%7B7%7D" style="display:inline-block;margin: 0;"/> 为 <em><strong>peripheral</strong></em> <em>node</em> 。</p>
+<p><img src="22.png" alt="1"></p>
+<p>我们这一小节的目标就是得到一个有效的<strong>启发式</strong>算法，来找到 <em><strong>eccentricity</strong></em> 很高的节点。注意，我们的算法不一定能找到  <em><strong>peripheral</strong></em> <em>node</em> ，但是我们找到的节点往往具有很高的 <em><strong>eccentricity</strong></em> ，适合作为初始节点。进一步地说，在实际应用中， <em><strong>peripheral</strong></em> <em>node</em> 貌似也没有比算法找到的初始节点有任何优势。最后查找  <em><strong>peripheral</strong></em> <em>node</em> 可能是非常耗时的。</p>
+<p>在下面的章节中，我们称用这个算法找到的节点为 <em>pseudo-peripheral</em> nodes 。这个算法的关键是 <em>rooted level structure</em> ，给定一个节点 <img src="https://math.now.sh?inline=x%20%5Cin%20X" style="display:inline-block;margin: 0;"/> ，<em>the level structure rooted at x</em> 就是 <em>partitioning</em> <img src="https://math.now.sh?inline=%5Cmathcal%7BL%7D%28x%29" style="display:inline-block;margin: 0;"/> ，满足：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathcal%7BL%7D%28x%29%20%3D%20%5C%7B%20L_%7B0%7D(x)%2C%20L_%7B1%7D(x)%2C%5Ccdots%2CL_%7B%5Cell(x)%7D(x)%5C%7D%0A" /></p><p>其中</p>
+<p style=""><img src="https://math.now.sh?from=L_%7B0%7D%28x%29%20%3D%20%5C%7B%20x%20%5C%7D%2C%20L_%7B1%7D(x)%20%3D%20Adj(L_%7B0%7D(x))%0A" /></p><p>并且</p>
+<p style=""><img src="https://math.now.sh?from=L_%7Bi%7D%28x%29%20%3D%20Adj(L_%7Bi-1%7D(x))%20-%20L_%7Bi-2%7D(x)%2C%20%5Cquad%20i%3D2%2C3%2C%5Ccdots%2C%5Cell(x)%0A" /></p><p><em>eccentricity</em> <img src="https://math.now.sh?inline=%5Cell%28x%29" style="display:inline-block;margin: 0;"/> 称为 <img src="https://math.now.sh?inline=%5Cmathcal%7BL%7D%28x%29" style="display:inline-block;margin: 0;"/> 的<strong>长度</strong> (<em>length</em>) 。 <img src="https://math.now.sh?inline=%5Cmathcal%7BL%7D%28x%29" style="display:inline-block;margin: 0;"/> 的<strong>宽度</strong> (<em>width</em>) 定义为：</p>
+<p style=""><img src="https://math.now.sh?from=w%28x%29%3D%5Cmax%20%5Cleft%5C%7B%5Cleft%7CL_%7Bi%7D(x)%5Cright%7C%20%5Cmid%200%20%5Cleq%20i%20%5Cleq%20%5Cell(x)%5Cright%5C%7D%0A" /></p><p>下图中我们展示了一个  <em>rooted level structure</em> at <img src="https://math.now.sh?inline=x_%7B6%7D" style="display:inline-block;margin: 0;"/> ，我们注意到 <img src="https://math.now.sh?inline=%5Cell%28x_%7B6%7D%29%20%3D%203" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=w%28x_%7B6%7D%29%20%3D%203" style="display:inline-block;margin: 0;"/> 。</p>
+<p><img src="23.png" alt="1"></p>
+<p>我们现在可以描述 <em>pseudo-peripheral</em> nodes finding algorithm 了，如下</p>
+<p><img src="24.png" alt="1"></p>
+<p><img src="25.png" alt="1"></p>
+<p>下图是其中的一个例子，<em>the level structures</em> 的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 层标记为 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 。</p>
+<p><img src="26.png" alt="1"></p>
+<h1>参考文献</h1>
+<ol>
+<li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>稀疏矩阵</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>稀疏矩阵</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>H逆矩阵的推导</title>
     <url>/posts/6a829195/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在<a href="https://vincere.fun/posts/e0b3b4ee/">基因组选择模型介绍下</a>提到了H逆矩阵，这里是补上证明。</p>
