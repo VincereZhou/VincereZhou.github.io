@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    稀疏矩阵算法最小度数算法五之最小度数算法子程序QMDRCH |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-稀疏矩阵算法最小度数算法五之最小度数算法子程序QMDRCH"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  稀疏矩阵算法最小度数算法五之最小度数算法子程序QMDRCH
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/cbfa6df5/" class="article-date">
+  <time datetime="2022-09-25T08:49:21.000Z" itemprop="datePublished">2022-09-25</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%A8%80%E7%96%8F%E7%9F%A9%E9%98%B5/">稀疏矩阵</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">6 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节介绍 <em>the minimum degree algorithm</em> ，我个人将其翻译为最小度数算法。这里我们看最小度数算法的子程序 QMDRCH。</p>
+<span id="more"></span>
+<h1>QMDRCH</h1>
+<p><strong>(Quotient MD Reachable set)</strong> ，这个子程序用于查找一个给定节点 ROOT 通过已经消元的节点的 <em>reachable set</em> 。这里使用的相邻结构必须已经是之前提到的商图结构。</p>
+<p>输出的 <em>reachable set</em> 存储在向量 <strong>RCHSET</strong> 中，其大于为 RCHSZE 。作为一个副产品，邻近 ROOT 的已经消元的 supernode 放在 <strong>NBRHD</strong>  中，其大小为 NHDSZE 。则两个集合中的节点其 MARKER 值均会设为非零值。</p>
+<p>这个子程序完全就是之前提到的算法的实现，如下图。</p>
+<p><img src="67.png" alt="1"></p>
+<p>脚本如下：</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line">C***************************************************************           <span class="number">1.</span></span><br><span class="line">C***************************************************************           <span class="number">2.</span></span><br><span class="line">C*********     QMDRCH ..... QUOT <span class="built_in">MIN</span> DEG REACH SET    **********           <span class="number">3.</span></span><br><span class="line">C***************************************************************           <span class="number">4.</span></span><br><span class="line">C***************************************************************           <span class="number">5.</span></span><br><span class="line"><span class="comment">C                                                                          6.</span></span><br><span class="line"><span class="comment">C     PURPOSE - THIS SUBROUTINE DETERMINES THE REACHABLE SET OF            7.</span></span><br><span class="line"><span class="comment">C        A NODE THROUGH A GIVEN SUBSET.  THE ADJACENCY STRUCTURE           8.</span></span><br><span class="line"><span class="comment">C        IS ASSUMED TO BE STORED IN A QUOTIENT GRAPH FORMAT.               9.</span></span><br><span class="line"><span class="comment">C                                                                         10.</span></span><br><span class="line"><span class="comment">C     INPUT PARAMETERS -                                                  11.</span></span><br><span class="line"><span class="comment">C        ROOT - THE GIVEN NODE NOT IN THE SUBSET.                         12.</span></span><br><span class="line"><span class="comment">C        (XADJ, ADJNCY) - THE ADJACENCY STRUCTURE PAIR.                   13.</span></span><br><span class="line"><span class="comment">C        DEG - THE DEGREE VECTOR.  DEG(I) LT 0 MEANS THE NODE             14.</span></span><br><span class="line"><span class="comment">C               BELONGS TO THE GIVEN SUBSET.                              15.</span></span><br><span class="line"><span class="comment">C                                                                         16.</span></span><br><span class="line"><span class="comment">C     OUTPUT PARAMETERS -                                                 17.</span></span><br><span class="line"><span class="comment">C        (RCHSZE, RCHSET) - THE REACHABLE SET.                            18.</span></span><br><span class="line"><span class="comment">C        (NHDSZE, NBRHD) - THE NEIGHBORHOOD SET.                          19.</span></span><br><span class="line"><span class="comment">C                                                                         20.</span></span><br><span class="line"><span class="comment">C     UPDATED PARAMETERS -                                                21.</span></span><br><span class="line"><span class="comment">C        MARKER - THE MARKER VECTOR FOR REACH AND NBRHD SETS.             22.</span></span><br><span class="line"><span class="comment">C               GT 0 MEANS THE NODE IS IN REACH SET.                      23.</span></span><br><span class="line"><span class="comment">C               LT 0 MEANS THE NODE HAS BEEN MERGED WITH                  24.</span></span><br><span class="line"><span class="comment">C               OTHERS IN THE QUOTIENT OR IT IS IN NBRHD SET.             25.</span></span><br><span class="line"><span class="comment">C                                                                         26.</span></span><br><span class="line">C***************************************************************          <span class="number">27.</span></span><br><span class="line"><span class="comment">C                                                                         28.</span></span><br><span class="line">      <span class="function"><span class="keyword">SUBROUTINE</span></span>  QMDRCH ( ROOT, XADJ, ADJNCY, DEG, MARKER,               <span class="number">29.</span></span><br><span class="line">     <span class="number">1</span>                     RCHSZE, RCHSET, NHDSZE, NBRHD )                <span class="number">30.</span></span><br><span class="line"><span class="comment">C                                                                         31.</span></span><br><span class="line">C***************************************************************          <span class="number">32.</span></span><br><span class="line"><span class="comment">C                                                                         33.</span></span><br><span class="line">         <span class="keyword">INTEGER</span> ADJNCY(<span class="number">1</span>), DEG(<span class="number">1</span>), MARKER(<span class="number">1</span>),                            <span class="number">34.</span></span><br><span class="line">     <span class="number">1</span>           RCHSET(<span class="number">1</span>), NBRHD(<span class="number">1</span>)                                      <span class="number">35.</span></span><br><span class="line">         <span class="keyword">INTEGER</span> XADJ(<span class="number">1</span>), I, ISTRT, ISTOP, J, JSTRT, JSTOP,               <span class="number">36.</span></span><br><span class="line">     <span class="number">1</span>           NABOR, NHDSZE, NODE, RCHSZE, ROOT                        <span class="number">37.</span></span><br><span class="line"><span class="comment">C                                                                         38.</span></span><br><span class="line">C***************************************************************          <span class="number">39.</span></span><br><span class="line"><span class="comment">C                                                                         40.</span></span><br><span class="line"><span class="comment">C        -----------------------------------------                        41.</span></span><br><span class="line"><span class="comment">C        LOOP THROUGH THE NEIGHBORS OF ROOT IN THE                        42.</span></span><br><span class="line"><span class="comment">C        QUOTIENT GRAPH.                                                  43.</span></span><br><span class="line"><span class="comment">C        -----------------------------------------                        44.</span></span><br><span class="line">         NHDSZE = <span class="number">0</span>                                                       <span class="number">45.</span></span><br><span class="line">         RCHSZE = <span class="number">0</span>                                                       <span class="number">46.</span></span><br><span class="line">         ISTRT = XADJ(ROOT)                                               <span class="number">47.</span></span><br><span class="line">         ISTOP = XADJ(ROOT+<span class="number">1</span>) - <span class="number">1</span>                                         <span class="number">48.</span></span><br><span class="line">         <span class="keyword">IF</span> ( ISTOP .LT. ISTRT )  <span class="keyword">RETURN</span>                                  <span class="number">49.</span></span><br><span class="line">            <span class="keyword">DO</span> <span class="number">600</span> I = ISTRT, ISTOP                                       <span class="number">50.</span></span><br><span class="line">               NABOR =  ADJNCY(I)                                         <span class="number">51.</span></span><br><span class="line">               <span class="keyword">IF</span> ( NABOR .EQ. <span class="number">0</span> ) <span class="keyword">RETURN</span>                                 <span class="number">52.</span></span><br><span class="line">               <span class="keyword">IF</span> ( MARKER(NABOR) .NE. <span class="number">0</span> )  GO TO <span class="number">600</span>                     <span class="number">53.</span></span><br><span class="line">                  <span class="keyword">IF</span> ( DEG(NABOR) .LT. <span class="number">0</span> )     GO TO <span class="number">200</span>                  <span class="number">54.</span></span><br><span class="line"><span class="comment">C                    -------------------------------------                55.</span></span><br><span class="line"><span class="comment">C                    INCLUDE NABOR INTO THE REACHABLE SET.                56.</span></span><br><span class="line"><span class="comment">C                    -------------------------------------                57.</span></span><br><span class="line">                     RCHSZE = RCHSZE + <span class="number">1</span>                                  <span class="number">58.</span></span><br><span class="line">                     RCHSET(RCHSZE) = NABOR                               <span class="number">59.</span></span><br><span class="line">                     MARKER(NABOR) = <span class="number">1</span>                                    <span class="number">60.</span></span><br><span class="line">                     GO TO <span class="number">600</span>                                            <span class="number">61.</span></span><br><span class="line"><span class="comment">C                 -------------------------------------                   62.</span></span><br><span class="line"><span class="comment">C                 NABOR HAS BEEN ELIMINATED. FIND NODES                   63.</span></span><br><span class="line"><span class="comment">C                 REACHABLE FROM IT.                                      64.</span></span><br><span class="line"><span class="comment">C                 -------------------------------------                   65.</span></span><br><span class="line">  <span class="number">200</span>             MARKER(NABOR) = -<span class="number">1</span>                                      <span class="number">66.</span></span><br><span class="line">                  NHDSZE = NHDSZE +  <span class="number">1</span>                                    <span class="number">67.</span></span><br><span class="line">                  NBRHD(NHDSZE) = NABOR                                   <span class="number">68.</span></span><br><span class="line">  <span class="number">300</span>             JSTRT = XADJ(NABOR)                                     <span class="number">69.</span></span><br><span class="line">                  JSTOP = XADJ(NABOR+<span class="number">1</span>) - <span class="number">1</span>                               <span class="number">70.</span></span><br><span class="line">                  <span class="keyword">DO</span> <span class="number">500</span> J = JSTRT, JSTOP                                 <span class="number">71.</span></span><br><span class="line">                     NODE = ADJNCY(J)                                     <span class="number">72.</span></span><br><span class="line">                     NABOR = - NODE                                       <span class="number">73.</span></span><br><span class="line">                     <span class="keyword">IF</span> (NODE) <span class="number">300</span>, <span class="number">600</span>, <span class="number">400</span>                              <span class="number">74.</span></span><br><span class="line">  <span class="number">400</span>                <span class="keyword">IF</span> ( MARKER(NODE) .NE. <span class="number">0</span> )  GO TO <span class="number">500</span>                <span class="number">75.</span></span><br><span class="line">                        RCHSZE = RCHSZE + <span class="number">1</span>                               <span class="number">76.</span></span><br><span class="line">                        RCHSET(RCHSZE) = NODE                             <span class="number">77.</span></span><br><span class="line">                        MARKER(NODE) = <span class="number">1</span>                                  <span class="number">78.</span></span><br><span class="line">  <span class="number">500</span>             <span class="keyword">CONTINUE</span>                                                <span class="number">79.</span></span><br><span class="line">  <span class="number">600</span>       <span class="keyword">CONTINUE</span>                                                      <span class="number">80.</span></span><br><span class="line">            <span class="keyword">RETURN</span>                                                        <span class="number">81.</span></span><br><span class="line">      <span class="keyword">END</span>                                                                 <span class="number">82.</span></span><br></pre></td></tr></table></figure>
+<p>现在开始逐行分析脚本。</p>
+<p><code>DO 600</code> 会遍历 ROOT 在商图中的相邻节点，<strong>如果相邻节点 NABOR 为0，说明已经到了相邻列表的终点</strong> 。如果相邻节点 NABOR 的 MARKER 值不为0，说明这个节点合并到其它节点中或者已经在 reachable set 中了，因此直接跳过这个节点，<code>GO TO 600</code> 。</p>
+<p>如果相邻节点 NABOR 的 DEG 值低于0，说明这个节点是已经消除的 supernode, 那么 <code>GO TO 200</code> ，将 NABOR 节点的相邻节点加到  reachable set 中</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">C        -----------------------------------------                        41.</span></span><br><span class="line"><span class="comment">C        LOOP THROUGH THE NEIGHBORS OF ROOT IN THE                        42.</span></span><br><span class="line"><span class="comment">C        QUOTIENT GRAPH.                                                  43.</span></span><br><span class="line"><span class="comment">C        -----------------------------------------                        44.</span></span><br><span class="line">         NHDSZE = <span class="number">0</span>                                                       <span class="number">45.</span></span><br><span class="line">         RCHSZE = <span class="number">0</span>                                                       <span class="number">46.</span></span><br><span class="line">         ISTRT = XADJ(ROOT)                                               <span class="number">47.</span></span><br><span class="line">         ISTOP = XADJ(ROOT+<span class="number">1</span>) - <span class="number">1</span>                                         <span class="number">48.</span></span><br><span class="line">         <span class="keyword">IF</span> ( ISTOP .LT. ISTRT )  <span class="keyword">RETURN</span>                                  <span class="number">49.</span></span><br><span class="line">            <span class="keyword">DO</span> <span class="number">600</span> I = ISTRT, ISTOP                                       <span class="number">50.</span></span><br><span class="line">               NABOR =  ADJNCY(I)                                         <span class="number">51.</span></span><br><span class="line">               <span class="keyword">IF</span> ( NABOR .EQ. <span class="number">0</span> ) <span class="keyword">RETURN</span>                                 <span class="number">52.</span></span><br><span class="line">               <span class="keyword">IF</span> ( MARKER(NABOR) .NE. <span class="number">0</span> )  GO TO <span class="number">600</span>                     <span class="number">53.</span></span><br><span class="line">                  <span class="keyword">IF</span> ( DEG(NABOR) .LT. <span class="number">0</span> )     GO TO <span class="number">200</span>                  <span class="number">54.</span></span><br></pre></td></tr></table></figure>
+<p>如果 NABOR 的 MARKER 值为 0，并且 DEG 值大于等于0，那么就直接将 NABOR 加入到 reachable set 中，最后将其 MARKER 值改为 1，然后 <code>GO TO 600</code>。</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">C                    -------------------------------------                55.</span></span><br><span class="line"><span class="comment">C                    INCLUDE NABOR INTO THE REACHABLE SET.                56.</span></span><br><span class="line"><span class="comment">C                    -------------------------------------                57.</span></span><br><span class="line">                     RCHSZE = RCHSZE + <span class="number">1</span>                                  <span class="number">58.</span></span><br><span class="line">                     RCHSET(RCHSZE) = NABOR                               <span class="number">59.</span></span><br><span class="line">                     MARKER(NABOR) = <span class="number">1</span>                                    <span class="number">60.</span></span><br><span class="line">                     GO TO <span class="number">600</span>                                            <span class="number">61.</span></span><br></pre></td></tr></table></figure>
+<p>接下来是  <code>GO TO 200</code>  之后的语句，需要将   NABOR 节点的相邻节点加到  reachable set 中。</p>
+<p>将 NABOR 加入到 NBRHD 中，并将其 MARKER 值改为 -1（因为这些节点会合并到 ROOT 中，因此属于要合并的节点，其 MARKER 值改为负数） 。</p>
+<p>JSTRT 和 JSTOP 是 NABOR 的相邻列表的第一个位置和最后一个位置。注意这里 NABOR  是已经消元的 supernode ，其在商图中的相邻列表如果不够放，最后一个位置会是链接（负数），最后一个相邻位点之后一个位置为 0 。</p>
+<p>因此，<code>IF (NODE) 300, 600, 400</code> ，这是一条<strong>算术 IF 语句</strong>，会判断 NODE 的符号，根据算术表达式的结果来决定程序执行的转移，如果 NODE &lt; 0 ，则 <code>GO TO 300</code> ，此时 NODE 是下一个节点的链接，<code>NABOR = - NODE</code> ，继续遍历相邻节点 ; 如果 NODE = 0 ，则 <code>GO TO 600</code> ，说明此时已经找完所有相邻节点; 如果 NODE &gt; 0 则 <code>GO TO 400</code>，正常向下运行 。</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">C                 -------------------------------------                   62.</span></span><br><span class="line"><span class="comment">C                 NABOR HAS BEEN ELIMINATED. FIND NODES                   63.</span></span><br><span class="line"><span class="comment">C                 REACHABLE FROM IT.                                      64.</span></span><br><span class="line"><span class="comment">C                 -------------------------------------                   65.</span></span><br><span class="line">  <span class="number">200</span>             MARKER(NABOR) = -<span class="number">1</span>                                      <span class="number">66.</span></span><br><span class="line">                  NHDSZE = NHDSZE +  <span class="number">1</span>                                    <span class="number">67.</span></span><br><span class="line">                  NBRHD(NHDSZE) = NABOR                                   <span class="number">68.</span></span><br><span class="line">  <span class="number">300</span>             JSTRT = XADJ(NABOR)                                     <span class="number">69.</span></span><br><span class="line">                  JSTOP = XADJ(NABOR+<span class="number">1</span>) - <span class="number">1</span>                               <span class="number">70.</span></span><br><span class="line">                  <span class="keyword">DO</span> <span class="number">500</span> J = JSTRT, JSTOP                                 <span class="number">71.</span></span><br><span class="line">                     NODE = ADJNCY(J)                                     <span class="number">72.</span></span><br><span class="line">                     NABOR = - NODE                                       <span class="number">73.</span></span><br><span class="line">                     <span class="keyword">IF</span> (NODE) <span class="number">300</span>, <span class="number">600</span>, <span class="number">400</span>                              <span class="number">74.</span></span><br><span class="line">  <span class="number">400</span>                <span class="keyword">IF</span> ( MARKER(NODE) .NE. <span class="number">0</span> )  GO TO <span class="number">500</span>                <span class="number">75.</span></span><br><span class="line">                        RCHSZE = RCHSZE + <span class="number">1</span>                               <span class="number">76.</span></span><br><span class="line">                        RCHSET(RCHSZE) = NODE                             <span class="number">77.</span></span><br><span class="line">                        MARKER(NODE) = <span class="number">1</span>                                  <span class="number">78.</span></span><br><span class="line">  <span class="number">500</span>             <span class="keyword">CONTINUE</span>                                                <span class="number">79.</span></span><br><span class="line">  <span class="number">600</span>       <span class="keyword">CONTINUE</span>                                                      <span class="number">80.</span></span><br><span class="line">            <span class="keyword">RETURN</span>                                                        <span class="number">81.</span></span><br><span class="line">      <span class="keyword">END</span>                                                                 <span class="number">82.</span></span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%A8%80%E7%96%8F%E7%9F%A9%E9%98%B5/" rel="tag">稀疏矩阵</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/e270c640/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            稀疏矩阵算法最小度数算法六之最小度数算法子程序QMDQT
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/e0c9e6c/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">稀疏矩阵算法最小度数算法四之最小度数算法主程序</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2022
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
