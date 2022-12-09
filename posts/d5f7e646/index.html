@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    python包-openpyxl |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-python包-openpyxl"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  python包-openpyxl
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/d5f7e646/" class="article-date">
+  <time datetime="2022-12-09T09:25:45.000Z" itemprop="datePublished">2022-12-09</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a> / <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/python/">python</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">7 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>openpyxl 是一个处理 excel 的 python 包，但是相比于 pandas ，除了速度上可能有优势外，个人感觉没有 pandas 更好用。</p>
+<span id="more"></span>
+<h1>创建工作簿</h1>
+<p>这里我们可以直接使用这个包来创建一个 excel 文件，只需要导入 <code>workbook</code> 类</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">1</span>]: from openpyxl <span class="keyword">import</span> Workbook</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">2</span>]: wb = Workbook()</span><br></pre></td></tr></table></figure>
+<p>一个工作簿至少有一个工作表 (worksheet)。你可以使用 <code>workbook.active</code> 的属性来得到一个工作表，使用这种方法得到的是第一个工作表。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">3</span>]: ws = wb.active</span><br></pre></td></tr></table></figure>
+<p>你可以使用  <code>Workbook.create_sheet()</code> 方法来创建新的工作表</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">4</span>]: &gt;&gt;&gt; ws1 = wb.create_sheet(<span class="string">&quot;Mysheet&quot;</span>) <span class="comment"># insert at the end (default)</span></span><br><span class="line">   ...: <span class="comment"># or</span></span><br><span class="line">   ...: &gt;&gt;&gt; ws2 = wb.create_sheet(<span class="string">&quot;Mysheet&quot;</span>, <span class="number">0</span>) <span class="comment"># insert at first position</span></span><br><span class="line">   ...: <span class="comment"># or</span></span><br><span class="line">   ...: &gt;&gt;&gt; ws3 = wb.create_sheet(<span class="string">&quot;Mysheet&quot;</span>, -<span class="number">1</span>) <span class="comment"># insert at the penultimate position</span></span><br></pre></td></tr></table></figure>
+<p>默认创建的sheet 表的名称为 Sheet, Sheet1, Sheet2, …，你可以通过 <code>Worksheet.title</code> 属性来随时修改名称</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">7</span>]: ws.title = <span class="string">&quot;New Title&quot;</span></span><br></pre></td></tr></table></figure>
+<p>一旦你给了工作表一个名称，你就可以通过名称得到这个工作表</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">8</span>]: ws3 = wb[<span class="string">&quot;New Title&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p>你可以通过 <code>Workbook.sheetnames</code> 属性得到工作簿中所有表格的名称</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">9</span>]: <span class="built_in">print</span>(wb.sheetnames)</span><br><span class="line">[<span class="string">&#x27;Mysheet1&#x27;</span>, <span class="string">&#x27;New Title&#x27;</span>, <span class="string">&#x27;Mysheet2&#x27;</span>, <span class="string">&#x27;Mysheet&#x27;</span>]</span><br></pre></td></tr></table></figure>
+<p>你可以使用 for 循环遍历所有的表格</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">10</span>]: &gt;&gt;&gt; for sheet <span class="keyword">in</span> wb:</span><br><span class="line">    ...: ...     <span class="built_in">print</span>(sheet.title)</span><br><span class="line">    ...:</span><br><span class="line">Mysheet1</span><br><span class="line">New Title</span><br><span class="line">Mysheet2</span><br><span class="line">Mysheet</span><br></pre></td></tr></table></figure>
+<p>你可以在一个工作簿中复制一个表格，使用 <code>Workbook.copy_worksheet()</code> 方法</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">11</span>]: &gt;&gt;&gt; source = wb.active</span><br><span class="line">    ...: &gt;&gt;&gt; <span class="keyword">target</span> = wb.copy_worksheet(source)</span><br></pre></td></tr></table></figure>
+<h1>处理数据</h1>
+<h2 id="获取一个单元格">获取一个单元格</h2>
+<p>一旦得到了一个表格，我们可以直接获取或修改某个单元格的值</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">12</span>]: &gt;&gt;&gt; c = ws[<span class="string">&#x27;A4&#x27;</span>]</span><br><span class="line">    ...: &gt;&gt;&gt; ws[<span class="string">&#x27;A4&#x27;</span>] = <span class="number">4</span></span><br><span class="line">    ...:</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>更普遍地，我们可以使用 <strong>Worksheet.cell()</strong> 通过行号和列号来获取某个单元格， value 参数用于赋值</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; d = ws.cell(row=<span class="number">4</span>, column=<span class="number">2</span>, <span class="keyword">value</span>=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+<p>当一个工作表只在内存中创建时，此时它没有任何单元格，因此第一次获取这个单元格就会创建这个单元格。因此类似下面的代码，就可以在内存中创建 100 乘 100 的空的单元格。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">18</span>]: &gt;&gt;&gt; <span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">101</span>):</span><br><span class="line">    ...: ...        <span class="keyword">for</span> y <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">101</span>):</span><br><span class="line">    ...: ...            ws.cell(row=x, column=y)</span><br><span class="line">    ...:</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="获取很多单元格">获取很多单元格</h2>
+<p>可以使用下面的切片获得一个区域</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">19</span>]: &gt;&gt;&gt; cell_range = ws[<span class="string">&#x27;A1&#x27;</span>:<span class="string">&#x27;C2&#x27;</span>]</span><br><span class="line">    ...:</span><br></pre></td></tr></table></figure>
+<p>行或列的切片如下</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">20</span>]: &gt;&gt;&gt; colC = ws[<span class="string">&#x27;C&#x27;</span>]</span><br><span class="line">    ...: &gt;&gt;&gt; col_range = ws[<span class="string">&#x27;C:D&#x27;</span>]</span><br><span class="line">    ...: &gt;&gt;&gt; row10 = ws[<span class="number">10</span>]</span><br><span class="line">    ...: &gt;&gt;&gt; row_range = ws[<span class="number">5</span>:<span class="number">10</span>]</span><br></pre></td></tr></table></figure>
+<p>你也可以使用 <strong>Worksheet.iter_rows()</strong> 方法</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">21</span>]: &gt;&gt;&gt; for row <span class="keyword">in</span> ws.iter_rows(min_row=<span class="number">1</span>, max_col=<span class="number">3</span>, max_row=<span class="number">2</span>):</span><br><span class="line">    ...: ...    for cell <span class="keyword">in</span> row:</span><br><span class="line">    ...: ...        <span class="built_in">print</span>(cell)</span><br><span class="line">    ...:</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.A1&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.B1&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.C1&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.A2&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.B2&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.C2&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>类似地， <code>Worksheet.iter_cols()</code> 会返回列，但是这个方法在可读模式中不可用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">22</span>]: &gt;&gt;&gt; <span class="keyword">for</span> col <span class="keyword">in</span> ws.iter_cols(min_row=<span class="number">1</span>, max_col=<span class="number">3</span>, max_row=<span class="number">2</span>):</span><br><span class="line">    ...: ...     <span class="keyword">for</span> cell <span class="keyword">in</span> col:</span><br><span class="line">    ...: ...         <span class="built_in">print</span>(cell)</span><br><span class="line">    ...:</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.A1&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.A2&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.B1&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.B2&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.C1&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.C2&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>如果你需要迭代一个表格的所有行，你可以</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">23</span>]: &gt;&gt;&gt; ws = wb.active</span><br><span class="line">    ...: &gt;&gt;&gt; ws[<span class="string">&#x27;C9&#x27;</span>] = <span class="string">&#x27;hello world&#x27;</span></span><br><span class="line">    ...: &gt;&gt;&gt; <span class="built_in">tuple</span>(ws.rows)</span><br><span class="line">Out[<span class="number">23</span>]:</span><br><span class="line">((&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A1&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B1&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C1&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A2&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B2&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C2&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A3&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B3&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C3&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A4&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B4&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C4&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A5&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B5&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C5&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A6&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B6&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C6&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A7&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B7&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C7&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A8&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B8&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C8&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A9&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B9&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C9&gt;))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>或  <code>Worksheet.columns</code> 属性。</p>
+<h2 id="只获取值">只获取值</h2>
+<p>如果你只想要获得一个表格中的值，你可以使用  <code>Worksheet.values</code> 属性。它会迭代一个表格中的所有的行，但是只会返回表格的值 (<strong>这才是目的</strong>)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">24</span>]: <span class="keyword">for</span> row <span class="keyword">in</span> ws.values:</span><br><span class="line">    ...:     <span class="keyword">for</span> value <span class="keyword">in</span> row:</span><br><span class="line">    ...:         <span class="built_in">print</span>(value)</span><br></pre></td></tr></table></figure>
+<p><code>Worksheet.iter_rows()</code> 和 <code>Worksheet.iter_cols()</code>  也可以通过 <code>values_only</code> 参数来返回单元格的值</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">25</span>]: &gt;&gt;&gt; <span class="keyword">for</span> row <span class="keyword">in</span> ws.iter_rows(min_row=<span class="number">1</span>, max_col=<span class="number">3</span>, max_row=<span class="number">2</span>, values_only=<span class="literal">True</span>):</span><br><span class="line">    ...: ...   <span class="built_in">print</span>(row)</span><br><span class="line">    ...:</span><br><span class="line">(<span class="literal">None</span>, <span class="literal">None</span>, <span class="literal">None</span>)</span><br><span class="line">(<span class="literal">None</span>, <span class="literal">None</span>, <span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
+<h1>追加 (append)</h1>
+<p>append是按行向Excel中追加数据，从当前行的下一行开始追加。默认从第1行开始，如果想要从指定的行开始需要通过sheet._current_row =row_num设置。</p>
+<p>输入数据类型可以是列表，元组和字典。</p>
+<p>列表和元组的作用是一样的，第一个元素对应插入行 A1 列的元素，以此类推。</p>
+<p>字典的话，键必须是 1234 或者 “A”,“B”,“C” ，对应列号；值必须是单个元素，对应单元格的值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> openpyxl <span class="keyword">import</span> Workbook</span><br><span class="line">wb=Workbook()</span><br><span class="line">ws=wb.create_sheet(<span class="string">&#x27;hello&#x27;</span>)</span><br><span class="line">ws._current_row=<span class="number">20</span></span><br><span class="line"><span class="comment"># 将当前行指定在20行</span></span><br><span class="line">ws.append([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>])</span><br><span class="line"><span class="comment"># 1,2,3,4将会插入到21行，的第A,B,C,D列</span></span><br></pre></td></tr></table></figure>
+<h1>数据存储</h1>
+<p>一旦你获得了一个单元格，你可以分配一个值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">26</span>]: &gt;&gt;&gt; c.value = <span class="string">&#x27;hello, world&#x27;</span></span><br><span class="line">    ...: &gt;&gt;&gt; <span class="built_in">print</span>(c.value)</span><br><span class="line">    ...: <span class="string">&#x27;hello, world&#x27;</span></span><br><span class="line">    ...:</span><br><span class="line">    ...: &gt;&gt;&gt; d.value = <span class="number">3.14</span></span><br><span class="line">    ...: &gt;&gt;&gt; <span class="built_in">print</span>(d.value)</span><br><span class="line">    ...: <span class="number">3.14</span></span><br></pre></td></tr></table></figure>
+<h2 id="保存为文件">保存为文件</h2>
+<p>使用  <code>Workbook.save()</code> 方法来保存文件，注意这会<strong>覆盖旧文件</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>wb = Workbook()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>wb.save(<span class="string">&#x27;balances.xlsx&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h1>导入文件</h1>
+<p>使用  <code>openpyxl.load_workbook()</code> 来打开一个 excel 文件</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> openpyxl <span class="keyword">import</span> load_workbook</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>wb2 = load_workbook(<span class="string">&#x27;test.xlsx&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(wb2.sheetnames)</span><br></pre></td></tr></table></figure>
+<h1>文献</h1>
+<ol>
+<li>
+<p><a target="_blank" rel="noopener" href="https://openpyxl.readthedocs.io/en/stable/tutorial.html">https://openpyxl.readthedocs.io/en/stable/tutorial.html</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/539094399">Python 处理数据（Excel）—— openpyxl 之append</a></p>
+</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/306861db/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            文献阅读-稀疏向量方法
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/b03a55a2/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">python包-subprosscess及f-string用法</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2022
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
