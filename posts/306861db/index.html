@@ -71,7 +71,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.2k</span>
+            <span class="post-count">2.1k</span>
         </span>
     </span>
 
@@ -113,7 +113,7 @@
 <h2 id="附录-A-求解过程">附录 A - 求解过程</h2>
 <p>这里 <img src="https://math.now.sh?inline=%5Cmathbf%7BLDy%3Db%7D" style="display:inline-block;margin: 0;"/> 其实还是可以分为两步，<img src="https://math.now.sh?inline=%5Cmathbf%7BLy'%3Db%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cmathbf%7By%3DD%5E%7B-1%7Dy'%7D" style="display:inline-block;margin: 0;"/> ，第一步就是常规的三角方程组求解，第二步其实就是 <img src="https://math.now.sh?inline=%5Cmathbf%7By'%7D" style="display:inline-block;margin: 0;"/> 的每个元素除以 <img src="https://math.now.sh?inline=%5Cmathbf%7BD%7D" style="display:inline-block;margin: 0;"/> 相应位置的对角线元素。这两步在计算过程中可以合二为一。</p>
 <p>以一个 <img src="https://math.now.sh?inline=3%20%5Ctimes%203" style="display:inline-block;margin: 0;"/> 的矩阵方程组为例，假设  <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 分解为 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%20%3D%20LDU%7D" style="display:inline-block;margin: 0;"/>，这里 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 矩阵按列存储，<img src="https://math.now.sh?inline=%5Cmathbf%7BU%7D" style="display:inline-block;margin: 0;"/> 矩阵按行存储，因此向前求解过程按照外积方法（求出的解再除以 <img src="https://math.now.sh?inline=%5Cmathbf%7BD%7D" style="display:inline-block;margin: 0;"/> 的对角线元素），向后求解过程按照内积方法，过程如下</p>
-<p>![1](E:\Desktop\writing[文献阅读]sparse vector methods\7.png)</p>
+<p><img src="7.png" alt="1"></p>
 <h1>稀疏向量求解</h1>
 <p>右手项 <img src="https://math.now.sh?inline=%5Cmathbf%7Bb%7D" style="display:inline-block;margin: 0;"/> 很多情况下是稀疏的，但是解向量 <img src="https://math.now.sh?inline=%5Cmathbf%7Bx%7D" style="display:inline-block;margin: 0;"/> 一般不是稀疏的。接下来我们说到的“稀疏向量”要么指的是一个稀疏向量 <img src="https://math.now.sh?inline=%5Cmathbf%7Bb%7D" style="display:inline-block;margin: 0;"/> ，要么就是指我们感兴趣的 <img src="https://math.now.sh?inline=%5Cmathbf%7Bx%7D" style="display:inline-block;margin: 0;"/> 向量的子集，可以语境来判断是哪一种情况。</p>
 <p>如果右手项 <img src="https://math.now.sh?inline=%5Cmathbf%7Bb%7D" style="display:inline-block;margin: 0;"/> 是稀疏的，那么向前求解时，我们只需要 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 的一部分列（因为采用外积方式，如果 <img src="https://math.now.sh?inline=y_%7Bi%7D%3D0" style="display:inline-block;margin: 0;"/>，那么就不需要使用 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D_%7B*i%7D" style="display:inline-block;margin: 0;"/> 列），这称为<strong>快速向前求解 (fast forward, FF)</strong>。如果我们只需要向量 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 的一部分元素，那么向后求解时，我们只需要使用 <img src="https://math.now.sh?inline=%5Cmathbf%7BU%7D" style="display:inline-block;margin: 0;"/> 的一部分行（行号对应需要向量 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> 的这部分元素的序号，这里应该还需要这部分行中的其它非零元素的行），这称为<strong>快速向后求解 (fast back, FB)</strong>。  <strong>稀疏向量的核心原理就是有效确定 FF 和 FB 中  <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cmathbf%7BU%7D" style="display:inline-block;margin: 0;"/> 的子集</strong>。</p>
@@ -137,12 +137,12 @@
 </ol>
 <p>一个一般的稀疏向量可以视为多个 singletons 的组合，其路径也是这些 singletons 的路径的并集。</p>
 <p>路径的性质可以通过下面一个例子来说明。下图1为 20个节点的图，图2是相应的 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 阵和 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 阵的结构。</p>
-<p>![1](E:\Desktop\writing[文献阅读]sparse vector methods\1.png)</p>
-<p>![1](E:\Desktop\writing[文献阅读]sparse vector methods\2.png)</p>
+<p><img src="1.png" alt="1"></p>
+<p><img src="2.png" alt="1"></p>
 <p>对于这个图的一个路径表格见下表，其描述所有的 singleton 的路径，任何一个 singleton 均可以直接从这个表格追溯到，首先起始节点为 K ，然后追踪 K 的 NEXT 列，一直到 K=N。举个例子，对于 K=4 的 singleton，其路径为 {4,10,13,18,19,20} 。但是注意这个路径表格在实践中不会生成，因为相应的信息均在 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 或 <img src="https://math.now.sh?inline=%5Cmathbf%7BU%7D" style="display:inline-block;margin: 0;"/> 矩阵中。</p>
-<p>![1](E:\Desktop\writing[文献阅读]sparse vector methods\3.png)</p>
+<p><img src="3.png" alt="1"></p>
 <p>路径表格一个图像描述见下图，对于 FF 方向是从低到高，对于 FB 则是从高到低。</p>
-<p>![1](E:\Desktop\writing[文献阅读]sparse vector methods\4.png)</p>
+<p><img src="4.png" alt="1"></p>
 <p>下面是一个对于多个非零元素的稀疏向量查找路径的算法。</p>
 <ol>
 <li>首先从稀疏向量中第一个非零元素开始，按照上面的方法查找其 singleton 的路径，这个路径通常都会终止于 N 。</li>
@@ -152,12 +152,12 @@
 </ol>
 <p>举个例子，假设我们有一个在 2,6,7,12 位置上具有非零元素的稀疏向量。第一步通过节点2找到的路径为 {2,11,12,15,17,18,19,20} 。第二个找到的路径片段为 {6,16} ，第三个为 {7,14}，第四个没有任何路径片段。总的路径为 {7,14,6,16, 2,11,12,15,17,18,19,20} 。<br>
 从图像来看，这些路径组成的子图如下</p>
-<p>![1](E:\Desktop\writing[文献阅读]sparse vector methods\5.png)</p>
+<p><img src="5.png" alt="1"></p>
 <p>在 FF 中，一个节点/未知数的求解需要知道子图中所有在其前面的节点的值。但是在交会点之前的分支可以按照任何顺序计算，也就是说 {7,14}, {6,16}, {2,11,12,15} 这三个分支可以按照任意顺序计算，然后再计算 {17,18,19,20} 。FB 类似，不过方向相反。</p>
 <p>举个例子，在 FF 过程，对于子图中的某个节点 k ，只有在其前面的节点在计算过程中才会影响右手项 k 位置的值。比如节点 12，那么在求解节点2 和节点 11 时均会修改右手项节点 12 的值，但是求解节点 6 不会影响右手项节点 12 的值（因为在 <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 矩阵中 (12,6) 不在第6列中）。</p>
 <h1>稀疏向量操作的初始化</h1>
 <p>我们需要避免对路径之外的位置进行归零(zeroing)，这里总共分为4种情况。其实这里只有涉及 FF 方法，才涉及到归零的操作（首先将右手项路径中或全部位置设为 0.0，然后再将右手项中的非零元素加进来）。</p>
-<p>![1](E:\Desktop\writing[文献阅读]sparse vector methods\6.png)</p>
+<p><img src="6.png" alt="1"></p>
 <h1>实验结果</h1>
 <ol>
 <li>对于 singletons ，稀疏向量算法具有优势。</li>
