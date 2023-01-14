@@ -142,72 +142,11 @@
       
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><h1>亲属个体间的基因型填充</h1>
-<p>在下图中，所有个体均存在分型的位点标为红色，前两个世代的个体多分型的位点标为黑色 (见图 A)。根据共同的红色位点，可以用于推断家系内的单倍型片段（见图 B）。最后，第三世代所有个体缺失的基因型可以通过比对它们自身的单倍型与家系中其它个体的单倍型 （二者同源相同，IBD）来推断缺失位点的基因型（见图 C）。</p>
-<p><img src="1.png" alt="1"></p>
-<p>从 图A 到图B根据系谱信息定向的过程如下（来自于张志燕老师的 ppt），首先前两个世代可以先定相纯合子，然后再定相前两个世代个体的其它杂合子（因为子代的两个单倍型一个来自于父本，一个来自于母本）。</p>
-<p>这里只根据系谱信息，无法实现所有个体全部位点的定相。而且如果存在<strong>分型错误</strong>，那么定相的比例和准确率都会下降。</p>
-<p><img src="6.png" alt="1"></p>
-<h1>无关个体的基因型填充</h1>
-<p>无关个体之间仍存在类似于亲属个体 IBD 片段的共同单倍型片段，只不过它们共享的单倍型片段长度要短得多（因为它们得共同祖先更远），因此也很难完全确定它们之间共享的单倍型片段。</p>
-<p>无关个体的基因型填充原理见下图，这里目标样本 (study samples) 具有相对较多的位点（可能是100k 到 1000 k），我们将目标样本与参考单倍型库（比目标样本具有更多的位点）进行比对（下图 A），二者共同的单倍型见图 B ，然后目标样本中的缺失位点可以通过复制匹配上的参考单倍型的基因型来进行填充（下图C）。</p>
-<p>当将目标样本的单倍型与参考单倍型库进行比对存在<strong>歧义</strong>，即不知道复制哪一个参考单倍型时，填充脚本一般会提供这个缺失位点的基因型概率（比如单倍型库中观测到的 A/A 比例为 60%，A/C 比例为 40%）。</p>
-<p>大部分的单倍型构建软件均会在估计单倍型过程中自动”填充“缺失的基因型。基因型填充软件可以分为两列：一是计算密集型工具，例如 IMPUTE, MACH, fastPHASE/BIMBAM，这些软件在填充缺失位点时会考虑全部观测到的位点；二是计算更加高效的工具，例如 PLINK，TUNA, WHAP, BEAGLE ，这些软件填充缺失位点时只会考虑少量的相邻位点的基因型。</p>
-<p><img src="2.png" alt="1"></p>
-<h1>基因型填充的准确性</h1>
-<p>Scott et al. (93) 填充了超过 2百万的位点，提取超过 500 个位点与实验室的实际分型进行比较，总的不一致率只有 1.5%。</p>
-<p>第二，通过对 90个样本的超过 660k 的位点的填充基因型和实际分型基因型进行比对，总的不一致率小于 0.9% ，<strong>所有位点的平均 <img src="https://math.now.sh?inline=r%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 达到了 0.93</strong> 。</p>
-<h1>基因型填充的作用</h1>
-<p>基因型填充的一个作用就是更好地挖掘与性状相关的位点和基因，通过基因型填充，我们可以查看一个关联位点其临近的位点是否也与性状关联，甚至我们可以找到<strong>潜在的因果位点</strong>。</p>
-<p>除此之外，基因型填充还可以提高 GWAS 分析的 POWER 。举个例子，Willer et al.  和 Kathiresan et al 发现 rs6511720 这个位点 (在 LDLR 基因中) 与 LDL cholesterol levels 这个性状显著关联，但是由于这个位点不在芯片中，而初始分析只使用了芯片位点，因此初始分析中遗漏了这个选择信号（芯片中的位点与 rs6511720 不存在紧密连锁，最大的配对 r2 只有 0.21）。</p>
-<p><img src="3.png" alt="1"></p>
-<p>另外一个例子如下</p>
-<p><img src="4.png" alt="1"></p>
-<p>但是，准确估计填充对于提高关联分析 POWER 的作用非常困难，这里有两种思路，第一种是使用模拟数据，第二种是合并使用基因组数据和基因表达数据。这里第二种方式更加吸引仍，因为我们比较容易确定位点和转录水平的正向关联。这两种思路均建议基因型填充可以提到挖掘基因研究的 power ，特别是对于等位基因频率小于 10% -20% 的位点。</p>
-<h1>基因组关联分析的元分析</h1>
-<p>基因型填充作用最好的说明可能就是其可以用于对不同检测平台产生的数据的 GWAS 分析结果的元分析（具体怎么做我不清楚）。</p>
-<h1>填充的注意事项</h1>
-<ol>
-<li>
-<p>自填充严格质控</p>
-</li>
-<li>
-<p>有参填充需要确保参考群体和填充群体相同位点的两个碱基的标签相同（应该说的是 vcf 文件中的 ref 和 alt）。</p>
-</li>
-<li>
-<p>有参填充需要严格挑选参考群体。比较不同参考群时，可以在填充群中的基因型随机缺失部分位点，然后查看使用不同参考群的填充准确性。</p>
-</li>
-<li>
-<p>填充完成后，不是所有标记都能准确填充，我们需要确定挑选哪些位点用于下一步的分析。</p>
-<p>最简单的方法就是看填充位点的一致率（比如挑选大于 90%），但是这里作者并不推荐这种方式，因为位点的一致率还受到 maf 的影响，因此无法直接比较（举个例子，对于 maf 小于 0.05 的位点，那么我们只要将所有样本的分型均分配为最可能的基因型，则一致率就会达到 90% 以上）。</p>
-<p>这里我们推荐的方法是使用位点的填充基因型和真实基因型的<strong>相关系数</strong>，通常我们会使用<strong>相关系数的平方</strong>，即 <img src="https://math.now.sh?inline=%5Cmathbf%7Br%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 。</p>
-<p>最通常的方法是查看填充位点偏离哈温平衡的程度（because imputed allele counts for poorly imputed markers show less variability than expected based on allele frequency，这句话没有太看懂） 。</p>
-</li>
-<li>
-<p>最后一步就是分析填充的基因型，一般来说填充的基因型是服从一个概率分布的，举个例子，某个样本在某个位点可能有 90% 的概率是 A/A ，有 10% 的概率是 A/C ，也就是说，这个位点的Ａ的剂量期望值为 1.9 。</p>
-<p>对于 GWAS 分析，这里作者建议不用使用具体的填充基因型（比如上面的 AA），而是可以使用碱基的剂量（即上面的 1.9）来进行关联分析。</p>
-</li>
-</ol>
-<h1>未来的挑战</h1>
-<ol>
-<li>
-<p>希望有更具特色的参考面板（reference panels），可以包含除 SNP 之外的其它变异，比如 CNV 。</p>
-</li>
-<li>
-<p>希望有更好的填充算法。</p>
-</li>
-<li>
-<p><strong>最重要的，希望有更大的参考面板</strong>，如下图，参考群体越大，基因型填充的准确性越高，因为参考群体的样本和目标样本之间共享的单倍型区块长度会越长，而且也越容易在参考面板中<strong>无歧义地</strong>识别共同的单倍型区块。</p>
-<p><img src="5.png" alt="1"></p>
-</li>
-</ol>
-<h1>填充和重测序数据</h1>
-<p>填充计数可以使得从<strong>低密度重测序数据</strong>得到高质量的分型数据，从而降低测序成本（略微降低数据质量），比如千人基因组计划。</p>
-<h1>参考文献</h1>
-<ol>
-<li>Li Y, Willer C, Sanna S, et al. Genotype imputation[J]. Annual review of genomics and human genetics, 2009, 10: 387.</li>
-</ol>
- 
+  <p>2009年的一篇关于基因型填充的综述。</p> 
+      <a class="article-more-link" href="/posts/2ca177e4/"
+        >阅读更多...</a
+      >
+       
       <!-- reward -->
       
     </div>
@@ -260,30 +199,30 @@
     <div class="article-entry" itemprop="articleBody">
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><h1>re</h1>
-<h2 id="多个分隔符拆分字符串">多个分隔符拆分字符串</h2>
+<h2 id="多个分隔符拆分字符串-3">多个分隔符拆分字符串</h2>
 <p>内置的 split() 函数只能有一个分隔符，可以采用 re 模块的 split 函数，可以采用多个分隔符，用 <code>|</code> 分开</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import rere.split(&#39;;|:&#39;, text)</span><br></pre></td></tr></table></figure>
 <h1>time</h1>
 <p>打印软件运行开始和结束时间如下</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">begin_time &#x3D; time.strftime(&quot;%Y-%m-%d %H:%M:%S&quot;, time.localtime())print(&quot;Start time: &#123;&#125;\n&quot;.format(begin_time)) end_time &#x3D; time.strftime(&quot;%Y-%m-%d %H:%M:%S&quot;, time.localtime())print(&quot;Finish time: &#123;&#125;\n&quot;.format(end_time)) </span><br></pre></td></tr></table></figure>
 <h1>random</h1>
-<h2 id="shuffle">shuffle</h2>
+<h2 id="shuffle-3">shuffle</h2>
 <p>shuffle 可以将列表中的元素随机排列（<strong>原地操作</strong>）</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import randomlist1 &#x3D; list(range(10))random.shuffle(list1)print(list1)</span><br></pre></td></tr></table></figure>
 <p>输出为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[0, 4, 5, 6, 7, 2, 3, 8, 9, 1]</span><br></pre></td></tr></table></figure>
 <h1>collections</h1>
-<h2 id="defaultdict">defaultdict</h2>
+<h2 id="defaultdict-3">defaultdict</h2>
 <p>可以设置字典的值的默认格式，比如列表</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">from collections import defaultdictdict1 &#x3D; defaultdict(list)</span><br></pre></td></tr></table></figure>
-<h2 id="Counter">Counter</h2>
+<h2 id="Counter-3">Counter</h2>
 <p>字典的值默认为 0，起到计数功能</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">from collections import Counterdict1 &#x3D; Counter()dict1[&quot;a&quot;] +&#x3D; 1</span><br></pre></td></tr></table></figure>
 <p>统计最常见的数（计数最多的键），使用 most_common([n]) 函数，其中的参数为输出键值对数目（如果省略则输出全部元素）。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">from collections import Counterdict1 &#x3D; Counter(&#39;abracadabra&#39;)dict1.most_common(3)</span><br></pre></td></tr></table></figure>
 <p>输出为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[(&#39;a&#39;, 5), (&#39;b&#39;, 2), (&#39;r&#39;, 2)]</span><br></pre></td></tr></table></figure>
-<h2 id="OrderedDict">OrderedDict</h2>
+<h2 id="OrderedDict-3">OrderedDict</h2>
 <p>有序字典</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">from collections import OrderedDictdict1 &#x3D; OrderedDict()</span><br></pre></td></tr></table></figure>
 <h1>argparse</h1>
@@ -325,7 +264,7 @@
 </ul>
 <p>第三步，解析参数</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">args &#x3D; parser.parse_args()print(args.gpus)</span><br></pre></td></tr></table></figure>
-<h2 id="实际例子">实际例子</h2>
+<h2 id="实际例子-3">实际例子</h2>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#coding&#x3D;utf-8import argparseparser &#x3D; argparse.ArgumentParser(description&#x3D;&#39;do sth&#39;)# 添加参数步骤parser.add_argument(&quot;-r&quot;, &quot;--raw&quot;, required&#x3D;True,     help&#x3D;&#39;&#39;&#39;the raw file&#39;&#39;&#39;)parser.add_argument(&quot;-i&quot;, &quot;--id&quot;, required&#x3D;True,     help&#x3D;&#39;&#39;&#39;id file&#39;&#39;&#39;)parser.add_argument(&quot;-p&quot;, &quot;--pedigree&quot;, required&#x3D;True,     help&#x3D;&#39;&#39;&#39;the pedigree file&#39;&#39;&#39;)parser.add_argument(&quot;-c&quot;, &quot;--choose&quot;, required&#x3D;False,     help&#x3D;&#39;&#39;&#39;a list file&#39;&#39;&#39;)# 解析参数步骤  args &#x3D; parser.parse_args()print(args.raw)print(args.id)print(args.pedigree)print(args.choose)    </span><br></pre></td></tr></table></figure>
 <h1>参考文献</h1>
 <ol>
