@@ -99,10 +99,10 @@
 <span id="more"></span>
 <h1>python 基础</h1>
 <p>python 是一门解释型语言，无需编译。</p>
-<h2 id="数据类型-3">数据类型</h2>
+<h2 id="数据类型">数据类型</h2>
 <p>不可变对象：数值（Numbers），字符串 （String) ， 元组 （Tuple) ，逻辑值 （Bool)</p>
 <p>可变对象：列表（List)，字典（Dictionary），集合（Set)</p>
-<h3 id="None-3">None</h3>
+<h3 id="None">None</h3>
 <p>None是Python的空值类型。如果一个函数没有明确的返回值，就会默认返回None。</p>
 <p>判断是否为空值，要用 <code>is</code>(内存地址是否相同)</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In [37]: a &#x3D; NoneIn [38]: a is NoneOut[38]: True</span><br></pre></td></tr></table></figure>
@@ -110,7 +110,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In [39]: def test(a,b,c&#x3D;None):    ...:     result &#x3D; a + b            ...:     if c is not None:    ...:         result &#x3D; result * c            ...:     return result    ...:</span><br></pre></td></tr></table></figure>
 <p>另外，None 不仅是一个保留字，还是唯一的 NoneType 的实例：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In [40]: type(None)Out[40]: NoneType</span><br></pre></td></tr></table></figure>
-<h2 id="变量赋值-3">变量赋值</h2>
+<h2 id="变量赋值">变量赋值</h2>
 <p>在 python 中，变量名称和变量本身的值是一种引用（指针）的关系，我个人就是理解为标签和人的关系，每个人均至少需要贴一个标签，一个人身上可以有多个标签，赋值的过程就是将左侧的标签对应上右侧的值。</p>
 <p>因此对于不可变对象，如果修改某个变量的值（因为这个过程是新建了一个值），不会影响其它变量，以字符串举例如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a&#x3D;&#39;ABC&#39;b&#x3D;aa&#x3D;&#39;XYZ&#39;# 问此时b是什么？# 咋一看，b&#x3D;a，此时a&#x3D;&#39;XYZ&#39;,b也应该是&#39;XYZ&#39;# 实际上不是，变量的名称和值是映射的关系，# 这里的逻辑是首先内存中创建了一个值’ABC&#39;,变量a 映射到了ABC, 之后变量b也映射到了ABC# 最后将a又映射到XYZ，过程见下图</span><br></pre></td></tr></table></figure>
@@ -118,17 +118,17 @@
 <p>但是，对于可变对象，则相反。举个例子，下面这种形式b也会改变（<strong>因为列表是可变对象，这里是修改了原列表</strong>）</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a&#x3D;[1,2]b&#x3D;aa.append(3) #b一样会改变</span><br></pre></td></tr></table></figure>
 <p>如果是 a=[1,2] , b=[1,2]，这个时候修改a，对b就没有任何影响了，因为这时候是创建了两个列表对象。</p>
-<h2 id="函数中修改全局变量（变量作用域）-3">函数中修改全局变量（变量作用域）</h2>
+<h2 id="函数中修改全局变量（变量作用域）">函数中修改全局变量（变量作用域）</h2>
 <p>可变对象：当函数内修改同名变量时，函数外的同名变量也会随之改变，所以<strong>使用修改可变对象没有作用域的概念</strong>。</p>
 <p>不可变对象：当函数内修改同名变量时，<strong>会先复制过来再修改</strong>，函数外部的变量不变。（如果一定要修改，可以使用 <code>global x</code>，x为全局变量名）</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">def test(a,b):    a&#x3D;a+1    b.append(13)    print(&#39;inner a: &#123;&#125;&#39;.format(a))    print(&#39;inner b: &#123;&#125;&#39;.format(b))a&#x3D;5b&#x3D;[10,11]test(a,b)print(&#39;outer a: &#123;&#125;&#39;.format(a))print(&#39;outer b: &#123;&#125;&#39;.format(b))</span><br></pre></td></tr></table></figure>
 <p>运行结果如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inner a: 6inner b: [10, 11, 13]outer a: 5outer b: [10, 11, 13]</span><br></pre></td></tr></table></figure>
 <p>注意如果再次运行 <code>test(a,b)</code>，那么列表 b 中还会新增一个元素 13 ，为了避免出现问题，<strong>避免使用可变对象作为函数参数</strong>。我们可以在函数内部中定义新的局部可变对象，也可以直接读取或修改全局变量中的可变对象。</p>
-<h3 id="变量查找顺序-3">变量查找顺序</h3>
+<h3 id="变量查找顺序">变量查找顺序</h3>
 <p>函数内部 – 父函数（如果有）-- 全局 – python 内置变量</p>
 <p><strong>UnboundLocalError</strong> ： 函数先调用，后修改同名全局变量。</p>
-<h3 id="函数调用和修改同名全局变量（针对不可变变量）-3">函数调用和修改同名全局变量（针对不可变变量）</h3>
+<h3 id="函数调用和修改同名全局变量（针对不可变变量）">函数调用和修改同名全局变量（针对不可变变量）</h3>
 <ol>
 <li>
 <p>光调用 ： python 认为是全局变量，没有问题</p>
@@ -143,24 +143,24 @@
 </li>
 </ol>
 <p>其实不用那么麻烦，命名的时候注意一点，<strong>避免函数内的变量名和全局变量同名</strong>就好了。</p>
-<h3 id="函数返回值-3">函数返回值</h3>
+<h3 id="函数返回值">函数返回值</h3>
 <ul>
 <li>无 return : 返回值均为 None。 例如 a = function() ， a 均为 None</li>
 <li>有 return : return 一旦执行，函数就会终止。</li>
 </ul>
-<h2 id="字符串操作-3">字符串操作</h2>
-<h3 id="字符串查找-3">字符串查找</h3>
+<h2 id="字符串操作">字符串操作</h2>
+<h3 id="字符串查找">字符串查找</h3>
 <ul>
 <li>str.find() : 找到目标时返回该字符的索引位置；没找到返回-1</li>
 <li>str.index() : 找到目标时返回该字符的索引位置；没找到报错</li>
 </ul>
-<h3 id="字符串分割-3">字符串分割</h3>
+<h3 id="字符串分割">字符串分割</h3>
 <ul>
 <li>str.patition() : 将字符串按找到的第一个关键字分割为三段（只分割一次），形成一个元组，内容包括关键字前、关键字本身、关键字后</li>
 <li>str.split() : 以关键字为分割点进行分割（多次分割，且结果中不包含关键字），生成一个列表。</li>
 <li>str.strip() : 移除字符串头尾指定的字符（默认是空格）</li>
 </ul>
-<h3 id="字符串运算符-3">字符串运算符</h3>
+<h3 id="字符串运算符">字符串运算符</h3>
 <ul>
 <li>+ : 连接字符串</li>
 <li>* : 重复，比如 a=“hello” , a*2 为 “hellohello&quot;</li>
@@ -172,25 +172,25 @@
 <li>str.upper() : 全部转为大写</li>
 <li>str.replace(old, new) : 替换字符串</li>
 </ul>
-<h2 id="break-3">break</h2>
-<h3 id="break-与-continue-3">break 与 continue</h3>
+<h2 id="break">break</h2>
+<h3 id="break-与-continue">break 与 continue</h3>
 <ul>
 <li>break 是直接跳出循环，包括该循环的 else 。如果break 在内层循环，则会跳出内层循环，但是不影响外层循环和外层循环的 else 部分</li>
 <li>continue : 准确地说，continue 是指不执行循环体中continue 语句之后的代码，重新回到循环开始部分，直接进入下一次循环。</li>
 </ul>
-<h3 id="break-与-else-3">break 与 else</h3>
+<h3 id="break-与-else">break 与 else</h3>
 <p>for else 语句 与 while else 语句 中如果存在 if break 语句，else 语句只有在满足下面两个条件才会运行</p>
 <ul>
 <li>for/while 执行完</li>
 <li>整个循环过程中没有触发 break</li>
 </ul>
-<h2 id="所有逻辑值-3">所有逻辑值</h2>
+<h2 id="所有逻辑值">所有逻辑值</h2>
 <p>python 进行逻辑判断的时候，认为:</p>
 <ul>
 <li>True : 所有非空的量（非空字符串，非空列表）；非0的数字</li>
 <li>False : <strong>0，None, False, 任意为空的量</strong></li>
 </ul>
-<h2 id="递归函数-3">递归函数</h2>
+<h2 id="递归函数">递归函数</h2>
 <p>递归函数有两点：</p>
 <ol>
 <li>自己引用自己</li>
@@ -200,7 +200,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import osm &#x3D; []def dirlist(path):    file_list &#x3D; os.listdir(path)    for i in file_list:        file_path &#x3D; os.path.join(path,i)        m.append(file_path)        if os.path.isdir(file_path):            dirlist(file_path) #引用自身</span><br></pre></td></tr></table></figure>
 <p>例子二，求阶乘 n!</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def f(n):</span><br><span class="line">	if n &#x3D;&#x3D; 1:</span><br><span class="line">		return 1</span><br><span class="line">    return n*f(n-1) </span><br><span class="line">#这里不用写else，因为python 只要运行了一个return，程序自动退出。但是我觉得还是写上 else，逻辑更严密，提高可读性</span><br></pre></td></tr></table></figure>
-<h2 id="切片-3">切片</h2>
+<h2 id="切片">切片</h2>
 <p>格式如下</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sequence[start_index:end_index:step]</span><br></pre></td></tr></table></figure>
 <ul>
@@ -210,7 +210,7 @@
 </ul>
 <p>注意：这里的正索引指的是<strong>方向从左到右</strong>，而不是单纯的索引号的增加。</p>
 <p>所以 <code>[:-1]</code>  表示从第一个位置，一直向右，读到倒数第二个位置（即不要最后一个）。<code>[-2:]</code> 表示提取最后两个位置</p>
-<h2 id="列表排序-3">列表排序</h2>
+<h2 id="列表排序">列表排序</h2>
 <p>简单列表</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a&#x3D;[3,1,2]</span><br><span class="line">b&#x3D;sorted(a,reverse&#x3D;True&#x2F;False)</span><br><span class="line">a.sort(reverse&#x3D;True&#x2F;False)</span><br></pre></td></tr></table></figure>
 <p>复杂列表（例如列表的每个元素又是一个长度为2的列表）</p>
@@ -218,27 +218,27 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">m2 &#x3D; sorted(m1, key &#x3D;lambda x:x[1], reverse&#x3D;True&#x2F;False)</span><br><span class="line">m2 &#x3D; sorted(m1, key &#x3D;lambda x:float(x[1]), reverse&#x3D;True&#x2F;False)</span><br></pre></td></tr></table></figure>
 <p>多个条件</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dup_sort_list &#x3D; sorted(dup_list, key &#x3D; lambda s:(float(s[5]),s[0])) #不一致率从小到大</span><br></pre></td></tr></table></figure>
-<h2 id="删除对象-3">删除对象</h2>
+<h2 id="删除对象">删除对象</h2>
 <ul>
 <li>del a : 只是删除对象的一个引用</li>
 </ul>
 <h1>python 标准库</h1>
 <p><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/index.html">https://docs.python.org/zh-cn/3/library/index.html</a></p>
-<h2 id="内置函数-3">内置函数</h2>
-<h3 id="enumerate-iterable-start-0-3"><code>enumerate</code>(<em>iterable</em>, <em>start=0</em>)</h3>
+<h2 id="内置函数">内置函数</h2>
+<h3 id="enumerate-iterable-start-0"><code>enumerate</code>(<em>iterable</em>, <em>start=0</em>)</h3>
 <p>返回一个枚举对象。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; seasons &#x3D; [&#39;Spring&#39;, &#39;Summer&#39;, &#39;Fall&#39;, &#39;Winter&#39;]</span><br><span class="line">&gt;&gt;&gt; enumerate(seasons)</span><br><span class="line">&lt;enumerate object at 0x2ba732af1c40&gt;</span><br><span class="line">&gt;&gt;&gt; list(enumerate(seasons))</span><br><span class="line">[(0, &#39;Spring&#39;), (1, &#39;Summer&#39;), (2, &#39;Fall&#39;), (3, &#39;Winter&#39;)]</span><br><span class="line">&gt;&gt;&gt; list(enumerate(seasons, start&#x3D;1))</span><br><span class="line">[(1, &#39;Spring&#39;), (2, &#39;Summer&#39;), (3, &#39;Fall&#39;), (4, &#39;Winter&#39;)]</span><br></pre></td></tr></table></figure>
 <p>等价于：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def enumerate(sequence, start&#x3D;0):</span><br><span class="line">    n &#x3D; start</span><br><span class="line">    for elem in sequence:</span><br><span class="line">        yield n, elem</span><br><span class="line">        n +&#x3D; 1</span><br></pre></td></tr></table></figure>
-<h3 id="zip-iterables-3"><code>zip</code>(*<em>iterables</em>)</h3>
+<h3 id="zip-iterables"><code>zip</code>(*<em>iterables</em>)</h3>
 <p>创建一个聚合了来自每个可迭代对象中的元素的<strong>元组</strong>的迭代器。</p>
 <p><strong>当所输入可迭代对象中最短的一个被耗尽时，迭代器将停止迭代。</strong></p>
 <p>相当于：（没看懂）</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">def zip(*iterables):</span><br><span class="line">    # zip(&#39;ABCD&#39;, &#39;xy&#39;) --&gt; Ax By</span><br><span class="line">    sentinel &#x3D; object()</span><br><span class="line">    iterators &#x3D; [iter(it) for it in iterables]</span><br><span class="line">    while iterators:</span><br><span class="line">        result &#x3D; []</span><br><span class="line">        for it in iterators:</span><br><span class="line">            elem &#x3D; next(it, sentinel)</span><br><span class="line">            if elem is sentinel:</span><br><span class="line">                return</span><br><span class="line">            result.append(elem)</span><br><span class="line">        yield tuple(result)</span><br><span class="line">&gt;&gt;&gt; x &#x3D; [1, 2, 3]</span><br><span class="line">&gt;&gt;&gt; y &#x3D; [4, 5, 6]</span><br><span class="line">&gt;&gt;&gt; zipped &#x3D; zip(x, y)</span><br><span class="line">&gt;&gt;&gt; list(zipped)</span><br><span class="line">[(1, 4), (2, 5), (3, 6)]</span><br><span class="line">&gt;&gt;&gt; list(zip(*zip(x, y))) #返回原来的两个列表</span><br><span class="line">[(1, 2, 3), (4, 5, 6)]</span><br><span class="line">&gt;&gt;&gt; x2, y2 &#x3D; zip(*zip(x, y))</span><br><span class="line">&gt;&gt;&gt; x &#x3D;&#x3D; list(x2) and y &#x3D;&#x3D; list(y2)</span><br><span class="line">True</span><br></pre></td></tr></table></figure>
 <p>zip 也可以用于使用两个列表构建字典</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">In [73]: mapping &#x3D; dict(zip(range(5),reversed(range(5))))</span><br><span class="line"></span><br><span class="line">In [74]: mapping</span><br><span class="line">Out[74]: &#123;0: 4, 1: 3, 2: 2, 3: 1, 4: 0&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="内置类型-3">内置类型</h2>
-<h3 id="数字类型-—-int-float-complex-3">数字类型 — int, float, complex</h3>
+<h2 id="内置类型">内置类型</h2>
+<h3 id="数字类型-—-int-float-complex">数字类型 — int, float, complex</h3>
 <table>
 <thead>
 <tr>
@@ -336,8 +336,8 @@
 </tr>
 </tbody>
 </table>
-<h3 id="序列类型-–-list-tuple-range-3">序列类型 – list, tuple, range</h3>
-<h4 id="通用序列操作-3">通用序列操作</h4>
+<h3 id="序列类型-–-list-tuple-range">序列类型 – list, tuple, range</h3>
+<h4 id="通用序列操作">通用序列操作</h4>
 <p>此表按优先级升序列出了序列操作。 在表格中，<em>s</em> 和 <em>t</em> 是具有相同类型的序列，<em>n</em>, <em>i</em>, <em>j</em> 和 <em>k</em> 是整数而 <em>x</em> 是任何满足 <em>s</em> 所规定的类型和值限制的任意对象。</p>
 <table>
 <thead>
