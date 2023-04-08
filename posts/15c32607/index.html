@@ -9,7 +9,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    文献阅读-genotype-imputation |  VincereZhou&#39;s blog
+    python包-f2py使用流程 |  VincereZhou&#39;s blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -41,7 +41,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-文献阅读-genotype-imputation"
+  id="post-python包-f2py使用流程"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -52,18 +52,18 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  文献阅读-genotype-imputation
+  python包-f2py使用流程
 </h1>
  
 
     </header>
      
     <div class="article-meta">
-      <a href="/posts/2ca177e4/" class="article-date">
-  <time datetime="2023-01-14T03:06:26.000Z" itemprop="datePublished">2023-01-14</time>
+      <a href="/posts/15c32607/" class="article-date">
+  <time datetime="2023-04-08T07:49:09.000Z" itemprop="datePublished">2023-04-08</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E5%9F%BA%E5%9B%A0%E5%9E%8B%E5%A1%AB%E5%85%85/">基因型填充</a>
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a> / <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/python/">python</a>
   </div>
   
 <div class="word_count">
@@ -71,7 +71,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.9k</span>
+            <span class="post-count">1.3k</span>
         </span>
     </span>
 
@@ -80,7 +80,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">6 分钟</span>
+            <span class="post-count">5 分钟</span>
         </span>
     </span>
 </div>
@@ -95,72 +95,75 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>2009年的一篇关于基因型填充的综述。</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>个人使用 f2py 的流程整理。</p>
 <span id="more"></span>
-<h1>亲属个体间的基因型填充</h1>
-<p>在下图中，所有个体均存在分型的位点标为红色，前两个世代的个体多分型的位点标为黑色 (见图 A)。根据共同的红色位点，可以用于推断家系内的单倍型片段（见图 B）。最后，第三世代所有个体缺失的基因型可以通过比对它们自身的单倍型与家系中其它个体的单倍型 （二者同源相同，IBD）来推断缺失位点的基因型（见图 C）。</p>
-<p><img src="1.png" alt="1"></p>
-<p>从 图A 到图B根据系谱信息定向的过程如下（来自于张志燕老师的 ppt），首先前两个世代可以先定相纯合子，然后再定相前两个世代个体的其它杂合子（因为子代的两个单倍型一个来自于父本，一个来自于母本）。</p>
-<p>这里只根据系谱信息，无法实现所有个体全部位点的定相。而且如果存在<strong>分型错误</strong>，那么定相的比例和准确率都会下降。</p>
-<p><img src="6.png" alt="1"></p>
-<h1>无关个体的基因型填充</h1>
-<p>无关个体之间仍存在类似于亲属个体 IBD 片段的共同单倍型片段，只不过它们共享的单倍型片段长度要短得多（因为它们得共同祖先更远），因此也很难完全确定它们之间共享的单倍型片段。</p>
-<p>无关个体的基因型填充原理见下图，这里目标样本 (study samples) 具有相对较多的位点（可能是100k 到 1000 k），我们将目标样本与参考单倍型库（比目标样本具有更多的位点）进行比对（下图 A），二者共同的单倍型见图 B ，然后目标样本中的缺失位点可以通过复制匹配上的参考单倍型的基因型来进行填充（下图C）。</p>
-<p>当将目标样本的单倍型与参考单倍型库进行比对存在<strong>歧义</strong>，即不知道复制哪一个参考单倍型时，填充脚本一般会提供这个缺失位点的基因型概率（比如单倍型库中观测到的 A/A 比例为 60%，A/C 比例为 40%）。</p>
-<p>大部分的单倍型构建软件均会在估计单倍型过程中自动”填充“缺失的基因型。基因型填充软件可以分为两列：一是计算密集型工具，例如 IMPUTE, MACH, fastPHASE/BIMBAM，这些软件在填充缺失位点时会考虑全部观测到的位点；二是计算更加高效的工具，例如 PLINK，TUNA, WHAP, BEAGLE ，这些软件填充缺失位点时只会考虑少量的相邻位点的基因型。</p>
-<p><img src="2.png" alt="1"></p>
-<h1>基因型填充的准确性</h1>
-<p>Scott et al. (93) 填充了超过 2百万的位点，提取超过 500 个位点与实验室的实际分型进行比较，总的不一致率只有 1.5%。</p>
-<p>第二，通过对 90个样本的超过 660k 的位点的填充基因型和实际分型基因型进行比对，总的不一致率小于 0.9% ，<strong>所有位点的平均 <img src="https://math.now.sh?inline=r%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 达到了 0.93</strong> 。</p>
-<h1>基因型填充的作用</h1>
-<p>基因型填充的一个作用就是更好地挖掘与性状相关的位点和基因，通过基因型填充，我们可以查看一个关联位点其临近的位点是否也与性状关联，甚至我们可以找到<strong>潜在的因果位点</strong>。</p>
-<p>除此之外，基因型填充还可以提高 GWAS 分析的 POWER 。举个例子，Willer et al.  和 Kathiresan et al 发现 rs6511720 这个位点 (在 LDLR 基因中) 与 LDL cholesterol levels 这个性状显著关联，但是由于这个位点不在芯片中，而初始分析只使用了芯片位点，因此初始分析中遗漏了这个选择信号（芯片中的位点与 rs6511720 不存在紧密连锁，最大的配对 r2 只有 0.21）。</p>
-<p><img src="3.png" alt="1"></p>
-<p>另外一个例子如下</p>
-<p><img src="4.png" alt="1"></p>
-<p>但是，准确估计填充对于提高关联分析 POWER 的作用非常困难，这里有两种思路，第一种是使用模拟数据，第二种是合并使用基因组数据和基因表达数据。这里第二种方式更加吸引仍，因为我们比较容易确定位点和转录水平的正向关联。这两种思路均建议基因型填充可以提到挖掘基因研究的 power ，特别是对于等位基因频率小于 10% -20% 的位点。</p>
-<h1>基因组关联分析的元分析</h1>
-<p>基因型填充作用最好的说明可能就是其可以用于对不同检测平台产生的数据的 GWAS 分析结果的元分析（具体怎么做我不清楚）。</p>
-<h1>填充的注意事项</h1>
+<h1>修改 fortran 脚本</h1>
 <ol>
 <li>
-<p>自填充严格质控</p>
+<p>在<strong>需要直接调用的</strong>子例程中的参数中，如果存在数组，那么同时需要将<strong>数组的维度作为参数添加进来</strong>。</p>
 </li>
 <li>
-<p>有参填充需要确保参考群体和填充群体相同位点的两个碱基的标签相同（应该说的是 vcf 文件中的 ref 和 alt）。</p>
+<p>在<strong>需要直接调用的</strong>子例程中的参数中，如果存在数组，那么定义数组参数时，需要准确定义数组的维度（因为有些子例程中数组维度会定义为1）。</p>
 </li>
 <li>
-<p>有参填充需要严格挑选参考群体。比较不同参考群时，可以在填充群中的基因型随机缺失部分位点，然后查看使用不同参考群的填充准确性。</p>
+<p>定义变量后，通过注释字符+<code>f2py</code> 定义参数的 <code>intent</code> 属性，总共有三种属性，解释如下：</p>
+<ul>
+<li>
+<p><code>in</code> ：输入变量，只读</p>
 </li>
 <li>
-<p>填充完成后，不是所有标记都能准确填充，我们需要确定挑选哪些位点用于下一步的分析。</p>
-<p>最简单的方法就是看填充位点的一致率（比如挑选大于 90%），但是这里作者并不推荐这种方式，因为位点的一致率还受到 maf 的影响，因此无法直接比较（举个例子，对于 maf 小于 0.05 的位点，那么我们只要将所有样本的分型均分配为最可能的基因型，则一致率就会达到 90% 以上）。</p>
-<p>这里我们推荐的方法是使用位点的填充基因型和真实基因型的<strong>相关系数</strong>，通常我们会使用<strong>相关系数的平方</strong>，即 <img src="https://math.now.sh?inline=%5Cmathbf%7Br%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 。</p>
-<p>最通常的方法是查看填充位点偏离哈温平衡的程度（because imputed allele counts for poorly imputed markers show less variability than expected based on allele frequency，这句话没有太看懂） 。</p>
+<p><code>out</code>:  输出变量，输出变量不会出现在模块的输入参数中，如果有多个输出变量，会以元组的形式同时输出。</p>
 </li>
 <li>
-<p>最后一步就是分析填充的基因型，一般来说填充的基因型是服从一个概率分布的，举个例子，某个样本在某个位点可能有 90% 的概率是 A/A ，有 10% 的概率是 A/C ，也就是说，这个位点的Ａ的剂量期望值为 1.9 。</p>
-<p>对于 GWAS 分析，这里作者建议不用使用具体的填充基因型（比如上面的 AA），而是可以使用碱基的剂量（即上面的 1.9）来进行关联分析。</p>
+<p><code>in, out</code> : 输入输出变量，会对输入变量进行修改，再输出，如果有多个输出变量，会以元组的形式同时输出。</p>
+</li>
+</ul>
 </li>
 </ol>
-<h1>未来的挑战</h1>
-<ol>
-<li>
-<p>希望有更具特色的参考面板（reference panels），可以包含除 SNP 之外的其它变异，比如 CNV 。</p>
-</li>
-<li>
-<p>希望有更好的填充算法。</p>
-</li>
-<li>
-<p><strong>最重要的，希望有更大的参考面板</strong>，如下图，参考群体越大，基因型填充的准确性越高，因为参考群体的样本和目标样本之间共享的单倍型区块长度会越长，而且也越容易在参考面板中<strong>无歧义地</strong>识别共同的单倍型区块。</p>
-<p><img src="5.png" alt="1"></p>
-</li>
-</ol>
-<h1>填充和重测序数据</h1>
-<p>填充计数可以使得从<strong>低密度重测序数据</strong>得到高质量的分型数据，从而降低测序成本（略微降低数据质量），比如千人基因组计划。</p>
+<p>举个例子，根据下面的脚本，假设这个子例程原本就只有两个数组参数 <code>a</code>, <code>b</code> ，那么首先第一步我们要将 <code>nze</code> 和 <code>n</code> 加入到子例程的参数中，第二步因为定义 <code>a</code>, <code>b</code> 时其维度已经定义好了，不需要动，第三步就是像最后两句一样定义   <code>a</code>, <code>b</code> 的 <code>intent</code> ，这里就是需要同时输入  <code>a</code>, <code>b</code>  ，然后输出 <code>a</code></p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">      <span class="keyword">real</span>*<span class="number">8</span> a(nze),b(n)</span><br><span class="line">cf2py <span class="keyword">intent</span>(<span class="keyword">in</span>,<span class="keyword">out</span>) a</span><br><span class="line">cf2py <span class="keyword">intent</span>(<span class="keyword">in</span>) b</span><br></pre></td></tr></table></figure>
+<h1>检查 fortran 脚本</h1>
+<p>在 linux 中逐个编译需要用到的 fortran 脚本，看看是否有语法问题。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gfortran -c *.f</span><br></pre></td></tr></table></figure>
+<h1>调用 F2PY</h1>
+<p>两种方式：既可以使用命令行工具<code>f2py</code> ，也可以使用 python 模块 <code>numpy.f2py</code> 。</p>
+<p>如果使用第一种方式，则直接运行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f2py</span><br></pre></td></tr></table></figure>
+<p>如果使用第二种方式，则运行命令为</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m numpy.f2py</span><br></pre></td></tr></table></figure>
+<p>按照下面的命令进行打包，<code>-c</code> 后面接 fortran 脚本名称，可以包含多个脚本；<code>-m</code> 后面接输出的模块名称。</p>
+<p>运行日志中如果最后有 <code>Removing build directory ***</code> 字样并且没有报错信息，则说明运行正常。并且在当前目录中会生成 <code>modulename.cpython-39-x86_64-linux-gnu.so</code>（在windows 中后缀为 <code>.pyd</code> ） 。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f2py -c *.f  -m modulename </span><br></pre></td></tr></table></figure>
+<p>然后在 ipython 页面中，导入生成的模块，查看其文档 (<code>__doc__</code>)。</p>
+<p>首先模块的文档包含了所有可用的函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">2</span>]: <span class="keyword">import</span> fib1</span><br><span class="line"></span><br><span class="line">In [<span class="number">3</span>]: <span class="built_in">print</span>(fib1.__doc__)</span><br><span class="line">This module <span class="string">&#x27;fib1&#x27;</span> <span class="keyword">is</span> auto-generated <span class="keyword">with</span> f2py (version:<span class="number">1.21</span><span class="number">.5</span>).</span><br><span class="line">Functions:</span><br><span class="line">  fib(a,n=<span class="built_in">len</span>(a))</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+<p>然后查看需要调用的函数的文档，可以看到所有输入函数的类型。</p>
+<p>这里有两个作用，第一是检查一下是否和之前设置的参数的 <code>intent</code> 属性保持一致（如果不一致，重新调用一遍 F2PY 覆盖一下），第二就是看如何在 python 中运行这个模块 (看第一行)。这个模块在 python 中的调用方式就是 <code>ia,ja,a,b = test(option,ia,ja,a,b,[n,nze])</code> 。</p>
+<p>这里也可以看到，虽然我们需要在 fortran 脚本将数组参数的维度也作为参数加入进来（<code>n</code> 和 <code>nze</code>），但是经过 F2PY 打包之后，我们在 python 中运行其实是不需要输入数组维度的（可选参数），因为会自动从输入数组维度中得到 <code>n</code> 和 <code>nze</code> 。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">In [2]: print(test.test.__doc__)</span><br><span class="line">ia,ja,a,b &#x3D; test(option,ia,ja,a,b,[n,nze])</span><br><span class="line"></span><br><span class="line">Wrapper for &#96;&#96;test&#96;&#96;.</span><br><span class="line"></span><br><span class="line">Parameters</span><br><span class="line">----------</span><br><span class="line">option : input int</span><br><span class="line">ia : input rank-1 array(&#39;i&#39;) with bounds (n + 1)</span><br><span class="line">ja : input rank-1 array(&#39;i&#39;) with bounds (nze)</span><br><span class="line">a : input rank-1 array(&#39;d&#39;) with bounds (nze)</span><br><span class="line">b : input rank-1 array(&#39;d&#39;) with bounds (n)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Other Parameters</span><br><span class="line">----------------</span><br><span class="line">n : input int, optional</span><br><span class="line">    Default: (len(ia)-1)</span><br><span class="line">nze : input int, optional</span><br><span class="line">    Default: len(ja)</span><br><span class="line"></span><br><span class="line">Returns</span><br><span class="line">-------</span><br><span class="line">ia : rank-1 array(&#39;i&#39;) with bounds (n + 1)</span><br><span class="line">ja : rank-1 array(&#39;i&#39;) with bounds (nze)</span><br><span class="line">a : rank-1 array(&#39;d&#39;) with bounds (nze)</span><br><span class="line">b : rank-1 array(&#39;d&#39;) with bounds (n)</span><br></pre></td></tr></table></figure>
+<p>除了在 ipython 界面运行，你也可以按照下面的命令生成一个签名文件 (<code>*.pyf</code>) ，查看子例程参数的属性。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f2py *.f  -m * -h *.pyf</span><br></pre></td></tr></table></figure>
+<h1>在 python 中运行</h1>
+<p>唯一需要注意的地方就是<strong>输入数组的数据类型必须正确</strong>，不然不会对输入数组进行修改，也不会报错。</p>
+<blockquote>
+<p>否则 F2PY会生成输入数组的连续副本（具有正确的dtype），并将副本的C指针传递给Fortran子例程。因此，对输入数组（副本）的任何可能更改都不会影响原始参数。</p>
+</blockquote>
+<p>比如说 fortran 中 <code>REAL*8</code> 对应的就是 python 中的 <code>float</code> 及数组中的 <code>np.float64</code> 。</p>
+<h2 id="注意-array-的顺序">注意 array 的顺序</h2>
+<p>注意 numpy 数组在内存中数据顺序一直使用 C 的惯例（称为行优先顺序），而 Fortran 使用列优先顺序。举个例例子，矩阵[ [1, 2], [3, 4] ] 在内存中按行优先顺序排列成[1, 2, 3, 4]，按列优先顺序排列成<br>
+[1, 3, 2, 4]。</p>
+<p>因此对于2维数组，在声明时需要指定其 <code>order=’F’</code> ，即按照列优先顺序排列，从而与 Fortran 保持一致。</p>
 <h1>参考文献</h1>
 <ol>
-<li>Li Y, Willer C, Sanna S, et al. Genotype imputation[J]. Annual review of genomics and human genetics, 2009, 10: 387.</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://numpy123.com/f2py/">https://numpy123.com/f2py/</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://blog.finaltheory.me/research/Introduction-to-F2PY.html">https://blog.finaltheory.me/research/Introduction-to-F2PY.html</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://sites.engineering.ucsb.edu/~shell/che210d/f2py.pdf">https://sites.engineering.ucsb.edu/~shell/che210d/f2py.pdf</a></p>
+</li>
 </ol>
  
       <!-- reward -->
@@ -184,7 +187,7 @@
     
     <footer class="article-footer">
        
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%9F%BA%E5%9B%A0%E5%9E%8B%E5%A1%AB%E5%85%85/" rel="tag">基因型填充</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li></ul>
 
     </footer>
   </div>
@@ -192,19 +195,19 @@
    
   <nav class="article-nav">
     
-      <a href="/posts/309f8f08/" class="article-nav-link">
+      <a href="/posts/fe54dd0e/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            python获得网络时间
+            case-control性状能用混合线性模型做GWAS吗
           
         </div>
       </a>
     
     
-      <a href="/posts/1fd14144/" class="article-nav-link">
+      <a href="/posts/7e15d6ea/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">python包-re-time-random-collections-argparse</div>
+        <div class="article-nav-title">python包-cython编译脚本</div>
       </a>
     
   </nav>

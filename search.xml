@@ -1,6 +1,215 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>创建kegg本地数据库</title>
+    <url>/posts/80b4ed31/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>将 kegg 数据库下载到本地，避免因为无法连接到 kegg 网页而无法分析。</p>
+<span id="more"></span>
+<h1>创建</h1>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">library(createKEGGdb)</span><br><span class="line"></span><br><span class="line">org &#x3D; &quot;gmx&quot;</span><br><span class="line"></span><br><span class="line">createKEGGdb::create_kegg_db(org) </span><br><span class="line"></span><br><span class="line">#file.rename(&quot;.&#x2F;KEGG.db_1.0.tar.gz&quot;, sprintf(&quot;.&#x2F;KEGG.db_1.0_%s.tar.gz&quot;, org))</span><br></pre></td></tr></table></figure>
+<p>然后安装这个包</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">install.packages(&quot;KEGG.db_1.0.tar.gz&quot;, type&#x3D;&#39;source&#39;, repos &#x3D; NULL)</span><br><span class="line"></span><br><span class="line">library(KEGG.db)</span><br></pre></td></tr></table></figure>
+<p>之后进行 kegg 分析，唯一的区别就是设置 <code>use_internal_data=T</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ekk&#x3D;enrichKEGG(gene&#x3D;eg$ENTREZID, organism&#x3D;organism,keyType&#x3D;&quot;kegg&quot;,pAdjustMethod&#x3D;&quot;none&quot;,pvalueCutoff&#x3D;1, use_internal_data&#x3D;T)</span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li><a href="http://www.360doc.com/content/19/1204/10/62751463_877310221.shtml">http://www.360doc.com/content/19/1204/10/62751463_877310221.shtml</a></li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>case-control性状能用混合线性模型做GWAS吗</title>
+    <url>/posts/fe54dd0e/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>偶读一篇文献，发现了对于为什么case-control 性状可以使用混合线性模型做GWAS的说明。</p>
+<span id="more"></span>
+<h1>前提说明</h1>
+<p>混合线性模型，或者标准的线性回归模型都是用于数量性状的。如果采用混合线性模型进行GWAS 分析，则性状需要满足正态分布假设。 而 case-control 性状明显是不符合正态分布假设的。</p>
+<h1>the Armitage trend test</h1>
+<p>Armitage 证明了可以对 case-control 性状转换为 0-1的数量性状的反应变量，然后直接使用线性回归的模型去进行检验。</p>
+<p>具体证明过程我没有细看，只是记录一下，插个眼。</p>
+<h1>参考文献</h1>
+<ol>
+<li>Kang, H., Sul, J., Service, S. <em>et al.</em> Variance component model to account for sample structure in genome-wide association studies. <em>Nat Genet</em> <strong>42</strong>, 348–354 (2010). <a href="https://doi.org/10.1038/ng.548">https://doi.org/10.1038/ng.548</a></li>
+<li>Armitage, P. Tests for linear trends in proportions and frequencies. Biometrics 11,<br>
+375–386 (1955)</li>
+<li><a href="https://en.wikipedia.org/wiki/Cochran%E2%80%93Armitage_test_for_trend">https://en.wikipedia.org/wiki/Cochran–Armitage_test_for_trend</a></li>
+<li>Agresti, A. &amp; Wiley, J.  Categorical Data Analysis (Wiley, New York, 1990)</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>线性模型</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>线性模型</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>python包-f2py使用流程</title>
+    <url>/posts/15c32607/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>个人使用 f2py 的流程整理。</p>
+<span id="more"></span>
+<h1>修改 fortran 脚本</h1>
+<ol>
+<li>
+<p>在<strong>需要直接调用的</strong>子例程中的参数中，如果存在数组，那么同时需要将<strong>数组的维度作为参数添加进来</strong>。</p>
+</li>
+<li>
+<p>在<strong>需要直接调用的</strong>子例程中的参数中，如果存在数组，那么定义数组参数时，需要准确定义数组的维度（因为有些子例程中数组维度会定义为1）。</p>
+</li>
+<li>
+<p>定义变量后，通过注释字符+<code>f2py</code> 定义参数的 <code>intent</code> 属性，总共有三种属性，解释如下：</p>
+<ul>
+<li>
+<p><code>in</code> ：输入变量，只读</p>
+</li>
+<li>
+<p><code>out</code>:  输出变量，输出变量不会出现在模块的输入参数中，如果有多个输出变量，会以元组的形式同时输出。</p>
+</li>
+<li>
+<p><code>in, out</code> : 输入输出变量，会对输入变量进行修改，再输出，如果有多个输出变量，会以元组的形式同时输出。</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>举个例子，根据下面的脚本，假设这个子例程原本就只有两个数组参数 <code>a</code>, <code>b</code> ，那么首先第一步我们要将 <code>nze</code> 和 <code>n</code> 加入到子例程的参数中，第二步因为定义 <code>a</code>, <code>b</code> 时其维度已经定义好了，不需要动，第三步就是像最后两句一样定义   <code>a</code>, <code>b</code> 的 <code>intent</code> ，这里就是需要同时输入  <code>a</code>, <code>b</code>  ，然后输出 <code>a</code></p>
+<figure class="highlight fortran"><table><tr><td class="code"><pre><span class="line">      <span class="keyword">real</span>*<span class="number">8</span> a(nze),b(n)</span><br><span class="line">cf2py <span class="keyword">intent</span>(<span class="keyword">in</span>,<span class="keyword">out</span>) a</span><br><span class="line">cf2py <span class="keyword">intent</span>(<span class="keyword">in</span>) b</span><br></pre></td></tr></table></figure>
+<h1>检查 fortran 脚本</h1>
+<p>在 linux 中逐个编译需要用到的 fortran 脚本，看看是否有语法问题。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">gfortran -c *.f</span><br></pre></td></tr></table></figure>
+<h1>调用 F2PY</h1>
+<p>两种方式：既可以使用命令行工具<code>f2py</code> ，也可以使用 python 模块 <code>numpy.f2py</code> 。</p>
+<p>如果使用第一种方式，则直接运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">f2py</span><br></pre></td></tr></table></figure>
+<p>如果使用第二种方式，则运行命令为</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">python -m numpy.f2py</span><br></pre></td></tr></table></figure>
+<p>按照下面的命令进行打包，<code>-c</code> 后面接 fortran 脚本名称，可以包含多个脚本；<code>-m</code> 后面接输出的模块名称。</p>
+<p>运行日志中如果最后有 <code>Removing build directory ***</code> 字样并且没有报错信息，则说明运行正常。并且在当前目录中会生成 <code>modulename.cpython-39-x86_64-linux-gnu.so</code>（在windows 中后缀为 <code>.pyd</code> ） 。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">f2py -c *.f  -m modulename </span><br></pre></td></tr></table></figure>
+<p>然后在 ipython 页面中，导入生成的模块，查看其文档 (<code>__doc__</code>)。</p>
+<p>首先模块的文档包含了所有可用的函数。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">2</span>]: <span class="keyword">import</span> fib1</span><br><span class="line"></span><br><span class="line">In [<span class="number">3</span>]: <span class="built_in">print</span>(fib1.__doc__)</span><br><span class="line">This module <span class="string">&#x27;fib1&#x27;</span> <span class="keyword">is</span> auto-generated <span class="keyword">with</span> f2py (version:<span class="number">1.21</span><span class="number">.5</span>).</span><br><span class="line">Functions:</span><br><span class="line">  fib(a,n=<span class="built_in">len</span>(a))</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+<p>然后查看需要调用的函数的文档，可以看到所有输入函数的类型。</p>
+<p>这里有两个作用，第一是检查一下是否和之前设置的参数的 <code>intent</code> 属性保持一致（如果不一致，重新调用一遍 F2PY 覆盖一下），第二就是看如何在 python 中运行这个模块 (看第一行)。这个模块在 python 中的调用方式就是 <code>ia,ja,a,b = test(option,ia,ja,a,b,[n,nze])</code> 。</p>
+<p>这里也可以看到，虽然我们需要在 fortran 脚本将数组参数的维度也作为参数加入进来（<code>n</code> 和 <code>nze</code>），但是经过 F2PY 打包之后，我们在 python 中运行其实是不需要输入数组维度的（可选参数），因为会自动从输入数组维度中得到 <code>n</code> 和 <code>nze</code> 。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">In [2]: print(test.test.__doc__)</span><br><span class="line">ia,ja,a,b &#x3D; test(option,ia,ja,a,b,[n,nze])</span><br><span class="line"></span><br><span class="line">Wrapper for &#96;&#96;test&#96;&#96;.</span><br><span class="line"></span><br><span class="line">Parameters</span><br><span class="line">----------</span><br><span class="line">option : input int</span><br><span class="line">ia : input rank-1 array(&#39;i&#39;) with bounds (n + 1)</span><br><span class="line">ja : input rank-1 array(&#39;i&#39;) with bounds (nze)</span><br><span class="line">a : input rank-1 array(&#39;d&#39;) with bounds (nze)</span><br><span class="line">b : input rank-1 array(&#39;d&#39;) with bounds (n)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Other Parameters</span><br><span class="line">----------------</span><br><span class="line">n : input int, optional</span><br><span class="line">    Default: (len(ia)-1)</span><br><span class="line">nze : input int, optional</span><br><span class="line">    Default: len(ja)</span><br><span class="line"></span><br><span class="line">Returns</span><br><span class="line">-------</span><br><span class="line">ia : rank-1 array(&#39;i&#39;) with bounds (n + 1)</span><br><span class="line">ja : rank-1 array(&#39;i&#39;) with bounds (nze)</span><br><span class="line">a : rank-1 array(&#39;d&#39;) with bounds (nze)</span><br><span class="line">b : rank-1 array(&#39;d&#39;) with bounds (n)</span><br></pre></td></tr></table></figure>
+<p>除了在 ipython 界面运行，你也可以按照下面的命令生成一个签名文件 (<code>*.pyf</code>) ，查看子例程参数的属性。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">f2py *.f  -m * -h *.pyf</span><br></pre></td></tr></table></figure>
+<h1>在 python 中运行</h1>
+<p>唯一需要注意的地方就是<strong>输入数组的数据类型必须正确</strong>，不然不会对输入数组进行修改，也不会报错。</p>
+<blockquote>
+<p>否则 F2PY会生成输入数组的连续副本（具有正确的dtype），并将副本的C指针传递给Fortran子例程。因此，对输入数组（副本）的任何可能更改都不会影响原始参数。</p>
+</blockquote>
+<p>比如说 fortran 中 <code>REAL*8</code> 对应的就是 python 中的 <code>float</code> 及数组中的 <code>np.float64</code> 。</p>
+<h2 id="注意-array-的顺序">注意 array 的顺序</h2>
+<p>注意 numpy 数组在内存中数据顺序一直使用 C 的惯例（称为行优先顺序），而 Fortran 使用列优先顺序。举个例例子，矩阵[ [1, 2], [3, 4] ] 在内存中按行优先顺序排列成[1, 2, 3, 4]，按列优先顺序排列成<br>
+[1, 3, 2, 4]。</p>
+<p>因此对于2维数组，在声明时需要指定其 <code>order=’F’</code> ，即按照列优先顺序排列，从而与 Fortran 保持一致。</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p><a href="https://numpy123.com/f2py/">https://numpy123.com/f2py/</a></p>
+</li>
+<li>
+<p><a href="https://blog.finaltheory.me/research/Introduction-to-F2PY.html">https://blog.finaltheory.me/research/Introduction-to-F2PY.html</a></p>
+</li>
+<li>
+<p><a href="https://sites.engineering.ucsb.edu/~shell/che210d/f2py.pdf">https://sites.engineering.ucsb.edu/~shell/che210d/f2py.pdf</a></p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>python包-cython编译脚本</title>
+    <url>/posts/7e15d6ea/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 cython 编译 python 脚本。</p>
+<span id="more"></span>
+<h1>安装 cython</h1>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">pip install cython</span><br></pre></td></tr></table></figure>
+<p>然后查看是否安装上</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> cython -V</span></span><br><span class="line">Cython version 0.29.33</span><br></pre></td></tr></table></figure>
+<h1>修改 pyx 脚本</h1>
+<p>以下面的程序为例，这个程序是计算一个对称矩阵和一个输入向量的乘积，这个矩阵的上三角元素按照三元组的形式存储在 <code>(row_list, col_list, data_list)</code> 中，<code>x</code> 为输入向量，函数返回乘积 <code>b</code> 。</p>
+<p>首先需要用 <code>cimport cython</code> 导入模块。</p>
+<p>将 <code>row_list</code> 和 <code>col_list</code> 的数据类型定义为 <code>np.intc</code> ，与 C 语言中的 <code>int</code> 类型对应；将 <code>data_list</code>的数据类型定义为 <code>np.double</code> ，与 C 语言中的 <code>double</code> 类型对应。这里就是要保证数据类型一致，具体的 numpy 与 C 语言所有数据类型的对应关系可见官网 <a href="https://www.numpy.org.cn/user/basics/types.html">数组类型之间的转换</a>。</p>
+<p>通过网上发现 numpy.double 等同于 numpy.float64 ,  numpy.intc 等同于 numpy.int32， 证明如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">1</span>]: <span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">In [<span class="number">2</span>]: np.double <span class="keyword">is</span> np.float64</span><br><span class="line">Out[<span class="number">2</span>]: <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">3</span>]: np.intc <span class="keyword">is</span> np.int32</span><br><span class="line">Out[<span class="number">3</span>]: <span class="literal">True</span></span><br></pre></td></tr></table></figure>
+<p><code>@cython.wraparound(False)</code> 和 <code>@cython.boundscheck(False)</code> 这两句是说不再检查循环变量 (<code>i</code> ) 的范围。</p>
+<p><code>@cython.cdivision(True)</code> 是说使用 C 语言中的除法，而不是 python 的除法。注意如果是两个整数相除，C 语言的除法会取整，想要得到正确的结果，需要将一个数改为浮点数，比如将 <code>x</code> 改为 <code>&lt;double&gt;  (x)</code> 。</p>
+<p>然后我们看函数内部 ，首先就是将数据类型改为与 C 语言一致，<code>x = x.astype(np.double)</code> 。然后数组对象需要放到缓存中，这样就能将 python 的数组对象转为 C 语言直接处理的对象，比如 <code>cdef int[:] row_list_view = row_list</code>（对 <code>row_list_view</code> 的处理，<code>row_list</code> 也会出现相应的改变）。标量可以直接定义，注意这里涉及数据维度的地方也需要提前定义，因为数组维度对象也是 python 对象，比如 <code>cdef int element_num = row_list.shape[0]</code> 。对于循环变量，定义为 <code>cdef Py_ssize_t</code> 。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cimport cython</span><br><span class="line"></span><br><span class="line">row_list = np.array(row_list, dtype = np.intc)   </span><br><span class="line">col_list = np.array(col_list, dtype = np.intc)          </span><br><span class="line">data_list = np.array(data_list, dtype = np.double)          </span><br><span class="line"></span><br><span class="line"><span class="meta">@cython.wraparound(<span class="params"><span class="literal">False</span></span>)</span></span><br><span class="line"><span class="meta">@cython.boundscheck(<span class="params"><span class="literal">False</span></span>)</span></span><br><span class="line"><span class="meta">@cython.cdivision(<span class="params"><span class="literal">True</span></span>) </span><span class="comment"># 使用 c 的除法</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Ax</span>(<span class="params">x</span>):</span></span><br><span class="line">    <span class="comment"># lhs_dict2 为 A 的字典, 0-index</span></span><br><span class="line">    <span class="comment"># x 为需要乘的向量，输出 Ax</span></span><br><span class="line">    <span class="comment"># x = x.astype(np.double) # 转换类型</span></span><br><span class="line">    b = np.zeros_like(x, dtype = np.double)</span><br><span class="line">    cdef <span class="built_in">int</span>[:] row_list_view = row_list <span class="comment"># 存入缓存中</span></span><br><span class="line">    cdef <span class="built_in">int</span>[:] col_list_view = col_list <span class="comment"># 存入缓存中</span></span><br><span class="line">    cdef double[:] data_list_view = data_list <span class="comment"># 存入缓存中</span></span><br><span class="line">    cdef double[:] x_view = x <span class="comment"># 存入缓存中</span></span><br><span class="line">    cdef double[:] b_view = b <span class="comment"># 存入缓存中</span></span><br><span class="line"></span><br><span class="line">    cdef <span class="built_in">int</span> element_num = row_list.shape[<span class="number">0</span>]</span><br><span class="line">    cdef Py_ssize_t i <span class="comment"># 循环变量</span></span><br><span class="line">    cdef <span class="built_in">int</span> row_index,col_index</span><br><span class="line">    cdef double data</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(element_num):</span><br><span class="line">        row_index = row_list_view[i] - <span class="number">1</span> <span class="comment"># 0-index</span></span><br><span class="line">        col_index = col_list_view[i] - <span class="number">1</span> <span class="comment"># 0-index</span></span><br><span class="line">        data = data_list_view[i]</span><br><span class="line">        b_view[row_index] += data * x_view[col_index]</span><br><span class="line">        <span class="keyword">if</span> (row_index != col_index): <span class="comment"># 非对角线元素</span></span><br><span class="line">            b_view[col_index] += data * x_view[row_index]</span><br><span class="line">            <span class="keyword">return</span> b</span><br></pre></td></tr></table></figure>
+<h1>查看修改效果</h1>
+<p>Cython 程序的扩展名是 .pyx ，使用下面的命令会生成一个同名的 html ，这个文件中黄色部分就是和 python 进行交互的地方，也就是拖累性能的地方。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cython -a *.pyx</span><br></pre></td></tr></table></figure>
+<p>如果遇到提示 <code>FutureWarning: Cython directive 'language_level' not set, using 2 for now (Py2).</code> 。只需要在 pyx 文件开头增加一条注释，指明使用 python3 即可。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cython: language_level=3</span></span><br></pre></td></tr></table></figure>
+<p>这里只要循环部分不是黄的，就可以了，比如上面的函数的 html 文件如下：</p>
+<p><img src="1.png" alt=""></p>
+<h1>使用 cython 编译 py 文件</h1>
+<p>创建一个临时的 py 文件，比如 <a href="http://setup.py">setup.py</a>，其中内容如下</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> distutils.core <span class="keyword">import</span> setup</span><br><span class="line"><span class="keyword">from</span> distutils.extension <span class="keyword">import</span> Extension</span><br><span class="line"><span class="keyword">from</span> Cython.Build <span class="keyword">import</span> cythonize</span><br><span class="line"></span><br><span class="line"><span class="comment"># 多个文件</span></span><br><span class="line"><span class="comment"># 第一个参数 recode 是输出模块的前缀，第二个列表是所有需要编译的源文件</span></span><br><span class="line">extensions=[</span><br><span class="line"> Extension(<span class="string">&quot;recode&quot;</span>, [<span class="string">&quot;recode_so.py&quot;</span>]),  <span class="comment"># 配置需要cython编译的源文件</span></span><br><span class="line"> Extension(<span class="string">&quot;blup&quot;</span>, [<span class="string">&quot;blup_so.py&quot;</span>]),</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">setup(ext_modules=cythonize(extensions, language_level=<span class="number">3</span>))</span><br><span class="line"><span class="comment"># 里面的 language_level=3 表示只需要兼容 python3 即可, 而默认是 2 和 3 都兼容</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后运行脚本进行编译</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python setup.py build</span><br></pre></td></tr></table></figure>
+<p>在我们执行命令之后，运行成功结尾就是 <code>.so</code>。并且在当前目录会多出一个 build 目录，里面的 <code>.so</code> 文件就是编译后的文件（windows 系统中是 <code>.pyd</code> ）</p>
+<p>实际使用发现，cython 不能和 numba 联合使用。</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p><a href="https://www.cnblogs.com/traditional/p/13213173.html">https://www.cnblogs.com/traditional/p/13213173.html</a></p>
+</li>
+<li>
+<p><a href="https://www.jianshu.com/p/9053dacee822">https://www.jianshu.com/p/9053dacee822</a></p>
+</li>
+<li>
+<p><a href="https://www.bilibili.com/video/BV1NF411i74S?p=1&amp;vd_source=584d44ba7fed271fb82848e7894a53c8">https://www.bilibili.com/video/BV1NF411i74S?p=1&amp;vd_source=584d44ba7fed271fb82848e7894a53c8</a></p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>python获得网络时间</title>
+    <url>/posts/309f8f08/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 <code>http.client</code> 包获得网络时间。</p>
+<span id="more"></span>
+<h1>获得网络时间</h1>
+<p>首先需要安装 <code>http.client</code> 这个包</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">pip install http.client</span><br></pre></td></tr></table></figure>
+<p>运行下面的脚本</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> http.client</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">host = <span class="string">&#x27;www.baidu.com&#x27;</span></span><br><span class="line">conn=http.client.HTTPConnection(host)</span><br><span class="line">conn.request(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;/&quot;</span>)</span><br><span class="line">r=conn.getresponse()</span><br><span class="line">ts=  r.getheader(<span class="string">&#x27;date&#x27;</span>) <span class="comment">#获取http头date部分</span></span><br><span class="line"><span class="comment">#将GMT时间转换成北京时间</span></span><br><span class="line">ltime= time.strptime(ts[<span class="number">5</span>:<span class="number">25</span>], <span class="string">&quot;%d %b %Y %H:%M:%S&quot;</span>) <span class="comment"># GMT 时间</span></span><br><span class="line">ttime=time.localtime(time.mktime(ltime)+<span class="number">8</span>*<span class="number">60</span>*<span class="number">60</span>) <span class="comment"># 北京时间</span></span><br><span class="line">dat=<span class="string">f&quot;<span class="subst">&#123;ttime.tm_year&#125;</span>-<span class="subst">&#123;ttime.tm_mon:02d&#125;</span>-<span class="subst">&#123;ttime.tm_mday:02d&#125;</span>&quot;</span></span><br><span class="line">tm=<span class="string">f&quot;<span class="subst">&#123;ttime.tm_hour:02d&#125;</span>:<span class="subst">&#123;ttime.tm_min:02d&#125;</span>:<span class="subst">&#123;ttime.tm_sec:02d&#125;</span>&quot;</span></span><br><span class="line"><span class="built_in">print</span>(dat,tm)</span><br><span class="line"><span class="comment"># 或者也可以直接使用 strftime() 输出, 会自动补零</span></span><br><span class="line"><span class="built_in">print</span>(time.strftime(<span class="string">&quot;%Y-%m-%d&quot;</span>, ttime))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">2023-02-17 13:46:54</span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li><a href="https://cloud.tencent.com/developer/article/1570662">https://cloud.tencent.com/developer/article/1570662</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>文献阅读-genotype-imputation</title>
     <url>/posts/2ca177e4/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>2009年的一篇关于基因型填充的综述。</p>
@@ -749,6 +958,48 @@
 </li>
 </ol>
 <h2 id="位点质控">位点质控</h2>
+<h3 id="杂合子比例-2">杂合子比例</h3>
+<p>位点杂合子比例可以通过 <code>--hardy</code> 进行计算，输出文件后缀维 <code>.hwe</code> ，内容举例如下。</p>
+<p>其中 <strong>O(HET)</strong> 便是位点的观察杂合度，GENO 的三个数值对应着 A1A1,A1A2,A2A2 三种基因型的数目。</p>
+<table>
+<thead>
+<tr>
+<th>CHR</th>
+<th>SNP</th>
+<th>TEST</th>
+<th>A1</th>
+<th>A2</th>
+<th>GENO</th>
+<th>O(HET)</th>
+<th>E(HET)</th>
+<th>P</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>snp1</td>
+<td>ALL(NP)</td>
+<td>T</td>
+<td>C</td>
+<td>4337/533/26259</td>
+<td>0.01712</td>
+<td>0.252</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>snp2</td>
+<td>ALL(NP)</td>
+<td>G</td>
+<td>T</td>
+<td>8035/1174/22550</td>
+<td>0.03697</td>
+<td>0.3956</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
 <h3 id="剔除多等位基因位点">剔除多等位基因位点</h3>
 <p>使用 <strong>–snps-only just-acgt</strong> 选项会剔除非 SNP 位点（例如 indel 位点），对于存在三等位基因的 SNP ，会将存在三等位基因的基因型替换为0。</p>
 <p>举个例子，输入文件，第一个SNP是<strong>一等位基因</strong>，第二个SNP是<strong>三等位基因</strong>，第三个SNP是<strong>INDEL</strong> 位点。</p>
