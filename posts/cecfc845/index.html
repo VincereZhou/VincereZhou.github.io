@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    R包-GCA |  VincereZhou&#39;s blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="VincereZhou's blog" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-R包-GCA"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  R包-GCA
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/cecfc845/" class="article-date">
+  <time datetime="2023-04-14T00:56:43.000Z" itemprop="datePublished">2023-04-14</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a> / <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/R/">R</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">14 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>GCA 包可以计算群体间遗传关联。</p>
+<span id="more"></span>
+<h1>安装包</h1>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">remotes::install_github(&quot;QGresources&#x2F;GCA&quot;)</span><br><span class="line">library(GCA)</span><br></pre></td></tr></table></figure>
+<h1>加载网页需要的包</h1>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">library(BGLR)</span><br><span class="line">library(corrplot)</span><br><span class="line">library(GCA)</span><br><span class="line">library(ggplot2)</span><br><span class="line">library(gridExtra)</span><br></pre></td></tr></table></figure>
+<h1>准备数据</h1>
+<p>模拟数据  <code>GCcattle</code>包含两个对象 <code>cattle.pheno</code> and <code>cattle.W</code>，分别为表型和基因组信息，具体信息可见</p>
+<p>这是模拟数据，6个世代，基因型应该没有缺失。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">?GCcattle</span><br><span class="line"></span><br><span class="line"># Load cattle dataset</span><br><span class="line">data(GCcattle)</span><br><span class="line"></span><br><span class="line"># Check phenotype, fixed covariates and pedigree information</span><br><span class="line">str(cattle.pheno)</span><br><span class="line">&#39;data.frame&#39;:   2500 obs. of  6 variables:</span><br><span class="line"> $ Progeny  : int  1 2 3 4 5 6 7 8 9 10 ...</span><br><span class="line"> $ Sire     : int  0 0 0 0 0 0 0 0 0 0 ...</span><br><span class="line"> $ Dam      : int  0 0 0 0 0 0 0 0 0 0 ...</span><br><span class="line"> $ Sex      : chr  &quot;M&quot; &quot;M&quot; &quot;M&quot; &quot;M&quot; ...</span><br><span class="line"> $ Unit     : Factor w&#x2F; 8 levels &quot;U1&quot;,&quot;U2&quot;,&quot;U3&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...</span><br><span class="line"> $ Phenotype: num  -0.614 0.803 1.79 0.117 0.399 ...</span><br><span class="line"></span><br><span class="line"># Check marker information</span><br><span class="line">str(cattle.W)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; dim(cattle.W) # marker matrix</span><br><span class="line">[1]  2500 10000</span><br></pre></td></tr></table></figure>
+<p>遗传力设为 0.6</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sigma2a &lt;- 0.6 # additive genetic variance</span><br><span class="line">sigma2e &lt;- 0.4 # residual variance</span><br></pre></td></tr></table></figure>
+<p>我们接下来构建固定效应的系数矩阵和基因组关系矩阵</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">X2 &lt;- model.matrix(~ -1 + factor(cattle.pheno$Unit) + factor(cattle.pheno$Sex)) # incidence matrix of unit effect and sex</span><br><span class="line">G &lt;- computeG(cattle.W, maf &#x3D; 0.05) # genomic relationship matrix; markers with minor allele frequency (maf) less than 0.05 are removed</span><br></pre></td></tr></table></figure>
+<p>查看一下 <code>computeG</code> 这个函数，基因型缺失为 NA ，缺失值默认用随机抽样得到。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">Compute genomic relationship matrix</span><br><span class="line"></span><br><span class="line">Description:</span><br><span class="line"></span><br><span class="line">     Use single nucleotide polymorphisms markers to derive an additive</span><br><span class="line">     genomic relationship matrix. Missing markers are allowed, but</span><br><span class="line">     should be coded as NA.</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line"></span><br><span class="line">     computeG(snpmatrix, maf &#x3D; 0.05, impute &#x3D; &quot;rbinom&quot;, method &#x3D; &quot;G1&quot;)</span><br><span class="line"></span><br><span class="line">Arguments:</span><br><span class="line"></span><br><span class="line">snpmatrix: A marker matrix with the dimension of n by m, where the</span><br><span class="line">          elements are coded as 0, 1, 2, or NA, where n and m are the</span><br><span class="line">          total number of individuals and markers, respectively.</span><br><span class="line"></span><br><span class="line">     maf: A minor allele frequency cutoff for quality control. The</span><br><span class="line">          default minor allele frequency is 0.05.</span><br><span class="line"></span><br><span class="line">  impute: Perform genotype imputation for missing markers if</span><br><span class="line">          applicable. Two methods of &#39;mean&#39; and &#39;rbinom&#39; are available,</span><br><span class="line">          where the &#39;mean&#39; imputes missing markers using mean and</span><br><span class="line">          &#39;rbinom&#39; imputes the missing markers by random sampling from</span><br><span class="line">          a binomial distribution. The default method is &#39;rbinom&#39;. This</span><br><span class="line">          argument will be ignored if the ‘snpmatrix’ does not include</span><br><span class="line">          any missing markers.</span><br><span class="line"></span><br><span class="line">  method: A type of genomic relationship matrix including &#39;G1&#39; and &#39;G2&#39;</span><br><span class="line">          (VanRaden 2008). The default method is &#39;G1&#39;.</span><br></pre></td></tr></table></figure>
+<h1>计算群体关联的例子</h1>
+<h2 id="选项说明">选项说明</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gca(Kmatrix, Xmatrix, sigma2a, sigma2e, MUScenario, statistic, NumofMU, </span><br><span class="line">    Uidx &#x3D; NULL, scale &#x3D; TRUE, diag &#x3D; TRUE)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>Kmatrix</code>: Genetic relationship matrix constructed from either pedigree or genomics.</li>
+<li><code>Xmatrix</code>: Fixed effects incidence matrix excluding intercept. The first column of the Xmatrix should start with unit effects followed by other fixed effects if applicable.</li>
+<li><code>sigma2a and sigma2e</code>: Estimates of additive genetic and residual variances, respectively.</li>
+<li><code>MUScenario</code>: A vector of fixed factor units.</li>
+<li><code>statistic</code>: Choice of connectedness statistic. Available options include
+<ol>
+<li>PEV-derived functions: PEVD_IdAve, PEVD_GrpAve, PEVD_contrast, CD_IdAve, CD_GrpAve, CD_contrast, r_IdAve, r_GrpAve, and r_contrast.</li>
+<li>VE-derived functions: VED0, VED1, VED2, CDVED0, CDVED1, CDVED2, CR0, CR1, and CR2.</li>
+</ol>
+</li>
+<li><code>NumofMU</code>: Return either pairwise unit connectedness (Pairwise) or overall connectedness across all units (Overall).</li>
+<li><code>Uidx</code>: An integer indicating the last column number of units in the Xmatrix. This Uidx is required for VED2, CDVED2, and CR2 statistics. The default is NULL.</li>
+<li><code>scale (logical)</code>: Should sigma2a be used to scale statistic (i.e., PEVD_IdAve, PEVD_GrpAve, PEVD_contrast, VED0, VED1, and VED2) so that connectedness is independent of measurement unit? The default is TRUE.</li>
+<li><code>diag (logical)</code>: Should the diagonal elements of the PEV matrix (i.e., PEVD_GrpAve, CD_GrpAve, and r_GrpAve) or the K matrix (CDVED0, CDVED1, and CDVED2) be included? The default is TRUE.</li>
+</ul>
+<h2 id="PEVD-GrpAve">PEVD_GrpAve</h2>
+<p>下面我们以 PEVD_GrpAve 这个指标作为例子，其范围为 0 到 1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PEVD_GrpAve &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">                  MUScenario &#x3D; as.factor(cattle.pheno$Unit), statistic &#x3D; &#39;PEVD_GrpAve&#39;,</span><br><span class="line">                  NumofMU &#x3D; &#39;Pairwise&#39;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&gt; PEVD_GrpAve</span><br><span class="line">           U1         U2         U3         U4         U5         U6         U7</span><br><span class="line">U1         NA 0.01668301 0.02314068 0.02845543 0.02468162 0.02908540 0.01920005</span><br><span class="line">U2 0.01668301         NA 0.03679673 0.04326783 0.03956293 0.04428925 0.03464098</span><br><span class="line">U3 0.02314068 0.03679673         NA 0.04837241 0.04439133 0.04987349 0.03808480</span><br><span class="line">U4 0.02845543 0.04326783 0.04837241         NA 0.05041112 0.05712596 0.04589734</span><br><span class="line">U5 0.02468162 0.03956293 0.04439133 0.05041112         NA 0.05062642 0.04002046</span><br><span class="line">U6 0.02908540 0.04428925 0.04987349 0.05712596 0.05062642         NA 0.04647375</span><br><span class="line">U7 0.01920005 0.03464098 0.03808480 0.04589734 0.04002046 0.04647375         NA</span><br><span class="line">U8 0.01559363 0.03069310 0.03658017 0.04175780 0.03786799 0.04314658 0.03401520</span><br><span class="line">           U8</span><br><span class="line">U1 0.01559363</span><br><span class="line">U2 0.03069310</span><br><span class="line">U3 0.03658017</span><br><span class="line">U4 0.04175780</span><br><span class="line">U5 0.03786799</span><br><span class="line">U6 0.04314658</span><br><span class="line">U7 0.03401520</span><br><span class="line">U8         NA</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>移除对角线元素，并绘图</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">diag(PEVD_GrpAve) &lt;- 0 </span><br><span class="line">corrplot(PEVD_GrpAve, is.corr &#x3D; FALSE, method &#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(PEVD_GrpAve), col &#x3D; cm.colors(10), cl.lim &#x3D; c(0, 0.08),</span><br><span class="line">         number.digits &#x3D; 4, mar &#x3D; c(0,1,1,1), addCoef.col &#x3D; &quot;black&quot;,</span><br><span class="line">         tl.col &#x3D; &quot;black&quot;, tl.srt &#x3D; 90, tl.cex &#x3D; 1.2)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>如果设置 <code>NumofMU = 'Overall'</code> ，那么我们会得到所有配对的群体间PEVD 的均值</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; PEVD_GrpAve_Overall &lt;- gca(Kmatrix = G, Xmatrix = X2, sigma2a = sigma2a,</span><br><span class="line">                           sigma2e = sigma2e, MUScenario = as.factor(cattle.pheno$Unit),</span><br><span class="line">                           statistic = <span class="string">&#x27;PEVD_GrpAve&#x27;</span>, NumofMU = <span class="string">&#x27;Overall&#x27;</span>)</span><br><span class="line">PEVD_GrpAve_Overall</span><br><span class="line">[<span class="number">1</span>] <span class="number">0.03752627</span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>当然，这里的统计量也可以换为  <code>'PEVD_IdAve'</code> 和 <code>'PEVD_contrast'</code>,</p>
+<h2 id="PEVD-IdAve">PEVD_IdAve</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">PEVD_IdAve &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">                  MUScenario &#x3D; as.factor(cattle.pheno$Unit), statistic &#x3D; &#39;PEVD_IdAve&#39;,</span><br><span class="line">                  NumofMU &#x3D; &#39;Pairwise&#39;)</span><br><span class="line">diag(PEVD_IdAve) &lt;- 0</span><br><span class="line">pdf(&quot;test2.pdf&quot;)</span><br><span class="line">corrplot(PEVD_IdAve, is.corr &#x3D; FALSE, method &#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(PEVD_GrpAve), col &#x3D; cm.colors(10), cl.lim &#x3D; c(0, 0.08),</span><br><span class="line">         number.digits &#x3D; 4, mar &#x3D; c(0,1,1,1), addCoef.col &#x3D; &quot;black&quot;,</span><br><span class="line">         tl.col &#x3D; &quot;black&quot;, tl.srt &#x3D; 90, tl.cex &#x3D; 1.2)</span><br><span class="line">dev.off()         </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>下图为两种方法结果的比对，左边是 PEVD_GrpAve ，右边是 PEVD_IdAve ，趋势是一致的。</p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/v7aeDU"><img src="https://s1.ax1x.com/2022/09/06/v7aeDU.png" alt="v7aeDU.png"></a></p>
+<h2 id="CD-GrpAve">CD_GrpAve</h2>
+<p>CD 越大越好，下面的统计量同样可以改为 <code>'CD_IdAve'</code>  和 <code>'CD_contrast'</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">CD_GrpAve &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">                MUScenario &#x3D; as.factor(cattle.pheno$Unit), statistic &#x3D; &#39;CD_GrpAve&#39;,</span><br><span class="line">                NumofMU &#x3D; &#39;Pairwise&#39;)</span><br><span class="line"># replace NAs in diagnol to make plot</span><br><span class="line">diag(CD_GrpAve) &lt;- min(CD_GrpAve, na.rm &#x3D; T)</span><br><span class="line">pdf(&quot;CD_GrpAve.pdf&quot;)</span><br><span class="line">corrplot(CD_GrpAve, is.corr &#x3D; FALSE, method &#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(CD_GrpAve), col &#x3D; cm.colors(10), </span><br><span class="line">         number.digits &#x3D; 4, mar &#x3D; c(0,1,1,1), addCoef.col &#x3D; &quot;black&quot;,</span><br><span class="line">         tl.col &#x3D; &quot;black&quot;, tl.srt &#x3D; 90, tl.cex &#x3D; 1.2, cl.lim &#x3D; c(0.5, 0.8))</span><br><span class="line">dev.off()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="https://s1.ax1x.com/2022/09/06/v7wpfs.png" alt="v7wpfs.png"></p>
+<p>结果和 PEVD 不一致。</p>
+<h2 id="r-GrpAve">r_GrpAve</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">r_GrpAve &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">                  MUScenario &#x3D; as.factor(cattle.pheno$Unit), </span><br><span class="line">                statistic &#x3D; &#39;r_GrpAve&#39;, NumofMU &#x3D; &#39;Pairwise&#39;)</span><br><span class="line">diag(r_GrpAve) &lt;- 0</span><br><span class="line">png(&quot;r_GrpAve.png&quot;)</span><br><span class="line">corrplot(r_GrpAve, is.corr &#x3D; FALSE, method &#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(PEVD_GrpAve), col &#x3D; cm.colors(10), cl.lim &#x3D; c(0, 0.08),</span><br><span class="line">         number.digits &#x3D; 4, mar &#x3D; c(0,1,1,1), addCoef.col &#x3D; &quot;black&quot;,</span><br><span class="line">         tl.col &#x3D; &quot;black&quot;, tl.srt &#x3D; 90, tl.cex &#x3D; 1.2)</span><br><span class="line">dev.off()         </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>全是负数</p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/v7yP1J"><img src="https://s1.ax1x.com/2022/09/06/v7yP1J.png" alt="v7yP1J.png"></a></p>
+<h2 id="VED">VED</h2>
+<p>VED 越小越好</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">VED0  &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">             MUScenario &#x3D; as.factor(cattle.pheno$Unit), statistic &#x3D; &#39;VED0&#39;,</span><br><span class="line">             NumofMU &#x3D; &#39;Pairwise&#39;)</span><br><span class="line">VED1  &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">             MUScenario &#x3D; as.factor(cattle.pheno$Unit), statistic &#x3D; &#39;VED1&#39;,</span><br><span class="line">             NumofMU &#x3D; &#39;Pairwise&#39;)</span><br><span class="line">VED2  &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">               MUScenario &#x3D; as.factor(cattle.pheno$Unit), statistic &#x3D; &#39;VED2&#39;,</span><br><span class="line">               NumofMU &#x3D; &#39;Pairwise&#39;, Uidx &#x3D; 8)</span><br><span class="line"># 剔除对角线的缺失</span><br><span class="line">diag(VED0) &lt;- diag(VED1) &lt;- diag(VED2) &lt;- floor(min(VED0, na.rm &#x3D; T)) </span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>分别绘图</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">png(&quot;VED0.png&quot;)</span><br><span class="line">corrplot(VED0, is.corr &#x3D;FALSE, method&#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(VED0), col &#x3D; cm.colors(10),</span><br><span class="line">         number.digits &#x3D; 4, addCoef.col &#x3D; &quot;black&quot;, tl.col &#x3D; &quot;black&quot;, </span><br><span class="line">         tl.srt &#x3D; 90, tl.cex &#x3D; 1.2, cl.lim &#x3D; c(0, 0.08))</span><br><span class="line">         dev.off()</span><br><span class="line">         </span><br><span class="line">png(&quot;VED1.png&quot;)</span><br><span class="line">corrplot(VED1, is.corr &#x3D;FALSE, method&#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(VED0), col &#x3D; cm.colors(10),</span><br><span class="line">         number.digits &#x3D; 4, addCoef.col &#x3D; &quot;black&quot;, tl.col &#x3D; &quot;black&quot;, </span><br><span class="line">         tl.srt &#x3D; 90, tl.cex &#x3D; 1.2, cl.lim &#x3D; c(0, 0.08))</span><br><span class="line">         dev.off()</span><br><span class="line">         </span><br><span class="line">png(&quot;VED2.png&quot;)</span><br><span class="line">corrplot(VED2, is.corr &#x3D;FALSE, method&#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(VED0), col &#x3D; cm.colors(10),</span><br><span class="line">         number.digits &#x3D; 4, addCoef.col &#x3D; &quot;black&quot;, tl.col &#x3D; &quot;black&quot;, </span><br><span class="line">         tl.srt &#x3D; 90, tl.cex &#x3D; 1.2, cl.lim &#x3D; c(0, 0.08))</span><br><span class="line">         dev.off()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>三个趋势一致，并且和 PEVD 趋势一致。</p>
+<p>只是 VED1 和 VED2 结果完全一致。</p>
+<h2 id="CR">CR</h2>
+<p>CR 越大越好</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CR0  &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">             MUScenario &#x3D; as.factor(cattle.pheno$Unit), statistic &#x3D; &#39;CR0&#39;,</span><br><span class="line">             NumofMU &#x3D; &#39;Pairwise&#39;)</span><br><span class="line">CR1  &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">             MUScenario &#x3D; as.factor(cattle.pheno$Unit), statistic &#x3D; &#39;CR1&#39;,</span><br><span class="line">             NumofMU &#x3D; &#39;Pairwise&#39;)</span><br><span class="line">CR2  &lt;- gca(Kmatrix &#x3D; G, Xmatrix &#x3D; X2, sigma2a &#x3D; sigma2a, sigma2e &#x3D; sigma2e,</span><br><span class="line">               MUScenario &#x3D; as.factor(cattle.pheno$Unit), statistic &#x3D; &#39;CR2&#39;,</span><br><span class="line">               NumofMU &#x3D; &#39;Pairwise&#39;, Uidx &#x3D; 8)</span><br><span class="line"># 剔除对角线的缺失</span><br><span class="line">diag(CR0) &lt;- diag(CR1) &lt;- diag(CR2) &lt;- floor(min(CR0, na.rm &#x3D; T)) </span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>分别绘图</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">png(&quot;CR0.png&quot;)</span><br><span class="line">corrplot(CR0, is.corr &#x3D;FALSE, method&#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(CR0), col &#x3D; cm.colors(10),</span><br><span class="line">         number.digits &#x3D; 4, addCoef.col &#x3D; &quot;black&quot;, tl.col &#x3D; &quot;black&quot;, </span><br><span class="line">         tl.srt &#x3D; 90, tl.cex &#x3D; 1.2, cl.lim &#x3D; c(0, 0.08))</span><br><span class="line">         dev.off()</span><br><span class="line">         </span><br><span class="line">png(&quot;CR1.png&quot;)</span><br><span class="line">corrplot(CR1, is.corr &#x3D;FALSE, method&#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(CR0), col &#x3D; cm.colors(10),</span><br><span class="line">         number.digits &#x3D; 4, addCoef.col &#x3D; &quot;black&quot;, tl.col &#x3D; &quot;black&quot;, </span><br><span class="line">         tl.srt &#x3D; 90, tl.cex &#x3D; 1.2, cl.lim &#x3D; c(0, 0.08))</span><br><span class="line">         dev.off()</span><br><span class="line">         </span><br><span class="line">png(&quot;CR2.png&quot;)</span><br><span class="line">corrplot(CR2, is.corr &#x3D;FALSE, method&#x3D;&quot;circle&quot;, type &#x3D; &quot;upper&quot;,</span><br><span class="line">         diag &#x3D; F, number.cex &#x3D; 7 &#x2F; ncol(CR0), col &#x3D; cm.colors(10),</span><br><span class="line">         number.digits &#x3D; 4, addCoef.col &#x3D; &quot;black&quot;, tl.col &#x3D; &quot;black&quot;, </span><br><span class="line">         tl.srt &#x3D; 90, tl.cex &#x3D; 1.2, cl.lim &#x3D; c(0, 0.08))</span><br><span class="line">         dev.off()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>趋势和 PEVD 完全相反。</p>
+<p>下图为 CR0</p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/v7yAn1"><img src="https://s1.ax1x.com/2022/09/06/v7yAn1.png" alt="v7yAn1.png"></a></p>
+<h1>不同统计量的关系</h1>
+<p>PEVD_GrPAve 和 VED0, VED1, and VED2 强相关，基本为 1</p>
+<p>CD_GrpAve 和  CDVED0, CDVED1, and CDVED2 强相关，基本为1</p>
+<p>r_GrPAve 和  CR0, CR1, and CR2 相关很强，但是只有0.94-0.99</p>
+<h1>关联率和GS准确性</h1>
+<p>在全基因组评估中，参考群和验证群的关系会影响预测准确性。</p>
+<p>在模拟数据中，模拟了5种情况，通过交换 0, 140, 210, 280 和 350 个个体来逐步增加参考群和验证群的群体关联，   计算 PEVD_GrpAve 和 CD_GrpAve</p>
+<p>从下面可以看到，从 MUSC1 到 MUSC5 ，PEVD_GrpAve 逐级递减，说明群体关联越来越高，而 CD_GrpAve 先高后低，这是由于 <code>CD penalizes the connectedness measure when the genetic variability among population is reduced</code>  。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># PEVD_GrpAve</span><br><span class="line">PEVD_GrpAve &lt;- apply(CattleSIM[, 7: 11], 2, function(x) GC(x,</span><br><span class="line">                     Kmatrix &#x3D; G, sigma2a, sigma2e, stat &#x3D; &#39;PEVD_GrpAve&#39;))</span><br><span class="line">print(PEVD_GrpAve)</span><br><span class="line">##        MUSC1        MUSC2        MUSC3        MUSC4        MUSC5 </span><br><span class="line">## 0.0039430647 0.0018066760 0.0013236613 0.0010374891 0.0009192205</span><br><span class="line"># CD_GrpAve</span><br><span class="line">CD_GrpAve &lt;- apply(CattleSIM[, 7: 11], 2, function(x) GC(x,</span><br><span class="line">                   Kmatrix &#x3D; G, sigma2a, sigma2e, stat &#x3D; &#39;CD_GrpAve&#39;))</span><br><span class="line">print(CD_GrpAve)</span><br><span class="line">##     MUSC1     MUSC2     MUSC3     MUSC4     MUSC5 </span><br><span class="line">## 0.6679398 0.7586556 0.7626448 0.7503289 0.7140141</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>通过交叉验证计算模拟数据的准确性（cor(gebv, tbv)）</p>
+<p>群体关联和GS准确性的关系见下图。</p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/v76ern"><img src="https://s1.ax1x.com/2022/09/06/v76ern.png" alt="v76ern.png"></a></p>
+<h1>参考文献</h1>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://qgresources.github.io/GCA_Vignette/GCA.html">https://qgresources.github.io/GCA_Vignette/GCA.html</a></li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/R/" rel="tag">R</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/6b882d9f/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            从GBLUP或ssGBLUP的育种值推导snp效应值
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/5375f878/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">软件学习-conda</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2023
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt="VincereZhou&#39;s blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"live2d-widget-model-wanko"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

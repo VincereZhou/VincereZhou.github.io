@@ -9,7 +9,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    文献阅读-genotype-imputation |  VincereZhou&#39;s blog
+    文献阅读-基因型填充 |  VincereZhou&#39;s blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -41,7 +41,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-文献阅读-genotype-imputation"
+  id="post-文献阅读-基因型填充"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -52,7 +52,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  文献阅读-genotype-imputation
+  文献阅读-基因型填充
 </h1>
  
 
@@ -60,7 +60,7 @@
      
     <div class="article-meta">
       <a href="/posts/2ca177e4/" class="article-date">
-  <time datetime="2023-01-14T03:06:26.000Z" itemprop="datePublished">2023-01-14</time>
+  <time datetime="2023-04-14T01:33:26.000Z" itemprop="datePublished">2023-04-14</time>
 </a> 
   <div class="article-category">
     <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E5%9F%BA%E5%9B%A0%E5%9E%8B%E5%A1%AB%E5%85%85/">基因型填充</a>
@@ -71,7 +71,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.9k</span>
+            <span class="post-count">2.6k</span>
         </span>
     </span>
 
@@ -80,7 +80,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">6 分钟</span>
+            <span class="post-count">9 分钟</span>
         </span>
     </span>
 </div>
@@ -95,20 +95,29 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>2009年的一篇关于基因型填充的综述。</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>关于基因型填充的文献总结。</p>
 <span id="more"></span>
 <h1>亲属个体间的基因型填充</h1>
-<p>在下图中，所有个体均存在分型的位点标为红色，前两个世代的个体多分型的位点标为黑色 (见图 A)。根据共同的红色位点，可以用于推断家系内的单倍型片段（见图 B）。最后，第三世代所有个体缺失的基因型可以通过比对它们自身的单倍型与家系中其它个体的单倍型 （二者同源相同，IBD）来推断缺失位点的基因型（见图 C）。</p>
+<p>在下图中，所有个体均存在分型的位点标为红色，前两个世代的个体存在分型的位点标为黑色 (见图 A)。根据前两个世代的基因型数据，可以对前两个世代的基因型进行定相，然后再第三世代的个体基因型进行定相（见图 B）。最后，第三世代所有个体缺失的基因型可以通过比对它们自身的单倍型与家系中其它个体的单倍型 （二者同源相同，IBD）来推断缺失位点的基因型（见图 C）。</p>
 <p><img src="1.png" alt="1"></p>
-<p>从 图A 到图B根据系谱信息定向的过程如下（来自于张志燕老师的 ppt），首先前两个世代可以先定相纯合子，然后再定相前两个世代个体的其它杂合子（因为子代的两个单倍型一个来自于父本，一个来自于母本）。</p>
-<p>这里只根据系谱信息，无法实现所有个体全部位点的定相。而且如果存在<strong>分型错误</strong>，那么定相的比例和准确率都会下降。</p>
+<p>从 图A 到图B根据系谱信息定向的原理解释如下，亲子对在每个位点都共享一个碱基，并且共享的碱基是 IBD 的，因此亲本和子代在一条染色体上共享一个相同的单倍型（假设没有重组事件）。</p>
+<p>下图就是根据 IBD 来定相的一个例子，这两个个体在这 4 个位点共享一个 IBD 的单倍型块（比如亲子对）。对于某个位点，只要其中一个个体的基因型为纯合子，那么 IBD 的单倍型在这个位点的分型就是这个纯合子的碱基。因此，只有当两个个体在某个位点均为杂合子时（或者存在缺失），这个位点的定相才是未知的。</p>
+<p>如果同时处理超过 2 个亲属个体，例如<strong>对于 trios 只有当三者均为杂合子（或者存在缺失）时才无法定相</strong>。采用更大的家系会包含更多的信息。</p>
 <p><img src="6.png" alt="1"></p>
-<h1>无关个体的基因型填充</h1>
+<p>因此只根据系谱信息无法实现所有个体全部位点的定相，之后还需要使用群体信息定相。并且而且如果存在<strong>分型错误</strong>，那么根据系谱信息定相的比例和准确率都会下降。</p>
+<h1>群体信息的基因型填充</h1>
 <p>无关个体之间仍存在类似于亲属个体 IBD 片段的共同单倍型片段，只不过它们共享的单倍型片段长度要短得多（因为它们得共同祖先更远），因此也很难完全确定它们之间共享的单倍型片段。</p>
 <p>无关个体的基因型填充原理见下图，这里目标样本 (study samples) 具有相对较多的位点（可能是100k 到 1000 k），我们将目标样本与参考单倍型库（比目标样本具有更多的位点）进行比对（下图 A），二者共同的单倍型见图 B ，然后目标样本中的缺失位点可以通过复制匹配上的参考单倍型的基因型来进行填充（下图C）。</p>
 <p>当将目标样本的单倍型与参考单倍型库进行比对存在<strong>歧义</strong>，即不知道复制哪一个参考单倍型时，填充脚本一般会提供这个缺失位点的基因型概率（比如单倍型库中观测到的 A/A 比例为 60%，A/C 比例为 40%）。</p>
 <p>大部分的单倍型构建软件均会在估计单倍型过程中自动”填充“缺失的基因型。基因型填充软件可以分为两列：一是计算密集型工具，例如 IMPUTE, MACH, fastPHASE/BIMBAM，这些软件在填充缺失位点时会考虑全部观测到的位点；二是计算更加高效的工具，例如 PLINK，TUNA, WHAP, BEAGLE ，这些软件填充缺失位点时只会考虑少量的相邻位点的基因型。</p>
 <p><img src="2.png" alt="1"></p>
+<h2 id="群体信息定相算法">群体信息定相算法</h2>
+<p>总共有三种算法：<code>Clark's algorithm</code> ，<code>EM algorithm</code> 和 <code>Coalescent-based methods and hidden Markov models</code>，目前用的最多是最后一种。</p>
+<p>运用 HMM 算法的软件包括，PHASE, fastPHASE, MACH, IMPUTE2 。其中，PHASE 古老，计算慢，但是在所有有的群体信息定相软件中最准确，有时视为金标准 (<strong>SHAPE-IT是其更快的版本</strong>)。fastPHASE 相比于 PHASE  提升了速度，准确性略有下降。</p>
+<p>相比于 fastPHASE ， <strong>BEAGLE 速度上快了一个数量级</strong>，但是 BEAGLE  对于<strong>中大型样本（大于 1000</strong>）群体更加准确，不适合小样本（100）。当某个染色体区域的位点数目小于 100 时，BEAGLE 同时不适合。</p>
+<p>MACH 和 IMPUTE2 使用了新的统计方法，其可以计算更大的群体，而且准确性比 fastPHASE 更高。</p>
+<p>Browning (2011) 比较了 BEAGLE  和 MACH, IMPUTE2 的定相表型，其中<strong>MACH在小样本中准确性最高</strong>，<strong>BEAGLE在大样本中准确性最高</strong>，并且 <strong>BEAGLE计算时间最短</strong>。<strong>三种软件均可以通过提高计算时间来增加填充准确性</strong>。在 MACH 和 IMPUTE2 中，可以通过增加 HMM states 的数目来增加模型复杂度，从而更好地利用数据中的信息，得到更准确的结果。在 BEAGLE 中，可以通过合并多次运行结果来提高准确性（这里使用 beagle 3.3.1 版本，跑 15 次，然后每一个杂合子的定向使用 15次结果中的最多的那个，也就是说之前的 beagle 版本都是每次运行结果不一样的）。</p>
+<p><img src="8.png" alt=""></p>
 <h1>基因型填充的准确性</h1>
 <p>Scott et al. (93) 填充了超过 2百万的位点，提取超过 500 个位点与实验室的实际分型进行比较，总的不一致率只有 1.5%。</p>
 <p>第二，通过对 90个样本的超过 660k 的位点的填充基因型和实际分型基因型进行比对，总的不一致率小于 0.9% ，<strong>所有位点的平均 <img src="https://math.now.sh?inline=r%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 达到了 0.93</strong> 。</p>
@@ -160,7 +169,12 @@
 <p>填充计数可以使得从<strong>低密度重测序数据</strong>得到高质量的分型数据，从而降低测序成本（略微降低数据质量），比如千人基因组计划。</p>
 <h1>参考文献</h1>
 <ol>
-<li>Li Y, Willer C, Sanna S, et al. Genotype imputation[J]. Annual review of genomics and human genetics, 2009, 10: 387.</li>
+<li>
+<p>Li Y, Willer C, Sanna S, et al. Genotype imputation[J]. Annual review of genomics and human genetics, 2009, 10: 387.</p>
+</li>
+<li>
+<p>Browning S R, Browning B L. Haplotype phasing: existing methods and new developments[J]. Nature Reviews Genetics, 2011, 12(10): 703-714.</p>
+</li>
 </ol>
  
       <!-- reward -->
@@ -192,19 +206,10 @@
    
   <nav class="article-nav">
     
-      <a href="/posts/309f8f08/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            python获得网络时间
-          
-        </div>
-      </a>
     
-    
-      <a href="/posts/1fd14144/" class="article-nav-link">
+      <a href="/posts/7aca4f75/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">python包-re-time-random-collections-argparse</div>
+        <div class="article-nav-title">文献阅读-APY方法</div>
       </a>
     
   </nav>
