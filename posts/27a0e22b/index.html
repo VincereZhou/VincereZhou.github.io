@@ -71,7 +71,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1k</span>
+            <span class="post-count">1.2k</span>
         </span>
     </span>
 
@@ -80,7 +80,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">3 分钟</span>
+            <span class="post-count">4 分钟</span>
         </span>
     </span>
 </div>
@@ -97,7 +97,14 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>EM 算法 (expectation-maximization)  是获得最大似然估计值的一种迭代算法，当原始的似然函数很复杂时，无法直接得到显式解时，我们可以选择使用 EM 算法。</p>
 <span id="more"></span>
-<h1>EM 算法</h1>
+<h1>Jensen’s inequality</h1>
+<p>假设 <img src="https://math.now.sh?inline=f" style="display:inline-block;margin: 0;"/> 是一个定义域为实数的函数，只有当 <img src="https://math.now.sh?inline=f%5E%7B%5Cprime%20%5Cprime%7D%28x%29%20%5Cgeq%200" style="display:inline-block;margin: 0;"/>  恒成立是，<img src="https://math.now.sh?inline=f" style="display:inline-block;margin: 0;"/> 才是一个<strong>凸函数</strong>。如果 <img src="https://math.now.sh?inline=f" style="display:inline-block;margin: 0;"/> 输入是一个向量，那么其为凸函数的条件一般化为，只有当其 hessian 矩阵是一个半正定矩阵成立 (<img src="https://math.now.sh?inline=%5Cboldsymbol%7BH%7D%20%5Cgeq%200" style="display:inline-block;margin: 0;"/>)。 如果 <img src="https://math.now.sh?inline=f%5E%7B%5Cprime%20%5Cprime%7D%28x%29%20%3E%200" style="display:inline-block;margin: 0;"/>  (<img src="https://math.now.sh?inline=%5Cboldsymbol%7BH%7D%20%3E%200" style="display:inline-block;margin: 0;"/>) ，那么我们称 <img src="https://math.now.sh?inline=f" style="display:inline-block;margin: 0;"/> 是一个<strong>严格凸函数 (strictly convex)</strong> 。</p>
+<p><strong>Jensen’s inequality</strong> 表述如下：</p>
+<p><img src="3.png" alt="1"></p>
+<p>我们可以下面的图，这里 <img src="https://math.now.sh?inline=f" style="display:inline-block;margin: 0;"/> 是一个凸函数，X 是一个随机变量，其有一半概率为 a, 一半概率为 b 。从这个例子中，我们可以看到 <img src="https://math.now.sh?inline=%5Cmathrm%7BE%7D%5Bf%28X%29%5D%20%5Cgeq%20f(%5Cmathrm%7BE%7D%20X)" style="display:inline-block;margin: 0;"/> 。</p>
+<p><img src="4.png" alt="1"></p>
+<p>注意：如果 <img src="https://math.now.sh?inline=f" style="display:inline-block;margin: 0;"/> 是一个凹函数，那么 <img src="https://math.now.sh?inline=-f" style="display:inline-block;margin: 0;"/> 就是凸函数。因此对于凹函数存在 <img src="https://math.now.sh?inline=%5Cmathrm%7BE%7D%5Bf%28X%29%5D%20%5Cleq%20f(%5Cmathrm%7BE%7D%20X)" style="display:inline-block;margin: 0;"/> 。</p>
+<h1>The EM algorithm</h1>
 <p>假设我们有一个包含 <img src="https://math.now.sh?inline=m" style="display:inline-block;margin: 0;"/> 个独立样本的训练集数据 <img src="https://math.now.sh?inline=%5Cleft%5C%7Bx%5E%7B%281%29%7D%2C%20%5Cldots%2C%20x%5E%7B(m)%7D%5Cright%5C%7D" style="display:inline-block;margin: 0;"/> ，我们需要对一个模型 <img src="https://math.now.sh?inline=p%28x%2C%20z%29" style="display:inline-block;margin: 0;"/> 进行拟合参数，其中似然函数为：</p>
 <p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cell%28%5Ctheta%29%20%26%3D%5Csum_%7Bi%3D1%7D%5E%7Bm%7D%20%5Clog%20p(x%20%3B%20%5Ctheta)%20%5C%5C%0A%26%3D%5Csum_%7Bi%3D1%7D%5E%7Bm%7D%20%5Clog%20%5Csum_%7Bz%7D%20p(x%2C%20z%20%3B%20%5Ctheta)%0A%5Cend%7Baligned%7D%0A" /></p><p>但是，我们想要找到 <img src="https://math.now.sh?inline=%5Ctheta" style="display:inline-block;margin: 0;"/> 的最大似然估计值很难。这里，<img src="https://math.now.sh?inline=z%5E%7B%28i%29%7D" style="display:inline-block;margin: 0;"/> 是隐藏的随机变量。如果我们已知 <img src="https://math.now.sh?inline=z%5E%7B%28i%29%7D" style="display:inline-block;margin: 0;"/> ，那么获取最大似然估计值就很容易。</p>
 <p>在这种情况下，EM 算法提供了一种估计参数的最大似然估计值的有效方法（哈哈哈，估计最大似然估计值，“估计估计值”，双重估计）。</p>
