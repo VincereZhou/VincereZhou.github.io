@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1k</span>
+            <span class="post-count">1.3k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">3 分钟</span>
+            <span class="post-count">4 分钟</span>
         </span>
     </span>
 </div>
@@ -109,6 +109,14 @@
 <p>原因：验证的文件内容错误。<br>
 问题分析&amp;解决办法： 验证文件的内容与我们提供的不符，请确定是原样上传搜索资源平台的问题，检查方式：访问验证文件——查看源代码检查，部分服务器会自动加上一些内容导致校验失败。</p>
 </blockquote>
+<p>有人说应该这么做</p>
+<blockquote>
+<p>网上大多数的说法都是说直接把该文件放到Hexo博客根目录的source目录下，然后编译打包上传到远程仓库，但是事实上这种做法是有问题的，当执行<code>hexo g</code>生成静态界面的时候，hexo会把多余的内容添加到source目录下的这个html验证文件中，导致百度、谷歌验证失败。</p>
+<h3 id="正确做法">正确做法</h3>
+<p>验证文件存放在Hexo博客根目录的source目录下，在验证文件头部添加<code>layout: false</code>，以谷歌验证文件为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">layout: false</span><br><span class="line">---</span><br><span class="line">google-site-verification: googlexxxxxx.html</span><br></pre></td></tr></table></figure>
+<p>这样<code>hexo g</code>执行成功后，这个html验证文件中就不会有多余的内容，然后执行<code>hexo d</code>上传到远程仓库，这样百度、谷歌都验证成功了，为了保证一直验证成功，建议不要删除这个验证文件。</p>
+</blockquote>
 <p>选择HTML标签验证，放到<code>head.ejs</code>（D:\Desktop\blog\themes\ayer\layout_partial\head.ejs），<code>&lt;head&gt;</code>与 <code>&lt;/head&gt;</code>标签之间，<strong>成功了</strong>。</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://vincere.xn--fun-zw2ey91ewf1dnwva">https://vincere.fun验证成功</a>！</p>
@@ -125,6 +133,10 @@
 </ol>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;vincere.fun</span><br></pre></td></tr></table></figure>
 <ol start="3">
+<li>在博客根目录下的配置文件<code>_config.yml</code>中配置 sitemap</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># automatically generate sitemap</span><br><span class="line">sitemap:</span><br><span class="line">  path: sitemap.xml</span><br><span class="line">baidusitemap:</span><br><span class="line">  path: baidusitemap.xml</span><br></pre></td></tr></table></figure>
+<ol start="4">
 <li>
 <p>执行<code>hexo g -d</code>，会在<code>博客根目录/public</code>中生成两个文件， <code>sitemap.xml</code> 文件是搜索引擎通用的 sitemap 文件，<code>baidusitemap.xml</code> 是百度专用的 sitemap 文件。然后访问 <code>你的首页/sitemap.xml</code> 或者  <code>你的首页/baidusitemap.xml</code>  就可以看到网站地图了</p>
 </li>
@@ -162,6 +174,9 @@
 </li>
 <li>
 <p><a target="_blank" rel="noopener" href="https://marmalade.vip/baidugoogleseo.html">https://marmalade.vip/baidugoogleseo.html</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://chengzhy.github.io/2022/hexo-seo-note/">https://chengzhy.github.io/2022/hexo-seo-note/</a></p>
 </li>
 </ol>
  
