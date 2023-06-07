@@ -10,7 +10,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    Hexo博客提交百度谷歌收录 |  
+    方差组分估计方法一之一般思路 |  
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -42,7 +42,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-Hexo博客提交百度谷歌收录"
+  id="post-方差组分估计方法一之一般思路"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -53,18 +53,18 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  Hexo博客提交百度谷歌收录
+  方差组分估计方法一之一般思路
 </h1>
  
 
     </header>
      
     <div class="article-meta">
-      <a href="/posts/8b726d4e/" class="article-date">
-  <time datetime="2023-05-13T03:07:45.000Z" itemprop="datePublished">2023-05-13</time>
+      <a href="/posts/372fb709/" class="article-date">
+  <time datetime="2023-06-07T12:40:25.000Z" itemprop="datePublished">2023-06-07</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/%E8%BD%AF%E4%BB%B6%E5%AD%A6%E4%B9%A0/">软件学习</a> / <a class="article-category-link" href="/categories/%E8%BD%AF%E4%BB%B6%E5%AD%A6%E4%B9%A0/hexo/">hexo</a>
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
   </div>
   
 <div class="word_count">
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">6 分钟</span>
+            <span class="post-count">5 分钟</span>
         </span>
     </span>
 </div>
@@ -96,97 +96,46 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>最近发现百度上搜索不到我的博客，原来是一直没有弄搜索引擎收录的原因，就捣鼓了一下。</p>
-<span id="more"></span> 
-<h1>百度收录</h1>
-<p>访问<a href="https://link.zhihu.com/?target=https%3A//ziyuan.baidu.com/">百度搜索资源平台官网</a>，注册或者登陆百度账号，依次选择【用户中心】-【站点管理】，添加你的网站</p>
-<p>选择文件验证，将文件放到 Source 根目录下。</p>
-<p>选择 HTML标签验证，放到<code>head.ejs</code>（D:\Desktop\blog\themes\ayer\layout_partial\head.ejs），<code>&lt;head&gt;</code>与 <code>&lt;/head&gt;</code>标签之间。</p>
-<p>两种方式，这两种方式我都失败了，都提示<code>原因：301 网页存在跳转。</code></p>
-<p>尝试对网页 <a target="_blank" rel="noopener" href="https://vincerezhou.github.io">https://vincerezhou.github.io</a> 进行收录，失败</p>
-<p>尝试对网页 <a href="https://vincere.fun">https://vincere.fun</a> （去除 www）进行收录，文件验证失败原因如下，选择HTML标签验证，</p>
-<blockquote>
-<p>原因：验证的文件内容错误。<br>
-问题分析&amp;解决办法： 验证文件的内容与我们提供的不符，请确定是原样上传搜索资源平台的问题，检查方式：访问验证文件——查看源代码检查，部分服务器会自动加上一些内容导致校验失败。</p>
-</blockquote>
-<p>有人说应该这么做</p>
-<blockquote>
-<p>网上大多数的说法都是说直接把该文件放到Hexo博客根目录的source目录下，然后编译打包上传到远程仓库，但是事实上这种做法是有问题的，当执行<code>hexo g</code>生成静态界面的时候，hexo会把多余的内容添加到source目录下的这个html验证文件中，导致百度、谷歌验证失败。</p>
-<h3 id="正确做法">正确做法</h3>
-<p>验证文件存放在Hexo博客根目录的source目录下，在验证文件头部添加<code>layout: false</code>，以谷歌验证文件为例：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">layout: false</span><br><span class="line">---</span><br><span class="line">google-site-verification: googlexxxxxx.html</span><br></pre></td></tr></table></figure>
-<p>这样<code>hexo g</code>执行成功后，这个html验证文件中就不会有多余的内容，然后执行<code>hexo d</code>上传到远程仓库，这样百度、谷歌都验证成功了，为了保证一直验证成功，建议不要删除这个验证文件。</p>
-</blockquote>
-<p>选择HTML标签验证，放到<code>head.ejs</code>（D:\Desktop\blog\themes\ayer\layout_partial\head.ejs），<code>&lt;head&gt;</code>与 <code>&lt;/head&gt;</code>标签之间，<strong>成功了</strong>。</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://vincere.xn--fun-zw2ey91ewf1dnwva">https://vincere.fun验证成功</a>！</p>
-<p>建议您向百度搜索主动推送资源，缩短爬虫发现网页链接时间。<a target="_blank" rel="noopener" href="https://ziyuan.baidu.com/linksubmit/index">提交资源</a></p>
-</blockquote>
-<h2 id="提交百度搜索">提交百度搜索</h2>
-<h3 id="sitemap-提交">sitemap 提交</h3>
-<ol>
-<li>执行命令，安装站点地图生成插件。</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cnpm install hexo-generator-sitemap --save</span><br><span class="line">cnpm install hexo-generator-baidu-sitemap --save</span><br></pre></td></tr></table></figure>
-<ol start="2">
-<li>在博客根目录下的配置文件<code>_config.yml</code>中修改 ·<code>url:</code> 部分为真实网址</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vincere.fun</span><br></pre></td></tr></table></figure>
-<ol start="3">
-<li>在博客根目录下的配置文件<code>_config.yml</code>中配置 sitemap</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># automatically generate sitemap</span><br><span class="line">sitemap:</span><br><span class="line">  path: sitemap.xml</span><br><span class="line">baidusitemap:</span><br><span class="line">  path: baidusitemap.xml</span><br></pre></td></tr></table></figure>
-<ol start="4">
-<li>
-<p>执行<code>hexo g -d</code>，会在<code>博客根目录/public</code>中生成两个文件， <code>sitemap.xml</code> 文件是搜索引擎通用的 sitemap 文件，<code>baidusitemap.xml</code> 是百度专用的 sitemap 文件。然后访问 <code>你的首页/sitemap.xml</code> 或者  <code>你的首页/baidusitemap.xml</code>  就可以看到网站地图了</p>
-</li>
-<li>
-<p>然后来到百度站长平台的 sitemap 提交页面，将你的 sitemap 地址提交即可（好像要两个都提交，一天只能提交一个文件），如果成功的话状态会显示为正常，初次提交要等几分钟，sitemap.xml 相比 baidusitemap.xml 来说等待时间也会更长，如果以后你博客有新的文章或其他页面，可以点击<strong>手动更新文件</strong>，更新一下新的 sitemap。</p>
-</li>
-</ol>
-<h4 id="解决无法抓取的问题">解决无法抓取的问题</h4>
-<p>提交完 sitemap 后显示无法抓取，按照网上的说法设置如下，好像还是显示无法抓取。</p>
-<blockquote>
-<p>配置完sitemap可能还是不行，然后通过google搜索后发现，大家都有遇到类似的问题，根据大神的说法，可能不是<code>Hexo</code>的问题，应该是<code>Github Pages</code>的问题。<code>Github Pages</code>默认是基于<code>Jekyll</code>构建的，如果不是基于此方式构建的，<code>Github Pages</code>会忽略掉一些文件和文件夹。</p>
-<p>因此，<strong>在Hexo博客的source文件夹下添加一个.nojekyll空文件</strong>，该文件会告诉<code>Github Pages</code>当前网站不是基于<code>Jekyll</code>构建的，不要忽略掉一些文件和文件夹。然后<strong>打开根目录下的_config.yml，找到include files区域，修改成下面这样</strong>，</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># Include / Exclude file(s)</span><br><span class="line">## include:/exclude: options only apply to the &#x27;source/&#x27; folder</span><br><span class="line">include: </span><br><span class="line"> - .nojekyll</span><br><span class="line">exclude: null</span><br><span class="line">ignore: null</span><br></pre></td></tr></table></figure>
-<p>然后再<strong>在<code>deploy</code>区域，添加<code>ignore_hidden</code>属性并设为<code>false</code></strong> （我设置了两行，一个 -type 下面放一行）。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Deployment</span><br><span class="line">## Docs: https://hexo.io/docs/one-command-deployment</span><br><span class="line">deploy:</span><br><span class="line">  # 上面部分省略</span><br><span class="line">  ignore_hidden: false</span><br></pre></td></tr></table></figure>
-<p>这样在<code>hexo g</code>时就会把<code>.nojekyll</code>文件添加到<code>public</code>目录下，<code>hexo d</code>时会把<code>.nojekyll</code>文件推送到github上。</p>
-</blockquote>
-<h3 id="主动提交">主动提交</h3>
-<p>首先在博客根目录中安装插件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cnpm install hexo-baidu-url-submit --save</span><br></pre></td></tr></table></figure>
-<p>然后在根目录 <code>_config.yml</code> 文件里写入以下配置：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 提交百度搜索</span><br><span class="line">baidu_url_submit:</span><br><span class="line">  count: 10               # 提交最新的多少个链接</span><br><span class="line">  host: vincere.fun    # 在百度站长平台中添加的域名</span><br><span class="line">  token: your_token      # 秘钥</span><br><span class="line">  path: baidu_urls.txt   # 文本文档的地址， 新链接会保存在此文本文档里</span><br></pre></td></tr></table></figure>
-<p>其中的 <code>token</code> 可以在【链接提交】-【API提交】下面看到，接口调用地址最后面 <code>token=xxxxx</code> 即为你的 <code>token</code></p>
-<blockquote>
-<p>推送接口<br>
-接口调用地址：<a target="_blank" rel="noopener" href="http://data.zz.baidu.com/urls?site=https://vincere.fun&amp;token=">http://data.zz.baidu.com/urls?site=https://vincere.fun&amp;token=</a>???</p>
-</blockquote>
-<p>然后在博客根目录下的配置文件<code>_config.yml</code>中修改 ·<code>url:</code> 部分为真实网址</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vincere.fun</span><br></pre></td></tr></table></figure>
-<p>最后，加入新的 deployer：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">***</span><br><span class="line">***	</span><br><span class="line">- type: baidu_url_submitter                         # 这是新加的主动推送</span><br></pre></td></tr></table></figure>
-<p>最后执行 <code>hexo g -d</code> 部署一遍即可实现主动推送，推送成功的标志是：在执行部署命令最后会显示类似如下代码：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&quot;remain&quot;</span>:89,<span class="string">&quot;success&quot;</span>:10&#125;</span><br><span class="line">INFO  Deploy <span class="keyword">done</span>: baidu_url_submitter</span><br></pre></td></tr></table></figure>
-<p>这表示有 10 个页面已经主动推送成功，remain 的意思是当天剩余的可推送 89 条。</p>
-<h1>谷歌收录</h1>
-<p>进入 <a target="_blank" rel="noopener" href="https://search.google.com/search-console/about">google search console</a> ，按照类似的方式进行收录，我是用了 CNAME 的方式。</p>
-<h2 id="提交sitemap">提交sitemap</h2>
-<p>点击<a target="_blank" rel="noopener" href="https://www.google.com/webmasters/tools/sitemap-list">添加站点地图</a>，选择要添加的网站，如下，点击【提交】。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vincere.fun/sitemap.xml</span><br></pre></td></tr></table></figure>
-<p>会提示正在处理数据，请在一天左右的时间内再次检查。</p>
-<h1>参考文献</h1>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是我重新整理方差组分算法的博客，主要是关于 EM-REML 和 AI-REML 算法。这是第一篇博客，介绍估计方差组分的一般思路。</p>
+<span id="more"></span>
+<h1>一般思路</h1>
+<p>我们采用似然方法，查找使得<strong>对数似然函数</strong>最大化的一组方差组分，这本身是一个优化问题，严格来说是一个<strong>有约束条件</strong>的优化问题，因为找到的方差组分需要在给定的参数空间内。</p>
+<p>我们是要关注对数似然函数值本身，而不是其一阶导数，这里有两个原因，第一是使得似然函数一阶导数等于0的位点可能是<strong>局部最小值，局部最大值和鞍点</strong>，仅仅是查看一阶导数，我们无法区分这三者；第二是在迭代过程中，随着一阶导数趋于0，我们可以通过对数似然函数值查看其值是否也在不断变大，从而检查我们是不是收敛于一个局部最大值。</p>
+<p>如果我们采用一阶导数进行方差组分估计，对于最简单的模型（应该指的是单性状模型），最大值可能在参数空间的边界线找到；对于随机效应之间存在协方差的模型，情况更加复杂，对数似然函数的表面可能会有局部最优解。</p>
+<p>一般的解决思路是使用目标函数的一阶导数或者二阶导数从而进行迭代，而这些迭代方法均有共同的特征，首先他们必须提供一个初始值，然后使用这个初始值通过迭代得到下一组值，循环这个过程直到根据某种规则停止迭代，然后将最后一组值视为 ML 或 REML 估计值。</p>
+<p>因此一个好的迭代方法应该至少具有三个特征：受到初始值影响小（指初始值的变化，不影响迭代方法收敛于全局最大值），每个迭代过程计算速度快，迭代次数短。但是可惜的是，没有一个已知的技术可以保证从任意的一个初始值均可以收敛到全局最大值（<strong>说明迭代方法均受到初始值的影响</strong>）。</p>
+<h1>基于导数的迭代方法</h1>
+<p>基于导数的迭代方法在数值分析文献中统称为<strong>导数方法</strong>（gradient methods）</p>
+<h2 id="方法基础">方法基础</h2>
+<p>任何一个迭代方法的核心就是如何使用当前的参数估计值找到下一组估计值，实际上是需要做两个决定，往哪个方向走，以及走多远的问题，我们称为 <em>step direction</em> 和 <em>step size</em> 。</p>
+<p>一个合理的方向选择是对数似然函数值增加最快的方向，一个合理的步长是使得似然函数值增加最大的长度。我们可以证明，似然函数增加最快的方向就是一阶导数向量指向的方向，我们称为<strong>梯度</strong>。按照这种方法进行迭代的方法称为<strong>最速上升法</strong>，但是不幸的是在实践中最速上升法效果很糟糕，需要很多次迭代才能收敛。</p>
+<p>然而我们还是可以通过梯度来定义方向，通过我们会对梯度乘以一个矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D" style="display:inline-block;margin: 0;"/> 来适度修改方向，因此此时的方向为 <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D%20%5CDelta%20l" style="display:inline-block;margin: 0;"/> 。如果 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Ctheta%7D%5E%7B%28m%29%7D" style="display:inline-block;margin: 0;"/> 表示第 <img src="https://math.now.sh?inline=m" style="display:inline-block;margin: 0;"/> 次迭代的参数向量，那么我们可以得到迭代方程为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5Ctheta%7D%5E%7B%28m%2B1%29%7D%20%3D%20%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D%20%2B%20s%5E%7B(m)%7D%20%5Cmathbf%7BM%7D%5E%7B(m)%7D%20%5Cfrac%7B%5Cpartial%7Bl%7D%7D%7B%5Cpartial%7B%5Cboldsymbol%7B%5Ctheta%7D%7D%7D%5Cbigg%7C_%7B%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D%7D%0A" /></p><p>在这个公式中， <img src="https://math.now.sh?inline=s%5E%7B%28m%29%7D" style="display:inline-block;margin: 0;"/> 是一个标量，表示第 <img src="https://math.now.sh?inline=m" style="display:inline-block;margin: 0;"/> 步的步长。</p>
+<p>Bard (1974) 证明只要  <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D%5E%7B%28m%29%7D" style="display:inline-block;margin: 0;"/> 是正定矩阵并且没有收敛到全局最大值，那么均存在一个步长   <img src="https://math.now.sh?inline=s%5E%7B%28m%29%7D" style="display:inline-block;margin: 0;"/>  使得似然值继续增加。</p>
+<h2 id="牛顿法">牛顿法</h2>
+<p>吴恩达老师对牛顿法的解释比较简单明了，放置如下：</p>
+<p>假设存在一个函数 f(θ): R → R，你想找到一个θ值，使得 f(θ) = 0 。 我们可以用牛顿方法使用下式来不断更新 θ 值</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctheta%3A%3D%5Ctheta-%5Cfrac%7Bf%28%5Ctheta%29%7D%7Bf%5E%7B%5Cprime%7D(%5Ctheta)%7D%0A" /></p><p>后面这部分就相当于目前位置与切线和X轴交点的距离。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cfrac%7Bf%28%5Ctheta%29-0%7D%7Bf%5E%7B%5Cprime%7D(%5Ctheta)%7D%20%3D%20%5Cfrac%7B%5CDelta%20f%7D%7Bf%5E%7B%5Cprime%7D(%5Ctheta)%7D%20%3D%20%7B%5CDelta%20%5Ctheta%7D%0A" /></p><p>因此每一次就是迭代到切线与X轴的交点，画图如下</p>
+<p><img src="1.png" alt=""></p>
+<p>如果你要找某个函数的最大值或最小值，比如似然函数 L(θ) 。你需要计算<strong>一阶导数等于0</strong>的地方，因此你可以将上面的 f(θ) 替换为 L’(θ)</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctheta%3A%3D%5Ctheta-%5Cfrac%7B%5Cell%5E%7B%5Cprime%7D%28%5Ctheta%29%7D%7B%5Cell%5E%7B%5Cprime%20%5Cprime%7D(%5Ctheta)%7D%0A" /></p><p>上面的 θ 只是单个数字，我们将其推广为一般化的向量。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5Ctheta%7D%3A%3D%5Cboldsymbol%7B%5Ctheta%7D-%5Cmathbf%7BH%7D%5E%7B-1%7D%20%5Cnabla_%7B%5Cboldsymbol%7B%5Ctheta%7D%7D%20%5Cell%28%5Cboldsymbol%7B%5Ctheta%7D%29%0A" /></p><p>这里 H 是 <strong>Hessian</strong> 矩阵，其元素为：</p>
+<p style=""><img src="https://math.now.sh?from=H_%7Bi%20j%7D%3D%5Cfrac%7B%5Cpartial%5E%7B2%7D%20%5Cell%28%5Ctheta%29%7D%7B%5Cpartial%20%5Ctheta_%7Bi%7D%20%5Cpartial%20%5Ctheta_%7Bj%7D%7D%0A" /></p><p>牛顿法的优点是迭代次数少，其缺点是需要计算二阶导数，每一轮迭代计算速度慢。</p>
+<p>Marquardt (1963) 年提出了一种综合牛顿法和最速上升法的一种方法，公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5Ctheta%7D%5E%7B%28m%2B1%29%7D%20%3D%20%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D%20-%5Cleft(%20%5Cmathbf%7BH%7D%5E%7B(m)%7D%20%2B%20%20%5Ctau%5E%7B(m)%7D%20%5Cmathbf%7BI%7D%5E%7B(m)%7D%5Cright)%5E%7B-1%7D%20%5Cfrac%7B%5Cpartial%7Bl%7D%7D%7B%5Cpartial%7B%5Cboldsymbol%7B%5Ctheta%7D%7D%7D%5Cbigg%7C_%7B%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Ctau%5E%7B%28m%29%7D" style="display:inline-block;margin: 0;"/> 是一个标量，如果  <img src="https://math.now.sh?inline=%5Ctau%5E%7B%28m%29%7D" style="display:inline-block;margin: 0;"/> 很小，那么就近似于牛顿法；如果   <img src="https://math.now.sh?inline=%5Ctau%5E%7B%28m%29%7D" style="display:inline-block;margin: 0;"/> 比较大，那么就接近最速上升法的方法。通常的建议是随着似然函数值的不断增加，  <img src="https://math.now.sh?inline=%5Ctau%5E%7B%28m%29%7D" style="display:inline-block;margin: 0;"/> 逐渐变小（越来越趋于牛顿法）。如果似然函数值没有增加，那么需要不断增加  <img src="https://math.now.sh?inline=%5Ctau%5E%7B%28m%29%7D" style="display:inline-block;margin: 0;"/> 的值，直到似然函数值增加。</p>
+<h2 id="scoring-法">scoring 法</h2>
+<p>为了减少计算二级导数的计算量，我们可以将 <img src="https://math.now.sh?inline=-%5Cmathbf%7BH%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 替换为信息矩阵的逆矩阵，即将黑塞矩阵替换为其期望，公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5Ctheta%7D%5E%7B%28m%2B1%29%7D%20%3D%20%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D%20%2B%20%5Cleft%5B%5Cmathbf%7BI%7D(%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D)%5Cright%5D%5E%7B-1%7D%20%5Cfrac%7B%5Cpartial%7Bl%7D%7D%7B%5Cpartial%7B%5Cboldsymbol%7B%5Ctheta%7D%7D%7D%5Cbigg%7C_%7B%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D%7D%0A" /></p><h2 id="超出参数空间的补救">超出参数空间的补救</h2>
+<p>如果在某次迭代中出现负数 (<img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D" style="display:inline-block;margin: 0;"/> 或 <img src="https://math.now.sh?inline=%5Cmathbf%7BR%7D" style="display:inline-block;margin: 0;"/> 不正定)，Jennrich and Schluchter (1986) 建议使用 “step-halving” 方法，即将步长减半，如果下一次得到了合理的结果则继续往下迭代，不然则将步长继续减半。</p>
+<p>有些AI算法软件遇到参数值超出参数空间时会改用 EM 算法。还有一种情况是，如果AI 估计值其与上次的参数估计值差距过大（计算公式如下，我们称其为 <em>convergence criterion</em>），那么我们更换使用 EM 算法。</p>
+<p style=""><img src="https://math.now.sh?from=%5CDelta%5E%7B%28m%29%7D%20%3D%20%5Csqrt%7B%5Cfrac%7B%5Csum%20%5Cleft(%20%5Ctheta_%7Bi%7D%5E%7B(m)%7D%20-%20%5Ctheta_%7Bi%7D%5E%7B(m-1)%7D%20%20%5Cright)%5E%7B2%7D%7D%7B%5Csum%20%5Ctheta_%7Bi%7D%5E%7B(m)%5E%7B2%7D%7D%7D%7D%0A" /></p><h1>参考文献</h1>
 <ol>
 <li>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/100922816">https://zhuanlan.zhihu.com/p/100922816</a></p>
+<p>Searle S R, Casella G, McCulloch C E. Variance components[M]. John Wiley &amp; Sons, 2009.</p>
 </li>
 <li>
-<p><a target="_blank" rel="noopener" href="https://marmalade.vip/baidugoogleseo.html">https://marmalade.vip/baidugoogleseo.html</a></p>
-</li>
-<li>
-<p><a target="_blank" rel="noopener" href="https://chengzhy.github.io/2022/hexo-seo-note/">https://chengzhy.github.io/2022/hexo-seo-note/</a></p>
+<p>Ng A. CS229 Lecture notes[J]. CS229 Lecture notes, 2000.</p>
 </li>
 </ol>
  
@@ -211,7 +160,7 @@
     
     <footer class="article-footer">
        
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%BD%AF%E4%BB%B6%E5%AD%A6%E4%B9%A0/" rel="tag">软件学习</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
 
     </footer>
   </div>
@@ -219,19 +168,10 @@
    
   <nav class="article-nav">
     
-      <a href="/posts/372fb709/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            方差组分估计方法一之一般思路
-          
-        </div>
-      </a>
     
-    
-      <a href="/posts/d4668321/" class="article-nav-link">
+      <a href="/posts/8b726d4e/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">R包-BGLR</div>
+        <div class="article-nav-title">Hexo博客提交百度谷歌收录</div>
       </a>
     
   </nav>
