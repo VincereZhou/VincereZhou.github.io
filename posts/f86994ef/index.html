@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">821</span>
+            <span class="post-count">855</span>
         </span>
     </span>
 
@@ -96,10 +96,11 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>在看极大似然估计的公式时，一个问题一直盘旋在我的心中，为什么对于连续变量采用概率密度函数呢？</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在看极大似然估计的公式时，一个问题一直盘旋在我的心中，为什么对于连续变量采用概率密度函数呢？</p>
 <span id="more"></span> 
 <h1>极大似然估计概述</h1>
-<p>直接把维基百科的话复制过来如下<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%9C%80%E5%A4%A7%E4%BC%BC%E7%84%B6%E4%BC%B0%E8%AE%A1">^1</a>：</p>
+<p>直接把维基百科的话复制过来如下<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label=" https://zh.wikipedia.org/wiki/%E6%9C%80%E5%A4%A7%E4%BC%BC%E7%84%B6%E4%BC%B0%E8%AE%A1
+">[1]</span></a></sup>：</p>
 <p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BL%7D%5Cleft%28%5Ctheta%20%5Cmid%20x_%7B1%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5Cright%29%3Df_%7B%5Ctheta%7D%5Cleft(x_%7B1%7D%2C%20%5Cldots%2C%20x_%7Bn%7D%5Cright)%0A" /></p><p>若 <img src="https://math.now.sh?inline=D" style="display:inline-block;margin: 0;"/> 是离散分布， <img src="https://math.now.sh?inline=f_%7B%5Ctheta%7D" style="display:inline-block;margin: 0;"/> 即是在参数为 <img src="https://math.now.sh?inline=%5Ctheta" style="display:inline-block;margin: 0;"/> 时观测到这一采样的概率。**若其是连续分布， <img src="https://math.now.sh?inline=f_%7B%5Ctheta%7D" style="display:inline-block;margin: 0;"/> 则为 <img src="https://math.now.sh?inline=X_%7B1%7D%2C%20X_%7B2%7D%2C%20%5Cldots%2C%20X_%7Bn%7D" style="display:inline-block;margin: 0;"/> 联合分布的概率密度函数在观测值处的取值。**一旦我们获得 <img src="https://math.now.sh?inline=X_%7B1%7D%2C%20X_%7B2%7D%2C%20%5Cldots%2C%20X_%7Bn%7D" style="display:inline-block;margin: 0;"/>, 我们就能求得一个关于 <img src="https://math.now.sh?inline=%5Ctheta" style="display:inline-block;margin: 0;"/> 的估计。最大似然估计会寻找关于 <img src="https://math.now.sh?inline=%5Ctheta" style="display:inline-block;margin: 0;"/> 的最可能的值 (即, 在所<br>
 注意</p>
 <ul>
@@ -113,12 +114,12 @@
 <p>我一开始有一个误解，我为了说通似然函数采用概率密度这件事，我将其理解成 P值的概念，即<strong>出现比这个残差相同或更极端情况的概率</strong>。比如正态分布，画出图像如下（图片来自网络，侵删）。我们可以看到出现这个残差或更极端情况的概率，与<strong>该残差的概率密度函数的值的大小成正比</strong>。于是似然函数中直接使用概率密度貌似就可以理解了。但是我慢慢发现，这个理解不对。</p>
 <p><img src="1.png" alt="1"></p>
 <h1>新的理解</h1>
-<p>后面我查看Fisher在1922年发表的论文<a target="_blank" rel="noopener" href="https://royalsocietypublishing.org/doi/10.1098/rsta.1922.0009">^2</a>，这好像也是第一次提论最大似然的地方。水平有限，看不太懂，但我还是找到了 Fisher 对于最大似然的阐述：</p>
+<p>后面我查看Fisher在1922年发表的论文<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="https://royalsocietypublishing.org/doi/10.1098/rsta.1922.0009">[2]</span></a></sup>，这好像也是第一次提论最大似然的地方。水平有限，看不太懂，但我还是找到了 Fisher 对于最大似然的阐述：</p>
 <p><img src="2.png" alt="1"></p>
 <p>我不是很理解第二个公式是怎么得到的，但从第一个公式我们可以清楚地看到，对于连续变量 <img src="https://math.now.sh?inline=x" style="display:inline-block;margin: 0;"/> ，<strong>极大似然需要最大化的是在该点的相邻区域的出现概率</strong>。</p>
 <p>这里仍然用一元正态分布的图来直观理解一下，需要计算的相邻区域的概率即为下图阴影区域，根据微积分，其计算公式为 <img src="https://math.now.sh?inline=P%20%3D%20f%28x%29dx" style="display:inline-block;margin: 0;"/> ，因此 <img src="https://math.now.sh?inline=P%20%5Cpropto%20f%28x%29" style="display:inline-block;margin: 0;"/> ，因此，<img src="https://math.now.sh?inline=%5Carg%20%5Cmax_%7B%5Ctheta%7D%20P%20%3D%20%5Carg%20%5Cmax_%7B%5Ctheta%7D%20f%28x%29" style="display:inline-block;margin: 0;"/> ，所以似然函数可以直接使用（联合）概率密度函数的值。</p>
 <p><img src="3.png" alt="1"></p>
- 
+<div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">https://zh.wikipedia.org/wiki/%E6%9C%80%E5%A4%A7%E4%BC%BC%E7%84%B6%E4%BC%B0%E8%AE%A1<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">https://royalsocietypublishing.org/doi/10.1098/rsta.1922.0009<a href="#fnref:2" rev="footnote"> ↩</a></span></li></ol></div></div> 
       <!-- reward -->
       
     </div>

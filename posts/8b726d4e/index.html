@@ -114,7 +114,7 @@
 <p>网上大多数的说法都是说直接把该文件放到Hexo博客根目录的source目录下，然后编译打包上传到远程仓库，但是事实上这种做法是有问题的，当执行<code>hexo g</code>生成静态界面的时候，hexo会把多余的内容添加到source目录下的这个html验证文件中，导致百度、谷歌验证失败。</p>
 <h3 id="正确做法">正确做法</h3>
 <p>验证文件存放在Hexo博客根目录的source目录下，在验证文件头部添加<code>layout: false</code>，以谷歌验证文件为例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">layout: false</span><br><span class="line">---</span><br><span class="line">google-site-verification: googlexxxxxx.html</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">layout: false</span><br><span class="line">---</span><br><span class="line">google-site-verification: googlexxxxxx.html</span><br></pre></td></tr></table></figure>
 <p>这样<code>hexo g</code>执行成功后，这个html验证文件中就不会有多余的内容，然后执行<code>hexo d</code>上传到远程仓库，这样百度、谷歌都验证成功了，为了保证一直验证成功，建议不要删除这个验证文件。</p>
 </blockquote>
 <p>选择HTML标签验证，放到<code>head.ejs</code>（D:\Desktop\blog\themes\ayer\layout_partial\head.ejs），<code>&lt;head&gt;</code>与 <code>&lt;/head&gt;</code>标签之间，<strong>成功了</strong>。</p>
@@ -127,15 +127,15 @@
 <ol>
 <li>执行命令，安装站点地图生成插件。</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cnpm install hexo-generator-sitemap --save</span><br><span class="line">cnpm install hexo-generator-baidu-sitemap --save</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cnpm install hexo-generator-sitemap --save</span><br><span class="line">cnpm install hexo-generator-baidu-sitemap --save</span><br></pre></td></tr></table></figure>
 <ol start="2">
 <li>在博客根目录下的配置文件<code>_config.yml</code>中修改 ·<code>url:</code> 部分为真实网址</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;vincere.fun</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vincere.fun</span><br></pre></td></tr></table></figure>
 <ol start="3">
 <li>在博客根目录下的配置文件<code>_config.yml</code>中配置 sitemap</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># automatically generate sitemap</span><br><span class="line">sitemap:</span><br><span class="line">  path: sitemap.xml</span><br><span class="line">baidusitemap:</span><br><span class="line">  path: baidusitemap.xml</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># automatically generate sitemap</span><br><span class="line">sitemap:</span><br><span class="line">  path: sitemap.xml</span><br><span class="line">baidusitemap:</span><br><span class="line">  path: baidusitemap.xml</span><br></pre></td></tr></table></figure>
 <ol start="4">
 <li>
 <p>执行<code>hexo g -d</code>，会在<code>博客根目录/public</code>中生成两个文件， <code>sitemap.xml</code> 文件是搜索引擎通用的 sitemap 文件，<code>baidusitemap.xml</code> 是百度专用的 sitemap 文件。然后访问 <code>你的首页/sitemap.xml</code> 或者  <code>你的首页/baidusitemap.xml</code>  就可以看到网站地图了</p>
@@ -149,25 +149,25 @@
 <blockquote>
 <p>配置完sitemap可能还是不行，然后通过google搜索后发现，大家都有遇到类似的问题，根据大神的说法，可能不是<code>Hexo</code>的问题，应该是<code>Github Pages</code>的问题。<code>Github Pages</code>默认是基于<code>Jekyll</code>构建的，如果不是基于此方式构建的，<code>Github Pages</code>会忽略掉一些文件和文件夹。</p>
 <p>因此，<strong>在Hexo博客的source文件夹下添加一个.nojekyll空文件</strong>，该文件会告诉<code>Github Pages</code>当前网站不是基于<code>Jekyll</code>构建的，不要忽略掉一些文件和文件夹。然后<strong>打开根目录下的_config.yml，找到include files区域，修改成下面这样</strong>，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># Include &#x2F; Exclude file(s)</span><br><span class="line">## include:&#x2F;exclude: options only apply to the &#39;source&#x2F;&#39; folder</span><br><span class="line">include: </span><br><span class="line"> - .nojekyll</span><br><span class="line">exclude: null</span><br><span class="line">ignore: null</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># Include / Exclude file(s)</span><br><span class="line">## include:/exclude: options only apply to the &#x27;source/&#x27; folder</span><br><span class="line">include: </span><br><span class="line"> - .nojekyll</span><br><span class="line">exclude: null</span><br><span class="line">ignore: null</span><br></pre></td></tr></table></figure>
 <p>然后再<strong>在<code>deploy</code>区域，添加<code>ignore_hidden</code>属性并设为<code>false</code></strong> （我设置了两行，一个 -type 下面放一行）。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Deployment</span><br><span class="line">## Docs: https:&#x2F;&#x2F;hexo.io&#x2F;docs&#x2F;one-command-deployment</span><br><span class="line">deploy:</span><br><span class="line">  # 上面部分省略</span><br><span class="line">  ignore_hidden: false</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Deployment</span><br><span class="line">## Docs: https://hexo.io/docs/one-command-deployment</span><br><span class="line">deploy:</span><br><span class="line">  # 上面部分省略</span><br><span class="line">  ignore_hidden: false</span><br></pre></td></tr></table></figure>
 <p>这样在<code>hexo g</code>时就会把<code>.nojekyll</code>文件添加到<code>public</code>目录下，<code>hexo d</code>时会把<code>.nojekyll</code>文件推送到github上。</p>
 </blockquote>
 <h3 id="主动提交">主动提交</h3>
 <p>首先在博客根目录中安装插件</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cnpm install hexo-baidu-url-submit --save</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cnpm install hexo-baidu-url-submit --save</span><br></pre></td></tr></table></figure>
 <p>然后在根目录 <code>_config.yml</code> 文件里写入以下配置：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 提交百度搜索</span><br><span class="line">baidu_url_submit:</span><br><span class="line">  count: 10               # 提交最新的多少个链接</span><br><span class="line">  host: vincere.fun    # 在百度站长平台中添加的域名</span><br><span class="line">  token: your_token      # 秘钥</span><br><span class="line">  path: baidu_urls.txt   # 文本文档的地址， 新链接会保存在此文本文档里</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 提交百度搜索</span><br><span class="line">baidu_url_submit:</span><br><span class="line">  count: 10               # 提交最新的多少个链接</span><br><span class="line">  host: vincere.fun    # 在百度站长平台中添加的域名</span><br><span class="line">  token: your_token      # 秘钥</span><br><span class="line">  path: baidu_urls.txt   # 文本文档的地址， 新链接会保存在此文本文档里</span><br></pre></td></tr></table></figure>
 <p>其中的 <code>token</code> 可以在【链接提交】-【API提交】下面看到，接口调用地址最后面 <code>token=xxxxx</code> 即为你的 <code>token</code></p>
 <blockquote>
 <p>推送接口<br>
 接口调用地址：<a target="_blank" rel="noopener" href="http://data.zz.baidu.com/urls?site=https://vincere.fun&amp;token=">http://data.zz.baidu.com/urls?site=https://vincere.fun&amp;token=</a>???</p>
 </blockquote>
 <p>然后在博客根目录下的配置文件<code>_config.yml</code>中修改 ·<code>url:</code> 部分为真实网址</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;vincere.fun</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vincere.fun</span><br></pre></td></tr></table></figure>
 <p>最后，加入新的 deployer：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">***</span><br><span class="line">***	</span><br><span class="line">- type: baidu_url_submitter                         # 这是新加的主动推送</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">***</span><br><span class="line">***	</span><br><span class="line">- type: baidu_url_submitter                         # 这是新加的主动推送</span><br></pre></td></tr></table></figure>
 <p>最后执行 <code>hexo g -d</code> 部署一遍即可实现主动推送，推送成功的标志是：在执行部署命令最后会显示类似如下代码：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&quot;remain&quot;</span>:89,<span class="string">&quot;success&quot;</span>:10&#125;</span><br><span class="line">INFO  Deploy <span class="keyword">done</span>: baidu_url_submitter</span><br></pre></td></tr></table></figure>
 <p>这表示有 10 个页面已经主动推送成功，remain 的意思是当天剩余的可推送 89 条。</p>
@@ -175,7 +175,7 @@
 <p>进入 <a target="_blank" rel="noopener" href="https://search.google.com/search-console/about">google search console</a> ，按照类似的方式进行收录，我是用了 CNAME 的方式。</p>
 <h2 id="提交sitemap">提交sitemap</h2>
 <p>点击<a target="_blank" rel="noopener" href="https://www.google.com/webmasters/tools/sitemap-list">添加站点地图</a>，选择要添加的网站，如下，点击【提交】。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;vincere.fun&#x2F;sitemap.xml</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vincere.fun/sitemap.xml</span><br></pre></td></tr></table></figure>
 <p>会提示正在处理数据，请在一天左右的时间内再次检查。</p>
 <h1>参考文献</h1>
 <ol>

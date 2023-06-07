@@ -96,7 +96,7 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>ISL 真是好书！</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>ISL 真是好书！</p>
 <span id="more"></span> 
 <h1>资料</h1>
 <p><a target="_blank" rel="noopener" href="https://www.statlearning.com/">An Introduction to Statistical Learning</a>，下文简称 <strong>ISL</strong></p>
@@ -148,11 +148,10 @@
 <p><img src="5.png" alt="1"></p>
 <h2 id="Choosing-the-Number-and-Locations-of-the-Knots">Choosing the Number and Locations of the Knots</h2>
 <p>当我们执行 spline 算法时，我们应该在哪里安置 <em>knots</em> 呢？一般来说，变化大的区域安放的 <em>knots</em> 更多，变化小的区域放得少比较合理，但是实际情况一般是，先获取需要安放的 <em>knots</em> 数目，然后按照自变量的百分位点进行选取 <em>knots</em> 。</p>
-<p>下图展示了一个例子，使用 <em>natural cubic spline</em> 进行拟合数据，<em>knots</em> 的位置在 age 自变量的 25th, 50th, 75th 分位点。这里总共有4个自由度[^1]。</p>
+<p>下图展示了一个例子，使用 <em>natural cubic spline</em> 进行拟合数据，<em>knots</em> 的位置在 age 自变量的 25th, 50th, 75th 分位点。这里总共有4个自由度<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="这里包括两个边界点，其实总共是 5 个 *knots* 。正常的 cubic spline 的自由度为 5+4 =9，但是由于 natural cubic spline 在两个边界处有线性限制，因此自由度为 9-4 = 5。下面怎么从5个自由度视为4个自由度没看懂，原话为：Since this includes a constant, which is absorbed in the intercept,we count it as four degrees of freedom.">[1]</span></a></sup>。</p>
 <p><img src="6.png" alt="1"></p>
 <p>那么我们需要使用多少个 knots 呢？或者说我们的 spline 中的自由度应该是多少呢？一个选项是变量不同数目的 knots，然后看哪一种生成的拟合曲线最好。一个更客观的方法是使用交叉验证，计算所有test sets 的 test RSS 均值。下图显示为10倍交叉验证的结果，左边为 <em>natural splines</em> ，右图为 <em>cubic splines</em> ，可以看到这两种方法结果差不多。</p>
 <p><img src="7.png" alt="1"></p>
-<p>[^1]: 这里包括两个边界点，其实总共是 5 个 <em>knots</em> 。正常的 cubic spline 的自由度为 5+4 =9，但是由于 natural cubic spline 在两个边界处有线性限制，因此自由度为 9-4 = 5。下面怎么从5个自由度视为4个自由度没看懂，原话为：Since this includes a constant, which is absorbed in the intercept,we count it as four degrees of freedom.</p>
 <h2 id="Comparison-to-Polynomial-Regression">Comparison to Polynomial Regression</h2>
 <p>Regression spines 通常效果比普通的多项式回归更好。因为多项式回归是通过增加最高项的次数来增加模型的复杂性（例如，X<sup>15</sup>），但是 splines 则是通过增加 <em>knots</em> 的数目来实现这一点，一般来说 splines 结果更稳定。下图为自由度同样为15 的 <em>natural cubic spline</em> 和 多项式回归的结果，可以看出多项式回归在边界处的结果比较诡异。</p>
 <p><img src="8.png" alt="1"></p>
@@ -217,7 +216,7 @@
 <p>因此，我们剔除了学历低于高中的个体的数据，然后重新拟合了模型，我们看到 age 和 education 对于成为高收入者的影响很大，而 year 影响很小。（剔除个体对 education 这个变量的作用这么大？）</p>
 <p><img src="16.png" alt="1"></p>
 <h1>R 代码</h1>
-<p>略</p>
+<p>略<div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">这里包括两个边界点，其实总共是 5 个 <em>knots</em> 。正常的 cubic spline 的自由度为 5+4 =9，但是由于 natural cubic spline 在两个边界处有线性限制，因此自由度为 9-4 = 5。下面怎么从5个自由度视为4个自由度没看懂，原话为：Since this includes a constant, which is absorbed in the intercept,we count it as four degrees of freedom.<a href="#fnref:1" rev="footnote"> ↩</a></span></li></ol></div></div></p>
  
       <!-- reward -->
       

@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">748</span>
+            <span class="post-count">731</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">3 分钟</span>
+            <span class="post-count">2 分钟</span>
         </span>
     </span>
 </div>
@@ -115,10 +115,10 @@
 <p>对于每一行进行循环，<code>XENV(I) = ENVSZE</code>  设置每一行的 XENV 的元素，这一行对应的置换矩阵的原始节点编号为 <code>IPERM = PERM(I)</code>，设这一行第一个非零元素位置为 IFIRST ，初始值设为 <code>i</code></p>
 <p>通过 <code>DO 100</code> 遍历其相邻的原始节点，<code>NABOR = ADJNCY(J)</code> 得到其原始编号，<code>NABOR = INVP(NABOR)</code> 进一步得到其在置换矩阵中的新编号，如果新编号低于 IFIRST ，则用这个编号覆盖 IFIRST ，最终得到 IFIRST 的真实值。</p>
 <p>通过 <code>I - IFIRST</code> 得到这一行的 <em>bandwidth</em> ，记为 <code>IBAND</code> ，下一行的初始位置更新为 <code>ENVSZE = ENVSZE + IBAND</code> ，如果 <code>BANDW</code> 小于  <code>IBAND</code> ，则 <code>BANDW = IBAND</code> ，最终得到矩阵的 <em>bandwidth</em> 。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">	  BANDW &#x3D; 0</span><br><span class="line">	  ENVSZE &#x3D; 1</span><br><span class="line">	  DO 200 I&#x3D;1, NEQNS</span><br><span class="line">	    XENV(I) &#x3D; ENVSZE</span><br><span class="line">	    IPERM &#x3D; PERM(I)</span><br><span class="line">	    JSTRT &#x3D; XADJ(IPERM)</span><br><span class="line">	    JSTOP &#x3D; XADJ(IPERM + 1) - 1</span><br><span class="line">	    IF (JSTOP .LT. JSTRT) GO TO 200</span><br><span class="line">          IFIRST &#x3D; I</span><br><span class="line">          DO 100 J &#x3D; JSTRT, JSTOP</span><br><span class="line">            NABOR &#x3D; ADJNCY(J)</span><br><span class="line">            NABOR &#x3D; INVP(NABOR)</span><br><span class="line">            IF ( NABOR .LT. IFIRST ) IFIRST &#x3D; NABOR</span><br><span class="line">100       CONTINUE</span><br><span class="line">          IBAND &#x3D; I - IFIRST</span><br><span class="line">          ENVSZE &#x3D; ENVSZE + IBAND</span><br><span class="line">          IF (BANDW .LT. IBAND) BANDW &#x3D; IBAND</span><br><span class="line">200   CONTINUE</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">	  BANDW = 0</span><br><span class="line">	  ENVSZE = 1</span><br><span class="line">	  DO 200 I=1, NEQNS</span><br><span class="line">	    XENV(I) = ENVSZE</span><br><span class="line">	    IPERM = PERM(I)</span><br><span class="line">	    JSTRT = XADJ(IPERM)</span><br><span class="line">	    JSTOP = XADJ(IPERM + 1) - 1</span><br><span class="line">	    IF (JSTOP .LT. JSTRT) GO TO 200</span><br><span class="line">          IFIRST = I</span><br><span class="line">          DO 100 J = JSTRT, JSTOP</span><br><span class="line">            NABOR = ADJNCY(J)</span><br><span class="line">            NABOR = INVP(NABOR)</span><br><span class="line">            IF ( NABOR .LT. IFIRST ) IFIRST = NABOR</span><br><span class="line">100       CONTINUE</span><br><span class="line">          IBAND = I - IFIRST</span><br><span class="line">          ENVSZE = ENVSZE + IBAND</span><br><span class="line">          IF (BANDW .LT. IBAND) BANDW = IBAND</span><br><span class="line">200   CONTINUE</span><br></pre></td></tr></table></figure>
 <p>最后，XENV 需要补上最后一个元素 <code>NEQNS+1</code></p>
 <p>实际的 <code>ENVSZE</code> 需要减1，程序终止</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  XENV(NEQNS+1) &#x3D; ENVSZE</span><br><span class="line">  ENVSZE &#x3D; ENVSZE - 1</span><br><span class="line">  RETURN</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  XENV(NEQNS+1) = ENVSZE</span><br><span class="line">  ENVSZE = ENVSZE - 1</span><br><span class="line">  RETURN</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
 <h1>参考文献</h1>
 <ol>
 <li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>

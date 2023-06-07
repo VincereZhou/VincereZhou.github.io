@@ -96,7 +96,7 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>本软件通过利用SNP信息根据孟德尔错误位点比例，对于系谱中均具有基因型的亲子对进行亲子鉴定，判断系谱是否正确。这里的孟德尔错误位点指个体和亲本之间具有相反的纯和子的位点（例如个体的基因型为AA，亲本的基因型为GG），依据孟德尔定律亲子间不应存在这种情况，但由于突变和分型错误等原因，真实的亲子对之间仍存在少量的孟德尔错误位点。当使用的位点数目较多时，通过设定一个合理的阈值可以明确判定系谱中正确的亲子关系和错误的亲子关系。</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本软件通过利用SNP信息根据孟德尔错误位点比例，对于系谱中均具有基因型的亲子对进行亲子鉴定，判断系谱是否正确。这里的孟德尔错误位点指个体和亲本之间具有相反的纯和子的位点（例如个体的基因型为AA，亲本的基因型为GG），依据孟德尔定律亲子间不应存在这种情况，但由于突变和分型错误等原因，真实的亲子对之间仍存在少量的孟德尔错误位点。当使用的位点数目较多时，通过设定一个合理的阈值可以明确判定系谱中正确的亲子关系和错误的亲子关系。</p>
 <span id="more"></span>
 <h1>使用软件</h1>
 <h1>软件</h1>
@@ -165,7 +165,7 @@
 <li>1,2,3 都是<strong>质数</strong>，这三个数之间任选两个数进行相乘得到的积是唯一的，比如如果乘积为2，那么只能是1和2相乘，3只能是1和3相乘……</li>
 </ol>
 <p>因此，这样我们在比对两个样本的基因型时，只需要将两个个体的基因型进行<strong>相乘</strong>，如果某个位点乘积为0，表示存在缺失（至少一个个体的基因型为缺失），无法比较；如果某个位点乘积为 3，表示在这个位点上存在孟德尔错误（两个个体为相反纯合子）。这样，我们统计两个个体的缺失位点和孟德尔错误位点非常方便。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#开始进行亲子鉴定</span><br><span class="line">#array4 改为 1 2 3 0(缺失)</span><br><span class="line">#这样两个array 的乘积的array为3的是错误位点，是0的是缺失位点。</span><br><span class="line"></span><br><span class="line">array4 +&#x3D; 1</span><br><span class="line">array4[array4&#x3D;&#x3D;4] &#x3D; 0</span><br><span class="line"></span><br><span class="line">snp_num4 &#x3D; array4.shape[1]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#开始进行亲子鉴定</span><br><span class="line">#array4 改为 1 2 3 0(缺失)</span><br><span class="line">#这样两个array 的乘积的array为3的是错误位点，是0的是缺失位点。</span><br><span class="line"></span><br><span class="line">array4 += 1</span><br><span class="line">array4[array4==4] = 0</span><br><span class="line"></span><br><span class="line">snp_num4 = array4.shape[1]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <h3 id="清洗系谱">清洗系谱</h3>
 <p>这里剔除了第一列个体没有基因型的行，因为个体没有基因型就不可能进行亲子鉴定 （如果提过了 --list 选项，那么只会提取需要亲子鉴定的个体的系谱）。</p>
 <p>这里得到个体和亲本均有基因型的亲子对列表：<code>offspring_sire_list</code>  和  <code>offspring_dam_list</code></p>
