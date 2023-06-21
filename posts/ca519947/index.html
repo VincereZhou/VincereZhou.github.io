@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    方差组分估计方法五之AI-REML |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-方差组分估计方法五之AI-REML"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  方差组分估计方法五之AI-REML
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/ca519947/" class="article-date">
+  <time datetime="2023-06-21T03:06:15.000Z" itemprop="datePublished">2023-06-21</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">577</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">2 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是方差组分估计方法的第五篇博客，也是最后一篇，介绍 AI-REML 算法。</p>
+<span id="more"></span>
+<h1>AI-REML</h1>
+<p>首先我们看 Newton-Raphson 算法，其迭代公式为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5Ctheta%7D%5E%7B%28t%2B1%29%7D%3D%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(t)%7D-%5Cleft(%5Cmathbf%7BH%7D%5E%7B(t)%7D%5Cright)%5E%7B-1%7D%20%5Cfrac%7B%5Cpartial%20L%7D%7B%5Cpartial%20%5Cboldsymbol%7B%5Ctheta%7D%7D%20%5Cmid%20%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(t)%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=L" style="display:inline-block;margin: 0;"/> 是需要最大化的原函数；<img src="https://math.now.sh?inline=%5Cfrac%7B%5Cpartial%20L%7D%7B%5Cpartial%20%5Cboldsymbol%7B%5Ctheta%7D%7D" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=L" style="display:inline-block;margin: 0;"/> 函数关于参数 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Ctheta%7D" style="display:inline-block;margin: 0;"/> 的一阶偏导数向量；  <img src="https://math.now.sh?inline=%5Cmathbf%7BH%7D" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=L" style="display:inline-block;margin: 0;"/> 函数关于参数 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Ctheta%7D" style="display:inline-block;margin: 0;"/> 的二阶偏导数矩阵，即 Hessian 矩阵，举例如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BH%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Ctheta_%7B1%7D%5E%7B2%7D%7D%20%26%20%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Ctheta_%7B1%7D%20%5Cpartial%20%5Ctheta_%7B2%7D%7D%20%26%20%5Ccdots%20%26%20%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Ctheta_%7B1%7D%20%5Cpartial%20%5Ctheta_%7Bk%7D%7D%20%5C%5C%0A%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Ctheta_%7B1%7D%20%5Cpartial%20%5Ctheta_%7B2%7D%7D%20%26%20%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Ctheta_%7B2%7D%5E%7B2%7D%7D%20%26%20%5Ccdots%20%26%20%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Ctheta_%7B2%7D%20%5Cpartial%20%5Ctheta_%7Bk%7D%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%26%20%5Cvdots%20%5C%5C%0A%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Ctheta_%7B1%7D%20%5Cpartial%20%5Ctheta_%7Bk%7D%7D%20%26%20%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Ctheta_%7B2%7D%20%5Cpartial%20%5Ctheta_%7Bk%7D%7D%20%26%20%5Ccdots%20%26%20%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Ctheta_%7Bk%7D%5E%7B2%7D%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>由于计算 <img src="https://math.now.sh?inline=%5Cmathbf%7BH%7D" style="display:inline-block;margin: 0;"/> 矩阵的计算量较大，scoring 方法采用以下迭代公式，即采用  <img src="https://math.now.sh?inline=%5Cmathbf%7BF%7D" style="display:inline-block;margin: 0;"/> 矩阵替换  <img src="https://math.now.sh?inline=%5Cmathbf%7BH%7D" style="display:inline-block;margin: 0;"/> 矩阵。 <img src="https://math.now.sh?inline=%5Cmathbf%7BF%7D" style="display:inline-block;margin: 0;"/> 矩阵是  <img src="https://math.now.sh?inline=%5Cmathbf%7BH%7D" style="display:inline-block;margin: 0;"/> 矩阵的数学期望，即 <img src="https://math.now.sh?inline=%5Cboldsymbol%7BF%7D%3DE%28%5Cboldsymbol%7BH%7D%29" style="display:inline-block;margin: 0;"/> ；  <img src="https://math.now.sh?inline=-%20%5Cmathbf%7BF%7D" style="display:inline-block;margin: 0;"/> 矩阵则称为 Fisher 信息矩阵</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5Ctheta%7D%5E%7B%28t%2B1%29%7D%3D%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(t)%7D-%5Cleft(%5Cmathbf%7BF%7D%5E%7B(t)%7D%5Cright)%5E%7B-1%7D%20%5Cfrac%7B%5Cpartial%20L%7D%7B%5Cpartial%20%5Cboldsymbol%7B%5Ctheta%7D%7D%20%5Cmid%20%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(t)%7D%0A" /></p><p>所谓平均信息算法，就是将期望信息 (<img src="https://math.now.sh?inline=-%20%5Cmathbf%7BF%7D" style="display:inline-block;margin: 0;"/>) 和观察信息 (<img src="https://math.now.sh?inline=-%20%5Cmathbf%7BH%7D" style="display:inline-block;margin: 0;"/>) 平均起来，得到一个平均信息矩阵</p>
+<p style=""><img src="https://math.now.sh?from=A%20%5Cboldsymbol%7BI%7D%3D%5Cfrac%7B-%5Cboldsymbol%7BF%7D%2B%28-%5Cboldsymbol%7BH%7D%29%7D%7B2%7D%0A" /></p><p>此时相应的迭代公式为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5Ctheta%7D%5E%7B%28t%2B1%29%7D%3D%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(t)%7D%2B%5Cleft(%5Cmathbf%7BAI%7D%5E%7B(t)%7D%5Cright)%5E%7B-1%7D%20%5Cfrac%7B%5Cpartial%20L%7D%7B%5Cpartial%20%5Cboldsymbol%7B%5Ctheta%7D%7D%20%5Cmid%20%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(t)%7D%0A" /></p><p>在前面的推导中，我们已知 REML 方法的似然函数为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cln%20L%5Cleft%28%5Csigma_%7B0%7D%5E%7B2%7D%2C%20%5Cldots%2C%20%5Csigma_%7Bm%7D%5E%7B2%7D%5Cright%29%3D%26%20%5Cfrac%7Bn-r%7D%7B2%7D%20%5Cln%20(2%20%5Cpi)-%5Cfrac%7B1%7D%7B2%7D%20%5Cln%20%5Cleft%7C%5Cmathbf%7BK%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%20%5Cmathbf%7BK%7D%5Cright%7C-%5Cfrac%7B1%7D%7B2%7D%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BK%7D%20%5Cleft(%5Cmathbf%7BK%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%20%5Cmathbf%7BK%7D%20%5Cright)%5E%7B-1%7D%20%5Cmathbf%7BK%5E%7B%5Cprime%7D%20y%7D%20%5C%5C%0A%3D%26%20%5Cfrac%7Bn-r%7D%7B2%7D%20%5Cln%20(2%20%5Cpi)-%5Cfrac%7B1%7D%7B2%7D%20%5Cln%20%5Cleft%7C%5Cmathbf%7BK%7D%5E%7B%5Cprime%7D%5Cleft(%5Csum_%7Bi%3D0%7D%5E%7Bm%7D%20%5Csigma_%7Bi%7D%5E%7B2%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%5Cright)%20%5Cmathbf%7BK%7D%20%5Cright%7C%20%5C%5C%0A%26-%5Cfrac%7B1%7D%7B2%7D%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BK%7D%20%5Cleft%5B%5Cmathbf%7BK%7D%5E%7B%5Cprime%7D%5Cleft(%5Csum_%7Bi%3D0%7D%5E%7Bm%7D%20%5Csigma_%7Bi%7D%5E%7B2%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%5Cright)%20%5Cmathbf%7BK%7D%5Cright%5D%5E%7B-1%7D%20%5Cmathbf%7BK%5E%7B%5Cprime%7D%20y%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>之前我们推导证明：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cfrac%7B%5Cpartial%5E2%20I_%7BR%7D%7D%7B%5Cpartial%20%5Csigma_i%5E2%20%5Cpartial%20%5Csigma_j%5E2%7D%20%0A%20%3D%5Cfrac%7B1%7D%7B2%7D%20%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BP%20%7D%20%5Cmathbf%7BV%7D_j%20%5Cmathbf%7BP%20%7D%20%5Cmathbf%7BV%7D_i%5Cright%29-%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_j%20%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_i%20%20%5Cmathbf%7BP%20y%7D%0A" /></p><p>举个例子，假设模型中随机效应只有加性效应（<img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D%20%3D%20%5Cmathbf%7BA%7D%20%5Csigma%5E%7B2%7D_%7Ba%7D" style="display:inline-block;margin: 0;"/> ）和残差 (<img src="https://math.now.sh?inline=%5Cmathbf%7BR%7D%20%3D%20%5Cmathbf%7BI%7D%20%5Csigma%5E%7B2%7D_%7Be%7D" style="display:inline-block;margin: 0;"/>)，此时  <img src="https://math.now.sh?inline=%5Cmathbf%7BH%7D" style="display:inline-block;margin: 0;"/> 矩阵为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BH%7D%20%26%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%5Cleft%28%5Csigma_%7Ba%7D%5E%7B2%7D%5Cright%29%5E%7B2%7D%7D%20%26%20%5Cfrac%7B%5Cpartial%20%5Ccdot%7D%7B%5Cpartial%20%5Csigma_%7Ba%7D%5E%7B2%7D%20%5Cpartial%20%5Csigma_%7Be%7D%5E%7B2%7D%7D%20%5C%5C%0A%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%20%5Csigma_%7B%5Cmathrm%7Ba%7D%7D%5E%7B2%7D%20%5Cpartial%20%5Csigma_%7Be%7D%5E%7B2%7D%7D%20%26%20%5Cfrac%7B%5Cpartial%5E%7B2%7D%20L%7D%7B%5Cpartial%5Cleft(%5Csigma_%7Be%7D%5E%7B2%7D%5Cright)%5E%7B2%7D%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7B2%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%5Cright)-2%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%26%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%5Cright)-2%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%20P%7D%20%5Cmathbf%7By%7D%20%5C%5C%0A%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%5Cright)-2%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%20P%7D%20%5Cmathbf%7By%7D%20%26%20%5Coperatorname%7Btr%7D(%5Cmathbf%7BP%20P%7D)-2%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%20P%20P%7D%20%5Cmathbf%7By%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A%5Cend%7Baligned%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BV%7D_%7Ba%7D%20%3D%20%5Cmathbf%7BZAZ'%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>同样地，我们之前推导得到：</p>
+<p style=""><img src="https://math.now.sh?from=-%5Cmathrm%7BE%7D%5Cleft%28%5Cfrac%7B%5Cpartial%5E2%20l_%7B%5Cmathbf%7BR%7D%7D%7D%7B%5Cpartial%20%5Csigma_i%5E2%20%5Csigma_j%5E2%7D%5Cright%29%0A%3D%5Cfrac%7B1%7D%7B2%7D%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_j%20%5Cmathbf%7BP%20V%7D_i%20%5Cright)%0A" /></p><p>采用上面的例子，此时 <img src="https://math.now.sh?inline=%5Cmathbf%7BF%7D" style="display:inline-block;margin: 0;"/> 矩阵为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BF%7D%3D%5Cmathrm%7BE%7D%28%5Cmathbf%7BH%7D%29%3D-%5Cfrac%7B1%7D%7B2%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D%20_%7Ba%7D%5Cright)%20%26%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%5Cright)%20%5C%5C%0A%5Coperatorname%7Btr%7D(%5Cmathbf%7BP%20V%7D_%7Ba%7D%20%5Cmathbf%7BP%7D)%20%26%20%5Coperatorname%7Btr%7D(%5Cmathbf%7BP%20P%7D)%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>此时平均信息矩阵为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BAI%7D_%7Bij%7D%20%26%3D%20%5Cfrac%7B-%5Cmathbf%7BF%7D_%7Bij%7D%2B%28-%5Cmathbf%7BH%7D_%7Bij%7D%29%7D%7B2%7D%20%5C%5C%0A%26%3D%20%5Cfrac%7B1%7D%7B2%7D%20%5Cleft(%5Cfrac%7B1%7D%7B2%7D%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_j%20%5Cmathbf%7BP%20V%7D_i%20%5Cright)%20-%5Cfrac%7B1%7D%7B2%7D%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%20%7D%20%5Cmathbf%7BV%7D_j%20%5Cmathbf%7BP%20%7D%20%5Cmathbf%7BV%7D_i%5Cright)%2B%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_j%20%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_i%20%20%5Cmathbf%7BP%20y%7D%20%5Cright)%20%5C%5C%0A%26%3D%20%5Cfrac%7B1%7D%7B2%7D%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_j%20%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_i%20%20%5Cmathbf%7BP%20y%7D%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>采用上面的例子，此时 <img src="https://math.now.sh?inline=%5Cmathbf%7BAI%7D" style="display:inline-block;margin: 0;"/> 矩阵为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BAI%7D%3D%5Cfrac%7B-%5Cmathbf%7BF%7D%2B%28-%5Cmathbf%7BH%7D%29%7D%7B2%7D%20%3D%20%5Cfrac%7B1%7D%7B2%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%26%20%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%20P%7D%20%5Cmathbf%7By%7D%20%5C%5C%0A%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%20P%7D%20%5Cmathbf%7By%7D%20%26%20%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%20P%20P%7D%20%5Cmathbf%7By%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>此时在 AI 算法中，不涉及迹函数的运算，计算难度相对低一点。</p>
+<p>如果我们设 <img src="https://math.now.sh?inline=%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bi%7D%7D%20%3D%20%5Cmathbf%7B%5Cdot%7BV%7D%7D_%7Bi%7D%5Cmathbf%7BPy%7D" style="display:inline-block;margin: 0;"/> ，定义 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D%20%3D%20%5Cleft%5B%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7B1%7D%7D%20%5Ccdots%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bk%7D%7D%5Cright%5D" style="display:inline-block;margin: 0;"/> ，则我们可以得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BAI%7D%20%3D%20%5Cfrac%7B1%7D%7B2%7D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%5Cmathbf%7BP%7D%5Cmathbf%7BQ%7D%0A" /></p><p>对于某一个随机效应的方差组分 <img src="https://math.now.sh?inline=%5Cgamma_%7Bij%7D" style="display:inline-block;margin: 0;"/> ，我们有 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BV%7D%7D_%7Bi%20j%7D%20%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D" style="display:inline-block;margin: 0;"/> ，则有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7Bq%7D_%7B%5Cgamma_%7Bij%7D%7D%20%26%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7Bu%7D_%7Bi%7D%20%5Cquad%20%5Cbecause%20%20%5Cmathbf%7Bu%7D_%7Bi%7D%20%3D%20%5Cmathbf%7BG%7D_%7Bi%7D%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>对于残差的方差组分 <img src="https://math.now.sh?inline=%5Cphi_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，我们有 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BV%7D%7D_%7Bi%7D%20%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，则有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7Bq%7D_%7B%5Cphi_%7Bi%7D%7D%20%26%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bi%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bi%7D%20%5Cmathbf%7BR%5E%7B-1%7De%7D%20%5Cquad%20%5Cbecause%20%5Cmathbf%7BPy%7D%20%3D%20%20%5Cmathbf%7BR%5E%7B-1%7De%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bi%7D%20%5Cmathbf%7B%5CSigma%5E%7B-1%7De%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>对于中间的 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 矩阵，我们采用公式 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D%20%3D%20%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D" style="display:inline-block;margin: 0;"/> 进行计算。</p>
+<p>我们也可以通过高斯消元得到 <img src="https://math.now.sh?inline=%5Cmathbf%7BAI%7D" style="display:inline-block;margin: 0;"/> 矩阵，首先我们构建增广矩阵如下 (用 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> 代替 <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D" style="display:inline-block;margin: 0;"/> )</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%5B%5Cbegin%7Barray%7D%7Bll%7D%0A%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%20%26%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%0A%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%2B%5Cmathbf%7BG%7D%5E%7B-1%7D%20%26%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%0A%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%20%26%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%20%26%20%5Cmathbf%7Ba%7D%20%5C%5C%0A%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D%20%26%20%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>将 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D" style="display:inline-block;margin: 0;"/> 吸收进入 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> 得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20-%20%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D%5Cmathbf%7BC%7D%5E%7B-1%7D%5Cmathbf%7Ba%7D%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20-%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bll%7D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%20%5Cend%7Barray%7D%5Cright%5D%20%5Cmathbf%7BC%7D%5E%7B-1%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Bll%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20-%20%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7DXC%5E%7B-1%7DX%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5Cmathbf%7BQ%7D%20%20-%20%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7DZC%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%28%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20-%20%5Cmathbf%7BR%5E%7B-1%7DXC%5E%7B-1%7DX%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%20-%5Cmathbf%7BR%5E%7B-1%7DZC%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%29%5Cmathbf%7BQ%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D(%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20-%20%5Cmathbf%7BR%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20)%5Cmathbf%7BQ%7D%20%5Cquad%20%5Cbecause%20%5Cmathbf%7BW%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BZ%7D%20%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BQ%7D%0A%5Cend%7Baligned%7D%0A" /></p><h2 id="第二种计算方法">第二种计算方法</h2>
+<p>我们现在逐个计算  <img src="https://math.now.sh?inline=%5Cmathbf%7BAI%7D" style="display:inline-block;margin: 0;"/> 矩阵的元素  <img src="https://math.now.sh?inline=%5Cmathbf%7BAI%7D_%7Bij%7D%3D%5Cfrac%7B1%7D%7B2%7D%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_j%20%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_i%20%20%5Cmathbf%7BP%20y%7D%3D%5Cfrac%7B1%7D%7B2%7D%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D%5E%7B%5Cprime%7D%20%20%5Cmathbf%7BP%7D%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bi%7D%7D" style="display:inline-block;margin: 0;"/> ，这里我们先忽略 1/2 这个常数项，推导如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D%5E%7B%5Cprime%7D%20%20%5Cmathbf%7BP%7D%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bi%7D%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D%5E%7B%5Cprime%7D%20%20%5Cleft%28%20%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5Cright%29%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bi%7D%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D%5E%7B%5Cprime%7D%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bi%7D%7D%20-%20%20%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D%5E%7B%5Cprime%7D%20%20%20%5Cmathbf%7BR%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bi%7D%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D%5E%7B%5Cprime%7D%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bi%7D%7D%20-%20%20%20%5Cmathbf%7BT%7D%5E%7B%5Cprime%7D%20%20%20%5Cmathbf%7BW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bi%7D%7D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>这里我们设 <img src="https://math.now.sh?inline=%5Cmathbf%7BT%7D%20%3D%20%5Cmathbf%7BC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>这里的第一项容易计算，第二项我们将 <img src="https://math.now.sh?inline=%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D" style="display:inline-block;margin: 0;"/> 替换 <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D" style="display:inline-block;margin: 0;"/> 构建混合模型方程组 <img src="https://math.now.sh?inline=%5Cmathbf%7BCT%3DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D%7D" style="display:inline-block;margin: 0;"/> ，此时 <img src="https://math.now.sh?inline=%5Cmathbf%7BW%5E%7B%5Cprime%7DR%5E%7B-1%7D%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bj%7D%7D%7D" style="display:inline-block;margin: 0;"/> 是右手项，<img src="https://math.now.sh?inline=%5Cmathbf%7BT%7D" style="display:inline-block;margin: 0;"/> 是相应的解。</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>Knight E. Improved iterative schemes for REML estimation of variance parameters in linear mixed models[D]. , 2008.</p>
+</li>
+<li>
+<p>Gilmour A R, Thompson R, Cullis B R. Average information REML: an efficient algorithm for variance parameter estimation in linear mixed models[J]. Biometrics, 1995: 1440-1450.</p>
+</li>
+<li>
+<p>Smith S P, Graser H U. Estimating variance components in a class of mixed models by restricted maximum likelihood[J]. Journal of Dairy Science, 1986, 69(4): 1156-1165.</p>
+</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/REML/" rel="tag">REML</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%96%B9%E5%B7%AE%E7%BB%84%E5%88%86/" rel="tag">方差组分</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/68754596/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">方差组分估计方法四之EM-REML</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2023
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

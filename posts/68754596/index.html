@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    方差组分估计方法四之EM-REML |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-方差组分估计方法四之EM-REML"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  方差组分估计方法四之EM-REML
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/68754596/" class="article-date">
+  <time datetime="2023-06-21T03:02:28.000Z" itemprop="datePublished">2023-06-21</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.7k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">9 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是方差组分估计方法的第四篇博客，介绍 EM-REML 算法。</p>
+<span id="more"></span>
+<h1>混合线性模型的一般式子</h1>
+<p>我们将混合线性模型写为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7By%7D%20%3D%20%5Cmathbf%7BX%7D%5Cboldsymbol%7B%5Cbeta%7D%2B%5Cmathbf%7BZu%7D%2B%5Cmathbf%7Be%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7Bu%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cmathbf%7Be%7D" style="display:inline-block;margin: 0;"/> 的联合分布为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A%5Cmathbf%7Bu%7D%20%5C%5C%0A%5Cmathbf%7Be%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%5Csim%20%5Cmathrm%7BN%7D%5Cleft%28%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%0A%5Cend%7Barray%7D%5Cright%5D%2C%20%5Ctheta%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cmathbf%7BG%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BR%7D%0A%5Cend%7Barray%7D%5Cright%5D%5Cright%29%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D%20%3D%20%5Cmathbf%7BG%7D%28%5Cboldsymbol%7B%5Cgamma%7D%29" style="display:inline-block;margin: 0;"/> ， <img src="https://math.now.sh?inline=%5Cmathbf%7BR%7D%20%3D%20%5Csigma%5E%7B2%7D%20%5Cmathbf%7B%5CSigma%7D" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=%5Cmathbf%7B%5CSigma%7D%20%3D%20%5Cmathbf%7B%5CSigma%7D%28%5Cboldsymbol%7B%5Cphi%7D%29" style="display:inline-block;margin: 0;"/> 。这里我们假定这三个矩阵均为<strong>正定</strong>矩阵。</p>
+<p>这里的 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cgamma%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cphi%7D" style="display:inline-block;margin: 0;"/> 是与随机效应 <img src="https://math.now.sh?inline=%5Cmathbf%7Bu%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cmathbf%7Be%7D" style="display:inline-block;margin: 0;"/> 相关的方差组分的向量，而标量参数  <img src="https://math.now.sh?inline=%5Csigma%5E%7B2%7D" style="display:inline-block;margin: 0;"/>  和 <img src="https://math.now.sh?inline=%5Ctheta" style="display:inline-block;margin: 0;"/> 是与残差和全部方差组分的缩放系数。因此我们需要估计的方差参数为 <img src="https://math.now.sh?inline=%5Ctheta" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Ckappa%7D%20%3D%20%28%5Cboldsymbol%7B%5Cgamma%7D%5E%7B%5Cprime%7D%2C%20%20%5Csigma%5E%7B2%7D%2C%20%5Cboldsymbol%7B%5Cphi%7D%5E%7B%5Cprime%7D%20%29%5E%7B%5Cprime%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>因为 <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D" style="display:inline-block;margin: 0;"/> 的分布为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7By%7D%20%5Csim%20%5Cmathrm%7BN%7D%28%5Cmathbf%7BX%7D%5Cboldsymbol%7B%5Cbeta%7D%2C%20%5Ctheta%5Cmathbf%7BH%7D%29%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BH%7D%20%3D%20%5Cmathbf%7BZGZ%5E%7B%5Cprime%7D%7D%2B%5Cmathbf%7BR%7D" style="display:inline-block;margin: 0;"/> 是一个正定矩阵。</p>
+<p>这里的标量参数 <img src="https://math.now.sh?inline=%5Csigma%5E%7B2%7D" style="display:inline-block;margin: 0;"/>  和  <img src="https://math.now.sh?inline=%5Ctheta" style="display:inline-block;margin: 0;"/>  均是用于缩放的参数，我们发现如果我们同时包含这两个参数，那么这两个参数的值便均无法确定，因为此时 <img src="https://math.now.sh?inline=%5Cmathrm%7BVar%7D%28%5Cmathbf%7Bu%7D%29%20%3D%20%5Ctheta%20%5Cmathbf%7BG%7D(%5Cboldsymbol%7B%5Cgamma%7D)" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=%5Cmathrm%7BVar%7D%28%5Cmathbf%7Be%7D%29%20%3D%20%5Ctheta%20%5Csigma%5E%7B2%7D%20%5Cmathbf%7B%5CSigma%7D(%5Cboldsymbol%7B%5Cphi%7D)" style="display:inline-block;margin: 0;"/>  。实际上我们至少会将其中一个参数设定为 1 。</p>
+<p>按照育种模型的一般思路，这里我将  <img src="https://math.now.sh?inline=%5Csigma%5E%7B2%7D" style="display:inline-block;margin: 0;"/>  和  <img src="https://math.now.sh?inline=%5Ctheta" style="display:inline-block;margin: 0;"/> 均设为 1， 此时 $\mathrm{Var}(\mathbf{y}) = \mathbf{V} =  \mathbf{ZGZ^{\prime}}+\mathbf{R} =  \mathbf{ZG(\boldsymbol{\gamma})Z^{\prime}}+\mathbf{\Sigma}(\boldsymbol{\phi}) $ ，我们需要估计的参数为  <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Ckappa%7D%20%3D%20%28%5Cboldsymbol%7B%5Cgamma%7D%5E%7B%5Cprime%7D%2C%20%5Cboldsymbol%7B%5Cphi%7D%5E%7B%5Cprime%7D%20%29%5E%7B%5Cprime%7D" style="display:inline-block;margin: 0;"/>  。</p>
+<p>假设我们有 <img src="https://math.now.sh?inline=s" style="display:inline-block;margin: 0;"/> 个随机效应，即 <img src="https://math.now.sh?inline=%5Cmathbf%7Bu%7D%20%3D%20%28%5Cmathbf%7Bu%7D_%7B1%7D%5E%7B%5Cprime%7D%2C%20%5Cmathbf%7Bu%7D_%7B2%7D%5E%7B%5Cprime%7D%2C%20%5Ccdots%2C%20%5Cmathbf%7Bu%7D_%7Bs%7D%5E%7B%5Cprime%7D%29%5E%7B%5Cprime%7D" style="display:inline-block;margin: 0;"/> ，因此此时随机效应的协方差矩阵可以写为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BG%7D%20%3D%20%5Coplus_%7Bi%3D1%7D%5E%7Bs%7D%5Cmathbf%7BG%7D_%7Bi%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bccccc%7D%0A%5Cmathbf%7BG%7D_1%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BG%7D_2%20%26%20%5Ccdots%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%20%5Cvdots%20%26%20%5Cvdots%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Cldots%20%26%20%5Cmathbf%7BG%7D_%7Bs-1%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BG%7D_s%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>此时的方差组分 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cgamma%7D" style="display:inline-block;margin: 0;"/> 也可以进行相应的分块，例如 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bi%7D%20%3D%20%5Cmathbf%7BG%7D_%7Bi%7D%28%5Cboldsymbol%7B%5Cgamma%7D_%7Bi%7D%29" style="display:inline-block;margin: 0;"/> ，因此我们有 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cgamma%7D%20%3D%20%28%5Cboldsymbol%7B%5Cgamma%7D_%7B1%7D%5E%7B%5Cprime%7D%2C%20%5Cboldsymbol%7B%5Cgamma%7D_%7B2%7D%5E%7B%5Cprime%7D%2C%20%5Ccdots%2C%20%5Cboldsymbol%7B%5Cgamma%7D_%7Bs%7D%5E%7B%5Cprime%7D%29%5E%7B%5Cprime%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>但是对于残差，我们通常还是认为所有数据来自与一个数据集，即残差是均质的，其协方差矩阵不用分块。</p>
+<h1>推导 C 逆矩阵</h1>
+<p>假设 <img src="https://math.now.sh?inline=%5Cmathbf%7BX%7D" style="display:inline-block;margin: 0;"/> 矩阵满秩，则混合线性模型的系数矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D" style="display:inline-block;margin: 0;"/> 可逆。</p>
+<p>我们将原始的系数矩阵分块为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BC%7D%20%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D_%7B11%7D%20%26%20%5Cmathbf%7BC%7D_%7B12%7D%20%5C%5C%0A%5Cmathbf%7BC%7D_%7B21%7D%20%26%20%5Cmathbf%7BC%7D_%7B22%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BX%5E%7B%5Cprime%7DR%5E%7B-1%7DX%7D%20%26%20%5Cmathbf%7BX%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%7D%20%5C%5C%0A%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DX%7D%20%26%20%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>根据舒尔补公式，系数矩阵逆矩阵可以写为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BC%7D%5E%7B-1%7D%20%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%5E%7B11%7D%20%26%20%5Cmathbf%7BC%7D%5E%7B12%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7B21%7D%20%26%20%5Cmathbf%7BC%7D%5E%7B22%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%28%5Cmathbf%7BC%7D_%7B11%7D%20%20-%20%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D%29%5E%7B-1%7D%20%26%20-(%5Cmathbf%7BC%7D_%7B11%7D%20%20-%20%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D)%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%20%5C%5C%0A-%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D(%5Cmathbf%7BC%7D_%7B11%7D%20%20-%20%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D)%5E%7B-1%7D%20%26%20%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%2B%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D(%5Cmathbf%7BC%7D_%7B11%7D%20%20-%20%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D)%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%5E%7B11%7D%20%26%20-%5Cmathbf%7BC%7D%5E%7B11%7D%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%20%5C%5C%0A-%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D%5Cmathbf%7BC%7D%5E%7B11%7D%20%26%20%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%2B%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D%5Cmathbf%7BC%7D%5E%7B11%7D%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>在之前的推导中，我们已经得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BC%5E%7B11%7D%7D%20%3D%20%28%5Cmathbf%7BC%7D_%7B11%7D%20%20-%20%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D%29%5E%7B-1%7D%20%3D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%0A" /></p><p>根据附录1，我们有 <img src="https://math.now.sh?inline=%5Cmathbf%7B%28Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%29%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%3D%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D(R%2BZGZ%5E%7B%5Cprime%7D)%5E%7B-1%7D%7D%3D%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7DV%5E%7B-1%7D%7D" style="display:inline-block;margin: 0;"/> ，因此其它分块子矩阵推导如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BC%7D%5E%7B12%7D%20%26%3D%20-%5Cmathbf%7BC%7D%5E%7B11%7D%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%20%20%5C%5C%0A%26%3D%20-%28%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D%29%5E%7B-1%7D%20%20%5Cmathbf%7BX%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%7D(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D%20%5C%5C%0A%26%3D%20-(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cmathbf%7BV%5E%7B-1%7DZG%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7B21%7D%20%26%3D%20(%5Cmathbf%7BC%7D%5E%7B12%7D)%5E%7B%5Cprime%7D%20%5C%5C%0A%26%3D%20-%5Cmathbf%7BGZ%5E%7B%5Cprime%7DV%5E%7B-1%7D%7D%20%5Cmathbf%7BX%7D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7B22%7D%20%26%3D%20%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%2B%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%5Cmathbf%7BC%7D_%7B21%7D%5Cmathbf%7BC%7D%5E%7B11%7D%5Cmathbf%7BC%7D_%7B12%7D%5Cmathbf%7BC%7D_%7B22%7D%5E%7B-1%7D%20%5C%5C%0A%26%3D%20(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D%2B(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%5Cmathbf%7BX%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%7D%20(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D%20%5C%5C%0A%26%3D(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D%2B%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7DV%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%5Cmathbf%7BX%5E%7B%5Cprime%7D%7D%20%5Cmathbf%7BV%5E%7B-1%7DZG%7D%20%5C%5C%0A%26%3D(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D%2B%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%7D%5Cmathbf%7B(V%5E%7B-1%7D-P)%7D%20%5Cmathbf%7BZG%7D%20%5Cquad%20%5Cbecause%20%5Cmathbf%7BP%7D%3D%5Cmathbf%7BV%7D%5E%7B-1%7D-%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5Cleft(%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5Cright)%5E%7B-%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5C%5C%0A%26%3D(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D%2B%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%7D%5Cmathbf%7BV%5E%7B-1%7D%7D%20%5Cmathbf%7BZG%7D-%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%7D%5Cmathbf%7BP%7D%20%5Cmathbf%7BZG%7D%20%5C%5C%0A%26%3D(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D%2B%20%5Cmathbf%7B(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D)%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%20%5Cmathbf%7BZG%7D-%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%7D%5Cmathbf%7BP%7D%20%5Cmathbf%7BZG%7D%20%5C%5C%0A%26%3D(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D(%5Cmathbf%7BI%7D%2B%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%20%5Cmathbf%7BZG%7D)-%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%7D%5Cmathbf%7BP%7D%20%5Cmathbf%7BZG%7D%20%5C%5C%0A%26%3D(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D(%5Cmathbf%7BG%7D%5E%7B-1%7D%2B%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%20%5Cmathbf%7BZ%7D)%5Cmathbf%7BG%7D-%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%7D%5Cmathbf%7BP%7D%20%5Cmathbf%7BZG%7D%20%5C%5C%0A%26%3D%5Cmathbf%7BG%7D-%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%7D%5Cmathbf%7BP%7D%20%5Cmathbf%7BZG%7D%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BC%7D%5E%7B-1%7D%20%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%5E%7B11%7D%20%26%20%5Cmathbf%7BC%7D%5E%7B12%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7B21%7D%20%26%20%5Cmathbf%7BC%7D%5E%7B22%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%20%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%28%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D%29%5E%7B-1%7D%20%26%20%20-(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cmathbf%7BV%5E%7B-1%7DZG%7D%20%5C%5C%0A-%5Cmathbf%7BGZ%5E%7B%5Cprime%7DV%5E%7B-1%7D%7D%20%5Cmathbf%7BX%7D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%26%20%5Cmathbf%7BG%7D-%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%7D%5Cmathbf%7BP%7D%20%5Cmathbf%7BZG%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><h1>推导 P 矩阵</h1>
+<p>之前我们得到了两个 P 矩阵的式子，如下（<img src="https://math.now.sh?inline=%5Cmathbf%7BK%7D" style="display:inline-block;margin: 0;"/> 为满足 <img src="https://math.now.sh?inline=%5Cmathbf%7BK'X%7D%3D0" style="display:inline-block;margin: 0;"/> 的一个矩阵）</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BP%7D%3D%5Cmathbf%7BV%7D%5E%7B-1%7D-%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5Cleft%28%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5Cright%29%5E%7B-%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%5E%7B-1%7D%3D%5Cmathbf%7BK%7D%5Cleft(%5Cmathbf%7BK%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%20%5Cmathbf%7BK%7D%5Cright)%5E%7B-1%7D%20%5Cmathbf%7BK%7D%5E%7B%5Cprime%7D%0A" /></p><p>这里我们推导第三个式子</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BP%7D%20%3D%20%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BW%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BZ%7D%20%5Cend%7Barray%7D%5Cright%5D" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D" style="display:inline-block;margin: 0;"/> 为系数矩阵。</p>
+<h2 id="证明过程">证明过程</h2>
+<p>根据下面的附录1，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BR%5E%7B-1%7DZ%28Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%29%5E%7B-1%7D%7D%20%3D%20%5Cmathbf%7B(R%2BZGZ%5E%7B%5Cprime%7D)%5E%7B-1%7DZG%7D%0A" /></p><p>我们可以将其写为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BR%5E%7B-1%7DZM%7D%20%3D%20%5Cmathbf%7BV%5E%7B-1%7DZG%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D%3D%5Cmathbf%7B%28Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%29%5E%7B-1%7D%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>我们也可以用 <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D" style="display:inline-block;margin: 0;"/> 来表示 <img src="https://math.now.sh?inline=%5Cmathbf%7BV%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/></p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BV%5E%7B-1%7D%7D%20%20%26%3D%20%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DZ%28Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%29%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5C%5C%0A%26%3D%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DZMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>我们同样可以用  <img src="https://math.now.sh?inline=%5Cmathbf%7BM%7D" style="display:inline-block;margin: 0;"/> 来表示 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 矩阵的元素</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BC%7D%5E%7B12%7D%20%26%3D%20-%28%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D%29%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cmathbf%7BV%5E%7B-1%7DZG%7D%20%5C%5C%0A%26%3D%20-(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cmathbf%7BR%5E%7B-1%7DZM%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7B21%7D%20%26%3D%20%20-%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7B22%7D%20%26%3D(%5Cmathbf%7BZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%7D)%5E%7B-1%7D%2B%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7DV%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%5Cmathbf%7BX%5E%7B%5Cprime%7D%7D%20%5Cmathbf%7BV%5E%7B-1%7DZG%7D%20%5C%5C%0A%26%3D%5Cmathbf%7BM%7D%2B%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%5Cmathbf%7BX%5E%7B%5Cprime%7D%7D%20%5Cmathbf%7BR%5E%7B-1%7DZM%7D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>因此系数矩阵逆矩阵可以表示为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BC%7D%5E%7B-1%7D%20%0A%20%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%28%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D%29%5E%7B-1%7D%20%26%20%20-(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cmathbf%7BR%5E%7B-1%7DZM%7D%20%5C%5C%0A%20-%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%26%20%5Cmathbf%7BM%7D%2B%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%5Cmathbf%7BX%5E%7B%5Cprime%7D%7D%20%5Cmathbf%7BR%5E%7B-1%7DZM%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>因此，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%20%7D%0A%20%26%3D%20%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BZ%7D%20%5Cend%7Barray%7D%5Cright%5D%0A%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%28%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D%29%5E%7B-1%7D%20%26%20%20-(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cmathbf%7BR%5E%7B-1%7DZM%7D%20%5C%5C%0A%20-%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%26%20%5Cmathbf%7BM%7D%2B%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%5Cmathbf%7BX%5E%7B%5Cprime%7D%7D%20%5Cmathbf%7BR%5E%7B-1%7DZM%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%0A%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5C%5C%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%20%26%3D%20%20%5Cmathbf%7BX%7D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20-%20%5Cmathbf%7BX%7D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cmathbf%7BR%5E%7B-1%7DZM%7D%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20-%20%5Cmathbf%7BZ%7D%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5C%5C%0A%20%26%20%5Cquad%20%2B%20%5Cmathbf%7BZ%7D%5Cmathbf%7BM%7D%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BZ%7D%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%5Cmathbf%7BX%5E%7B%5Cprime%7D%7D%20%5Cmathbf%7BR%5E%7B-1%7DZM%7D%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>因此</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5C%5C%0A%26%3D%20%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20-%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BX%7D%20%28%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D%29%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%2B%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BX%7D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cmathbf%7BR%5E%7B-1%7DZM%7D%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%2B%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BZ%7D%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5C%5C%0A%20%26%20%5Cquad%20-%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BZ%7D%5Cmathbf%7BM%7D%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20-%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BZ%7D%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5Cmathbf%7BX%7D(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%5Cmathbf%7BX%5E%7B%5Cprime%7D%7D%20%5Cmathbf%7BR%5E%7B-1%7DZM%7D%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5C%5C%0A%20%26%3D%20%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20-%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BZ%7D%5Cmathbf%7BM%7D%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20-%20(%5Cmathbf%7BR%5E%7B-1%7D%7D-%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BZ%7D%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20)%20%5Cmathbf%7BX%7D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%5C%5C%0A%20%26%2B%20(%5Cmathbf%7BR%5E%7B-1%7D%7D-%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BZ%7D%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D)%20%5Cmathbf%7BX%7D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cmathbf%7BR%5E%7B-1%7DZM%7D%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%0A%5C%5C%20%0A%0A%20%20%26%3D%20%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20-%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BZ%7D%5Cmathbf%7BM%7D%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5C%5C%0A%20%26%20-%20(%5Cmathbf%7BR%5E%7B-1%7D%7D-%5Cmathbf%7BR%5E%7B-1%7D%7D%20%5Cmathbf%7BZ%7D%20%5Cmathbf%7BMZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20)%20%5Cmathbf%7BX%7D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20(%5Cmathbf%7BR%5E%7B-1%7D%7D%20-%5Cmathbf%7BR%5E%7B-1%7DZM%7D%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%20)%5C%5C%0A%20%26%3D%20%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%0A%20%20-%20%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%20%5Cmathbf%7BX%7D%20(%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D)%5E%7B-1%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BP%7D%0A%20%0A%5Cend%7Baligned%7D%0A" /></p><p>证明完毕</p>
+<h1>EM-REML</h1>
+<p>在之前的DF-REML 推导中，我们得到 REML 的一个似然函数的式子如下：</p>
+<p style=""><img src="https://math.now.sh?from=l%28%5Cmathbf%7By%7D_%7B2%7D%29%20%0A%3D%20-%5Cfrac%7B1%7D%7B2%7D%5Cleft(%20%5Cln%20%7C%5Cmathbf%7BV%7D%7C%20%2B%20%5Cln%20%7C%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D%7C%2B%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%5Cright)%0A" /></p><p>对于某个参数 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Ckappa%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 进行求导，如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AU%28%5Ckappa_%7Bi%7D%29%20%26%3D%20%5Cfrac%7B%5Cpartial%7Bl_%7BR%7D(%5Cmathbf%7By%7D_%7B2%7D)%7D%7D%7B%5Cpartial%7B%5Ckappa_%7Bi%7D%7D%7D%20%5C%5C%0A%26%3D%20-%5Cfrac%7B1%7D%7B2%7D%5Cleft(%20%5Cfrac%7B%5Cpartial%5Cln%20%7C%5Cmathbf%7BV%7D%7C%7D%7B%5Cpartial%7B%5Ckappa_%7Bi%7D%7D%7D%20%2B%20%5Cfrac%7B%5Cpartial%5Cln%20%7C%5Cmathbf%7BX%5E%7B%5Cprime%7DV%5E%7B-1%7DX%7D%7C%7D%7B%5Cpartial%7B%5Ckappa_%7Bi%7D%7D%7D%2B%5Cfrac%7B%5Cpartial%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%7D%7B%5Cpartial%7B%5Ckappa_%7Bi%7D%7D%7D%20%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>我们定义 <img src="https://math.now.sh?inline=%5Cdot%7B%5Cmathbf%7BV%7D%7D_%7Bi%7D%20%3D%20%5Cfrac%7B%5Cpartial%20%5Cmathbf%7BV%7D%7D%7B%5Cpartial%20%5Ckappa_%7Bi%7D%7D" style="display:inline-block;margin: 0;"/> ，并且使用下面的求导公式</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cfrac%7B%5Cpartial%20%5Clog%20%7C%5Cmathbf%7BV%7D%7C%7D%7B%5Cpartial%20%5Ckappa_i%7D%20%26%20%3D%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_i%5Cright%29%20%5C%5C%0A%5Cfrac%7B%5Cpartial%20%5Cmathbf%7BV%7D%5E%7B-1%7D%7D%7B%5Cpartial%20%5Ckappa_i%7D%20%26%20%3D-%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_i%20%5Cmathbf%7BV%7D%5E%7B-1%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%20%5Cfrac%7B%5Cpartial%20%5Clog%20%7C%5Cmathbf%7BV%7D%7C%7D%7B%5Cpartial%20%5Ckappa_i%7D%2B%5Cfrac%7B%5Cpartial%20%5Clog%20%5Cleft%7C%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright%7C%7D%7B%5Cpartial%20%5Ckappa_i%7D%20%5C%5C%0A%26%20%3D%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_i%5Cright%29-%5Coperatorname%7Btr%7D%5Cleft(%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_i%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%20%5C%5C%0A%26%20%3D%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_i-%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BV%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_i%5Cright)%20%5C%5C%0A%26%20%3D%5Coperatorname%7Btr%7D%5Cleft(%5Cboldsymbol%7BP%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_i%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7By%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BP%7D%20%5Cboldsymbol%7By%7D%7D%7B%5Cpartial%20%5Ckappa_i%7D%20%26%20%3D%5Cboldsymbol%7By%7D%5E%7B%5Cprime%7D%20%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BP%7D%7D%7B%5Cpartial%20%5Ckappa_i%7D%20%5Cboldsymbol%7By%7D%20%5C%5C%0A%26%20%3D-%5Cboldsymbol%7By%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BP%7D%20%5Cdot%7B%5Cboldsymbol%7BV%7D%7D_i%20%5Cboldsymbol%7BP%7D%20%5Cboldsymbol%7By%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>因此我们得到 REML score 式子：</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Ckappa_%7Bi%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_%7Bi%7D%5Cright)-%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_%7Bi%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%5CBig)%0A" /></p><p>下面我们要考虑 REML score 对于 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cgamma%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cphi%7D" style="display:inline-block;margin: 0;"/> 的具体式子。</p>
+<p>对于一个与 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 相关的方差组分 <img src="https://math.now.sh?inline=%5Cgamma_%7Bij%7D" style="display:inline-block;margin: 0;"/> ，<img src="https://math.now.sh?inline=%5Cmathbf%7BV%7D_%7Bij%7D" style="display:inline-block;margin: 0;"/> 推导如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cboldsymbol%7BV%7D_%7Bi%20j%7D%20%26%20%3D%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BV%7D%7D%7B%5Cpartial%20%5Cgamma_%7Bi%20j%7D%7D%20%5C%5C%0A%26%20%3D%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BZ%20G%20Z%7D%5E%7B%5Cprime%7D%7D%7B%5Cpartial%20%5Cgamma_%7Bi%20j%7D%7D%20%5C%5C%0A%26%20%3D%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20%5Cgamma_%7Bi%20j%7D%7D%5Cleft%28%5Cboldsymbol%7BZ%7D_1%20%5Cboldsymbol%7BG%7D_1%20%5Cboldsymbol%7BZ%7D_1%5E%7B%5Cprime%7D%2B%5Cldots%2B%5Cboldsymbol%7BZ%7D_i%20%5Cboldsymbol%7BG%7D_i%20%5Cboldsymbol%7BZ%7D_i%5E%7B%5Cprime%7D%2B%5Cldots%20%5Cboldsymbol%7BZ%7D_s%20%5Cboldsymbol%7BG%7D_s%20%5Cboldsymbol%7BZ%7D_s%5E%7B%5Cprime%7D%5Cright%29%20%5C%5C%0A%26%20%3D%5Cboldsymbol%7BZ%7D_i%20%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BG%7D_i%7D%7B%5Cpartial%20%5Cgamma_%7Bi%20j%7D%7D%20%5Cboldsymbol%7BZ%7D_i%5E%7B%5Cprime%7D%20%5C%5C%0A%26%20%3D%5Cboldsymbol%7BZ%7D_i%20%5Cdot%7B%5Cboldsymbol%7BG%7D%7D_%7Bi%20j%7D%20%5Cboldsymbol%7BZ%7D_i%5E%7B%5Cprime%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%3D%20%5Cfrac%7B%5Cpartial%20%5Cmathbf%7BG%7D_i%7D%7B%5Cpartial%20%5Cgamma_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>如果模型中只有一个随机组分，则有：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cboldsymbol%7BV%7D_%7Bi%7D%20%26%20%3D%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BV%7D%7D%7B%5Cpartial%20%5Cgamma_%7Bi%7D%7D%20%5C%5C%0A%0A%26%20%3D%5Cboldsymbol%7BZ%7D%20%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BG%7D_i%7D%7B%5Cpartial%20%5Cgamma_%7Bi%7D%7D%20%5Cboldsymbol%7BZ%7D%5E%7B%5Cprime%7D%20%5C%5C%0A%26%20%3D%5Cboldsymbol%7BZ%7D%20%5Cdot%7B%5Cboldsymbol%7BG%7D%7D_%7Bi%7D%20%5Cboldsymbol%7BZ%7D%5E%7B%5Cprime%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>对于残差的方差组分 <img src="https://math.now.sh?inline=%5Cphi_%7Bi%7D" style="display:inline-block;margin: 0;"/> 则有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BV%7D%7D%7B%5Cpartial%20%5Cphi_%7Bi%7D%7D%20%5C%5C%0A%26%20%3D%20%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7B%5CSigma%7D%7D%7B%5Cpartial%20%5Cphi_%7Bi%7D%7D%20%5C%5C%0A%26%20%3D%20%5Cdot%7B%5Cboldsymbol%7B%5CSigma%7D%7D_%7Bi%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>因此我们得到对于 <img src="https://math.now.sh?inline=%5Cgamma_%7Bij%7D" style="display:inline-block;margin: 0;"/> 的 REML score 式子为：</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cgamma_%7Bij%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cmathbf%7BZ%7D_i%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7BZ%7D_i%5E%7B%5Cprime%7D%5Cright)-%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BZ%7D_i%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7BZ%7D_i%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%5CBig)%0A" /></p><p>我们定义 <img src="https://math.now.sh?inline=%5Cmathbf%7BS%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 是一个 <img src="https://math.now.sh?inline=%28p%2Bq%29%20%5Ctimes%20q_%7Bi%7D" style="display:inline-block;margin: 0;"/> 的矩阵（<img src="https://math.now.sh?inline=p%2Cq" style="display:inline-block;margin: 0;"/> 为所有固定因子和所有随机因子的水平数目，<img src="https://math.now.sh?inline=q_%7Bi%7D" style="display:inline-block;margin: 0;"/> 是第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 个随机因子的水平数目 ），并且满足 <img src="https://math.now.sh?inline=%5Cmathbf%7BW%7D%5Cmathbf%7BS%7D_%7Bi%7D%3D%5Cmathbf%7BZ%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，因此  <img src="https://math.now.sh?inline=%5Cmathbf%7BS%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 中只有对应 <img src="https://math.now.sh?inline=%5Cmathbf%7BZ%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 在 <img src="https://math.now.sh?inline=%5Cmathbf%7BW%7D" style="display:inline-block;margin: 0;"/> 中的位置存在一个单位矩阵，其它元素全是 0 （因为矩阵向量乘积可以理解为矩阵的列的线性组合，因此   <img src="https://math.now.sh?inline=%5Cmathbf%7BS%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 每一列只有一个对应 <img src="https://math.now.sh?inline=%5Cmathbf%7BZ%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 的列号的元素为1，其它为0 ）。</p>
+<p>我们将系数矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D" style="display:inline-block;margin: 0;"/> 写为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BC%7D%20%3D%20%5Cmathbf%7BW%5E%7B%5Cprime%7DR%5E%7B-1%7DW%7D%20%2B%20%5Cmathbf%7BG%7D%5E%7B*%7D%0A" /></p><p>其中</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BG%7D%5E%7B*%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>我们对上面式子进一步推导，得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Coperatorname%7Btr%7D%5Cleft%28%20%5Cmathbf%7BPZ_%7Bi%7D%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7DZ_%7Bi%7D%5E%7B%5Cprime%7D%7D%5Cright%29%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DZ_%7Bi%7D%5E%7B%5Cprime%7DPZ_%7Bi%7D%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DS_%7Bi%7D%5E%7B%5Cprime%7DW%5E%7B%5Cprime%7DPWS_%7Bi%7D%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DS_%7Bi%7D%5E%7B%5Cprime%7DW%5E%7B%5Cprime%7D(R%5E%7B-1%7D-R%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D)WS_%7Bi%7D%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DS_%7Bi%7D%5E%7B%5Cprime%7D(W%5E%7B%5Cprime%7DR%5E%7B-1%7DW-W%5E%7B%5Cprime%7DR%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7DW)S_%7Bi%7D%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DS_%7Bi%7D%5E%7B%5Cprime%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7DWC%5E%7B-1%7D(C-W%5E%7B%5Cprime%7DR%5E%7B-1%7DW)S_%7Bi%7D%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DS_%7Bi%7D%5E%7B%5Cprime%7D(C-G%5E%7B*%7D)C%5E%7B-1%7DG%5E%7B*%7DS_%7Bi%7D%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DS_%7Bi%7D%5E%7B%5Cprime%7DG%5E%7B*%7DS_%7Bi%7D%7D%5Cright)%20-%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DS_%7Bi%7D%5E%7B%5Cprime%7DG%5E%7B*%7DC%5E%7B-1%7DG%5E%7B*%7DS_%7Bi%7D%7D%5Cright)%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%5E%7B*%7DC%5E%7B-1%7DG%5E%7B*%7D%7D" style="display:inline-block;margin: 0;"/> 可以写为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BG%5E%7B*%7DC%5E%7B-1%7DG%5E%7B*%7D%7D%20%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%5E%7BXX%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BXZ%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZX%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>这里 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D%5E%7BZZ%7D" style="display:inline-block;margin: 0;"/> 就是<img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 中对应着随机效应的部分，由于我们可以有多个随机效应 ，因此 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D%5E%7BZZ%7D" style="display:inline-block;margin: 0;"/> 可以进一步分块为（其中 <img src="https://math.now.sh?inline=s" style="display:inline-block;margin: 0;"/> 为随机效应数目）：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%5E%7BZ_%7B1%7DZ_%7B1%7D%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZ_%7B1%7DZ_%7B2%7D%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BC%7D%5E%7BZ_%7B1%7DZ_%7Bs%7D%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZ_%7B2%7DZ_%7B1%7D%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZ_%7B2%7DZ_%7B2%7D%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BC%7D%5E%7BZ_%7B2%7DZ_%7Bs%7D%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%5Cvdots%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZ_%7Bs%7DZ_%7B1%7D%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZ_%7Bs%7DZ_%7B2%7D%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BC%7D%5E%7BZ_%7Bs%7DZ_%7Bs%7D%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D%5E%7BZ_%7Bi%7DZ_%7Bi%7D%7D" style="display:inline-block;margin: 0;"/> 就是对应着第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 个随机效应 <img src="https://math.now.sh?inline=%5Cmathbf%7Bu%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 的部分。</p>
+<p>同样的道理，我们可以将 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D" style="display:inline-block;margin: 0;"/> 矩阵分块为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BG%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BG%7D_%7B1%7D%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BG%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%5Cvdots%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BG%7D_%7Bs%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BG%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D%5Cmathbf%7BG%7D%5E%7B-1%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BG%7D_%7B1%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7B1%7DZ_%7B1%7D%7D%5Cmathbf%7BG%7D_%7B1%7D%5E%7B-1%7D%20%26%20%5Cmathbf%7BG%7D_%7B1%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7B1%7DZ_%7B2%7D%7D%5Cmathbf%7BG%7D_%7B2%7D%5E%7B-1%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BG%7D_%7B1%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7B1%7DZ_%7Bs%7D%7D%5Cmathbf%7BG%7D_%7Bs%7D%5E%7B-1%7D%20%5C%5C%0A%5Cmathbf%7BG%7D_%7B2%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7B2%7DZ_%7B1%7D%7D%5Cmathbf%7BG%7D_%7B1%7D%5E%7B-1%7D%20%26%20%5Cmathbf%7BG%7D_%7B2%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7B2%7DZ_%7B2%7D%7D%5Cmathbf%7BG%7D_%7B2%7D%5E%7B-1%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BG%7D_%7B2%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7B2%7DZ_%7Bs%7D%7D%5Cmathbf%7BG%7D_%7Bs%7D%5E%7B-1%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%5Cvdots%20%5C%5C%0A%5Cmathbf%7BG%7D_%7Bs%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7Bs%7DZ_%7B1%7D%7D%5Cmathbf%7BG%7D_%7B1%7D%5E%7B-1%7D%20%26%20%5Cmathbf%7BG%7D_%7Bs%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7Bs%7DZ_%7B2%7D%7D%5Cmathbf%7BG%7D_%7B2%7D%5E%7B-1%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BG%7D_%7Bs%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7Bs%7DZ_%7Bs%7D%7D%5Cmathbf%7BG%7D_%7Bs%7D%5E%7B-1%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>因为   <img src="https://math.now.sh?inline=%5Cmathbf%7BS%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 中只有对应 <img src="https://math.now.sh?inline=%5Cmathbf%7BZ%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 在 <img src="https://math.now.sh?inline=%5Cmathbf%7BW%7D" style="display:inline-block;margin: 0;"/> 中的位置存在一个单位矩阵，其它元素全是 0 ，因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BS%7D_%7Bi%7D%5E%7B%5Cprime%7D%5Cmathbf%7BG%5E%7B*%7DC%5E%7B-1%7DG%5E%7B*%7D%7D%5Cmathbf%7BS%7D_%7Bi%7D%20%3D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7Bi%7DZ_%7Bi%7D%7D%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%0A" /></p><p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BS%7D_%7Bi%7D%5E%7B%5Cprime%7D%5Cmathbf%7BG%7D%5E%7B*%7D%5Cmathbf%7BS%7D_%7Bi%7D%20%3D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%0A" /></p><p>因此，<img src="https://math.now.sh?inline=%5Coperatorname%7Btr%7D%5Cleft%28%20%5Cmathbf%7BPZ_%7Bi%7D%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7DZ_%7Bi%7D%5E%7B%5Cprime%7D%7D%5Cright%29" style="display:inline-block;margin: 0;"/> 可以进一步推导得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Coperatorname%7Btr%7D%5Cleft%28%20%5Cmathbf%7BPZ_%7Bi%7D%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7DZ_%7Bi%7D%5E%7B%5Cprime%7D%7D%5Cright%29%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DS_%7Bi%7D%5E%7B%5Cprime%7DG%5E%7B*%7DS_%7Bi%7D%7D%5Cright)%20-%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DS_%7Bi%7D%5E%7B%5Cprime%7DG%5E%7B*%7DC%5E%7B-1%7DG%5E%7B*%7DS_%7Bi%7D%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DG%5E%7B-1%7D_%7Bi%7D%7D%5Cright)%20-%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7Bi%7DZ_%7Bi%7D%7D%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7DG%5E%7B-1%7D_%7Bi%7D%7D%5Cright)%20-%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZ_%7Bi%7DZ_%7Bi%7D%7D%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%5Cright)%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>对第二个式子推导前，我们先用 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 得到随机效应 <img src="https://math.now.sh?inline=%5Cmathbf%7Bu%7D" style="display:inline-block;margin: 0;"/> 的式子，根据BLUP方法，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bu%7D%3D%5Cmathbf%7BGZ%5E%7B%5Cprime%7DV%5E%7B-1%7D%28y-X%5Cboldsymbol%7B%5Cbeta%7D%29%7D%0A" /></p><p>同时我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BPy%7D%20%3D%20%5Cmathbf%7BV%5E%7B-1%7D%28y-X%5Cboldsymbol%7B%5Cbeta%7D%29%7D%0A" /></p><p>因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7Bu%7D%26%3D%5Cmathbf%7BGZ%5E%7B%5Cprime%7DPy%7D%20%5C%5C%0A%26%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BG%7D_%7B1%7D%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BG%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%5Cvdots%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BG%7D_%7Bs%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BZ%7D_%7B1%7D%5E%7B%5Cprime%7D%20%20%5C%5C%0A%5Cmathbf%7BZ%7D_%7B2%7D%5E%7B%5Cprime%7D%20%20%5C%5C%0A%5Cvdots%20%5C%5C%0A%5Cmathbf%7BZ%7D_%7Bs%7D%5E%7B%5Cprime%7D%20%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BG%7D_%7B1%7D%5Cmathbf%7BZ%7D_%7B1%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%5Cmathbf%7BG%7D_%7B2%7D%5Cmathbf%7BZ%7D_%7B2%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%5Cvdots%20%5C%5C%0A%5Cmathbf%7BG%7D_%7Bs%7D%5Cmathbf%7BZ%7D_%7Bs%7D%5E%7B%5Cprime%7D%5Cmathbf%7BPy%7D%20%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>我们同时得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bu%7D_%7Bi%7D%20%3D%20%5Cmathbf%7BG%7D_%7Bi%7D%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%0A" /></p><p>因此，对右手项推导得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%20%20%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7Bu%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7Bu%7D_%7Bi%7D%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>因此，我们得到对于 <img src="https://math.now.sh?inline=%5Cgamma_%7Bij%7D" style="display:inline-block;margin: 0;"/> 的 REML score 式子可以写为：</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cgamma_%7Bij%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7BG%5E%7B-1%7D_%7Bi%7D%5Cdot%7BG%7D_%7Bi%20j%7D%7D%5Cright)%20-%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7BC%7D%5E%7BZ_%7Bi%7DZ_%7Bi%7D%7D%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%5Cright)-%5Cmathbf%7Bu%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7Bu%7D_%7Bi%7D%20%5CBig)%0A" /></p><p>如果模型中只有一个随机效应，则有</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cgamma_%7Bi%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7BG%5E%7B-1%7D%5Cdot%7BG%7D_%7Bi%20%7D%7D%5Cright)%20-%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7BC%7D%5E%7BZZ%7D%5Cmathbf%7BG%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%7D%7D%5Cmathbf%7BG%7D%5E%7B-1%7D%5Cright)-%5Cmathbf%7Bu%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%7D%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5Cmathbf%7Bu%7D%20%5CBig)%0A" /></p><p>对于残差的方差组分 <img src="https://math.now.sh?inline=%5Cphi_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，我们将 $\dot{\mathbf{V}}<em>{i} = \dot{\mathbf{\Sigma}}</em>{i} $  代入 <img src="https://math.now.sh?inline=U%28%5Ckappa_%7Bi%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_%7Bi%7D%5Cright)-%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cdot%7B%5Cmathbf%7BV%7D%7D_%7Bi%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%5CBig)" style="display:inline-block;margin: 0;"/> 得到</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cphi_%7Bi%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BP%7D%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%5Cright)-%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%5CBig)%0A" /></p><p>我们对其进行推导得到：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BP%7D%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%5Cright%29%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%20%5Cleft(%20%5Cleft(%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5Cright)%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%20%5Cleft(%20%5Cleft(%5Cmathbf%7B%5CSigma%5E%7B-1%7D-%5CSigma%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%5CSigma%5E%7B-1%7D%7D%20%5Cright)%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%20%20%5Cleft(%5Cmathbf%7B%5CSigma%5E%7B-1%7D%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D-%5CSigma%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%5CSigma%5E%7B-1%7D%7D%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%20%5Cright)%20%20%5C%5C%0A%26%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>对于第二个式子，首先我们推导 <img src="https://math.now.sh?inline=%5Cmathbf%7BPy%7D%3D%5Cmathbf%7BR%5E%7B-1%7De%7D" style="display:inline-block;margin: 0;"/> ，如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BV%5E%7B-1%7D%7D%28%5Cmathbf%7By%7D-%5Cmathbf%7BX%7D%5Cboldsymbol%7B%5Cbeta%7D%29%20%5C%5C%0A%26%3D%20%5Cleft(%20%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DZ%5Cleft(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%5Cright)%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5Cright)(%5Cmathbf%7By%7D-%5Cmathbf%7BX%7D%5Cboldsymbol%7B%5Cbeta%7D)%20%5C%5C%0A%26%3D%20%5Cmathbf%7BR%5E%7B-1%7D%7D(%5Cmathbf%7By%7D-%5Cmathbf%7BX%7D%5Cboldsymbol%7B%5Cbeta%7D)-%20%5Cmathbf%7BR%5E%7B-1%7DZ%5Cleft(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%5Cright)%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D(%5Cmathbf%7By%7D-%5Cmathbf%7BX%7D%5Cboldsymbol%7B%5Cbeta%7D)%20%5C%5C%0A%26%3D%20%5Cmathbf%7BR%5E%7B-1%7D%7D(%5Cmathbf%7By%7D-%5Cmathbf%7BX%7D%5Cboldsymbol%7B%5Cbeta%7D)-%20%5Cmathbf%7BR%5E%7B-1%7DZ%7D%5Cmathbf%7Bu%7D%20%5Cquad%20%5Cbecause%20%5Cmathbf%7Bu%7D%20%3D%5Cleft(%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%2B%5Cmathbf%7BG%7D%5E%7B-1%7D%5Cright)%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D(%5Cmathbf%7By%7D-%5Cmathbf%7BX%7D%20%5Cboldsymbol%7B%5Cbeta%7D)%20%20%5C%5C%0A%26%3D%20%5Cmathbf%7BR%5E%7B-1%7D%7D(%5Cmathbf%7By%7D-%5Cmathbf%7BX%7D%5Cboldsymbol%7B%5Cbeta%7D%20-%5Cmathbf%7BZ%7D%5Cmathbf%7Bu%7D)%20%5C%5C%0A%26%3D%20%5Cmathbf%7BR%5E%7B-1%7D%7D%5Cmathbf%7Be%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7B%5CSigma%5E%7B-1%7D%7D%5Cmathbf%7Be%7D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%0A%3D%20%5Cmathbf%7Be%7D%5E%7B%5Cprime%7D%5Cmathbf%7B%5CSigma%5E%7B-1%7D%7D%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%5Cmathbf%7B%5CSigma%5E%7B-1%7D%7D%5Cmathbf%7Be%7D%0A" /></p><p>因此我们得到关于 <img src="https://math.now.sh?inline=%5Cphi_%7Bi%7D" style="display:inline-block;margin: 0;"/> 的 REML score 式子如下</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cphi_%7Bi%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20%5Coperatorname%7Btr%7D%20%20%5Cleft(%5Cmathbf%7B%5CSigma%5E%7B-1%7D%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%7D%5Cright)%20-%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BC%5E%7B-1%7DW%5E%7B%5Cprime%7D%5CSigma%5E%7B-1%7D%7D%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%5Cmathbf%7B%5CSigma%5E%7B-1%7DW%7D%20%5Cright)-%5Cmathbf%7Be%7D%5E%7B%5Cprime%7D%5Cmathbf%7B%5CSigma%5E%7B-1%7D%7D%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%7D%5Cmathbf%7B%5CSigma%5E%7B-1%7D%7D%5Cmathbf%7Be%7D%20%5CBig)%0A" /></p><h1>单性状模型的迭代公式</h1>
+<p>对于单性状模型（<strong>假设所有随机因子之间均不存在相关</strong>），我们将 <img src="https://math.now.sh?inline=U%28%5Cgamma_%7Bij%7D%29" style="display:inline-block;margin: 0;"/> 设为 0， 推导一下，我们得到：</p>
+<p style=""><img src="https://math.now.sh?from=q_%7Bi%7D%2F%5Csigma_%7Bi%7D%5E%7B2%7D%20-%20%5Coperatorname%7Btr%7D%5Cleft%28%20%5Cmathbf%7BC%7D%5E%7BZ_%7Bi%7DZ_%7Bi%7D%7D%5Cmathbf%7BA%7D_%7Bi%7D%5E%7B-1%7D%5Cright%29%2F%5Csigma_%7Bi%7D%5E%7B4%7D%20%3D%20%5Cmathbf%7Bu%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BA%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7Bu%7D_%7Bi%7D%2F%5Csigma_%7Bi%7D%5E%7B4%7D%0A" /></p><p>整理一下，我们得到（其中 <img src="https://math.now.sh?inline=q_%7Bi%7D" style="display:inline-block;margin: 0;"/> 为 <img src="https://math.now.sh?inline=u_%7Bi%7D" style="display:inline-block;margin: 0;"/> 的水平数目，或者说是  <img src="https://math.now.sh?inline=%5Cmathbf%7BZ%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 的列数）</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Csigma%7D_%7Bi%7D%5E%7B2%7D%3D%5Cleft%28%5Chat%7B%5Cmathbf%7Bu%7D%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BA%7D_%7Bi%7D%5E%7B-1%7D%20%5Chat%7B%5Cmathbf%7Bu%7D%7D_%7Bi%7D%2B%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7BC%7D%5E%7BZ_%7Bi%7DZ_%7Bi%7D%7D%5Cmathbf%7BA%7D_%7Bi%7D%5E%7B-1%7D%5Cright%29%5Cright)%20%2F%20q_%7Bi%7D%0A" /></p><p>一个收敛更快的迭代公式为</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Csigma%7D_%7Bi%7D%5E%7B2%7D%3D%5Cfrac%7B%5Chat%7B%5Cmathbf%7Bu%7D%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BA%7D_%7Bi%7D%5E%7B-1%7D%20%5Chat%7B%5Cmathbf%7Bu%7D%7D_%7Bi%7D%7D%7Bq_%7Bi%7D-%20%5Coperatorname%7Btr%7D%5Cleft%28%20%5Cmathbf%7BC%7D%5E%7BZ_%7Bi%7DZ_%7Bi%7D%7D%5Cmathbf%7BA%7D_%7Bi%7D%5E%7B-1%7D%5Cright%29%2F%5Chat%7B%5Csigma%7D_%7Bi%7D%5E%7B2%7D%20%7D%0A" /></p><p>联合使用之前推导得到的残差计算公式(其中 <strong><img src="https://math.now.sh?inline=N" style="display:inline-block;margin: 0;"/> 是表型数目，<img src="https://math.now.sh?inline=r" style="display:inline-block;margin: 0;"/> 为 <img src="https://math.now.sh?inline=%5Cmathbf%7BX%7D" style="display:inline-block;margin: 0;"/> 的秩</strong>，只适合单性状模型)，我们便得到了完整的 EM-REML 估计公式</p>
+<p style=""><img src="https://math.now.sh?from=%5Chat%7B%5Csigma%7D_%7B0%7D%5E%7B2%7D%3D%5Cleft%28%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7By%7D-%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BX%7D%20%5Chat%7B%5Cboldsymbol%7B%5Cbeta%7D%7D-%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BZ%7D%20%5Chat%7B%5Cmathbf%7Bu%7D%7D%5Cright%29%20%2F(N-r)%0A" /></p><p>这里我们还有残差的另外两种推导公式，如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Csigma_%7B0%7D%5E%7B2%7D%20%26%3D%20%5Cfrac%7B1%7D%7Bn%7D%28%5Cmathbf%7Be%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D%2B%20%5Coperatorname%7Btr%7D(%5Cmathbf%7BWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%7D%29)%20%5C%5C%0A%5Ctext%7Bor%7D%26%5C%5C%0A%5Csigma_%7B0%7D%5E%7B2%7D%20%26%3D%20%5Cfrac%7B1%7D%7Bn%7D%5Cleft(%5Csigma_%7B0%7D%5E%7B2%7D%5Cleft(p%2Bq%5Cright)-%20%5Csigma_%7B0%7D%5E%7B2%7D%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BG%5E%7B-1%7DC%5E%7BZZ%7D%7D%5Cright)%20%2B%20%5Cmathbf%7Be%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D%5Cright)%0A%5Cend%7Baligned%7D%0A" /></p><p>将 <img src="https://math.now.sh?inline=U%28%5Cphi_%7Bi%7D%29" style="display:inline-block;margin: 0;"/> 设为0，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cfrac%7Bn%7D%7B%5Csigma_%7B0%7D%5E%7B2%7D%7D-%5Cfrac%7B%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%7D%20%5Cright%29%7D%7B%5Csigma_%7B0%7D%5E%7B4%7D%7D%20%3D%20%5Cfrac%7B%5Cmathbf%7Be%5E%7B%5Cprime%7De%7D%7D%7B%5Csigma_%7B0%7D%5E%7B4%7D%7D%0A" /></p><p>因此可以得到第一个式子，我们对其中 <img src="https://math.now.sh?inline=%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%7D%20%5Cright%29%2F%5Csigma_%7B0%7D%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 推导如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%7D%20%5Cright%29%2F%5Csigma_%7B0%7D%5E%7B2%7D%20%5C%5C%0A%26%3D%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BW%5E%7B%5Cprime%7DR%5E%7B-1%7DWC%5E%7B-1%7D%7D%20%5Cright)%20%5C%5C%0A%26%3D%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7B(C-G%5E%7B*%7D)C%5E%7B-1%7D%7D%20%5Cright)%20%5Cquad%20%5Cbecause%20%5Cmathbf%7BC%7D%20%3D%20%5Cmathbf%7BW%5E%7B%5Cprime%7DR%5E%7B-1%7DW%7D%20%2B%20%5Cmathbf%7BG%7D%5E%7B*%7D%20%5C%5C%0A%26%3D%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BI_%7Bp%2Bq%7D-G%5E%7B*%7DC%5E%7B-1%7D%7D%20%5Cright)%5C%5C%0A%26%3D%20p%2Bq-%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BG%5E%7B*%7DC%5E%7B-1%7D%7D%20%5Cright)%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>对于 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%5E%7B*%7DC%5E%7B-1%7D%7D" style="display:inline-block;margin: 0;"/> ，我们对其推导得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BG%5E%7B*%7DC%5E%7B-1%7D%7D%20%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%5E%7BXX%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BXZ%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZX%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7BG%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZX%7D%20%26%20%5Cmathbf%7BG%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%28%5Cmathbf%7BG%5E%7B*%7DC%5E%7B-1%7D%7D%29%20%3D%20%5Coperatorname%7Btr%7D(%5Cmathbf%7BG%5E%7B-1%7DC%5E%7BZZ%7D%7D)%0A" /></p><p>因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%7D%20%5Cright%29%2F%5Csigma_%7B0%7D%5E%7B2%7D%20%3D%20p%2Bq-%5Coperatorname%7Btr%7D(%5Cmathbf%7BG%5E%7B-1%7DC%5E%7BZZ%7D%7D)%0A" /></p><p>代入上式，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cfrac%7Bn-p-q%2B%5Coperatorname%7Btr%7D%28%5Cmathbf%7BG%5E%7B-1%7DC%5E%7BZZ%7D%7D%29%7D%7B%5Csigma_%7B0%7D%5E%7B2%7D%7D%20%3D%20%5Cfrac%7B%5Cmathbf%7Be%5E%7B%5Cprime%7De%7D%7D%7B%5Csigma_%7B0%7D%5E%7B4%7D%7D%0A" /></p><p>因此可以得到第二个式子。</p>
+<h1>多性状模型的迭代公式</h1>
+<h2 id="随机效应">随机效应</h2>
+<p>对于多性状模型，假设只有一个随机因子（其实多个因子同理，只是这样不用写 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D" style="display:inline-block;margin: 0;"/> 矩阵的下标了，符号更加清晰），按照性状排序， 则有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BG%7D%20%3D%20%20%5Cmathbf%7BG%7D_%7Bk%7D%20%5Cotimes%20%20%5Cmathbf%7BA%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D" style="display:inline-block;margin: 0;"/> 就是相应的方差组分的矩阵形式，如下所示，即反过来 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Cgamma%7D%20%3D%20%5Cmathrm%7Bvec%7D%28%5Cmathbf%7BG%7D_%7Bk%7D%29" style="display:inline-block;margin: 0;"/> ，其中 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 为性状数目。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7BG%7D_k%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cgamma_%7B11%7D%20%26%20%5Cgamma_%7B12%7D%20%26%20%5Ccdots%20%26%20%5Cgamma_%7B1%20k%7D%20%5C%5C%0A%5Cgamma_%7B12%7D%20%26%20%5Cgamma_%7B22%7D%20%26%20%5Ccdots%20%26%20%5Cgamma_%7B2%20k%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%20%5Cvdots%20%5C%5C%0A%5Cgamma_%7B1%20k%7D%20%26%20%5Cgamma_%7B2%20k%7D%20%26%20%5Ccdots%20%26%20%5Cgamma_%7Bk%20k%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>对于随机因子 <img src="https://math.now.sh?inline=%5Cmathbf%7Bu%7D" style="display:inline-block;margin: 0;"/> ，假设对于<strong>每个性状的随机因子水平数目均为 <img src="https://math.now.sh?inline=m" style="display:inline-block;margin: 0;"/></strong> ，则 <img src="https://math.now.sh?inline=%5Cmathbf%7Bu%7D" style="display:inline-block;margin: 0;"/> 也可以表示为一个 <img src="https://math.now.sh?inline=m%20%5Ctimes%20k" style="display:inline-block;margin: 0;"/> 的矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BU%7D" style="display:inline-block;margin: 0;"/> ，其中每一列代表一个性状的所有水平，如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BU%7D%20%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0Au_%7B11%7D%20%26%20u_%7B12%7D%20%26%20%5Ccdots%20%26%20u_%7B1%20k%7D%20%5C%5C%0Au_%7B21%7D%20%26%20u_%7B22%7D%20%26%20%5Ccdots%20%26%20u_%7B2%20k%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%20%5Cvdots%20%5C%5C%0Au_%7Bm1%7D%20%26%20u_%7Bm2%7D%20%26%20%5Ccdots%20%26%20u_%7Bm%20k%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7Bu%7D_%7B1%7D%20%26%20%5Cmathbf%7Bu%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7Bu%7D_%7B%20k%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>反过来则有 <img src="https://math.now.sh?inline=%5Cmathbf%7Bu%7D%20%3D%20%5Cmathrm%7Bvec%7D%20%28%5Cmathbf%7BU%7D%29" style="display:inline-block;margin: 0;"/> 。</p>
+<p>对于 <img src="https://math.now.sh?inline=%5Cgamma_%7Bij%7D" style="display:inline-block;margin: 0;"/> ，我们有公式</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cgamma_%7Bij%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7BG%5E%7B-1%7D%5Cdot%7BG%7D_%7Bi%20j%7D%7D%5Cright)%20-%20%5Coperatorname%7Btr%7D%5Cleft(%20%5Cmathbf%7BC%7D%5E%7BZZ%7D%5Cmathbf%7BG%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%5Cright)-%5Cmathbf%7Bu%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5Cmathbf%7Bu%7D%20%5CBig)%0A" /></p><p>因为  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 相应 <img src="https://math.now.sh?inline=%28m%2Cn%29" style="display:inline-block;margin: 0;"/> 位置的元素 就是 <img src="https://math.now.sh?inline=%5Cpartial%20g_%7Bmn%7D%20%2F%20%5Cpartial%20%5Cgamma_%7Bij%7D" style="display:inline-block;margin: 0;"/> ，所有易得 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BG%7D_%7Bi%20j%7D%7D%20%3D%20%5Cmathbf%7B%5Cdot%7BG%7D_%7Bk_%7Bi%20j%7D%7D%7D%20%5Cotimes%20%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> ，其中 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BG%7D_%7Bk_%7Bi%20j%7D%7D%7D%20%3D%20%5Cfrac%7B%5Cpartial%20%5Cmathbf%7BG%7D_%7Bk%7D%7D%7B%5Cpartial%20%5Cgamma_%7Bij%7D%7D" style="display:inline-block;margin: 0;"/>  。</p>
+<p>因此，我们推导得到。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%20%5Cmathbf%7BG%5E%7B-1%7D%5Cdot%7BG%7D_%7Bi%20j%7D%7D%20%5C%5C%0A%26%3D%20%5Cleft%28%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright%29%20%5Cleft(%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cotimes%20%5Cmathbf%7BA%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cotimes%20%5Cmathbf%7BI%7D_%7Bm%7D%20%5Cright)%20%0A%26%5C%5C%0A%26%5C%5C%0A%26%20%5Coperatorname%7Btr%7D%20(%5Cmathbf%7BG%5E%7B-1%7D%5Cdot%7BG%7D_%7Bi%20j%7D%7D)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cotimes%20%5Cmathbf%7BI%7D_%7Bm%7D%20%5Cright)%20%5C%5C%0A%26%3D%20m%20%5Coperatorname%7Btr%7D%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cright)%20%5C%5C%0A%26%5C%5C%0A%26%5C%5C%0A%26%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5C%5C%0A%26%3D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright)%20%5Cleft(%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cotimes%20%5Cmathbf%7BA%7D%5Cright)%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright)%5C%5C%0A%26%3D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright)%20%0A%0A%26%5C%5C%0A%26%5C%5C%0A%26%5Cmathbf%7Bu%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7BG%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5Cmathbf%7Bu%7D%20%5C%5C%0A%26%3D%20%5Cmathrm%7Bvec%7D(%5Cmathbf%7BU%7D)%5E%7B%5Cprime%7D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright)%20%5Cmathrm%7Bvec%7D(%5Cmathbf%7BU%7D)%20%5C%5C%0A%0A%26%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7BU%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cmathbf%7BU%7D)%20%5Cquad%20%5Cbecause%20%5Cmathrm%7Bvec%7D(%5Cmathbf%7BA%7D)%5E%7B%5Cprime%7D%20(%5Cmathbf%7BB%7D%20%5Cotimes%20%5Cmathbf%7BC%7D)%20%5Cmathrm%7Bvec%7D(%5Cmathbf%7BA%7D)%20%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7BB%5E%7B%5Cprime%7DA%5E%7B%5Cprime%7DCA%7D)%20%5C%5C%0A%26%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%20)%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>最后一个式子中，我们设 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%20%3D%20%5Cmathbf%7BU%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cmathbf%7BU%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>代入 <img src="https://math.now.sh?inline=U%28%5Cgamma_%7Bij%7D%29" style="display:inline-block;margin: 0;"/> 得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AU%28%5Cgamma_%7Bij%7D%29%20%26%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20m%20%5Coperatorname%7Btr%7D%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cright)%20-%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright)%20%5Cright)-%5Cmathrm%7Btr%7D(%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%20)%20%20%5CBig)%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>我们需要对这个式子进一步简化，我们知道  <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D" style="display:inline-block;margin: 0;"/> 是一个对称矩阵，因此  <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 也是一个对称矩阵，  我们将   <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 中的元素表示为 <img src="https://math.now.sh?inline=%5Cgamma%5E%7Bij%7D" style="display:inline-block;margin: 0;"/> (<img src="https://math.now.sh?inline=i%20%5Cleq%20j" style="display:inline-block;margin: 0;"/> ) 。</p>
+<p>首先我们考虑 <img src="https://math.now.sh?inline=%5Coperatorname%7Btr%7D%5Cleft%28%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cright%29" style="display:inline-block;margin: 0;"/> 这一项，当  <img src="https://math.now.sh?inline=i%3Dj" style="display:inline-block;margin: 0;"/> 时，矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 只有 <img src="https://math.now.sh?inline=%28i%2Ci%29" style="display:inline-block;margin: 0;"/> 位置元素为1，其它位置元素均为 0 。因此 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 只有第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列元素为 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列元素，其它元素为 0 。因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%5Cleft%28%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cright%29%20%3D%20%5Cgamma%5E%7Bii%7D%0A" /></p><p>当   <img src="https://math.now.sh?inline=i%20%5Cneq%20j" style="display:inline-block;margin: 0;"/>  时, 矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 只有 <img src="https://math.now.sh?inline=%28i%2Cj%29" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%28j%2Ci%29" style="display:inline-block;margin: 0;"/> 位置为 1，其它位置元素为 0 。因此  <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 其第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列为 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/>  列， 其第 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/> 列为 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/>  列，其它位置元素为 0 。因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%5Cleft%28%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cright%29%20%3D%20%5Cgamma%5E%7Bij%7D%20%2B%20%5Cgamma%5E%7Bji%7D%20%3D%202%20%5Cgamma%5E%7Bij%7D%0A" /></p><p>即我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%5Cleft%28%5Cboldsymbol%7BG%7D_k%5E%7B-1%7D%20%5Cdot%7B%5Cboldsymbol%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cright%29%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cgamma%5E%7Bi%20i%7D%2C%20%26%20i%3Dj%20%5C%5C%0A2%20%5Cgamma%5E%7Bi%20j%7D%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>我们现在考虑第三项，如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathrm%7Btr%7D%28%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%29%20%26%20%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D)%20%5C%5C%0A%26%20%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D)%20%20%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>其中我们设 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%20%3D%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%3D%20%5C%7B%20%5Cdelta_%7Bij%7D%5E%7B*%7D%5C%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>当 <img src="https://math.now.sh?inline=i%3Dj" style="display:inline-block;margin: 0;"/>  时，矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 只有第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列元素为 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列元素 ，其它位置元素为 0 。因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7Btr%7D%28%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%29%20%3D%20%5Cdelta_%7Bii%7D%5E%7B*%7D%0A" /></p><p>当   <img src="https://math.now.sh?inline=i%20%5Cneq%20j" style="display:inline-block;margin: 0;"/>  时, 矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 其第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列为 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/>  列， 其第 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/> 列为 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/>  列，其它位置元素为 0 。因此，我们得到 (因为  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 对称)</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7Btr%7D%28%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%29%20%3D%20%5Cdelta_%7Bij%7D%5E%7B*%7D%20%2B%20%5Cdelta_%7Bji%7D%5E%7B*%7D%20%3D%202%20%5Cdelta_%7Bij%7D%5E%7B*%7D%0A" /></p><p>综上，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7Btr%7D%28%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%29%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cdelta%5E%7B*%7D_%7Bi%20i%7D%2C%20%26%20i%3Dj%20%5C%5C%0A2%20%5Cdelta%5E%7B*%7D_%7Bi%20j%7D%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>我们现在考虑第二项，我们将 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D%5E%7BZZ%7D" style="display:inline-block;margin: 0;"/> 按照性状分块为 <img src="https://math.now.sh?inline=k%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 个 <img src="https://math.now.sh?inline=m%20%5Ctimes%20m" style="display:inline-block;margin: 0;"/> 的子矩阵，如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B11%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B12%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B1%20k%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B21%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B22%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B2%20k%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%20%5Cvdots%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bk1%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bk2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bk%20k%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>处于简化的目的，我们这里考虑 <img src="https://math.now.sh?inline=k%3D3" style="display:inline-block;margin: 0;"/> 的情况（这个不影响推导出来的结果），根据矩阵乘法，当 <img src="https://math.now.sh?inline=i%3Dj" style="display:inline-block;margin: 0;"/>  时，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bi1%7D%20%26%20%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bi2%7D%20%26%20%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bi3%7D%20%5C%5C%0A%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bi1%7D%20%26%20%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bi2%7D%20%26%20%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bi3%7D%20%5C%5C%0A%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bi1%7D%20%26%20%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bi2%7D%20%26%20%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bi3%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5Cleft%28%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright%29%20%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B11%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B12%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B1%203%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B21%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B22%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B2%203%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B31%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B32%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B3%203%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bi1%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%26%20%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bi2%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%26%20%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bi3%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5C%5C%0A%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bi1%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%26%20%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bi2%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%20%26%20%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bi3%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5C%5C%0A%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bi1%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%26%20%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bi2%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%26%20%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bi3%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>利用迹函数的性质，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright%29%20%5Cright)%20%26%3D%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%20%5Coperatorname%7Btr%7D%20(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cgamma%5E%7Bti%7D%5Cgamma%5E%7Bis%7D%5Cmathbf%7BA%7D%5E%7B-1%7D)%20%5C%5C%0A%26%3D%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Bit%7D%5Cgamma%5E%7Bsi%7D%20%5Coperatorname%7Btr%7D%20(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D)%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>当 <img src="https://math.now.sh?inline=i%20%5Cneq%20j" style="display:inline-block;margin: 0;"/>  时, 我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cgamma%5E%7B1j%7D%5Cgamma%5E%7Bi1%7D%2B%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bj1%7D%20%26%20%5Cgamma%5E%7B1j%7D%5Cgamma%5E%7Bi2%7D%2B%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bj2%7D%20%26%20%5Cgamma%5E%7B1j%7D%5Cgamma%5E%7Bi3%7D%2B%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bj3%7D%20%5C%5C%0A%5Cgamma%5E%7B2j%7D%5Cgamma%5E%7Bi1%7D%2B%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bj1%7D%20%26%20%5Cgamma%5E%7B2j%7D%5Cgamma%5E%7Bi2%7D%2B%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bj2%7D%20%26%20%5Cgamma%5E%7B2j%7D%5Cgamma%5E%7Bi3%7D%2B%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bj3%7D%20%5C%5C%0A%5Cgamma%5E%7B3j%7D%5Cgamma%5E%7Bi1%7D%2B%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bj1%7D%20%26%20%5Cgamma%5E%7B3j%7D%5Cgamma%5E%7Bi2%7D%2B%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bj2%7D%20%26%20%5Cgamma%5E%7B3j%7D%5Cgamma%5E%7Bi3%7D%2B%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bj3%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>因此</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5Cleft%28%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright%29%20%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B11%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B12%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B1%203%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B21%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B22%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B2%203%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B31%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B32%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7B3%203%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%20%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A(%5Cgamma%5E%7B1j%7D%5Cgamma%5E%7Bi1%7D%2B%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bj1%7D)%5Cmathbf%7BA%7D%5E%7B-1%7D%20%26%20(%5Cgamma%5E%7B1j%7D%5Cgamma%5E%7Bi2%7D%2B%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bj2%7D)%5Cmathbf%7BA%7D%5E%7B-1%7D%20%26%20(%5Cgamma%5E%7B1j%7D%5Cgamma%5E%7Bi3%7D%2B%5Cgamma%5E%7B1i%7D%5Cgamma%5E%7Bj3%7D)%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5C%5C%0A(%5Cgamma%5E%7B2j%7D%5Cgamma%5E%7Bi1%7D%2B%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bj1%7D)%5Cmathbf%7BA%7D%5E%7B-1%7D%20%26%20(%5Cgamma%5E%7B2j%7D%5Cgamma%5E%7Bi2%7D%2B%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bj2%7D)%5Cmathbf%7BA%7D%5E%7B-1%7D%20%26%20(%5Cgamma%5E%7B2j%7D%5Cgamma%5E%7Bi3%7D%2B%5Cgamma%5E%7B2i%7D%5Cgamma%5E%7Bj3%7D)%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5C%5C%0A(%5Cgamma%5E%7B3j%7D%5Cgamma%5E%7Bi1%7D%2B%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bj1%7D)%5Cmathbf%7BA%7D%5E%7B-1%7D%20%26%20(%5Cgamma%5E%7B3j%7D%5Cgamma%5E%7Bi2%7D%2B%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bj2%7D)%5Cmathbf%7BA%7D%5E%7B-1%7D%20%26%20(%5Cgamma%5E%7B3j%7D%5Cgamma%5E%7Bi3%7D%2B%5Cgamma%5E%7B3i%7D%5Cgamma%5E%7Bj3%7D)%5Cmathbf%7BA%7D%5E%7B-1%7D%20%0A%5Cend%7Barray%7D%5Cright%5D%0A%0A%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright%29%20%5Cright)%20%26%3D%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%20%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cleft(%5Cgamma%5E%7Btj%7D%5Cgamma%5E%7Bis%7D%2B%5Cgamma%5E%7Bti%7D%5Cgamma%5E%7Bjs%7D%5Cright)%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%20%5Cleft(%5Cgamma%5E%7Btj%7D%5Cgamma%5E%7Bis%7D%2B%5Cgamma%5E%7Bti%7D%5Cgamma%5E%7Bjs%7D%5Cright)%20%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Btj%7D%5Cgamma%5E%7Bis%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%2B%20%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Bti%7D%5Cgamma%5E%7Bjs%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%20%0A%5Cend%7Baligned%7D%0A" /></p><p>我们对需要求和的第一项交换 <img src="https://math.now.sh?inline=s" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=t" style="display:inline-block;margin: 0;"/> ，并且我们知道 <img src="https://math.now.sh?inline=%5Cgamma%5E%7Bij%7D%20%3D%20%5Cgamma%5E%7Bji%7D" style="display:inline-block;margin: 0;"/> , <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%3D%20%28%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bts%7D%29%5E%7BT%7D" style="display:inline-block;margin: 0;"/>  ，因此我们继续推导得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright%29%20%5Cright)%20%0A%26%3D%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Btj%7D%5Cgamma%5E%7Bis%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%2B%20%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Bti%7D%5Cgamma%5E%7Bjs%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%20%5C%5C%0A%26%20%3D%20%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Bsj%7D%5Cgamma%5E%7Bit%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bts%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%2B%20%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Bti%7D%5Cgamma%5E%7Bjs%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bts%7D%20%5Cright)%20%20%5C%5C%0A%26%20%3D%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Bsj%7D%5Cgamma%5E%7Bit%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bts%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%2B%20%20%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Bti%7D%5Cgamma%5E%7Bjs%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bts%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%20%5C%5C%0A%26%20%3D%202%5Csum_%7Bs%3D1%7D%5E%7B3%7D%5Csum_%7Bt%3D1%7D%5E%7B3%7D%5Cgamma%5E%7Bit%7D%5Cgamma%5E%7Bsj%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bts%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%20%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>综上，我们将 <img src="https://math.now.sh?inline=k%3D3" style="display:inline-block;margin: 0;"/> 改为一般的 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> ，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright%29%20%5Cright)%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cgamma%5E%7Bit%7D%5Cgamma%5E%7Bsi%7D%20%5Coperatorname%7Btr%7D%20(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D)%2C%20%26%20i%3Dj%20%5C%5C%0A2%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cgamma%5E%7Bit%7D%5Cgamma%5E%7Bsj%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cright)%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>现在我们定义 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CPsi%7D" style="display:inline-block;margin: 0;"/> 是一个 <img src="https://math.now.sh?inline=k%20%5Ctimes%20k" style="display:inline-block;margin: 0;"/> 的矩阵，其元素为 <img src="https://math.now.sh?inline=%5CPsi_%7Bij%7D%20%3D%20%5Coperatorname%7Btr%7D%28%5Cmathbf%7BC%7D_%7Bij%7D%5E%7BZZ%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%29" style="display:inline-block;margin: 0;"/> ，根据矩阵乘法性质（假设 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%2CB%2CC%7D" style="display:inline-block;margin: 0;"/> 均为 <img src="https://math.now.sh?inline=n%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 的矩阵，则 <img src="https://math.now.sh?inline=%5Cmathbf%7BABC%7D%20%3D%20%5C%7B%5Csum_%7Bs%3D1%7D%5E%7Bn%7D%5Csum_%7Bt%3D1%7D%5E%7Bn%7Da_%7Bit%7Db_%7Bts%7Dc_%7Bsj%7D%5C%7D" style="display:inline-block;margin: 0;"/> ），我们发现</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CPsi%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%26%3D%20%5Cleft%20%5C%7B%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cgamma%5E%7Bit%7D%5Coperatorname%7Btr%7D%28%5Cmathbf%7BC%7D_%7Bts%7D%5E%7BZZ%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%29%5Cgamma%5E%7Bsj%7D%20%5Cright%5C%7D%5C%5C%0A%26%3D%20%5Cleft%20%5C%7B%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cgamma%5E%7Bit%7D%5Cgamma%5E%7Bsj%7D%5Coperatorname%7Btr%7D(%5Cmathbf%7BC%7D_%7Bts%7D%5E%7BZZ%7D%5Cmathbf%7BA%7D%5E%7B-1%7D)%20%5Cright%5C%7D%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>我们定义 <img src="https://math.now.sh?inline=%5Cpsi_%7Bij%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CPsi%7D%5E%7B*%7D%20%3D%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CPsi%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 的元素，即 <img src="https://math.now.sh?inline=%5Cpsi_%7Bij%7D%5E%7B*%7D%20%3D%20%5Cleft%5C%7B%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CPsi%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cright%5C%7D_%7Bij%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5Cleft(%20%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cright%29%20%5Cright)%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cpsi_%7Bii%7D%5E%7B*%7D%2C%20%26%20i%3Dj%20%5C%5C%0A2%5Cpsi_%7Bij%7D%5E%7B*%7D%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>将上面的式子代入 <img src="https://math.now.sh?inline=U%28%5Cgamma_%7Bij%7D%29" style="display:inline-block;margin: 0;"/> ，进一步简化得到</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cgamma_%7Bij%7D%29%20%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(m%5Cgamma%5E%7Bii%7D%20-%20%5Cpsi_%7Bii%7D%5E%7B*%7D-%20%5Cdelta_%7Bii%7D%5E%7B*%7D%20%5Cbig)%2C%20%26%20i%3Dj%20%5C%5C%0A-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(2m%5Cgamma%5E%7Bij%7D%20-%202%5Cpsi_%7Bij%7D%5E%7B*%7D-%202%5Cdelta_%7Bij%7D%5E%7B*%7D%20%5Cbig)%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>将之设为0， 对 <img src="https://math.now.sh?inline=%5Cgamma%5E%7Bij%7D" style="display:inline-block;margin: 0;"/> 求解得到 EM 推导公式</p>
+<p style=""><img src="https://math.now.sh?from=m%5Cgamma%5E%7Bij%7D%20%3D%20%5Cpsi_%7Bij%7D%5E%7B*%7D%20%2B%20%5Cdelta_%7Bij%7D%5E%7B*%7D%0A" /></p><p>使用矩阵格式，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0Am%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%26%3D%20%5Cmathbf%7B%5CPsi%7D%5E%7B*%7D%20%2B%20%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CPsi%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%2B%20%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>左右均乘以 <img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> ，得到</p>
+<p style=""><img src="https://math.now.sh?from=m%5Cmathbf%7BG%7D_%7Bk%7D%3D%20%20%5Cmathbf%7B%5CPsi%7D%20%2B%20%20%5Cmathbf%7B%5CDelta%7D%0A" /></p><p>因此，我们得到 EM 推导公式</p>
+<p style=""><img src="https://math.now.sh?from=m%5Cgamma_%7Bij%7D%5E%7B%28m%2B1%29%7D%20%3D%20%5Cpsi_%7Bij%7D%5E%7B(m)%7D%20%2B%20%5Cdelta_%7Bij%7D%5E%7B(m)%7D%0A" /></p><p>因为  <img src="https://math.now.sh?inline=%5Cpsi_%7Bij%7D%20%3D%20%5Coperatorname%7Btr%7D%28%5Cmathbf%7BC%7D_%7Bij%7D%5E%7BZZ%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%29" style="display:inline-block;margin: 0;"/> ，  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%20%3D%20%5Cmathbf%7BU%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cmathbf%7BU%7D" style="display:inline-block;margin: 0;"/>  可以进一步分块为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7B%5CDelta%7D%20%3D%20%5Cmathbf%7BU%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BA%7D%5E%7B-1%7D%20%5Cmathbf%7BU%7D%20%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7Bu%7D_%7B1%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7B1%7D%20%26%20%5Cmathbf%7Bu%7D_%7B1%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7Bu%7D_%7B1%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7Bk%7D%20%5C%5C%0A%5Cmathbf%7Bu%7D_%7B2%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7B1%7D%20%26%20%5Cmathbf%7Bu%7D_%7B2%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7Bu%7D_%7B2%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7Bk%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%20%5Cvdots%20%5C%5C%0A%5Cmathbf%7Bu%7D_%7Bk%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7B1%7D%20%26%20%5Cmathbf%7Bu%7D_%7Bk%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7Bu%7D_%7Bk%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7Bk%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>因此 <img src="https://math.now.sh?inline=%5Cdelta_%7Bij%7D%20%3D%20%5Cmathbf%7Bu%7D_%7Bi%7D%5E%7B%5Cprime%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7Bj%7D" style="display:inline-block;margin: 0;"/> 。因此上面的 EM 推导公式可以写为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cgamma_%7Bij%7D%5E%7B%28m%2B1%29%7D%20%3D%20%5Cfrac%7B1%7D%7Bm%7D%20%5Cleft(%5Coperatorname%7Btr%7D(%5Cmathbf%7BC%7D_%7Bij%7D%5E%7BZZ%5E%7B(m)%7D%7D%5Cmathbf%7BA%7D%5E%7B-1%7D)%20%2B%20%5Cmathbf%7Bu%7D_%7Bi%7D%5E%7B(m)%5E%7B%5Cprime%7D%7D%5Cmathbf%7BA%7D%5E%7B-1%7D%5Cmathbf%7Bu%7D_%7Bj%7D%5E%7B(m)%7D%20%5Cright)%0A" /></p><p>这个式子和单性状模型的推导公式正好具有相同的格式。</p>
+<h2 id="残差">残差</h2>
+<p>按照性状排序， 此时我们有下式成立，其中 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 为表型行数，<img src="https://math.now.sh?inline=%5Cmathbf%7B%5CSigma%7D_%7Bk%7D" style="display:inline-block;margin: 0;"/> 为需要估计的协方差组分的矩阵。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7B%5CSigma%7D%20%3D%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%20%5Cotimes%20%20%5Cmathbf%7BI%7D_%7Bn%7D%0A" /></p><p><img src="https://math.now.sh?inline=%5Cmathbf%7B%5CSigma%7D_%7Bk%7D" style="display:inline-block;margin: 0;"/> 形式如下（这里我们使用 <img src="https://math.now.sh?inline=%5Cphi_%7Bij%7D" style="display:inline-block;margin: 0;"/> ，与上面的随机效应格式相同 ）。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5CSigma%7D_k%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cphi_%7B11%7D%20%26%20%5Cphi_%7B12%7D%20%26%20%5Ccdots%20%26%20%5Cphi_%7B1%20k%7D%20%5C%5C%0A%5Cphi_%7B12%7D%20%26%20%5Cphi_%7B22%7D%20%26%20%5Ccdots%20%26%20%5Cphi_%7B2%20k%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%20%5Cvdots%20%5C%5C%0A%5Cphi_%7B1%20k%7D%20%26%20%5Cphi_%7B2%20k%7D%20%26%20%5Ccdots%20%26%20%5Cphi_%7Bk%20k%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>对于随机因子 <img src="https://math.now.sh?inline=%5Cmathbf%7Be%7D" style="display:inline-block;margin: 0;"/> ，同上，<img src="https://math.now.sh?inline=%5Cmathbf%7Be%7D" style="display:inline-block;margin: 0;"/> 也可以表示为一个 <img src="https://math.now.sh?inline=n%20%5Ctimes%20k" style="display:inline-block;margin: 0;"/> 的矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BE%7D" style="display:inline-block;margin: 0;"/> ，其中每一列代表一个性状的所有残差，如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BE%7D%20%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0Ae_%7B11%7D%20%26%20e_%7B12%7D%20%26%20%5Ccdots%20%26%20e_%7B1%20k%7D%20%5C%5C%0Ae_%7B21%7D%20%26%20e_%7B22%7D%20%26%20%5Ccdots%20%26%20e_%7B2%20k%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%20%5Cvdots%20%5C%5C%0Ae_%7Bn1%7D%20%26%20e_%7Bn2%7D%20%26%20%5Ccdots%20%26%20e_%7Bn%20k%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7Be%7D_%7B1%7D%20%26%20%5Cmathbf%7Be%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7Be%7D_%7B%20k%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>反过来则有 <img src="https://math.now.sh?inline=%5Cmathbf%7Be%7D%20%3D%20%5Cmathrm%7Bvec%7D%20%28%5Cmathbf%7BE%7D%29" style="display:inline-block;margin: 0;"/> 。</p>
+<p>对于 <img src="https://math.now.sh?inline=%5Cphi_%7Bij%7D" style="display:inline-block;margin: 0;"/> ，我们有公式</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cphi_%7Bij%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20%5Coperatorname%7Btr%7D%20%20%5Cleft(%5Cmathbf%7B%5CSigma%5E%7B-1%7D%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bij%7D%7D%5Cright)%20-%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BC%5E%7B-1%7DW%5E%7B%5Cprime%7D%5CSigma%5E%7B-1%7D%7D%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bij%7D%5Cmathbf%7B%5CSigma%5E%7B-1%7DW%7D%20%5Cright)-%5Cmathbf%7Be%7D%5E%7B%5Cprime%7D%5Cmathbf%7B%5CSigma%5E%7B-1%7D%7D%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bij%7D%5Cmathbf%7B%5CSigma%5E%7B-1%7D%7D%5Cmathbf%7Be%7D%20%5CBig)%0A" /></p><p>易得 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7B%5CSigma%7D_%7Bi%20j%7D%7D%20%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D_%7Bk_%7Bi%20j%7D%7D%7D%20%5Cotimes%20%5Cmathbf%7BI%7D_%7Bn%7D" style="display:inline-block;margin: 0;"/> ，其中 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7B%5CSigma%7D_%7Bk_%7Bi%20j%7D%7D%7D%20%3D%20%5Cfrac%7B%5Cpartial%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%7D%7B%5Cpartial%20%5Cphi_%7Bij%7D%7D" style="display:inline-block;margin: 0;"/>  。</p>
+<p>因此，我们推导得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%20%5Cmathbf%7B%5CSigma%5E%7B-1%7D%5Cdot%7B%5CSigma%7D_%7Bi%20j%7D%7D%20%5C%5C%0A%26%3D%20%5Cleft%28%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%5E%7B-1%7D%20%5Cright%29%20%5Cleft(%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cotimes%20%5Cmathbf%7BI%7D%5Cright)%20%5C%5C%0A%26%3D%20%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cotimes%20%5Cmathbf%7BI%7D_%7Bn%7D%20%5Cright)%20%0A%26%5C%5C%0A%26%5C%5C%0A%26%20%5Coperatorname%7Btr%7D%20(%5Cmathbf%7B%5CSigma%5E%7B-1%7D%5Cdot%7B%5CSigma%7D_%7Bi%20j%7D%7D)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cotimes%20%5Cmathbf%7BI%7D_%7Bn%7D%20%5Cright)%20%5C%5C%0A%26%3D%20n%20%5Coperatorname%7Btr%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cright)%20%5C%5C%0A%26%5C%5C%0A%26%5C%5C%0A%26%5Cmathbf%7B%5CSigma%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7B%5CSigma%7D%5E%7B-1%7D%20%5C%5C%0A%26%3D%20%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%5E%7B-1%7D%20%5Cright)%20%5Cleft(%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cotimes%20%5Cmathbf%7BI%7D%5Cright)%20%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%5E%7B-1%7D%20%5Cright)%5C%5C%0A%26%3D%20%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright)%20%0A%0A%26%5C%5C%0A%26%5C%5C%0A%26%5Cmathbf%7Be%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7B%5CSigma%7D%5E%7B-1%7D%20%5Cdot%7B%5Cmathbf%7B%5CSigma%7D%7D_%7Bi%20j%7D%20%5Cmathbf%7B%5CSigma%7D%5E%7B-1%7D%20%5Cmathbf%7Be%7D%20%5C%5C%0A%26%3D%20%5Cmathrm%7Bvec%7D(%5Cmathbf%7BE%7D)%5E%7B%5Cprime%7D%20%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright)%20%5Cmathrm%7Bvec%7D(%5Cmathbf%7BE%7D)%20%5C%5C%0A%26%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7BE%7D%5E%7B%5Cprime%7D%20%20%5Cmathbf%7BE%7D)%20%5Cquad%20%5Cbecause%20%5Cmathrm%7Bvec%7D(%5Cmathbf%7BA%7D)%5E%7B%5Cprime%7D%20(%5Cmathbf%7BB%7D%20%5Cotimes%20%5Cmathbf%7BC%7D)%20%5Cmathrm%7Bvec%7D(%5Cmathbf%7BA%7D)%20%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7BB%5E%7B%5Cprime%7DA%5E%7B%5Cprime%7DCA%7D)%20%5C%5C%0A%26%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%20)%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>最后一个式子中，我们设 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%20%3D%20%5Cmathbf%7BE%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BE%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>代入 <img src="https://math.now.sh?inline=U%28%5Cphi_%7Bij%7D%29" style="display:inline-block;margin: 0;"/> 得到</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cphi_%7Bij%7D%29%20%3D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20n%20%5Coperatorname%7Btr%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cright)%20-%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BC%5E%7B-1%7DW%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright)%20W%7D%20%5Cright)-%5Cmathrm%7Btr%7D(%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%20)%20%5CBig)%0A" /></p><p>我们需要对这个式子进一步简化，我们知道  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CSigma%7D_%7Bk%7D" style="display:inline-block;margin: 0;"/> 是一个对称矩阵，因此  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 也是一个对称矩阵，  我们将   <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 中的元素表示为 <img src="https://math.now.sh?inline=%5Cphi%5E%7Bij%7D" style="display:inline-block;margin: 0;"/> (<img src="https://math.now.sh?inline=i%20%5Cleq%20j" style="display:inline-block;margin: 0;"/> ) 。</p>
+<p>首先我们考虑第一项 <img src="https://math.now.sh?inline=%5Coperatorname%7Btr%7D%5Cleft%28%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%20%5Cright%29" style="display:inline-block;margin: 0;"/> ，同上，我们可以得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%5Cleft%28%5Cboldsymbol%7B%5CSigma%7D_k%5E%7B-1%7D%20%5Cdot%7B%5Cboldsymbol%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cright%29%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cphi%5E%7Bi%20i%7D%2C%20%26%20i%3Dj%20%5C%5C%0A2%20%5Cphi%5E%7Bi%20j%7D%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>我们现在考虑第三项，如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathrm%7Btr%7D%28%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%29%20%26%20%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D)%20%5C%5C%0A%26%20%3D%20%5Cmathrm%7Btr%7D(%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D)%20%20%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>其中我们设 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%20%3D%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%3D%20%5C%7B%20%5Cdelta_%7Bij%7D%5E%7B*%7D%5C%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>当 <img src="https://math.now.sh?inline=i%3Dj" style="display:inline-block;margin: 0;"/>  时，矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 只有第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列元素为 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列元素 ，其它位置元素为 0 。因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7Btr%7D%28%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%29%20%3D%20%5Cdelta_%7Bii%7D%5E%7B*%7D%0A" /></p><p>当   <img src="https://math.now.sh?inline=i%20%5Cneq%20j" style="display:inline-block;margin: 0;"/>  时, 矩阵  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D" style="display:inline-block;margin: 0;"/> 其第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列为 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/>  列， 其第 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/> 列为 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/>  列，其它位置元素为 0 。因此，我们得到 (因为  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 对称)</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7Btr%7D%28%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%29%20%3D%20%5Cdelta_%7Bij%7D%5E%7B*%7D%20%2B%20%5Cdelta_%7Bji%7D%5E%7B*%7D%20%3D%202%20%5Cdelta_%7Bij%7D%5E%7B*%7D%0A" /></p><p>综上，我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathrm%7Btr%7D%28%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%29%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cdelta%5E%7B*%7D_%7Bi%20i%7D%2C%20%26%20i%3Dj%20%5C%5C%0A2%20%5Cdelta%5E%7B*%7D_%7Bi%20j%7D%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>对于第二项，首先我们对 <img src="https://math.now.sh?inline=%5Cmathbf%7BWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%7D" style="display:inline-block;margin: 0;"/> 进行推导如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7BWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%7D%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BZ%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%5E%7BXX%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BXZ%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZX%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5C%5C%0A%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%5Cmathbf%7BX%7D%5Cmathbf%7BC%7D%5E%7BXX%7D%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%2B%5Cmathbf%7BX%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%2B%5Cmathbf%7BZ%7D%5Cmathbf%7BC%7D%5E%7BZX%7D%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%2B%5Cmathbf%7BZ%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>因此，第二项推导得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BC%5E%7B-1%7DW%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright%29%20W%7D%20%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BWC%5E%7B-1%7DW%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright)%20%7D%20%5Cright)%20%5C%5C%0A%26%3D%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BX%7D%5Cmathbf%7BC%7D%5E%7BXX%7D%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright)%20%20%5Cright)%20%2B%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BX%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright)%20%20%5Cright)%20%2B%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BZ%7D%5Cmathbf%7BC%7D%5E%7BZX%7D%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright)%20%20%5Cright)%20%2B%20%5Coperatorname%7Btr%7D%5Cleft(%5Cmathbf%7BZ%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright)%20%20%5Cright)%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>对于第二项的第一项进行推导（其余项同理可得），假设 <img src="https://math.now.sh?inline=k%3D3" style="display:inline-block;margin: 0;"/>  ，则 <img src="https://math.now.sh?inline=%5Cmathbf%7BX%7D%5Cmathbf%7BC%7D%5E%7BXX%7D%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D" style="display:inline-block;margin: 0;"/>  可以分解为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7BX%7D%5Cmathbf%7BC%7D%5E%7BXX%7D%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7BX%7D_%7B1%7D%20%26%20%5Cmathbf%7B0%7D%20%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BX%7D_%7B2%7D%20%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%20%26%20%5Cmathbf%7BX%7D_%7B3%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%0A%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B11%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B12%7D%20%20%26%20%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B13%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B21%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B22%7D%20%20%26%20%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B23%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B31%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B32%7D%20%20%26%20%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B33%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7BX%7D_%7B1%7D%5E%7B%5Cprime%7D%20%26%20%5Cmathbf%7B0%7D%20%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7BX%7D_%7B2%7D%5E%7B%5Cprime%7D%20%20%26%20%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%26%20%5Cmathbf%7B0%7D%20%20%26%20%5Cmathbf%7BX%7D_%7B3%7D%5E%7B%5Cprime%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7BX%7D_%7B1%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B11%7D%5Cmathbf%7BX%7D_%7B1%7D%5E%7B%5Cprime%7D%20%26%20%5Cmathbf%7BX%7D_%7B1%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B12%7D%5Cmathbf%7BX%7D_%7B2%7D%5E%7B%5Cprime%7D%20%20%26%20%5Cmathbf%7BX%7D_%7B1%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B13%7D%5Cmathbf%7BX%7D_%7B3%7D%5E%7B%5Cprime%7D%20%5C%5C%0A%5Cmathbf%7BX%7D_%7B2%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B21%7D%5Cmathbf%7BX%7D_%7B1%7D%5E%7B%5Cprime%7D%20%26%20%5Cmathbf%7BX%7D_%7B2%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B22%7D%5Cmathbf%7BX%7D_%7B2%7D%5E%7B%5Cprime%7D%20%20%26%20%5Cmathbf%7BX%7D_%7B2%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B23%7D%5Cmathbf%7BX%7D_%7B3%7D%5E%7B%5Cprime%7D%20%5C%5C%0A%5Cmathbf%7BX%7D_%7B3%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B31%7D%5Cmathbf%7BX%7D_%7B1%7D%5E%7B%5Cprime%7D%20%26%20%5Cmathbf%7BX%7D_%7B3%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B32%7D%5Cmathbf%7BX%7D_%7B2%7D%5E%7B%5Cprime%7D%20%20%26%20%5Cmathbf%7BX%7D_%7B3%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7B33%7D%5Cmathbf%7BX%7D_%7B3%7D%5E%7B%5Cprime%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A%5Cend%7Baligned%7D%0A" /></p><p>类似与随机效应，我们可以得到（推导过程略）</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BX%7D%5Cmathbf%7BC%7D%5E%7BXX%7D%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright%29%20%20%5Cright)%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cphi%5E%7Bit%7D%5Cphi%5E%7Bsi%7D%20%5Coperatorname%7Btr%7D%20(%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20)%2C%20%26%20i%3Dj%20%5C%5C%0A%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cphi%5E%7Bit%7D%5Cphi%5E%7Bsj%7D%20%5Cleft(%20%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%5Cright)%20%2B%20%20%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BX%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bts%7D%5Cmathbf%7BX%7D_%7Bs%7D%5E%7B%5Cprime%7D%5Cright)%5Cright)%20%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>因此，我们得到（同上，我们有 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D%5E%7BAB%7D_%7Bst%7D%20%3D%20%28%5Cmathbf%7BC%7D%5E%7BBA%7D_%7Bts%7D%29%5E%7BT%7D" style="display:inline-block;margin: 0;"/>  ）</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BC%5E%7B-1%7DW%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright%29%20W%7D%20%5Cright)%5C%5C%0A%26%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cphi%5E%7Bit%7D%5Cphi%5E%7Bsi%7D%20%5Coperatorname%7Btr%7D%20(%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20)%2C%20%26%20i%3Dj%20%5C%5C%0A%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cphi%5E%7Bit%7D%5Cphi%5E%7Bsj%7D%20%5Cleft(%20%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%5Cright)%20%2B%20%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BX%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bts%7D%5Cmathbf%7BX%7D_%7Bs%7D%5E%7B%5Cprime%7D%2B%5Cmathbf%7BX%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bts%7D%5Cmathbf%7BZ%7D_%7Bs%7D%5E%7B%5Cprime%7D%2B%5Cmathbf%7BZ%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bts%7D%5Cmathbf%7BX%7D_%7Bs%7D%5E%7B%5Cprime%7D%2B%5Cmathbf%7BZ%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bts%7D%5Cmathbf%7BZ%7D_%7Bs%7D%5E%7B%5Cprime%7D%5Cright)%20%5Cright)%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%20%5C%5C%0A%26%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cphi%5E%7Bit%7D%5Cphi%5E%7Bsi%7D%20%5Coperatorname%7Btr%7D%20(%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20)%2C%20%26%20i%3Dj%20%5C%5C%0A%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cphi%5E%7Bit%7D%5Cphi%5E%7Bsj%7D%202%20%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%20%5Cright)%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%20%5C%5C%0A%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>现在我们定义 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CPsi%7D" style="display:inline-block;margin: 0;"/> 是一个 <img src="https://math.now.sh?inline=k%20%5Ctimes%20k" style="display:inline-block;margin: 0;"/> 的矩阵，其元素为 <img src="https://math.now.sh?inline=%5Cpsi_%7Bij%7D%20%3D%20%20%5Coperatorname%7Btr%7D%20%5Cleft%28%5Cmathbf%7BX%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bij%7D%5Cmathbf%7BX%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bij%7D%5Cmathbf%7BX%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%20%5Cright%29" style="display:inline-block;margin: 0;"/>，根据矩阵乘法性质（假设 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%2CB%2CC%7D" style="display:inline-block;margin: 0;"/> 均为 <img src="https://math.now.sh?inline=n%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 的矩阵，则 <img src="https://math.now.sh?inline=%5Cmathbf%7BABC%7D%20%3D%20%5C%7B%5Csum_%7Bs%3D1%7D%5E%7Bn%7D%5Csum_%7Bt%3D1%7D%5E%7Bn%7Da_%7Bit%7Db_%7Bts%7Dc_%7Bsj%7D%5C%7D" style="display:inline-block;margin: 0;"/> ），我们发现</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CPsi%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%26%3D%20%5Cleft%20%5C%7B%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cphi%5E%7Bit%7D%5Coperatorname%7Btr%7D%20%5Cleft%28%5Cmathbf%7BX%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bts%7D%5Cmathbf%7BX%7D_%7Bs%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bts%7D%5Cmathbf%7BZ%7D_%7Bs%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bts%7D%5Cmathbf%7BX%7D_%7Bs%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bts%7D%5Cmathbf%7BZ%7D_%7Bs%7D%5E%7B%5Cprime%7D%20%20%5Cright%29%5Cphi%5E%7Bsj%7D%20%5Cright%5C%7D%5C%5C%0A%26%3D%20%5Cleft%20%5C%7B%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cphi%5E%7Bit%7D%5Cphi%5E%7Bsj%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BX%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bts%7D%5Cmathbf%7BX%7D_%7Bs%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bts%7D%5Cmathbf%7BZ%7D_%7Bs%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bts%7D%5Cmathbf%7BX%7D_%7Bs%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bt%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bts%7D%5Cmathbf%7BZ%7D_%7Bs%7D%5E%7B%5Cprime%7D%20%20%5Cright)%5Cright%5C%7D%5C%5C%0A%26%3D%20%5Cleft%20%5C%7B%5Csum_%7Bs%3D1%7D%5E%7Bk%7D%5Csum_%7Bt%3D1%7D%5E%7Bk%7D%5Cphi%5E%7Bit%7D%5Cphi%5E%7Bsj%7D%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bst%7D%5Cmathbf%7BX%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bs%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bst%7D%5Cmathbf%7BZ%7D_%7Bt%7D%5E%7B%5Cprime%7D%20%20%5Cright)%5Cright%5C%7D%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>我们定义 <img src="https://math.now.sh?inline=%5Cpsi_%7Bij%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CPsi%7D%5E%7B*%7D%20%3D%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CPsi%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 的元素，即 <img src="https://math.now.sh?inline=%5Cpsi_%7Bij%7D%5E%7B*%7D%20%3D%20%5Cleft%5C%7B%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CPsi%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cright%5C%7D_%7Bij%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p>因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Btr%7D%5Cleft%28%5Cmathbf%7BC%5E%7B-1%7DW%5E%7B%5Cprime%7D%5Cleft(%20%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bk_%7Bi%20j%7D%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%20%5Cotimes%20%5Cmathbf%7BI%7D%20%5Cright%29%20W%7D%20%5Cright)%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%5Cpsi_%7Bii%7D%5E%7B*%7D%2C%20%26%20i%3Dj%20%5C%5C%0A2%5Cpsi_%7Bij%7D%5E%7B*%7D%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>将上面的式子代入 <img src="https://math.now.sh?inline=U%28%5Cphi_%7Bij%7D%29" style="display:inline-block;margin: 0;"/> ，进一步简化得到</p>
+<p style=""><img src="https://math.now.sh?from=U%28%5Cphi_%7Bij%7D%29%20%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bcc%7D%0A%20-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(n%5Cphi%5E%7Bii%7D%20-%20%5Cpsi_%7Bii%7D%5E%7B*%7D-%20%5Cdelta_%7Bii%7D%5E%7B*%7D%20%5Cbig)%2C%20%26%20i%3Dj%20%5C%5C%0A-%20%5Cfrac%7B1%7D%7B2%7D%20%5CBig(2n%5Cphi%5E%7Bij%7D%20-%202%5Cpsi_%7Bij%7D%5E%7B*%7D-%202%5Cdelta_%7Bij%7D%5E%7B*%7D%20%5Cbig)%2C%20%26%20i%20%5Cneq%20j%0A%5Cend%7Barray%7D%5Cright.%0A" /></p><p>将之设为0， 对 <img src="https://math.now.sh?inline=%5Cgamma%5E%7Bij%7D" style="display:inline-block;margin: 0;"/> 求解得到 EM 推导公式</p>
+<p style=""><img src="https://math.now.sh?from=n%5Cphi%5E%7Bij%7D%20%3D%20%5Cpsi_%7Bij%7D%5E%7B*%7D%20%2B%20%5Cdelta_%7Bij%7D%5E%7B*%7D%0A" /></p><p>使用矩阵格式，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0An%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%26%3D%20%5Cmathbf%7B%5CPsi%7D%5E%7B*%7D%20%2B%20%5Cmathbf%7B%5CDelta%7D%5E%7B*%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CPsi%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%2B%20%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%20%5Cmathbf%7B%5CDelta%7D%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%5E%7B-1%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>左右均乘以 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CSigma%7D_%7Bk%7D" style="display:inline-block;margin: 0;"/> ，得到</p>
+<p style=""><img src="https://math.now.sh?from=n%5Cmathbf%7B%5CSigma%7D_%7Bk%7D%3D%20%20%5Cmathbf%7B%5CPsi%7D%20%2B%20%20%5Cmathbf%7B%5CDelta%7D%0A" /></p><p>因此，我们得到</p>
+<p style=""><img src="https://math.now.sh?from=n%5Cphi_%7Bij%7D%20%3D%20%5Cpsi_%7Bij%7D%20%2B%20%5Cdelta_%7Bij%7D%0A" /></p><p>因为  <img src="https://math.now.sh?inline=%5Cpsi_%7Bij%7D%20%3D%20%5Coperatorname%7Btr%7D%20%5Cleft%28%5Cmathbf%7BX%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bij%7D%5Cmathbf%7BX%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bij%7D%5Cmathbf%7BX%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%20%5Cright%29" style="display:inline-block;margin: 0;"/> ，  <img src="https://math.now.sh?inline=%5Cmathbf%7B%5CDelta%7D%20%3D%20%5Cmathbf%7BE%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BE%7D" style="display:inline-block;margin: 0;"/>  可以进一步分块为：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7B%5CDelta%7D%20%3D%20%5Cmathbf%7BE%7D%5E%7B%5Cprime%7D%20%20%5Cmathbf%7BE%7D%20%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0A%5Cmathbf%7Be%7D_%7B1%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7B1%7D%20%26%20%5Cmathbf%7Be%7D_%7B1%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7Be%7D_%7B1%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7Bk%7D%20%5C%5C%0A%5Cmathbf%7Be%7D_%7B2%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7B1%7D%20%26%20%5Cmathbf%7Be%7D_%7B2%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7Be%7D_%7B2%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7Bk%7D%20%5C%5C%0A%5Cvdots%20%26%20%5Cvdots%20%26%20%5Cddots%20%26%20%5Cvdots%20%5C%5C%0A%5Cmathbf%7Be%7D_%7Bk%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7B1%7D%20%26%20%5Cmathbf%7Be%7D_%7Bk%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7B2%7D%20%26%20%5Ccdots%20%26%20%5Cmathbf%7Be%7D_%7Bk%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7Bk%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>因此 <img src="https://math.now.sh?inline=%5Cdelta_%7Bij%7D%20%3D%20%5Cmathbf%7Be%7D_%7Bi%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7Bj%7D" style="display:inline-block;margin: 0;"/> 。因此上面的 EM 推导公式可以写为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cphi_%7Bij%7D%20%3D%20%5Cfrac%7B1%7D%7Bn%7D%20%5Cleft%28%5Coperatorname%7Btr%7D%20%5Cleft(%5Cmathbf%7BX%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bij%7D%5Cmathbf%7BX%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bij%7D%5Cmathbf%7BX%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%20%5Cright%29%20%2B%20%5Cmathbf%7Be%7D_%7Bi%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7Bj%7D%20%5Cright)%0A" /></p><p>如果我们设 <img src="https://math.now.sh?inline=%5Cmathbf%7BW%7D_%7Bi%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BX%7D_%7Bi%7D%20%26%20%5Cmathbf%7BZ%7D_%7Bi%7D%0A%5Cend%7Barray%7D%5Cright%5D" style="display:inline-block;margin: 0;"/> ,   <img src="https://math.now.sh?inline=%5Cmathbf%7BW%7D_%7Bj%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BX%7D_%7Bj%7D%20%26%20%5Cmathbf%7BZ%7D_%7Bj%7D%0A%5Cend%7Barray%7D%5Cright%5D" style="display:inline-block;margin: 0;"/> ,  <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D%5E%7Bij%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bij%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bij%7D%20%5C%5C%0A%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bij%7D%20%26%20%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bij%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D" style="display:inline-block;margin: 0;"/> ，则我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cpsi_%7Bij%7D%20%3D%20%5Coperatorname%7Btr%7D%20%5Cleft%28%5Cmathbf%7BX%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BXX%7D_%7Bij%7D%5Cmathbf%7BX%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%20%5Cmathbf%7BX%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BXZ%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BZX%7D_%7Bij%7D%5Cmathbf%7BX%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%2B%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7BC%7D%5E%7BZZ%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%20%5Cright%29%20%3D%20%5Coperatorname%7Btr%7D%20%5Cleft(%20%5Cmathbf%7BW%7D_%7Bi%7D%20%5Cmathbf%7BC%7D%5E%7Bij%7D%20%5Cmathbf%7BW%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%5Cright)%0A" /></p><p>则 <img src="https://math.now.sh?inline=%5Cphi_%7Bij%7D" style="display:inline-block;margin: 0;"/> 的 EM 推导公式可以写为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cphi_%7Bij%7D%20%3D%20%5Cfrac%7B1%7D%7Bn%7D%20%5Cleft%28%5Coperatorname%7Btr%7D%20%5Cleft(%20%5Cmathbf%7BW%7D_%7Bi%7D%20%5Cmathbf%7BC%7D%5E%7Bij%7D%20%5Cmathbf%7BW%7D_%7Bj%7D%5E%7B%5Cprime%7D%20%5Cright%29%20%2B%20%5Cmathbf%7Be%7D_%7Bi%7D%5E%7B%5Cprime%7D%5Cmathbf%7Be%7D_%7Bj%7D%20%5Cright)%0A" /></p><h1>附录1: V逆相关推导</h1>
+<p>根据舒尔补公式 <img src="https://math.now.sh?inline=%5Cmathbf%7B%28D%2BCA%5E%7B-1%7DB%29%5E%7B-1%7D%3DD%5E%7B-1%7D-D%5E%7B-1%7DC(A%2BBD%5E%7B-1%7DC)%5E%7B-1%7DBD%5E%7B-1%7D%7D" style="display:inline-block;margin: 0;"/> ， 我们可以得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BV%5E%7B-1%7D%7D%20%20%3D%20%5Cmathbf%7B%28R%2BZGZ%5E%7B%5Cprime%7D%29%5E%7B-1%7D%7D%20%3D%20%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DZ(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D)%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%0A" /></p><p>两边左乘 <img src="https://math.now.sh?inline=%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%7D" style="display:inline-block;margin: 0;"/> 得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%20%5Cquad%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D%28R%2BZGZ%5E%7B%5Cprime%7D%29%5E%7B-1%7D%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7DR%5E%7B-1%7D-GZ%5E%7B%5Cprime%7DR%5E%7B-1%7DZ(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D)%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%5C%5C%0A%26%3D%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7DR%5E%7B-1%7D-G(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D)(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D)%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%2B(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D)%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7DR%5E%7B-1%7D-GZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%2B(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D)%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7B(Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D)%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>因此我们得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7B%28Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%29%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%3D%20%5Cmathbf%7BGZ%5E%7B%5Cprime%7D(R%2BZGZ%5E%7B%5Cprime%7D)%5E%7B-1%7D%7D%0A" /></p><p>转置一下，得到</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BR%5E%7B-1%7DZ%28Z%5E%7B%5Cprime%7DR%5E%7B-1%7DZ%2BG%5E%7B-1%7D%29%5E%7B-1%7D%7D%20%3D%20%5Cmathbf%7B(R%2BZGZ%5E%7B%5Cprime%7D)%5E%7B-1%7DZG%7D%0A" /></p><h1>附录2：P 矩阵对方差组分的导数</h1>
+<p>我们有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BP%7D%7D%7B%5Cpartial%20%5Ckappa_i%7D%3D-%5Cboldsymbol%7BP%7D%20%5Cboldsymbol%7BV%7D_i%20%5Cboldsymbol%7BP%7D%0A" /></p><p>证明如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BP%7D%7D%7B%5Cpartial%20%5Ckappa_i%7D%3D%20%26%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20%5Ckappa_i%7D%5Cleft%28%5Cboldsymbol%7BV%7D%5E%7B-1%7D-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright%29%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%5Cright)%20%5C%5C%0A%3D%20%26%20%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%7D%7B%5Cpartial%20%5Ckappa_i%7D-%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%7D%7B%5Cpartial%20%5Ckappa_i%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%20%5Cfrac%7B%5Cpartial%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%7D%7B%5Cpartial%20%5Ckappa_i%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5C%5C%0A%26%20%5Cquad-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cfrac%7B%5Cpartial%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%7D%7B%5Cpartial%20%5Ckappa_i%7D%20%5C%5C%0A%3D%20%26%20-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BV%7D_i%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%2B%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BV%7D_i%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5C%5C%0A%26%20%5Cquad-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BV%7D_i%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5C%5C%0A%26%20%5Cquad%2B%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BV%7D_i%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5C%5C%0A%3D%20%26%20-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BV%7D_i%5Cleft(%5Cboldsymbol%7BV%7D%5E%7B-1%7D-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%5Cright)%5Cright.%20%5C%5C%0A%26%20%5Cquad%2B%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BV%7D_i%5Cleft(%5Cboldsymbol%7BV%7D%5E%7B-1%7D-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%5Cright)%20%5C%5C%0A%3D%20%26%20-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BV%7D_i%20%5Cboldsymbol%7BP%7D%2B%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BV%7D_i%20%5Cboldsymbol%7BP%7D%20%5C%5C%0A%3D%20%26%20-%5Cleft(%5Cboldsymbol%7BV%7D%5E%7B-1%7D-%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cleft(%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5Cright)%5E%7B-1%7D%20%5Cboldsymbol%7BX%7D%5E%7B%5Cprime%7D%20%5Cboldsymbol%7BV%7D%5E%7B-1%7D%5Cright)%20%5Cboldsymbol%7BV%7D_i%20%5Cboldsymbol%7BP%7D%20%5C%5C%0A%3D%20%26%20-%5Cboldsymbol%7BP%7D%20%5Cboldsymbol%7BV%7D_i%20%5Cboldsymbol%7BP%7D%0A%5Cend%7Baligned%7D%0A" /></p><h1>参考文献</h1>
+<ol>
+<li>Knight E. Improved iterative schemes for REML estimation of variance parameters in linear mixed models[D]. , 2008.</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/REML/" rel="tag">REML</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%96%B9%E5%B7%AE%E7%BB%84%E5%88%86/" rel="tag">方差组分</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/ca519947/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            方差组分估计方法五之AI-REML
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/e0661366/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">方差组分估计方法三之DF-REML</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2023
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
