@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.7k</span>
+            <span class="post-count">1.6k</span>
         </span>
     </span>
 
@@ -128,8 +128,8 @@
 <p>为了减少计算二级导数的计算量，我们可以将 <img src="https://math.now.sh?inline=-%5Cmathbf%7BH%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 替换为信息矩阵的逆矩阵，即将黑塞矩阵替换为其期望，公式如下</p>
 <p style=""><img src="https://math.now.sh?from=%5Cboldsymbol%7B%5Ctheta%7D%5E%7B%28m%2B1%29%7D%20%3D%20%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D%20%2B%20%5Cleft%5B%5Cmathbf%7BI%7D(%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D)%5Cright%5D%5E%7B-1%7D%20%5Cfrac%7B%5Cpartial%7Bl%7D%7D%7B%5Cpartial%7B%5Cboldsymbol%7B%5Ctheta%7D%7D%7D%5Cbigg%7C_%7B%5Cboldsymbol%7B%5Ctheta%7D%5E%7B(m)%7D%7D%0A" /></p><h2 id="超出参数空间的补救">超出参数空间的补救</h2>
 <p>如果在某次迭代中出现负数 (<img src="https://math.now.sh?inline=%5Cmathbf%7BG%7D" style="display:inline-block;margin: 0;"/> 或 <img src="https://math.now.sh?inline=%5Cmathbf%7BR%7D" style="display:inline-block;margin: 0;"/> 或 <strong>AI</strong> 矩阵不正定)，Jennrich and Schluchter (1986) 建议使用 “step-halving” 方法，即将步长减半，如果下一次得到了合理的结果则继续往下迭代，不然则将步长继续减半。例如在 AI 算法，我们可以添加一个步长的参数 <img src="https://math.now.sh?inline=%5Clambda%20%3C%201" style="display:inline-block;margin: 0;"/> ，使得 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Ckappa%7D%5E%7B%28m%2B1%29%7D%20%3D%20%5Cmathbf%7B%5Ckappa%7D%5E%7B(m)%7D%20%2B%20%5Clambda%20%5Cmathbf%7BI%7D(%5Cmathbf%7B%5Ckappa%7D%5E%7B(m)%7D)%5E%7B-1%7D%5Cmathbf%7BU%7D(%5Cmathbf%7B%5Ckappa%7D%5E%7B(m)%7D)" style="display:inline-block;margin: 0;"/>  。某软件就采用了控制步长的方式来避免 <code>overshooting</code> ，一开始 AI 算法的 <img src="https://math.now.sh?inline=%5Clambda" style="display:inline-block;margin: 0;"/> 值设为  0.1 ，随着每一步的迭代逐渐接近 1 。</p>
-<p>这里作者建议不要设置步长，或者修改 AI 矩阵（如果 AI 矩阵不正定）。如果 AI 矩阵不正定，或者估计的方差组分超出参数空间，作者建议使用使用 EM 算法（初始值使用上一次 EM 算法的估计值）来获得更好的初始值。</p>
-<p>有些AI算法软件遇到参数值超出参数空间时会改用 EM 算法。还有一种情况是，如果AI 估计值其与上次的参数估计值差距过大（计算公式如下，我们称其为 <em>convergence criterion</em>），那么我们更换使用 EM 算法。</p>
+<p>另外一种补救方式是改成使用 EM 算法（初始值使用上一次 EM 算法的估计值）来获得更好的初始值。</p>
+<p>还有一种情况是，如果AI 估计值其与上次的参数估计值差距过大（计算公式如下，我们称其为 <em>convergence criterion</em>），那么此时也可以更换使用 EM 算法。</p>
 <p style=""><img src="https://math.now.sh?from=%5CDelta%5E%7B%28m%29%7D%20%3D%20%5Csqrt%7B%5Cfrac%7B%5Csum%20%5Cleft(%20%5Ctheta_%7Bi%7D%5E%7B(m)%7D%20-%20%5Ctheta_%7Bi%7D%5E%7B(m-1)%7D%20%20%5Cright)%5E%7B2%7D%7D%7B%5Csum%20%5Ctheta_%7Bi%7D%5E%7B(m)%5E%7B2%7D%7D%7D%7D%0A" /></p><h1>参考文献</h1>
 <ol>
 <li>

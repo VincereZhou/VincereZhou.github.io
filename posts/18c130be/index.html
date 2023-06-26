@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">4.2k</span>
+            <span class="post-count">4.3k</span>
         </span>
     </span>
 
@@ -133,6 +133,13 @@
 <h3 id="compound格式-2">compound格式</h3>
 <p>使用 <strong>–recode compound-genotypes</strong> 选项，生成 compound格式的plink文件（一个SNP的两个碱基之间没有空格）</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --allow-extra-chr --chr-set 95 --file plink59 --recode compound-genotypes --out plink59_compound</span><br></pre></td></tr></table></figure>
+<h3 id="012格式">012格式</h3>
+<p>使用 <code>--recodeA</code> 选项可以输出 012 格式的基因型文件，默认是按照 A1 (最小等位基因) 进行计数。</p>
+<p>可以通过添加 <code>--recode-allele</code> 选项指定每一个 SNP 是计数哪一个碱基，其后面接着输入文件名称，这个输入文件含有两列，第一列是 SNP 名称，第二列是需要计数的碱基。</p>
+<p>举例如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --allow-extra-chr --chr-set 95 --file 1 --recode-allele count_allele.txt --recodeA --out 1_count</span><br></pre></td></tr></table></figure>
+<p>其中的 count_allele.txt 文件内容如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1_242598	C</span><br><span class="line">1_10673082	T</span><br><span class="line">1_10723065	T</span><br><span class="line">1_11407894	A</span><br><span class="line">1_11426075	C</span><br></pre></td></tr></table></figure>
 <h3 id="VCF-文件-2">VCF 文件</h3>
 <p>使用 <strong>–recode vcf-iid</strong> 输出为 VCF 文件。</p>
 <p>这里 vcf-iid 含义是只使用个体号作为 VCF 文件中的样本号，如果仅仅是 --recode vcf，那么生成的VCF文件的样本号是家系号和个体号合并的结果（以_连接） 。</p>
