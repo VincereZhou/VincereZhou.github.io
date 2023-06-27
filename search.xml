@@ -1,6 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>参考基因组下载及illumina芯片注释文件下载方法</title>
+    <url>/posts/3a38b14d/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>从 Ensembl 和 NCBI 下载参考基因组，以及下载 illumina 芯片的注释文件的教程。</p>
+<span id="more"></span>
+<h1>Ensembl 基因组下载方法</h1>
+<p>首先进入到  <a href="http://ensembl.org/index.html">Ensembl</a> 官网，如果是植物则进入 <a href="https://plants.ensembl.org/index.html">plants.ensembl</a> 。</p>
+<p>这里我们以猪的 11.1 版本为例，看看如何下载其参考基因组文件，进入官网后，点击下图中的 <code>view full list of all species</code> 。</p>
+<p><img src="3.png" alt="1"></p>
+<p>在下一个页面中，在下图的窗口中输入 pig （拉丁文应该也可以），得到以下结果。这里第三个就是我们想要的，点进去。</p>
+<p><img src="4.png" alt="1"></p>
+<p>进入下面的页面，左上角标注的部分已经告诉你这是猪的 11.1 版本的参考基因组，点击右下红框处下载 FASTA 文件和其它基因组注释文件。</p>
+<p>一般 Ensembl 显示的都是最新的参考基因组版本，如果你要查找一些旧版本的参考基因组，图中左下方的红框就是其它可用的参考基因组，比如这里就是 10.2 版本的参考基因组。</p>
+<p><img src="5.png" alt="1"></p>
+<p>假设你点了下载 FASTA 的链接，在下一个页面中你会看到一堆的 FASTA 压缩文件，一般我们就是下载红框中的文件，其后缀就是 <code>dna.toplevel.fa.gz</code> 。</p>
+<p>在这个文件夹的上面的一堆文件实际是每条染色体的文件，这个文件是所有染色体汇总的文件。</p>
+<p><img src="6.png" alt="1"></p>
+<p>但是你往下拉的话，你还能看到后缀为 <code>dna_rm.toplevel.fa.gz</code> 和 <code>dna_sm.toplevel.fa.gz</code> ，这几个文件有什么区别呢？</p>
+<p>这三者的区别主要在于对重复序列的处理不同，如下：</p>
+<ul>
+<li>’dna’ - unmasked genomic DNA sequences.</li>
+<li>‘dna_rm’ - masked genomic DNA 。通过RepeatMasker软件检测弥散的重复序列和低复杂度的区域，并将重复序列使用N替代。</li>
+<li>‘dna_sm’ - soft-masked genomic DNA 。指Soft-masked的DNA序列，其中的重复序列和低复杂度的区域会用其相应碱基的小写字母来表示</li>
+</ul>
+<h1>NCBI 基因组下载方法</h1>
+<p>首先进入到 <a href="https://www.ncbi.nlm.nih.gov/">NCBI</a> 官网，在坐标的复选框中选择 Assembly ，然后右边框中输入物种名称，还是以猪为例，输入 pig （拉丁文更好）。</p>
+<p><img src="7.png" alt="1"></p>
+<p>在上面的搜索结果中，找到相应的参考基因组版本，比如我们这里第一个就是 11.1 版本的参考基因组，点进去。</p>
+<p><img src="8.png" alt="1"></p>
+<p>然后点击右侧的 <code>FTP directory for RefSeq assembly</code>，进入FTP下载界面。</p>
+<p><img src="9.png" alt="1"></p>
+<p>还是在这个页面，往下拉，你可以得到 NCBI 中 RefSeq 中的序列名称与染色体的对应关系，因此下面在FTP下载界面下载的文件中染色体名称用的都是 RefSeq 中的序列名称，需要用到这个对应关系改回正常的染色体。</p>
+<p><img src="11.png" alt="1"></p>
+<p>在FTP下载界面，其中 <code>genomic.fna.gz</code> 就是相应的 FASTA 文件， <code>genomic.gff.gz</code> 就是相应的 GFF3 文件。</p>
+<p><img src="10.png" alt="1"></p>
+<h1>利用 Filezilla 下载参考基因组</h1>
+<p>进入 Filezilla 官网，下载软件 Filezilla 。</p>
+<p>打开Filezilla，在主机添加 ftp地址， ncbi 和 ensembl 的 ftp 地址如下。其它均不用填写。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#例如ncbi的ftp地址为:</span><br><span class="line">ftp://ftp.ncbi.nlm.nih.gov/</span><br><span class="line">#ensembl的ftp地址为：</span><br><span class="line">ftp://ftp.ensembl.org/pub/</span><br><span class="line">#ensembl植物地址</span><br><span class="line">ftp://ftp.ensemblgenomes.org/pub/</span><br></pre></td></tr></table></figure>
+<p>然后你就可以像windows系统的资源管理器一样，用这种文件夹的方式查找文件。找到了需要的文件后，直接拖拽到本地就会自动下载。</p>
+<p>但是我发现有些时候 Filezilla 下载的文件是不完整的，所以用这种方式下载后最好还是通过 md5 校验一下下载的文件有无问题。</p>
+<h1>查找 illumina 芯片的注释文件</h1>
+<p>进入<a href="https://www.illumina.com.cn/products/selection-tools/gene-panel-finder.html#/">illumina官网</a> (貌似现在进不去了)，一步步查找。</p>
+<p>进入某个芯片的主页后，点击 <a href="https://support.illumina.com/array/array_kits/bovinesnp50-beadchip-kit/downloads.html">View Manifest (Array Content) Files</a> 。我估计这个 <code>Manifest</code> 就是注释文件的意思。</p>
+<p>在下一个页面，选择相应的注释文件下载。</p>
+<p><img src="2.png" alt="1"></p>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>生物信息</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>测序技术基础知识学习</title>
+    <url>/posts/d6ae1355/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>学习一代测序和二代测序的基础原理。</p>
+<span id="more"></span>
+<h1>一代测序 - Sanger 测序</h1>
+<p><a href="https://zhuanlan.zhihu.com/p/75408383">https://zhuanlan.zhihu.com/p/75408383</a></p>
+<p>采用 ddNTP，均不含羟基，如果合成了一个 ddNTP之后，DNA合成过程就中止了。</p>
+<p>一代测序需要4个 DNA 合成反应体系（A C G T 各一个），原理如下图</p>
+<p><img src="1.jpg" alt="1"></p>
+<p>优点：</p>
+<ul>
+<li>测序读长可达1,000bp</li>
+<li>准确性高达99.999%</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>成本高</li>
+<li>通量低</li>
+</ul>
+<h1>二代测序</h1>
+<p><a href="https://zhuanlan.zhihu.com/p/20702684">https://zhuanlan.zhihu.com/p/20702684</a></p>
+<p>优酷视频</p>
+<p><a href="https://v.youku.com/v_show/id_XNzEzNzk1NTA0.html">https://v.youku.com/v_show/id_XNzEzNzk1NTA0.html</a></p>
+<p>二代测序目前的主流是 illumina 测序</p>
+<h2 id="建库">建库</h2>
+<p>由于Illumina测序策略本身的问题，导致其测序长度不可能太长。</p>
+<p>所谓的建库就是把基因组打断成一定长度的片段。</p>
+<p>打断后，补齐末端，然后再3‘段添加一个碱基A，之后再加上 adapter</p>
+<h2 id="桥式PCR">桥式PCR</h2>
+<p>这个看视频更形象一点。</p>
+<p>最终就是在 flowcell 中 形成了一个具有完全相同序列的簇，一般叫 cluster</p>
+<h2 id="测序">测序</h2>
+<p>这个也是看视频更形象一点。</p>
+<p>它是边合成，边测序。</p>
+<p>它用于测序的碱基有两个特殊的地方，一是脱氧核糖3号位加入了叠氮基团而不是常规的羟基，类似于一代测序的ddNTP，保证一次只能添加一个碱基；二是碱基部分添加了荧光基团，不同的碱基有不同的颜色。</p>
+<p>在测序过程中，每1轮测序，保证只有1个碱基加入的当前测序链。这时候测序仪会发出激发光，并扫描荧光。因为一个cluster中所有的序列是一样的，所以理论上，这时候cluster中发出的荧光应该颜色一致。一个测序扫描图片如下：</p>
+<p><img src="2.jpg" alt="1"></p>
+<p>然后洗脱多余的没有附着上的脱氧核糖和聚合酶，加入特殊试剂，将脱氧核糖3号位的—N2改变成—OH，然后切掉部分荧光基团，使其在下一轮反应中，不再发出荧光。</p>
+<p>如此反复，测出所有reads每个位置的序列。</p>
+<h2 id="为什么Illumina测序会有长度限制呢">为什么Illumina测序会有长度限制呢</h2>
+<blockquote>
+<ol>
+<li>测序时，经过长时间的PCR，会有不同步的情况。通俗一点讲，比如一开始1个cluster中是100个完全一样的DNA链，但是经过1轮增加碱基，其中99个都加入了1个碱基，显示了红色，另外1个没有加入碱基，不显示颜色。这时候整体为红色，我们可以顺利得到结果。随后，在第2轮再加入碱基进行合成的时候，就变成了，之前没有加入的加入了1个碱基显示红色，剩下的99个显示绿色，这个时候就会出现杂信号。当测序长度不断延长，这个杂信号会越来越多，最后很有可能出现，50个红，50个绿色，这时候我们判断不出来到底是什么碱基被合成。</li>
+<li>测序过程中，使用的碱基是特殊处理的，有一个非常大的荧光基团修饰。在使用DNA ploymerase的时候，酶的状态也会受到底物的影响，越来越差。</li>
+</ol>
+</blockquote>
+<p>这一方面应该也说明了，每条 read 最开始的分型质量是最好的，越往后质量越差。</p>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>生物信息</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>生物信息</tag>
+        <tag>测序技术</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用Colleau算法构建A22矩阵</title>
+    <url>/posts/d4853f4c/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在 ssGBLUP 中需要构建 A22 矩阵，通过 Colleau 算法可以避免直接构建 A 矩阵，节约内存和时间。</p>
+<span id="more"></span>
+<h1>A 阵分解</h1>
+<p>我们可以将 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 分解为 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D%20%3D%20%5Cmathbf%7B%28I-P%29%5E%7B-1%7DD(I-P)%5E%7B-1%5Cprime%7D%7D" style="display:inline-block;margin: 0;"/> （要求系谱按照出生日期顺序排序）。</p>
+<p>其中 <img src="https://math.now.sh?inline=%5Cmathbf%7BD%7D" style="display:inline-block;margin: 0;"/> 是一个对角矩阵，其元素计算公式如下，其中 <img src="https://math.now.sh?inline=F_%7Bi%7D" style="display:inline-block;margin: 0;"/> 是近交系数。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AD_%7Bii%7D%20%26%20%20%3D%200.5%20-%200.25%28F_%7Bs_%7Bi%7D%7D%20%2B%20F_%7Bd_%7Bi%7D%7D%29%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E7%88%B6%E6%AF%8D%E5%9D%87%E5%B7%B2%E7%9F%A5%7D%5C%5C%0A%26%20%20%3D%200.75%20-%200.25%20F_%7Bp_%7Bi%7D%7D%20%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E5%8D%95%E4%B8%AA%E4%BA%B2%E6%9C%AC%E5%B7%B2%E7%9F%A5%7D%5C%5C%0A%26%20%3D%201%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E4%B8%A4%E4%B8%AA%E4%BA%B2%E6%9C%AC%E5%9D%87%E6%9C%AA%E7%9F%A5%7D%5C%5C%0A%5Cend%7Baligned%7D%0A" /></p><p>这里 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 是一个下三角矩阵，对角线元素为 0，非对角线只有亲子间为 0.5，其余元素也为 0 。</p>
+<p><img src="https://math.now.sh?inline=%5Cmathbf%7BI-P%7D" style="display:inline-block;margin: 0;"/> 矩阵举例如下：</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccccc%7D%0A1%20%26%20%26%20%26%20%26%20%26%20%5C%5C%0A0%20%26%201%20%26%20%26%20%26%20%5C%5C%0A-0.5%20%26%200%20%26%201%20%26%20%26%20%5C%5C%0A-0.5%20%26%20-0.5%20%26%200%20%26%201%20%26%20%5C%5C%0A0%20%26%200%20%26%20-0.5%20%26%20-0.5%20%26%201%20%26%20%5C%5C%0A-0.5%20%26%200%20%26%200%20%26%20-0.5%20%26%200%20%26%201%20%5C%5C%0A0%20%26%200%20%26%200%20%26%200%20%26%20-0.5%20%26%20-0.5%20%26%201%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><h1>Colleau 算法</h1>
+<p>Colleau (2002) 年证明 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 阵与一个向量 <img src="https://math.now.sh?inline=%5Cmathbf%7Bt%7D" style="display:inline-block;margin: 0;"/> 的乘积可以在一个线性的时间内计算完成，如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bv%7D%20%3D%20%5Cmathbf%7BAt%7D%20%3D%20%5Cmathbf%7B%28I-P%29%5E%7B-1%7DD%5B(I-P)%5E%7B-1%5Cprime%7Dt%5D%7D%0A" /></p><p>这里我们可以分步骤进行计算：</p>
+<ul>
+<li>
+<p>首先我们定义 <img src="https://math.now.sh?inline=%5Cmathbf%7Br%7D%20%3D%20%5Cmathbf%7B%28I-P%29%5E%7B-1%5Cprime%7Dt%7D" style="display:inline-block;margin: 0;"/> ，转换一下我们可以通过求解三角方程组 <img src="https://math.now.sh?inline=%5Cmathbf%7B%28I-P%29%5E%7B%5Cprime%7Dr%3Dt%7D" style="display:inline-block;margin: 0;"/> 得到 <img src="https://math.now.sh?inline=%5Cmathbf%7Br%7D" style="display:inline-block;margin: 0;"/> 。</p>
+</li>
+<li>
+<p>然后我们得到 <img src="https://math.now.sh?inline=%5Cmathbf%7Bv%7D%20%3D%20%20%5Cmathbf%7B%28I-P%29%5E%7B-1%7DDr%7D" style="display:inline-block;margin: 0;"/> ，转换一下我们可以通过求解三角方程组 <img src="https://math.now.sh?inline=%5Cmathbf%7B%28I-P%29v%3DDr%7D" style="display:inline-block;margin: 0;"/> 得到 <img src="https://math.now.sh?inline=%5Cmathbf%7Bv%7D" style="display:inline-block;margin: 0;"/> 。</p>
+</li>
+</ul>
+<p>标量公式如下（第一行是采用 <strong>outer-product</strong> 的原理；第二行是采用向量内积的原理）</p>
+<p style=""><img src="https://math.now.sh?from=r_%7Bi%7D%20%3D%20r_%7Bi%7D%2Bt_%7Bi%7D%3B%20%5Cquad%20r_%7Bsi%7D%20%3D%20r_%7Bsi%7D%20%2B%20r_%7Bi%7D%2F2%3B%20%5Cquad%20r_%7Bdi%7D%20%3D%20r_%7Bdi%7D%20%2B%20r_%7Bi%7D%2F2%3B%20%5Cquad%20i%3Dn%2C%5Ccdots%2C1%0A" /></p><p style=""><img src="https://math.now.sh?from=v_%7Bi%7D%20%3D%20d_%7Bi%7Dr_%7Bi%7D%2B%20%28v_%7Bsi%7D%2Bv_%7Bdi%7D%29%2F2%2C%20%5Cquad%20i%20%3D%201%2C%5Ccdots%2Cn%0A" /></p><p>这里的 <img src="https://math.now.sh?inline=si" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=di" style="display:inline-block;margin: 0;"/> 表示个体 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 的父母本。</p>
+<p>通过 Colleau 算法可以用于计算子矩阵，举个例子，下面展示了如何计算 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D_%7B11%7D%5Cmathbf%7Bq%7D" style="display:inline-block;margin: 0;"/>，<img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D_%7B21%7D%5Cmathbf%7Bq%7D" style="display:inline-block;margin: 0;"/> 。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BA%7D_%7B11%7D%20%26%20%5Cmathbf%7BA%7D_%7B12%7D%20%5C%5C%0A%5Cmathbf%7BA%7D_%7B21%7D%20%26%20%5Cmathbf%7BA%7D_%7B22%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7Bq%7D%20%5C%5C%0A%5Cmathbf%7B0%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BA%7D_%7B11%7D%20%5Cmathbf%7Bq%7D%20%5C%5C%0A%5Cmathbf%7BA%7D_%7B21%7D%20%5Cmathbf%7Bq%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><h1>构建 A22 矩阵</h1>
+<p>这里需要注意的是，构建 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 阵时是按照出生日期顺序排序，但是我们提取A22 矩阵要求按照无基因型个体在前，有基因型个体在后的顺序排列，因此我们还要对原始的 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 阵的行和列进行重新重排。我们设相应的置换矩阵为 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> ，重排后按照无基因型个体在前，有基因型个体在后的顺序的矩阵称为 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 矩阵，则有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BA%7D%5E%7B*%7D%20%3D%20%5Cmathbf%7BQAQ%5E%7B%5Cprime%7D%7D%20%3D%20%5Cmathbf%7BQ%28I-P%29%5E%7B-1%7DD(I-P)%5E%7B-1%5Cprime%7DQ%5E%7B%5Cprime%7D%7D%0A" /></p><p>此时我们逐列提取 A22 矩阵的每一列，举个例子，假如基因型个体在 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 矩阵中的位置是 80 到 100，那么我们构建第一个 <img src="https://math.now.sh?inline=%5Cmathbf%7Bt%7D" style="display:inline-block;margin: 0;"/> 向量就是在 80位置为1，其它位置为0；构建第二个 <img src="https://math.now.sh?inline=%5Cmathbf%7Bt%7D" style="display:inline-block;margin: 0;"/> 向量就是在 81位置为1，其它位置为0 …以此类推。</p>
+<p>通过  <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D%5E%7B*%7D%5Cmathbf%7Bt%7D" style="display:inline-block;margin: 0;"/> 便可以得到 A22 矩阵个体的一列，其计算公式为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Bv%7D%5E%7B*%7D%20%3D%20%5Cmathbf%7BA%7D%5E%7B*%7D%5Cmathbf%7Bt%7D%20%3D%20%5Cmathbf%7BQ%28I-P%29%5E%7B-1%7DD(I-P)%5E%7B-1%5Cprime%7DQ%5E%7B%5Cprime%7Dt%7D%0A" /></p><p>这里我们可以同样分步骤进行计算：</p>
+<ul>
+<li>
+<p>首先计算 <img src="https://math.now.sh?inline=%5Cmathbf%7Bt%7D%5E%7B*%7D%20%3D%20%5Cmathbf%7BQ%5E%7B%5Cprime%7Dt%7D" style="display:inline-block;margin: 0;"/></p>
+</li>
+<li>
+<p>我们定义 <img src="https://math.now.sh?inline=%5Cmathbf%7Br%7D%20%3D%20%5Cmathbf%7B%28I-P%29%5E%7B-1%5Cprime%7Dt%5E%7B*%7D%7D" style="display:inline-block;margin: 0;"/> ，转换一下我们可以通过求解三角方程组 <img src="https://math.now.sh?inline=%5Cmathbf%7B%28I-P%29%5E%7B%5Cprime%7Dr%3Dt%5E%7B*%7D%7D" style="display:inline-block;margin: 0;"/> 得到 <img src="https://math.now.sh?inline=%5Cmathbf%7Br%7D" style="display:inline-block;margin: 0;"/> 。</p>
+</li>
+<li>
+<p>然后我们得到 <img src="https://math.now.sh?inline=%5Cmathbf%7Bv%7D%20%3D%20%20%5Cmathbf%7B%28I-P%29%5E%7B-1%7DDr%7D" style="display:inline-block;margin: 0;"/> ，转换一下我们可以通过求解三角方程组 <img src="https://math.now.sh?inline=%5Cmathbf%7B%28I-P%29v%3DDr%7D" style="display:inline-block;margin: 0;"/> 得到 <img src="https://math.now.sh?inline=%5Cmathbf%7Bv%7D" style="display:inline-block;margin: 0;"/> 。</p>
+</li>
+<li>
+<p>然后我们通过 <img src="https://math.now.sh?inline=%5Cmathbf%7Bv%7D%5E%7B*%7D%20%3D%20%5Cmathbf%7BQv%7D" style="display:inline-block;margin: 0;"/> 得到 <img src="https://math.now.sh?inline=%5Cmathbf%7Bv%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 。</p>
+</li>
+</ul>
+<p>最后这里得到的 <img src="https://math.now.sh?inline=%5Cmathbf%7Bv%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 还包含一些无关元素，按照上例，还需要从  <img src="https://math.now.sh?inline=%5Cmathbf%7Bv%7D%5E%7B*%7D" style="display:inline-block;margin: 0;"/> 提取从 80 到 100 的位置的元素，这才是真正的 A22 矩阵的一列元素。</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>Colleau J J. An indirect approach to the extensive calculation of relationship coefficients[J]. Genetics Selection Evolution, 2002, 34(4): 409.</p>
+</li>
+<li>
+<p>Misztal I, Aguilar I, Legarra A, et al. A unified approach to utilize phenotypic, full pedigree, andgenomic information for genetic evaluation[C]//9. World Congress on Genetics Applied to Livestock Production. 2010.</p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>线性模型</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>线性模型</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>STR个体识别指标</title>
     <url>/posts/dafd850d/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>利用微卫星标记 (STR) 可以进行个体识别的指标介绍。</p>
@@ -6239,7 +6413,7 @@
 <p>因此，我们有 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D%20%3D%20%5Cmathbf%7BT%20D%5E%7B2%7D%20T%5E%7B%5Cprime%7D%7D" style="display:inline-block;margin: 0;"/> ，其对角线元素计算公式如下</p>
 <p style=""><img src="https://math.now.sh?from=A_%7Bii%7D%20%3D%20%5Csum_%7Bj%3D1%7D%5E%7Bi%7D%20T_%7Bij%7D%5E%7B2%7D%20D%5E%7B2%7D_%7Bjj%7D%0A" /></p><p>同时，<img src="https://math.now.sh?inline=%5Cmathbf%7BA%5E%7B-1%7D%7D" style="display:inline-block;margin: 0;"/> 可写为</p>
 <p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BA%5E%7B-1%7D%3D%5Cleft%28L%20L%5E%7B%5Cprime%7D%5Cright%29%5E%7B-1%7D%3D%5Cleft(T%20D%20D%20T%5E%7B%5Cprime%7D%5Cright)%5E%7B-1%7D%3D%5Cleft(T%5E%7B%5Cprime%7D%5Cright)%5E%7B-1%7D%20D%5E%7B-2%7D%20T%5E%7B-1%7D%7D%0A" /></p><p>其中，<img src="https://math.now.sh?inline=%5Cmathbf%7BD%5E%7B2%7D%7D" style="display:inline-block;margin: 0;"/> 矩阵元素计算方式如下，其中 <img src="https://math.now.sh?inline=F_%7Bi%7D" style="display:inline-block;margin: 0;"/> 为 近交系数。</p>
-<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%0A%26%20%5Cquad%20D%5E%7B2%7D_%7Bii%7D%20%3D%200.5%20-%200.25%28F_%7Bs_%7Bi%7D%7D%20%2B%20F_%7Bd_%7Bi%7D%7D%29%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E7%88%B6%E6%AF%8D%E5%9D%87%E5%B7%B2%E7%9F%A5%7D%5C%5C%0A%26%20%5Cquad%20%5Cquad%20%20%20%3D%200.75%20-%200.25%20F_%7Bp_%7Bi%7D%7D%20%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E5%8D%95%E4%B8%AA%E4%BA%B2%E6%9C%AC%E5%B7%B2%E7%9F%A5%7D%5C%5C%0A%26%20%5Cquad%20%5Cquad%20%20%20%3D%201%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E4%B8%A4%E4%B8%AA%E4%BA%B2%E6%9C%AC%E5%9D%87%E6%9C%AA%E7%9F%A5%7D%5C%5C%0A%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>根据  <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 矩阵元素，我们可以按列计算 <img src="https://math.now.sh?inline=%5Cmathbf%7BT%7D" style="display:inline-block;margin: 0;"/> 阵元素，计算公式如下（系谱按照出生日期顺序排序）</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%0AD%5E%7B2%7D_%7Bii%7D%20%26%20%3D%200.5%20-%200.25%28F_%7Bs_%7Bi%7D%7D%20%2B%20F_%7Bd_%7Bi%7D%7D%29%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E7%88%B6%E6%AF%8D%E5%9D%87%E5%B7%B2%E7%9F%A5%7D%5C%5C%0A%26%3D%200.75%20-%200.25%20F_%7Bp_%7Bi%7D%7D%20%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E5%8D%95%E4%B8%AA%E4%BA%B2%E6%9C%AC%E5%B7%B2%E7%9F%A5%7D%5C%5C%0A%26%3D%201%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E4%B8%A4%E4%B8%AA%E4%BA%B2%E6%9C%AC%E5%9D%87%E6%9C%AA%E7%9F%A5%7D%5C%5C%0A%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>根据  <img src="https://math.now.sh?inline=%5Cmathbf%7BL%7D" style="display:inline-block;margin: 0;"/> 矩阵元素，我们可以按列计算 <img src="https://math.now.sh?inline=%5Cmathbf%7BT%7D" style="display:inline-block;margin: 0;"/> 阵元素，计算公式如下（系谱按照出生日期顺序排序）</p>
 <p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%20%5Ctext%7Bfor%20%7D%20j%3D1%20%5Ctext%7B%20to%20%7D%20N%20%5C%5C%0A%26%20%5Cquad%20T_%7Bii%7D%20%3D%201%20%5C%5C%0A%0A%26%5C%5C%0A%26%20%5Ctext%7Bfor%20%7D%20i%3Dj%2B1%20%5Ctext%7B%20to%20%7D%20N%20%5C%5C%0A%26%20%5Cquad%20T_%7Bij%7D%20%3D%20%28T_%7Bs_%7Bi%7Dj%7D%20%2B%20T_%7Bd_%7Bi%7Dj%7D%29%2F2%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E7%88%B6%E6%AF%8D%E5%9D%87%E5%B7%B2%E7%9F%A5%7D%5C%5C%0A%26%20%5Cquad%20%5Cquad%20%20%20%3D%20T_%7Bp_%7Bi%7Dj%7D%20%2F2%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E5%8D%95%E4%B8%AA%E4%BA%B2%E6%9C%AC%E5%B7%B2%E7%9F%A5%7D%5C%5C%0A%26%20%5Cquad%20%5Cquad%20%20%20%3D%200%20%5Cquad%20%5Ctext%7B%E5%BD%93%20i%20%E7%9A%84%E4%B8%A4%E4%B8%AA%E4%BA%B2%E6%9C%AC%E5%9D%87%E6%9C%AA%E7%9F%A5%7D%5C%5C%0A%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>如果按行来计算 <img src="https://math.now.sh?inline=%5Cmathbf%7BT%7D" style="display:inline-block;margin: 0;"/> 阵元素，其第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行元素等于个体 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 从其直系祖先中得到的基因比例（个体与其亲本是 0.5 ，与其祖父母是 0.25 ，每隔一代乘以 0.5），比如  <img src="https://math.now.sh?inline=T_%7Bis_%7Bi%7D%7D%20%3D%20T_%7Bid_%7Bi%7D%7D%20%3D%200.5" style="display:inline-block;margin: 0;"/> 。如果两个个体没有直系的亲缘关系，那么 <img src="https://math.now.sh?inline=T_%7Bij%7D%20%3D%200" style="display:inline-block;margin: 0;"/> 。因此， <img src="https://math.now.sh?inline=%5Cmathbf%7BT%7D" style="display:inline-block;margin: 0;"/> 阵第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 行元素可以拆分与个体 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 的亲本的元素的 1/2 的累积之和，即</p>
 <p style=""><img src="https://math.now.sh?from=T_%7Bij%7D%20%3D%20%5Csum_%7Bk%20%5Cin%20P_%7Bj%7D%7D%200.5%20T_%7Bik%7D%20%3D%20%5Csum_%7Bk%20%5Cin%20ANC_%7Bi%7D%20%5Ccap%20P_%7Bj%7D%7D%200.5%20T_%7Bik%7D%0A" /></p><p>这里 <img src="https://math.now.sh?inline=P_%7Bj%7D" style="display:inline-block;margin: 0;"/> 为个体 <img src="https://math.now.sh?inline=j" style="display:inline-block;margin: 0;"/> 的所有后代， <img src="https://math.now.sh?inline=ANC_%7Bi%7D" style="display:inline-block;margin: 0;"/> 为个体 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 的所有祖先（包括个体 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 本身），第二个等号就是只提取  <img src="https://math.now.sh?inline=P_%7Bj%7D" style="display:inline-block;margin: 0;"/>  中为个体 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 祖先的个体，因为不是个体 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 祖先 ，那么 <img src="https://math.now.sh?inline=T_%7Bik%7D%20%3D%200" style="display:inline-block;margin: 0;"/> ，加不加一样 。</p>
 <h2 id="T-1-矩阵">T^-1 矩阵</h2>
