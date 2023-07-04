@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">4.3k</span>
+            <span class="post-count">4.5k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">17 分钟</span>
+            <span class="post-count">18 分钟</span>
         </span>
     </span>
 </div>
@@ -143,6 +143,20 @@
 <h3 id="VCF-文件-2">VCF 文件</h3>
 <p>使用 <strong>–recode vcf-iid</strong> 输出为 VCF 文件。</p>
 <p>这里 vcf-iid 含义是只使用个体号作为 VCF 文件中的样本号，如果仅仅是 --recode vcf，那么生成的VCF文件的样本号是家系号和个体号合并的结果（以_连接） 。</p>
+<p>需要注意的是，plink 默认会将等位基因频率高的碱基 (A2) 设置为 ref ，将等位基因频率低的碱基 (A1) 设置为 alt 。如果你需要指定每个位点 的 ref 和 alt ，比如你可以设置与某一个 VCF 中的 ref 和 alt 保持一致，你可以添加一下选项：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--a2-allele ref.vcf 4 3 &#x27;#&#x27;</span><br></pre></td></tr></table></figure>
+<p>参数说明：</p>
+<p><code>--a2-allele ref.vcf 4 3 '#'</code> :</p>
+<p>​	<code>--a2-allele</code> 命令表示 指定A2基因（Major）</p>
+<p>​	<code>ref.vcf</code>  是参考群体的vcf文件（必须是未压缩文件）</p>
+<p>​	<code>4</code> 是参考群体A2基因所在列</p>
+<p>​	<code>3</code> 是SNP名称列</p>
+<p>​	<code>#</code> 是需要跳过的行</p>
+<p>需要注意的地方如下</p>
+<ol>
+<li><strong>ref.vcf 和 plink 文件中的染色体，snp名称，物理位置，两个碱基必须一致</strong></li>
+<li>需要转换的 plink 文件中的位点必须均在 ref.vcf 中。</li>
+</ol>
 <h3 id="位点顺序">位点顺序</h3>
 <p>经过 plink 处理之后，<strong>位点会按照物理位置排序</strong>。</p>
 <h3 id="样本顺序">样本顺序</h3>
