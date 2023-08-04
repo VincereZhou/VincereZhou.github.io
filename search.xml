@@ -2297,6 +2297,16 @@
 <p>额，找到了 <code>../lib/R</code> 文件夹，没有找到 <code>../lib/bin</code> 文件夹。删除</p>
 <p>ok，删除成功</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> R</span></span><br><span class="line">/usr/bin/R</span><br></pre></td></tr></table></figure>
+<h2 id="版本回退">版本回退</h2>
+<p>我发现 conda 也有类似于 git 一样的版本控制功能，首先使用下面的语句查看所有版本。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda list --revision</span><br></pre></td></tr></table></figure>
+<p>确定需要回退的版本后，使用下面的语句回退到历史版本。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda install --rev 1</span><br></pre></td></tr></table></figure>
+<p>如果遇到报错，比如下面的语句</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">RemoveError: &#x27;requests&#x27; is a dependency of conda and cannot be removed from conda&#x27;s operating environment</span><br></pre></td></tr></table></figure>
+<p>那么先退出 conda 环境（base） ，然后更新 conda ，如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda deactivate</span><br><span class="line">conda update conda</span><br></pre></td></tr></table></figure>
+<p>还是不行，就只能删除 conda 文件夹，重新按照 conda 了。</p>
 <h1>创建虚拟环境</h1>
 <p>创建虚拟环境，后面可以指定自带的python版本 (<strong>这里我保持与主环境一致</strong>)。</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">conda create --name R4<span class="number">.1</span><span class="number">.0</span> python=<span class="number">3.9</span><span class="number">.5</span></span><br></pre></td></tr></table></figure>
@@ -3022,7 +3032,7 @@
 <p>其中的 count_allele.txt 文件内容如下</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1_242598	C</span><br><span class="line">1_10673082	T</span><br><span class="line">1_10723065	T</span><br><span class="line">1_11407894	A</span><br><span class="line">1_11426075	C</span><br></pre></td></tr></table></figure>
 <h3 id="VCF-文件-2">VCF 文件</h3>
-<p>使用 <strong>–recode vcf-iid</strong> 输出为 VCF 文件。</p>
+<p>使用 <strong>–recode vcf-iid</strong> 输出为 VCF 文件，使用  <strong>–recode vcf-iid bgz</strong> 输出为 vcf.gz 压缩文件。</p>
 <p>这里 vcf-iid 含义是只使用个体号作为 VCF 文件中的样本号，如果仅仅是 --recode vcf，那么生成的VCF文件的样本号是家系号和个体号合并的结果（以_连接） 。</p>
 <p>需要注意的是，plink 默认会将等位基因频率高的碱基 (A2) 设置为 ref ，将等位基因频率低的碱基 (A1) 设置为 alt 。如果你需要指定每个位点 的 ref 和 alt ，比如你可以设置与某一个 VCF 中的 ref 和 alt 保持一致，你可以添加一下选项：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--a2-allele ref.vcf 4 3 &#x27;#&#x27;</span><br></pre></td></tr></table></figure>

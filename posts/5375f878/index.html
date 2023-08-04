@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">972</span>
+            <span class="post-count">1.1k</span>
         </span>
     </span>
 
@@ -136,6 +136,16 @@
 <p>额，找到了 <code>../lib/R</code> 文件夹，没有找到 <code>../lib/bin</code> 文件夹。删除</p>
 <p>ok，删除成功</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> R</span></span><br><span class="line">/usr/bin/R</span><br></pre></td></tr></table></figure>
+<h2 id="版本回退">版本回退</h2>
+<p>我发现 conda 也有类似于 git 一样的版本控制功能，首先使用下面的语句查看所有版本。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda list --revision</span><br></pre></td></tr></table></figure>
+<p>确定需要回退的版本后，使用下面的语句回退到历史版本。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install --rev 1</span><br></pre></td></tr></table></figure>
+<p>如果遇到报错，比如下面的语句</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RemoveError: &#x27;requests&#x27; is a dependency of conda and cannot be removed from conda&#x27;s operating environment</span><br></pre></td></tr></table></figure>
+<p>那么先退出 conda 环境（base） ，然后更新 conda ，如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda deactivate</span><br><span class="line">conda update conda</span><br></pre></td></tr></table></figure>
+<p>还是不行，就只能删除 conda 文件夹，重新按照 conda 了。</p>
 <h1>创建虚拟环境</h1>
 <p>创建虚拟环境，后面可以指定自带的python版本 (<strong>这里我保持与主环境一致</strong>)。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create --name R4<span class="number">.1</span><span class="number">.0</span> python=<span class="number">3.9</span><span class="number">.5</span></span><br></pre></td></tr></table></figure>
