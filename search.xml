@@ -1,6 +1,302 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>bcftools软件</title>
+    <url>/posts/f3c7472f/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>bcftools 是用于处理 VCF/BCF 文件的工具。</p>
+<span id="more"></span>
+<h1>sort</h1>
+<p><code>bcftools sort</code> 命令就是将变异按照染色体和物理位置排序，最简单的例子如下，其中 <code>-o</code> 是输出文件名称。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools sort input_file.vcf -o input_file_sorted.vcf</span><br></pre></td></tr></table></figure>
+<p>可以配合 <code>-O</code> （<strong>Output type</strong>）选项指定输出文件格式，有下面选项</p>
+<ul>
+<li>压缩 BCF (b) ， 后缀为 <code>.bcf</code></li>
+<li>未压缩 BCF (u),  后缀也是 <code>.bcf</code></li>
+<li>压缩 VCF (z)</li>
+<li>未压缩 VCF (v)</li>
+</ul>
+<p>如果是生成 bcftools 使用的中间文件，建议一直使用 <code>-Ou</code> 选项，即未压缩的 BCF 格式，避免运行时<strong>无谓的压缩/解压缩操作，以及 VCF 和 BCF 转换过程</strong>。</p>
+<p>举个例子，生成 <code>vcf.gz</code> 文件如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools sort input_file.vcf -Oz -o input_file_sorted.vcf.gz</span><br></pre></td></tr></table></figure>
+<h1>index</h1>
+<p>基本所有分析第一步都是创建索引文件（除了需要 sort 的情况），类似于书籍的目录。</p>
+<p>如果输入文件是 VCF 格式，那么我们首先需要将其压缩（<code>bcftools index</code> 只接受 <code>vcf.gz</code> 或 <code>bcf</code> 格式  ）。这里你可以使用 <code>bgzip</code> 命令，也可以使用 <code>bcftools view</code></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bgzip -c input_file.vcf &gt; input_file.vcf.gz </span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bcftools view input_file.vcf  -Oz -o input_file.vcf.gz</span><br></pre></td></tr></table></figure>
+<p>然后我们创建索引文件 (默认是 CSI 格式，可以使用 <code>-t</code> 选项创建 TBI 格式的索引)</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools index input_file.vcf.gz</span><br></pre></td></tr></table></figure>
+<p>对于 <code>.bcf</code>，<code>bcftools index</code> 也只接受压缩格式，如果使用 <code>-Ou</code> 格式（未压缩的 BCF），则会出现以下报错信息</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">bcftools index val_all_phased.bcf</span></span><br><span class="line">[E::main_vcfindex] unknown filetype; expected bgzip compressed VCF or BCF</span><br><span class="line">[E::main_vcfindex] was the VCF/BCF compressed with bgzip?</span><br></pre></td></tr></table></figure>
+<h1>concat</h1>
+<p>用于合并相同样本的多个 VCF/BCF 文件（比如不同染色体的基因型），注意所有文件中的<strong>样本顺序必须报错一致</strong>，<strong>所有输入文件必须已经按照染色体和物理位置排序了</strong>，<strong>输入文件的顺序必须也得按照物理位置的顺序</strong>（比如从1号染色体到 18号染色体）</p>
+<p>最简单的例子如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools concat input1.bcf input2.bcf -o output.vcf</span><br></pre></td></tr></table></figure>
+<p>也可以使用 <code>-f</code> 选项定一个包含输入文件路径的文本文件。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools concat -f file_list.txt -o output.vcf</span><br></pre></td></tr></table></figure>
+<h1>view</h1>
+<p>最简单的应用就是 VCF 和 BCF 格式的互相转换</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools view input.vcf -Ob -o output.bcf  # vcf to bcf</span><br><span class="line"></span><br><span class="line">bcftools view input.bcf -Ov -o output.vcf  # bcf to vcf</span><br></pre></td></tr></table></figure>
+<h1>filter</h1>
+<p>第一个功能是<strong>提取染色体片段</strong>，示例命令如下（这里的染色体是 Gm01 ，测试了可以接受这种异常的染色体名称）</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools filter test.vcf.gz --regions Gm01:1-1000 &gt; test2.vcf</span><br></pre></td></tr></table></figure>
+<p>可以提取多条染色体的位点</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bcftools filter test.vcf.gz --regions Gm01,Gm02 &gt; test2.vcf</span><br></pre></td></tr></table></figure>
+<p>第二个功能是<strong>质控位点</strong>，下面是过滤位点缺失率大于 0.1 ， maf 小于 0.05 的位点（前提是 VCF 的 INFO 列中含有 F_MISSING 列）。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools filter -e &quot;F_MISSING &gt; 0.1 ||  MAF &lt; 0.05&quot; input.vcf.gz -Oz -o output.vcf.gz</span><br></pre></td></tr></table></figure>
+<h1>norm</h1>
+<p>将多等位碱基的位点拆分为多行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bcftools norm --multiallelics -both $&#123;result&#125;/Genotype.cohort.dbSNP.g.vcf \</span><br><span class="line">   -Oz -o $&#123;result&#125;/Genotype.cohort.dbSNP.g.vcf.gz</span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p><a href="https://www.biocomputix.com/post/bcftools">https://www.biocomputix.com/post/bcftools</a></p>
+</li>
+<li>
+<p><a href="http://samtools.github.io/bcftools/bcftools.html">bcftools 官方文档</a></p>
+</li>
+<li>
+<p><a href="https://www.jianshu.com/p/266c55c87978">bcftools常用命令详解</a></p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>软件学习</category>
+        <category>bcftools</category>
+      </categories>
+      <tags>
+        <tag>软件学习</tag>
+        <tag>bcftools</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>python包-使用pysam库处理vcf.gz文件</title>
+    <url>/posts/57f8e30c/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>如何使用 <code>pysam</code> 库直接读取 <code>bgzip</code> 压缩的 <code>vcf.gz</code> 文件。</p>
+<span id="more"></span>
+<p>使用 <code>pysam</code> 库处理 <code>vcf.gz</code> 文件可以实现对压缩的 VCF 文件进行读取、写入和查询等操作。以下是一些常见的 <code>pysam</code> 操作示例：</p>
+<h1>读取 <code>vcf.gz</code> 文件：</h1>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打开压缩的 VCF 文件</span></span><br><span class="line">vcf_file = pysam.VariantFile(<span class="string">&#x27;file.vcf.gz&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历所有记录</span></span><br><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> vcf_file:</span><br><span class="line">    <span class="comment"># 处理每个记录</span></span><br><span class="line">    f = <span class="built_in">str</span>(record).split()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">vcf_file.close()</span><br></pre></td></tr></table></figure>
+<p>在上面的代码中，我们使用 <code>VariantFile</code> 类来打开 <code>vcf.gz</code> 文件，并使用 <code>for</code> 循环遍历每个记录。你可以根据需要处理每个记录。</p>
+<p>注意需要读取的 <code>vcf.gz</code> 文件必须事先 index 。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools index file.vcf.gz</span><br></pre></td></tr></table></figure>
+<h1>写入 <code>vcf.gz</code> 文件：</h1>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个新的 VCF 文件</span></span><br><span class="line">vcf_out = pysam.VariantFile(<span class="string">&#x27;output.vcf.gz&#x27;</span>, <span class="string">&#x27;w&#x27;</span>, header=vcf_file.header)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历原始 VCF 文件的记录并写入新文件</span></span><br><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> vcf_file:</span><br><span class="line">    f = <span class="built_in">str</span>(record).split()</span><br><span class="line">    vcf_out.write(record)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">vcf_out.close()</span><br><span class="line">vcf_file.close()</span><br></pre></td></tr></table></figure>
+<p>在上面的代码中，我们创建了一个新的 <code>VariantFile</code> 对象用于写入记录，并通过指定 <code>header</code> 参数设置了相同的头部信息。然后，我们遍历原始 <code>vcf.gz</code> 文件的记录，并将每个记录写入新文件。</p>
+<h1>查询特定区域的记录：</h1>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打开压缩的 VCF 文件</span></span><br><span class="line">vcf_file = pysam.VariantFile(<span class="string">&#x27;file.vcf.gz&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查询特定区域的记录（例如：染色体1，位置从1000到2000）</span></span><br><span class="line">region_records = vcf_file.fetch(<span class="string">&#x27;1&#x27;</span>, <span class="number">1000</span>, <span class="number">2000</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历查询结果</span></span><br><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> region_records:</span><br><span class="line">    <span class="comment"># 处理每个记录</span></span><br><span class="line">    f = <span class="built_in">str</span>(record).split()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">vcf_file.close()</span><br></pre></td></tr></table></figure>
+<p>在上面的代码中，我们使用 <code>fetch()</code> 方法查询 <code>vcf.gz</code> 文件中某个特定区域的记录。通过指定染色体名称和起始/结束位置，可以获取该区域的记录。</p>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用软件构建A阵和G阵</title>
+    <url>/posts/afd03e8/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用现成的软件构建A阵和G阵。</p>
+<span id="more"></span>
+<h1>构建A阵</h1>
+<p>我一般使用 R 中的 <code>nadiv</code> 包构建 A阵，A逆阵，以及计算近交系数。</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line"><span class="comment">## 使用了nadiv包</span></span><br><span class="line"><span class="comment">## 唯一一个参数是系谱文件，无标题</span></span><br><span class="line"></span><br><span class="line">args<span class="operator">&lt;-</span>commandArgs<span class="punctuation">(</span><span class="built_in">T</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">library<span class="punctuation">(</span>data.table<span class="punctuation">)</span></span><br><span class="line">ped <span class="operator">&lt;-</span> read.table<span class="punctuation">(</span>args<span class="punctuation">[</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">,</span>header <span class="operator">=</span> <span class="built_in">F</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment"># ped &lt;- read.table(&quot;pedigree.txt&quot;,header = F)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 处理系谱</span></span><br><span class="line"></span><br><span class="line">new_ped <span class="operator">&lt;-</span> ped<span class="punctuation">[</span><span class="punctuation">,</span><span class="number">1</span><span class="operator">:</span><span class="number">3</span><span class="punctuation">]</span> <span class="comment">#不要第四列</span></span><br><span class="line"></span><br><span class="line">library<span class="punctuation">(</span>nadiv<span class="punctuation">)</span></span><br><span class="line">pped <span class="operator">=</span> prepPed<span class="punctuation">(</span>new_ped<span class="punctuation">)</span><span class="comment">#给founders也增加一行系谱，然后排序系谱</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###构建A阵</span></span><br><span class="line">A <span class="operator">=</span> as.matrix<span class="punctuation">(</span>makeA<span class="punctuation">(</span>pped<span class="punctuation">)</span><span class="punctuation">)</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">#write.table(A,&quot;A.txt&quot;, quote=F, row.names=F) # 保存A阵文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###构建A逆</span></span><br><span class="line">A_inv<span class="operator">=</span> makeAinv<span class="punctuation">(</span>pped<span class="punctuation">)</span><span class="operator">$</span>Ainv<span class="comment">#可直接求A逆</span></span><br><span class="line">A_inv <span class="operator">=</span> as.matrix<span class="punctuation">(</span>A_inv<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">colnames<span class="punctuation">(</span>A_inv<span class="punctuation">)</span> <span class="operator">=</span> rownames<span class="punctuation">(</span>A_inv<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#write.table(A_inv,&quot;A_inv.txt&quot;, quote=F, row.names=F, col.names=F) # 保存A阵文件</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">### 求近交系数</span></span><br><span class="line">inbreeding <span class="operator">=</span> makeAinv<span class="punctuation">(</span>pped<span class="punctuation">)</span><span class="operator">$</span>f </span><br><span class="line"></span><br><span class="line">out <span class="operator">=</span> cbind<span class="punctuation">(</span>pped<span class="punctuation">[</span><span class="punctuation">,</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">,</span> inbreeding<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">colnames<span class="punctuation">(</span>out<span class="punctuation">)</span> <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;id&quot;</span><span class="punctuation">,</span> <span class="string">&quot;inbreeding&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">write.table<span class="punctuation">(</span>out<span class="punctuation">,</span><span class="string">&quot;inbreeding.txt&quot;</span><span class="punctuation">,</span> <span class="built_in">quote</span><span class="operator">=</span><span class="built_in">F</span><span class="punctuation">,</span> row.names<span class="operator">=</span><span class="built_in">F</span><span class="punctuation">,</span> col.names<span class="operator">=</span><span class="built_in">T</span><span class="punctuation">)</span> </span><br></pre></td></tr></table></figure>
+<h1>构建 G 阵</h1>
+<p>标准化的 G阵可以使用 GCTA 计算得到；</p>
+<p>中心化的 G阵可以使用 GCTA 或 PLINK 软件计算得到；</p>
+]]></content>
+      <categories>
+        <category>软件学习</category>
+      </categories>
+      <tags>
+        <tag>软件学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用shapeit和impute软件定相填充</title>
+    <url>/posts/f5617387/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 shapeit 和 impute 软件进行填充。</p>
+<span id="more"></span>
+<h1><s>shapeit5</s></h1>
+<p>用芯片数据实际使用报错如下。AC(Allele Count) 表示该Allele的数目，这个应该只有测序的 VCF 才有，芯片只有 GT 字段，因此芯片数据用不了 shapeit5，只有 shapeit3 及更低版本才能使用 bed/bim/fam 作为输入文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ERROR: AC field is needed in file</span><br></pre></td></tr></table></figure>
+<h2 id="下载安装">下载安装</h2>
+<p>官网见<a href="https://odelaneau.github.io/shapeit5/">shapeit5</a></p>
+<p>首先尝试使用 conda 安装，不然自己安装貌似很麻烦。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda search shapeit5</span></span><br><span class="line">Loading channels: done</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Name                       Version           Build  Channel</span></span><br><span class="line">shapeit5                       1.0.0      h0c8ee15_0  anaconda/cloud/bioconda</span><br><span class="line">shapeit5                       5.1.1      hb60d31d_0  anaconda/cloud/bioconda</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda install shapeit5=5.1.1</span></span><br></pre></td></tr></table></figure>
+<p>安装完之后查看一下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda list | grep <span class="string">&quot;shapeit&quot;</span></span></span><br><span class="line">shapeit5                  5.1.1                </span><br></pre></td></tr></table></figure>
+<p>在 conda 的 bin 目录下出现了以下文件 ( <code>-iname</code> 不区分大小写)</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">find /mnt/data/zhouziwen/lib/miniconda3/bin -iname <span class="string">&quot;*shapeit*&quot;</span></span></span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/bin/SHAPEIT5_ligate</span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/bin/SHAPEIT5_phase_common</span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/bin/SHAPEIT5_phase_rare</span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/bin/SHAPEIT5_switch</span><br></pre></td></tr></table></figure>
+<h2 id="使用">使用</h2>
+<p>参考<a href="https://odelaneau.github.io/shapeit5/docs/documentation/phase_common/">官网文档</a></p>
+<h3 id="定相常见变异">定相常见变异</h3>
+<p><code>phase_common</code> 这个工具对常见变异（common variant sites）进行定相，例如 SNP 数据。这个工具是对大型测序数据定相的第一步，可以视为 SHAPEIT4 的升级版本（<strong>芯片定相</strong>只需要使用这一个工具）。</p>
+<p><strong>第一种使用方式：对无关个体定相</strong>，其中：</p>
+<ul>
+<li><code>--input</code> ： 验证群基因型文件，vcf/bcf 格式</li>
+<li><code>--thread 8</code> : 使用 8 个线程</li>
+<li><code>--region 1</code> : 使用 1 号染色体的数据</li>
+<li><code>--map</code> ：遗传图片文件，可选</li>
+<li><code>--output target.phased.bcf</code> : 输出文件</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">phase_common --input array/target.unrelated.bcf --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p><strong>第二种使用方式：对有亲缘关系的个体定相</strong>，这里 <code>--pedigree</code> 就是系谱文件（缺失记为 NA）。</p>
+<p>这里的原理是用亲本数据对子代定相（当不存在孟德尔错误，并且至少有一个亲本是纯合子）时，此时后代的第一个单倍型是父本的单倍型，第二个单倍型是母本的单倍型。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">phase_common --input array/target.family.bcf --pedigree info/target.family.fam --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p><strong>第三种使用方式：对 X 染色体定相</strong>，其中 <code>--haploids info/target.haploid.txt</code>  中的文件指定单倍体的样本（一行一个样本号，例如雄性）。</p>
+<p>这里的原理其实是见单倍体在输入或输出文件中当作完全纯合的二倍体来编码。对于单倍体个体，<strong>所有杂合子首先会改为缺失</strong>，然后再填充；对于双倍体个体，按照正常流程填充。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">phase_common --input array/target.haploid.bcf --haploids info/target.haploid.txt --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p><strong>第四种使用方式：使用参考面板填充</strong>，<code>--reference</code> 后面跟着 vcf/bcf 文件。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">phase_common --input array/target.unrelated.bcf --reference array/reference.bcf --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p><strong>第五种使用方式：使用 scaffold 填充</strong>，<code>--scaffold array/target.scaffold.bcf</code> 后面跟着的 vcf/bcf 文件就是输入文件部分定相的结果（部分样本部分位点，不能有缺失并且全部定相）。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">phase_common --input array/target.unrelated.bcf --scaffold array/target.scaffold.bcf --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<h3 id="ligate">ligate</h3>
+<p>如果你将一条染色体分为了多个片段进行定相，那么可以使用 <code>ligate</code> 来将合并成一整条染色体（无用）。</p>
+<p>首先，我们对同一条染色体两个重叠的片段进行定相。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">phase_common --input array/target.unrelated.bcf --region 1:1-5500000 --map info/chr1.gmap.gz --output target.chunk1.bcf --thread 8</span><br><span class="line">phase_common --input array/target.unrelated.bcf --region 1:4500000-10000000 --map info/chr1.gmap.gz --output target.chunk2.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p>然后我们将这两个 bcf 文件名称写入一个文件（需要排序好）</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">echo target.chunk1.bcf &gt; chunks.txt</span><br><span class="line">echo target.chunk2.bcf &gt;&gt; chunks.txt</span><br></pre></td></tr></table></figure>
+<p>然后，我们执行下面的命令</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">ligate --input chunks.txt --output target.phased.bcf --thread 2</span><br></pre></td></tr></table></figure>
+<p>在整合的过程中，会输出两个统计量（前提是多个 bcf 文件之间存在重叠的区域）</p>
+<ul>
+<li>Switch rate: the percentage of samples for which haplotypes have been switched,</li>
+<li>Avg phaseQ: the agreement of the phasing in the overlapping region between two successive chunks of data. We usually expect values above 80 or 90.</li>
+</ul>
+<p>注意，如果定相过程中使用了系谱，那么这里也需要使用  <code>--pedigree</code> 选项。</p>
+<h3 id="定相稀有变异">定相稀有变异</h3>
+<p>这里建议只对于<strong>样本数目超过2000</strong>的数据使用 <code>phase_rare</code> ，不然就可以正常使用 <code>phase_common</code> 。</p>
+<p>第一种使用方式：定相无关个体。</p>
+<p>这里我们分多步来定相，首先我们对常见变异（MAF&gt;0.1%）进行定相</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">phase_common --input wgs/target.unrelated.bcf --filter-maf 0.001 --region 1 --map info/chr1.gmap.gz --output tmp/target.scaffold.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p>然后，我们使用常见变异定相结果作为 scaffold 来定相稀有变异。</p>
+<p>没太看懂，暂时不管它。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">while read LINE; do</span><br><span class="line">	CHK=$(echo $LINE | awk &#x27;&#123; print $1; &#125;&#x27;)</span><br><span class="line">	SRG=$(echo $LINE | awk &#x27;&#123; print $3; &#125;&#x27;)</span><br><span class="line">	IRG=$(echo $LINE | awk &#x27;&#123; print $4; &#125;&#x27;)</span><br><span class="line">	phase_rare --input wgs/target.unrelated.bcf --scaffold tmp/target.scaffold.bcf --map info/chr1.gmap.gz --input-region $IRG --scaffold-region $SRG --output tmp/target.phased.chunk$CHK\.bcf  --thread 8</span><br><span class="line">done &lt; info/chunks.coordinates.txt</span><br></pre></td></tr></table></figure>
+<h1>shapeit4</h1>
+<h2 id="下载安装-2">下载安装</h2>
+<p>官网见<a href="https://odelaneau.github.io/shapeit4/">shapeit4</a></p>
+<p>首先尝试使用 conda 安装，发现安装了 shapeit5 以后就没法安装 shapeit4 了（因为附属软件的版本冲突），但是在一个虚拟环境中安装成功了。</p>
+<p>手动编译安装教程参考<a href="https://zhuanlan.zhihu.com/p/87668128">shapeit4 安装</a></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda search shapeit4</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda install shapeit4=4.2.2 <span class="comment"># 安装失败</span></span></span><br></pre></td></tr></table></figure>
+<p>安装完之后查看一下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda list | grep <span class="string">&quot;shapeit&quot;</span></span></span><br><span class="line">shapeit4                  4.2.2 </span><br></pre></td></tr></table></figure>
+<p>安装后的 shapeit4 在虚拟环境下面的目录</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> shapeit4</span></span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/envs/R4.1.0/bin/shapeit4</span><br></pre></td></tr></table></figure>
+<p>我尝试在 base 环境下回退版本失败，懒得卸载重装 conda 了，于是给上面的 shapeit4  创建一个软链接</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ln -s /mnt/data/zhouziwen/lib/miniconda3/envs/R4.1.0/bin/shapeit4 /mnt/data/zhouziwen/lib/bin</span><br></pre></td></tr></table></figure>
+<h2 id="使用-2">使用</h2>
+<p>参考<a href="https://odelaneau.github.io/shapeit4/">shapeit4</a></p>
+<p>类似 impute5 ，首先也需要对输入的基因型数据进行 index</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bgzip chr_1.vcf</span><br><span class="line">bcftools index chr_1.vcf.gz</span><br></pre></td></tr></table></figure>
+<p>基本使用方式类似，如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">shapeit4 --reference reference.vcf.gz  --input unphased.vcf.gz --map chr20.b37.gmap.gz --region 20 --output phased.vcf.gz</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>--reference</code> ：参考面板（index），<code>vcf.gz</code> 或 <code>bcf</code> 格式，经过测试<strong>可以使用全部染色体的基因型文件</strong>。注意参考面板和验证群的chrom, position, ref, alt 必须一致 ，shapeit4 只会使用参考面板和验证群的共同位点。</li>
+<li><code>--input</code> ：验证群基因型文件（index），<code>vcf.gz</code> 或 <code>bcf</code> 格式，经过测试<strong>可以使用全部染色体的基因型文件</strong></li>
+</ul>
+<p>shapeit4 <strong>默认使用芯片数据</strong>，如果使用测序数据，增加选项 <strong>–sequencing</strong> 。</p>
+<h1><s>shapeit2</s></h1>
+<p><a href="https://mathgen.stats.ox.ac.uk/genetics_software/shapeit/shapeit.html#home">官网网址</a></p>
+<h2 id="定相命令">定相命令</h2>
+<p>从<a href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#download">shapeit2</a>下载二进制文件，解压即可</p>
+<p>无参定相如下 (首先<strong>需要按照染色体拆分开</strong>，一次定相一条染色体)，其中</p>
+<ul>
+<li><code>--input-bed</code> ： 输入的二进制文件前缀。输入文件也可以使用 vcf （<code>--input-vcf file</code>）</li>
+<li><code>--output-max</code>： 输出文件， 这里也可以只使用前缀（<code>--output-max gwas.phased</code>）</li>
+<li><code>--thread 8</code> : 多进程</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">shapeit2 --input-bed gwas \</span><br><span class="line">        --output-max gwas.phased.haps gwas.phased.sample \</span><br><span class="line">        --thread 8 \</span><br><span class="line">        --force</span><br></pre></td></tr></table></figure>
+<p>shapeit2 运行过程中会对数据进行检查，如果存在缺失率超过 5% 的样本或位点，或者<strong>单态的位点</strong>（无变异）都会提出 warnings 。如果存在个体的缺失率为 100% ，则会报错。</p>
+<p>实际运行过程中发现以下报错，个体缺失率超过 10% 就会报错，结果文件为空文件。加入 <code>--force</code> 选项后就可以正常运行。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">ERROR: 3 individuals with high rates of missing data (&gt;10%). These individuals should be removed. You can disable this error with --force (at your own risk).</span><br></pre></td></tr></table></figure>
+<p>有参考群填充命令如下，加入选项 <code>--input-ref</code> ，这里使用的是 HAP/LEGEND/SAMPLE 格式 ，因此需要转格式。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">shapeit2 --input-bed gwas \</span><br><span class="line">        --output-max gwas.phased \</span><br><span class="line">        --input-ref reference.haplotypes reference.legend reference.sample \</span><br><span class="line">        --thread 8 \</span><br><span class="line">        --force</span><br></pre></td></tr></table></figure>
+<p>注意，<strong>验证群的位点必须均在参考群中，位点的染色体，物理位置， ref/alt 必须保持一致（因此输入文件只能使用二进制格式或VCF，不能使用ped/map），不然会报错</strong>。</p>
+<p>输出文件如下</p>
+<ul>
+<li><code>shapeit_[date]_[time]_UUID.log</code> ：日志文件，可以通过 <code>--output-log gwas.phased.log</code>指定日志文件名称</li>
+<li>haps 文件</li>
+<li>sample 文件</li>
+</ul>
+<p>可以将定相结果文件从  HAPS/SAMPLE 转化为两种不同的格式，第一种是转为 HAP/LEGEND/SAMPLE 格式 （这是 impute2 的参考面板的输入格式，注意 <code>--output-ref</code> 不能只提供前缀）</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">shapeit2 -convert \</span><br><span class="line">        --input-haps gwas.phased \</span><br><span class="line">        --output-ref gwas.phased.hap gwas.phased.leg gwas.phased.sam</span><br></pre></td></tr></table></figure>
+<p>第二种格式是转化为 VCF 格式</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">shapeit2 -convert \</span><br><span class="line">        --input-haps gwas.phased \</span><br><span class="line">        --output-vcf gwas.phased.vcf</span><br></pre></td></tr></table></figure>
+<p>下面具体介绍一下不同的输出文件格式</p>
+<h2 id="HAPS-SAMPLE-格式">HAPS/SAMPLE 格式</h2>
+<p>假设我们有 4 个样本和 3 个 SNP ，SAMPLE 文件用于描述样本情况，举例如下，前两行是标题行，之后每一行表示一个个体，前3列分别为样本1 - 样本2 - 缺失率。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ID_1 ID_2 missing</span><br><span class="line">0    0    0</span><br><span class="line">UNR1 UNR1 0</span><br><span class="line">UNR2 UNR2 0</span><br><span class="line">UNR3 UNR3 0</span><br><span class="line">UNR4 UNR4 0</span><br></pre></td></tr></table></figure>
+<p>HAPS 用于描述 SNP 情况和单倍型，如下所示，每一行代表一个 SNP ，前 5 列分别为 染色体 - SNP - 物理位置 - 第一个碱基 - 第二个碱基；之后的列每两列组成一对，这两列表示一个个体的单倍型。</p>
+<p>举个例子，第 6 列和第 7 列内容分别是 000 和 011 ，这里 0 代表第一个碱基，1代表第二个碱基，因此也就是说第一个个体的单倍型为 ATA 和 ACT 。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">7 SNP1 123 A G 0 0 1 0 0 0 1 1</span><br><span class="line">7 SNP2 456 T C 0 1 1 0 0 1 0 1</span><br><span class="line">7 SNP3 789 A T 0 1 1 0 1 1 1 1</span><br></pre></td></tr></table></figure>
+<h2 id="HAP-LEGEND-SAMPLE">HAP/LEGEND/SAMPLE</h2>
+<p>SAMPLE 文件如下所示，前 4 类分别为 个体号 - Group1 ID - Group2 ID - Sex 。其中个体号必须只能包含字母和数字。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sample population group sex</span><br><span class="line">CEU1 CEU EUR 1</span><br><span class="line">CEU2 CEU EUR 2</span><br><span class="line">GBR1 GBR EUR 2</span><br><span class="line">YRI1 YRI AFR 2</span><br></pre></td></tr></table></figure>
+<p>LEGEND 文件描述样本情况，每一行代表一个 SNP ，前 4 列分别为 SNP - 物理位置 - 第一个碱基 - 第二个碱基；</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">id position a0 a1</span><br><span class="line">SNP1 123 A G</span><br><span class="line">SNP2 456 T C</span><br><span class="line">SNP3 789 A T</span><br></pre></td></tr></table></figure>
+<p>HAP 文件包含单倍型结果，每两列表示一个个体的单倍型。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">0 0 1 0 0 0 1 1</span><br><span class="line">0 1 1 0 0 1 0 1</span><br><span class="line">0 1 1 0 1 1 1 1</span><br></pre></td></tr></table></figure>
+<h2 id="使用-xargs-多进程">使用 xargs 多进程</h2>
+<p>这里我们可以使用 xargs 实现多进程，首先我们生成所有的命令行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">for i in $(seq 1 22); do</span><br><span class="line">  echo &quot;-B gwas.chr$i -M gmap.chr$i\.txt -O gwas.chr$i\.phased -T T&quot; &gt;&gt; myCommands.txt</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+<p>第二步，定相如下，这里 <code>J</code>  就是并行数目，<code>2</code> 是线程数目。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cat myCommands.txt | xargs -PJ -n2 shapeit2 &amp;</span><br></pre></td></tr></table></figure>
+<h2 id="加入系谱数据">加入系谱数据</h2>
+<p>如果存在系谱，那么直接在 plink 或二进制文件中的父本列和母本列写入即可。</p>
+<h1><s>impute2</s></h1>
+<p>下载及使用说明见<a href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html">impute2官网</a></p>
+<p>impute2 也可以定相，也可以进行自填充。</p>
+<h2 id="填充命令">填充命令</h2>
+<p>shapeit 和 impute2 的搭配如下：</p>
+<ol start="0">
+<li>
+<p>参考群构建（ wang 2022 文献中使用 shapeit 定相， minmac4 填充；验证群也是 shapeit + minmac4 , 填充后提出 R^2 小于 0.4 （应该是 minmac4 的统计指标）的位点）</p>
+</li>
+<li>
+<p>使用 shapeit 对验证群进行<strong>无参定相</strong>（不过有参定相更准）。</p>
+</li>
+<li>
+<p>使用 impute2 对 shapeit  结果文件进行<strong>有参填充</strong>。</p>
+</li>
+</ol>
+<p>参考面板构建仅仅是第二步改为无参填充即可。</p>
+<p>填充命令如下</p>
+<ul>
+<li><code>-use_prephased_g</code> ：说明验证群已经定相了。</li>
+<li><code>-known_haps_g</code> :  验证群定相后的基因型文件</li>
+<li><code>-int 9.1e6 9.6e6</code> : 填充的区域（要填充整条染色体，只能是 <strong>-int 1 5000000</strong>，然后 <strong>-int 5000001 10000000</strong> 这种，最终再合并，张志燕老师就是间隔 5MB ，不过他是测序，不是芯片）</li>
+<li><code>-m</code> ：遗传图谱，这也是必选项（没有怎么办？）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">impute2 -use_prephased_g \</span><br><span class="line">        -known_haps_g gwas.phased.haps \</span><br><span class="line">        -h reference.haplotypes.gz \</span><br><span class="line">        -l reference.legend.gz \</span><br><span class="line">        -m genetic_map.txt \</span><br><span class="line">        -int 9.1e6 9.6e6 \</span><br><span class="line">        -Ne 20000 \</span><br><span class="line">        -o gwas.from9.1e6_to9.6e6.imputed</span><br></pre></td></tr></table></figure>
+<h1>impute5</h1>
+<h2 id="下载安装-3">下载安装</h2>
+<p>从<a href="https://jmarchini.org/software/#impute-5">impute-5</a>下载得到二进制文件和说明文档，将二进制文件放在环境变量的文件夹中即可。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">impute5_1.1.5_static --help</span><br></pre></td></tr></table></figure>
+<p>使用前需要对参考面板和验证群创建 index ，使用 bcftools 可以完成这一点（需要实现使用 <code>bgzip</code> 压缩为<code>vcf.gz</code> 格式）。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bgzip -c reference.vcf &gt; reference.vcf.gz</span><br><span class="line">bcftools index reference.vcf.gz</span><br><span class="line"></span><br><span class="line">bgzip target.vcf # 不保留未压缩文件</span><br><span class="line">bcftools index target.vcf.gz</span><br></pre></td></tr></table></figure>
+<p>填充命令如下，其中</p>
+<ul>
+<li><code>--h</code> : 参考面板（indexed, phased, non-missing），必须无缺失且定相（经过测试，<strong>可以使用全部染色体的基因型文件</strong>）</li>
+<li><code>--g</code>:  需要填充的基因型（indexed, phased, non-missing），和参考面板的 chr,pos,ref,alt 必须保持一致</li>
+<li><code>--r</code>:  指定染色体</li>
+<li><code>--o</code>:  输出文件</li>
+<li><code>--out-gp-field</code>:  输出 genotype probabilities</li>
+<li><code>--threads 2</code>:  多线程（原理是将验证群逐个样本去填充）</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">impute5_1.1.5_static --h reference.vcf  --g target.vcf --r </span><br><span class="line">20 --o imputed.vcf.gz --out-gp-field --threads 2</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>软件学习</category>
+      </categories>
+      <tags>
+        <tag>软件学习</tag>
+        <tag>shapeit</tag>
+        <tag>impute</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>安装R包报错解决思路</title>
     <url>/posts/799136a6/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这算是<a href="https://vincere.fun/posts/c4bb4461/">批量下载R包</a>的续篇了。</p>
@@ -2989,6 +3285,15 @@
     <url>/posts/18c130be/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是我个人使用的plink软件备忘录，将我所有会用到但是又没有完全记住的选项和功能记录在这里，方便查看。</p>
 <span id="more"></span>
+<h1>windows中使用plink</h1>
+<ol>
+<li>
+<p>进入<a href="https://www.cog-genomics.org/plink/">plink官网</a>，下载 plink</p>
+</li>
+<li>
+<p>将 plink.exe 加入到环境变量 （我的做法是建立快捷方式，命名为 plink ，放到 D:\shortcuts 中）</p>
+</li>
+</ol>
 <h1>输入输出</h1>
 <h2 id="输入">输入</h2>
 <h3 id="compound格式">compound格式</h3>
@@ -3020,6 +3325,7 @@
 <p>注意 VCF 文件作为 plink 的输入文件，<strong>其位点必须严格按照物理位置顺序排序</strong>，不然就会遇到下面的报错。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Error: .bim file has a split chromosome.  Use --make-bed by itself to</span><br><span class="line">remedy this.</span><br></pre></td></tr></table></figure>
 <p>你需要先用 <strong>–make-bed</strong> 生成标准的二进制文件（排序好的），再进行其他处理。</p>
+<p>使用 <strong>–bcf</strong> 选项可以读取 BCF2 文件。</p>
 <h2 id="输出">输出</h2>
 <h3 id="compound格式-2">compound格式</h3>
 <p>使用 <strong>–recode compound-genotypes</strong> 选项，生成 compound格式的plink文件（一个SNP的两个碱基之间没有空格）</p>
@@ -3823,7 +4129,7 @@
 <p>注意这里我没有考虑 <code>&#123;&#125;</code> 中还有引号的情况，因为被替换的字段包含引号的情况基本不可能发生。</p>
 <h3 id="大括号">大括号</h3>
 <p>如果 f-string 中需要使用大括号，则需要输入连续两个大括号 <code>&#123;&#123;` 和 `&#125;&#125;</code> 。</p>
-<p>举个实际的例子，假如我们需要获取某个文件的第二列，则可以使用以下命令。</p>
+<p>举个实际的例子，如果我们使用 <code>awk</code> 获取某个文件的第二列，则可以使用以下命令。</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">57</span>]: filename = <span class="string">&quot;all.ped&quot;</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">58</span>]: a = subprocess.run(<span class="string">f&quot;awk &#x27;&#123;&#123;print $2&#125;&#125;&#x27; <span class="subst">&#123;filename&#125;</span>&quot;</span>, shell=<span class="literal">True</span>, encoding = <span class="string">&quot;utf-8&quot;</span>, stdout=subprocess.PIPE)</span><br></pre></td></tr></table></figure>
 <h2 id="自定义格式">自定义格式</h2>
 <p>f-string采用 <code>&#123;content:format&#125;</code> 设置字符串格式，其中 <code>content</code> 是替换并填入字符串的内容，可以是变量、表达式或函数等，<code>format</code> 是格式描述符。如果不指定  <code>&#123;:format&#125;</code> 则采用默认格式。</p>

@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    使用shapeit和impute软件定相填充 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-使用shapeit和impute软件定相填充"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  使用shapeit和impute软件定相填充
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/f5617387/" class="article-date">
+  <time datetime="2023-09-22T02:42:28.000Z" itemprop="datePublished">2023-09-22</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E8%BD%AF%E4%BB%B6%E5%AD%A6%E4%B9%A0/">软件学习</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">13 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 shapeit 和 impute 软件进行填充。</p>
+<span id="more"></span>
+<h1><s>shapeit5</s></h1>
+<p>用芯片数据实际使用报错如下。AC(Allele Count) 表示该Allele的数目，这个应该只有测序的 VCF 才有，芯片只有 GT 字段，因此芯片数据用不了 shapeit5，只有 shapeit3 及更低版本才能使用 bed/bim/fam 作为输入文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR: AC field is needed in file</span><br></pre></td></tr></table></figure>
+<h2 id="下载安装">下载安装</h2>
+<p>官网见<a target="_blank" rel="noopener" href="https://odelaneau.github.io/shapeit5/">shapeit5</a></p>
+<p>首先尝试使用 conda 安装，不然自己安装貌似很麻烦。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda search shapeit5</span></span><br><span class="line">Loading channels: done</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Name                       Version           Build  Channel</span></span><br><span class="line">shapeit5                       1.0.0      h0c8ee15_0  anaconda/cloud/bioconda</span><br><span class="line">shapeit5                       5.1.1      hb60d31d_0  anaconda/cloud/bioconda</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda install shapeit5=5.1.1</span></span><br></pre></td></tr></table></figure>
+<p>安装完之后查看一下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda list | grep <span class="string">&quot;shapeit&quot;</span></span></span><br><span class="line">shapeit5                  5.1.1                </span><br></pre></td></tr></table></figure>
+<p>在 conda 的 bin 目录下出现了以下文件 ( <code>-iname</code> 不区分大小写)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">find /mnt/data/zhouziwen/lib/miniconda3/bin -iname <span class="string">&quot;*shapeit*&quot;</span></span></span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/bin/SHAPEIT5_ligate</span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/bin/SHAPEIT5_phase_common</span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/bin/SHAPEIT5_phase_rare</span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/bin/SHAPEIT5_switch</span><br></pre></td></tr></table></figure>
+<h2 id="使用">使用</h2>
+<p>参考<a target="_blank" rel="noopener" href="https://odelaneau.github.io/shapeit5/docs/documentation/phase_common/">官网文档</a></p>
+<h3 id="定相常见变异">定相常见变异</h3>
+<p><code>phase_common</code> 这个工具对常见变异（common variant sites）进行定相，例如 SNP 数据。这个工具是对大型测序数据定相的第一步，可以视为 SHAPEIT4 的升级版本（<strong>芯片定相</strong>只需要使用这一个工具）。</p>
+<p><strong>第一种使用方式：对无关个体定相</strong>，其中：</p>
+<ul>
+<li><code>--input</code> ： 验证群基因型文件，vcf/bcf 格式</li>
+<li><code>--thread 8</code> : 使用 8 个线程</li>
+<li><code>--region 1</code> : 使用 1 号染色体的数据</li>
+<li><code>--map</code> ：遗传图片文件，可选</li>
+<li><code>--output target.phased.bcf</code> : 输出文件</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phase_common --input array/target.unrelated.bcf --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p><strong>第二种使用方式：对有亲缘关系的个体定相</strong>，这里 <code>--pedigree</code> 就是系谱文件（缺失记为 NA）。</p>
+<p>这里的原理是用亲本数据对子代定相（当不存在孟德尔错误，并且至少有一个亲本是纯合子）时，此时后代的第一个单倍型是父本的单倍型，第二个单倍型是母本的单倍型。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phase_common --input array/target.family.bcf --pedigree info/target.family.fam --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p><strong>第三种使用方式：对 X 染色体定相</strong>，其中 <code>--haploids info/target.haploid.txt</code>  中的文件指定单倍体的样本（一行一个样本号，例如雄性）。</p>
+<p>这里的原理其实是见单倍体在输入或输出文件中当作完全纯合的二倍体来编码。对于单倍体个体，<strong>所有杂合子首先会改为缺失</strong>，然后再填充；对于双倍体个体，按照正常流程填充。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phase_common --input array/target.haploid.bcf --haploids info/target.haploid.txt --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p><strong>第四种使用方式：使用参考面板填充</strong>，<code>--reference</code> 后面跟着 vcf/bcf 文件。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phase_common --input array/target.unrelated.bcf --reference array/reference.bcf --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p><strong>第五种使用方式：使用 scaffold 填充</strong>，<code>--scaffold array/target.scaffold.bcf</code> 后面跟着的 vcf/bcf 文件就是输入文件部分定相的结果（部分样本部分位点，不能有缺失并且全部定相）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phase_common --input array/target.unrelated.bcf --scaffold array/target.scaffold.bcf --region 1 --map info/chr1.gmap.gz --output target.phased.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<h3 id="ligate">ligate</h3>
+<p>如果你将一条染色体分为了多个片段进行定相，那么可以使用 <code>ligate</code> 来将合并成一整条染色体（无用）。</p>
+<p>首先，我们对同一条染色体两个重叠的片段进行定相。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">phase_common --input array/target.unrelated.bcf --region 1:1-5500000 --map info/chr1.gmap.gz --output target.chunk1.bcf --thread 8</span><br><span class="line">phase_common --input array/target.unrelated.bcf --region 1:4500000-10000000 --map info/chr1.gmap.gz --output target.chunk2.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p>然后我们将这两个 bcf 文件名称写入一个文件（需要排序好）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo target.chunk1.bcf &gt; chunks.txt</span><br><span class="line">echo target.chunk2.bcf &gt;&gt; chunks.txt</span><br></pre></td></tr></table></figure>
+<p>然后，我们执行下面的命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ligate --input chunks.txt --output target.phased.bcf --thread 2</span><br></pre></td></tr></table></figure>
+<p>在整合的过程中，会输出两个统计量（前提是多个 bcf 文件之间存在重叠的区域）</p>
+<ul>
+<li>Switch rate: the percentage of samples for which haplotypes have been switched,</li>
+<li>Avg phaseQ: the agreement of the phasing in the overlapping region between two successive chunks of data. We usually expect values above 80 or 90.</li>
+</ul>
+<p>注意，如果定相过程中使用了系谱，那么这里也需要使用  <code>--pedigree</code> 选项。</p>
+<h3 id="定相稀有变异">定相稀有变异</h3>
+<p>这里建议只对于<strong>样本数目超过2000</strong>的数据使用 <code>phase_rare</code> ，不然就可以正常使用 <code>phase_common</code> 。</p>
+<p>第一种使用方式：定相无关个体。</p>
+<p>这里我们分多步来定相，首先我们对常见变异（MAF&gt;0.1%）进行定相</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phase_common --input wgs/target.unrelated.bcf --filter-maf 0.001 --region 1 --map info/chr1.gmap.gz --output tmp/target.scaffold.bcf --thread 8</span><br></pre></td></tr></table></figure>
+<p>然后，我们使用常见变异定相结果作为 scaffold 来定相稀有变异。</p>
+<p>没太看懂，暂时不管它。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">while read LINE; do</span><br><span class="line">	CHK=$(echo $LINE | awk &#x27;&#123; print $1; &#125;&#x27;)</span><br><span class="line">	SRG=$(echo $LINE | awk &#x27;&#123; print $3; &#125;&#x27;)</span><br><span class="line">	IRG=$(echo $LINE | awk &#x27;&#123; print $4; &#125;&#x27;)</span><br><span class="line">	phase_rare --input wgs/target.unrelated.bcf --scaffold tmp/target.scaffold.bcf --map info/chr1.gmap.gz --input-region $IRG --scaffold-region $SRG --output tmp/target.phased.chunk$CHK\.bcf  --thread 8</span><br><span class="line">done &lt; info/chunks.coordinates.txt</span><br></pre></td></tr></table></figure>
+<h1>shapeit4</h1>
+<h2 id="下载安装-2">下载安装</h2>
+<p>官网见<a target="_blank" rel="noopener" href="https://odelaneau.github.io/shapeit4/">shapeit4</a></p>
+<p>首先尝试使用 conda 安装，发现安装了 shapeit5 以后就没法安装 shapeit4 了（因为附属软件的版本冲突），但是在一个虚拟环境中安装成功了。</p>
+<p>手动编译安装教程参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/87668128">shapeit4 安装</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda search shapeit4</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda install shapeit4=4.2.2 <span class="comment"># 安装失败</span></span></span><br></pre></td></tr></table></figure>
+<p>安装完之后查看一下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda list | grep <span class="string">&quot;shapeit&quot;</span></span></span><br><span class="line">shapeit4                  4.2.2 </span><br></pre></td></tr></table></figure>
+<p>安装后的 shapeit4 在虚拟环境下面的目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> shapeit4</span></span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/envs/R4.1.0/bin/shapeit4</span><br></pre></td></tr></table></figure>
+<p>我尝试在 base 环境下回退版本失败，懒得卸载重装 conda 了，于是给上面的 shapeit4  创建一个软链接</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s /mnt/data/zhouziwen/lib/miniconda3/envs/R4.1.0/bin/shapeit4 /mnt/data/zhouziwen/lib/bin</span><br></pre></td></tr></table></figure>
+<h2 id="使用-2">使用</h2>
+<p>参考<a target="_blank" rel="noopener" href="https://odelaneau.github.io/shapeit4/">shapeit4</a></p>
+<p>类似 impute5 ，首先也需要对输入的基因型数据进行 index</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bgzip chr_1.vcf</span><br><span class="line">bcftools index chr_1.vcf.gz</span><br></pre></td></tr></table></figure>
+<p>基本使用方式类似，如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shapeit4 --reference reference.vcf.gz  --input unphased.vcf.gz --map chr20.b37.gmap.gz --region 20 --output phased.vcf.gz</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>--reference</code> ：参考面板（index），<code>vcf.gz</code> 或 <code>bcf</code> 格式，经过测试<strong>可以使用全部染色体的基因型文件</strong>。注意参考面板和验证群的chrom, position, ref, alt 必须一致 ，shapeit4 只会使用参考面板和验证群的共同位点。</li>
+<li><code>--input</code> ：验证群基因型文件（index），<code>vcf.gz</code> 或 <code>bcf</code> 格式，经过测试<strong>可以使用全部染色体的基因型文件</strong></li>
+</ul>
+<p>shapeit4 <strong>默认使用芯片数据</strong>，如果使用测序数据，增加选项 <strong>–sequencing</strong> 。</p>
+<h1><s>shapeit2</s></h1>
+<p><a target="_blank" rel="noopener" href="https://mathgen.stats.ox.ac.uk/genetics_software/shapeit/shapeit.html#home">官网网址</a></p>
+<h2 id="定相命令">定相命令</h2>
+<p>从<a target="_blank" rel="noopener" href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#download">shapeit2</a>下载二进制文件，解压即可</p>
+<p>无参定相如下 (首先<strong>需要按照染色体拆分开</strong>，一次定相一条染色体)，其中</p>
+<ul>
+<li><code>--input-bed</code> ： 输入的二进制文件前缀。输入文件也可以使用 vcf （<code>--input-vcf file</code>）</li>
+<li><code>--output-max</code>： 输出文件， 这里也可以只使用前缀（<code>--output-max gwas.phased</code>）</li>
+<li><code>--thread 8</code> : 多进程</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">shapeit2 --input-bed gwas \</span><br><span class="line">        --output-max gwas.phased.haps gwas.phased.sample \</span><br><span class="line">        --thread 8 \</span><br><span class="line">        --force</span><br></pre></td></tr></table></figure>
+<p>shapeit2 运行过程中会对数据进行检查，如果存在缺失率超过 5% 的样本或位点，或者<strong>单态的位点</strong>（无变异）都会提出 warnings 。如果存在个体的缺失率为 100% ，则会报错。</p>
+<p>实际运行过程中发现以下报错，个体缺失率超过 10% 就会报错，结果文件为空文件。加入 <code>--force</code> 选项后就可以正常运行。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR: 3 individuals with high rates of missing data (&gt;10%). These individuals should be removed. You can disable this error with --force (at your own risk).</span><br></pre></td></tr></table></figure>
+<p>有参考群填充命令如下，加入选项 <code>--input-ref</code> ，这里使用的是 HAP/LEGEND/SAMPLE 格式 ，因此需要转格式。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">shapeit2 --input-bed gwas \</span><br><span class="line">        --output-max gwas.phased \</span><br><span class="line">        --input-ref reference.haplotypes reference.legend reference.sample \</span><br><span class="line">        --thread 8 \</span><br><span class="line">        --force</span><br></pre></td></tr></table></figure>
+<p>注意，<strong>验证群的位点必须均在参考群中，位点的染色体，物理位置， ref/alt 必须保持一致（因此输入文件只能使用二进制格式或VCF，不能使用ped/map），不然会报错</strong>。</p>
+<p>输出文件如下</p>
+<ul>
+<li><code>shapeit_[date]_[time]_UUID.log</code> ：日志文件，可以通过 <code>--output-log gwas.phased.log</code>指定日志文件名称</li>
+<li>haps 文件</li>
+<li>sample 文件</li>
+</ul>
+<p>可以将定相结果文件从  HAPS/SAMPLE 转化为两种不同的格式，第一种是转为 HAP/LEGEND/SAMPLE 格式 （这是 impute2 的参考面板的输入格式，注意 <code>--output-ref</code> 不能只提供前缀）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">shapeit2 -convert \</span><br><span class="line">        --input-haps gwas.phased \</span><br><span class="line">        --output-ref gwas.phased.hap gwas.phased.leg gwas.phased.sam</span><br></pre></td></tr></table></figure>
+<p>第二种格式是转化为 VCF 格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">shapeit2 -convert \</span><br><span class="line">        --input-haps gwas.phased \</span><br><span class="line">        --output-vcf gwas.phased.vcf</span><br></pre></td></tr></table></figure>
+<p>下面具体介绍一下不同的输出文件格式</p>
+<h2 id="HAPS-SAMPLE-格式">HAPS/SAMPLE 格式</h2>
+<p>假设我们有 4 个样本和 3 个 SNP ，SAMPLE 文件用于描述样本情况，举例如下，前两行是标题行，之后每一行表示一个个体，前3列分别为样本1 - 样本2 - 缺失率。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ID_1 ID_2 missing</span><br><span class="line">0    0    0</span><br><span class="line">UNR1 UNR1 0</span><br><span class="line">UNR2 UNR2 0</span><br><span class="line">UNR3 UNR3 0</span><br><span class="line">UNR4 UNR4 0</span><br></pre></td></tr></table></figure>
+<p>HAPS 用于描述 SNP 情况和单倍型，如下所示，每一行代表一个 SNP ，前 5 列分别为 染色体 - SNP - 物理位置 - 第一个碱基 - 第二个碱基；之后的列每两列组成一对，这两列表示一个个体的单倍型。</p>
+<p>举个例子，第 6 列和第 7 列内容分别是 000 和 011 ，这里 0 代表第一个碱基，1代表第二个碱基，因此也就是说第一个个体的单倍型为 ATA 和 ACT 。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">7 SNP1 123 A G 0 0 1 0 0 0 1 1</span><br><span class="line">7 SNP2 456 T C 0 1 1 0 0 1 0 1</span><br><span class="line">7 SNP3 789 A T 0 1 1 0 1 1 1 1</span><br></pre></td></tr></table></figure>
+<h2 id="HAP-LEGEND-SAMPLE">HAP/LEGEND/SAMPLE</h2>
+<p>SAMPLE 文件如下所示，前 4 类分别为 个体号 - Group1 ID - Group2 ID - Sex 。其中个体号必须只能包含字母和数字。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sample population group sex</span><br><span class="line">CEU1 CEU EUR 1</span><br><span class="line">CEU2 CEU EUR 2</span><br><span class="line">GBR1 GBR EUR 2</span><br><span class="line">YRI1 YRI AFR 2</span><br></pre></td></tr></table></figure>
+<p>LEGEND 文件描述样本情况，每一行代表一个 SNP ，前 4 列分别为 SNP - 物理位置 - 第一个碱基 - 第二个碱基；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">id position a0 a1</span><br><span class="line">SNP1 123 A G</span><br><span class="line">SNP2 456 T C</span><br><span class="line">SNP3 789 A T</span><br></pre></td></tr></table></figure>
+<p>HAP 文件包含单倍型结果，每两列表示一个个体的单倍型。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0 0 1 0 0 0 1 1</span><br><span class="line">0 1 1 0 0 1 0 1</span><br><span class="line">0 1 1 0 1 1 1 1</span><br></pre></td></tr></table></figure>
+<h2 id="使用-xargs-多进程">使用 xargs 多进程</h2>
+<p>这里我们可以使用 xargs 实现多进程，首先我们生成所有的命令行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for i in $(seq 1 22); do</span><br><span class="line">  echo &quot;-B gwas.chr$i -M gmap.chr$i\.txt -O gwas.chr$i\.phased -T T&quot; &gt;&gt; myCommands.txt</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+<p>第二步，定相如下，这里 <code>J</code>  就是并行数目，<code>2</code> 是线程数目。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat myCommands.txt | xargs -PJ -n2 shapeit2 &amp;</span><br></pre></td></tr></table></figure>
+<h2 id="加入系谱数据">加入系谱数据</h2>
+<p>如果存在系谱，那么直接在 plink 或二进制文件中的父本列和母本列写入即可。</p>
+<h1><s>impute2</s></h1>
+<p>下载及使用说明见<a target="_blank" rel="noopener" href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html">impute2官网</a></p>
+<p>impute2 也可以定相，也可以进行自填充。</p>
+<h2 id="填充命令">填充命令</h2>
+<p>shapeit 和 impute2 的搭配如下：</p>
+<ol start="0">
+<li>
+<p>参考群构建（ wang 2022 文献中使用 shapeit 定相， minmac4 填充；验证群也是 shapeit + minmac4 , 填充后提出 R^2 小于 0.4 （应该是 minmac4 的统计指标）的位点）</p>
+</li>
+<li>
+<p>使用 shapeit 对验证群进行<strong>无参定相</strong>（不过有参定相更准）。</p>
+</li>
+<li>
+<p>使用 impute2 对 shapeit  结果文件进行<strong>有参填充</strong>。</p>
+</li>
+</ol>
+<p>参考面板构建仅仅是第二步改为无参填充即可。</p>
+<p>填充命令如下</p>
+<ul>
+<li><code>-use_prephased_g</code> ：说明验证群已经定相了。</li>
+<li><code>-known_haps_g</code> :  验证群定相后的基因型文件</li>
+<li><code>-int 9.1e6 9.6e6</code> : 填充的区域（要填充整条染色体，只能是 <strong>-int 1 5000000</strong>，然后 <strong>-int 5000001 10000000</strong> 这种，最终再合并，张志燕老师就是间隔 5MB ，不过他是测序，不是芯片）</li>
+<li><code>-m</code> ：遗传图谱，这也是必选项（没有怎么办？）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">impute2 -use_prephased_g \</span><br><span class="line">        -known_haps_g gwas.phased.haps \</span><br><span class="line">        -h reference.haplotypes.gz \</span><br><span class="line">        -l reference.legend.gz \</span><br><span class="line">        -m genetic_map.txt \</span><br><span class="line">        -int 9.1e6 9.6e6 \</span><br><span class="line">        -Ne 20000 \</span><br><span class="line">        -o gwas.from9.1e6_to9.6e6.imputed</span><br></pre></td></tr></table></figure>
+<h1>impute5</h1>
+<h2 id="下载安装-3">下载安装</h2>
+<p>从<a target="_blank" rel="noopener" href="https://jmarchini.org/software/#impute-5">impute-5</a>下载得到二进制文件和说明文档，将二进制文件放在环境变量的文件夹中即可。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">impute5_1.1.5_static --help</span><br></pre></td></tr></table></figure>
+<p>使用前需要对参考面板和验证群创建 index ，使用 bcftools 可以完成这一点（需要实现使用 <code>bgzip</code> 压缩为<code>vcf.gz</code> 格式）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bgzip -c reference.vcf &gt; reference.vcf.gz</span><br><span class="line">bcftools index reference.vcf.gz</span><br><span class="line"></span><br><span class="line">bgzip target.vcf # 不保留未压缩文件</span><br><span class="line">bcftools index target.vcf.gz</span><br></pre></td></tr></table></figure>
+<p>填充命令如下，其中</p>
+<ul>
+<li><code>--h</code> : 参考面板（indexed, phased, non-missing），必须无缺失且定相（经过测试，<strong>可以使用全部染色体的基因型文件</strong>）</li>
+<li><code>--g</code>:  需要填充的基因型（indexed, phased, non-missing），和参考面板的 chr,pos,ref,alt 必须保持一致</li>
+<li><code>--r</code>:  指定染色体</li>
+<li><code>--o</code>:  输出文件</li>
+<li><code>--out-gp-field</code>:  输出 genotype probabilities</li>
+<li><code>--threads 2</code>:  多线程（原理是将验证群逐个样本去填充）</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">impute5_1.1.5_static --h reference.vcf  --g target.vcf --r </span><br><span class="line">20 --o imputed.vcf.gz --out-gp-field --threads 2</span><br></pre></td></tr></table></figure> 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/impute/" rel="tag">impute</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shapeit/" rel="tag">shapeit</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%BD%AF%E4%BB%B6%E5%AD%A6%E4%B9%A0/" rel="tag">软件学习</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/afd03e8/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            使用软件构建A阵和G阵
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/799136a6/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">安装R包报错解决思路</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2023
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
