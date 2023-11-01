@@ -1,6 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>如何使用多等位遗传标记进行GWAS分析</title>
+    <url>/posts/5fb36fcb/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>参考一篇文献中的做法，可以利用多等位标记进行GWAS分析。</p>
+<span id="more"></span>
+<p>多等位标记和一般的二等位标记的处理不同的地方主要就是质控填充这一块，还有就是如何将多等位标记转为二等位标记。</p>
+<h1>质控</h1>
+<p>使用 vcftools 进行质控，举例如下，质控标准为：</p>
+<ul>
+<li>等位碱基数目为 2 或 3</li>
+<li>位点缺失率 0.1</li>
+<li>位点 maf 0.05</li>
+</ul>
+<p>这里 <code>--recode-INFO-all</code> 是保留所有的 INFO 信息；<code>--recode -c</code> 是打印到屏幕上，然后使用 <code>bgzip -c</code> 进行压缩。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">vcftools --gzvcf ../vcf.finalINDEL.vcf.gz --min-alleles 2 --max-alleles 3 --max-missing 0.9 --maf 0.05 --recode-INFO-all --recode -c |bgzip -c &gt; qc2.vcf.gz &amp;</span><br></pre></td></tr></table></figure>
+<p>测试 vcftools 质控哈温平衡 (<code>--hwe 0.000001</code>) ，发现所有的多等位碱基均被剔除了，因此对于含有多等位碱基的基因型数据不建议质控哈温平衡。</p>
+<h1>填充</h1>
+<p>使用 shapeit4 填充，发现填充结果中所有的多等位碱基均被剔除，因此说明 shapeit4  只能填充二等位碱基的标记。</p>
+<p>改为使用 beagle 5.2 填充，多等位碱基的标记可以正常填充，填充前后位点数目一致，检查前 10000 个位点发现填充基因前后基因型一致，说明填充没有问题。</p>
+<h1>拆分多等位位点</h1>
+<p>使用 bcftools norm 拆分多等位位点（一个多等位标记拆分位多行，每一个 alt 基因占据一行）， 具体命令如下，查看拆分结果，发现其结果就是将其它 alt 变异的基因型改为 0（同 ref 碱基） 。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools norm --multiallelics -both val_all_phased_auto.vcf.gz -Oz -o val_all_phased_norm.vcf.gz &amp;</span><br></pre></td></tr></table></figure>
+<p>拆分后的 VCF 就满足了二等位的条件，可以正常进行 GWAS 分析。</p>
+<h1>参考文献</h1>
+<p>1.Blaj I, Tetens J, Bennewitz J, et al. Structural variants and tandem repeats in the founder individuals of four F2 pig crosses and implications to F2 GWAS results[J]. BMC genomics, 2022, 23(1): 1-14.</p>
+]]></content>
+      <tags>
+        <tag>GWAS</tag>
+        <tag>多等位标记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用plink进行ROH分析</title>
+    <url>/posts/642de6af/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>如何使用 plink 检测 ROH。</p>
+<span id="more"></span>
+<h1>plink 检测 ROH</h1>
+<h2 id="输入命令">输入命令</h2>
+<p>长纯合片段(runs of homozygosity，ROH)是二倍体生物基因组中纯合基因型的连续片段。</p>
+<p>现在一般都是用 plink 软件分析 ROH ，用到的参数描述如下：</p>
+<ul>
+<li><code>--homozyg-snp n</code>:  ROH中的SNP数目应超过 n</li>
+<li><code>--homozyg-kb n</code>: ROH 长度应该超过 n kb</li>
+<li><code>--homozyg-density n </code> : ROH中平均每 n kb 必须有 1 个SNP</li>
+<li><code>--homozyg-gap n</code> ：ROH中连续SNP的间隔必须小于 n kb</li>
+<li><code>--homozyg-window-snp n</code>: 滑窗大小为 n 个SNP</li>
+<li><code>--homozyg-window-het n</code>: 一个 ROH 中最多有 n 个SNP为杂合子</li>
+<li><code>--homozyg-window-missing n</code>: 一个 ROH 中最多有 n 个SNP为缺失</li>
+</ul>
+<h2 id="输出结果">输出结果</h2>
+<p>三个输出结果，后缀分别为 <code>.hom</code> ，<code>.hom.indiv</code> 和 <code>.hom.summary</code> 。</p>
+<h3 id="hom">.hom</h3>
+<p>这个文件中内容就是每个个体的每个ROH的统计，其各列内容如下</p>
+<table>
+<thead>
+<tr>
+<th>FID</th>
+<th>家系号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IID</td>
+<td>个体号</td>
+</tr>
+<tr>
+<td>PHE</td>
+<td>表型值</td>
+</tr>
+<tr>
+<td>CHR</td>
+<td>染色体</td>
+</tr>
+<tr>
+<td>SNP1</td>
+<td>ROH中第一个SNP</td>
+</tr>
+<tr>
+<td>SNP2</td>
+<td>ROH中最后一个SNP</td>
+</tr>
+<tr>
+<td>POS1</td>
+<td>SNP1的物理位置</td>
+</tr>
+<tr>
+<td>POS2</td>
+<td>SNP2的物理位置</td>
+</tr>
+<tr>
+<td>KB</td>
+<td>ROH长度(kb)</td>
+</tr>
+<tr>
+<td>NSNP</td>
+<td>ROH中的SNP数目</td>
+</tr>
+<tr>
+<td>DENSITY</td>
+<td>SNP密度(长度除以SNP数目，kb/SNP)</td>
+</tr>
+<tr>
+<td>PHOM</td>
+<td>ROH中纯合子比例</td>
+</tr>
+<tr>
+<td>PHET</td>
+<td>ROH中杂合子比例</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hom-indiv">.hom.indiv</h3>
+<p>这个文件是每个个体的汇总统计结果，其各列内容如下</p>
+<table>
+<thead>
+<tr>
+<th>FID</th>
+<th>家系号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IID</td>
+<td>个体号</td>
+</tr>
+<tr>
+<td>PHE</td>
+<td>表型值</td>
+</tr>
+<tr>
+<td>NSEG</td>
+<td>ROH数目</td>
+</tr>
+<tr>
+<td>KB</td>
+<td>ROH总长度 (kb)</td>
+</tr>
+<tr>
+<td>KBAVG</td>
+<td>ROH平均长度 (kb)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hom-summary">.hom.summary</h3>
+<p>这个文件是每个SNP的汇总统计结果，其各列内容如下</p>
+<table>
+<thead>
+<tr>
+<th>CHR</th>
+<th>染色体</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SNP</td>
+<td>SNP名称</td>
+</tr>
+<tr>
+<td>BP</td>
+<td>物理位置</td>
+</tr>
+<tr>
+<td>AFF</td>
+<td>病历样本(case)ROH中包含这个SNP的数目</td>
+</tr>
+<tr>
+<td>UNAFF</td>
+<td>非病历样本(non-case)ROH中包含这个SNP的数目</td>
+</tr>
+</tbody>
+</table>
+<p>如果表型是数量性状，那么所有样本都会放在 <code>UNAFF</code> 列中。</p>
+<p>经过测试，如果所有表型均为缺失，那么所有样本也都会放在 <code>UNAFF</code> 列中。</p>
+<h1>参考文献</h1>
+<ol>
+<li>刘家鑫, 魏霞, 邓天宇, 谢锐, 韩建林, 杜立新, 赵福平, 王立贤. 绵羊全基因组ROH检测及候选基因鉴定[J]. 畜牧兽医学报, 2019, 50(8): 1554-1566.</li>
+<li><a href="https://www.cog-genomics.org/plink/1.9/formats#hom">plink1.9官网</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>软件学习</category>
+        <category>plink</category>
+      </categories>
+      <tags>
+        <tag>软件学习</tag>
+        <tag>plink</tag>
+        <tag>ROH</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>bcftools软件</title>
     <url>/posts/f3c7472f/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>bcftools 是用于处理 VCF/BCF 文件的工具。</p>
@@ -725,8 +914,8 @@
 <p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BAI%7D%3D%5Cfrac%7B-%5Cmathbf%7BF%7D%2B%28-%5Cmathbf%7BH%7D%29%7D%7B2%7D%20%3D%20%5Cfrac%7B1%7D%7B2%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%0A%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7By%7D%20%26%20%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%20P%7D%20%5Cmathbf%7By%7D%20%5C%5C%0A%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BV%7D_%7Ba%7D%20%5Cmathbf%7BP%20P%7D%20%5Cmathbf%7By%7D%20%26%20%20%5Cmathbf%7By%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%20P%20P%7D%20%5Cmathbf%7By%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>此时在 AI 算法中，不涉及迹函数的运算，计算难度相对低一点。</p>
 <p>如果我们设 <img src="https://math.now.sh?inline=%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bi%7D%7D%20%3D%20%5Cmathbf%7B%5Cdot%7BV%7D%7D_%7Bi%7D%5Cmathbf%7BPy%7D" style="display:inline-block;margin: 0;"/> ，定义 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D%20%3D%20%5Cleft%5B%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7B1%7D%7D%20%5Ccdots%20%5Cmathbf%7Bq%7D_%7B%5Ckappa_%7Bk%7D%7D%5Cright%5D" style="display:inline-block;margin: 0;"/> ，则我们可以得到</p>
 <p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BAI%7D%20%3D%20%5Cfrac%7B1%7D%7B2%7D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%5Cmathbf%7BP%7D%5Cmathbf%7BQ%7D%0A" /></p><p>对于某一个随机效应的方差组分 <img src="https://math.now.sh?inline=%5Cgamma_%7Bij%7D" style="display:inline-block;margin: 0;"/> ，我们有 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BV%7D%7D_%7Bi%20j%7D%20%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D" style="display:inline-block;margin: 0;"/> ，则有</p>
-<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7Bq%7D_%7B%5Cgamma_%7Bij%7D%7D%20%26%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7Bu%7D_%7Bi%7D%20%5Cquad%20%5Cbecause%20%20%5Cmathbf%7Bu%7D_%7Bi%7D%20%3D%20%5Cmathbf%7BG%7D_%7Bi%7D%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>对于残差的方差组分 <img src="https://math.now.sh?inline=%5Cphi_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，我们有 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BV%7D%7D_%7Bi%7D%20%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，则有</p>
-<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7Bq%7D_%7B%5Cphi_%7Bi%7D%7D%20%26%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bi%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bi%7D%20%5Cmathbf%7BR%5E%7B-1%7De%7D%20%5Cquad%20%5Cbecause%20%5Cmathbf%7BPy%7D%20%3D%20%20%5Cmathbf%7BR%5E%7B-1%7De%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bi%7D%20%5Cmathbf%7B%5CSigma%5E%7B-1%7De%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>对于中间的 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 矩阵，我们采用公式 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D%20%3D%20%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D" style="display:inline-block;margin: 0;"/> 进行计算。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7Bq%7D_%7B%5Cgamma_%7Bij%7D%7D%20%26%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BZ%7D_%7Bi%7D%5Cmathbf%7B%5Cdot%7BG%7D%7D_%7Bij%7D%20%5Cmathbf%7BG%7D_%7Bi%7D%5E%7B-1%7D%20%5Cmathbf%7Bu%7D_%7Bi%7D%20%5Cquad%20%5Cbecause%20%20%5Cmathbf%7Bu%7D_%7Bi%7D%20%3D%20%5Cmathbf%7BG%7D_%7Bi%7D%5Cmathbf%7BZ%7D_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%0A%5Cend%7Baligned%7D%0A" /></p><p>对于残差的方差组分 <img src="https://math.now.sh?inline=%5Cphi_%7Bij%7D" style="display:inline-block;margin: 0;"/> ，我们有 <img src="https://math.now.sh?inline=%5Cmathbf%7B%5Cdot%7BV%7D%7D_%7Bij%7D%20%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bij%7D" style="display:inline-block;margin: 0;"/> ，则有</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Cmathbf%7Bq%7D_%7B%5Cphi_%7Bij%7D%7D%20%26%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bij%7D%20%5Cmathbf%7BPy%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bij%7D%20%5Cmathbf%7BR%5E%7B-1%7De%7D%20%5Cquad%20%5Cbecause%20%5Cmathbf%7BPy%7D%20%3D%20%20%5Cmathbf%7BR%5E%7B-1%7De%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7B%5Cdot%7B%5CSigma%7D%7D_%7Bij%7D%20%5Cmathbf%7B%5CSigma%5E%7B-1%7De%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>对于中间的 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D" style="display:inline-block;margin: 0;"/> 矩阵，我们采用公式 <img src="https://math.now.sh?inline=%5Cmathbf%7BP%7D%20%3D%20%5Cmathbf%7BR%5E%7B-1%7D-R%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D" style="display:inline-block;margin: 0;"/> 进行计算。</p>
 <p>我们也可以通过高斯消元得到 <img src="https://math.now.sh?inline=%5Cmathbf%7BAI%7D" style="display:inline-block;margin: 0;"/> 矩阵，首先我们构建增广矩阵如下 (用 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> 代替 <img src="https://math.now.sh?inline=%5Cmathbf%7By%7D" style="display:inline-block;margin: 0;"/> )</p>
 <p style=""><img src="https://math.now.sh?from=%5Cleft%5B%5Cbegin%7Barray%7D%7Bll%7D%0A%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%20%26%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%0A%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%2B%5Cmathbf%7BG%7D%5E%7B-1%7D%20%26%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%0A%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%20%26%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%0A%5Cend%7Barray%7D%5Cright%5D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bc%7D%0A%5Cmathbf%7BC%7D%20%26%20%5Cmathbf%7Ba%7D%20%5C%5C%0A%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D%20%26%20%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>将 <img src="https://math.now.sh?inline=%5Cmathbf%7BC%7D" style="display:inline-block;margin: 0;"/> 吸收进入 <img src="https://math.now.sh?inline=%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D" style="display:inline-block;margin: 0;"/> 得到</p>
 <p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20-%20%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D%5Cmathbf%7BC%7D%5E%7B-1%7D%5Cmathbf%7Ba%7D%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20-%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bll%7D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BZ%7D%20%5Cend%7Barray%7D%5Cright%5D%20%5Cmathbf%7BC%7D%5E%7B-1%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Bll%7D%20%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%20%5Cmathbf%7BZ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%0A%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20%5Cmathbf%7BQ%7D%20-%20%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7DXC%5E%7B-1%7DX%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5Cmathbf%7BQ%7D%20%20-%20%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BR%5E%7B-1%7DZC%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%5Cmathbf%7BQ%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%28%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20-%20%5Cmathbf%7BR%5E%7B-1%7DXC%5E%7B-1%7DX%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20%20-%5Cmathbf%7BR%5E%7B-1%7DZC%5E%7B-1%7DZ%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%29%5Cmathbf%7BQ%7D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D(%20%5Cmathbf%7BR%7D%5E%7B-1%7D%20-%20%5Cmathbf%7BR%5E%7B-1%7DWC%5E%7B-1%7DW%5E%7B%5Cprime%7DR%5E%7B-1%7D%7D%20)%5Cmathbf%7BQ%7D%20%5Cquad%20%5Cbecause%20%5Cmathbf%7BW%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%20%5Cmathbf%7BX%7D%20%26%20%5Cmathbf%7BZ%7D%20%5Cend%7Barray%7D%5Cright%5D%20%5C%5C%0A%26%3D%20%5Cmathbf%7BQ%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BP%7D%20%5Cmathbf%7BQ%7D%0A%5Cend%7Baligned%7D%0A" /></p><h2 id="第二种计算方法">第二种计算方法</h2>
@@ -7499,7 +7688,7 @@
 <p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BA%7D%5Cmathbf%7BB%7D%20%3D%20%5Cleft%5B%5Cbegin%7Barray%7D%7Bll%7D%0A15%20%26%2011%20%5C%5C%0A4%20%26%203%20%5C%5C%0A9%20%26%2014%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>根据我们上面的推导，<img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 每一列可以拆分为：</p>
 <p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26%7B%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A2%20%5C%5C%0A1%20%5C%5C%0A3%0A%5Cend%7Barray%7D%5Cright%5D%201%2B%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A2%20%5C%5C%0A0%20%5C%5C%0A2%0A%5Cend%7Barray%7D%5Cright%5D%202%2B%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A3%20%5C%5C%0A1%20%5C%5C%0A4%0A%5Cend%7Barray%7D%5Cright%5D%203%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A15%20%5C%5C%0A4%20%5C%5C%0A19%0A%5Cend%7Barray%7D%5Cright%5D%7D%20%5C%5C%0A%26%7B%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A2%20%5C%5C%0A1%5C%5C%0A3%0A%5Cend%7Barray%7D%5Cright%5D%200%2B%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A2%20%5C%5C%0A0%20%5C%5C%0A2%0A%5Cend%7Barray%7D%5Cright%5D%201%2B%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A3%20%5C%5C%0A1%20%5C%5C%0A4%0A%5Cend%7Barray%7D%5Cright%5D%203%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bl%7D%0A11%20%5C%5C%0A3%20%5C%5C%0A14%0A%5Cend%7Barray%7D%5Cright%5D%7D%0A%5Cend%7Baligned%7D%0A" /></p><h1>AB 的每一行均为B的行的线性组合</h1>
 <p>类似上面，假设 <img src="https://math.now.sh?inline=%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D" style="display:inline-block;margin: 0;"/> 是一个 <img src="https://math.now.sh?inline=1%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 的行向量，<img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 是一个 <img src="https://math.now.sh?inline=n%20%5Ctimes%20q" style="display:inline-block;margin: 0;"/> 的矩阵，那么</p>
-<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D%5Cmathbf%7BB%7D%20%3D%20%5Cleft%28%5Cbegin%7Barray%7D%7Br%7D%0Aa_%7B1%7D%2C%20%26%0Aa_%7B2%7D%2C%20%26%0A%5Ccdots%2C%20%26%0Aa_%7Bn%7D%0A%5Cend%7Barray%7D%5Cright%29%0A%5Cleft(%5Cbegin%7Barray%7D%7Br%7D%0A%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7B1%7D%20%5C%5C%0A%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7B2%7D%20%5C%5C%0A%5Cvdots%20%5C%5C%0A%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7Bn%7D%0A%5Cend%7Barray%7D%5Cright)%0A%3Da_%7B1%7D%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7B1%7D%2B%0Aa_%7B2%7D%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7B2%7D%20%2B%0A%5Ccdots%20%2B%0Aa_%7Bn%7D%20%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7Bn%7D%0A%0A" /></p><p>因此，我们证明 <img src="https://math.now.sh?inline=%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/>的行的线性组合。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D%5Cmathbf%7BB%7D%20%3D%20%5Cleft%28%5Cbegin%7Barray%7D%7Br%7D%0Aa_%7B1%7D%2C%20%26%0Aa_%7B2%7D%2C%20%26%0A%5Ccdots%2C%20%26%0Aa_%7Bn%7D%0A%5Cend%7Barray%7D%5Cright%29%0A%5Cleft(%5Cbegin%7Barray%7D%7Br%7D%0A%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7B1%7D%20%5C%5C%0A%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7B2%7D%20%5C%5C%0A%5Cvdots%20%5C%5C%0A%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7Bn%7D%0A%5Cend%7Barray%7D%5Cright)%0A%3Da_%7B1%7D%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7B1%7D%2B%0Aa_%7B2%7D%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7B2%7D%20%2B%0A%5Ccdots%20%2B%0Aa_%7Bn%7D%20%5Cmathbf%7Bb%7D%5E%7B%5Cprime%7D_%7Bn%7D%0A" /></p><p>因此，我们证明 <img src="https://math.now.sh?inline=%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/>的行的线性组合。</p>
 <p>假如 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D" style="display:inline-block;margin: 0;"/> 为 <img src="https://math.now.sh?inline=m%20%5Ctimes%20n" style="display:inline-block;margin: 0;"/> 的矩阵，<img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 为 <img src="https://math.now.sh?inline=n%20%5Ctimes%20q" style="display:inline-block;margin: 0;"/> 的矩阵，那么</p>
 <p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BA%7D%5Cmathbf%7BB%7D%20%3D%20%0A%0A%5Cleft%28%5Cbegin%7Barray%7D%7Br%7D%0A%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D_%7B1%7D%20%5C%5C%0A%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D_%7B2%7D%20%5C%5C%0A%5Cvdots%20%5C%5C%0A%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D_%7Bn%7D%0A%5Cend%7Barray%7D%5Cright%29%20%5Cmathbf%7BB%7D%0A%0A%20%3D%20%0A%0A%5Cleft(%5Cbegin%7Barray%7D%7Br%7D%0A%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D_%7B1%7D%20%5Cmathbf%7BB%7D%20%5C%5C%0A%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D_%7B2%7D%20%5Cmathbf%7BB%7D%20%5C%5C%0A%5Cvdots%20%5C%5C%0A%5Cmathbf%7Ba%7D%5E%7B%5Cprime%7D_%7Bn%7D%20%5Cmathbf%7BB%7D%0A%5Cend%7Barray%7D%5Cright)%0A" /></p><p>因此得证 <img src="https://math.now.sh?inline=%5Cmathbf%7BA%7D%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 的每一行均是 <img src="https://math.now.sh?inline=%5Cmathbf%7BB%7D" style="display:inline-block;margin: 0;"/> 的行的线性组合。</p>
 ]]></content>
