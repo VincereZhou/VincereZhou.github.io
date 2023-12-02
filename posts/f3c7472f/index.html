@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">776</span>
+            <span class="post-count">887</span>
         </span>
     </span>
 
@@ -126,6 +126,13 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools concat input1.bcf input2.bcf -o output.vcf</span><br></pre></td></tr></table></figure>
 <p>也可以使用 <code>-f</code> 选项定一个包含输入文件路径的文本文件。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools concat -f file_list.txt -o output.vcf</span><br></pre></td></tr></table></figure>
+<h1>merge</h1>
+<p>合并样本不同（多个文件的样本号必须保证是不同的，不然会报错），位点相同的情况。</p>
+<p>注意这个命令只能用 <code>vcf.gz</code> 和 <code>bcf</code> 文件，并且必须事先创建索引。</p>
+<p>最简单的例子如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools merge input1.vcf.gz input2.vcf.gz -o output.vcf</span><br></pre></td></tr></table></figure>
+<p>也可以使用 <code>-l</code> 选项定一个包含输入文件路径的文本文件。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools merge -l file_list.txt -o output.vcf</span><br></pre></td></tr></table></figure>
 <h1>view</h1>
 <p>最简单的应用就是 VCF 和 BCF 格式的互相转换</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bcftools view input.vcf -Ob -o output.bcf  # vcf to bcf</span><br><span class="line"></span><br><span class="line">bcftools view input.bcf -Ov -o output.vcf  # bcf to vcf</span><br></pre></td></tr></table></figure>
