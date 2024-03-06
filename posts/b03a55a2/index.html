@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.5k</span>
+            <span class="post-count">2.3k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">11 分钟</span>
+            <span class="post-count">10 分钟</span>
         </span>
     </span>
 </div>
@@ -182,27 +182,20 @@
 <p>举例如下</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">67</span>]: b = <span class="string">&quot;abcdef&quot;</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">68</span>]: <span class="string">f&quot;<span class="subst">&#123;b:&lt;<span class="number">8</span>&#125;</span>&quot;</span></span><br><span class="line">Out[<span class="number">68</span>]: <span class="string">&#x27;abcdef  &#x27;</span></span><br></pre></td></tr></table></figure>
 <h3 id="宽度和精度">宽度和精度</h3>
-<p>这里只介绍最常用的宽度与精度的格式。<strong>一般格式为 <code>width.precision</code>, 整数 width 指定宽度，整数 precision 指定显示精度。</strong></p>
+<p>这里只介绍最常用的宽度与精度的格式。<strong>一般格式为 <code>width.precision</code>, 整数 width 指定宽度（宽度表示输出的最小字符数，不足用空格填充），整数 precision 指定显示精度（用于设置浮点数小数部分的位数）。</strong></p>
 <p>width.precision 用于 f 和 % (浮点数) 时 precision 指定的是小数点后的位数。</p>
 <p>width.precision 用于字符串时 precision 含义是只使用字符串中前 precision 位字符。</p>
 <h4 id="浮点数">浮点数</h4>
 <p>我最常用的就是设置小数点位数，这里 width 设为 0 。</p>
 <p>使用 % 来获得百分号的格式。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">74</span>]: a = <span class="number">111.111</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">75</span>]: <span class="string">f&quot;<span class="subst">&#123;a:<span class="number">0.2</span>f&#125;</span>&quot;</span> <span class="comment"># 2 位小数</span></span><br><span class="line">Out[<span class="number">75</span>]: <span class="string">&#x27;111.11&#x27;</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">76</span>]: <span class="string">f&quot;<span class="subst">&#123;a:<span class="number">0.2</span>%&#125;</span>&quot;</span> <span class="comment"># 百分数</span></span><br><span class="line">Out[<span class="number">76</span>]: <span class="string">&#x27;11111.10%&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>省略 width 也可以</p>
+<p>省略 width 也可以（<strong>更通用的写法是省略</strong>, 等价于 <strong>round()</strong> 函数）</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">83</span>]: <span class="string">f&quot;<span class="subst">&#123;a:<span class="number">.2</span>f&#125;</span>&quot;</span> <span class="comment"># 2 位小数</span></span><br><span class="line">Out[<span class="number">83</span>]: <span class="string">&#x27;111.11&#x27;</span></span><br></pre></td></tr></table></figure>
 <p>但是注意双精度下，只能保留 16 位小数（只能精确到小数点后 15 位，有效位数位 16位 ）。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">93</span>]: a = <span class="number">1.12345678901234567890</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">94</span>]: a</span><br><span class="line">Out[<span class="number">94</span>]: <span class="number">1.1234567890123457</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">95</span>]: <span class="string">f&quot;<span class="subst">&#123;a:<span class="number">.18</span>f&#125;</span>&quot;</span></span><br><span class="line">Out[<span class="number">95</span>]: <span class="string">&#x27;1.123456789012345691&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>单双精度描述见下</p>
-<blockquote>
-<p>含义：表明单精度和双精度精确的范围不一样，单精度，也即float，一般在计算机中存储占用4字节，也32位，有效位数为7位；双精度（double）在计算机中存储占用8字节，64位，有效位数为16位。</p>
-<p>原因：不管float还是double 在计算机上的存储都遵循IEEE规范，使用二进制科学计数法，都包含三个部分：符号位，指数位和尾数部分。其中float的符号位，指数位，尾数部分分别为1,  8,  23.     双精度分别为1,  11,  52。</p>
-<p>精度主要取决于尾数部分的位数，float为23位，除去全部为0的情况以外，最小为2的-23次方，约等于1.19乘以10的-7次方，所以float小数部分只能精确到后面6位，加上小数点前的一位，即有效数字为7位。  类似，double 尾数部分52位，最小为2的-52次方，约为2.22乘以10的-16次方，所以精确到小数点后15位，有效位数为16位。</p>
-<p>作者：涛了个帅<br>
-链接：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/26022206/answer/81573345">https://www.zhihu.com/question/26022206/answer/81573345</a><br>
-来源：知乎<br>
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
-</blockquote>
+<h4 id="设置有效数字">设置有效数字</h4>
+<p>上面是设置小数点位数，如果是设置有效数字数目，则将 <code>.2f</code> 改为 <code>.2g</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">20</span>]: number = <span class="number">314.25588</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">23</span>]: <span class="string">f&quot;<span class="subst">&#123;number:<span class="number">.5</span>g&#125;</span>&quot;</span></span><br><span class="line">Out[<span class="number">23</span>]: <span class="string">&#x27;314.26&#x27;</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">28</span>]: <span class="string">f&quot;<span class="subst">&#123;number:<span class="number">0.5</span>f&#125;</span>&quot;</span></span><br><span class="line">Out[<span class="number">28</span>]: <span class="string">&#x27;38.33334&#x27;</span></span><br></pre></td></tr></table></figure>
 <h4 id="字符串">字符串</h4>
 <p>没怎么格式化字符串</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">78</span>]: <span class="string">f&quot;<span class="subst">&#123;a:8s&#125;</span>&quot;</span></span><br><span class="line">Out[<span class="number">78</span>]: <span class="string">&#x27;hell0   &#x27;</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">79</span>]: <span class="string">f&quot;<span class="subst">&#123;a:<span class="number">8.3</span>s&#125;</span>&quot;</span> <span class="comment"># 提取前3个字符，总长度为 8</span></span><br><span class="line">Out[<span class="number">79</span>]: <span class="string">&#x27;hel     &#x27;</span></span><br><span class="line">    </span><br><span class="line">In [<span class="number">80</span>]: <span class="string">f&quot;<span class="subst">&#123;a:<span class="number">3.3</span>s&#125;</span>&quot;</span> <span class="comment"># 提取前3个字符，总长度正好为 3</span></span><br><span class="line">Out[<span class="number">80</span>]: <span class="string">&#x27;hel&#x27;</span></span><br></pre></td></tr></table></figure>
@@ -324,7 +317,7 @@
     <ul>
       <li>
         Copyrights &copy;
-        2019-2023
+        2019-2024
         <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
       </li>
     </ul>
