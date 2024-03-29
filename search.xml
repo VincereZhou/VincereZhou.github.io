@@ -2451,6 +2451,7 @@ emWeight=NULL)</p>
 </ul>
 <p>后续列为（<strong>注意</strong>，这里的结果是<strong>非排除概率</strong>，排除概率等于 1- 该列的值） 。</p>
 <p>后面三列应该对应着三种情况，双亲的基因型均未知鉴定一个候选亲本（1P）， 已知一个亲本基因型鉴定另一个候选亲本（2P），双亲的基因型均未知鉴定一对候选亲本（PP）。</p>
+<p>NE-I 对应个体识别的非排除概率。</p>
 <blockquote>
 <p>NE-1P: Average non-exclusion probability for one candidate parent.</p>
 <p>NE-2P: Average non-exclusion probability for one candidate parent given the genotype of a known parent of the opposite sex.</p>
@@ -2461,6 +2462,13 @@ emWeight=NULL)</p>
 <p>F(Null): Estimated null allele frequency估计无效等位基因频率</p>
 </blockquote>
 <p><img src="5.png" alt=""></p>
+<p>因此，需要手动计算的排除概率如下：</p>
+<ul>
+<li><code>PE-1P</code> = 1 -  <code>NE-1P</code></li>
+<li><code>PE-2P</code> = 1 -  <code>NE-2P</code></li>
+<li><code>PE-PP</code> = 1 -  <code>NE-PP</code></li>
+<li><code>DP</code> = 1 -  <code>NE-I</code></li>
+</ul>
 <p>之后的统计内容为</p>
 <ul>
 <li><code>Number of individuals</code>: 个体数量</li>
@@ -3821,6 +3829,8 @@ emWeight=NULL)</p>
 <p>你需要先用 <strong>–make-bed</strong> 生成标准的二进制文件（排序好的），再进行其他处理。</p>
 <p>使用 <strong>–bcf</strong> 选项可以读取 BCF2 文件。</p>
 <h2 id="输出">输出</h2>
+<h3 id="二进制格式">二进制格式</h3>
+<p>使用 <code>--make-bed</code> 输出二进制格式，使用<code>--make-just-bim</code> 和 <code>--make-just-fam</code> 只输出 bim 或 fam 文件。</p>
 <h3 id="compound格式-2">compound格式</h3>
 <p>使用 <strong>–recode compound-genotypes</strong> 选项，生成 compound格式的plink文件（一个SNP的两个碱基之间没有空格）</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">plink --allow-extra-chr --chr-set 95 --file plink59 --recode compound-genotypes --out plink59_compound</span><br></pre></td></tr></table></figure>
