@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">626</span>
+            <span class="post-count">851</span>
         </span>
     </span>
 
@@ -105,11 +105,18 @@
 <p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0ADP%20%26%3D%201%20-%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%28p_%7Bi%7D%5E%7B2%7D%29%5E%7B2%7D%20-%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Csum_%7Bj%3Di%2B1%7D%5E%7Bn%7D(2p_%7Bi%7Dp_%7Bj%7D)%5E%7B2%7D%20%5C%5C%0A%26%3D%201-2%20%5Ctimes%20%5Cleft(%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20p_%7Bi%7D%5E%7B2%7D%5Cright)%5E%7B2%7D%20%2B%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20p_%7Bi%7D%5E%7B4%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>上面的公式是对于单个遗传标记而言的，对于一组遗传标记，其累积个体识别能力 (total discrimination power, TDP)  计算公式如下</p>
 <p style=""><img src="https://math.now.sh?from=TDP%20%3D%201%20-%20%5Csum_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%0A" /></p><p>其中 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 为标记数目。</p>
 <p>相似的，我们定义累积匹配概率 (cumulative match probability, CPM) 如下</p>
-<p style=""><img src="https://math.now.sh?from=CPM%20%3D%20%5Csum_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%0A" /></p><h1>似然率计算</h1>
+<p style=""><img src="https://math.now.sh?from=CPM%20%3D%20%5Csum_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%0A" /></p><p>在《GBT27642-2011牛个体及亲子鉴定微卫星DNA法》中，当 CPM 小于 <img src="https://math.now.sh?inline=5%C3%9710%5E%7B-9%7D" style="display:inline-block;margin: 0;"/> 时，认定两份样本来源于同一个个体。</p>
+<h1>似然率计算</h1>
 <p>个体识别的似然率，或者称为似然比（likelihood ratio, LR）计算公式如下</p>
 <p style=""><img src="https://math.now.sh?from=LR%20%3D%20%5Cfrac%7BPr%28E%7CHp%29%7D%7BPr(E%7CHd)%7D%0A" /></p><p>这里 E 表示出现这个个体基因型的事件，Hp 表示是同一个个体的假设，Hd 表示是随机个体的假设。</p>
 <p>例如，我们假设现场血痕DNA和一名嫌疑人血样DNA表型组合均为E，如果是同一个人的话，那么出现这种事件的概率就为1，即 <img src="https://math.now.sh?inline=Pr%28E%7CHp%29%20%3D%201" style="display:inline-block;margin: 0;"/> ；如果是随机个体偶然基因型完全一样，这种概率 <img src="https://math.now.sh?inline=Pr%28E%7CHd%29%20%3D%20CPM" style="display:inline-block;margin: 0;"/> ，因此我们得到似然比的实际计算公式为</p>
 <p style=""><img src="https://math.now.sh?from=LR%20%3D%20%5Cfrac%7B1%7D%7BCPM%7D%0A" /></p><p>统计学上似然比超过 1 则支持假设 <img src="https://math.now.sh?inline=Hp" style="display:inline-block;margin: 0;"/> ，反之则支持假设 <img src="https://math.now.sh?inline=Hd" style="display:inline-block;margin: 0;"/> 。在法医学个体识别实践 中，当LR在数值上超过全球人口总数时，表明证据有足够强度支持原告假设（Hp）。</p>
+<h1>杂合度</h1>
+<p>指调查群体中某遗传标记所有基因型中杂合子的占比。杂合度越高，说明该遗传标记的杂合性越大，<br>
+在法医学个人识别中的应用价值越大。杂合度分为观察杂合度（observed heterozygosity, Hobs ）和期望杂<br>
+合度（expected heterozygosity, Hexp ）。计算公式分别如下：</p>
+<p style=""><img src="https://math.now.sh?from=H_%7Bobs%7D%20%3D%20%5Cfrac%7B%E6%9D%82%E5%90%88%E5%AD%90%E4%B8%AA%E4%BD%93%E6%95%B0%7D%7B%E8%B0%83%E6%9F%A5%E4%B8%AA%E4%BD%93%E6%95%B0%7D%0A" /></p><p style=""><img src="https://math.now.sh?from=H_%7Bexp%7D%20%3D%20%5Cfrac%7BN%7D%7BN-1%7D%20%281-%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20p_%7Bi%7D%5E%7B2%7D%29%0A" /></p><p>其中 N 为调查群体中的等位基因总数（对于二倍体生物，就是非缺失的样本数乘2），n 为等位基因种类的数目。</p>
+<p>这里的期望杂合度公式我不太清楚是怎么来的，但是通过比较发现这应该就是 CERVUS 使用的计算公式。</p>
 <h1>鉴定意见</h1>
 <ul>
 <li>如果存在分型不一致，则判定为“排除两者来自同一个体”</li>
@@ -122,6 +129,9 @@
 </li>
 <li>
 <p>SF/Z JD0105010——2018 《常染色体 STR 基因座的法医学参数计算规范》</p>
+</li>
+<li>
+<p>GBT27642-2011牛个体及亲子鉴定微卫星DNA法</p>
 </li>
 </ol>
  

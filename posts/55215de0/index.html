@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    Linux之time命令 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-Linux之time命令"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Linux之time命令
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/55215de0/" class="article-date">
+  <time datetime="2024-09-29T08:24:44.000Z" itemprop="datePublished">2024-09-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a> / <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/Linux/">Linux</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">3 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>比较两个软件的执行时间可以使用多种方法，其中使用 <code>time</code> 命令是一个常见且有效的方法。<code>time</code> 命令提供了程序运行时的各种时间统计信息，包括用户时间（User time）和系统时间（System time）。</p>
+<span id="more"></span>
+<h1><code>time</code> 命令的输出</h1>
+<p>当你在 Unix/Linux 系统上使用 <code>time</code> 命令运行一个程序时，通常会得到以下几项信息：</p>
+<ul>
+<li><strong>user time</strong>: 该程序在用户模式下消耗的 CPU 时间，表示程序实际执行代码所花费的时间。</li>
+<li><strong>sys time</strong>: 该程序在内核模式下消耗的 CPU 时间，表示程序与操作系统进行交互（如 I/O 操作）所花费的时间。</li>
+<li><strong>real time</strong>: 从程序开始到结束的总经过时间，这个时间包括其他进程的等待时间、I/O 等。</li>
+</ul>
+<h1>比较两个软件的执行时间</h1>
+<p>如果仅仅是想要比较两个软件的执行速度，可以考虑以下方法：</p>
+<ol>
+<li>
+<p><strong>使用 <code>time</code> 命令并关注 <code>real time</code></strong>：</p>
+<ul>
+<li>
+<p>直接使用 <code>real time</code> 是一种简单而直观的比较方式，因为它反映了程序从开始到结束所需的实际墙钟时间。</p>
+</li>
+<li>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bash复制代码/usr/bin/time ./software1</span><br><span class="line">/usr/bin/time ./software2</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>在输出中，你可以看到每个软件的 <code>real</code> 时间，直接比较这两个值即可。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>使用 <code>user time</code> 和 <code>sys time</code> 的总和</strong>：</p>
+<ul>
+<li>如果你对 CPU 使用效率感兴趣，使用 <code>user time</code> + <code>sys time</code> 之和也很有用。这可以帮助你了解程序实际使用 CPU 资源的多少。</li>
+<li>在大多数情况下，将二者相加可以给出一个关于 CPU 时间的粗略估计，但请注意，这并不代表程序的总体性能，因为它无法反映 I/O 等待时间。</li>
+</ul>
+</li>
+</ol>
+<h2 id="示例">示例</h2>
+<p>假设你使用 <code>time</code> 命令运行两个程序，输出可能如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bash复制代码$ /usr/bin/time ./software1</span><br><span class="line">real    0m1.234s</span><br><span class="line">user    0m0.456s</span><br><span class="line">sys     0m0.123s</span><br><span class="line"></span><br><span class="line">$ /usr/bin/time ./software2</span><br><span class="line">real    0m2.345s</span><br><span class="line">user    0m1.234s</span><br><span class="line">sys     0m0.321s</span><br></pre></td></tr></table></figure>
+<h1>总结</h1>
+<ul>
+<li><strong>比较方式</strong>：可以直接使用 <code>real time</code> 进行比较，也可以比较 <code>user time</code> + <code>sys time</code> 的总和。</li>
+<li><strong>选择依据</strong>：如果你关注的是程序在现实世界中的反应速度，使用 <code>real time</code> 更合适。如果关注的是 CPU 的使用情况，可以考虑 <code>user time</code> 和 <code>sys time</code>。</li>
+</ul>
+<h1>user time 和 sys time 的总和的称呼</h1>
+<p><code>user time</code> 和 <code>sys time</code> 的总和在中文中通常被称为 <strong>“CPU时间”</strong> 或 <strong>“总CPU时间”</strong>。有时也可以见到的表述是 <strong>“用户时间与系统时间之和”</strong>，但最常用和简洁的说法就是 <strong>“CPU时间”</strong>。</p>
+<h2 id="CPU时间和执行时间">CPU时间和执行时间</h2>
+<p>将 <code>user time</code> 和 <code>sys time</code> 的总和称为 <strong>执行时间</strong>（或 <strong>总执行时间</strong>）在某些上下文中是可以接受的，但更常见的术语是 <strong>CPU时间</strong>。这两者之间的细微差别在于它们所关注的内容和计算方式。</p>
+<h3 id="定义区分">定义区分</h3>
+<ol>
+<li><strong>CPU时间 (CPU Time)</strong>:
+<ul>
+<li>指程序在 CPU 上实际运行的时间，包括用户模式下的时间 (<code>user time</code>) 和内核模式下的时间 (<code>sys time</code>)。</li>
+<li>用于评估程序对 CPU 资源的使用。</li>
+</ul>
+</li>
+<li><strong>执行时间 (Execution Time)</strong>:
+<ul>
+<li>一般来说，执行时间通常指从程序开始执行到完成所耗费的总时间（包括 <code>real time</code>），但有时也可以用于描述 CPU 时间，即只包含用户时间和系统时间之和。</li>
+<li>在一些文献或非正式讨论中，可能会有人把 CPU 时间称为执行时间，但这种用法不够严格。</li>
+</ul>
+</li>
+</ol>
+<h3 id="总结">总结</h3>
+<ul>
+<li>在技术文献和性能分析中，更推荐使用 <strong>CPU时间</strong> 来明确表达 <code>user time</code> 和 <code>sys time</code> 的总和。</li>
+<li>如果你在与他人交流时使用 <strong>执行时间</strong>，最好先确认对方理解你所说的是 CPU 时间的意思，以避免混淆。</li>
+</ul>
+<p>因此，虽然将 <code>user time</code> 和 <code>sys time</code> 的总和称为 <strong>执行时间</strong> 在某些情况下可以被接受，但在专业的讨论中，使用 <strong>CPU时间</strong> 会更加精确和清晰。</p>
+<h1>参考文献</h1>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/z_ssyy/article/details/123069566">https://blog.csdn.net/z_ssyy/article/details/123069566</a></li>
+<li>chatgpt 3.5</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/dac1bfe0/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">母体效应模型理论介绍</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2024
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

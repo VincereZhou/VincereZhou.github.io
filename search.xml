@@ -1,6 +1,234 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Linux之time命令</title>
+    <url>/posts/55215de0/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>比较两个软件的执行时间可以使用多种方法，其中使用 <code>time</code> 命令是一个常见且有效的方法。<code>time</code> 命令提供了程序运行时的各种时间统计信息，包括用户时间（User time）和系统时间（System time）。</p>
+<span id="more"></span>
+<h1><code>time</code> 命令的输出</h1>
+<p>当你在 Unix/Linux 系统上使用 <code>time</code> 命令运行一个程序时，通常会得到以下几项信息：</p>
+<ul>
+<li><strong>user time</strong>: 该程序在用户模式下消耗的 CPU 时间，表示程序实际执行代码所花费的时间。</li>
+<li><strong>sys time</strong>: 该程序在内核模式下消耗的 CPU 时间，表示程序与操作系统进行交互（如 I/O 操作）所花费的时间。</li>
+<li><strong>real time</strong>: 从程序开始到结束的总经过时间，这个时间包括其他进程的等待时间、I/O 等。</li>
+</ul>
+<h1>比较两个软件的执行时间</h1>
+<p>如果仅仅是想要比较两个软件的执行速度，可以考虑以下方法：</p>
+<ol>
+<li>
+<p><strong>使用 <code>time</code> 命令并关注 <code>real time</code></strong>：</p>
+<ul>
+<li>
+<p>直接使用 <code>real time</code> 是一种简单而直观的比较方式，因为它反映了程序从开始到结束所需的实际墙钟时间。</p>
+</li>
+<li>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash复制代码/usr/bin/time ./software1</span><br><span class="line">/usr/bin/time ./software2</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>在输出中，你可以看到每个软件的 <code>real</code> 时间，直接比较这两个值即可。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>使用 <code>user time</code> 和 <code>sys time</code> 的总和</strong>：</p>
+<ul>
+<li>如果你对 CPU 使用效率感兴趣，使用 <code>user time</code> + <code>sys time</code> 之和也很有用。这可以帮助你了解程序实际使用 CPU 资源的多少。</li>
+<li>在大多数情况下，将二者相加可以给出一个关于 CPU 时间的粗略估计，但请注意，这并不代表程序的总体性能，因为它无法反映 I/O 等待时间。</li>
+</ul>
+</li>
+</ol>
+<h2 id="示例">示例</h2>
+<p>假设你使用 <code>time</code> 命令运行两个程序，输出可能如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash复制代码$ /usr/bin/time ./software1</span><br><span class="line">real    0m1.234s</span><br><span class="line">user    0m0.456s</span><br><span class="line">sys     0m0.123s</span><br><span class="line"></span><br><span class="line">$ /usr/bin/time ./software2</span><br><span class="line">real    0m2.345s</span><br><span class="line">user    0m1.234s</span><br><span class="line">sys     0m0.321s</span><br></pre></td></tr></table></figure>
+<h1>总结</h1>
+<ul>
+<li><strong>比较方式</strong>：可以直接使用 <code>real time</code> 进行比较，也可以比较 <code>user time</code> + <code>sys time</code> 的总和。</li>
+<li><strong>选择依据</strong>：如果你关注的是程序在现实世界中的反应速度，使用 <code>real time</code> 更合适。如果关注的是 CPU 的使用情况，可以考虑 <code>user time</code> 和 <code>sys time</code>。</li>
+</ul>
+<h1>user time 和 sys time 的总和的称呼</h1>
+<p><code>user time</code> 和 <code>sys time</code> 的总和在中文中通常被称为 <strong>“CPU时间”</strong> 或 <strong>“总CPU时间”</strong>。有时也可以见到的表述是 <strong>“用户时间与系统时间之和”</strong>，但最常用和简洁的说法就是 <strong>“CPU时间”</strong>。</p>
+<h2 id="CPU时间和执行时间">CPU时间和执行时间</h2>
+<p>将 <code>user time</code> 和 <code>sys time</code> 的总和称为 <strong>执行时间</strong>（或 <strong>总执行时间</strong>）在某些上下文中是可以接受的，但更常见的术语是 <strong>CPU时间</strong>。这两者之间的细微差别在于它们所关注的内容和计算方式。</p>
+<h3 id="定义区分">定义区分</h3>
+<ol>
+<li><strong>CPU时间 (CPU Time)</strong>:
+<ul>
+<li>指程序在 CPU 上实际运行的时间，包括用户模式下的时间 (<code>user time</code>) 和内核模式下的时间 (<code>sys time</code>)。</li>
+<li>用于评估程序对 CPU 资源的使用。</li>
+</ul>
+</li>
+<li><strong>执行时间 (Execution Time)</strong>:
+<ul>
+<li>一般来说，执行时间通常指从程序开始执行到完成所耗费的总时间（包括 <code>real time</code>），但有时也可以用于描述 CPU 时间，即只包含用户时间和系统时间之和。</li>
+<li>在一些文献或非正式讨论中，可能会有人把 CPU 时间称为执行时间，但这种用法不够严格。</li>
+</ul>
+</li>
+</ol>
+<h3 id="总结">总结</h3>
+<ul>
+<li>在技术文献和性能分析中，更推荐使用 <strong>CPU时间</strong> 来明确表达 <code>user time</code> 和 <code>sys time</code> 的总和。</li>
+<li>如果你在与他人交流时使用 <strong>执行时间</strong>，最好先确认对方理解你所说的是 CPU 时间的意思，以避免混淆。</li>
+</ul>
+<p>因此，虽然将 <code>user time</code> 和 <code>sys time</code> 的总和称为 <strong>执行时间</strong> 在某些情况下可以被接受，但在专业的讨论中，使用 <strong>CPU时间</strong> 会更加精确和清晰。</p>
+<h1>参考文献</h1>
+<ol>
+<li><a href="https://blog.csdn.net/z_ssyy/article/details/123069566">https://blog.csdn.net/z_ssyy/article/details/123069566</a></li>
+<li>chatgpt 3.5</li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>母体效应模型理论介绍</title>
+    <url>/posts/dac1bfe0/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>介绍一下母体效应模型的基础知识</p>
+<span id="more"></span>
+<h1>简要介绍</h1>
+<p>有一些性状在后代中的表现，例如断奶重，会受到个体母本提供适宜环境的能力的影响，这里所谓的环境是以母本提供的营养的形式存在（母畜的泌乳能力）。这里母本对后代表型的影响分为两种方式：第一种是可以传递给后代的遗传效应；第二种是通过母畜构建的环境造成的环境效应。</p>
+<p>下面我说一下我自己的理解，以断奶重为例，母畜对个体断奶重的影响就是母畜的泌乳能力造成的。然后母畜的泌乳能力有一部分是可以遗传给后代的，这一部分就是母体遗传效应；另外一部分是作为环境因素造成的，又可以进一步分为永久环境效应和暂时环境效应。母体遗传效应这一部分只有当其雌性后代也具有后代时才会表现出来（只有雌性后代分娩后才能体现出其泌乳能力）。</p>
+<p>在一般的母体效应模型中，表型一般会拆分为以下部分：</p>
+<ol>
+<li>个体加性效应，个体本身基因型对个体表型的加性效应。</li>
+<li>母体加性效应，母本构建环境的能力中可以遗传给后代的加性效应部分</li>
+<li>母体永久环境效应部分，母本构建环境的能力中由环境因素造成的永久环境效应部分。</li>
+<li>残差</li>
+</ol>
+<h1>模型</h1>
+<p>母体遗传效应模型如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7By%3DXb%2BZu%2BWm%2BSpe%2Be%7D%0A" /></p><p>这里 <img src="https://math.now.sh?inline=%5Cmathbf%7Bm%7D" style="display:inline-block;margin: 0;"/> 是母体遗传效应，<img src="https://math.now.sh?inline=%5Cmathbf%7Bpe%7D" style="display:inline-block;margin: 0;"/> 是母体永久环境效应。</p>
+<p>随机效应协方差矩阵假设如下，即我们假设个体加性效应和母体加性效应存在加性协方差。</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Bvar%7D%5Cleft%5B%5Cbegin%7Barray%7D%7Br%7D%0A%5Cmathbf%7Bu%7D%20%5C%5C%0A%5Cmathbf%7Bm%7D%20%5C%5C%0A%5Cmathbf%7Bp%20e%7D%20%5C%5C%0A%5Cmathbf%7Be%7D%0A%5Cend%7Barray%7D%5Cright%5D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bcccc%7D%0Ag_%7B11%7D%20%5Cmathbf%7BA%7D%20%26%20g_%7B12%7D%20%5Cmathbf%7BA%7D%20%26%200%20%26%200%20%5C%5C%0Ag_%7B21%7D%20%5Cmathbf%7BA%7D%20%26%20g_%7B22%7D%20%5Cmathbf%7BA%7D%20%26%200%20%26%200%20%5C%5C%0A0%20%26%200%20%26%20%5Cmathbf%7BI%7D%20%5Csigma_%7Bp%20e%7D%5E2%20%26%200%20%5C%5C%0A0%20%26%200%20%26%200%20%26%20%5Cmathbf%7BI%7D%20%5Csigma_e%5E2%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><h1>举例</h1>
+<p>假设我们有下面的数据，其中 herds 和 pen 是固定因子，采用母体效应模型。</p>
+<p><img src="1.png" alt=""></p>
+<p>首先构建设计矩阵，我们看固定因子的设计矩阵 <img src="https://math.now.sh?inline=%5Cmathbf%7BX%7D" style="display:inline-block;margin: 0;"/> ，其前 3 列是 herds 的因子，后 2 列是 pen 的因子，转置后如下，这里一列表示一行表型。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cmathbf%7BX%7D%5E%7B%5Cprime%7D%3D%5Cleft%5B%5Cbegin%7Barray%7D%7Bllllllllll%7D%0A1%20%26%201%20%26%201%20%26%201%20%26%200%20%26%200%20%26%200%20%26%200%20%26%200%20%26%200%20%5C%5C%0A0%20%26%200%20%26%200%20%26%200%20%26%201%20%26%201%20%26%201%20%26%200%20%26%200%20%26%200%20%5C%5C%0A0%20%26%200%20%26%200%20%26%200%20%26%200%20%26%200%20%26%200%20%26%201%20%26%201%20%26%201%20%5C%5C%0A1%20%26%200%20%26%200%20%26%201%20%26%201%20%26%200%20%26%200%20%26%200%20%26%201%20%26%200%20%5C%5C%0A0%20%26%201%20%26%201%20%26%200%20%26%200%20%26%201%20%26%201%20%26%201%20%26%200%20%26%201%0A%5Cend%7Barray%7D%5Cright%5D%0A" /></p><p>个体加性效应 <img src="https://math.now.sh?inline=%5Cmathbf%7BZ%7D" style="display:inline-block;margin: 0;"/> 其维度是 <img src="https://math.now.sh?inline=14%20%5Ctimes%2014" style="display:inline-block;margin: 0;"/> ，前4行是全0行（没有表型的祖先个体），剔除前4行后是一个单位矩阵。</p>
+<p><strong>重点来了</strong>，<img src="https://math.now.sh?inline=%5Cmathbf%7BW%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=%5Cmathbf%7BS%7D" style="display:inline-block;margin: 0;"/> 矩阵都是关于母体效应的，但是母体遗传效应是可遗传的（从亲本到子代），因此所有个体都需要估计其母体遗传效应；而估计母体永久环境效应只需要针对表型中个体的母本。<strong>因此这里 <img src="https://math.now.sh?inline=%5Cmathbf%7BW%7D" style="display:inline-block;margin: 0;"/> 中的因子数目是全部个体数 14 ，而 <img src="https://math.now.sh?inline=%5Cmathbf%7BS%7D" style="display:inline-block;margin: 0;"/> 矩阵的因子数目仅为 4 （个母本）。</strong></p>
+<p><img src="2.png" alt=""></p>
+<h1>参考文献</h1>
+<ol>
+<li>Mrode R A. Linear models for the prediction of animal breeding values[M]. 2005.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>理论学习</category>
+        <category>线性模型</category>
+      </categories>
+      <tags>
+        <tag>理论学习</tag>
+        <tag>线性模型</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用R进行卡方检验和fisher精确检验</title>
+    <url>/posts/5c83812e/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用卡方分布可以检验分类×分类数据是否存在显著差异。</p>
+<span id="more"></span>
+<h2 id="举例">举例</h2>
+<p>以下是一个示例数据集，包含男人和女人在不同学历层次（小学、初中、高中和大学）的人数。然后我将展示如何使用 R 进行卡方检验。</p>
+<h3 id="示例数据">示例数据</h3>
+<p>我们假设以下样本数量：</p>
+<table>
+<thead>
+<tr>
+<th>学历</th>
+<th>男性人数</th>
+<th>女性人数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>小学</td>
+<td>30</td>
+<td>25</td>
+</tr>
+<tr>
+<td>初中</td>
+<td>40</td>
+<td>50</td>
+</tr>
+<tr>
+<td>高中</td>
+<td>35</td>
+<td>45</td>
+</tr>
+<tr>
+<td>大学</td>
+<td>20</td>
+<td>30</td>
+</tr>
+</tbody>
+</table>
+<h3 id="在-R-中进行卡方检验">在 R 中进行卡方检验</h3>
+<p>下面是使用 R 进行卡方检验的代码示例：</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建数据框</span></span><br><span class="line">data <span class="operator">&lt;-</span> matrix<span class="punctuation">(</span><span class="built_in">c</span><span class="punctuation">(</span><span class="number">30</span><span class="punctuation">,</span> <span class="number">25</span><span class="punctuation">,</span> <span class="number">40</span><span class="punctuation">,</span> <span class="number">50</span><span class="punctuation">,</span> <span class="number">35</span><span class="punctuation">,</span> <span class="number">45</span><span class="punctuation">,</span> <span class="number">20</span><span class="punctuation">,</span> <span class="number">30</span><span class="punctuation">)</span><span class="punctuation">,</span> </span><br><span class="line">                nrow <span class="operator">=</span> <span class="number">4</span><span class="punctuation">,</span> </span><br><span class="line">                byrow <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定行和列名称</span></span><br><span class="line">rownames<span class="punctuation">(</span>data<span class="punctuation">)</span> <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;小学&quot;</span><span class="punctuation">,</span> <span class="string">&quot;初中&quot;</span><span class="punctuation">,</span> <span class="string">&quot;高中&quot;</span><span class="punctuation">,</span> <span class="string">&quot;大学&quot;</span><span class="punctuation">)</span></span><br><span class="line">colnames<span class="punctuation">(</span>data<span class="punctuation">)</span> <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;男性&quot;</span><span class="punctuation">,</span> <span class="string">&quot;女性&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示数据</span></span><br><span class="line">print<span class="punctuation">(</span>data<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行卡方检验</span></span><br><span class="line">chi_square_test <span class="operator">&lt;-</span> chisq.test<span class="punctuation">(</span>data<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出检验结果</span></span><br><span class="line">print<span class="punctuation">(</span>chi_square_test<span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<h3 id="解释输出">解释输出</h3>
+<p>运行上述代码后，你将看到卡方检验的结果，</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">        Pearson<span class="string">&#x27;s Chi-squared test</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">data:  data</span></span><br><span class="line"><span class="string">X-squared = 2.5641, df = 3, p-value = 0.4638</span></span><br></pre></td></tr></table></figure>
+<p>其中包括：</p>
+<ul>
+<li>卡方统计量（Chi-squared value）</li>
+<li>自由度（Degrees of freedom）</li>
+<li>P 值（p-value）</li>
+</ul>
+<p>根据得到的 P 值，可以判断学历与性别之间是否存在显著性差异。如果 P 值小于显著性水平（如 0.05），则可以拒绝零假设，认为学历和性别之间存在显著相关性。</p>
+<h2 id="举例2">举例2</h2>
+<p><strong>这里构建矩阵的行和列的顺序不重要</strong>，下面将行和列的顺序进行对调，使得学历分布在列中，而性别在行中。</p>
+<table>
+<thead>
+<tr>
+<th>性别</th>
+<th>小学</th>
+<th>初中</th>
+<th>高中</th>
+<th>大学</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>男性</td>
+<td>30</td>
+<td>40</td>
+<td>35</td>
+<td>20</td>
+</tr>
+<tr>
+<td>女性</td>
+<td>25</td>
+<td>50</td>
+<td>45</td>
+<td>30</td>
+</tr>
+</tbody>
+</table>
+<h3 id="在-R-中进行卡方检验-2">在 R 中进行卡方检验</h3>
+<p>下面是更新后的 R 代码：</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建数据框</span></span><br><span class="line">data <span class="operator">&lt;-</span> matrix<span class="punctuation">(</span><span class="built_in">c</span><span class="punctuation">(</span><span class="number">30</span><span class="punctuation">,</span> <span class="number">40</span><span class="punctuation">,</span> <span class="number">35</span><span class="punctuation">,</span> <span class="number">20</span><span class="punctuation">,</span> <span class="number">25</span><span class="punctuation">,</span> <span class="number">50</span><span class="punctuation">,</span> <span class="number">45</span><span class="punctuation">,</span> <span class="number">30</span><span class="punctuation">)</span><span class="punctuation">,</span> </span><br><span class="line">                nrow <span class="operator">=</span> <span class="number">2</span><span class="punctuation">,</span> </span><br><span class="line">                byrow <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定行和列名称</span></span><br><span class="line">rownames<span class="punctuation">(</span>data<span class="punctuation">)</span> <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;男性&quot;</span><span class="punctuation">,</span> <span class="string">&quot;女性&quot;</span><span class="punctuation">)</span></span><br><span class="line">colnames<span class="punctuation">(</span>data<span class="punctuation">)</span> <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;小学&quot;</span><span class="punctuation">,</span> <span class="string">&quot;初中&quot;</span><span class="punctuation">,</span> <span class="string">&quot;高中&quot;</span><span class="punctuation">,</span> <span class="string">&quot;大学&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示数据</span></span><br><span class="line">print<span class="punctuation">(</span>data<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行卡方检验</span></span><br><span class="line">chi_square_test <span class="operator">&lt;-</span> chisq.test<span class="punctuation">(</span>data<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出检验结果</span></span><br><span class="line">print<span class="punctuation">(</span>chi_square_test<span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<h3 id="解释输出-2">解释输出</h3>
+<p>运行上述代码后，你将得到与之前相同的信息，包括卡方统计量、自由度和 P 值。</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">        Pearson<span class="string">&#x27;s Chi-squared test</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">data:  data</span></span><br><span class="line"><span class="string">X-squared = 2.5641, df = 3, p-value = 0.4638</span></span><br></pre></td></tr></table></figure>
+<h1>fisher精确检验</h1>
+<p>当存在某个频数小于5时，需要使用 fisher 精确检验。</p>
+<p>这里只需要将 <code>chisq.test()</code> 函数换成 <code>fisher.test()</code> 函数即可。</p>
+<p>如果只需要提取P值结果，则可以使用</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">chisq.test<span class="punctuation">(</span>data<span class="punctuation">)</span><span class="operator">$</span>p.value</span><br><span class="line">fisher.test<span class="punctuation">(</span>data<span class="punctuation">)</span><span class="operator">$</span>p.value</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>R</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>R</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>aireml估计方差组分日志信息解读</title>
     <url>/posts/33156ed7/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>解读使用 airemlf90 估计方差组分的日志信息。</p>
@@ -1166,11 +1394,18 @@ emWeight=NULL)</p>
 <p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0ADP%20%26%3D%201%20-%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%28p_%7Bi%7D%5E%7B2%7D%29%5E%7B2%7D%20-%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Csum_%7Bj%3Di%2B1%7D%5E%7Bn%7D(2p_%7Bi%7Dp_%7Bj%7D)%5E%7B2%7D%20%5C%5C%0A%26%3D%201-2%20%5Ctimes%20%5Cleft(%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20p_%7Bi%7D%5E%7B2%7D%5Cright)%5E%7B2%7D%20%2B%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20p_%7Bi%7D%5E%7B4%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>上面的公式是对于单个遗传标记而言的，对于一组遗传标记，其累积个体识别能力 (total discrimination power, TDP)  计算公式如下</p>
 <p style=""><img src="https://math.now.sh?from=TDP%20%3D%201%20-%20%5Csum_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%0A" /></p><p>其中 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 为标记数目。</p>
 <p>相似的，我们定义累积匹配概率 (cumulative match probability, CPM) 如下</p>
-<p style=""><img src="https://math.now.sh?from=CPM%20%3D%20%5Csum_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%0A" /></p><h1>似然率计算</h1>
+<p style=""><img src="https://math.now.sh?from=CPM%20%3D%20%5Csum_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%0A" /></p><p>在《GBT27642-2011牛个体及亲子鉴定微卫星DNA法》中，当 CPM 小于 <img src="https://math.now.sh?inline=5%C3%9710%5E%7B-9%7D" style="display:inline-block;margin: 0;"/> 时，认定两份样本来源于同一个个体。</p>
+<h1>似然率计算</h1>
 <p>个体识别的似然率，或者称为似然比（likelihood ratio, LR）计算公式如下</p>
 <p style=""><img src="https://math.now.sh?from=LR%20%3D%20%5Cfrac%7BPr%28E%7CHp%29%7D%7BPr(E%7CHd)%7D%0A" /></p><p>这里 E 表示出现这个个体基因型的事件，Hp 表示是同一个个体的假设，Hd 表示是随机个体的假设。</p>
 <p>例如，我们假设现场血痕DNA和一名嫌疑人血样DNA表型组合均为E，如果是同一个人的话，那么出现这种事件的概率就为1，即 <img src="https://math.now.sh?inline=Pr%28E%7CHp%29%20%3D%201" style="display:inline-block;margin: 0;"/> ；如果是随机个体偶然基因型完全一样，这种概率 <img src="https://math.now.sh?inline=Pr%28E%7CHd%29%20%3D%20CPM" style="display:inline-block;margin: 0;"/> ，因此我们得到似然比的实际计算公式为</p>
 <p style=""><img src="https://math.now.sh?from=LR%20%3D%20%5Cfrac%7B1%7D%7BCPM%7D%0A" /></p><p>统计学上似然比超过 1 则支持假设 <img src="https://math.now.sh?inline=Hp" style="display:inline-block;margin: 0;"/> ，反之则支持假设 <img src="https://math.now.sh?inline=Hd" style="display:inline-block;margin: 0;"/> 。在法医学个体识别实践 中，当LR在数值上超过全球人口总数时，表明证据有足够强度支持原告假设（Hp）。</p>
+<h1>杂合度</h1>
+<p>指调查群体中某遗传标记所有基因型中杂合子的占比。杂合度越高，说明该遗传标记的杂合性越大，<br>
+在法医学个人识别中的应用价值越大。杂合度分为观察杂合度（observed heterozygosity, Hobs ）和期望杂<br>
+合度（expected heterozygosity, Hexp ）。计算公式分别如下：</p>
+<p style=""><img src="https://math.now.sh?from=H_%7Bobs%7D%20%3D%20%5Cfrac%7B%E6%9D%82%E5%90%88%E5%AD%90%E4%B8%AA%E4%BD%93%E6%95%B0%7D%7B%E8%B0%83%E6%9F%A5%E4%B8%AA%E4%BD%93%E6%95%B0%7D%0A" /></p><p style=""><img src="https://math.now.sh?from=H_%7Bexp%7D%20%3D%20%5Cfrac%7BN%7D%7BN-1%7D%20%281-%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20p_%7Bi%7D%5E%7B2%7D%29%0A" /></p><p>其中 N 为调查群体中的等位基因总数（对于二倍体生物，就是非缺失的样本数乘2），n 为等位基因种类的数目。</p>
+<p>这里的期望杂合度公式我不太清楚是怎么来的，但是通过比较发现这应该就是 CERVUS 使用的计算公式。</p>
 <h1>鉴定意见</h1>
 <ul>
 <li>如果存在分型不一致，则判定为“排除两者来自同一个体”</li>
@@ -1183,6 +1418,9 @@ emWeight=NULL)</p>
 </li>
 <li>
 <p>SF/Z JD0105010——2018 《常染色体 STR 基因座的法医学参数计算规范》</p>
+</li>
+<li>
+<p>GBT27642-2011牛个体及亲子鉴定微卫星DNA法</p>
 </li>
 </ol>
 ]]></content>
@@ -2211,7 +2449,7 @@ emWeight=NULL)</p>
   <entry>
     <title>R包-BGLR</title>
     <url>/posts/d4668321/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>BGLR 是一个使用贝叶斯方法进行基因组选择的一个 R 包。</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>BGLR 是一个使用贝叶斯方法进行基因组选择的一个 R 包，可用方法包括 BayesA , BayesB , BayesC(Pi), Bayes Lasso （对应参数为 BL）。</p>
 <span id="more"></span>
 <h1>支持的表型</h1>
 <ul>
@@ -2331,6 +2569,7 @@ emWeight=NULL)</p>
 <p style=""><img src="https://math.now.sh?from=%5Cmathrm%7BCPE%7D%20%3D%201%20%20-%20%5Cprod_%7Bi%3D1%7D%5E%7Bm%7D%281-%5Cmathrm%7BPE%7D_%7Bi%7D%29%0A" /></p><p>这个公式解释一下，<img src="https://math.now.sh?inline=1-%5Cmathrm%7BPE%7D_%7Bi%7D" style="display:inline-block;margin: 0;"/> 就是标记 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 不能排除随机样本是真实亲本的概率，所有位点连乘的结果就是所有位点都不能排除随机样本的概率，1减去这个值就是至少有一个位点能够排除随机样本的概率。</p>
 <p>排除概率是针对标记而言的，标记的多态性越好则排除概率越高。</p>
 <p>如果累积排除概率较低，说明标记数目不够，需要继续增加标记数目。</p>
+<p>在《GBT27642-2011牛个体及亲子鉴定微卫星DNA法》中，CPE 需要大于等于 99.73% 。</p>
 <h3 id="排除概率公式推导过程">排除概率公式推导过程</h3>
 <p>根据 Fung (2002) 的文献，我找到了排除概率公式的推导过程。</p>
 <p>我们假设一个标记有 <img src="https://math.now.sh?inline=n" style="display:inline-block;margin: 0;"/> 个等位碱基 <img src="https://math.now.sh?inline=A_%7B1%7D%2C%20%5Ccdots%2C%20A_%7Bn%7D" style="display:inline-block;margin: 0;"/> ，相应的等位基因频率为 <img src="https://math.now.sh?inline=p_%7B1%7D%2C%20%5Ccdots%2C%20p_%7Bn%7D" style="display:inline-block;margin: 0;"/> ，假设一个孩子和其母亲在这个位点的基因型标记为 <img src="https://math.now.sh?inline=G_%7BC%7D" style="display:inline-block;margin: 0;"/> 和 <img src="https://math.now.sh?inline=G_%7BM%7D" style="display:inline-block;margin: 0;"/> ，举个例子，假设 <img src="https://math.now.sh?inline=G_%7BM%7D%20%3D%20A_%7B1%7DA_%7B2%7D" style="display:inline-block;margin: 0;"/> ， <img src="https://math.now.sh?inline=G_%7BC%7D%20%3D%20A_%7B1%7DA_%7B1%7D" style="display:inline-block;margin: 0;"/> ，因此任何没有 <img src="https://math.now.sh?inline=A_%7B1%7D" style="display:inline-block;margin: 0;"/> 基因的男性都可以被排除（不是这个孩子的父亲），此时的排除概率我们定义为 <code>individual probability of exclusion(IPE)</code> 为 <img src="https://math.now.sh?inline=%5Cmathrm%7BIPE%7D%20%3D%20%281-p_%7B1%7D%29%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，即 <img src="https://math.now.sh?inline=%281-p_%7B1%7D%29%5E%7B2%7D" style="display:inline-block;margin: 0;"/> 的男性群体可以被排除，即</p>
@@ -2384,6 +2623,9 @@ emWeight=NULL)</p>
 </li>
 <li>
 <p>SF/Z JD0105004 - 2015《亲子鉴定文书规范》</p>
+</li>
+<li>
+<p>GBT27642-2011牛个体及亲子鉴定微卫星DNA法</p>
 </li>
 <li>
 <p>Marshall T C, Slate J, Kruuk L E B, et al. Statistical confidence for likelihood‐based paternity inference in natural populations[J]. Molecular ecology, 1998, 7(5): 639-655.</p>
