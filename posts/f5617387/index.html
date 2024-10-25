@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3.2k</span>
+            <span class="post-count">3.6k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">13 分钟</span>
+            <span class="post-count">15 分钟</span>
         </span>
     </span>
 </div>
@@ -242,14 +242,22 @@
 </li>
 </ol>
 <p>参考面板构建仅仅是第二步改为无参填充即可。</p>
-<p>填充命令如下</p>
+<p>填充命令如下（参考 <a target="_blank" rel="noopener" href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#required_args">https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#required_args</a> ）</p>
 <ul>
 <li><code>-use_prephased_g</code> ：说明验证群已经定相了。</li>
-<li><code>-known_haps_g</code> :  验证群定相后的基因型文件</li>
-<li><code>-int 9.1e6 9.6e6</code> : 填充的区域（要填充整条染色体，只能是 <strong>-int 1 5000000</strong>，然后 <strong>-int 5000001 10000000</strong> 这种，最终再合并，张志燕老师就是间隔 5MB ，不过他是测序，不是芯片）</li>
-<li><code>-m</code> ：遗传图谱，这也是必选项（没有怎么办？）</li>
+<li><code>-known_haps_g</code> :  验证群定相后的基因型文件 (<strong>必选项</strong>，或者提供 <code>-g</code>参数) 。</li>
+<li><code>-int 9.1e6 9.6e6</code> : 填充的区域（<strong>必选项</strong>，默认长度不超过 7MB，除非添加 <a target="_blank" rel="noopener" href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#-allow_large_regions"><strong>-allow_large_regions</strong></a> 参数允许更大的长度）</li>
+<li><code>-m</code> ：遗传图谱，<strong>必选项</strong>（三列，第一列是物理位置，第二列是当前位置与map文件下一个位置的重组率(in cM/Mb)，第三列是遗传图谱位置（in cM），列标题必须为 “<strong>position COMBINED_rate(cM/Mb) Genetic_Map(cM)</strong>” ）（<strong>由于遗传图谱是必选项，因此很难创建自己的参考面板</strong>）</li>
 </ul>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">impute2 -use_prephased_g \</span><br><span class="line">        -known_haps_g gwas.phased.haps \</span><br><span class="line">        -h reference.haplotypes.gz \</span><br><span class="line">        -l reference.legend.gz \</span><br><span class="line">        -m genetic_map.txt \</span><br><span class="line">        -int 9.1e6 9.6e6 \</span><br><span class="line">        -Ne 20000 \</span><br><span class="line">        -o gwas.from9.1e6_to9.6e6.imputed</span><br></pre></td></tr></table></figure>
+<h2 id="如何填充整条染色体">如何填充整条染色体</h2>
+<p>参考 <a target="_blank" rel="noopener" href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#whole_chroms">https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#whole_chroms</a></p>
+<p>原则上 impute 可以一次填充一整条染色体，但是我们更加推荐将整条染色体切分为更小的区块来分析，第一是填充更准确，第二是可以使用多个CPU同时填充，节约计算时间和内存。</p>
+<p>举个例子，我们可以将整条染色体按照 5MB 来拆分开，使用 “<strong>-int 1 5000000</strong>”  用于第一次分析, “<strong>-int 5000001 10000000</strong>” 用于第二次分析，以此类推。impute2 分析时会在区域两端使用一个 250kb 的 buffer 区域来避免边缘效应（就是说为了避免区域两端的位点结果不准，它会在两边延长 250kb 的长度，但是这两个 buffer 区域的位点不会出现在最终结果中，这和 beagle 的窗口的 overlap 原理一样），因此你在提供拆分片段时不用重叠（因为 impute2 已经考虑重叠了，overlap 长度可以通过 -buffer 选项设置）。</p>
+<p>拆分后并填充完毕后，你可以直接将所有合并结果合并</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat chr16_chunk1.impute2 chr16_chunk2.impute2 chr16_chunk3.impute2 &gt; chr16_chunkAll.impute2</span><br></pre></td></tr></table></figure>
+<h1>小结</h1>
+<p>impute2 只是适用于<strong>重测序</strong>数据，而且参考面板需要<strong>遗传图谱</strong>，分析时需要将整条染色体按照 5MB 来拆分开，比较麻烦。</p>
 <h1>impute5</h1>
 <h2 id="下载安装-3">下载安装</h2>
 <p>从<a target="_blank" rel="noopener" href="https://jmarchini.org/software/#impute-5">impute-5</a>下载得到二进制文件和说明文档，将二进制文件放在环境变量的文件夹中即可。</p>

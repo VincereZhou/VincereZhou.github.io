@@ -983,14 +983,22 @@ emWeight=NULL)</p>
 </li>
 </ol>
 <p>参考面板构建仅仅是第二步改为无参填充即可。</p>
-<p>填充命令如下</p>
+<p>填充命令如下（参考 <a href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#required_args">https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#required_args</a> ）</p>
 <ul>
 <li><code>-use_prephased_g</code> ：说明验证群已经定相了。</li>
-<li><code>-known_haps_g</code> :  验证群定相后的基因型文件</li>
-<li><code>-int 9.1e6 9.6e6</code> : 填充的区域（要填充整条染色体，只能是 <strong>-int 1 5000000</strong>，然后 <strong>-int 5000001 10000000</strong> 这种，最终再合并，张志燕老师就是间隔 5MB ，不过他是测序，不是芯片）</li>
-<li><code>-m</code> ：遗传图谱，这也是必选项（没有怎么办？）</li>
+<li><code>-known_haps_g</code> :  验证群定相后的基因型文件 (<strong>必选项</strong>，或者提供 <code>-g</code>参数) 。</li>
+<li><code>-int 9.1e6 9.6e6</code> : 填充的区域（<strong>必选项</strong>，默认长度不超过 7MB，除非添加 <a href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#-allow_large_regions"><strong>-allow_large_regions</strong></a> 参数允许更大的长度）</li>
+<li><code>-m</code> ：遗传图谱，<strong>必选项</strong>（三列，第一列是物理位置，第二列是当前位置与map文件下一个位置的重组率(in cM/Mb)，第三列是遗传图谱位置（in cM），列标题必须为 “<strong>position COMBINED_rate(cM/Mb) Genetic_Map(cM)</strong>” ）（<strong>由于遗传图谱是必选项，因此很难创建自己的参考面板</strong>）</li>
 </ul>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">impute2 -use_prephased_g \</span><br><span class="line">        -known_haps_g gwas.phased.haps \</span><br><span class="line">        -h reference.haplotypes.gz \</span><br><span class="line">        -l reference.legend.gz \</span><br><span class="line">        -m genetic_map.txt \</span><br><span class="line">        -int 9.1e6 9.6e6 \</span><br><span class="line">        -Ne 20000 \</span><br><span class="line">        -o gwas.from9.1e6_to9.6e6.imputed</span><br></pre></td></tr></table></figure>
+<h2 id="如何填充整条染色体">如何填充整条染色体</h2>
+<p>参考 <a href="https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#whole_chroms">https://mathgen.stats.ox.ac.uk/impute/impute_v2.html#whole_chroms</a></p>
+<p>原则上 impute 可以一次填充一整条染色体，但是我们更加推荐将整条染色体切分为更小的区块来分析，第一是填充更准确，第二是可以使用多个CPU同时填充，节约计算时间和内存。</p>
+<p>举个例子，我们可以将整条染色体按照 5MB 来拆分开，使用 “<strong>-int 1 5000000</strong>”  用于第一次分析, “<strong>-int 5000001 10000000</strong>” 用于第二次分析，以此类推。impute2 分析时会在区域两端使用一个 250kb 的 buffer 区域来避免边缘效应（就是说为了避免区域两端的位点结果不准，它会在两边延长 250kb 的长度，但是这两个 buffer 区域的位点不会出现在最终结果中，这和 beagle 的窗口的 overlap 原理一样），因此你在提供拆分片段时不用重叠（因为 impute2 已经考虑重叠了，overlap 长度可以通过 -buffer 选项设置）。</p>
+<p>拆分后并填充完毕后，你可以直接将所有合并结果合并</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat chr16_chunk1.impute2 chr16_chunk2.impute2 chr16_chunk3.impute2 &gt; chr16_chunkAll.impute2</span><br></pre></td></tr></table></figure>
+<h1>小结</h1>
+<p>impute2 只是适用于<strong>重测序</strong>数据，而且参考面板需要<strong>遗传图谱</strong>，分析时需要将整条染色体按照 5MB 来拆分开，比较麻烦。</p>
 <h1>impute5</h1>
 <h2 id="下载安装-3">下载安装</h2>
 <p>从<a href="https://jmarchini.org/software/#impute-5">impute-5</a>下载得到二进制文件和说明文档，将二进制文件放在环境变量的文件夹中即可。</p>
@@ -1392,9 +1400,9 @@ emWeight=NULL)</p>
 <p style=""><img src="https://math.now.sh?from=DP%20%3D%201-%20Pm%20%3D%201%20-%20%5Csum_%7Bi%3D1%7D%5E%7Bm%7D%20f_%7Bi%7D%5E%7B2%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=m" style="display:inline-block;margin: 0;"/> 为基因型数目，<img src="https://math.now.sh?inline=f_%7Bi%7D" style="display:inline-block;margin: 0;"/> 是第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 个基因型的频率，<img src="https://math.now.sh?inline=Pm" style="display:inline-block;margin: 0;"/>（probability of matching,  <strong>随机匹配概率</strong>） 是指调查群体中随机抽取两个无关个体在某一个基因座上二者表型纯粹由于机会而一致的概率（定义与 DP 相反，二者之和为 1）。</p>
 <p>如果我们假设哈温平衡，那么个体识别能力也可以基于等位基因频率进行计算，纯合子的 <img src="https://math.now.sh?inline=Pm" style="display:inline-block;margin: 0;"/> 值为 <img src="https://math.now.sh?inline=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%28p_%7Bi%7D%5E%7B2%7D%29%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，杂合子的  <img src="https://math.now.sh?inline=Pm" style="display:inline-block;margin: 0;"/> 值为 <img src="https://math.now.sh?inline=%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Csum_%7Bj%3Di%2B1%7D%5E%7Bn%7D%282p_%7Bi%7Dp_%7Bj%7D%29%5E%7B2%7D" style="display:inline-block;margin: 0;"/> ，因此我们得到</p>
 <p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0ADP%20%26%3D%201%20-%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%28p_%7Bi%7D%5E%7B2%7D%29%5E%7B2%7D%20-%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Csum_%7Bj%3Di%2B1%7D%5E%7Bn%7D(2p_%7Bi%7Dp_%7Bj%7D)%5E%7B2%7D%20%5C%5C%0A%26%3D%201-2%20%5Ctimes%20%5Cleft(%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20p_%7Bi%7D%5E%7B2%7D%5Cright)%5E%7B2%7D%20%2B%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20p_%7Bi%7D%5E%7B4%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>上面的公式是对于单个遗传标记而言的，对于一组遗传标记，其累积个体识别能力 (total discrimination power, TDP)  计算公式如下</p>
-<p style=""><img src="https://math.now.sh?from=TDP%20%3D%201%20-%20%5Csum_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%0A" /></p><p>其中 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 为标记数目。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0ATDP%20%26%3D%201%20-%20%5CPi_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%20%5C%5C%0A%26%3D%201%20-%20%5CPi_%7Bj%3D1%7D%5E%7Bk%7D%7BPm%7D_%7BK%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>其中 <img src="https://math.now.sh?inline=k" style="display:inline-block;margin: 0;"/> 为标记数目。</p>
 <p>相似的，我们定义累积匹配概率 (cumulative match probability, CPM) 如下</p>
-<p style=""><img src="https://math.now.sh?from=CPM%20%3D%20%5Csum_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%0A" /></p><p>在《GBT27642-2011牛个体及亲子鉴定微卫星DNA法》中，当 CPM 小于 <img src="https://math.now.sh?inline=5%C3%9710%5E%7B-9%7D" style="display:inline-block;margin: 0;"/> 时，认定两份样本来源于同一个个体。</p>
+<p style=""><img src="https://math.now.sh?from=CPM%20%3D%20%5CPi_%7Bj%3D1%7D%5E%7Bk%7D%281-DP_%7BK%7D%29%20%3D%20%5CPi_%7Bj%3D1%7D%5E%7Bk%7D%7BPm%7D_%7BK%7D%0A" /></p><p>在《GBT27642-2011牛个体及亲子鉴定微卫星DNA法》中，当 CPM 小于 <img src="https://math.now.sh?inline=5%C3%9710%5E%7B-9%7D" style="display:inline-block;margin: 0;"/> 时，认定两份样本来源于同一个个体。</p>
 <h1>似然率计算</h1>
 <p>个体识别的似然率，或者称为似然比（likelihood ratio, LR）计算公式如下</p>
 <p style=""><img src="https://math.now.sh?from=LR%20%3D%20%5Cfrac%7BPr%28E%7CHp%29%7D%7BPr(E%7CHd)%7D%0A" /></p><p>这里 E 表示出现这个个体基因型的事件，Hp 表示是同一个个体的假设，Hd 表示是随机个体的假设。</p>
