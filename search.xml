@@ -1,6 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>软件学习-STITCH</title>
+    <url>/posts/983f10d4/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>STITCH 是低深度重测序填充的软件。</p>
+<span id="more"></span>
+<h1>安装</h1>
+<p>这里我们使用 mamba 进行安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">mamba install r-stitch -c defaults -c bioconda -c conda-forge</span><br></pre></td></tr></table></figure>
+<h1>输入文件</h1>
+<h2 id="bam文件">bam文件</h2>
+<p>每一个个体均有一个 bam 文件和相应的索引文件 <code>*.bam.bai</code>  。</p>
+<h2 id="位点染色体物理位置文件">位点染色体物理位置文件</h2>
+<p>需要高深度的重测序数据来获得SNP的染色体和物理位置</p>
+<p>这里命名为 <code>Chr?.txt</code>，内容举例如下，<strong>分隔符必须为制表符</strong>，这里是染色体，物理位置，碱基1，碱基2（按照官方文档的说法，碱基1是 REF 碱基，碱基2是 ALT 碱基）</p>
+<blockquote>
+<p>4	12650	T	G<br>
+4	12665	T	C<br>
+4	12669	A	C</p>
+</blockquote>
+<h1>运行</h1>
+<p>STITCH 函数的部分参数如下：</p>
+<ul>
+<li>chr :  染色体</li>
+<li>posfile : 物理位置的文件</li>
+<li>K ：祖先/嵌合单倍型的数目（<code>How many founder / mosaic haplotypes to use</code>）</li>
+<li>outputdir : 输出目录</li>
+<li>output_filename ：输出文件名称</li>
+<li>bamlist ：存放bam文件路径的文件，其中内容是一行是一个bam文件的路径（bam文件必须存在相应的索引文件）。</li>
+<li>method : 填充方法，只能选 <code>diploid</code> 或 <code>pseudoHaploid</code> （二倍体或伪单倍体）</li>
+<li>nGen ： 世代数（<code>Number of generations since founding or mixing. Note that the algorithm is relatively robust to this. Use nGen = 4 * Ne / K if unsure</code>）</li>
+<li>nCores : 使用的核心数目</li>
+</ul>
+<h1>参考文献</h1>
+<ol>
+<li><a href="https://github.com/rwdavies/STITCH">https://github.com/rwdavies/STITCH</a></li>
+<li></li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>shell多进程并行计算代码</title>
+    <url>/posts/9cc5d19c/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>shell 本身没有多线程的做法，但是通过 <code>&amp;</code> 号将命令放到后台运算从而实现并行计算。</p>
+<span id="more"></span>
+<h1>第一种做法</h1>
+<p>代码如下， 这里 <code>degree</code> 是多进程的数目（同时跑几个进程），<code>do something</code> 是实际运算代码部分。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">degree=4</span><br><span class="line">for i in `seq 1 10`</span><br><span class="line">do</span><br><span class="line">    do something &amp; # 提交到后台的任务</span><br><span class="line">    [ `expr $i % $degree` -eq 0 ] &amp;&amp; wait</span><br><span class="line">done</span><br><span class="line">wait</span><br></pre></td></tr></table></figure>
+<p>做法的解释如下</p>
+<blockquote>
+<p>上面的脚本中设置了一个变量 degree，用来表示并行度，在整个循环中控制阻塞的关键语句是 [ <code>expr $i % $degree</code> -eq 0 ] &amp;&amp; wait，即在第 n 次循环时，如果 n 恰好对 degree 求模等于 0，那么循环阻塞，等待前面 n 个后台任务执行完成后再继续，以此类推。</p>
+</blockquote>
+<p>但是这里的做法是向后台一次性提交 3 个任务，然后通过 <code>wait</code> 命令等待当前所有后台任务完成再继续下一批，DS将其称为<strong>分批等待机制</strong> 。</p>
+<p>原始代码少了最后一行的 <code>wait</code> ，这可能有点问题，因为<code>i=10</code> 此时只提交了2个任务，不会触发 <code>for</code> 循环中的 <code>wait</code> 语句，因此可能总脚本可能会不等最后2个任务而完成而先退出，因此需要再补充一个 <code>wait</code> 命令，确保所有剩余任务完成。</p>
+<h2 id="缺点">缺点</h2>
+<ol>
+<li>
+<p>但是这个代码<strong>必须等待每批4个任务全部完成后，才能继续提交下一批任务，而不是动态地“完成一个、补充一个”</strong>，下面的做法就可以动态实现完成一个、补充一个的做法。</p>
+</li>
+<li>
+<p>实际计算部分只能是一行代码，然后用 <code>&amp;</code> 号结尾表示提交后台运算（多行运算代码那就得弄成一个bash文件）。</p>
+</li>
+</ol>
+<h1>第二种做法</h1>
+<p>shell 可以结合命名管道的方式实现并行计算。</p>
+<p>代码如下， 这里 <code>degree</code> 是多进程的数目（同时跑几个进程），<code># do something</code> 是实际运算代码部分。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment"># 创建管道，利用管道进行并行</span></span></span><br><span class="line">mkfifo pipfifo</span><br><span class="line">exec 6&lt;&gt;pipfifo</span><br><span class="line">degree=3</span><br><span class="line">for ((i=0;i&lt;$&#123;degree&#125;;i++))</span><br><span class="line">do</span><br><span class="line">	echo</span><br><span class="line"><span class="meta prompt_">done&gt;</span><span class="language-bash">&amp;6</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment"># 遍历每条染色体</span></span></span><br><span class="line">for i in `seq 0 25`</span><br><span class="line">do</span><br><span class="line">	read -u6</span><br><span class="line">	&#123;</span><br><span class="line">    # do something</span><br><span class="line">	echo &gt;&amp;6</span><br><span class="line">	&#125; &amp;</span><br><span class="line">done</span><br><span class="line">wait</span><br><span class="line">exec 6&gt;&amp;-</span><br><span class="line">rm pipfifo</span><br></pre></td></tr></table></figure>
+<p>deepseek 对这段代码的解释如下</p>
+<p>以下是对该 Shell 脚本的逐段解释，结合命名管道（FIFO）实现并行控制的原理：</p>
+<hr>
+<h2 id="一、管道创建与并发控制"><strong>一、管道创建与并发控制</strong></h2>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkfifo</span> pipfifo</span><br><span class="line"><span class="built_in">exec</span> 6&lt;&gt;pipfifo</span><br><span class="line">degree=3</span><br><span class="line"><span class="keyword">for</span> ((i=<span class="number">0</span>;i&lt;<span class="variable">$&#123;degree&#125;</span>;i++))</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span></span><br><span class="line"><span class="keyword">done</span>&gt;&amp;6</span><br></pre></td></tr></table></figure>
+<ol>
+<li>
+<p><code>mkfifo pipfifo</code><br>
+创建一个名为 <code>pipfifo</code> 的命名管道文件，用于进程间通信。管道的特点是：如果管道中没有数据，读取操作会阻塞；数据被读取后会被清除。</p>
+</li>
+<li>
+<p><code>exec 6&lt;&gt;pipfifo</code><br>
+将文件描述符 <code>6</code> 绑定到管道文件。<code>&lt;&gt;</code> 表示以读写模式打开管道，后续通过操作文件描述符 <code>6</code> 控制管道。</p>
+</li>
+<li>
+<p>初始化令牌</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> ((i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)); <span class="keyword">do</span> <span class="built_in">echo</span>; <span class="keyword">done</span> &gt;&amp;6</span><br></pre></td></tr></table></figure>
+<p>向文件描述符 <code>6</code>（即管道）写入 3 个空行。这些空行相当于“并发令牌”，用于限制同时运行的进程数。</p>
+</li>
+</ol>
+<hr>
+<h2 id="二、并行任务分发与回收"><strong>二、并行任务分发与回收</strong></h2>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> `<span class="built_in">seq</span> 0 25`</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    <span class="built_in">read</span> -u6          <span class="comment"># 从管道读取一个令牌（阻塞直到有令牌）</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment"># 实际任务（例如处理染色体数据）</span></span><br><span class="line">        <span class="built_in">echo</span> &gt;&amp;6      <span class="comment"># 任务完成后归还令牌</span></span><br><span class="line">    &#125; &amp;</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"><span class="built_in">wait</span></span><br><span class="line"><span class="built_in">exec</span> 6&gt;&amp;-</span><br><span class="line"><span class="built_in">rm</span> pipfifo</span><br></pre></td></tr></table></figure>
+<ol>
+<li>
+<p>任务分发逻辑<br>
+• <code>read -u6</code>：每次循环从文件描述符 <code>6</code>（管道）读取一个空行（令牌）。若管道为空，则阻塞等待，直到有令牌可用。</p>
+<p>• <code>&#123; ... &#125; &amp;</code>：将任务放入后台执行。<code>&amp;</code> 表示后台运行，不阻塞主进程。</p>
+</li>
+<li>
+<p>令牌回收机制<br>
+• <code>echo &gt;&amp;6</code>：任务完成后，向管道写回一个空行（令牌），允许新的任务获取令牌执行。这保证了并发数始终不超过 <code>degree=3</code>。</p>
+</li>
+<li>
+<p>等待与清理<br>
+• <code>wait</code>：等待所有后台任务完成后再继续执行后续命令。</p>
+<p>• <code>exec 6&gt;&amp;-</code>：关闭文件描述符 <code>6</code> 的读写绑定。</p>
+<p>• <code>rm pipfifo</code>：删除命名管道文件。</p>
+</li>
+</ol>
+<hr>
+<h2 id="三、技术原理总结"><strong>三、技术原理总结</strong></h2>
+<ol>
+<li>
+<p>并发控制核心<br>
+通过管道的阻塞特性实现信号量机制：初始时放入 <code>3</code> 个令牌，每个后台任务执行前需获取令牌，执行完毕归还令牌。若所有令牌被占用，后续任务自动阻塞等待。</p>
+</li>
+<li>
+<p>应用场景<br>
+适用于需要限制并发数的批量任务（如处理 26 条染色体数据，但限制同时处理 3 条），避免资源耗尽或系统过载。</p>
+</li>
+<li>
+<p>性能优势<br>
+相比简单使用 <code>&amp;</code> 将所有任务放入后台，该方案能精确控制并发量，避免瞬间创建过多进程导致系统崩溃。</p>
+</li>
+</ol>
+<hr>
+<h1>参考文献</h1>
+<ol>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzkyOTI1NjA5MQ==&amp;mid=2247484566&amp;idx=1&amp;sn=3c306077ef48beebe935d014ee7f4397&amp;chksm=c337e1c0c5a8caf9aa2dc6be9253d068beb19d55cf9e88e1366c41ff3e402e244f5cef2195bf#rd">https://mp.weixin.qq.com/s?__biz=MzkyOTI1NjA5MQ==&amp;mid=2247484566&amp;idx=1&amp;sn=3c306077ef48beebe935d014ee7f4397&amp;chksm=c337e1c0c5a8caf9aa2dc6be9253d068beb19d55cf9e88e1366c41ff3e402e244f5cef2195bf#rd</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>R包-ggplot2</title>
     <url>/posts/5cb25283/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>主要基于《数据科学中的R语言》的学习笔记。</p>
