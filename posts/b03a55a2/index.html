@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.3k</span>
+            <span class="post-count">3k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">10 分钟</span>
+            <span class="post-count">13 分钟</span>
         </span>
     </span>
 </div>
@@ -160,6 +160,115 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">30</span>]: a = subprocess.Popen(<span class="string">&quot;wc -l *.ped&quot;</span>, shell=<span class="literal">True</span>, stdout=subprocess.PIPE, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">31</span>]: a.stdout.readline()</span><br><span class="line">Out[<span class="number">31</span>]: <span class="string">&#x27;    773 all.ped\n&#x27;</span></span><br></pre></td></tr></table></figure>
 <p>也可以写入一个文件</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">32</span>]: test_file = <span class="built_in">open</span>(<span class="string">&quot;test.txt&quot;</span>, <span class="string">&quot;w&quot;</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">33</span>]: a = subprocess.Popen(<span class="string">&quot;wc -l *.ped&quot;</span>, shell=<span class="literal">True</span>, stdout=test_file, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">34</span>]: test_file.close()</span><br><span class="line"></span><br><span class="line">In [<span class="number">35</span>]: !cat test.txt</span><br><span class="line">    <span class="number">773</span> <span class="built_in">all</span>.ped</span><br><span class="line">    <span class="number">193</span> <span class="number">1.</span>ped</span><br><span class="line">    <span class="number">198</span> <span class="number">2.</span>ped</span><br><span class="line">    <span class="number">187</span> <span class="number">3.</span>ped</span><br><span class="line">   <span class="number">1351</span> total</span><br></pre></td></tr></table></figure>
+<h2 id="subprocess-check-out">subprocess.check_out()</h2>
+<p><code>subprocess.check_output()</code>是 Python <code>subprocess</code>模块中的一个高级函数，专门用于<strong>执行外部命令并捕获其标准输出</strong>。它是执行命令行操作并获取结果的推荐方式，特别适合需要简单快速获取命令输出的场景。</p>
+<p><strong>核心功能</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">output = subprocess.check_output(args, *, </span><br><span class="line">                                 stdin=None, </span><br><span class="line">                                 stderr=None, </span><br><span class="line">                                 shell=False, </span><br><span class="line">                                 timeout=None, </span><br><span class="line">                                 encoding=None, </span><br><span class="line">                                 errors=None, </span><br><span class="line">                                 text=None)</span><br></pre></td></tr></table></figure>
+<p><strong>关键特性：</strong></p>
+<ol>
+<li><strong>执行命令</strong>：运行指定的外部程序或命令</li>
+<li><strong>捕获输出</strong>：返回命令的标准输出（stdout）内容</li>
+<li><strong>错误处理</strong>：如果命令返回非零退出码（失败），自动引发 <code>CalledProcessError</code>异常</li>
+<li><strong>简化流程</strong>：无需手动处理管道和错误检查</li>
+</ol>
+<h3 id="参数解析"><strong>参数解析</strong></h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>类型</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>args</strong></td>
+<td>str/list</td>
+<td>要执行的命令（字符串或列表）</td>
+<td><code>&quot;ls -l&quot;</code>或 <code>[&quot;ls&quot;, &quot;-l&quot;]</code></td>
+</tr>
+<tr>
+<td><strong>shell</strong></td>
+<td>bool</td>
+<td>是否通过系统shell执行</td>
+<td><code>True</code>（支持管道等）</td>
+</tr>
+<tr>
+<td><strong>text</strong></td>
+<td>bool</td>
+<td>是否返回字符串（而非字节）</td>
+<td><code>True</code>（推荐）</td>
+</tr>
+<tr>
+<td><strong>encoding</strong></td>
+<td>str</td>
+<td>输出解码编码</td>
+<td><code>&quot;utf-8&quot;</code></td>
+</tr>
+<tr>
+<td><strong>timeout</strong></td>
+<td>float</td>
+<td>命令超时时间（秒）</td>
+<td><code>5.0</code></td>
+</tr>
+<tr>
+<td><strong>stderr</strong></td>
+<td></td>
+<td>错误输出处理</td>
+<td><code>subprocess.STDOUT</code>（合并到stdout）</td>
+</tr>
+</tbody>
+</table>
+<p>这里一个核心参数在于 <code>text</code> ，只需要设置这个参数，就不用再对输出进行解码了，举例如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Python 3.7+ 推荐</span></span><br><span class="line">output = subprocess.check_output(<span class="string">&quot;cmd&quot;</span>, text=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 旧版本替代方案</span></span><br><span class="line">output = subprocess.check_output(<span class="string">&quot;cmd&quot;</span>).decode(<span class="string">&quot;utf-8&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="使用示例">使用示例</h3>
+<p>基础用法（获取命令输出）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取当前目录文件列表</span></span><br><span class="line">files = subprocess.check_output(<span class="string">&quot;ls&quot;</span>, shell=<span class="literal">True</span>, text=<span class="literal">True</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;文件列表:\n<span class="subst">&#123;files&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>带参数的命令</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 推荐使用列表形式（避免注入风险）</span></span><br><span class="line">disk_usage = subprocess.check_output([<span class="string">&quot;df&quot;</span>, <span class="string">&quot;-h&quot;</span>], text=<span class="literal">True</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;磁盘使用情况:\n<span class="subst">&#123;disk_usage&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>错误处理</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="comment"># 尝试访问不存在的文件</span></span><br><span class="line">    result = subprocess.check_output(<span class="string">&quot;cat no_such_file.txt&quot;</span>, shell=<span class="literal">True</span>, text=<span class="literal">True</span>)</span><br><span class="line"><span class="keyword">except</span> subprocess.CalledProcessError <span class="keyword">as</span> e:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;命令失败! 退出码: <span class="subst">&#123;e.returncode&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;错误输出: <span class="subst">&#123;e.output&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>高级应用（带超时）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="comment"># 限制命令执行时间</span></span><br><span class="line">    output = subprocess.check_output(<span class="string">&quot;sleep 10&quot;</span>, shell=<span class="literal">True</span>, timeout=<span class="number">3</span>, text=<span class="literal">True</span>)</span><br><span class="line"><span class="keyword">except</span> subprocess.TimeoutExpired:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;命令执行超时!&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="与-subprocess-run-的对比">与 <code>subprocess.run()</code>的对比</h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>check_output()</code></th>
+<th><code>run()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>返回值</strong></td>
+<td>直接返回输出内容</td>
+<td>返回CompletedProcess对象</td>
+</tr>
+<tr>
+<td><strong>错误处理</strong></td>
+<td>自动抛出异常</td>
+<td>需手动检查returncode</td>
+</tr>
+<tr>
+<td><strong>输出捕获</strong></td>
+<td>仅捕获stdout</td>
+<td>可分别捕获stdout/stderr</td>
+</tr>
+<tr>
+<td><strong>代码简洁度</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td><strong>灵活性</strong></td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><code>subprocess.check_output()</code>是Python与系统命令交互的瑞士军刀，它通过简洁的API提供了强大的功能，特别适合需要快速获取命令结果的场景。</p>
 <h1>f-string 技巧</h1>
 <p>f-string 是Python3.6新引入的一种字符串格式化方法，上面 subprocess 的介绍中也提到了 f-string ，其使用起来非常简便。其形式就是 <code>f'***'</code> 或 <code>F'***'</code> （单双引号均可），以大括号<code>&#123;&#125;</code>表示被替换的字段（也可以是表达式或待用函数）。</p>
 <h2 id="特殊字符">特殊字符</h2>
@@ -317,7 +426,7 @@
     <ul>
       <li>
         Copyrights &copy;
-        2019-2024
+        2019-2025
         <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
       </li>
     </ul>

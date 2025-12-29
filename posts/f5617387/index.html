@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3.6k</span>
+            <span class="post-count">3.9k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">15 分钟</span>
+            <span class="post-count">16 分钟</span>
         </span>
     </span>
 </div>
@@ -260,7 +260,7 @@
 <p>impute2 只是适用于<strong>重测序</strong>数据，而且参考面板需要<strong>遗传图谱</strong>，分析时需要将整条染色体按照 5MB 来拆分开，比较麻烦。</p>
 <h1>impute5</h1>
 <h2 id="下载安装-3">下载安装</h2>
-<p>从<a target="_blank" rel="noopener" href="https://jmarchini.org/software/#impute-5">impute-5</a>下载得到二进制文件和说明文档，将二进制文件放在环境变量的文件夹中即可。</p>
+<p>从<a target="_blank" rel="noopener" href="https://jmarchini.org/software/#impute-5">impute-5</a>下载得到二进制文件和说明文档，将二进制文件放在环境变量的文件夹中即可，添加执行权限。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">impute5_1.1.5_static --help</span><br></pre></td></tr></table></figure>
 <p>使用前需要对参考面板和验证群创建 index ，使用 bcftools 可以完成这一点（需要实现使用 <code>bgzip</code> 压缩为<code>vcf.gz</code> 格式）。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bgzip -c reference.vcf &gt; reference.vcf.gz</span><br><span class="line">bcftools index reference.vcf.gz</span><br><span class="line"></span><br><span class="line">bgzip target.vcf # 不保留未压缩文件</span><br><span class="line">bcftools index target.vcf.gz</span><br></pre></td></tr></table></figure>
@@ -273,7 +273,16 @@
 <li><code>--out-gp-field</code>:  输出 genotype probabilities</li>
 <li><code>--threads 2</code>:  多线程（原理是将验证群逐个样本去填充）</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">impute5_1.1.5_static --h reference.vcf  --g target.vcf --r </span><br><span class="line">20 --o imputed.vcf.gz --out-gp-field --threads 2</span><br></pre></td></tr></table></figure> 
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">impute5_1.1.5_static --h reference.vcf  --g target.vcf --r </span><br><span class="line">20 --o imputed.vcf.gz --out-gp-field --threads 2</span><br></pre></td></tr></table></figure>
+<p>填充结果文件中 INFO 列的 INFO 字段为该位点的 <code>IMPUTE INFO score </code> ，用来评估填充位点的填充质量，越大说明填充准确性越好。从<a target="_blank" rel="noopener" href="https://bioinformaticshome.com/bioinformatics_tutorials/Genotype_Imputation.html">Genotype_Imputation.html</a> 中找到解释如下</p>
+<blockquote>
+<p><strong>Imputation quality score (INFO)</strong></p>
+<p>INFO scores measure the imputation accuracy of each variant. Variants with low INFO scores, typically less than 0.3, are often removed.</p>
+<p>We can use genotype imputation software tools, such as (<a target="_blank" rel="noopener" href="https://bioinformaticshome.com/tools/imputation/descriptions/IMPUTE2.html">IMPUTE2</a>, <a target="_blank" rel="noopener" href="https://bioinformaticshome.com/tools/imputation/descriptions/MaCH.html">MaCH</a>, <a target="_blank" rel="noopener" href="https://bioinformaticshome.com/tools/imputation/descriptions/BEAGLE.html">Beagle</a>, <a target="_blank" rel="noopener" href="https://bioinformaticshome.com/tools/imputation/descriptions/SHAPEIT.html">SHAPEIT</a>), to compute the imputation quality score (INFO score) to indicate the imputation accuracy of each variant. The INFO score ranges from 0 to 1. A score of 1 indicates perfect imputation accuracy, while 0 indicates the variant was not imputed.</p>
+<p>The INFO score is calculated using a selected imputation algorithm and the reference panel used for imputation. The algorithm calculates the probability of the imputed genotype based on the available genotype data and the reference panel. The INFO score is calculated as the ratio of the difference between the probability of the imputed genotype and the probability of the most likely observed genotype to the maximum possible difference between the two probabilities. The INFO score represents the amount of information gained by imputing the missing genotype and indicates the accuracy of the imputed data.</p>
+<p>Researchers typically set a threshold for the INFO score, below which the imputed variant is considered unreliable and removed from the dataset. The threshold may vary depending on the research question, the studied population, and the imputation software used.</p>
+</blockquote>
+ 
       <!-- reward -->
       
     </div>
@@ -379,7 +388,7 @@
     <ul>
       <li>
         Copyrights &copy;
-        2019-2024
+        2019-2025
         <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
       </li>
     </ul>

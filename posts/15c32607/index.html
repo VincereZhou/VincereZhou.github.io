@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.3k</span>
+            <span class="post-count">1.5k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">5 分钟</span>
+            <span class="post-count">6 分钟</span>
         </span>
     </span>
 </div>
@@ -98,6 +98,18 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>个人使用 f2py 的流程整理。</p>
 <span id="more"></span>
+<h1>安装f2py</h1>
+<p>安装 <code>f2py</code>（Fortran 到 Python 的接口生成器）通常通过安装 <code>numpy</code> 实现，因为 <code>f2py</code> 是 <code>numpy</code> 的一部分。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install numpy</span><br></pre></td></tr></table></figure>
+<h1>解决报错：找不到 distutils.msvccompiler</h1>
+<p>如果遇到报错（我是3.9.5版本的python和 1.21.5版本的numpy）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ModuleNotFoundError: No module named <span class="string">&#x27;distutils.msvccompiler&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>我搜了一下原因，好像是 python 本身的 bug ，这个模块是在 windows 下使用的，所以在 linux 环境下没有。</p>
+<blockquote>
+<p><code>distutils.msvccompiler</code>是Python的<code>distutils</code>模块的一部分，通常在Windows下用于调用Microsoft Visual C++编译器。然而，用户是在Linux环境下，为什么会引用到msvccompiler呢？可能是NumPy的某些部分在尝试调用这个模块，而它在Linux下并不存在。</p>
+</blockquote>
+<p>从网上找到的解决思路是将 setuptools 模块降低一下版本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install setuptools==69.5.1 </span><br></pre></td></tr></table></figure>
 <h1>修改 fortran 脚本</h1>
 <ol>
 <li>
@@ -272,7 +284,7 @@
     <ul>
       <li>
         Copyrights &copy;
-        2019-2024
+        2019-2025
         <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
       </li>
     </ul>

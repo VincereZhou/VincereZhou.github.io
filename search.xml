@@ -1,6 +1,228 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>R包-ggplot2</title>
+    <url>/posts/5cb25283/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>主要基于《数据科学中的R语言》的学习笔记。</p>
+<span id="more"></span>
+<h1>ggplot2介绍</h1>
+<p>ggplot2有一套优雅的绘图语法，包名中“gg”是grammar of graphics的简称。 Hadley Wickham将这套可视化语法诠释为:</p>
+<blockquote>
+<p>一张统计图形就是从<strong>数据</strong>到几何形状(geometric object，缩写geom)所包含的<strong>图形属性</strong>(aesthetic attribute，缩写aes)的一种映射。</p>
+</blockquote>
+<p>通俗解释：就是我们的<strong>数据</strong>通过图形的<strong>视觉元素</strong>表示出来。比如<strong>点的位置</strong>，如果坐标x值越大，水平方向离原点的位置就越远，数值越小，水平方向离原点的位置就越近。 <strong>数值的大小变成了视觉能感知的东西</strong>。</p>
+<p><code>ggplot()</code>函数包括9个部件：</p>
+<ul>
+<li><strong>数据 (data)</strong> （数据框）</li>
+<li><strong>映射 (mapping)</strong></li>
+<li><strong>几何形状 (geom)</strong></li>
+<li>统计变换 (stats)</li>
+<li>标度 (scale)</li>
+<li>坐标系 (coord)</li>
+<li>分面 (facet)</li>
+<li>主题 (theme)</li>
+<li>存储和输出 (output)</li>
+</ul>
+<p>其中前三个是必需的。语法模板</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ggplot(data = &lt;DATA&gt;) + </span><br><span class="line">   &lt;GEOM_FUNCTION&gt;(mapping = aes(&lt;MAPPINGS&gt;))</span><br></pre></td></tr></table></figure>
+<p>此外，图形中还可能包含数据的统计变换(statistical transformation，缩写stats)，最后绘制在某个特定的坐标系(coordinate system，缩写coord)中，而分面(facet)则可以用来生成数据不同子集的图形。</p>
+<h2 id="简单例子">简单例子</h2>
+<p>用科考人员收集的企鹅体征<a href="https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv">数据</a>来演示。</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">library<span class="punctuation">(</span>tidyverse<span class="punctuation">)</span></span><br><span class="line">penguins <span class="operator">&lt;-</span> read_csv<span class="punctuation">(</span>here<span class="operator">::</span>here<span class="punctuation">(</span><span class="string">&quot;demo_data&quot;</span><span class="punctuation">,</span> <span class="string">&quot;penguins.csv&quot;</span><span class="punctuation">)</span><span class="punctuation">)</span> <span class="operator">%&gt;%</span></span><br><span class="line">  janitor<span class="operator">::</span>clean_names<span class="punctuation">(</span><span class="punctuation">)</span> <span class="operator">%&gt;%</span> </span><br><span class="line">  drop_na<span class="punctuation">(</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">penguins <span class="operator">%&gt;%</span></span><br><span class="line">  head<span class="punctuation">(</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>这里我们用到4个变量，species (企业种类)， sex (性别)， bill_length_mm (嘴峰长度) ， bill_depth_mm (嘴峰深度) 。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">penguins %&gt;%</span><br><span class="line">  select(species, sex, bill_length_mm, bill_depth_mm) %&gt;%</span><br><span class="line">  head(4)</span><br></pre></td></tr></table></figure>
+<p>我们想要考察嘴峰长度(bill_length_mm)与嘴峰深度(bill_depth_mm)之间的关联，先绘制这两个变量的散点图，。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ggplot(penguins) +</span><br><span class="line">  geom_point(aes(x = bill_length_mm, y = bill_depth_mm))</span><br></pre></td></tr></table></figure>
+<p>刚才看到的是位置上的映射，<code>ggplot()</code>还包含了颜色 (<strong>color</strong>)、形状 (<strong>shape</strong>) 以及透明度 (<strong>alpha</strong>) 等图形属性的映射。</p>
+<p>比如我们在<code>aes()</code>里增加一个颜色映射<code>color = species</code>, 这样做就是希望，<strong>不同的企鹅类型</strong>, 用<strong>不同的颜色</strong>来表现。这里，企鹅类型有三组，那么就用三种不同的颜色来表示</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">ggplot<span class="punctuation">(</span>penguins<span class="punctuation">)</span> <span class="operator">+</span></span><br><span class="line">  geom_point<span class="punctuation">(</span>aes<span class="punctuation">(</span>x <span class="operator">=</span> bill_length_mm<span class="punctuation">,</span> y <span class="operator">=</span> bill_depth_mm<span class="punctuation">,</span> color <span class="operator">=</span> species<span class="punctuation">)</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>如果我们只是想把图中的点指定为某一种颜色，可以使用设置语句，例如</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ggplot(penguins) +</span><br><span class="line">  geom_point(aes(x = bill_length_mm, y = bill_depth_mm), color = &quot;blue&quot;)</span><br></pre></td></tr></table></figure>
+<p>注意这里 <code>color = &quot;blue&quot;</code> 不能放在 <code>aes()</code> 函数中，不然所有点就都是红色。</p>
+<p>因为这种方式会将 ‘blue’ 映射到color轴，'blue’实际上是从c(‘blue’),是个长度为1的字符串，离散型变量，所以<strong>映射函数</strong>会把从c(‘blue’)映射到离散型的默认color轴，第一个颜色是红色，所以所有点是红色。注意映射函数接受长度为1或者长度和x,y等长的vector.</p>
+<h2 id="图层叠加">图层叠加</h2>
+<p><code>geom_point()</code> 可以画散点图，也可以使用<code>geom_smooth()</code>绘制平滑曲线，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ggplot(penguins) +</span><br><span class="line">  geom_smooth(aes(x = bill_length_mm, y = bill_depth_mm))</span><br></pre></td></tr></table></figure>
+<p>我们也可以同时画出散点图和平滑曲线图，如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ggplot(penguins) +</span><br><span class="line">  geom_point(aes(x = bill_length_mm, y = bill_depth_mm)) +</span><br><span class="line">  geom_smooth(aes(x = bill_length_mm, y = bill_depth_mm))</span><br></pre></td></tr></table></figure>
+<p>但是此时我们将相同的 <code>aes()</code> 函数写了两遍，我们可以将 <code>aes()</code> 函数放在 <code>ggplot()</code> 函数中，这样可以偷懒一点。</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">ggplot<span class="punctuation">(</span>penguins<span class="punctuation">,</span> aes<span class="punctuation">(</span>x <span class="operator">=</span> bill_length_mm<span class="punctuation">,</span> y <span class="operator">=</span> bill_depth_mm<span class="punctuation">)</span><span class="punctuation">)</span> <span class="operator">+</span></span><br><span class="line">  geom_point<span class="punctuation">(</span><span class="punctuation">)</span> <span class="operator">+</span></span><br><span class="line">  geom_smooth<span class="punctuation">(</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>那么将  <code>aes()</code> 函数放在 <code>ggplot()</code> 函数中，和放在 <code>geom_point()</code> 有什么区别呢？二者其实是全局声明和局部声明的关系。如果全局变量和局部变量均有某个映射关系，使用局部变量中的映射关系，更详细的解释如下。</p>
+<p>说白了，将  <code>aes()</code> 函数放在 <code>ggplot()</code> 函数中 就是为了偷懒，少打点字而已。</p>
+<blockquote>
+<ul>
+<li>映射关系<code>aes(x = bill_length_mm, y = bill_depth_mm)</code> 写在<code>ggplot()</code>里, 为<strong>全局声明</strong>。那么，当<code>geom_point()</code>画图时，发现缺少图形所需要的映射关系（点的位置、点的大小、点的颜色等等），就会从<code>ggplot()</code>全局变量中继承映射关系。</li>
+<li>如果映射关系<code>aes(x = bill_length_mm, y = bill_depth_mm)</code> 写在几何形状<code>geom_point()</code>里, 那么此处的映射关系就为<strong>局部声明</strong>, 那么<code>geom_point()</code>绘图时，发现所需要的映射关系已经存在，就不会继承全局变量的映射关系。</li>
+</ul>
+</blockquote>
+<h2 id="保存图片">保存图片</h2>
+<p>可以使用<code>ggsave()</code>函数，将图片保存为所需要的格式，如”.pdf”, “.png”等， 还可以指定图片的高度和宽度，默认<code>units</code>是英寸，也可以使用”cm”, or “mm”.</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">p1 <span class="operator">&lt;-</span> penguins <span class="operator">%&gt;%</span> </span><br><span class="line">  ggplot<span class="punctuation">(</span>aes<span class="punctuation">(</span>x <span class="operator">=</span> bill_length_mm<span class="punctuation">,</span> y <span class="operator">=</span> bill_depth_mm<span class="punctuation">)</span><span class="punctuation">)</span> <span class="operator">+</span></span><br><span class="line">  geom_smooth<span class="punctuation">(</span>method <span class="operator">=</span> lm<span class="punctuation">)</span> <span class="operator">+</span></span><br><span class="line">  geom_point<span class="punctuation">(</span>aes<span class="punctuation">(</span>color <span class="operator">=</span> species<span class="punctuation">)</span><span class="punctuation">)</span> <span class="operator">+</span></span><br><span class="line">  ggtitle<span class="punctuation">(</span><span class="string">&quot;This is my first plot&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">ggsave<span class="punctuation">(</span></span><br><span class="line">  plot <span class="operator">=</span> p1<span class="punctuation">,</span></span><br><span class="line">  filename <span class="operator">=</span> <span class="string">&quot;my_plot.pdf&quot;</span><span class="punctuation">,</span></span><br><span class="line">  width <span class="operator">=</span> <span class="number">8</span><span class="punctuation">,</span></span><br><span class="line">  height <span class="operator">=</span> <span class="number">6</span><span class="punctuation">,</span></span><br><span class="line">  dpi <span class="operator">=</span> <span class="number">300</span></span><br><span class="line"><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<h1>ggplot2之几何形状</h1>
+<p>先看一组数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">df &lt;- read_csv(&quot;./demo_data/datasaurus.csv&quot;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line"><span class="operator">&gt;</span> df</span><br><span class="line"><span class="comment"># A tibble: 1,846 × 3</span></span><br><span class="line">   dataset     x     y</span><br><span class="line">   <span class="operator">&lt;</span>chr<span class="operator">&gt;</span>   <span class="operator">&lt;</span>dbl<span class="operator">&gt;</span> <span class="operator">&lt;</span>dbl<span class="operator">&gt;</span></span><br><span class="line"> <span class="number">1</span> dino     <span class="number">55.4</span>  <span class="number">97.2</span></span><br><span class="line"> <span class="number">2</span> dino     <span class="number">51.5</span>  <span class="number">96.0</span></span><br><span class="line"> <span class="number">3</span> dino     <span class="number">46.2</span>  <span class="number">94.5</span></span><br><span class="line"> <span class="number">4</span> dino     <span class="number">42.8</span>  <span class="number">91.4</span></span><br><span class="line"> <span class="number">5</span> dino     <span class="number">40.8</span>  <span class="number">88.3</span></span><br></pre></td></tr></table></figure>
+<p>先用<code>dataset</code>分组后，然后计算每组下<code>x</code>的均值和方差，<code>y</code>的均值和方差，以及<code>x，y</code>两者的相关系数，我们发现每组数据下它们几乎都是相等的</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">df <span class="operator">%&gt;%</span></span><br><span class="line">  group_by<span class="punctuation">(</span>dataset<span class="punctuation">)</span> <span class="operator">%&gt;%</span></span><br><span class="line">  summarise<span class="punctuation">(</span></span><br><span class="line">    across<span class="punctuation">(</span>everything<span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">,</span> <span class="built_in">list</span><span class="punctuation">(</span>mean <span class="operator">=</span> mean<span class="punctuation">,</span> sd <span class="operator">=</span> sd<span class="punctuation">)</span><span class="punctuation">,</span> .names <span class="operator">=</span> <span class="string">&quot;&#123;fn&#125;_&#123;col&#125;&quot;</span><span class="punctuation">)</span></span><br><span class="line">  <span class="punctuation">)</span> <span class="operator">%&gt;%</span></span><br><span class="line">  mutate<span class="punctuation">(</span></span><br><span class="line">    across<span class="punctuation">(</span><span class="built_in">is.numeric</span><span class="punctuation">,</span> <span class="built_in">round</span><span class="punctuation">,</span> <span class="number">3</span><span class="punctuation">)</span></span><br><span class="line">  <span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>如果上面代码不熟悉，可以用第 <a href="https://bookdown.org/wangminjie/R4DS/tidyverse-dplyr.html#tidyverse-dplyr">12</a> 章的代码重新表达，也是一样的</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">df %&gt;%</span><br><span class="line">  group_by(dataset) %&gt;%</span><br><span class="line">  summarize(</span><br><span class="line">    mean_x = mean(x),</span><br><span class="line">    mean_y = mean(y),</span><br><span class="line">    std_dev_x = sd(x),</span><br><span class="line">    std_dev_y = sd(y),</span><br><span class="line">    corr_x_y = cor(x, y)</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line"><span class="comment">## # A tibble: 13 × 6</span></span><br><span class="line"><span class="comment">##    dataset    mean_x mean_y std_dev_x std_dev_y corr_x_y</span></span><br><span class="line"><span class="comment">##    &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;</span></span><br><span class="line"><span class="comment">##  1 away         54.3   47.8      16.8      26.9  -0.0641</span></span><br><span class="line"><span class="comment">##  2 bullseye     54.3   47.8      16.8      26.9  -0.0686</span></span><br><span class="line"><span class="comment">##  3 circle       54.3   47.8      16.8      26.9  -0.0683</span></span><br><span class="line"><span class="comment">##  4 dino         54.3   47.8      16.8      26.9  -0.0645</span></span><br><span class="line"><span class="comment">##  5 dots         54.3   47.8      16.8      26.9  -0.0603</span></span><br><span class="line"><span class="comment">##  6 h_lines      54.3   47.8      16.8      26.9  -0.0617</span></span><br><span class="line"><span class="comment">##  7 high_lines   54.3   47.8      16.8      26.9  -0.0685</span></span><br><span class="line"><span class="comment">##  8 slant_down   54.3   47.8      16.8      26.9  -0.0690</span></span><br><span class="line"><span class="comment">##  9 slant_up     54.3   47.8      16.8      26.9  -0.0686</span></span><br><span class="line"><span class="comment">## 10 star         54.3   47.8      16.8      26.9  -0.0630</span></span><br><span class="line"><span class="comment">## 11 v_lines      54.3   47.8      16.8      26.9  -0.0694</span></span><br><span class="line"><span class="comment">## 12 wide_lines   54.3   47.8      16.8      26.9  -0.0666</span></span><br><span class="line"><span class="comment">## 13 x_shape      54.3   47.8      16.8      26.9  -0.0656</span></span><br></pre></td></tr></table></figure>
+<p>那么，我们是否能得出结论，每组的数据长的差不多呢？然而，我们画图发现</p>
+<p><img src="1.png" alt=""></p>
+<p>事实上，每张图都相差很大。所以，这里想说明的是，眼见为实。换句话说，可视化是数据探索中非常重要的部分。本章的目的就是带领大家学习ggplot2基本的绘图技能。</p>
+<h2 id="学习目标">学习目标</h2>
+<h3 id="图形语法">图形语法</h3>
+<p>图形语法 “grammar of graphics” (“ggplot2” 中的<code>gg</code> 就来源于此) 使用图层(layer)去描述和构建图形，下图是ggplot2图层概念的示意图</p>
+<h3 id="图形部件">图形部件</h3>
+<p>一张统计图形就是从<strong>数据</strong>到几何形状(geometric object，缩写geom)所包含的<strong>图形属性</strong>(aesthetic attribute，缩写aes)的一种映射。</p>
+<ol>
+<li>
+<p><code>data</code>: 数据框data.frame (注意，不支持向量vector和列表list类型）</p>
+</li>
+<li>
+<p><code>aes</code>: 数据框中的数据变量<strong>映射</strong>到图形属性。什么叫图形属性？就是图中点的位置、形状，大小，颜色等眼睛能看到的东西。什么叫映射？就是一种对应关系，比如数学中的函数<code>b = f(a)</code>就是<code>a</code>和<code>b</code>之间的一种映射关系, <code>a</code>的值决定或者控制了<code>b</code>的值，在ggplot2语法里，<code>a</code>就是我们输入的数据变量，<code>b</code>就是图形属性， 这些图形属性包括：</p>
+<ul>
+<li>x（x轴方向的位置）</li>
+<li>y（y轴方向的位置）</li>
+<li>color（点或者线等元素的颜色）</li>
+<li>size（点或者线等元素的大小）</li>
+<li>shape（点或者线等元素的形状）</li>
+<li>alpha（点或者线等元素的透明度）</li>
+</ul>
+</li>
+<li>
+<p><code>geoms</code>: 几何形状，确定我们想画什么样的图，一个<code>geom_***</code>确定一种形状。更多几何形状推荐阅读<a href="https://ggplot2.tidyverse.org/reference/">这里</a></p>
+<ul>
+<li><code>geom_bar()</code></li>
+<li><code>geom_density()</code></li>
+<li><code>geom_freqpoly()</code></li>
+<li><code>geom_histogram()</code></li>
+<li><code>geom_violin()</code></li>
+<li><code>geom_boxplot()</code></li>
+<li><code>geom_col()</code></li>
+<li><code>geom_point()</code></li>
+<li><code>geom_smooth()</code></li>
+<li><code>geom_tile()</code></li>
+<li><code>geom_density2d()</code></li>
+<li><code>geom_bin2d()</code></li>
+<li><code>geom_hex()</code></li>
+<li><code>geom_count()</code></li>
+<li><code>geom_text()</code></li>
+<li><code>geom_sf()</code></li>
+</ul>
+</li>
+<li>
+<p><code>stats</code>: 统计变换</p>
+</li>
+<li>
+<p><code>scales</code>: 标度</p>
+</li>
+<li>
+<p><code>coord</code>: 坐标系统</p>
+</li>
+<li>
+<p><code>facet</code>: 分面</p>
+</li>
+<li>
+<p><code>layer</code>： 增加图层</p>
+</li>
+<li>
+<p><code>theme</code>: 主题风格</p>
+</li>
+<li>
+<p><code>save</code>: 保存图片</p>
+</li>
+</ol>
+<h2 id="开始">开始</h2>
+<p>R语言数据类型，有字符串型、数值型、因子型、逻辑型、日期型等。 ggplot2会将字符串型、因子型、逻辑型默认为<strong>离散变量</strong>，而数值型默认为<strong>连续变量</strong>，将日期时间为<strong>日期变量</strong>：</p>
+<ul>
+<li><strong>离散变量</strong>: 字符串型, 因子型, 逻辑型</li>
+<li><strong>连续变量</strong>: 双精度数值, 整数数值</li>
+<li><strong>日期变量</strong>: 日期, 时间, 日期时间</li>
+</ul>
+<h3 id="导入数据">导入数据</h3>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gapdata &lt;- read_csv(&quot;./demo_data/gapminder.csv&quot;)</span><br></pre></td></tr></table></figure>
+<h3 id="检查数据">检查数据</h3>
+<p>是否有缺失值</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gapdata %&gt;%</span><br><span class="line">  summarise(</span><br><span class="line">    across(everything(), ~ sum(is.na(.)))</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## # A tibble: 1 × 6</span><br><span class="line">##   country continent  year lifeExp   pop gdpPercap</span><br><span class="line">##     &lt;int&gt;     &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;     &lt;int&gt;</span><br><span class="line">## 1       0         0     0       0     0         0</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>country</code> 代表国家</li>
+<li><code>countinet</code> 表示所在的洲</li>
+<li><code>year</code> 时间</li>
+<li><code>lifeExp</code> 平均寿命</li>
+<li><code>pop</code> 人口数量</li>
+<li><code>gdpPercap</code> 人均GDP</li>
+</ul>
+<h2 id="基本绘图">基本绘图</h2>
+<h3 id="柱状图">柱状图</h3>
+<p>常用于一个离散变量</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gapdata %&gt;%</span><br><span class="line">  ggplot(aes(x = continent)) +</span><br><span class="line">  geom_bar()</span><br></pre></td></tr></table></figure>
+<p>按照出现次数，从低到高排序</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gapdata %&gt;%</span><br><span class="line">  ggplot(aes(x = reorder(continent, continent, length))) +</span><br><span class="line">  geom_bar()</span><br></pre></td></tr></table></figure>
+<p>翻转坐标轴，使用 <code>coord_flip()</code> 函数</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gapdata %&gt;%</span><br><span class="line">  ggplot(aes(x = reorder(continent, continent, length))) +</span><br><span class="line">  geom_bar() +</span><br><span class="line">  coord_flip()</span><br></pre></td></tr></table></figure>
+<h1>ggplot2之标度</h1>
+<h2 id="标度">标度</h2>
+<p>在 <a href="https://bookdown.org/wangminjie/R4DS/tidyverse-ggplot2-geom.html#tidyverse-ggplot2-geom">22</a>章，我们了解到ggplot2中，映射是数据转化到图形属性，这里的图形属性是指视觉可以感知的东西，比如大小，形状，颜色和位置等。我们今天讨论的标度（scale）是控制着数据到图形属性映射的函数，每一种标度都是从数据空间的某个区域（标度的定义域）到图形属性空间的某个区域（标度的值域）的一个函数。</p>
+<p>简单点来说，<strong>标度是用于调整数据映射的图形属性</strong>。 在ggplot2中，每一种图形属性都拥有一个默认的标度，也许你对这个默认的标度不满意，可以就需要学习如何修改默认的标度。比如， 系统默认<code>&quot;a&quot;</code>对应红色，<code>&quot;b&quot;</code>对应蓝色，我们想让<code>&quot;a&quot;</code>对应紫色，<code>&quot;b&quot;</code>对应橙色。</p>
+<h2 id="图形属性和变量类型">图形属性和变量类型</h2>
+<p>还是用我们熟悉的<code>ggplot2::mpg</code>，可能有同学说，我画图没接触到<code>scale</code>啊，比如</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">library(tidyverse)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mpg %&gt;% </span><br><span class="line">  ggplot(aes(x = displ, y = hwy)) + </span><br><span class="line">  geom_point(aes(colour = class)) </span><br></pre></td></tr></table></figure>
+<p>事实上，根据映射关系和变量名，我们将标度写完整，应该是这样的</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ggplot(mpg, aes(x = displ, y = hwy)) + </span><br><span class="line">  geom_point(aes(colour = class)) +</span><br><span class="line">  </span><br><span class="line">  scale_x_continuous() + </span><br><span class="line">  scale_y_continuous() + </span><br><span class="line">  scale_colour_discrete()</span><br></pre></td></tr></table></figure>
+<p>如果每次都要手动设置一次标度函数，那将是比较繁琐的事情。因此ggplot2使用了默认了设置，如果不满意ggplot2的默认值，可以手动调整或者改写标度，比如</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ggplot(mpg, aes(x = displ, y = hwy)) + </span><br><span class="line">  geom_point(aes(colour = class)) +</span><br><span class="line">  </span><br><span class="line">  scale_x_continuous(name = &quot;This is my x axis&quot;) + </span><br><span class="line">  scale_y_continuous(name = &quot;This is my y axis&quot;) + </span><br><span class="line">  scale_colour_brewer()</span><br></pre></td></tr></table></figure>
+<h2 id="坐标轴和图例是同样的东西">坐标轴和图例是同样的东西</h2>
+<p><img src="2.png" alt=""></p>
+<h2 id="丰富的标度体系">丰富的标度体系</h2>
+<p>注意到，标度函数是由”_“分割的三个部分构成的：</p>
+<blockquote>
+<p>scale - 视觉属性名 (e.g., colour, shape or x) - 标度名 (e.g., continuous, discrete, brewer).</p>
+</blockquote>
+<p><img src="3.png" alt=""></p>
+<p>每个标度函数内部都有丰富的参数系统</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">scale_colour_manual(</span><br><span class="line">  palette = function(), </span><br><span class="line">  limits = NULL,</span><br><span class="line">  name = waiver(),</span><br><span class="line">  labels = waiver(),</span><br><span class="line">  breaks = waiver(),</span><br><span class="line">  minor_breaks = waiver(),</span><br><span class="line">  values = waiver(),</span><br><span class="line">  ...</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>参数<code>name</code>，坐标和图例的名字，如果不想要图例的名字，就可以 <code>name = NULL</code></li>
+<li>参数<code>limits</code>, 坐标或图例的范围区间。连续性<code>c(n, m)</code>，离散型<code>c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</code></li>
+<li>参数<code>breaks</code>, 控制显示在坐标轴或者图例上的值（元素）</li>
+<li>参数<code>labels</code>, 坐标和图例的间隔标签
+<ul>
+<li>一般情况下，内置函数会自动完成</li>
+<li>也可人工指定一个字符型向量，与<code>breaks</code>提供的字符型向量一一对应</li>
+<li>也可以是函数，把<code>breaks</code>提供的字符型向量当做函数的输入</li>
+<li><code>NULL</code>，就是去掉标签</li>
+</ul>
+</li>
+<li>参数<code>values</code> 指的是（颜色、形状等）视觉属性值,
+<ul>
+<li>要么，与数值的顺序一致；</li>
+<li>要么，与<code>breaks</code>提供的字符型向量长度一致</li>
+<li>要么，用命名向量<code>c(&quot;数据标签&quot; = &quot;视觉属性&quot;)</code>提供</li>
+</ul>
+</li>
+<li>参数<code>expand</code>, 控制参数溢出量</li>
+<li>参数<code>range</code>, 设置尺寸大小范围，比如针对点的相对大小</li>
+</ul>
+<p>下面，我们通过具体的案例讲解如何使用参数，把图形变成我们想要的模样。</p>
+<h2 id="案例详解">案例详解</h2>
+<p>先导入一个数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gapdata &lt;- read_csv(&quot;./demo_data/gapminder.csv&quot;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">newgapdata &lt;- gapdata %&gt;% </span><br><span class="line">  group_by(continent, country) %&gt;% </span><br><span class="line">  summarise(</span><br><span class="line">    across(c(lifeExp, gdpPercap, pop), mean)</span><br><span class="line">  )</span><br><span class="line">newgapdata</span><br></pre></td></tr></table></figure>
+<p>画散点图</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">newgapdata %&gt;% </span><br><span class="line">  ggplot(aes(x = gdpPercap, y = lifeExp)) +</span><br><span class="line">    geom_point(aes(color = continent, size = pop)) +</span><br><span class="line">    scale_x_continuous()</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>R</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>R</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Linux之time命令</title>
     <url>/posts/55215de0/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>比较两个软件的执行时间可以使用多种方法，其中使用 <code>time</code> 命令是一个常见且有效的方法。<code>time</code> 命令提供了程序运行时的各种时间统计信息，包括用户时间（User time）和系统时间（System time）。</p>
@@ -749,22 +971,34 @@ emWeight=NULL)</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools index input_file.vcf.gz</span><br></pre></td></tr></table></figure>
 <p>对于 <code>.bcf</code>，<code>bcftools index</code> 也只接受压缩格式，如果使用 <code>-Ou</code> 格式（未压缩的 BCF），则会出现以下报错信息</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">bcftools index val_all_phased.bcf</span></span><br><span class="line">[E::main_vcfindex] unknown filetype; expected bgzip compressed VCF or BCF</span><br><span class="line">[E::main_vcfindex] was the VCF/BCF compressed with bgzip?</span><br></pre></td></tr></table></figure>
+<p>还可以用 index 命令快速获得<strong>所有标记数目</strong> （需要事先创建好索引），只需要加上一个 <code>-n</code> 选项</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools index -n val_all_phased.bcf</span><br></pre></td></tr></table></figure>
 <h1>concat</h1>
-<p>用于合并相同样本的多个 VCF/BCF 文件（比如不同染色体的基因型），注意所有文件中的<strong>样本顺序必须报错一致</strong>，<strong>所有输入文件必须已经按照染色体和物理位置排序了</strong>，<strong>输入文件的顺序必须也得按照物理位置的顺序</strong>（比如从1号染色体到 18号染色体）</p>
+<p>用于合并相同样本的多个 VCF/BCF 文件（比如不同染色体的基因型），注意所有文件中的<strong>样本顺序必须保持一致</strong>，<strong>所有输入文件必须已经按照染色体和物理位置排序了</strong>，<strong>输入文件的顺序必须也得按照物理位置的顺序</strong>（比如从1号染色体到 18号染色体）</p>
 <p>最简单的例子如下</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools concat input1.bcf input2.bcf -o output.vcf</span><br></pre></td></tr></table></figure>
 <p>也可以使用 <code>-f</code> 选项定一个包含输入文件路径的文本文件。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools concat -f file_list.txt -o output.vcf</span><br></pre></td></tr></table></figure>
 <h1>merge</h1>
 <p>合并样本不同（多个文件的样本号必须保证是不同的，不然会报错），位点相同的情况。</p>
-<p>注意这个命令只能用 <code>vcf.gz</code> 和 <code>bcf</code> 文件，并且必须事先创建索引。</p>
+<p>注意这个命令只能用 <code>vcf.gz</code> 和 <code>bcf</code> 文件，并且必须<strong>事先创建索引</strong>。</p>
 <p>最简单的例子如下</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools merge input1.vcf.gz input2.vcf.gz -o output.vcf</span><br></pre></td></tr></table></figure>
+<p>实用写法如下，这里 <code>&#123;1..29&#125;</code>是 Bash 的大括号扩展语法，会自动展开为 1 到 29 的数字序列。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nohup bcftools concat Chr&#123;1..29&#125;_phased_snp.vcf.gz -Oz -o ref_all_phased.vcf.gz &amp;</span><br><span class="line">nohup bcftools concat Chr&#123;1..29&#125;_phased_snp.vcf.gz -Ob -o ref_all_phased.bcf &amp;</span><br></pre></td></tr></table></figure>
 <p>也可以使用 <code>-l</code> 选项定一个包含输入文件路径的文本文件。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools merge -l file_list.txt -o output.vcf</span><br></pre></td></tr></table></figure>
 <h1>view</h1>
 <p>最简单的应用就是 VCF 和 BCF 格式的互相转换</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools view input.vcf -Ob -o output.bcf  # vcf to bcf</span><br><span class="line"></span><br><span class="line">bcftools view input.bcf -Ov -o output.vcf  # bcf to vcf</span><br></pre></td></tr></table></figure>
+<p>还有提取位点，SNP位置列表文件 <code>sites.txt</code>，格式有几种：</p>
+<ul>
+<li>每行一个<code>chr:pos</code>（如 <code>chr1:12345</code>），提取单个位置的位点</li>
+<li>每行两列，<code>chr pos</code>（用制表符分隔），提取单个位置的位点</li>
+<li>每行一个区间如<code>chr1:1000-2000</code></li>
+<li>每行一个区间如<code>chr1 1000 2000</code> （用制表符分隔）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bcftools view -R sites.txt input.vcf -o extracted.vcf</span><br></pre></td></tr></table></figure>
 <h1>filter</h1>
 <p>第一个功能是<strong>提取染色体片段</strong>，示例命令如下（这里的染色体是 Gm01 ，测试了可以接受这种异常的染色体名称）</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bcftools filter test.vcf.gz --regions Gm01:1-1000 &gt; test2.vcf</span><br></pre></td></tr></table></figure>
@@ -775,6 +1009,11 @@ emWeight=NULL)</p>
 <h1>norm</h1>
 <p>将多等位碱基的位点拆分为多行</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bcftools norm --multiallelics -both $&#123;result&#125;/Genotype.cohort.dbSNP.g.vcf \</span><br><span class="line">   -Oz -o $&#123;result&#125;/Genotype.cohort.dbSNP.g.vcf.gz</span><br></pre></td></tr></table></figure>
+<h1>query</h1>
+<p>使用下面命令输出所有样本号</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">bcftools query -l Holstein_phased.bcf &gt; Holstein_id3.txt</span><br></pre></td></tr></table></figure>
+<p>使用下面命令提取前 5 列内容</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">bcftools query -f <span class="string">&#x27;%CHROM\t%POS\t%ID\t%REF\t%ALT\n&#x27;</span> ref_all_phased.bcf &gt; first5_columns.txt</span><br></pre></td></tr></table></figure>
 <h1>参考文献</h1>
 <ol>
 <li>
@@ -1010,7 +1249,7 @@ emWeight=NULL)</p>
 <p>impute2 只是适用于<strong>重测序</strong>数据，而且参考面板需要<strong>遗传图谱</strong>，分析时需要将整条染色体按照 5MB 来拆分开，比较麻烦。</p>
 <h1>impute5</h1>
 <h2 id="下载安装-3">下载安装</h2>
-<p>从<a href="https://jmarchini.org/software/#impute-5">impute-5</a>下载得到二进制文件和说明文档，将二进制文件放在环境变量的文件夹中即可。</p>
+<p>从<a href="https://jmarchini.org/software/#impute-5">impute-5</a>下载得到二进制文件和说明文档，将二进制文件放在环境变量的文件夹中即可，添加执行权限。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">impute5_1.1.5_static --help</span><br></pre></td></tr></table></figure>
 <p>使用前需要对参考面板和验证群创建 index ，使用 bcftools 可以完成这一点（需要实现使用 <code>bgzip</code> 压缩为<code>vcf.gz</code> 格式）。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bgzip -c reference.vcf &gt; reference.vcf.gz</span><br><span class="line">bcftools index reference.vcf.gz</span><br><span class="line"></span><br><span class="line">bgzip target.vcf # 不保留未压缩文件</span><br><span class="line">bcftools index target.vcf.gz</span><br></pre></td></tr></table></figure>
@@ -1023,7 +1262,16 @@ emWeight=NULL)</p>
 <li><code>--out-gp-field</code>:  输出 genotype probabilities</li>
 <li><code>--threads 2</code>:  多线程（原理是将验证群逐个样本去填充）</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">impute5_1.1.5_static --h reference.vcf  --g target.vcf --r </span><br><span class="line">20 --o imputed.vcf.gz --out-gp-field --threads 2</span><br></pre></td></tr></table></figure>]]></content>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">impute5_1.1.5_static --h reference.vcf  --g target.vcf --r </span><br><span class="line">20 --o imputed.vcf.gz --out-gp-field --threads 2</span><br></pre></td></tr></table></figure>
+<p>填充结果文件中 INFO 列的 INFO 字段为该位点的 <code>IMPUTE INFO score </code> ，用来评估填充位点的填充质量，越大说明填充准确性越好。从<a href="https://bioinformaticshome.com/bioinformatics_tutorials/Genotype_Imputation.html">Genotype_Imputation.html</a> 中找到解释如下</p>
+<blockquote>
+<p><strong>Imputation quality score (INFO)</strong></p>
+<p>INFO scores measure the imputation accuracy of each variant. Variants with low INFO scores, typically less than 0.3, are often removed.</p>
+<p>We can use genotype imputation software tools, such as (<a href="https://bioinformaticshome.com/tools/imputation/descriptions/IMPUTE2.html">IMPUTE2</a>, <a href="https://bioinformaticshome.com/tools/imputation/descriptions/MaCH.html">MaCH</a>, <a href="https://bioinformaticshome.com/tools/imputation/descriptions/BEAGLE.html">Beagle</a>, <a href="https://bioinformaticshome.com/tools/imputation/descriptions/SHAPEIT.html">SHAPEIT</a>), to compute the imputation quality score (INFO score) to indicate the imputation accuracy of each variant. The INFO score ranges from 0 to 1. A score of 1 indicates perfect imputation accuracy, while 0 indicates the variant was not imputed.</p>
+<p>The INFO score is calculated using a selected imputation algorithm and the reference panel used for imputation. The algorithm calculates the probability of the imputed genotype based on the available genotype data and the reference panel. The INFO score is calculated as the ratio of the difference between the probability of the imputed genotype and the probability of the most likely observed genotype to the maximum possible difference between the two probabilities. The INFO score represents the amount of information gained by imputing the missing genotype and indicates the accuracy of the imputed data.</p>
+<p>Researchers typically set a threshold for the INFO score, below which the imputed variant is considered unreliable and removed from the dataset. The threshold may vary depending on the research question, the studied population, and the imputation software used.</p>
+</blockquote>
+]]></content>
       <categories>
         <category>软件学习</category>
       </categories>
@@ -2312,6 +2560,172 @@ emWeight=NULL)</p>
       </tags>
   </entry>
   <entry>
+    <title></title>
+    <url>/posts/0/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">title: 软件学习-conda</span><br><span class="line">tags:</span><br><span class="line">  - 软件学习</span><br><span class="line">  - conda</span><br><span class="line">categories:</span><br><span class="line">  - 软件学习</span><br><span class="line">  - conda</span><br><span class="line">abbrlink: 5375f878</span><br><span class="line">date: 2023-04-14 08:52:52</span><br></pre></td></tr></table></figure>
+<p>介绍conda的使用教程</p>
+<span id="more"></span>
+<h1>conda 介绍</h1>
+<p>conda 就是一个软件包安装管理系统，方便安装各种软件。</p>
+<p><strong>Anaconda 与 Miniconda</strong> 的差别。</p>
+<blockquote>
+<p>Anaconda则是一个打包的集合，里面预装好了conda、某个版本的python、众多packages、科学计算工具等等，就是把很多常用的不常用的库都给你装好了。</p>
+<p>Miniconda，顾名思义，它只包含最基本的内容——python与conda，以及相关的必须依赖项，对于空间要求严格的用户，Miniconda是一种选择。就只包含最基本的东西，其他的库得自己装。</p>
+</blockquote>
+<p>个人倾向于使用 Miniconda</p>
+<h1>miniconda 安装</h1>
+<p>先下载一个 bash 脚本</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
+<p>如果 <code>wget</code> 不行，可以尝试使用 <code>curl</code> 进行下载，或者手动下载然后上传到服务器</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl -O https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
+<p>运行如下代码进行安装 miniconda</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash Miniconda3-latest-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
+<p>按照提示操作：</p>
+<ul>
+<li>阅读并同意许可协议 (输入 “yes”)。</li>
+<li>选择安装路径（我这里改为 <code>/data/software/miniconda3</code>）。</li>
+<li>选择“yes”以初始化 Miniconda。</li>
+</ul>
+<p>安装完成后刷新一下环境变了，通过查看 conda 版本确定是否安装成功。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">source ~/.bashrc</span><br><span class="line">conda --version</span><br></pre></td></tr></table></figure>
+<h1>添加 channel</h1>
+<p>清华大学的 Conda 镜像源包含了许多常用的包和工具，您可以通过以下命令将其添加为 Conda 的默认 Channel。</p>
+<p>执行以下命令将清华镜像源添加到 Conda 配置中：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 1. 生成 .condarc 配置文件（若不存在）</span><br><span class="line">conda config --set show_channel_urls yes</span><br><span class="line"></span><br><span class="line"># 2. 添加清华镜像源</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/</span><br><span class="line"></span><br><span class="line"># 3. 设置优先级（可选）</span><br><span class="line">conda config --set channel_priority flexible</span><br></pre></td></tr></table></figure>
+<p>通过运行以下命令来查看当前 Conda 配置的 Channels：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda config --show channels</span><br></pre></td></tr></table></figure>
+<p>通过下面的命令可以一键删除所有已添加的频道（包括镜像源），恢复默认的 <code>defaults</code> 频道。</p>
+<p>这个是我发现有些时候用 清华源会导致包安装错误，出现 <code>File not valid: file size doesn't match expectation </code> 的问题，但是恢复为默认的 <code>defaults</code> 频道就没有问题。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda config --remove-key channels</span><br></pre></td></tr></table></figure>
+<h1>设置环境变量-root</h1>
+<p>root 安装 conda 后只是修改 root 账号本身的 <code>.bashrc</code> 文件，也就是只是修改了 root 账号的环境变量，如果要使得所有用户都能使用 Miniconda（而不只是某个特定用户），可以将 Miniconda 的路径添加到系统的全局配置文件中。</p>
+<p>编辑 <code>/etc/profile</code> 文件，添加 Miniconda 路径</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vi /etc/profile</span><br></pre></td></tr></table></figure>
+<p>我的做法是直接将 root 的 <code>.bashrc</code> 文件中关于 conda 的内容复制黏贴过来，放到最后面，内容如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># &gt;&gt;&gt; conda initialize &gt;&gt;&gt;</span><br><span class="line"># !! Contents within this block are managed by &#x27;conda init&#x27; !!</span><br><span class="line">__conda_setup=&quot;$(&#x27;/data/software/miniconda3/bin/conda&#x27; &#x27;shell.bash&#x27; &#x27;hook&#x27; 2&gt; /dev/null)&quot;</span><br><span class="line">if [ $? -eq 0 ]; then</span><br><span class="line">    eval &quot;$__conda_setup&quot;</span><br><span class="line">else</span><br><span class="line">    if [ -f &quot;/data/software/miniconda3/etc/profile.d/conda.sh&quot; ]; then</span><br><span class="line">        . &quot;/data/software/miniconda3/etc/profile.d/conda.sh&quot;</span><br><span class="line">    else</span><br><span class="line">        export PATH=&quot;/data/software/miniconda3/bin:$PATH&quot;</span><br><span class="line">    fi</span><br><span class="line">fi</span><br><span class="line">unset __conda_setup</span><br><span class="line"># &lt;&lt;&lt; conda initialize &lt;&lt;&lt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这样做不太好，这样做会使得所有账户都用 root 的 conda 环境，只要设置一下环境变量就行。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export PATH=&quot;/data/software/miniconda3/bin:$PATH&quot;</span><br></pre></td></tr></table></figure>
+<p>然后 source 一下，使配置生效</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+<p>切换成别的普通用户账号，可以通过以下命令检查是否成功将 Miniconda 路径添加到 <code>$PATH</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $PATH</span><br></pre></td></tr></table></figure>
+<h1>更新环境中的所有的可更新包</h1>
+<p>用下面命令更新所有包</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">conda update --all -y</span><br></pre></td></tr></table></figure>
+<h2 id="何时需要使用这个命令">何时需要使用这个命令</h2>
+<p>我是一开始就遇到依赖冲突了，conda 应该安装的不同的 sqlite 版本不一致导致了冲突，使用了这个命令就好了 。并且运行这个命令前，R 版本只能安装 4.4.2 ，运行后便升级为 4.4.3 。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">场景</th>
+<th style="text-align:left">推荐频率</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">环境维护</td>
+<td style="text-align:left">每月1-2次</td>
+<td style="text-align:left">保持包的最新稳定状态</td>
+</tr>
+<tr>
+<td style="text-align:left">解决依赖冲突</td>
+<td style="text-align:left">遇到问题时</td>
+<td style="text-align:left">修复因版本滞后导致的问题</td>
+</tr>
+<tr>
+<td style="text-align:left">安全更新</td>
+<td style="text-align:left">安全公告发布后</td>
+<td style="text-align:left">及时修补漏洞</td>
+</tr>
+<tr>
+<td style="text-align:left">准备共享环境</td>
+<td style="text-align:left">导出环境前</td>
+<td style="text-align:left">确保环境配置是最新状态</td>
+</tr>
+</tbody>
+</table>
+<h1>更新 python （其它软件通用）</h1>
+<p>安装 conda 会自带 python ，应该是 conda 能支持的最新的</p>
+<ol>
+<li><strong>检查当前 Python 版本</strong></li>
+</ol>
+<p>首先，检查当前环境中 Python 的版本，以确认您需要更新：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda list python</span><br></pre></td></tr></table></figure>
+<p>或</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python --version</span><br></pre></td></tr></table></figure>
+<p>这会显示当前环境中安装的 Python 版本。</p>
+<ol start="2">
+<li><strong>更新 Conda</strong></li>
+</ol>
+<p>更新 Conda 本身，确保使用的是最新版本的 <code>conda</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda update conda</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li><strong>更新 Python</strong></li>
+</ol>
+<p>然后，您可以更新 Python 版本。您可以选择指定您需要的 Python 版本，或者让 Conda 更新到可用的最新版本（<strong>Conda 可用的最新版本可能会落后于实际最新版本</strong>，比如 python 现在的最新版本是 3.13 ，但是我an）。</p>
+<p>​		3.1 <strong>更新到最新版本的 Python</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda update python</span><br></pre></td></tr></table></figure>
+<p>​		3.2 <strong>安装指定版本的 Python</strong>：</p>
+<p>如果您想更新到特定版本的 Python，例如 Python 3.9.5 (如果是降低版本，最好还是在一个虚拟环境中安装，避免弄乱主环境)：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda install python=3.9.5</span><br></pre></td></tr></table></figure>
+<p>这将安装您指定版本的 Python，同时更新环境中的其他依赖包。</p>
+<ol start="4">
+<li><strong>验证更新</strong></li>
+</ol>
+<p>更新完成后，您可以通过以下命令验证 Python 的版本是否已更新：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python --version</span><br></pre></td></tr></table></figure>
+<p>或者：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda list python</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li><strong>如果遇到依赖问题</strong></li>
+</ol>
+<p>有时更新 Python 版本可能会导致依赖包的兼容性问题。您可以通过创建一个新的环境来避免这些问题：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda create --name new_env python=3.12.9</span><br><span class="line">conda activate new_env # 激活环境</span><br><span class="line">conda deactivate      # 退出环境</span><br></pre></td></tr></table></figure>
+<p>这样会创建一个新的环境，使用您指定的 Python 版本。</p>
+<h1>安装 python 包</h1>
+<p>建议优先使用 conda 安装，只有在conda 中没有的情况下才用 pip 安装，因为二者之间可能产生冲突。</p>
+<h1>安装 R</h1>
+<p>先查找一下 r</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda search r</span><br></pre></td></tr></table></figure>
+<p>安装 r</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install -c conda-forge r=4.4</span><br></pre></td></tr></table></figure>
+<p>看一下版本</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">which R</span><br><span class="line">R --version</span><br></pre></td></tr></table></figure>
+<h1>安装 R 包</h1>
+<p>在 Conda 环境中安装 R 后，优先通过 <code>conda</code> 安装 R 的常用包，其次通过 <code>install.packages()</code> 安装。</p>
+<p>在 conda 中的 R 包命名规则为：Conda 中的 R 包名前缀为 <code>r-</code>（如 <code>r-dplyr</code>），Bioconductor 包前缀为<code>bioconductor-</code>。</p>
+<p>例如，安装常用的 R 包 <code>ggplot2</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda install r-ggplot2</span><br></pre></td></tr></table></figure>
+<p>我之前一直使用 <code>install.packages()</code> 安装R包。</p>
+<h1>重装conda</h1>
+<h2 id="重装系统">重装系统</h2>
+<p>如果是要重装系统了，那么有一个简单的方法可以保存原来的 conda 环境，首先我们将原来的 miniconda3 安装包 和 home 路径下的 <code>.bashrc</code> ，<code>.condarc</code> （如果是 root ，则可能还有 <code>/etc/profile</code> ）保存下来。</p>
+<p>之后在原来的位置(<strong>注意，必须是原来的位置</strong>)复制黏贴原来的 miniconda3 安装包  ，修改 home 路径下的 <code>.bashrc</code> ，<code>.condarc</code>文件即可。</p>
+<h2 id="conda-崩溃">conda 崩溃</h2>
+<p>如果是 conda 崩溃了，那么只能保存 conda 中还有用的部分，比如R 包（<code>*/miniConda/miniconda3/lib/R/library</code>），虚拟环境（<code>*/miniConda/envs</code>）。</p>
+<h1>安装其它软件</h1>
+<p>bcftools</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda search -c bioconda -c conda-forge bcftools</span><br><span class="line"></span><br><span class="line">conda install -c bioconda -c conda-forge bcftools=1.21</span><br><span class="line"></span><br><span class="line">bcftools --version</span><br></pre></td></tr></table></figure>
+<p>shapeit4</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda create -n shapeit4</span><br><span class="line">conda activate shapeit4</span><br><span class="line"></span><br><span class="line">conda search shapeit4</span><br><span class="line">conda install shapeit4=4.2.2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置环境变量，尚未修改路径</span></span><br><span class="line">ln -s /opt/miniconda3/envs/shapeit4/bin/shapeit4 /usr/local/bin</span><br><span class="line"></span><br><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
+<p>个人账户安装 shapeit4 时遇到报错，如下，暂时无法解决。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">critical libconda filesystem error: cannot copy symlink: Invalid argument [/data/zhouziwen/software/miniconda3/pkgs/ncurses-6.5-h2d0b736_3/bin/captoinfo] [/data/zhouziwen/software/miniconda3/envs/shapeit4/bin/captoinfo]</span><br></pre></td></tr></table></figure>
+<p>安装一下 gcc , g++</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">conda install -c conda-forge gcc</span><br><span class="line">conda install -c conda-forge gxx</span><br></pre></td></tr></table></figure>
+<p>检查一下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gcc --version</span><br><span class="line">g++ --version</span><br></pre></td></tr></table></figure>
+<p>设置一下环境变量</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 永久设置（添加到 ~/.bashrc）</span></span><br><span class="line">echo <span class="string">&#x27;export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH&#x27;</span> &gt;&gt; ~/.bashrc</span><br><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure>
+<h1>在 Bash 脚本中激活 Conda 环境</h1>
+<p>方法一：使用 <code>source</code>加载 Conda 初始化脚本（推荐）</p>
+<p>这里我测试了一下，用这个方法就行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">1. 加载 Conda 初始化脚本</span></span><br><span class="line">source &quot;/path/to/miniconda3/etc/profile.d/conda.sh&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">2. 激活环境</span></span><br><span class="line">conda activate snakemake</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">3. 执行命令</span></span><br><span class="line">snakemake --cores 4</span><br></pre></td></tr></table></figure>
+<p>方法二：使用 <code>eval</code>初始化</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">初始化 Conda</span></span><br><span class="line">eval &quot;$(conda shell.bash hook)&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">激活环境</span></span><br><span class="line">conda activate snakemake</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">执行命令</span></span><br><span class="line">snakemake --cores 4</span><br></pre></td></tr></table></figure>
+]]></content>
+  </entry>
+  <entry>
     <title>我的个人数据备份之路</title>
     <url>/posts/1536238c/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>整理一下我的个人数据存储和备份方法的历程。</p>
@@ -2757,7 +3171,7 @@ emWeight=NULL)</p>
 <li><code>Allow 3 mismatches</code> ：允许重复样本之间最多存在几个不一致位点</li>
 </ul>
 <p><img src="8.png" alt=""></p>
-<p>输出文件 <code>identity.csv</code> 中含有所有重复样本的信息</p>
+<p>输出文件 <code>identity.csv</code> 中含有所有重复样本的信息，其中 pID 这一列就是累积匹配概率 CPM 。</p>
 <p><img src="9.png" alt=""></p>
 <h1>模拟亲缘关系推断</h1>
 <p>通过模拟训练可以获得亲子关系统计指标 <img src="https://math.now.sh?inline=%5CDelta" style="display:inline-block;margin: 0;"/> 置信区间为80%和95%的临界值。</p>
@@ -3319,89 +3733,6 @@ emWeight=NULL)</p>
       </tags>
   </entry>
   <entry>
-    <title>软件学习-conda</title>
-    <url>/posts/5375f878/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>我一般在linux 系统下会用 conda 安装 R 和 python 。</p>
-<span id="more"></span>
-<h1>Anaconda 与 Miniconda 介绍</h1>
-<p><strong>Anaconda</strong>是一个免费<a href="https://zh.wikipedia.org/wiki/%E5%BC%80%E6%94%BE%E6%BA%90%E4%BB%A3%E7%A0%81">开源</a>[<a href="https://zh.wikipedia.org/wiki/Anaconda_(Python%E5%8F%91%E8%A1%8C%E7%89%88)#cite_note-5">5]</a>的<a href="https://zh.wikipedia.org/wiki/Python">Python</a>和<a href="https://zh.wikipedia.org/wiki/R%E8%AF%AD%E8%A8%80">R语言</a>的发行版本，用于<a href="https://zh.wikipedia.org/wiki/%E8%AE%A1%E7%AE%97%E7%A7%91%E5%AD%A6">计算科学</a>（<a href="https://zh.wikipedia.org/wiki/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6">数据科学</a>、<a href="https://zh.wikipedia.org/wiki/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0">机器学习</a>、<a href="https://zh.wikipedia.org/w/index.php?title=%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86&amp;action=edit&amp;redlink=1">大数据处理</a>和<a href="https://zh.wikipedia.org/wiki/%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90">预测分析</a>），Anaconda致力于简化<a href="https://zh.wikipedia.org/wiki/%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F">软件包管理系统</a>和部署。Anaconda的包使用<a href="https://zh.wikipedia.org/wiki/%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F">软件包管理系统</a><a href="https://zh.wikipedia.org/wiki/Conda">Conda</a>[<a href="https://zh.wikipedia.org/wiki/Anaconda_(Python%E5%8F%91%E8%A1%8C%E7%89%88)#cite_note-6">6]</a>进行管理。超过1200万人使用Anaconda发行版本，并且Anaconda拥有超过1400个适用于<a href="https://zh.wikipedia.org/wiki/Microsoft_Windows">Windows</a>、<a href="https://zh.wikipedia.org/wiki/Linux">Linux</a>和<a href="https://zh.wikipedia.org/wiki/MacOS">MacOS</a>的<a href="https://zh.wikipedia.org/w/index.php?title=%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%8C%85&amp;action=edit&amp;redlink=1">数据科学软件包</a>[<a href="https://zh.wikipedia.org/wiki/Anaconda_(Python%E5%8F%91%E8%A1%8C%E7%89%88)#cite_note-AnacondaSite-7">7]</a>。 - 维基百科</p>
-<p><strong>Anaconda 与 Miniconda</strong> 的差别。</p>
-<blockquote>
-<p>Anaconda则是一个打包的集合，里面预装好了conda、某个版本的python、众多packages、科学计算工具等等，就是把很多常用的不常用的库都给你装好了。</p>
-<p>Miniconda，顾名思义，它只包含最基本的内容——python与conda，以及相关的必须依赖项，对于空间要求严格的用户，Miniconda是一种选择。就只包含最基本的东西，其他的库得自己装。</p>
-</blockquote>
-<p>个人倾向于使用 Miniconda</p>
-<h1>Miniconda 安装</h1>
-<p>网址：<a href="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&amp;O=D">https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&amp;O=D</a></p>
-<p>安装代码</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cd /mnt/data/zhouziwen/lib</span><br><span class="line">wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh</span><br><span class="line">bash Miniconda3-latest-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
-<p>安装过程</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Do you accept the license terms? [yes|no] #是否接受协议，必须选 yes</span><br><span class="line">yes</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Anaconda3 will now be installed into this location: #安装位置，必须给一个事先不存在的路径</span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3</span><br><span class="line"></span><br><span class="line">  - Press ENTER to confirm the location</span><br><span class="line">  - Press CTRL-C to abort the installation</span><br><span class="line">  - Or specify a different location below</span><br><span class="line"></span><br><span class="line">[/home/zhouziwen/anaconda3] &gt;&gt;&gt; /mnt/data/zhouziwen/bin/Anaconda/Anaconda3</span><br><span class="line"></span><br><span class="line">Do you wish the installer to initialize Anaconda3 #选yes</span><br><span class="line">by running conda init? [yes|no]</span><br><span class="line">[no] &gt;&gt;&gt; yes</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">之后就没有提示了</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>注意，需要退出终端后，再次进入才能输入conda命令。</p>
-<p>或者不想退出的话，刷新一下环境变量</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">source</span> ~/.bashrc</span><br></pre></td></tr></table></figure>
-<h2 id="查看是否安装R和python">查看是否安装R和python</h2>
-<p>安装好之后，发现自带了python，但是没有R</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> python</span></span><br><span class="line">/mnt/data/zhouziwen/bin/Anaconda/Anaconda3/bin/python</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> R</span></span><br><span class="line">/usr/bin/R</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">whereis R</span></span><br><span class="line">R: /usr/bin/R /usr/bin/R.distrib /usr/lib64/R /usr/include/R /usr/share/R /usr/share/man/man1/R.1.gz</span><br></pre></td></tr></table></figure>
-<p>到Anaconda 的 bin 文件夹下看看，确实没有R，再安装R</p>
-<h2 id="安装-R-4-1">安装 R 4.1</h2>
-<p><a href="https://www.jianshu.com/p/9a77174549cc">https://www.jianshu.com/p/9a77174549cc</a></p>
-<p>安装好 Miniconda 之后，首先添加 channel : <strong>清华镜像 free conda-forge bioconda</strong> （Miniconda 默认情况下，R 版本最高为 3.6，有点低）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda</span><br><span class="line">conda config --set show_channel_urls yes</span><br></pre></td></tr></table></figure>
-<p>查看当前的镜像</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda config --show</span><br></pre></td></tr></table></figure>
-<p>此时再查找一下可以用的 R (<code>conda search r</code>) ，发现就有了 4.0 和 4.1</p>
-<p>安装 4.1.0 版本</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install r-base=4.1.0</span><br></pre></td></tr></table></figure>
-<h2 id="卸载R">卸载R</h2>
-<p>我发现使用 <code>conda remove r</code> 只能卸载R包，不能卸载R。</p>
-<p>只能是粗暴地手动删除了。先找到R所在路径</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> R</span></span><br><span class="line">/mnt/data/zhouziwen/bin/Anaconda/Anaconda3/bin/R</span><br></pre></td></tr></table></figure>
-<p>这里的 R 文件是一个软链接，链接到 <code>../lib/bin/R</code>。删除</p>
-<p>额，找到了 <code>../lib/R</code> 文件夹，没有找到 <code>../lib/bin</code> 文件夹。删除</p>
-<p>ok，删除成功</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> R</span></span><br><span class="line">/usr/bin/R</span><br></pre></td></tr></table></figure>
-<h2 id="版本回退">版本回退</h2>
-<p>我发现 conda 也有类似于 git 一样的版本控制功能，首先使用下面的语句查看所有版本。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda list --revision</span><br></pre></td></tr></table></figure>
-<p>确定需要回退的版本后，使用下面的语句回退到历史版本。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda install --rev 1</span><br></pre></td></tr></table></figure>
-<p>如果遇到报错，比如下面的语句</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">RemoveError: &#x27;requests&#x27; is a dependency of conda and cannot be removed from conda&#x27;s operating environment</span><br></pre></td></tr></table></figure>
-<p>那么先退出 conda 环境（base） ，然后更新 conda ，如下</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda deactivate</span><br><span class="line">conda update conda</span><br></pre></td></tr></table></figure>
-<p>还是不行，就只能删除 conda 文件夹，重新按照 conda 了。</p>
-<h1>创建虚拟环境</h1>
-<p>创建虚拟环境，后面可以指定自带的python版本 (<strong>这里我保持与主环境一致</strong>)。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">conda create --name R4<span class="number">.1</span><span class="number">.0</span> python=<span class="number">3.9</span><span class="number">.5</span></span><br></pre></td></tr></table></figure>
-<p>创建后的虚拟环境在 <code>envs</code> 文件夹下。</p>
-<p>进入虚拟环境</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda activate R4.1.0</span><br></pre></td></tr></table></figure>
-<p>安装 R</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda search r</span><br><span class="line">conda install r-base=4.1.0</span><br></pre></td></tr></table></figure>
-<p>进入 R</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/mnt/data/zhouziwen/lib/miniconda3/envs/R4.1.0/bin/R</span><br><span class="line">packageVersion(&quot;showtext&quot;)</span><br></pre></td></tr></table></figure>
-<p>安装 R 包举例（这样安装的R包版本可能对应不上，如果无法使用则卸载后重新安装一个版本更低的）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda search r-showtext</span><br><span class="line">conda install r-showtext</span><br></pre></td></tr></table></figure>
-<p>退出虚拟环境</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
-<p><strong>卸载 R 包</strong>， 与 <code>conda remove</code> 是同一个命令。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda uninstall r-showtext</span><br></pre></td></tr></table></figure>
-<p>查看所有环境</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda env list</span><br></pre></td></tr></table></figure>
-<p><strong>卸载环境</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda remove --name sth --all </span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>软件学习</category>
-        <category>conda</category>
-      </categories>
-      <tags>
-        <tag>软件学习</tag>
-        <tag>conda</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>创建kegg本地数据库</title>
     <url>/posts/80b4ed31/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>将 kegg 数据库下载到本地，避免因为无法连接到 kegg 网页而无法分析。</p>
@@ -3451,6 +3782,18 @@ emWeight=NULL)</p>
     <url>/posts/15c32607/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>个人使用 f2py 的流程整理。</p>
 <span id="more"></span>
+<h1>安装f2py</h1>
+<p>安装 <code>f2py</code>（Fortran 到 Python 的接口生成器）通常通过安装 <code>numpy</code> 实现，因为 <code>f2py</code> 是 <code>numpy</code> 的一部分。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pip install numpy</span><br></pre></td></tr></table></figure>
+<h1>解决报错：找不到 distutils.msvccompiler</h1>
+<p>如果遇到报错（我是3.9.5版本的python和 1.21.5版本的numpy）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ModuleNotFoundError: No module named <span class="string">&#x27;distutils.msvccompiler&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>我搜了一下原因，好像是 python 本身的 bug ，这个模块是在 windows 下使用的，所以在 linux 环境下没有。</p>
+<blockquote>
+<p><code>distutils.msvccompiler</code>是Python的<code>distutils</code>模块的一部分，通常在Windows下用于调用Microsoft Visual C++编译器。然而，用户是在Linux环境下，为什么会引用到msvccompiler呢？可能是NumPy的某些部分在尝试调用这个模块，而它在Linux下并不存在。</p>
+</blockquote>
+<p>从网上找到的解决思路是将 setuptools 模块降低一下版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install setuptools==69.5.1 </span><br></pre></td></tr></table></figure>
 <h1>修改 fortran 脚本</h1>
 <ol>
 <li>
@@ -4077,7 +4420,7 @@ emWeight=NULL)</p>
 <p>bed 文件将8个bits 作为一个 block (即一个字节)。一开始的三个block是由plink指定的，从第四个开始才开始记录基因型数据。</p>
 <p>前两个 block 称为 magic number ，作用是用于plink软件来区分这个bed是不是真的bed文件。第三个 block 称为 mode ，表明这个bed文件是SNP-major(00000001) 还是 individual-major(0000000)，这个意思就是说数据按什么顺序排序，默认都是按照SNP的顺序，即先把bim文件中第一个SNP的所有基因型排列完，然后是第二个SNP，第三个SNP……（一直到最后，如果样本不能整除4，那么最后一个block多余的bits设为0，确保每一个新行都从一个新的block开始）。</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">|-magic number--| |-mode-| |--genotype data---------| </span><br><span class="line"></span><br><span class="line">01101100 00011011 00000001 11011100 00001111 11100111</span><br><span class="line"></span><br><span class="line">|--genotype data-cont&#x27;d--| </span><br><span class="line"></span><br><span class="line">00001111 01101011 00000001 </span><br></pre></td></tr></table></figure>
-<p>这里其相应的 bim 文件内容如下（<strong>A1 为等位基因频率较小的碱基</strong> ）</p>
+<p>这里其相应的 bim 文件内容如下 (chromosome, SNP, cM, base-position, allele 1, allele 2)（<strong>A1 为等位基因频率较小的碱基</strong> ）</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1       snp1    0       1       G       A</span><br><span class="line">1       snp2    0       2       1       2</span><br><span class="line">1       snp3    0       3       A       C</span><br></pre></td></tr></table></figure>
 <p>fam 文件如下</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1 1 0 0 1 0</span><br><span class="line">1 2 0 0 1 0</span><br><span class="line">1 3 1 2 1 2</span><br><span class="line">2 1 0 0 1 0</span><br><span class="line">2 2 0 0 1 2</span><br><span class="line">2 3 1 2 1 2</span><br></pre></td></tr></table></figure>
@@ -4097,6 +4440,15 @@ emWeight=NULL)</p>
 <h2 id="输出">输出</h2>
 <h3 id="二进制格式">二进制格式</h3>
 <p>使用 <code>--make-bed</code> 输出二进制格式，使用<code>--make-just-bim</code> 和 <code>--make-just-fam</code> 只输出 bim 或 fam 文件。</p>
+<p>需要注意的是，plink 默认会将等位基因频率高的碱基 (A2) 设置为 ref ，将等位基因频率低的碱基 (A1) 设置为 alt 。如果你需要指定每个位点 的 ref 和 alt ，比如你可以设置与某一个 VCF 中的 ref 和 alt 保持一致，你可以添加一下选项：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--a2-allele ref.vcf 4 3 &#x27;#&#x27;</span><br></pre></td></tr></table></figure>
+<p>参数说明：</p>
+<p><code>--a2-allele ref.vcf 4 3 '#'</code> :</p>
+<p>​	<code>--a2-allele</code> 命令表示 指定A2基因（Major）</p>
+<p>​	<code>ref.vcf</code>  是参考群体的vcf文件（必须是未压缩文件）</p>
+<p>​	<code>4</code> 是参考群体A2基因所在列</p>
+<p>​	<code>3</code> 是SNP名称列</p>
+<p>​	<code>#</code> 是需要跳过的行</p>
 <h3 id="compound格式-2">compound格式</h3>
 <p>使用 <strong>–recode compound-genotypes</strong> 选项，生成 compound格式的plink文件（一个SNP的两个碱基之间没有空格）</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">plink --allow-extra-chr --chr-set 95 --file plink59 --recode compound-genotypes --out plink59_compound</span><br></pre></td></tr></table></figure>
@@ -4311,6 +4663,8 @@ emWeight=NULL)</p>
 <p><strong>计算 IBD 前必须根据 LD 质控位点</strong>，不然得到的结果更加糟糕。</p>
 </li>
 </ol>
+<h3 id="基于基因组亲缘关系剔除样本">基于基因组亲缘关系剔除样本</h3>
+<p>使用选项 <code>--rel-cutoff [maximum]</code> 剔除基因组亲缘关系（应该是 G阵）较近的个体间的一个，会输出 <code> plink.rel.id</code> ，即最终保存的个体的ID。</p>
 <h2 id="位点质控">位点质控</h2>
 <h3 id="杂合子比例-2">杂合子比例</h3>
 <p>位点杂合子比例可以通过 <code>--hardy</code> 进行计算，输出文件后缀维 <code>.hwe</code> ，内容举例如下。</p>
@@ -4354,8 +4708,9 @@ emWeight=NULL)</p>
 </tr>
 </tbody>
 </table>
-<h3 id="剔除多等位基因位点">剔除多等位基因位点</h3>
-<p>使用 <strong>–snps-only just-acgt</strong> 选项会剔除非 SNP 位点（例如 indel 位点），对于存在三等位基因的 SNP ，会将存在三等位基因的基因型替换为0。</p>
+<h3 id="剔除非SNP位点">剔除非SNP位点</h3>
+<p>使用 <strong>–snps-only just-acgt</strong> 选项会剔除非 SNP 位点（例如 indel 位点），<strong>–snps-only</strong> 会剔除所有存在至少一个等位基因是<strong>多字符</strong>的位点（也就是所只会保留两个等位基因均是单字符的位点）。<strong>just-acgt</strong> 会进一步剔除等位基因不在 <code>&#123;'A', 'C', 'G', 'T', 'a', 'c', 'g', 't', &lt;missing code&gt;&#125;</code> 范围内容的位点</p>
+<p>对于存在三等位基因的 SNP ，PLINK默认就会将存在三等位基因的基因型替换为0。</p>
 <p>举个例子，输入文件，第一个SNP是<strong>一等位基因</strong>，第二个SNP是<strong>三等位基因</strong>，第三个SNP是<strong>INDEL</strong> 位点。</p>
 <blockquote>
 <p>1 1 0 0 0 0 A A A C I D<br>
@@ -4372,6 +4727,11 @@ emWeight=NULL)</p>
 </blockquote>
 <p>注意：<strong>–make-bed</strong> 默认就会执行 <strong>–snps-only</strong>，因此如果生成二进制文件过程中出现多等位基因的 SNP ，不会报错，只会给出下面的提示：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Warning: Variant 1 triallelic; setting rarest alleles missing.</span><br></pre></td></tr></table></figure>
+<h3 id="VCF文件剔除3等位基因位点">VCF文件剔除3等位基因位点</h3>
+<p>当输入为 VCF 文件时，可以使用下面的选项剔除多等位基因位点</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--biallelic-only [&#x27;strict&#x27;] [&#x27;list&#x27;]</span><br></pre></td></tr></table></figure>
+<p>使用–biallelic-only 会剔除基因型中实际存在多等位碱基的位点（3个或以上），添加 strict 会无差别删除次等位基因ALT是2个及2个以上的情况（哪怕基因型中只出现了1个ALT），添加 list 会将剔除的位点放在 plink-temporary.skip.3allele 文件中。举例如下</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plink --allow-extra-<span class="built_in">chr</span> --<span class="built_in">chr</span>-<span class="built_in">set</span> <span class="number">95</span> --vcf test.vcf --const-fid --biallelic-only <span class="built_in">list</span> --recode --out out4</span><br></pre></td></tr></table></figure>
 <h3 id="LD-过滤">LD 过滤</h3>
 <p>使用 <strong>–indep-pairwise &lt;window size&gt;[‘kb’] &lt;step size (variant ct)&gt; &lt;r^2 threshold&gt;</strong> 选项来过滤位点，常用参数组合为 <strong>50 5 0.5</strong> 或 <strong>50 5 0.2</strong> ，一般不动前面两个参数，修改第三个的值。</p>
 <p>这三个参数说明如下：</p>
@@ -4472,7 +4832,7 @@ emWeight=NULL)</p>
 <p>可以设置一下过滤的参数</p>
 <ul>
 <li>
-<p>–ld-window 10  ：表示计算LD的区间（SNP数目，默认为10），表示距离小于这个值的标记对都要进行LD的计算。</p>
+<p>–ld-window 10  ：表示计算LD的区间（SNP数目，默认为10），表示距离小于这个值的标记对都要进行LD的计算（换句话说，两个位点之间的SNP数目大于等于 (10-1) 的情况不计算 r2）。</p>
 </li>
 <li>
 <p>–ld-window-kb 1000 ：默认为1Mb，表示只对距离在1Mb之内的SNP位点进行分析。</p>
@@ -4482,12 +4842,22 @@ emWeight=NULL)</p>
 </li>
 </ul>
 <p>如果按照默认参数，就是<strong>只算两个位点对距离小于1000kb，中间间隔的SNP数目小于9（10-1）的位点对的r2</strong>，<strong>并且只输出 r2 大于 0.2 的结果</strong>。</p>
+<p><strong>plink 有时输出的结果不全</strong>，因为有些位点对的 r2 是 nan 就没有输出，原因是对于对于两个位点同时有分型的样本（剔除缺失后），至少有一个位点没有变异 (来自于 <a href="https://groups.google.com/g/plink2-users/c/zD2aME9Kb3o">https://groups.google.com/g/plink2-users/c/zD2aME9Kb3o</a>)。</p>
+<blockquote>
+<p>The only SNP-pairs that still get filtered under “–ld-window-r2 0” are those where the r^2 value is “nan”, i.e. at least one of the SNPs exhibits no variation at all, across all samples genotyped at both SNPs.  If you want that case to be reported as well, you can use e.g. “–ld-window-r2 -1”.  (This detail is mentioned in the <a href="https://www.cog-genomics.org/plink/2.0/ld#r">plink 2.0 documentation</a>.)</p>
+</blockquote>
+<p>所以推荐使用 plink 2.0 版本进行分析</p>
 <h3 id="指定位点和其它位点的r2">指定位点和其它位点的r2</h3>
 <p>举个例子，我只需要位点Chr11_11501307 前后 5kb 距离位点与这个位点的 r2 ，那么我们首先需要提取这个区域的位点基因型。</p>
 <p>然后我们计算 r2 时，只需要加上参数 <code>--ld-snp Chr11_11501307</code> ，同时设置其它过滤参数，避免结果被过滤（比如 <code>--ld-window-r2 0</code> 就是不基于 r2 大小过滤结果）。</p>
 <figure class="highlight r"><table><tr><td class="code"><pre><span class="line">plink <span class="operator">-</span><span class="operator">-</span>allow<span class="operator">-</span>extra<span class="operator">-</span>chr <span class="operator">-</span><span class="operator">-</span>chr<span class="operator">-</span>set <span class="number">95</span> <span class="operator">-</span><span class="operator">-</span>bfile pick <span class="operator">-</span><span class="operator">-</span>r2 <span class="operator">-</span><span class="operator">-</span>ld<span class="operator">-</span>snp Chr11_11501307 <span class="operator">-</span><span class="operator">-</span>ld<span class="operator">-</span>window <span class="number">10000</span> <span class="operator">-</span><span class="operator">-</span>ld<span class="operator">-</span>window<span class="operator">-</span>kb <span class="number">1000</span> <span class="operator">-</span><span class="operator">-</span>ld<span class="operator">-</span>window<span class="operator">-</span>r2 <span class="number">0</span></span><br></pre></td></tr></table></figure>
 <p>输出的结果文件第一个位点便均是 Chr11_11501307 。</p>
 <p>类似地选项还有 <code>--ld-snps</code> (后面跟着多个位点名称)， <code>--ld-snp-list</code> (后面跟着一列位点名称的文件)</p>
+<h3 id="plink-2-0-版本分析r2">plink 2.0 版本分析r2</h3>
+<p>官网文档：<a href="https://www.cog-genomics.org/plink/2.0/ld#r">https://www.cog-genomics.org/plink/2.0/ld#r</a></p>
+<p>上面计算的r2 其实是碱基计数的相关系数的平方，不是按照连锁不平衡的公式计算的 r2</p>
+<p>在 plink 2.0 中，计算 r2 有两种方式，<code>--r2-unphased</code> 对应碱基计数的相关系数的平方，<code>--r2-phased</code> 对应教科书上的基于单倍型频率计算的 r2 。如果要输出 nan 的结果，则 <code>--ld-window-r2</code> 的值设为 - 1，举例如下 （这里不需要设定 <code>--ld-window-kb</code>，因为 plink2 的默认值是无穷大）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">./plink2 --allow-extra-<span class="built_in">chr</span> --<span class="built_in">chr</span>-<span class="built_in">set</span> <span class="number">95</span> --pedmap check_snp --r2-phased  --ld-snp-<span class="built_in">list</span> need_snp_test --ld-window-kb <span class="number">17</span> --ld-window-r2 -<span class="number">1</span></span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>数据分析</category>
@@ -4893,6 +5263,115 @@ emWeight=NULL)</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">30</span>]: a = subprocess.Popen(<span class="string">&quot;wc -l *.ped&quot;</span>, shell=<span class="literal">True</span>, stdout=subprocess.PIPE, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">31</span>]: a.stdout.readline()</span><br><span class="line">Out[<span class="number">31</span>]: <span class="string">&#x27;    773 all.ped\n&#x27;</span></span><br></pre></td></tr></table></figure>
 <p>也可以写入一个文件</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">In [<span class="number">32</span>]: test_file = <span class="built_in">open</span>(<span class="string">&quot;test.txt&quot;</span>, <span class="string">&quot;w&quot;</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">33</span>]: a = subprocess.Popen(<span class="string">&quot;wc -l *.ped&quot;</span>, shell=<span class="literal">True</span>, stdout=test_file, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"></span><br><span class="line">In [<span class="number">34</span>]: test_file.close()</span><br><span class="line"></span><br><span class="line">In [<span class="number">35</span>]: !cat test.txt</span><br><span class="line">    <span class="number">773</span> <span class="built_in">all</span>.ped</span><br><span class="line">    <span class="number">193</span> <span class="number">1.</span>ped</span><br><span class="line">    <span class="number">198</span> <span class="number">2.</span>ped</span><br><span class="line">    <span class="number">187</span> <span class="number">3.</span>ped</span><br><span class="line">   <span class="number">1351</span> total</span><br></pre></td></tr></table></figure>
+<h2 id="subprocess-check-out">subprocess.check_out()</h2>
+<p><code>subprocess.check_output()</code>是 Python <code>subprocess</code>模块中的一个高级函数，专门用于<strong>执行外部命令并捕获其标准输出</strong>。它是执行命令行操作并获取结果的推荐方式，特别适合需要简单快速获取命令输出的场景。</p>
+<p><strong>核心功能</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">output = subprocess.check_output(args, *, </span><br><span class="line">                                 stdin=None, </span><br><span class="line">                                 stderr=None, </span><br><span class="line">                                 shell=False, </span><br><span class="line">                                 timeout=None, </span><br><span class="line">                                 encoding=None, </span><br><span class="line">                                 errors=None, </span><br><span class="line">                                 text=None)</span><br></pre></td></tr></table></figure>
+<p><strong>关键特性：</strong></p>
+<ol>
+<li><strong>执行命令</strong>：运行指定的外部程序或命令</li>
+<li><strong>捕获输出</strong>：返回命令的标准输出（stdout）内容</li>
+<li><strong>错误处理</strong>：如果命令返回非零退出码（失败），自动引发 <code>CalledProcessError</code>异常</li>
+<li><strong>简化流程</strong>：无需手动处理管道和错误检查</li>
+</ol>
+<h3 id="参数解析"><strong>参数解析</strong></h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>类型</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>args</strong></td>
+<td>str/list</td>
+<td>要执行的命令（字符串或列表）</td>
+<td><code>&quot;ls -l&quot;</code>或 <code>[&quot;ls&quot;, &quot;-l&quot;]</code></td>
+</tr>
+<tr>
+<td><strong>shell</strong></td>
+<td>bool</td>
+<td>是否通过系统shell执行</td>
+<td><code>True</code>（支持管道等）</td>
+</tr>
+<tr>
+<td><strong>text</strong></td>
+<td>bool</td>
+<td>是否返回字符串（而非字节）</td>
+<td><code>True</code>（推荐）</td>
+</tr>
+<tr>
+<td><strong>encoding</strong></td>
+<td>str</td>
+<td>输出解码编码</td>
+<td><code>&quot;utf-8&quot;</code></td>
+</tr>
+<tr>
+<td><strong>timeout</strong></td>
+<td>float</td>
+<td>命令超时时间（秒）</td>
+<td><code>5.0</code></td>
+</tr>
+<tr>
+<td><strong>stderr</strong></td>
+<td></td>
+<td>错误输出处理</td>
+<td><code>subprocess.STDOUT</code>（合并到stdout）</td>
+</tr>
+</tbody>
+</table>
+<p>这里一个核心参数在于 <code>text</code> ，只需要设置这个参数，就不用再对输出进行解码了，举例如下</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Python 3.7+ 推荐</span></span><br><span class="line">output = subprocess.check_output(<span class="string">&quot;cmd&quot;</span>, text=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 旧版本替代方案</span></span><br><span class="line">output = subprocess.check_output(<span class="string">&quot;cmd&quot;</span>).decode(<span class="string">&quot;utf-8&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="使用示例">使用示例</h3>
+<p>基础用法（获取命令输出）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取当前目录文件列表</span></span><br><span class="line">files = subprocess.check_output(<span class="string">&quot;ls&quot;</span>, shell=<span class="literal">True</span>, text=<span class="literal">True</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;文件列表:\n<span class="subst">&#123;files&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>带参数的命令</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 推荐使用列表形式（避免注入风险）</span></span><br><span class="line">disk_usage = subprocess.check_output([<span class="string">&quot;df&quot;</span>, <span class="string">&quot;-h&quot;</span>], text=<span class="literal">True</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;磁盘使用情况:\n<span class="subst">&#123;disk_usage&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>错误处理</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="comment"># 尝试访问不存在的文件</span></span><br><span class="line">    result = subprocess.check_output(<span class="string">&quot;cat no_such_file.txt&quot;</span>, shell=<span class="literal">True</span>, text=<span class="literal">True</span>)</span><br><span class="line"><span class="keyword">except</span> subprocess.CalledProcessError <span class="keyword">as</span> e:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;命令失败! 退出码: <span class="subst">&#123;e.returncode&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;错误输出: <span class="subst">&#123;e.output&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>高级应用（带超时）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="comment"># 限制命令执行时间</span></span><br><span class="line">    output = subprocess.check_output(<span class="string">&quot;sleep 10&quot;</span>, shell=<span class="literal">True</span>, timeout=<span class="number">3</span>, text=<span class="literal">True</span>)</span><br><span class="line"><span class="keyword">except</span> subprocess.TimeoutExpired:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;命令执行超时!&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="与-subprocess-run-的对比">与 <code>subprocess.run()</code>的对比</h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>check_output()</code></th>
+<th><code>run()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>返回值</strong></td>
+<td>直接返回输出内容</td>
+<td>返回CompletedProcess对象</td>
+</tr>
+<tr>
+<td><strong>错误处理</strong></td>
+<td>自动抛出异常</td>
+<td>需手动检查returncode</td>
+</tr>
+<tr>
+<td><strong>输出捕获</strong></td>
+<td>仅捕获stdout</td>
+<td>可分别捕获stdout/stderr</td>
+</tr>
+<tr>
+<td><strong>代码简洁度</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td><strong>灵活性</strong></td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><code>subprocess.check_output()</code>是Python与系统命令交互的瑞士军刀，它通过简洁的API提供了强大的功能，特别适合需要快速获取命令结果的场景。</p>
 <h1>f-string 技巧</h1>
 <p>f-string 是Python3.6新引入的一种字符串格式化方法，上面 subprocess 的介绍中也提到了 f-string ，其使用起来非常简便。其形式就是 <code>f'***'</code> 或 <code>F'***'</code> （单双引号均可），以大括号<code>&#123;&#125;</code>表示被替换的字段（也可以是表达式或待用函数）。</p>
 <h2 id="特殊字符">特殊字符</h2>

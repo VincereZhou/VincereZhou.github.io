@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">887</span>
+            <span class="post-count">1.1k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">3 分钟</span>
+            <span class="post-count">4 分钟</span>
         </span>
     </span>
 </div>
@@ -120,22 +120,34 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools index input_file.vcf.gz</span><br></pre></td></tr></table></figure>
 <p>对于 <code>.bcf</code>，<code>bcftools index</code> 也只接受压缩格式，如果使用 <code>-Ou</code> 格式（未压缩的 BCF），则会出现以下报错信息</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">bcftools index val_all_phased.bcf</span></span><br><span class="line">[E::main_vcfindex] unknown filetype; expected bgzip compressed VCF or BCF</span><br><span class="line">[E::main_vcfindex] was the VCF/BCF compressed with bgzip?</span><br></pre></td></tr></table></figure>
+<p>还可以用 index 命令快速获得<strong>所有标记数目</strong> （需要事先创建好索引），只需要加上一个 <code>-n</code> 选项</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools index -n val_all_phased.bcf</span><br></pre></td></tr></table></figure>
 <h1>concat</h1>
-<p>用于合并相同样本的多个 VCF/BCF 文件（比如不同染色体的基因型），注意所有文件中的<strong>样本顺序必须报错一致</strong>，<strong>所有输入文件必须已经按照染色体和物理位置排序了</strong>，<strong>输入文件的顺序必须也得按照物理位置的顺序</strong>（比如从1号染色体到 18号染色体）</p>
+<p>用于合并相同样本的多个 VCF/BCF 文件（比如不同染色体的基因型），注意所有文件中的<strong>样本顺序必须保持一致</strong>，<strong>所有输入文件必须已经按照染色体和物理位置排序了</strong>，<strong>输入文件的顺序必须也得按照物理位置的顺序</strong>（比如从1号染色体到 18号染色体）</p>
 <p>最简单的例子如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools concat input1.bcf input2.bcf -o output.vcf</span><br></pre></td></tr></table></figure>
 <p>也可以使用 <code>-f</code> 选项定一个包含输入文件路径的文本文件。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools concat -f file_list.txt -o output.vcf</span><br></pre></td></tr></table></figure>
 <h1>merge</h1>
 <p>合并样本不同（多个文件的样本号必须保证是不同的，不然会报错），位点相同的情况。</p>
-<p>注意这个命令只能用 <code>vcf.gz</code> 和 <code>bcf</code> 文件，并且必须事先创建索引。</p>
+<p>注意这个命令只能用 <code>vcf.gz</code> 和 <code>bcf</code> 文件，并且必须<strong>事先创建索引</strong>。</p>
 <p>最简单的例子如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools merge input1.vcf.gz input2.vcf.gz -o output.vcf</span><br></pre></td></tr></table></figure>
+<p>实用写法如下，这里 <code>&#123;1..29&#125;</code>是 Bash 的大括号扩展语法，会自动展开为 1 到 29 的数字序列。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nohup bcftools concat Chr&#123;1..29&#125;_phased_snp.vcf.gz -Oz -o ref_all_phased.vcf.gz &amp;</span><br><span class="line">nohup bcftools concat Chr&#123;1..29&#125;_phased_snp.vcf.gz -Ob -o ref_all_phased.bcf &amp;</span><br></pre></td></tr></table></figure>
 <p>也可以使用 <code>-l</code> 选项定一个包含输入文件路径的文本文件。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools merge -l file_list.txt -o output.vcf</span><br></pre></td></tr></table></figure>
 <h1>view</h1>
 <p>最简单的应用就是 VCF 和 BCF 格式的互相转换</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bcftools view input.vcf -Ob -o output.bcf  # vcf to bcf</span><br><span class="line"></span><br><span class="line">bcftools view input.bcf -Ov -o output.vcf  # bcf to vcf</span><br></pre></td></tr></table></figure>
+<p>还有提取位点，SNP位置列表文件 <code>sites.txt</code>，格式有几种：</p>
+<ul>
+<li>每行一个<code>chr:pos</code>（如 <code>chr1:12345</code>），提取单个位置的位点</li>
+<li>每行两列，<code>chr pos</code>（用制表符分隔），提取单个位置的位点</li>
+<li>每行一个区间如<code>chr1:1000-2000</code></li>
+<li>每行一个区间如<code>chr1 1000 2000</code> （用制表符分隔）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools view -R sites.txt input.vcf -o extracted.vcf</span><br></pre></td></tr></table></figure>
 <h1>filter</h1>
 <p>第一个功能是<strong>提取染色体片段</strong>，示例命令如下（这里的染色体是 Gm01 ，测试了可以接受这种异常的染色体名称）</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools filter test.vcf.gz --regions Gm01:1-1000 &gt; test2.vcf</span><br></pre></td></tr></table></figure>
@@ -146,6 +158,11 @@
 <h1>norm</h1>
 <p>将多等位碱基的位点拆分为多行</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bcftools norm --multiallelics -both $&#123;result&#125;/Genotype.cohort.dbSNP.g.vcf \</span><br><span class="line">   -Oz -o $&#123;result&#125;/Genotype.cohort.dbSNP.g.vcf.gz</span><br></pre></td></tr></table></figure>
+<h1>query</h1>
+<p>使用下面命令输出所有样本号</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools query -l Holstein_phased.bcf &gt; Holstein_id3.txt</span><br></pre></td></tr></table></figure>
+<p>使用下面命令提取前 5 列内容</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools query -f <span class="string">&#x27;%CHROM\t%POS\t%ID\t%REF\t%ALT\n&#x27;</span> ref_all_phased.bcf &gt; first5_columns.txt</span><br></pre></td></tr></table></figure>
 <h1>参考文献</h1>
 <ol>
 <li>
@@ -264,7 +281,7 @@
     <ul>
       <li>
         Copyrights &copy;
-        2019-2024
+        2019-2025
         <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
       </li>
     </ul>

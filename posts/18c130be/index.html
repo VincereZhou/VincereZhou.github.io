@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">4.8k</span>
+            <span class="post-count">5.6k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">19 分钟</span>
+            <span class="post-count">23 分钟</span>
         </span>
     </span>
 </div>
@@ -122,7 +122,7 @@
 <p>bed 文件将8个bits 作为一个 block (即一个字节)。一开始的三个block是由plink指定的，从第四个开始才开始记录基因型数据。</p>
 <p>前两个 block 称为 magic number ，作用是用于plink软件来区分这个bed是不是真的bed文件。第三个 block 称为 mode ，表明这个bed文件是SNP-major(00000001) 还是 individual-major(0000000)，这个意思就是说数据按什么顺序排序，默认都是按照SNP的顺序，即先把bim文件中第一个SNP的所有基因型排列完，然后是第二个SNP，第三个SNP……（一直到最后，如果样本不能整除4，那么最后一个block多余的bits设为0，确保每一个新行都从一个新的block开始）。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">|-magic number--| |-mode-| |--genotype data---------| </span><br><span class="line"></span><br><span class="line">01101100 00011011 00000001 11011100 00001111 11100111</span><br><span class="line"></span><br><span class="line">|--genotype data-cont&#x27;d--| </span><br><span class="line"></span><br><span class="line">00001111 01101011 00000001 </span><br></pre></td></tr></table></figure>
-<p>这里其相应的 bim 文件内容如下（<strong>A1 为等位基因频率较小的碱基</strong> ）</p>
+<p>这里其相应的 bim 文件内容如下 (chromosome, SNP, cM, base-position, allele 1, allele 2)（<strong>A1 为等位基因频率较小的碱基</strong> ）</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1       snp1    0       1       G       A</span><br><span class="line">1       snp2    0       2       1       2</span><br><span class="line">1       snp3    0       3       A       C</span><br></pre></td></tr></table></figure>
 <p>fam 文件如下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1 1 0 0 1 0</span><br><span class="line">1 2 0 0 1 0</span><br><span class="line">1 3 1 2 1 2</span><br><span class="line">2 1 0 0 1 0</span><br><span class="line">2 2 0 0 1 2</span><br><span class="line">2 3 1 2 1 2</span><br></pre></td></tr></table></figure>
@@ -142,6 +142,15 @@
 <h2 id="输出">输出</h2>
 <h3 id="二进制格式">二进制格式</h3>
 <p>使用 <code>--make-bed</code> 输出二进制格式，使用<code>--make-just-bim</code> 和 <code>--make-just-fam</code> 只输出 bim 或 fam 文件。</p>
+<p>需要注意的是，plink 默认会将等位基因频率高的碱基 (A2) 设置为 ref ，将等位基因频率低的碱基 (A1) 设置为 alt 。如果你需要指定每个位点 的 ref 和 alt ，比如你可以设置与某一个 VCF 中的 ref 和 alt 保持一致，你可以添加一下选项：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--a2-allele ref.vcf 4 3 &#x27;#&#x27;</span><br></pre></td></tr></table></figure>
+<p>参数说明：</p>
+<p><code>--a2-allele ref.vcf 4 3 '#'</code> :</p>
+<p>​	<code>--a2-allele</code> 命令表示 指定A2基因（Major）</p>
+<p>​	<code>ref.vcf</code>  是参考群体的vcf文件（必须是未压缩文件）</p>
+<p>​	<code>4</code> 是参考群体A2基因所在列</p>
+<p>​	<code>3</code> 是SNP名称列</p>
+<p>​	<code>#</code> 是需要跳过的行</p>
 <h3 id="compound格式-2">compound格式</h3>
 <p>使用 <strong>–recode compound-genotypes</strong> 选项，生成 compound格式的plink文件（一个SNP的两个碱基之间没有空格）</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --allow-extra-chr --chr-set 95 --file plink59 --recode compound-genotypes --out plink59_compound</span><br></pre></td></tr></table></figure>
@@ -356,6 +365,8 @@
 <p><strong>计算 IBD 前必须根据 LD 质控位点</strong>，不然得到的结果更加糟糕。</p>
 </li>
 </ol>
+<h3 id="基于基因组亲缘关系剔除样本">基于基因组亲缘关系剔除样本</h3>
+<p>使用选项 <code>--rel-cutoff [maximum]</code> 剔除基因组亲缘关系（应该是 G阵）较近的个体间的一个，会输出 <code> plink.rel.id</code> ，即最终保存的个体的ID。</p>
 <h2 id="位点质控">位点质控</h2>
 <h3 id="杂合子比例-2">杂合子比例</h3>
 <p>位点杂合子比例可以通过 <code>--hardy</code> 进行计算，输出文件后缀维 <code>.hwe</code> ，内容举例如下。</p>
@@ -399,8 +410,9 @@
 </tr>
 </tbody>
 </table>
-<h3 id="剔除多等位基因位点">剔除多等位基因位点</h3>
-<p>使用 <strong>–snps-only just-acgt</strong> 选项会剔除非 SNP 位点（例如 indel 位点），对于存在三等位基因的 SNP ，会将存在三等位基因的基因型替换为0。</p>
+<h3 id="剔除非SNP位点">剔除非SNP位点</h3>
+<p>使用 <strong>–snps-only just-acgt</strong> 选项会剔除非 SNP 位点（例如 indel 位点），<strong>–snps-only</strong> 会剔除所有存在至少一个等位基因是<strong>多字符</strong>的位点（也就是所只会保留两个等位基因均是单字符的位点）。<strong>just-acgt</strong> 会进一步剔除等位基因不在 <code>&#123;'A', 'C', 'G', 'T', 'a', 'c', 'g', 't', &lt;missing code&gt;&#125;</code> 范围内容的位点</p>
+<p>对于存在三等位基因的 SNP ，PLINK默认就会将存在三等位基因的基因型替换为0。</p>
 <p>举个例子，输入文件，第一个SNP是<strong>一等位基因</strong>，第二个SNP是<strong>三等位基因</strong>，第三个SNP是<strong>INDEL</strong> 位点。</p>
 <blockquote>
 <p>1 1 0 0 0 0 A A A C I D<br>
@@ -417,6 +429,11 @@
 </blockquote>
 <p>注意：<strong>–make-bed</strong> 默认就会执行 <strong>–snps-only</strong>，因此如果生成二进制文件过程中出现多等位基因的 SNP ，不会报错，只会给出下面的提示：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Warning: Variant 1 triallelic; setting rarest alleles missing.</span><br></pre></td></tr></table></figure>
+<h3 id="VCF文件剔除3等位基因位点">VCF文件剔除3等位基因位点</h3>
+<p>当输入为 VCF 文件时，可以使用下面的选项剔除多等位基因位点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--biallelic-only [&#x27;strict&#x27;] [&#x27;list&#x27;]</span><br></pre></td></tr></table></figure>
+<p>使用–biallelic-only 会剔除基因型中实际存在多等位碱基的位点（3个或以上），添加 strict 会无差别删除次等位基因ALT是2个及2个以上的情况（哪怕基因型中只出现了1个ALT），添加 list 会将剔除的位点放在 plink-temporary.skip.3allele 文件中。举例如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --allow-extra-<span class="built_in">chr</span> --<span class="built_in">chr</span>-<span class="built_in">set</span> <span class="number">95</span> --vcf test.vcf --const-fid --biallelic-only <span class="built_in">list</span> --recode --out out4</span><br></pre></td></tr></table></figure>
 <h3 id="LD-过滤">LD 过滤</h3>
 <p>使用 <strong>–indep-pairwise &lt;window size&gt;[‘kb’] &lt;step size (variant ct)&gt; &lt;r^2 threshold&gt;</strong> 选项来过滤位点，常用参数组合为 <strong>50 5 0.5</strong> 或 <strong>50 5 0.2</strong> ，一般不动前面两个参数，修改第三个的值。</p>
 <p>这三个参数说明如下：</p>
@@ -517,7 +534,7 @@
 <p>可以设置一下过滤的参数</p>
 <ul>
 <li>
-<p>–ld-window 10  ：表示计算LD的区间（SNP数目，默认为10），表示距离小于这个值的标记对都要进行LD的计算。</p>
+<p>–ld-window 10  ：表示计算LD的区间（SNP数目，默认为10），表示距离小于这个值的标记对都要进行LD的计算（换句话说，两个位点之间的SNP数目大于等于 (10-1) 的情况不计算 r2）。</p>
 </li>
 <li>
 <p>–ld-window-kb 1000 ：默认为1Mb，表示只对距离在1Mb之内的SNP位点进行分析。</p>
@@ -527,12 +544,22 @@
 </li>
 </ul>
 <p>如果按照默认参数，就是<strong>只算两个位点对距离小于1000kb，中间间隔的SNP数目小于9（10-1）的位点对的r2</strong>，<strong>并且只输出 r2 大于 0.2 的结果</strong>。</p>
+<p><strong>plink 有时输出的结果不全</strong>，因为有些位点对的 r2 是 nan 就没有输出，原因是对于对于两个位点同时有分型的样本（剔除缺失后），至少有一个位点没有变异 (来自于 <a target="_blank" rel="noopener" href="https://groups.google.com/g/plink2-users/c/zD2aME9Kb3o">https://groups.google.com/g/plink2-users/c/zD2aME9Kb3o</a>)。</p>
+<blockquote>
+<p>The only SNP-pairs that still get filtered under “–ld-window-r2 0” are those where the r^2 value is “nan”, i.e. at least one of the SNPs exhibits no variation at all, across all samples genotyped at both SNPs.  If you want that case to be reported as well, you can use e.g. “–ld-window-r2 -1”.  (This detail is mentioned in the <a target="_blank" rel="noopener" href="https://www.cog-genomics.org/plink/2.0/ld#r">plink 2.0 documentation</a>.)</p>
+</blockquote>
+<p>所以推荐使用 plink 2.0 版本进行分析</p>
 <h3 id="指定位点和其它位点的r2">指定位点和其它位点的r2</h3>
 <p>举个例子，我只需要位点Chr11_11501307 前后 5kb 距离位点与这个位点的 r2 ，那么我们首先需要提取这个区域的位点基因型。</p>
 <p>然后我们计算 r2 时，只需要加上参数 <code>--ld-snp Chr11_11501307</code> ，同时设置其它过滤参数，避免结果被过滤（比如 <code>--ld-window-r2 0</code> 就是不基于 r2 大小过滤结果）。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink <span class="operator">-</span><span class="operator">-</span>allow<span class="operator">-</span>extra<span class="operator">-</span>chr <span class="operator">-</span><span class="operator">-</span>chr<span class="operator">-</span>set <span class="number">95</span> <span class="operator">-</span><span class="operator">-</span>bfile pick <span class="operator">-</span><span class="operator">-</span>r2 <span class="operator">-</span><span class="operator">-</span>ld<span class="operator">-</span>snp Chr11_11501307 <span class="operator">-</span><span class="operator">-</span>ld<span class="operator">-</span>window <span class="number">10000</span> <span class="operator">-</span><span class="operator">-</span>ld<span class="operator">-</span>window<span class="operator">-</span>kb <span class="number">1000</span> <span class="operator">-</span><span class="operator">-</span>ld<span class="operator">-</span>window<span class="operator">-</span>r2 <span class="number">0</span></span><br></pre></td></tr></table></figure>
 <p>输出的结果文件第一个位点便均是 Chr11_11501307 。</p>
 <p>类似地选项还有 <code>--ld-snps</code> (后面跟着多个位点名称)， <code>--ld-snp-list</code> (后面跟着一列位点名称的文件)</p>
+<h3 id="plink-2-0-版本分析r2">plink 2.0 版本分析r2</h3>
+<p>官网文档：<a target="_blank" rel="noopener" href="https://www.cog-genomics.org/plink/2.0/ld#r">https://www.cog-genomics.org/plink/2.0/ld#r</a></p>
+<p>上面计算的r2 其实是碱基计数的相关系数的平方，不是按照连锁不平衡的公式计算的 r2</p>
+<p>在 plink 2.0 中，计算 r2 有两种方式，<code>--r2-unphased</code> 对应碱基计数的相关系数的平方，<code>--r2-phased</code> 对应教科书上的基于单倍型频率计算的 r2 。如果要输出 nan 的结果，则 <code>--ld-window-r2</code> 的值设为 - 1，举例如下 （这里不需要设定 <code>--ld-window-kb</code>，因为 plink2 的默认值是无穷大）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./plink2 --allow-extra-<span class="built_in">chr</span> --<span class="built_in">chr</span>-<span class="built_in">set</span> <span class="number">95</span> --pedmap check_snp --r2-phased  --ld-snp-<span class="built_in">list</span> need_snp_test --ld-window-kb <span class="number">17</span> --ld-window-r2 -<span class="number">1</span></span><br></pre></td></tr></table></figure>
  
       <!-- reward -->
       
@@ -639,7 +666,7 @@
     <ul>
       <li>
         Copyrights &copy;
-        2019-2024
+        2019-2025
         <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
       </li>
     </ul>
