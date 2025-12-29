@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    软件学习-DMU |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-软件学习-DMU"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  软件学习-DMU
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/29c9bc50/" class="article-date">
+  <time datetime="2025-12-29T08:40:56.000Z" itemprop="datePublished">2025-12-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.7k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">11 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>DMU软件使用方法。</p>
+<span id="more"></span>
+<h1>官网</h1>
+<p><a target="_blank" rel="noopener" href="https://dmu.ghpc.au.dk/dmu/">https://dmu.ghpc.au.dk/dmu/</a></p>
+<h1>模块介绍</h1>
+<ul>
+<li>dmu1: 预处理模块</li>
+<li>dmuai : 估计方差组分模块</li>
+<li>dmu4 : BLUP 模块</li>
+<li>dmu5 ：通过数据迭代求解的 BLUP模块</li>
+<li>rjmc : 贝叶斯分析模块</li>
+</ul>
+<h1>输入数据</h1>
+<p>所有输入文件只能含有数值，不能含有字符（中文或英文字符）</p>
+<h2 id="表型数据">表型数据</h2>
+<ul>
+<li>整数变量在前（如个体ID，固定因子），实数变量在后（性状，协变量等）</li>
+<li>整数变量缺失值表示为 0 ，实数变量用一个极小值表示（如 -99，实际是等于小于参数卡中 miss 值的任意值）</li>
+</ul>
+<h2 id="系谱数据">系谱数据</h2>
+<ul>
+<li>4列，第4列是排序列（出生日期；如果忽略近交，最好使用<strong>行号</strong>，避免报错）</li>
+<li>旧版本的DMU软件要求系谱要按照出生日期排序，现在版本的DMU软件不需要。</li>
+</ul>
+<h1>基因型数据</h1>
+<p>使用<a target="_blank" rel="noopener" href="https://github.com/chaoning/GMAT/">gmatrix</a>软件构建G阵，这里我遇到报错，好像是  root 安装的 gcc ，g++ 版本太低，通过Conda环境解决GMatrix依赖问题</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:\$LD_LIBRARY_PATH</span><br></pre></td></tr></table></figure>
+<p>运行 gmatrix 如下，这里 renew_chipid.fam 中的个体号是已经重编码之后的，与上面的表型系谱文件保持一致。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gmatrix --bfile renew_chipid --grm agrm --out renew_chipid</span><br></pre></td></tr></table></figure>
+<p>生成了 <code>renew_chipid.id</code> 和 <code>renew_chipid.agrm.id_fmt</code> 。这里 <code>renew_chipid.id</code> 是一列基因型个体号， <code>renew_chipid.agrm.id_fmt</code> 为G阵内容, 为三列:个体号、个体号、值，示例如下</p>
+<blockquote>
+<p>1 1 1.02875<br>
+2 1 0.333399<br>
+2 2 0.8651</p>
+</blockquote>
+<h1>一步法参数卡说明</h1>
+<h2 id="生长参数卡-DMU4">生长参数卡-DMU4</h2>
+<p>DMU4 参数卡如下，这里</p>
+<ul>
+<li>
+<p><code>$ANALYSE 11 9 0 0</code> : 表示是运行DMU4，方法是速度优先的 FSPAK算法（计算se），最后两个用不上。</p>
+</li>
+<li>
+<p><code>$DATA  ASCII (3,2,-99) dmu.dat</code> : 这里 3 是整型变量数目，2是实型变量数目，-99是缺失值，dmu.dat 是表型数据</p>
+</li>
+<li>
+<p><code>$VARIABLE</code> ：每一列变量的名称缩写</p>
+</li>
+<li>
+<p><code>$MODEL</code> :</p>
+<ul>
+<li>
+<p><code>2 2 0 0 0 </code></p>
+<p>几个性状就写 <code>n n 0 0 0</code> 即可（用一行5个整数描述分析性状的数目和性状类型，即1)总性<br>
+状数, 2)正态分布性状数,3)正态截尾分布性状数, 4)多类阈性状数，5) 二类阈性状数），但是我看官方说明书，这里只需要写一个数字 <code>n</code> 即可</p>
+</li>
+<li>
+<p><code>0  0  </code></p>
+<p>只有几个性状就放几个0的行，只用于 DMU5 模块，描述在分析过程中是否采用吸收法吸收一个固定效应。</p>
+</li>
+<li>
+<p><code>1  0   3  2 3 1 2  0   3  2 3 1 	</code></p>
+</li>
+</ul>
+<p>用于指定每一个性状的模型，以 <code>1  0   3  2 3 1</code> 为例，逐个数字解释，1表示目标性状在实型数据中的序号，0表示权重变量在实型数据中的序号（0表示没有权重），3表示因子总数（固定+随机），之后便是具体的因子所在的列号，2表示第二列（固定因子），3表示第三列（窝效应），1表示第一列（加性效应）(官方文档上说，0表示截距，应该就是值为1的列)</p>
+<ul>
+<li>
+<p><code>2  1 2  2  1 2   </code></p>
+<p>用于指定每一个性状的随机因子组的设置。第一个数字 2 是这个性状随机因子总数，之后是每一个随机因子所在的随机因子组（从1开始编号，相同数字表示属于同一个因子组，例如母体效应模型）</p>
+</li>
+<li>
+<p><code> 0  0</code></p>
+<p>用于指定每一个性状的协变量，第一个数字是协变量数目（0表示没有），如果存在协变量，则之后的数字就是指定的协变量在实型数据中的序号。</p>
+</li>
+<li>
+<p><code>0</code></p>
+<p>用于指定哪些残差协方差不存在（例如当两个性状是在不同的个体中获得的情况），第一行的数字表示不存在的残差协方差的数目，之后的行就是描述不存在的残差协方差的两个表型所在实型数据中的序号。举个例子假如第一个性状和第二个性状的残差协方差不存在，则第一行为<code>1</code>，第二行为<code>1 2</code>。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>$VAR_STR 2 PGMIX 2 ASCII dmu.ped  renew_chipid.id renew_chipid.agrm.id_fmt 0.05 G-ADJUST  </code></p>
+<p>这里指定随机效应的方差协方差结构。</p>
+<p>这里第一个数字 <code>2</code> 指定随机因子组的编号，这里我们加性效应是第2个随机因子，因此设置为2</p>
+<p><code>PGMIX </code> 表示使用 H 阵，即一步法。</p>
+<p><code>2</code> 表示构建 A逆的方式，2表示公畜-母畜系谱，不考虑近交</p>
+<p><code>ASCII </code> 表示文本格式</p>
+<p><code>dmu.ped</code> 系谱文件</p>
+<p><code>renew_chipid.id</code>  基因型个体的ID</p>
+<p><code>renew_chipid.agrm.id_fmt</code> G阵元素</p>
+<p><code>0.05</code> ：A阵权重</p>
+<p><code>G-ADJUST</code> ：将G阵的对角线和非对角线元素均值校正到与A阵相同</p>
+<p><strong>常规评估则使用 $VAR_STR 2 PED 2 ASCII dmu.ped</strong> 即可，将 PGMIX 改为 PED ，后面的内容删掉即可。</p>
+</li>
+<li>
+<p><code>$SOLUTION</code> ：输出solution结果</p>
+</li>
+<li>
+<p><code>$RESIDUALS ASCII</code> ：输出残差结果</p>
+</li>
+<li>
+<p><code>$PRIOR</code> ：方差组分的值，对于 DMUAI 则为初始值</p>
+<p>以 <code>1  1  1    11.281</code> 为例，第一个数字1表示随机因子(组)编号，第二和第三个数字1表示这个随机因子组的方差组分的行号和列号，最后是方差组分的值（可以按照上三角或者下三角的形式描述）。</p>
+</li>
+<li>
+<p><code>$DMU4</code> : 可以用于对于某些解计算标准误，最多100个（每一行表示一个需要的解的序号）。</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">$COMMENT</span><br><span class="line">This is a test example for estimating cow DRP variance component</span><br><span class="line">Model drp=u+a+e</span><br><span class="line"></span><br><span class="line">$ANALYSE 11 9 0 0</span><br><span class="line"></span><br><span class="line">$DATA  ASCII (3,2,-99) dmu.dat</span><br><span class="line">$VARIABLE</span><br><span class="line">#1   2  3   </span><br><span class="line">id  Gu wo</span><br><span class="line">#1  2  </span><br><span class="line">age bf  </span><br><span class="line"></span><br><span class="line">$MODEL</span><br><span class="line">2 2 0 0 0                                                                            </span><br><span class="line">0 </span><br><span class="line">0                                                                                    </span><br><span class="line">#Trait Weight #effects u id</span><br><span class="line">1  0   3  2 3 1</span><br><span class="line">2  0   3  2 3 1 	</span><br><span class="line">#Random  id  </span><br><span class="line">2  1 2 </span><br><span class="line">2  1 2                                                                                                  </span><br><span class="line">#Regressions</span><br><span class="line">0 </span><br><span class="line">0</span><br><span class="line">#NoCov</span><br><span class="line">0                                                                             </span><br><span class="line"></span><br><span class="line">$VAR_STR 2 PGMIX 2 ASCII dmu.ped  renew_chipid.id renew_chipid.agrm.id_fmt 0.05 G-ADJUST  </span><br><span class="line"></span><br><span class="line">$SOLUTION</span><br><span class="line"></span><br><span class="line">$RESIDUALS ASCII</span><br><span class="line"></span><br><span class="line">$PRIOR</span><br><span class="line">1  1  1    11.281    </span><br><span class="line">1  2  1   0.87081</span><br><span class="line">1  2  2   4.3223</span><br><span class="line">2  1  1    17.450    </span><br><span class="line">2  2  1    1.0489    </span><br><span class="line">2  2  2    5.3171    </span><br><span class="line">3  1  1    30.568    </span><br><span class="line">3  2  1   0.89017    </span><br><span class="line">3  2  2    14.207    </span><br><span class="line"></span><br><span class="line">$DMU4</span><br></pre></td></tr></table></figure>
+<h2 id="生长参数卡-DMUAI">生长参数卡-DMUAI</h2>
+<p>这里只需要将上面的参数卡改2个地方</p>
+<ul>
+<li>
+<p><code>$ANALYSE 1 1 0 0</code>  ： 表示采用DMUAI，采用AI+EM混合的方法（应该是说如果AI迭代失败就用 EM算法的意思）</p>
+</li>
+<li>
+<p><code>$DMU4</code> 改为 <code>$DMUAI</code>， 默认值如下</p>
+<blockquote>
+<p>$DMUAI<br>
+10	! Emstep = Number of steps before full weight on EM<br>
+1.0d-7	! Conv_ndelta = Conv. criteria for norm of the update vector<br>
+1.0d-6 ! Conv_gnorm =	Conv. criteria for norm of the gradient vector (AI)<br>
+1	! Printout = 1 -&gt; Solution vector is printed/written to file SOL<br>
+0	! Fspopt = 0 -&gt; time  = 1 memory  optimized FSPAK<br>
+0	! For development should always be zero (0)</p>
+</blockquote>
+</li>
+</ul>
+<h1>一步法繁殖参数卡</h1>
+<p>这里只展示 DMU4 的参数卡，DMUAI的参数卡同上进行修改。</p>
+<p>这里模型是2个固定因子（场年季和胎次），2个随机因子（永久环境效应和加性效应）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">$COMMENT</span><br><span class="line">This is a test example for estimating cow DRP variance component</span><br><span class="line">Model drp=u+a+e</span><br><span class="line"></span><br><span class="line">$ANALYSE 11 9 0 0</span><br><span class="line"></span><br><span class="line">$DATA  ASCII (3,1,-99) dmu.dat</span><br><span class="line">$VARIABLE</span><br><span class="line">#1   2  3   </span><br><span class="line">id  Gu taici</span><br><span class="line">#1  </span><br><span class="line">tnb  </span><br><span class="line"></span><br><span class="line">$MODEL</span><br><span class="line">1 1 0 0 0</span><br><span class="line">0</span><br><span class="line">#Trait Weight #effects id</span><br><span class="line">1  0   4  2 3 1 1</span><br><span class="line">#Random  id  </span><br><span class="line">2  1 2 </span><br><span class="line">#Regressions</span><br><span class="line">0 </span><br><span class="line">#NoCov</span><br><span class="line">0                                                                             </span><br><span class="line"></span><br><span class="line">$VAR_STR 2 PGMIX 2 ASCII dmu.ped  renew_chipid.id renew_chipid.agrm.id_fmt 0.05 G-ADJUST  </span><br><span class="line"></span><br><span class="line">$SOLUTION</span><br><span class="line"></span><br><span class="line">$RESIDUALS ASCII</span><br><span class="line"></span><br><span class="line">$PRIOR</span><br><span class="line">  1  1  1   0.95886    </span><br><span class="line">  2  1  1   0.70218    </span><br><span class="line">  3  1  1    10.566    </span><br><span class="line"></span><br><span class="line">$DMU4</span><br></pre></td></tr></table></figure>
+<h1>输出文件</h1>
+<h2 id="结果文件-SOL">结果文件 .SOL</h2>
+<p>每一列说明如下，正常来说我们只要提取第1，2，5，8，9 列，只需要第1列是4的行（加性效应）</p>
+<table>
+<thead>
+<tr>
+<th>列</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>效应类型：1表示用于回归的协变量；2表示固定因子；3表示除了加性效应外的随机因子；4表示加性效应；5表示DMU5中的吸收效应</td>
+<td>正常分析只需要提取第一列是4的结果</td>
+</tr>
+<tr>
+<td>2</td>
+<td>性状</td>
+<td>单性状模型则均为1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>随机效应在协方差矩阵中的编号（0表示固定因子）</td>
+<td>这应该是用于随机因子组的情况，如母体效应模型</td>
+</tr>
+<tr>
+<td>4</td>
+<td>因子编号</td>
+<td>第几个固定因子/第几个随机因子(组)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>水平原始编号</td>
+<td>对应育种值就是个体号</td>
+</tr>
+<tr>
+<td>6</td>
+<td>这个水平的观测值数目</td>
+<td></td>
+</tr>
+<tr>
+<td>7</td>
+<td>重编码的水平编号</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>估计值/预测值</td>
+<td></td>
+</tr>
+<tr>
+<td>9</td>
+<td>SE</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="结果文件-PAROUT">结果文件 .PAROUT</h2>
+<p>方差组分结果，示例如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">1  1  1    10.958817    </span><br><span class="line">1  2  1   0.77859959    </span><br><span class="line">1  2  2    4.1533056    </span><br><span class="line">2  1  1    17.123556    </span><br><span class="line">2  2  1   0.80002186    </span><br><span class="line">2  2  2    5.7508502    </span><br><span class="line">3  1  1    30.272560    </span><br><span class="line">3  2  1    1.1302146    </span><br><span class="line">3  2  2    13.807863    </span><br></pre></td></tr></table></figure>
+<h1>GBLUP</h1>
+<h2 id="基因型数据">基因型数据</h2>
+<p>此时这里我们需要使用 <strong>G逆</strong> 矩阵，命令如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gmatrix --bfile renew_chipid --grm agrm --inv --out renew_chipid</span><br></pre></td></tr></table></figure>
+<p>输出 <code>renew_chipid.id</code> 为一列基因型个体号，<code>renew_chipid.agiv.id_fmt</code> 为G逆矩阵的元素，为三列:个体号、个体号、值。</p>
+<p>G逆矩阵首行需要提供行列式的值（不清楚是什么行列式），实际操作只要首行添加0 0 1即可。不然估计方差组分时会报错。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">G逆文件首行添加 0 0 1</span> </span><br><span class="line">sed -i &#x27;1i\0 0 1&#x27; renew_chipid.agiv.id_fmt</span><br></pre></td></tr></table></figure>
+<h2 id="修改参数卡">修改参数卡</h2>
+<p>方差组分结果修改如下， 这里 chip_id 是所有基因型个体的个体号文件，fmt 是 <strong>G逆</strong> 矩阵的元素（两个个体号，G逆元素，上/下三角元素）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$VAR_STR 2 GREL ASCII renew_chipid.agiv.id_fmt</span><br></pre></td></tr></table></figure>
+<p>这里第一个数字 <code>2</code> 指定随机因子组的编号，这里我们加性效应是第2个随机因子，因此设置为2</p>
+<p><code>GREL</code> 表示使用GBLUP。</p>
+<p><code>ASCII </code> 表示文本格式</p>
+<p><code>renew_chipid.agiv.id_fmt</code> 系谱文件</p>
+<p>以生长性状举例，完整 DMU4 参数卡如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">$COMMENT</span><br><span class="line">This is a test example for estimating cow DRP variance component</span><br><span class="line">Model drp=u+a+e</span><br><span class="line"></span><br><span class="line">$ANALYSE 11 9 0 0</span><br><span class="line"></span><br><span class="line">$DATA  ASCII (3,2,-99) dmu.dat</span><br><span class="line">$VARIABLE</span><br><span class="line">#1   2  3   </span><br><span class="line">id  Gu wo</span><br><span class="line">#1  2  </span><br><span class="line">age bf  </span><br><span class="line"></span><br><span class="line">$MODEL</span><br><span class="line">2 2 0 0 0                                                                            </span><br><span class="line">0 </span><br><span class="line">0                                                                                    </span><br><span class="line">#Trait Weight #effects u id</span><br><span class="line">1  0   3  2 3 1</span><br><span class="line">2  0   3  2 3 1 	</span><br><span class="line">#Random  id  </span><br><span class="line">2  1 2 </span><br><span class="line">2  1 2                                                                                                  </span><br><span class="line">#Regressions</span><br><span class="line">0 </span><br><span class="line">0</span><br><span class="line">#NoCov</span><br><span class="line">0                                                                             </span><br><span class="line"></span><br><span class="line">$VAR_STR 2 GREL ASCII renew_chipid.agiv.id_fmt</span><br><span class="line"></span><br><span class="line">$SOLUTION</span><br><span class="line"></span><br><span class="line">$RESIDUALS ASCII</span><br><span class="line"></span><br><span class="line">$PRIOR</span><br><span class="line">1  1  1    11.281    </span><br><span class="line">1  2  1   0.87081</span><br><span class="line">1  2  2   4.3223</span><br><span class="line">2  1  1    17.450    </span><br><span class="line">2  2  1    1.0489    </span><br><span class="line">2  2  2    5.3171    </span><br><span class="line">3  1  1    30.568    </span><br><span class="line">3  2  1   0.89017    </span><br><span class="line">3  2  2    14.207    </span><br><span class="line"></span><br><span class="line">$DMU4</span><br></pre></td></tr></table></figure>
+<h2 id="结果文件">结果文件</h2>
+<p>注意这里结果中没有第一列是4的结果，第一列是3，并且第4列是加性效应编号（如2）的结果就是育种值结果。</p>
+<p>结果举例如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">3  1  1   1         881           2         881       -0.821932             2.76516    </span><br><span class="line">3  2  2   1         881           2         881        0.181913             1.74172    </span><br><span class="line">3  1  1   1         882           2         882        0.528774             2.76009    </span><br><span class="line">3  2  2   1         882           2         882         1.68531             1.73936    </span><br><span class="line">3  1  1   1         883           1         883        -1.20906             3.00678    </span><br><span class="line">3  2  2   1         883           1         883        0.931078E-01         1.88361    </span><br><span class="line">3  1  1   2           1           1           1         4.23958             2.55934    </span><br><span class="line">3  2  2   2           1           1           1         1.01104             1.53087    </span><br><span class="line">3  1  1   2           2           1           2        -2.48123             2.50535    </span><br><span class="line">3  2  2   2           2           1           2        -1.16639             1.49150    </span><br><span class="line">3  1  1   2           3           1           3         1.01817             2.57584    </span><br><span class="line">3  2  2   2           3           1           3         1.69694             1.53178    </span><br><span class="line">3  1  1   2           4           1           4        -2.85359             2.62452    </span><br><span class="line">3  2  2   2           4           1           4         1.28764             1.56361   </span><br><span class="line">...</span><br></pre></td></tr></table></figure> 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/868d13f0/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">使用blupf90运行测定日模型</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2025
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
