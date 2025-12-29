@@ -1,6 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>使用blupf90进行ssgwas分析</title>
+    <url>/posts/4edebbb0/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 blupf90 进行 ssgwas 分析。</p>
+<span id="more"></span>
+<h1>从育种值推导 SNP 效应值</h1>
+<p>见 <a href="https://vincere.fun/posts/6b882d9f/">从GBLUP或ssGBLUP的育种值推导snp效应值</a> 。</p>
+<p>简单地说，首先我们计算一次育种值（SNP权重矩阵视为单位矩阵），按照育种值结果 <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Chat%7Ba%7D%7D" style="display:inline-block;margin: 0;"/>  中推导出SNP效应值  <img src="https://math.now.sh?inline=%5Cboldsymbol%7B%5Chat%7Bu%7D%7D" style="display:inline-block;margin: 0;"/>。基于  Wang et al. (2012) ， 我们可以基于SNP效应值计算每个SNP的权重（SNP权重矩阵 <img src="https://math.now.sh?inline=%5Cboldsymbol%7BD%7D%0A" style="display:inline-block;margin: 0;"/> 矩阵），这里也是每个SNP解释的方差。</p>
+<p style=""><img src="https://math.now.sh?from=w_%7Bi%7D%20%3D%20%5Chat%7B%5Csigma%7D_%7Bu%2Ci%7D%5E%7B2%7D%20%3D%20%5Chat%7Bu%7D_%7Bi%7D%5E%7B2%7D2p_%7Bi%7D%281-p_%7Bi%7D%29%0A" /></p><p>这里还对原始权重进行了处理，使所有权重的均值为1。</p>
+<p>然后我们用更新后的  <img src="https://math.now.sh?inline=%5Cboldsymbol%7BD%7D%0A" style="display:inline-block;margin: 0;"/> 矩阵重新计算  <img src="https://math.now.sh?inline=%5Cboldsymbol%7BG%7D" style="display:inline-block;margin: 0;"/> 阵，重新计算育种值（可选），再计算出SNP效应值，这样循环几次（官方文档说是直到得到“合理的结果为止”）。说白了，就是每次循环就是为了更新SNP权重的   <img src="https://math.now.sh?inline=%5Cboldsymbol%7BD%7D%0A" style="display:inline-block;margin: 0;"/> 矩阵。</p>
+<p>但是最初的SSGWAS 只是给出了SNP的效应值，没有给出 P 值。</p>
+<h1>旧的流程</h1>
+<p>运行ssGWAS可能需要用到下面的模块：</p>
+<ol>
+<li>RENUMF90: general preparation of data set.</li>
+<li>PREGSF90: quality control and creation of cleaned genotypes.（用不到）</li>
+<li>BLUPF90: prediction of a with a weighted G.</li>
+<li>POSTGSF90: prediction of u and a new weight D.（计算SNP效应值）</li>
+<li>PREDF90 (Optional): computation of GEBV based on the predicted SNP effects and genotypes</li>
+</ol>
+<p>其中正常就是重复使用 blupf90 （计算育种值）和 postgsf90 （计算SNP效应值）这两个模块。</p>
+<h2 id="示例">示例</h2>
+<p>官方文档中给出了一个示例数据和脚本。</p>
+<p>准备文件如下</p>
+<p>• phenotypes.txt = observation data file<br>
+• pedigree = pedigree file<br>
+• marker.geno.clean = marker file<br>
+• chrmap.txt = chromosome map file （三列，分别为 SNP 序号（从1开始编号），染色体，物理位置，无标题，空格分隔）<br>
+• w = the default weight file（一列，每一行对应一个SNP的权重，初始全是1，无标题，空格分隔）<br>
+• renum.par = instruction file for RENUMF90</p>
+<p>两个脚本</p>
+<p>• run_renum.sh = for renumbering, and for generating the parameter files<br>
+• run_ssgwas.sh = for iterative ssGWAS with BLUPF90 and POSTGSF90</p>
+<h2 id="run-renum-sh">run_renum.sh</h2>
+<p>首先第一个脚本是运行 renumf90 后，修改 renf90.par ，生成两个参数卡 (param_ssgwas1a.txt 和 param_ssgwas1b.txt，分别用于 blupf90 和 postgsf90 使用)</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Prepare and renum data to run </span></span><br><span class="line"><span class="comment">#   GWAS example from GWAS from Wang et al 2012 Gen Res</span></span><br><span class="line"><span class="comment">#   Simplified by Yutaka Masuda</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># your binary path (ending with /)</span></span><br><span class="line">bindir=<span class="string">&#x27;./&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> renum.par | <span class="variable">$&#123;bindir&#125;</span>renumf90 | <span class="built_in">tee</span> log.renum</span><br><span class="line"></span><br><span class="line"><span class="comment"># making parameter files</span></span><br><span class="line"><span class="built_in">cp</span> renf90.par param_ssgwas1a.txt</span><br><span class="line"><span class="built_in">cp</span> renf90.par param_ssgwas1b.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># adding extra options</span></span><br><span class="line"><span class="comment"># BLUPF90</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;OPTION saveGInverse&quot;</span> &gt;&gt; param_ssgwas1a.txt</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;OPTION weightedG w&quot;</span> &gt;&gt; param_ssgwas1a.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># POSTGSF90</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;OPTION ReadGInverse&quot;</span> &gt;&gt; param_ssgwas1b.txt</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;OPTION weightedG w&quot;</span> &gt;&gt; param_ssgwas1b.txt</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;OPTION chrinfo chrmap.txt&quot;</span> &gt;&gt; param_ssgwas1b.txt</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;#OPTION Manhattan_plot&quot;</span> &gt;&gt; param_ssgwas1b.txt</span><br></pre></td></tr></table></figure>
+<p>解释一下这里额外增加的选项的含义</p>
+<ul>
+<li>OPTION saveGInverse ： 保存 <img src="https://math.now.sh?inline=%5Ctau%20%5Cboldsymbol%7BG%7D%5E%7B-1%7D" style="display:inline-block;margin: 0;"/> 结果为 “Gi”</li>
+<li>OPTION weightedG w :  读取 SNP 权重文件</li>
+<li>OPTION ReadGInverse ： 从  “Gi” 文件中读取 G 逆结果</li>
+<li>OPTION chrinfo chrmap.txt ： 专门用于 postgsf90 模块计算 SNP 效应，三列，分别为 SNP 序号（从1开始编号），染色体，物理位置（postGSF90 需要用这个文件的信息绘制曼哈顿图）</li>
+</ul>
+<p>这里 blupf90 会读取 SNP权重文件，输出 G 逆和育种值结果；而 postf90 会读取 G 逆文件和 SNP的物理位置文件，输出 SNP效应结果。</p>
+<h2 id="run-ssgwas-sh">run_ssgwas.sh</h2>
+<p>内容如下（改了一下 blupf90 等运行方式）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># result directory</span></span><br><span class="line">resdir=results</span><br><span class="line">mkdir -p $&#123;resdir&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># the number of iteration</span></span><br><span class="line">niter=<span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># You don&#x27;t have to modify the following statements unless needed.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># the number of snps</span></span><br><span class="line">ns=`wc -l chrmap | awk <span class="string">&#x27;&#123;print $1&#125;&#x27;</span>`</span><br><span class="line"></span><br><span class="line"><span class="comment"># the default weights</span></span><br><span class="line">awk -v ns=$&#123;ns&#125; <span class="string">&#x27;BEGIN &#123;for(i=1;i&lt;=ns;i++) print 1&#125;&#x27;</span> &gt; w</span><br><span class="line">cp w w.default</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> `seq <span class="number">1</span> $&#123;niter&#125;`; do</span><br><span class="line">   <span class="comment"># updating the weights using BLUPF90 and POSTGSF90</span></span><br><span class="line">   blupf90 param_ssgwas1a.txt | tee logblup_$i</span><br><span class="line">   cp solutions solutions_$i</span><br><span class="line">   postGSf90 param_ssgwas1b.txt | tee logpost_$i</span><br><span class="line">   cp snp_sol snp_sol_$i</span><br><span class="line">   cp chrsnp chrsnp_$i</span><br><span class="line">   cp w w_$i</span><br><span class="line">   awk <span class="string">&#x27;&#123;print $7&#125;&#x27;</span> snp_sol &gt; w</span><br><span class="line"></span><br><span class="line">   <span class="comment"># save the results in the current iteration</span></span><br><span class="line">   mv logblup_$i $resdir</span><br><span class="line">   mv logpost_$i $resdir</span><br><span class="line">   mv solutions_$i $resdir</span><br><span class="line">   mv snp_sol_$i $resdir</span><br><span class="line">   mv chrsnp_$i $resdir</span><br><span class="line">   mv w_$i $resdir</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+<p>这里运行 blupf90 后除了育种值结果 solutions ，还会生成 Gi （G逆的二进制文件）</p>
+<h3 id="运行-postGSf90-输出文件">运行 postGSf90 输出文件</h3>
+<p><strong>snp_sol</strong></p>
+<p>SNP 效应值结果，各列内容解释如下，第 6 列应该是 SNP 效应值 <img src="https://math.now.sh?inline=u_%7Bi%7D" style="display:inline-block;margin: 0;"/> ，第 7 列是SNP权重 <img src="https://math.now.sh?inline=d_%7Bi%7D" style="display:inline-block;margin: 0;"/> （感觉结果不太对）。</p>
+<p>1: trait<br>
+2: effect<br>
+3: SNP<br>
+4: Chromosome<br>
+5: Position<br>
+6: SNP solution<br>
+7: weight (can be used as the weight to calculate the weighted G matrix)<br>
+8: variance explained by n adjacent SNP.（#if OPTION windows_variance is used ，计算 n个相邻SNP的解释方差）<br>
+9: variance of the SNP solution (used to compute the p-value if OPTION snp_p_value is used)</p>
+<p>这里可以通过选型 <code>OPTION which_weight x</code> 来选择使用哪种方法来计算 SNP 权重（官方文档没说哪种是默认的选项）。这里计算得到的权重应该都经过了标准化（均值为1）</p>
+<p>1: w = y^2 * (2(p(1-p)))<br>
+2: w = y^2<br>
+3: experimental with the degree of brief<br>
+4: w = C**(abs(y i )/sqrt(var(y))-2) from VanRaden et al. (2009)<br>
+nonlinearA: same as 4<br>
+where y is the SNP solution, with scaled weight = w * nSnp/sum(w); and C is 1.125 by default (enable to<br>
+change it using the second argument of the option line (OPTION which_weight nonlinearA value), e.g.,<br>
+OPTION which_weight nonlinearA 1.2</p>
+<p><strong>chrsnp</strong></p>
+<p>用于绘制曼哈顿图</p>
+<p>1: trait<br>
+2: effect<br>
+3: values of SNP effects to use in Manhattan plots, i.e., (abs(SNP_i)/var(SNP))<br>
+4: SNP<br>
+5: Chromosome<br>
+6: Position</p>
+<p>其他输出文件不重要，这里就不介绍了</p>
+<h1>计算 P 值</h1>
+<p>Aguilar 2019年发的文章，更新了一下算法，增加了计算 SNP 的 P 值的计算公式。而且这篇文章中说，<strong>不需要使用SNP权重</strong> ，使用并迭代更新SNP权重没有增加SNP效应值和方差。</p>
+<p>这里要计算SNP效应估计值的预测误差方差，公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%5Coperatorname%7BVar%7D%5Cleft%28%5Chat%7Ba%7D_i%5Cright%29%3D%20%26%20%5Cfrac%7B1%7D%7B2%20%5Csum%20p_i%20q_i%7D(1-%5Calpha)%20b%20%5Cmathbf%7Bz%7D_%7B%5Cmathbf%7Bi%7D%7D%5E%7B%5Cprime%7D%20%5Cmathbf%7BG%7D%5E%7B-1%7D%5Cleft(%5Cmathbf%7BG%7D%20%5Csigma_%7B%5Cmathrm%7Bu%7D%7D%5E2-%5Cmathbf%7BC%7D%5E%7B%5Cmathbf%7Bu%7D_2%20%5Cmathbf%7Bu%7D_2%7D%5Cright)%20%5C%5C%0A%26%20%5Ctimes%20%5Cmathbf%7BG%7D%5E%7B-1%7D%20%5Cmathbf%7Bz%7D_%7B%5Cmathbf%7Bi%7D%7D(1-%5Calpha)%20b%20%5Cfrac%7B1%7D%7B2%20%5Csum%20p_i%20q_i%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>这里 <img src="https://math.now.sh?inline=%5Cmathbf%7Bz%7D_%7B%5Cmathbf%7Bi%7D%7D" style="display:inline-block;margin: 0;"/> 是 <img src="https://math.now.sh?inline=%5Cmathbf%7BZ%7D" style="display:inline-block;margin: 0;"/> 矩阵的第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 列，对应着第 <img src="https://math.now.sh?inline=i" style="display:inline-block;margin: 0;"/> 个SNP。</p>
+<p>然后，SNP的 P值计算公式如下，这里 <img src="https://math.now.sh?inline=%5CPhi%28%29" style="display:inline-block;margin: 0;"/> 为累积标准正态分布函数。</p>
+<p style=""><img src="https://math.now.sh?from=%5Coperatorname%7Bpval%7D_i%3D2%5Cleft%281-%5CPhi%5Cleft(%5Cleft%7C%5Cfrac%7B%5Chat%7Ba%7D_i%7D%7B%5Coperatorname%7Bsd%7D%5Cleft(%5Chat%7Ba%7D_i%5Cright%29%7D%5Cright%7C%5Cright)%5Cright)%20.%0A" /></p><p>在blupf90 的参数卡 postGSf90  参数卡加入下面选项</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">OPTION snp_p_value</span><br></pre></td></tr></table></figure>
+<p>此时输出结果 <strong>snp_sol</strong> 中第9列就有了SNP效应估计值的预测误差方差，但是没有P值结果，还是需要自己手动算一下P值。</p>
+<p>因此汇总一下，通过测试，blupf90 参数卡最少只需要加入两条选项如下，此时会额外输出文件 xx_ija （应该系数矩阵的逆矩阵元素）</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">OPTION saveGInverse</span><br><span class="line">OPTION snp_p_value</span><br></pre></td></tr></table></figure>
+<p>postGSf90 最少也只需要加入两条选项如下（可以不提供 OPTION chrinfo chrmap.txt ，此时输出结果中的染色体和物理位置全为1）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">OPTION ReadGInverse</span><br><span class="line">OPTION snp_p_value</span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li>blupf90 官方文档</li>
+<li>Wang H, Misztal I, Aguilar I, et al. Genome-wide association mapping including phenotypes from relatives without genotypes[J]. Genetics research, 2012, 94(2): 73-83.</li>
+<li>Aguilar I, Legarra A, Cardoso F, et al. Frequentist p-values for large-scale-single step genome-wide association, with an application to birth weight in American Angus cattle[J]. Genetics Selection Evolution, 2019, 51(1): 28.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>blupf90</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>blupf90</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Cervus亲子鉴定计算方法</title>
+    <url>/posts/de1a03d/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>Cervus亲子鉴定计算方法，主要是公式。</p>
+<span id="more"></span>
+<h1>似然法基础公式</h1>
+<p>假设1 H1 ：候选亲本是真实亲本；</p>
+<p>假设2 H2 ：候选亲本是从群体中随机选择的一个无关个体。</p>
+<p>数据 D：trios 或 pairs 的基因型数据</p>
+<p>此时似然比为</p>
+<p style=""><img src="https://math.now.sh?from=L%28H_1%2CH_2%7CD%29%20%3D%20%5Cfrac%7BP(D%7CH_1)%7D%7BP(D%7CH_2)%7D%0A" /></p><p>假设母本基因型已知，<img src="https://math.now.sh?inline=g_m%2Cg_a%2Cg_o" style="display:inline-block;margin: 0;"/> 分别表示母本 (mother)，候选父本 (alleged father) 和子代 (offspring) 的基因型。此时假设1和假设2的似然值如下，其中 T() 函数就是按照孟德尔分配定律从亲本得到子代基因型的概率。</p>
+<p style=""><img src="https://math.now.sh?from=L%28H_1%7Cg_m%2Cg_a%2Cg_o%29%20%3D%20T(g_o%7Cg_m%2Cg_a)P(g_m)P(g_a)%0A" /></p><p style=""><img src="https://math.now.sh?from=L%28H_2%7Cg_m%2Cg_a%2Cg_o%29%20%3D%20T(g_o%7Cg_m)P(g_m)P(g_a)%0A" /></p><p>如果母本基因型未知，此时两个似然值函数如下</p>
+<p style=""><img src="https://math.now.sh?from=L%28H_1%7Cg_a%2Cg_o%29%20%3D%20T(g_o%7Cg_a)P(g_a)%0A" /></p><p style=""><img src="https://math.now.sh?from=L%28H_2%7Cg_a%2Cg_o%29%20%3D%20P(g_o)P(g_a)%0A" /></p><p>而 LOD 值是似然比的以 e 为底的对数（在 Cervus 这里）。</p>
+<p style=""><img src="https://math.now.sh?from=%5Ctext%7BLOD%7D%20%3D%20%5Cln%5Cbig%5B%5Cfrac%7BL%28H_1%29%7D%7BL(H_2)%7D%20%5Cbig%5D%0A" /></p><h1>考虑分型错误后的似然法公式</h1>
+<p>这里 Cervus 3.0 （Kalinowski, 2007）修改了之前 Cervus 1.0 和 2.0 （Marshall, 1998）的计算公式，认为之前的算法存在问题，实际上计算时会增大给定的错误率，因此有文献指出对于旧版本的 Cervus ，人为设定一个比实际情况更小的错误率结果更好。当分型错误率升高时（无论是本身数据错误率高，还是软件无意识地增大了错误率），此时出现孟德尔错误的情况更加常见，想要正确判断一个错误候选亲本是无关个体的难度更大。</p>
+<p>这里我们只考虑目前  Cervus 3.0 的方法部分，这里是假设当分型错误出现时，任何一个错误基因型观测到的概率等于其在群体中的基因型频率，并且所有个体和所有位点的分型错误率是独立和不变的。这个假设很方便，而且适用于于某些情况下的分型错误，如移液，打标签或数据输入错误。</p>
+<p>假设 <img src="https://math.now.sh?inline=g" style="display:inline-block;margin: 0;"/> 是观测到的基因型，设 <img src="https://math.now.sh?inline=%5Cvarepsilon" style="display:inline-block;margin: 0;"/> 是分型错误率，<img src="https://math.now.sh?inline=P%28g%29" style="display:inline-block;margin: 0;"/> 是满足哈温平衡下的群体中<img src="https://math.now.sh?inline=g" style="display:inline-block;margin: 0;"/> 的基因型频率，那么此时观测到 <img src="https://math.now.sh?inline=g" style="display:inline-block;margin: 0;"/> 的基因型概率如下式，仍为 <img src="https://math.now.sh?inline=P%28g%29" style="display:inline-block;margin: 0;"/>  ，这里第一项是没有分型错误的情况，第二项是存在分析错误并且观测到 <img src="https://math.now.sh?inline=g" style="display:inline-block;margin: 0;"/> 的情况。</p>
+<p style=""><img src="https://math.now.sh?from=%281-%5Cvarepsilon%29%20P(g)%20%2B%20%5Cvarepsilon%20P(g)%20%3D%20P(g)%0A" /></p><h2 id="母本已知检验候选父本">母本已知检验候选父本</h2>
+<p>假设母本基因型已知，<img src="https://math.now.sh?inline=g_m%2Cg_a%2Cg_o" style="display:inline-block;margin: 0;"/> 分别表示母本 (mother)，候选父本 (alleged father) 和子代 (offspring) 的基因型，此时假设1的似然值如下，这里4个子式分别表示：(1) 所有基因型都是正确的；(2) 存在1个基因型是错误的（分别是父本、母本和子代是错误的）；(3) 存在2个基因型是错误的；(3) 所有基因型都是错误的。这里下划线的部分就是对应的错误的基因型。</p>
+<p>这里每一个式子都是由两部分构成的，第一部分是三个基因型是正确或错误的概率，第二部分是满足基因型正确或错误条件下观测到这三个基因型的概率。举个例子，最后一个式子，所有基因型均错误的概率是 <img src="https://math.now.sh?inline=%5Cvarepsilon%5E3" style="display:inline-block;margin: 0;"/> ，当所有基因型均错误的情况下观测到 <img src="https://math.now.sh?inline=g_m%2Cg_a%2Cg_o" style="display:inline-block;margin: 0;"/> 的概率是 <img src="https://math.now.sh?inline=P%5Cleft%28g_m%5Cright%29%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)" style="display:inline-block;margin: 0;"/> 。</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AL%5Cleft%28H_1%5Cright%29%3D%20%26%20(1-%5Cvarepsilon)%5E3%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_m%2C%20g_a%5Cright)%20P%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon(1-%5Cvarepsilon)%5E2%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_m%5Cright)%20P%5Cleft(g_m%5Cright)%20%5Cunderline%7BP%5Cleft(g_a%5Cright)%7D%5Cright.%20%5C%5C%0A%26%20%5Cleft.%2BT%5Cleft(g_o%20%5Cmid%20g_a%5Cright)%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_m%5Cright)%7D%2BP%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E2(1-%5Cvarepsilon)%5Cleft%5BP%5Cleft(g_m%5Cright)%5Cunderline%7B%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright.%20%5C%5C%0A%26%20%2B%5Cunderline%7BP%5Cleft(g_m%5Cright)%7D%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%2B%5Cleft.%5Cunderline%7BP%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%20%7DP%5Cleft(g_o%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E3%5Cleft%5B%5Cleft.%5Cunderline%7BP%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright%5D%5Cright.%0A%5Cend%7Baligned%7D%0A" /></p><p>此时假设2的似然值如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AL%5Cleft%28H_2%5Cright%29%3D%20%26%20(1-%5Cvarepsilon)%5E3%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_m%5Cright)%20P%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon(1-%5Cvarepsilon)%5E2%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_m%5Cright)%20P%5Cleft(g_m%5Cright)%20%5Cunderline%7BP%5Cleft(g_a%5Cright)%7D%5Cright.%20%5C%5C%0A%26%20%5Cleft.%2BP%5Cleft(g_o%20%5Cright)%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_m%5Cright)%7D%2BP%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E2(1-%5Cvarepsilon)%5Cleft%5BP%5Cleft(g_m%5Cright)%5Cunderline%7B%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright.%20%5C%5C%0A%26%20%2B%5Cunderline%7BP%5Cleft(g_m%5Cright)%7D%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%2B%5Cleft.%5Cunderline%7BP%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%20%7DP%5Cleft(g_o%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E3%5Cleft%5B%5Cleft.%5Cunderline%7BP%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright%5D%5Cright.%0A%5Cend%7Baligned%7D%0A" /></p><h2 id="母本未知检验候选父本">母本未知检验候选父本</h2>
+<p>易得，此时假设1的公式为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AL%5Cleft%28H_1%5Cright%29%3D%20%26%20(1-%5Cvarepsilon)%5E2%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_a%5Cright)%20%20P%5Cleft(g_a%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon(1-%5Cvarepsilon)%5Cleft%5BP%5Cleft(g_o%5Cright)%20%20%5Cunderline%7BP%5Cleft(g_a%5Cright)%7D%5Cright.%20%5Cleft.%2B%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E2%5Cleft%5B%5Cleft.%5Cunderline%7B%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright%5D%5Cright.%0A%5Cend%7Baligned%7D%0A" /></p><p>假设2的公式为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AL%5Cleft%28H_2%5Cright%29%3D%20%26%20(1-%5Cvarepsilon)%5E2%5Cleft%5BP%5Cleft(g_o%5Cright)%20%20P%5Cleft(g_a%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon(1-%5Cvarepsilon)%5Cleft%5BP%5Cleft(g_o%5Cright)%20%20%5Cunderline%7BP%5Cleft(g_a%5Cright)%7D%5Cright.%20%5Cleft.%2B%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E2%5Cleft%5B%5Cleft.%5Cunderline%7B%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright%5D%5Cright.%0A%5Cend%7Baligned%7D%0A" /></p><h2 id="同时检验候选父本和候选母本">同时检验候选父本和候选母本</h2>
+<p>这里将候选母本的基因型表示为了 <img src="https://math.now.sh?inline=g_%7Bam%7D" style="display:inline-block;margin: 0;"/></p>
+<p>易得，此时假设1的公式为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AL%5Cleft%28H_1%5Cright%29%3D%20%26%20(1-%5Cvarepsilon)%5E3%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_%7Bam%7D%2C%20g_a%5Cright)%20P%5Cleft(g_%7Bam%7D%5Cright)%20P%5Cleft(g_a%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon(1-%5Cvarepsilon)%5E2%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_%7Bam%7D%5Cright)%20P%5Cleft(g_%7Bam%7D%5Cright)%20%5Cunderline%7BP%5Cleft(g_a%5Cright)%7D%5Cright.%20%5C%5C%0A%26%20%5Cleft.%2BT%5Cleft(g_o%20%5Cmid%20g_a%5Cright)%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_%7Bam%7D%5Cright)%7D%2BP%5Cleft(g_%7Bam%7D%5Cright)%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E2(1-%5Cvarepsilon)%5Cleft%5BP%5Cleft(g_%7Bam%7D%5Cright)%5Cunderline%7B%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright.%20%5C%5C%0A%26%20%2B%5Cunderline%7BP%5Cleft(g_%7Bam%7D%5Cright)%7D%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%2B%5Cleft.%5Cunderline%7BP%5Cleft(g_%7Bam%7D%5Cright)%20P%5Cleft(g_a%5Cright)%20%7DP%5Cleft(g_o%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E3%5Cleft%5B%5Cleft.%5Cunderline%7BP%5Cleft(g_%7Bam%7D%5Cright)%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright%5D%5Cright.%0A%5Cend%7Baligned%7D%0A" /></p><p>假设2的公式为</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0AL%5Cleft%28H_2%5Cright%29%3D%20%26%20(1-%5Cvarepsilon)%5E3%5Cleft%5BP%5Cleft(g_o%20%5Cright)%20P%5Cleft(g_%7Bam%7D%5Cright)%20P%5Cleft(g_a%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon(1-%5Cvarepsilon)%5E2%5Cleft%5BP%5Cleft(g_o%5Cright)%20P%5Cleft(g_%7Bam%7D%5Cright)%20%5Cunderline%7BP%5Cleft(g_a%5Cright)%7D%5Cright.%20%5C%5C%0A%26%20%5Cleft.%2BP%5Cleft(g_o%20%5Cright)%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_%7Bam%7D%5Cright)%7D%2BP%5Cleft(g_%7Bam%7D%5Cright)%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E2(1-%5Cvarepsilon)%5Cleft%5BP%5Cleft(g_%7Bam%7D%5Cright)%5Cunderline%7B%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright.%20%5C%5C%0A%26%20%2B%5Cunderline%7BP%5Cleft(g_%7Bam%7D%5Cright)%7D%20P%5Cleft(g_a%5Cright)%20%5Cunderline%7BP%5Cleft(g_o%5Cright)%7D%2B%5Cleft.%5Cunderline%7BP%5Cleft(g_%7Bam%7D%5Cright)%20P%5Cleft(g_a%5Cright)%20%7DP%5Cleft(g_o%5Cright)%5Cright%5D%20%5C%5C%0A%26%20%2B%5Cvarepsilon%5E3%5Cleft%5B%5Cleft.%5Cunderline%7BP%5Cleft(g_%7Bam%7D%5Cright)%20P%5Cleft(g_a%5Cright)%20P%5Cleft(g_o%5Cright)%7D%5Cright%5D%5Cright.%0A%5Cend%7Baligned%7D%0A" /></p><h2 id="简化后的式子">简化后的式子</h2>
+<p>母本未知检验候选父本的公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Baligned%7D%0A%26L%5Cleft%28H_1%5Cright%29%3DP%5Cleft(g_a%5Cright)%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bl%7D%0A(1-%5Cvarepsilon)%5E2%20T%5Cleft(g_o%20%5Cmid%20g_a%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon(1-%5Cvarepsilon)%202%20P%5Cleft(g_o%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon%5E2%20P%5Cleft(g_o%5Cright)%0A%5Cend%7Barray%7D%5Cright%5C%7D%5C%5C%0A%26L%5Cleft(H_2%5Cright)%3DP%5Cleft(g_a%5Cright)%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bl%7D%0A(1-%5Cvarepsilon)%5E2%20P%5Cleft(g_o%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon(1-%5Cvarepsilon)%202%20P%5Cleft(g_o%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon%5E2%20P%5Cleft(g_o%5Cright)%0A%5Cend%7Barray%7D%5Cright%5C%7D%0A%5Cend%7Baligned%7D%0A" /></p><p>母本已知检验候选父本的公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Bgathered%7D%0AL%5Cleft%28H_1%5Cright%29%3DP%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bl%7D%0A(1-%5Cvarepsilon)%5E3%20T%5Cleft(g_o%20%5Cmid%20g_m%2C%20g_a%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon(1-%5Cvarepsilon)%5E2%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_m%5Cright)%2BT%5Cleft(g_o%20%5Cmid%20g_a%5Cright)%2BP%5Cleft(g_o%5Cright)%5Cright%5D%20%5C%5C%0A%2B%5Cvarepsilon%5E2(1-%5Cvarepsilon)%203%20P%5Cleft(g_o%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon%5E3%20P%5Cleft(g_o%5Cright)%0A%5Cend%7Barray%7D%5Cright%5C%7D%20%5C%5C%0AL%5Cleft(H_2%5Cright)%3DP%5Cleft(g_m%5Cright)%20P%5Cleft(g_a%5Cright)%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bl%7D%0A(1-%5Cvarepsilon)%5E3%20T%5Cleft(g_o%20%5Cmid%20g_m%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon(1-%5Cvarepsilon)%5E2%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_m%5Cright)%2B2%20P%5Cleft(g_o%5Cright)%5Cright%5D%20%5C%5C%0A%5Cleft.%2B%5Cvarepsilon%5E2%203-%5Cvarepsilon%5Cright)%203%20P%5Cleft(g_o%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon%5E3%20P%5Cleft(g_o%5Cright)%0A%5Cend%7Barray%7D%5Cright%5C%7D%0A%5Cend%7Bgathered%7D%0A" /></p><p>同时检验候选父本和候选母本的公式如下</p>
+<p style=""><img src="https://math.now.sh?from=%5Cbegin%7Bgathered%7D%0AL%5Cleft%28H_1%5Cright%29%3DP%5Cleft(g_%7Ba%20m%7D%5Cright)%20P%5Cleft(g_a%5Cright)%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bl%7D%0A(1-%5Cvarepsilon)%5E3%20T%5Cleft(g_o%20%5Cmid%20g_%7Ba%20m%7D%2C%20g_a%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon(1-%5Cvarepsilon)%5E2%5Cleft%5BT%5Cleft(g_o%20%5Cmid%20g_%7Ba%20m%7D%5Cright)%2BT%5Cleft(g_o%20%5Cmid%20g_a%5Cright)%2BP%5Cleft(g_o%5Cright)%5Cright%5D%20%5C%5C%0A%2B%5Cvarepsilon%5E2(1-%5Cvarepsilon)%203%20P%5Cleft(g_o%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon%5E3%20P%5Cleft(g_o%5Cright)%0A%5Cend%7Barray%7D%5Cright%5C%7D%20%5C%5C%0AL%5Cleft(H_2%5Cright)%3DP%5Cleft(g_%7Ba%20m%7D%5Cright)%20P%5Cleft(g_a%5Cright)%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bl%7D%0A(1-%5Cvarepsilon)%5E3%20P%5Cleft(g_o%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon(1-%5Cvarepsilon)%5E2%203%20P%5Cleft(g_o%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon%5E2(1-%5Cvarepsilon)%203%20P%5Cleft(g_o%5Cright)%20%5C%5C%0A%2B%5Cvarepsilon%5E3%20P%5Cleft(g_o%5Cright)%0A%5Cend%7Barray%7D%5Cright%5C%7D%0A%5Cend%7Bgathered%7D%0A" /></p><h1>参考文献</h1>
+<ol>
+<li>Marshall, TC, Slate, J, Kruuk, LEB &amp; Pemberton, JM (1998) Statistical confidence for likelihood-based paternity inference in natural populations. <em>Molecular Ecology</em> <strong>7</strong>: 639-655.</li>
+<li>Kalinowski, ST, Taper, ML &amp; Marshall, TC (2007) Revising how the computer program CERVUS accommodates genotyping error increases success in paternity assignment.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>软件学习-DMU</title>
     <url>/posts/29c9bc50/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>DMU软件使用方法。</p>
