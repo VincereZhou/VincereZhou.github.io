@@ -1,6 +1,374 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>使用vcftools计算FST</title>
+    <url>/posts/a73c5bf4/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>vcftools可以计算群体间<strong>固定指数（Fst）</strong>， 来筛选和优先处理遗传标记（如SNP）。下面内容主要来自于 deepseek 。</p>
+<h1>理论介绍</h1>
+<h2 id="核心方法：Weir和Cockerham的Fst算法"><strong>核心方法：Weir和Cockerham的Fst算法</strong></h2>
+<ul>
+<li><strong>方法来源</strong>：<br>
+由统计遗传学家Bruce Weir和Cockerham于1984年提出的<strong>经典Fst计算方法</strong>，该方法通过方差分析（ANOVA）量化群体间的遗传分化。</li>
+<li>为什么选择它：
+<ul>
+<li><strong>统计严谨性</strong>：考虑样本量和群体结构</li>
+<li><strong>广泛验证</strong>：适用于多种生物（人类、动植物、微生物）</li>
+</ul>
+</li>
+</ul>
+<h2 id="Fst（固定指数）的本质"><strong>Fst（固定指数）的本质</strong></h2>
+<ul>
+<li>
+<p>定义：衡量不同亚群间遗传变异的差异程度</p>
+<ul>
+<li><strong>低Fst（0-0.05）</strong>：群体间基因流强（如人类非洲群体间的变异）</li>
+<li><strong>高Fst（&gt;0.15）</strong>：强遗传分化（如人类欧洲与东亚群体的差异）</li>
+</ul>
+</li>
+<li>
+<p><strong>计算公式</strong>：<img src="https://math.now.sh?inline=Fst%20%3D%20%5Cfrac%7BH_T%20-%20H_S%7D%7BH_T%7D" style="display:inline-block;margin: 0;"/><br>
+其中<img src="https://math.now.sh?inline=H_T" style="display:inline-block;margin: 0;"/>=总群体杂合度，<img src="https://math.now.sh?inline=H_S" style="display:inline-block;margin: 0;"/>=群体内平均杂合度</p>
+<p>基于 <a href="https://www.jianshu.com/p/bb0beec0ed63">https://www.jianshu.com/p/bb0beec0ed63</a> ，计算 FST 只需要每个群体的基因频率就能计算（但我看不同网页的计算方法还是有区别，而且貌似这样手动计算的结果和软件结果并不一致）</p>
+<p>1）找出每个亚群的等位基因频率。</p>
+<p>2）查找复合群体的平均等位基因频率</p>
+<p>3）计算每个亚群的杂合度（2pq）</p>
+<p>4）计算这些亚群杂合度的平均值，这是HS。</p>
+<p>5）根据总体等位基因频率计算杂合度，这是HT。</p>
+<p>6）最后，计算FST =（HT-HS）/ HT</p>
+<p><img src="1.png" alt=""></p>
+<p>另一个网页 <a href="https://blog.csdn.net/u014182497/article/details/52672308">https://blog.csdn.net/u014182497/article/details/52672308</a> ，这里计算方式与上面有区别，如下：</p>
+<ul>
+<li>这里.<code>2）查找复合群体的平均等位基因频率</code> 不是使用每个群体的等位基因型的算数平均值，而是就是用这个整个复合群体的等位基因频率（用全部样本算等位基因频率）</li>
+<li>这里<code>4）计算这些亚群杂合度的平均值，这是HS。</code> 不是用的算数平均值，而是加权平均值，分子为每个亚群期望杂合度乘以<strong>亚群样本数目</strong>的求和，分母为整个复合群体的样本数目。</li>
+</ul>
+</li>
+</ul>
+<h2 id="筛选SNP的实际应用"><strong>筛选SNP的实际应用</strong></h2>
+<table>
+<thead>
+<tr>
+<th><strong>Fst范围</strong></th>
+<th><strong>遗传学意义</strong></th>
+<th><strong>应用场景</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0-0.05</td>
+<td>弱分化</td>
+<td>排除（背景噪音）</td>
+</tr>
+<tr>
+<td>0.05-0.15</td>
+<td>中度分化</td>
+<td>潜在功能位点</td>
+</tr>
+<tr>
+<td><strong>&gt;0.15</strong></td>
+<td><strong>强分化标志</strong></td>
+<td><strong>优先研究</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>筛选逻辑</strong>：</p>
+<blockquote>
+<p>“高Fst SNP” → 群体间显著差异 → 可能受自然选择 → 功能重要性验证</p>
+</blockquote>
+<h2 id="实用案例解析">实用案例解析</h2>
+<p>假设用此方法分析<strong>非洲 vs. 欧洲人群的SNP数据</strong>：</p>
+<ul>
+<li><strong>发现</strong>：位于乳糖酶基因（LCT）的SNP <code>rs4988235</code>的Fst=0.32</li>
+<li>解读：
+<ul>
+<li>高Fst反映欧洲人群乳糖耐受突变的选择压力</li>
+<li>优先对此SNP进行功能研究</li>
+</ul>
+</li>
+</ul>
+<h2 id="与其他方法的比较">与其他方法的比较</h2>
+<table>
+<thead>
+<tr>
+<th><strong>方法</strong></th>
+<th><strong>优势</strong></th>
+<th><strong>劣势</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Weir-Fst</td>
+<td>校正样本偏差</td>
+<td>计算速度较慢</td>
+</tr>
+<tr>
+<td>Hudson-Fst</td>
+<td>计算效率高</td>
+<td>忽略群体层次结构</td>
+</tr>
+<tr>
+<td>PCA</td>
+<td>直观可视化群体结构</td>
+<td>难以量化具体位点分化程度</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>结论：Weir-Cockerham方法因其统计严谨性，成为群体遗传学分析的<strong>金标准</strong>。</p>
+</blockquote>
+<p>以下是使用 <strong>vcftools</strong> 计算 <strong>Weir-Cockerham 群体分化指数（Fst）</strong> 的完整流程，结合群体遗传学原理和实操步骤，涵盖数据准备、命令执行、结果解读及可视化方法。内容综合自权威生信教程与文献 。</p>
+<h1>实际计算</h1>
+<h2 id="数据准备">数据准备</h2>
+<p>输入文件要求</p>
+<ul>
+<li>
+<p><strong>VCF 文件</strong>：包含所有样本的基因型数据（需经质控过滤，如 MAF &gt; 0.05、缺失率 &lt; 20% 等）。</p>
+</li>
+<li>
+<p>群体分组文件：两个文本文件（如 pop1.txt、pop2.txt），每行一个样本 ID（需与 VCF 中的样本名一致）。</p>
+<p>示例 <code>pop1.txt</code> 内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Sample1</span><br><span class="line">  Sample2</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="Fst-计算命令">Fst 计算命令</h2>
+<h3 id="1-单点位点-Fst-计算">1. <strong>单点位点 Fst 计算</strong></h3>
+<p>逐个位点计算，每个位点的FST是<strong>无偏估计量</strong>，但受抽样误差影响大，易出现负值（理论下限为0，负值需视为0）。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vcftools --vcf filtered.vcf \</span><br><span class="line">  --weir-fst-pop pop1.txt \</span><br><span class="line">  --weir-fst-pop pop2.txt \</span><br><span class="line">  --out single_snp_fst</span><br></pre></td></tr></table></figure>
+<ul>
+<li>
+<p>输出文件：single_snp_fst.weir.fst</p>
+<ul>
+<li>列说明：<br>
+<code>CHROM</code> | <code>POS</code> | <code>WEIR_AND_COCKERHAM_FST</code>（Fst 值）</li>
+<li><strong>注意</strong>：单点 Fst 值波动较大，可能包含负值（理论应为 0-1），负值通常视为 0 。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-滑动窗口-Fst-计算（推荐）">2. <strong>滑动窗口 Fst 计算（推荐）</strong></h3>
+<p>将基因组划分为固定长度（如50 kb）或固定SNP数量（如1,000个位点）的窗口，计算窗口内所有SNP FST的加权平均值。</p>
+<p>加权方式：</p>
+<ul>
+<li><strong>等权重</strong>：直接取算术平均</li>
+<li><strong>杂合度权重</strong>：按每个SNP的 <img src="https://math.now.sh?inline=H_T" style="display:inline-block;margin: 0;"/> 加权，减少低多态性位点的噪声影响。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vcftools --vcf filtered.vcf \</span><br><span class="line">  --weir-fst-pop pop1.txt \</span><br><span class="line">  --weir-fst-pop pop2.txt \</span><br><span class="line">  --fst-window-size 100000 \  # 窗口大小（单位：bp）</span><br><span class="line">  --fst-window-step 50000 \   # 步长（单位：bp）</span><br><span class="line">  --out window_fst</span><br></pre></td></tr></table></figure>
+<ul>
+<li>
+<p>输出文件：window_fst.windowed.weir.fst</p>
+<ul>
+<li>列说明：<br>
+<code>CHROM</code> | <code>BIN_START</code> | <code>BIN_END</code> | <code>N_VARIANTS</code>（窗口内 SNP 数） | <code>WEIGHTED_FST</code>（加权 Fst） | <code>MEAN_FST</code>（平均 Fst）</li>
+</ul>
+</li>
+<li>
+<p>参数建议：</p>
+<ul>
+<li>窗口大小：<strong>50kb–500kb</strong>（依基因组密度调整）</li>
+</ul>
+</li>
+<li>
+<p>步长：一般为窗口大小的 50%（如 100kb 窗口 + 50kb 步长）。</p>
+</li>
+</ul>
+<h3 id="两种方式比较">两种方式比较</h3>
+<table>
+<thead>
+<tr>
+<th><strong>特性</strong></th>
+<th><strong>单点FST</strong></th>
+<th><strong>滑动窗口FST</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>稳定性</strong></td>
+<td>高方差，易受测序错误或低频等位基因影响</td>
+<td>低方差，通过平均抑制随机噪声</td>
+</tr>
+<tr>
+<td><strong>负值处理</strong></td>
+<td>常见负值（抽样偏差），需手动设为0</td>
+<td>负值被平均抵消，极少出现</td>
+</tr>
+<tr>
+<td><strong>连锁不平衡（LD）</strong></td>
+<td>忽略LD，假设位点独立</td>
+<td>隐含考虑LD，窗口内SNP多为连锁区域</td>
+</tr>
+</tbody>
+</table>
+<p><strong>单点FST</strong>适用场景：</p>
+<ul>
+<li>
+<p>精细定位受选择位点（如因果突变）</p>
+</li>
+<li>
+<p>群体分层校正（如PCA前筛选高分化位点）。</p>
+</li>
+<li>
+<p><strong>局限性</strong>：<br>
+单个SNP的FST波动大（例如中性位点偶然偏高），假阳性率高，需结合p值或经验阈值（如top 1%）筛选。</p>
+</li>
+</ul>
+<p><strong>滑动窗口FST</strong>适用场景：</p>
+<ul>
+<li>检测受选择基因组区域（如驯化基因、环境适应区块）</li>
+<li>比较不同亚群的分化模式（如地理隔离 vs. 人工选择）。</li>
+<li>优势：
+<ul>
+<li><strong>增强信号连续性</strong>：自然选择常作用于基因簇（如MHC区域），窗口FST可捕获局部选择信号。</li>
+<li><strong>支持可视化</strong>：可直接用于曼哈顿图或热图，展示全基因组分化模式。</li>
+</ul>
+</li>
+</ul>
+<h2 id="注意事项">注意事项</h2>
+<ol>
+<li>
+<p><strong>负值处理</strong>：Weir-Cockerham 方法可能计算负 Fst 值（因样本抽样偏差），通常<strong>取值为 0</strong> 或<strong>过滤负值位点</strong> 。</p>
+</li>
+<li>
+<p>窗口选择：</p>
+<ul>
+<li>窗口过小 → 噪声大；窗口过大 → 掩盖局部选择信号。</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>建议尝试不同窗口参数，结合功能注释验证候选基因 。</li>
+</ul>
+<ol start="3">
+<li><strong>群体结构干扰</strong>：<br>
+若群体存在亚结构（如 PCA 显示分层），需先校正群体结构，否则 Fst 可能偏高 。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>python进阶-类</title>
+    <url>/posts/dab46aae/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>python 类的简单使用方法。</p>
+<span id="more"></span>
+<h1>创建和使用类</h1>
+<h2 id="创建Dog类">创建Dog类</h2>
+<p>使用类几乎可以模拟任何东西。下面来编写一个表示小狗的简单类Dog，它表示的不是特定的小狗，而是任何小狗。对于大多数宠物狗，它们均有名字和年龄，会蹲下和打滚，因此我们的 Dog类需要具备这两项信息和两种行为。</p>
+<p>创建Dog类的代码如下（<a href="http://dog.py">dog.py</a>），</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Dog</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;一次模拟小狗的简单尝试。&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, name, age</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;初始化属性name和age。&quot;&quot;&quot;</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.age = age</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sit</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;模拟小狗收到命令时蹲下。&quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;self.name&#125;</span> is now sitting.&quot;</span>)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">roll_over</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;模拟小狗收到命令时打滚。&quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;self.name&#125;</span> rolled over!.&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>这里我们定义了一个名为 Dog 的类。根据约定，在Python中，<strong>首字母大写的名称值的是类（建议使用驼峰命名法，而不使用下划线）</strong>。这个类的定义中没有园括号，因为要从空白创建这个类。</p>
+<p><strong>方法<code>__init__()</code></strong></p>
+<p>类中的函数称为方法，这里<code>__init__()</code>是一个特殊方法，每当你根据Dog类创建新实例时，Python都会自动运行它，这个方法名称前后的2个下划线是一种约定，是为了避免与普通方法发生名称冲突。</p>
+<p>我们将方法<code>__init__()</code>定义为包含3个形参：self、name 和 age 。这里，形参 self 必不可少，而且必须位于其它形参的前面。因为在创建实例时，将自动传入实参self，每个与实例相关联的方法调用都自动传递实参self，它是一个<strong>指向实例本身的引用</strong>，让实例能够访问类中的属性和方法。创建Dog实例时，Python将调用Dog类的方法<code>__init__()</code>。我们将通过实参向Dog()传递名字和年龄，self会自动传递，因此不用传递它。每当根据Dog类创建实例时，都只需给最后两个形参（name 和 age）提供值。</p>
+<p><code>__init__()</code>函数正文中定义的两个变量都有前缀self。以 self 为前缀的变量可供类中的所有方法使用，可以通过类的任何实例来访问。<a href="http://self.name">self.name</a> = name 获取与形参 name 相关联的值，并将其赋给变量 name ， 然后该变量被关联到当前创建的实例。 self.age = age 的作用类似。像这样可以通过实例访问的变量才能为<strong>属性</strong>。</p>
+<p><strong>方法 sit() 和 roll_over()</strong></p>
+<p>这些方法执行时不需要额外的信息，因此它们只有一个形参self。我们随后创建的实例都能够访问这些方法。</p>
+<h2 id="根据类创建实例">根据类创建实例</h2>
+<p>下来来创建一个表示特定小狗的实例：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">my_dog = Dog(<span class="string">&quot;Willie&quot;</span>, <span class="number">6</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;My dog&#x27;s name is <span class="subst">&#123;my_dog.name&#125;</span>.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;My dog is <span class="subst">&#123;my_dog.age&#125;</span> years old.&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>这里我们创建一条名字为 “Willie” ，年龄为6 的小狗。遇到这行代码时，Python 使用实参 “Willie” 和 6 调用Dog类的方法 <code>__init__()</code> 。方法<code>__init__()</code>创建一个表示特定小狗的实例，并使用提供的值来设置属性 name 和 age 。接下来， Python 返回一个表示这个小狗的实例，而我们将这个实例赋给了变量 my_dog 。 在这里，通常我们将首字母大写的名称（如 Dog）指的是类，而小写的名称指的是根据类创建的实例（如 my_dog）。</p>
+<p><strong>访问属性</strong></p>
+<p>要访问实例的属性，使用句点表示法，举例如下</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">my_dog.name</span><br></pre></td></tr></table></figure>
+<p><strong>调用方法</strong></p>
+<p>根据 Dog 类创建实例后，就能使用句点表示法来调用 Dog 类中定义的任何方法了，下面的代码让小狗蹲下和打滚。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">my_dog = Dog(&quot;Willie&quot;, 6)</span><br><span class="line">my_dog.sit()</span><br><span class="line">my_dog.roll_over()</span><br></pre></td></tr></table></figure>
+<p>要调用方法，可指定实例的名称和要调用的方法，并用句点分隔。</p>
+<p>你可以按照需求根据类创建任意数量的实例，不同实例之间是彼此独立的，有自己的一组属性。</p>
+<h1>使用类和实例</h1>
+<h2 id="Car-类">Car 类</h2>
+<p>下面来编写一个表示汽车的类，它存储了有关汽车的信息，还有一个汇总这些信息的方法：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;一次模拟汽车的简单尝试。&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, make, model, year</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;初始化描述汽车的属性&quot;&quot;&quot;</span></span><br><span class="line">        self.make = make</span><br><span class="line">        self.model = model</span><br><span class="line">        self.year = year</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_descriptive_name</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;返回整洁的描述性信息。&quot;&quot;&quot;</span></span><br><span class="line">        long_name = <span class="string">f&quot;<span class="subst">&#123;self.year&#125;</span> <span class="subst">&#123;self.make&#125;</span> <span class="subst">&#123;self.model&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">return</span> long_name.title()</span><br><span class="line"> </span><br><span class="line">        </span><br><span class="line">my_new_car = Car(<span class="string">&#x27;audi&#x27;</span>, <span class="string">&#x27;a4&#x27;</span>, <span class="number">2019</span>)</span><br><span class="line"><span class="built_in">print</span>(my_new_car.get_descriptive_name())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在<code>__init__()</code>方法中除了 self ，还有三个形参，指定制造商、型号和生产年份。另外一个方法是返回汽车的描述性信息。</p>
+<p>为了让这个类更有趣，下面给它添加一个随时间变化的属性，用于存储汽车的总里程。</p>
+<h2 id="给属性指定默认值">给属性指定默认值</h2>
+<p>创建实例时，有些属性无须通过形参来定义，可在方法<code>__init__()</code>中为其指定默认值。</p>
+<p>下面来添加一个名为 odometer_reading 的属性，其初始值为0。我们还添加了一个 read_odometer() 的方法，用于读取汽车的里程表。（<strong>问了 DS ，一般而言，值固定不变的变量放在 <code>__init__()</code>函数的输入参数中，值可能改变的参数则放在 <code>__init__()</code>函数的正文中，所有需要存储的属性均要在 <code>__init__()</code>函数中定义</strong> ）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;一次模拟汽车的简单尝试。&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, make, model, year</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;初始化描述汽车的属性&quot;&quot;&quot;</span></span><br><span class="line">        self.make = make</span><br><span class="line">        self.model = model</span><br><span class="line">        self.year = year</span><br><span class="line">        self.odometer_reading = <span class="number">0</span></span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_descriptive_name</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;返回整洁的描述性信息。&quot;&quot;&quot;</span></span><br><span class="line">        long_name = <span class="string">f&quot;<span class="subst">&#123;self.year&#125;</span> <span class="subst">&#123;self.make&#125;</span> <span class="subst">&#123;self.model&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">return</span> long_name.title()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">read_odometer</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;打印一条指出汽车里程的消息。&quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;This car has <span class="subst">&#123;self.odometer_reading&#125;</span> miles on it.&quot;</span>)</span><br><span class="line"> </span><br><span class="line">        </span><br><span class="line">my_new_car = Car(<span class="string">&#x27;audi&#x27;</span>, <span class="string">&#x27;a4&#x27;</span>, <span class="number">2019</span>)</span><br><span class="line"><span class="built_in">print</span>(my_new_car.get_descriptive_name())</span><br><span class="line">my_new_car.read_odometer()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>此时创建实例的方式和上面一样，但是Python将会自动创建一个odometer_reading 的属性，其值为 0 。</p>
+<h2 id="修改属性的值"><strong>修改属性的值</strong></h2>
+<p>我们能以三种方式修改属性的值：直接通过实例进行修改，通过方法进行设置，以及通过方法进行递增。下面依次进行介绍。</p>
+<p>最直接的方式就是通过实例直接修改，下面的代码将里程表读数设置为 23</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">my_new_car.odometer_reading = <span class="number">23</span></span><br><span class="line">my_new_car.read_odometer()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>也可以创建一个方法在内部进行更新，下面的代码我们添加了一个方法 update_odometer() ，其接受一个里程值，并将其赋值给 <code>self.odometer_reading</code> 。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>:</span><br><span class="line">   --snip--</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update_odometer</span>(<span class="params">self, mileage</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;将里程表读数设置为指定的值。&quot;&quot;&quot;</span></span><br><span class="line">        self.odometer_reading = mileage</span><br><span class="line">        </span><br><span class="line">my_new_car.update_odometer(<span class="number">23</span>)</span><br><span class="line">my_new_car.read_odometer()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>可以对这个函数做一些修改，禁止任何人将里程表读数往回调。修改后的函数会检查指定的读数是否大于等于原来的里程，是则修改，不是则发出警告。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>:</span><br><span class="line">   --snip--</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update_odometer</span>(<span class="params">self, mileage</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        将里程表读数设置为指定的值。</span></span><br><span class="line"><span class="string">        禁止将里程表读数往回调。</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">if</span> mileage &gt;= self.odometer_reading:</span><br><span class="line">            self.odometer_reading = mileage</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;You can&#x27;t roll back an odometer!&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>有时候需要将属性值递增特定的量，而不是设置为全新的值。举例如下，下面新增方法 increment_odometer() 用于递增里程数。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>:</span><br><span class="line">    --snip--</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">increment_odometer</span>(<span class="params">self, miles</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;将里程表读数增加指定的量。&quot;&quot;&quot;</span></span><br><span class="line">        self.odometer_reading += miles</span><br><span class="line"></span><br><span class="line">my_new_car.update_odometer(<span class="number">23_500</span>)</span><br><span class="line">my_new_car.read_odometer()</span><br><span class="line"></span><br><span class="line">my_new_car.increment_odometer(<span class="number">100</span>)</span><br><span class="line">my_new_car.read_odometer()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1>继承</h1>
+<p>编写类时，并非总是从空白开始。如果要编写的类时另一个现成类的特殊版本，可使用继承。一个类继承另一个类时，将自动获得另一个类的所有属性和方法。原有的类称为父类，而新类称为子类。子类继承了父类的所有属性和方法，同时还可以定义自己的属性和方法。</p>
+<h2 id="子类的方法-init">子类的方法<code>__init__()</code></h2>
+<p>在既有类的基础上编写新类时，通常要调用父类的方法 <code>__init__()</code> 。这将初始化在父类 <code>__init__()</code> 方法中定义的所有属性，从而让子类包含这些属性 。</p>
+<p>例如，下面来模拟电动汽车，它属于汽车的子类，只需要为电动汽车特有的属性和行为编写代码。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;一次模拟汽车的简单尝试。&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, make, model, year</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;初始化描述汽车的属性&quot;&quot;&quot;</span></span><br><span class="line">        self.make = make</span><br><span class="line">        self.model = model</span><br><span class="line">        self.year = year</span><br><span class="line">        self.odometer_reading = <span class="number">0</span></span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_descriptive_name</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;返回整洁的描述性信息。&quot;&quot;&quot;</span></span><br><span class="line">        long_name = <span class="string">f&quot;<span class="subst">&#123;self.year&#125;</span> <span class="subst">&#123;self.make&#125;</span> <span class="subst">&#123;self.model&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">return</span> long_name.title()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">read_odometer</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;打印一条指出汽车里程的消息。&quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;This car has <span class="subst">&#123;self.odometer_reading&#125;</span> miles on it.&quot;</span>)</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update_odometer</span>(<span class="params">self, mileage</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        将里程表读数设置为指定的值。</span></span><br><span class="line"><span class="string">        禁止将里程表读数往回调。</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">if</span> mileage &gt;= self.odometer_reading:</span><br><span class="line">            self.odometer_reading = mileage</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;You can&#x27;t roll back an odometer!&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">increment_odometer</span>(<span class="params">self, miles</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;将里程表读数增加指定的量。&quot;&quot;&quot;</span></span><br><span class="line">        self.odometer_reading += miles</span><br><span class="line">            </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ElectricCar</span>(<span class="title class_ inherited__">Car</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;电动车的特殊之处。&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, make, model, year</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;初始化父类的属性。&quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">super</span>().__init__(make, model, year)</span><br><span class="line">        </span><br><span class="line">my_tesla = ElectricCar(<span class="string">&#x27;tesla&#x27;</span>, <span class="string">&#x27;model s&#x27;</span>, <span class="number">2019</span>)</span><br><span class="line"><span class="built_in">print</span>(my_tesla.get_descriptive_name())</span><br></pre></td></tr></table></figure>
+<p>首先时 Car 类的代码。创建子类时，父类必须包含在当前文件中，且位于子类前面。在定义子类时，必须在圆括号内指定父类的名称。方法 <code>__init__()</code> 中需要包含创建 Car 实例所需的属性，其中 super() 是一个特殊函数，让你能够调用父类的<code>__init__()</code> 方法，让 ElectricCar 实例包含这个方法中的所有属性。父类也称为<strong>超类</strong> (superclass)，名称 super 由次而来。</p>
+<p>下面我们创建了一个电动汽车的实例，这里提供的信息与创建普通汽车时相同，下面我们开始定义电动汽车特有的属性和方法。</p>
+<h2 id="给子类定义属性和方法">给子类定义属性和方法</h2>
+<p>子类可以添加新属性和新方法，这里我们添加了一个电动汽车特有的属性（电瓶），以及一个描述该属性的方法。这里新属性电瓶容量设置其初始值为 75 ，新方法用于打印有关电瓶的信息。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>:</span><br><span class="line">    --snip--</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ElectricCar</span>(<span class="title class_ inherited__">Car</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;电动车的特殊之处。&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, make, model, year</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        初始化父类的属性。</span></span><br><span class="line"><span class="string">        再初始化电动汽车特有的属性。</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">super</span>().__init__(make, model, year)</span><br><span class="line">        self.battery_size = <span class="number">75</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">describe_battery</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;打印一条描述电瓶容量的消息。&quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;This car has a <span class="subst">&#123;self. battery_size&#125;</span>-kWh battery.&quot;</span>)</span><br><span class="line">        </span><br><span class="line">my_tesla = ElectricCar(<span class="string">&#x27;tesla&#x27;</span>, <span class="string">&#x27;model s&#x27;</span>, <span class="number">2019</span>)</span><br><span class="line"><span class="built_in">print</span>(my_tesla.get_descriptive_name())</span><br><span class="line">my_tesla.describe_battery()</span><br></pre></td></tr></table></figure>
+<h2 id="重写父类的方法">重写父类的方法</h2>
+<p>对于父类的方法，只要它不符合子类模拟的实物的方法，都可以进行重写。为此，可在子类中定义一个与要重写的父类方法同名的方法。这样，Python将不会考虑这个父类方法，而只关注你在子类中定义的相应方法。</p>
+<p>假设 Car 类有一个名为 <code>fill_gas_tank()</code> 的方法，它对全电动汽车来说毫无意义，因此你可能想重写它。下面演示了一种重写方式：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ElectricCar</span>(<span class="title class_ inherited__">Car</span>):</span><br><span class="line">    --snip--</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">fill_gas_tank</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;电动汽车没有油箱。&quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;This car doesn&#x27;t need a gas tank!&quot;</span>)</span><br><span class="line">        </span><br></pre></td></tr></table></figure>
+<p>现在，如果有人对电动汽车调用  <code>fill_gas_tank()</code>  方法，Python 将忽略 Car 类中的  <code>fill_gas_tank()</code>  方法，转而运行上述代码。</p>
+<h2 id="将实例用作属性">将实例用作属性</h2>
+<p>使用代码模拟实物时，你可能会发现自己给类添加的细节越来越多：属性和方法清单和文件都越来越长。在这种情况下，可能需要将类的一部分提取出来，作为一个独立的类。可以将大型类拆分成多个协同工作的小类。</p>
+<p>例如，不断给 ElectricCar 类添加细节时，我们可能发现其中包含很多专门针对汽车电瓶的属性和方法。在这种情况下，可将这些属性和方法提取出来，放到一个名为 Battery 的类中，并将一个 Battery 实例作为 ElectricCar 类的属性。</p>
+<p>下面代码中我们创建了一个名为 Battery 的新类，它没有继承任何类，存在一个可选的形参 battery_size （默认为 75）。我们将 describe_battery() 方法也移动到了这个类中。</p>
+<p>在  ElectricCar 类中，我们添加了一个名为 <code>self.battery</code> 的属性，将其赋值给 <code>Battery()</code> ，这会创建一个新的 Battery 实例（这里没有指定电池容量，因此采用默认值75）。</p>
+<p>我们创建一辆电动汽车 my_tesla 。描述电瓶时，需要使用电动汽车的属性 battery ，并对存储在该属性中的 Battery 实例调用方法  <code>describe_battery()</code> ，因此完整语句为 <code>my_tesla.battery.describe_battery()</code> 。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>:</span><br><span class="line">	--snip--</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Battery</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;一次模拟电动汽车电瓶的简单尝试。&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, battery_size=<span class="number">75</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;初始化电瓶的属性。&quot;&quot;&quot;</span></span><br><span class="line">        self.battery_size = battery_size</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">describe_battery</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;打印一条描述电瓶容量的消息。&quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;This car has a <span class="subst">&#123;self. battery_size&#125;</span>-kWh battery.&quot;</span>)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ElectricCar</span>(<span class="title class_ inherited__">Car</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;电动车的特殊之处。&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, make, model, year</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        初始化父类的属性。</span></span><br><span class="line"><span class="string">        再初始化电动汽车特有的属性。</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">super</span>().__init__(make, model, year)</span><br><span class="line">        self.battery = Battery()</span><br><span class="line">    </span><br><span class="line">        </span><br><span class="line">my_tesla = ElectricCar(<span class="string">&#x27;tesla&#x27;</span>, <span class="string">&#x27;model s&#x27;</span>, <span class="number">2019</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(my_tesla.get_descriptive_name())</span><br><span class="line">my_tesla.battery.describe_battery()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这看似做了很多额外的工作，但是现在想多详细地描述电瓶都可以，且不会导致  ElectricCar 类混乱不堪。</p>
+<p>下面再给 Battery 类添加一个方法，它根据电瓶容量报告汽车的续航里程：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>:</span><br><span class="line">	--snip--</span><br><span class="line">    </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Battery</span>:</span><br><span class="line">	--snip--</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_range</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;打印一条消息，指出电瓶的续航里程。&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">if</span> self.battery_size == <span class="number">75</span>:</span><br><span class="line">            <span class="built_in">range</span> = <span class="number">260</span></span><br><span class="line">        <span class="keyword">elif</span> self.battery_size == <span class="number">100</span>:</span><br><span class="line">            <span class="built_in">range</span> = <span class="number">315</span></span><br><span class="line">        </span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;This car can go about <span class="subst">&#123;<span class="built_in">range</span>&#125;</span> miles on a full charge.&quot;</span>)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ElectricCar</span>(<span class="title class_ inherited__">Car</span>):</span><br><span class="line">	--snip--</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">my_tesla = ElectricCar(<span class="string">&#x27;tesla&#x27;</span>, <span class="string">&#x27;model s&#x27;</span>, <span class="number">2019</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(my_tesla.get_descriptive_name())</span><br><span class="line">my_tesla.battery.describe_battery()</span><br><span class="line">my_tesla.battery.get_range()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1>导入类</h1>
+<p>随着不断给类添加功能，文件可能变得很长，即便妥善地使用了继承亦如此。为遵循Python地总体理念，应让文件尽可能整洁。Python在这方面提供了帮助，允许将类存储在模块中，然后在主程序中导入所需的模块。</p>
+<h2 id="导入单个类">导入单个类</h2>
+<p>下面我们创建一个只包含 Car 类的模块，文件名为 <a href="http://car.py">car.py</a> ，内容见上。</p>
+<p>下面我们创建一个使用该模块的程序，命名为 my_car.py ，在其中导入 Car 类并创建其实例。</p>
+<p>其中的 import 语句让 Python 打开模块 car 并导入其中的 Car 类，这样我们就可以使用 Car 类，就像它是在这个文件中定义的一样。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> car <span class="keyword">import</span> Car</span><br><span class="line"></span><br><span class="line">my_new_car = Car(<span class="string">&#x27;audi&#x27;</span>, <span class="string">&#x27;a4&#x27;</span>, <span class="number">2019</span>)</span><br><span class="line"><span class="built_in">print</span>(my_new_car.get_descriptive_name())</span><br><span class="line">my_new_car.read_odometer()</span><br></pre></td></tr></table></figure>
+<p>导入类是一种有效的编程方式。如果这个程序包含整个 Class 类，它该有多长啊！通过将这个类以到一个模块中并导入该模块，依然可以使用其所有功能，但主程序文件变得整洁而易于阅读了。这还让你能够将大部分逻辑存储在独立的文件中。确定类像你希望的那样工作后，就可以不管这些文件，而专注于主程序的高级逻辑了。</p>
+<h2 id="在一个模块中存储多个类">在一个模块中存储多个类</h2>
+<p>虽然同一个模块中的类之间存在某种相关性，但可根据需要在一个模块中存储任意数量的类。下面我们将 Battery 类和 ElectricCar 类都加入模块 <a href="http://car.py">car.py</a> 中。</p>
+<p>现在，可以新建一个名为my_electric_car.py的文件，导入 ElectricCar 类，并创建一辆电动汽车了</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> car <span class="keyword">import</span> ElectricCar </span><br><span class="line">my_tesla = ElectricCar(<span class="string">&#x27;tesla&#x27;</span>, <span class="string">&#x27;model s&#x27;</span>, <span class="number">2019</span>) </span><br><span class="line"> </span><br><span class="line"><span class="built_in">print</span>(my_tesla.get_descriptive_name()) </span><br><span class="line">my_tesla.battery.describe_battery() </span><br><span class="line">my_tesla.battery.get_range()</span><br></pre></td></tr></table></figure>
+<h2 id="从一个模块中导入多个类">从一个模块中导入多个类</h2>
+<p>导入多个类形式如下，不同类之间用逗号分隔。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> car <span class="keyword">import</span> Car, ElectricCar </span><br></pre></td></tr></table></figure>
+<h2 id="导入整个模块">导入整个模块</h2>
+<p>我们还可以导入整个模块，再使用句点表示法访问需要的类。这种导入方式很简单，代码也易于阅读。因为创建类实例的代码都包含模块名称，所以不会与当前文件使用的任何名称发生冲突。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> car </span><br><span class="line"> </span><br><span class="line">my_beetle = car.Car(<span class="string">&#x27;volkswagen&#x27;</span>, <span class="string">&#x27;beetle&#x27;</span>, <span class="number">2019</span>) </span><br><span class="line"><span class="built_in">print</span>(my_beetle.get_descriptive_name()) </span><br><span class="line"> </span><br><span class="line">my_tesla = car.ElectricCar(<span class="string">&#x27;tesla&#x27;</span>, <span class="string">&#x27;roadster&#x27;</span>, <span class="number">2019</span>) </span><br><span class="line"><span class="built_in">print</span>(my_tesla.get_descriptive_name())</span><br></pre></td></tr></table></figure>
+<h2 id="导入模块中的所有类">导入模块中的所有类</h2>
+<p>要导入模块中的每个类，可以使用下面的语法</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> car <span class="keyword">import</span> *</span><br></pre></td></tr></table></figure>
+<p>这里我们<strong>不推荐使用这种导入方法</strong>，原因有二。第一，如果只看文件开头的 import 语句，就能清楚地知道程序使用了哪些类，将大有裨益。然而这种导入方法没有明确地指出使用了模块中的哪些类。第二，这种方式还可能引发名称方面的迷惑。如果不小心导入了一个与程序文件中其它东西同名的类，将引发难以诊断的错误。</p>
+<p>这里之所以介绍这种导入方式，是因为你可能在别人编写的代码中见到它。</p>
+<h2 id="在一个模块中导入另一个模块">在一个模块中导入另一个模块</h2>
+<p>有时候，需要将类分散到多个模块中，以免模块太大或在同一个模块中存储不相干的类。将类存储在多个模块中时，你可能会发现一个模块中的类依赖于另一个模块中的类。在这种情况下，可在前一个模块中导入必要的类（我感觉最好避免这种情况，不同模块做到彼此独立）。</p>
+<p>这里我们将 Car 类存储在模块 <a href="http://car.py">car.py</a> 中，将 Battery 类和 ElectricCar 类存储在另一个模块 electric_car.py 中，其内容如下</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;一组可用于表示电动汽车的类。&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">from</span> car <span class="keyword">import</span> Car</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Battery</span>:</span><br><span class="line">    --snip--</span><br><span class="line">    </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ElectricCar</span>(<span class="title class_ inherited__">Car</span>):</span><br><span class="line">    --snip--</span><br></pre></td></tr></table></figure>
+<p>这里 ElectricCar  类需要访问其父类 Car ，因此通过 import 命令导入了 Car 类。</p>
+<h2 id="使用别名">使用别名</h2>
+<p>通过 <code>as</code> 命令指定别名，例如我们将 ElectricCar  类指定为 EC，使其名称简化</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> electric_car <span class="keyword">import</span> ElectricCar <span class="keyword">as</span> EC</span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<ol>
+<li>Matthes E. Python 编程: 从入门到实践[M]. Ren min you dian chu ban she, 2020.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>GS方法_GFBLUP</title>
     <url>/posts/ac27f7c7/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>GFBLUP 也是 GBLUP 模型的一个变体，这里将加性效应拆分为了两个部分。</p>
