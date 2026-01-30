@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    asreml分析阈值性状笔记 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-asreml分析阈值性状笔记"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  asreml分析阈值性状笔记
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/2c1f0d50/" class="article-date">
+  <time datetime="2026-01-30T11:56:40.000Z" itemprop="datePublished">2026-01-30</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">4 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>asreml 分析阈值性状笔记。</p>
+<span id="more"></span>
+<h1>理论</h1>
+<p>asreml 使用广义线性模型来分析阈值性状（通过为二分类性状，通常呈现二项分布）。对应《ASReml-R Reference Manual Version 4》书中的 39 页。</p>
+<h2 id="广义线性模型">广义线性模型</h2>
+<p>广义线性模型（Generalized Linear Model, GLM）可以被人为是传统一般线性模型的延伸。</p>
+<p>广义线性模型包括以下几个部分：</p>
+<ol>
+<li>
+<p>因变量：因变量不同取值间相互独立，服从指定数族概率分布。即，不局限于正态分布一种情形。</p>
+</li>
+<li>
+<p>线性部分：该部分和传统线性部分没有什么区别：</p>
+<p style=""><img src="https://math.now.sh?from=%5Ceta_%7Bi%7D%20%3D%20x_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cbeta%0A" /></p></li>
+<li>
+<p>连接函数：用于描述因变量的期望是怎样和线性预测值 <img src="https://math.now.sh?inline=%5Ceta_%7Bi%7D" style="display:inline-block;margin: 0;"/> 相关联的。</p>
+</li>
+</ol>
+<p style=""><img src="https://math.now.sh?from=g%28%5Cmu_%7Bi%7D%29%20%3D%20%5Ceta_%7Bi%7D%20%3D%20x_%7Bi%7D%5E%7B%5Cprime%7D%20%5Cbeta%0A" /></p><p>广义线性模型在以下方面做了扩展：</p>
+<ol>
+<li>放松因变量的限制，因变量分布由正态分布扩展到二项分布、Poisson 分布、负二项分布等指数分布族</li>
+<li>通过连接函数，把因变量取值变换到自变量的线性预测的取值范围<img src="https://math.now.sh?inline=%28-%5Cinfty%2C%20%2B%5Cinfty%29" style="display:inline-block;margin: 0;"/>。</li>
+</ol>
+<p>如果观测值之间存在相关性（非独立），那么我们就需要使用<strong>广义线性混合模型</strong>（Generalized Linear Mixed Model, GLMM），模型中可以对残差项进行相关性的定义。</p>
+<p>下图是 asreml 支持的数据类型和连接函数，这里 <img src="https://math.now.sh?inline=%5CPhi" style="display:inline-block;margin: 0;"/> 表示累积标准正态分布函数。（其实我感觉这个表说的不清楚，而且还少了 <code>multinomial</code> 分布，其可用的连接函数与 <code>binomial</code> 相同）</p>
+<p><img src="1.png" alt=""></p>
+<p>这里的写法就是补充一个 family 语句，后面 <code>asr_*</code> 中后<code>*</code> 就是因变量的分布类型的名称，之后括号中就是连接函数。</p>
+<p>这里下面提到对于二分类性状，两个连接函数的模型公式如下（我不清楚 Logit 模型中的 <code>exp()</code> 函数哪里来的，和上面的公式不一样）</p>
+<p><img src="2.png" alt=""></p>
+<h1>实操</h1>
+<p>现在我不太想自己测试一下，先把代码放上来吧。</p>
+<h2 id="二分类性状">二分类性状</h2>
+<p>数据部分：表型中为 0 和 1。</p>
+<p>代码部分：可以选 logistic模型和probit模型 ，二者只是加一个 <code>family</code> 语句而已。</p>
+<p>但是需要注意的是，logistic模型算出的方差组分，计算遗传力的时候，残差要改为 本身的值乘以<img src="https://math.now.sh?inline=%5Cpi%5E%7B2%7D%2F3" style="display:inline-block;margin: 0;"/> （不清楚原因，本身残差的结果均为1，应该是设定好的残差是1），举例代码如下（probit模型计算遗传力的时候不用改）</p>
+<p>（这里直接加的 <code>pi^2/3</code> ，应该写成 <code>V2*pi^2/3</code> 比较好）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### 二分类logistic模型</span></span><br><span class="line"><span class="built_in">str</span>(dat)</span><br><span class="line">m2 = asreml(y1_bio ~ G + Sex + Shidai,</span><br><span class="line">            random = ~ vm(ID,ainv),</span><br><span class="line">            family = asr_binomial(link=<span class="string">&quot;logit&quot;</span>),</span><br><span class="line">            <span class="comment"># residual = ~ idv(units),</span></span><br><span class="line">            na.action = na.method(x = <span class="string">&quot;include&quot;</span>,y = <span class="string">&quot;include&quot;</span>),</span><br><span class="line">            data=dat)</span><br><span class="line">m2 = update(m2)</span><br><span class="line">summary(m2)$varcomp</span><br><span class="line">vpredict(m2, h2 ~ V1/(V1+pi^<span class="number">2</span>/<span class="number">3</span>)) <span class="comment"># logit的残差为pi^2/3</span></span><br></pre></td></tr></table></figure>
+<p>提取育种值结果就和正常分析一样，举例如下</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 育种值</span></span><br><span class="line">hblup_y1 <span class="operator">=</span> as.data.frame<span class="punctuation">(</span>coef<span class="punctuation">(</span>mod_y1<span class="punctuation">)</span><span class="operator">$</span>random<span class="punctuation">)</span></span><br><span class="line">head<span class="punctuation">(</span>hblup_y1<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">hblup_y1 <span class="operator">=</span> hblup_y1 <span class="operator">%&gt;%</span> mutate<span class="punctuation">(</span>tid <span class="operator">=</span> rownames<span class="punctuation">(</span>.<span class="punctuation">)</span><span class="punctuation">)</span> <span class="operator">%&gt;%</span> separate<span class="punctuation">(</span>tid<span class="punctuation">,</span>into <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;type&quot;</span><span class="punctuation">,</span><span class="string">&quot;ID&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span>sep<span class="operator">=</span><span class="string">&quot;_&quot;</span><span class="punctuation">)</span> <span class="operator">%&gt;%</span> select<span class="punctuation">(</span>type<span class="punctuation">,</span>ID<span class="punctuation">,</span>effect<span class="punctuation">)</span></span><br><span class="line">head<span class="punctuation">(</span>hblup_y1<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">fwrite<span class="punctuation">(</span>hblup_y1<span class="punctuation">,</span><span class="string">&quot;re_hblup_y1.csv&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<h2 id="多分类性状">多分类性状</h2>
+<p>表型：<strong>性状必须转为 factor</strong> (好像012或123这两种都可以，官方貌似建议012这种标记方式)</p>
+<p>代码：<code>asr_binomial</code> 改为 <code>asr_multinomial</code> ，举例如下</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mul_logit <span class="operator">=</span> asreml<span class="punctuation">(</span>mulb<span class="operator">~</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">                   random<span class="operator">=</span><span class="operator">~</span> Sire<span class="operator">+</span>Family<span class="punctuation">,</span></span><br><span class="line">                   family<span class="operator">=</span>asr_multinomial<span class="punctuation">(</span>link<span class="operator">=</span><span class="string">&quot;logit&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span> </span><br><span class="line">                   data<span class="operator">=</span>data<span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<h2 id="连续性状和阈值性状多性状模型"><strong>连续性状和阈值性状多性状模型</strong></h2>
+<p>表型：同上</p>
+<p>代码：和普通多性状模型类似，不同的是增加了性状的分布函数，也就是还是 <code>family</code> 语句部分。</p>
+<p>举例如下，这里第一个是二分类阈值性状，第二类为服从正态分布的连续性状，因此 <code>family</code> 语句 中按照相应顺序去写 。这里没有指定连接函数，因此就是默认函数，二分类性状就是 logistic模型，连续性状就是 identity 模型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mod3 = asreml(cbind(score4,norm) ~ trait + trait:(Sex + Grp + year), </span><br><span class="line"></span><br><span class="line">              random = ~ us(trait):Sire, </span><br><span class="line"></span><br><span class="line">              family = <span class="built_in">list</span>(asr_binomial(),asr_gaussian()),</span><br><span class="line"></span><br><span class="line">              maxit = <span class="number">100</span>,</span><br><span class="line"></span><br><span class="line">              data=dat)</span><br></pre></td></tr></table></figure>
+<p>但是视频中有个问题，视频中计算遗传相关和表型相关的时候是按照正常的方式算的，没有考虑 logistic模型单性状模型中的 <img src="https://math.now.sh?inline=%5Cpi%5E%7B2%7D%2F3" style="display:inline-block;margin: 0;"/> 的系数，不清楚原因（我感觉有可能是视频中搞错了，不过不清楚残差协方差是不是和残差方差一样校正，不过好像这个广义线性模型算出来的遗传力啥的本身就可能不太可靠）。</p>
+<h2 id="阈值性状和阈值性状多性状模型"><strong>阈值性状和阈值性状多性状模型</strong></h2>
+<p>同上，还是改一下 <code>family</code> 语句部分 ，举例如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mod2 = asreml(cbind(score4,rot) ~ trait + trait:(Sex + Grp + year), </span><br><span class="line"></span><br><span class="line">              random = ~ us(trait):Sire, </span><br><span class="line"></span><br><span class="line">              family = <span class="built_in">list</span>(asr_binomial(),asr_binomial()),</span><br><span class="line"></span><br><span class="line">              maxit = <span class="number">100</span>,</span><br><span class="line"></span><br><span class="line">              data=dat)</span><br></pre></td></tr></table></figure>
+<h1>参考文献</h1>
+<p>1.<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1oi4y1p7uX/">https://www.bilibili.com/video/BV1oi4y1p7uX/</a></p>
+<p>2.<a target="_blank" rel="noopener" href="https://www.bilibili.com/opus/965825234531778579">https://www.bilibili.com/opus/965825234531778579</a></p>
+<p>3.《ASReml-R Reference Manual Version 4》</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/d2e41a48/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">深度学习入门_基于Python的理论与实现</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
