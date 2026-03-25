@@ -1,6 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>GWAS计算PVE</title>
+    <url>/posts/7f5325ac/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>GWAS结果如何计算SNP解释表型方差的比例（the proportion of phenotypic variance explained ，PVE ）。理论上所有位点的 PVE 之和不能超过遗传力，但是实际计算得到的 PVE 之和会远大于1，因为位点之间存在连锁，而一般计算PVE都是每个位点单独计算的。</p>
+<span id="more"></span>
+<p>这里我整理了4种方法，安装使用的常用顺序排序如下</p>
+<h1>第一种</h1>
+<p>这种方法需要用到SNP效应值的 se 值，也是混合线性模型使用最广的方法。</p>
+<p>基于文献1，PVE计算公式如下图中的红框</p>
+<p><img src="1.png" alt=""></p>
+<p>其中</p>
+<ul>
+<li><img src="https://math.now.sh?inline=%5Chat%7B%5Cbeta%7D" style="display:inline-block;margin: 0;"/> 是标记效应值</li>
+<li><img src="https://math.now.sh?inline=se%28%5Chat%7B%5Cbeta%7D%29" style="display:inline-block;margin: 0;"/> 是标记效应值的标准误</li>
+<li><img src="https://math.now.sh?inline=MAF" style="display:inline-block;margin: 0;"/> 是最小等位基因型</li>
+<li><img src="https://math.now.sh?inline=N" style="display:inline-block;margin: 0;"/> 为样本数目</li>
+</ul>
+<h1>第二种</h1>
+<p>基于文献2，这个公式和上面的分子相同，只是分母直接用的表型方差，而不是上面的展开式子。</p>
+<p><img src="2.png" alt=""></p>
+<h1>第三种</h1>
+<p>这种不是估计单个位点的PVE ，而是一堆位点的 PVE</p>
+<p>在HIBLUP软件的答疑部分，建议是用显著位点和其它位点构建2个G阵，然后计算方差组分，最后基于方差组分结果计算这个</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">step1: construct GRM1 using the significant SNPs</span></span><br><span class="line">./hiblup --make-xrm </span><br><span class="line">         --bfile demo </span><br><span class="line">         --extract snp.txt </span><br><span class="line">         --out grm1 </span><br><span class="line">         --threads 32    # grm1.GA.id, grm1.GA.bin will be generated</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">step2: construct GRM2 using the SNPs excluding the significant SNPs</span></span><br><span class="line">./hiblup --make-xrm </span><br><span class="line">         --bfile demo </span><br><span class="line">         --exclude snp.txt </span><br><span class="line">         --out grm2 </span><br><span class="line">         --threads 32    # grm2.GA.id, grm2.GA.bin will be generated</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">step3: compute the variance components <span class="keyword">for</span> GRM1 and GRM2 by single trait model</span></span><br><span class="line">./hiblup --single-trait </span><br><span class="line">         --pheno demo.phe </span><br><span class="line">         --pheno-pos X </span><br><span class="line">         --xrm grm1.GA,grm2.GA </span><br><span class="line">         --out vc </span><br><span class="line">         --threads 32    </span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">step4: calculate the PVE <span class="keyword">for</span> significant SNPs by following equation:</span></span><br><span class="line">         pve = V(grm1) / ( V(grm1)+V(grm2)+V(e) )</span><br></pre></td></tr></table></figure>
+<h1>第四种</h1>
+<p>对于一般线性模型，可以利用一般线性回归的 R2 （决定系数）作为 PVE 结果。</p>
+<p>具体计算的时候，也可以计算单独加上SNP的 R2 增量作为 PVE 结果，步骤如下</p>
+<blockquote>
+<ol>
+<li>计算 SNP 和 其它固定因子在一般线性回归模型（R中的lm函数）对表型的决定系数 R2_all</li>
+<li>剔除SNP，计算其它固定因子在一般线性回归模型（R中的lm函数）对表型的决定系数 R2_less</li>
+<li>PVE = R2_all - R2_less</li>
+</ol>
+</blockquote>
+<h1>参考文献</h1>
+<ol>
+<li>Shim H, Chasman D I, Smith J D, et al. A multivariate genome-wide association analysis of 10 LDL subfractions, and their response to statin treatment, in 1868 Caucasians[J]. PloS one, 2015, 10(4): e0120758.</li>
+<li>Zhang T, Gao H, Sahana G, et al. Genome‐wide association studies revealed candidate genes for tail fat deposition and body size in the Hulun Buir sheep[J]. Journal of Animal Breeding and Genetics, 2019, 136(5): 362-370.</li>
+<li><a href="https://www.hiblup.com/tutorials">https://www.hiblup.com/tutorials</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据分析</category>
+      </categories>
+      <tags>
+        <tag>数据分析</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>asreml分析阈值性状笔记</title>
     <url>/posts/2c1f0d50/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>asreml 分析阈值性状笔记。</p>
