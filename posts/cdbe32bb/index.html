@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    ANNOVAR注释 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-ANNOVAR注释"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  ANNOVAR注释
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/cdbe32bb/" class="article-date">
+  <time datetime="2026-05-12T13:01:28.000Z" itemprop="datePublished">2026-05-12</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">19 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 ANNOVAR 软件进行基因注释。</p>
+<span id="more"></span>
+<h1>创建注释文件</h1>
+<p>基因注释前需要自己先创建用于注释的文件。</p>
+<h2 id="下载-fasta-和-gff3-文件">下载 fasta 和 gff3 文件</h2>
+<ul>
+<li>如果没有 gff3 文件，也可以下载 gtf 文件（作者说 Ensembl  的 gff3 有时转换不成功，建议用 gtf ）。</li>
+<li>fasta 文件需要解压缩，gff3 文件不需要</li>
+</ul>
+<p>示例如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir atdb</span><br><span class="line">cd atdb</span><br><span class="line">wget ftp://ftp.ensemblgenomes.org/pub/release-27/plants/fasta/arabidopsis_thaliana/dna/Arabidopsis_thaliana.TAIR10.27.dna.genome.fa.gz</span><br><span class="line">wget ftp://ftp.ensemblgenomes.org/pub/release-27/plants/gtf/arabidopsis_thaliana/Arabidopsis_thaliana.TAIR10.27.gtf.gz</span><br></pre></td></tr></table></figure>
+<h2 id="处理fasta-和-gff3-文件">处理fasta 和 gff3 文件</h2>
+<p>结果文件命名就不要带版本了（例如pig10.2），直接用物种名(pig)</p>
+<p>这样注释用的 annovar 命令 <code>-buildver</code> 参数就可以直接写物种名。</p>
+<h3 id="gff3-文件转格式">gff3 文件转格式</h3>
+<p>gff3ToGenePred 是 UCSC 开发的一款命令行工具，作用是将 GFF3 格式的基因结构注释文件转换为 GenePred 格式（也就是你命令中输出的 pig_refGene.txt）。下载网址：<a target="_blank" rel="noopener" href="https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/">https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/</a></p>
+<p>输入文件可以是压缩或者未压缩格式（我的脚本可以，可以测试一下，如果不支持压缩格式就解压）。</p>
+<p>输出文件名称建议就是物种名称加 “_refGene.txt”。如果是 gtf 文件，则改为 <code>gtfToGenePred</code> 脚本。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gff3ToGenePred Sus_scrofa.Sscrofa10.2.89.gff3.gz pig_refGene.txt</span><br></pre></td></tr></table></figure>
+<p>作用是将 <strong>GFF3 格式的基因结构注释文件</strong>转换为 <strong>GenePred 格式</strong>（也就是你命令中输出的 <code>pig_refGene.txt</code>）。</p>
+<p>含义是：读取压缩的 GFF3 文件，解析其中的基因/转录本/外显子/CDS 层级关系，并输出一个<strong>每一行代表一个转录本结构</strong>的表格文件（基本上都是 mRNA）。这种 GenePred 格式（常被称为 refGene 格式）是 UCSC Genome Browser 和 ANNOVAR 等工具内部常用的基因结构存储格式。</p>
+<p>解析输入的 GFF3 文件（支持直接读 <code>.gz</code>压缩包），根据 GFF3 第 9 列的 <code>ID</code>和 <code>Parent</code>标签把基因（gene）、转录本（mRNA/mRNA）、外显子（exon）和 CDS 重新组装起来，最终输出一个以 Tab 分隔的 <code>pig_refGene.txt</code>文件，每行代表一个转录本的完整结构。</p>
+<h4 id="它是如何工作的（关键逻辑）">它是如何工作的（关键逻辑）</h4>
+<ol>
+<li><strong>寻找转录本锚点</strong>：它主要在 GFF3 中寻找 <code>mRNA</code>、<code>transcript</code>或 <code>RNA</code>类型的行作为每个转录本的“根”。</li>
+<li><strong>归集子特征</strong>：把具有相同 <code>Parent=转录本ID</code>的 <code>exon</code>和 <code>CDS</code>行归到对应的转录本下，并按坐标排序。</li>
+<li><strong>计算边界</strong>：自动算出整个转录本的起点/终点（txStart/txEnd），以及编码区 CDS 的起点/终点（cdsStart/cdsEnd）。</li>
+<li><strong>命名提取</strong>：默认会把 GFF3 里转录本特征的 <code>ID</code>属性作为输出文件第 1 列的 <code>name</code>，如果有 <code>Name</code>属性则作为第 12 列的 <code>geneName</code>（也可以用 <code>-useName</code>参数强制用 Name 作为主名）。</li>
+</ol>
+<h4 id="输出格式">输出格式</h4>
+<p>输出文件是 <strong>16 列、Tab 分隔</strong>的文本（扩展版 GenePred），含义如下：</p>
+<ol>
+<li><strong>name</strong>：转录本标识符（通常来自 GFF3 的 <code>ID=</code>）</li>
+<li><strong>chrom</strong>：染色体名称</li>
+<li><strong>strand</strong>：链方向（<code>+</code>或 <code>-</code>）</li>
+<li><strong>txStart</strong>：转录本起始位置（<strong>0-based</strong>，即 GFF3 的 start - 1）</li>
+<li><strong>txEnd</strong>：转录本终止位置（<strong>1-based</strong>，同 GFF3 的 end）</li>
+<li><strong>cdsStart</strong>：CDS 编码区起始（0-based，若无 CDS 则与 txStart 相同）</li>
+<li><strong>cdsEnd</strong>：CDS 编码区终止（1-based，若无 CDS 则与 txEnd 相同）</li>
+<li><strong>exonCount</strong>：外显子个数</li>
+<li><strong>exonStarts</strong>：所有外显子起始位置列表（0-based，逗号分隔，末尾有逗号）</li>
+<li><strong>exonEnds</strong>：所有外显子终止位置列表（1-based，逗号分隔，末尾有逗号）</li>
+<li><strong>score</strong>：分数（通常填 0）</li>
+<li><strong>name2</strong>：基因名称/别名（通常来自 GFF3 的 <code>Name=</code>或 <code>gene_name=</code>）</li>
+<li><strong>cdsStartStat</strong>：CDS 起始状态（<code>cmpl</code>完整、<code>incmpl</code>不完整、<code>none</code>无）</li>
+<li><strong>cdsEndStat</strong>：CDS 终止状态（同上）</li>
+<li><strong>exonFrames</strong>：外显子读码框偏移（0,1,2 或 -1）</li>
+<li><strong>extra</strong>：有时会有保留列</li>
+</ol>
+<p>这种格式把原本分散在多行的 GFF3 外显子信息“打包”到了一行里，特别适合像 <strong>ANNOVAR</strong> 这类注释工具快速索引“某个坐标落在哪个转录本的哪根外显子上”，而不用再去实时解析复杂的 Parent 层级关系。</p>
+<h3 id="提取fasta序列">提取fasta序列</h3>
+<p>这里要改的就是输入输出文件名称，输入是参考基因组的<code>fasta</code>文件和上一步的 <code>pig_refGene.txt</code> ，输出文件是 <code>pig_refGeneMrna.fa</code> 。</p>
+<p>这里用的软件就是 annovar 的一个脚本。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perl /mnt/data/zhouziwen/bin/annovar/retrieve_seq_from_fasta.pl --format refGene --seqfile Sus_scrofa.Sscrofa10.2.dna.toplevel.fa pig_refGene.txt --outfile pig_refGeneMrna.fa</span><br></pre></td></tr></table></figure>
+<p>这个脚本的作用是根据你指定的“转录本区间文件”，从参考基因组 FASTA 中提取对应的 DNA 序列，并输出为 FASTA 文件。具体到这个例子，就是</p>
+<blockquote>
+<p>✅ <strong>从猪的参考基因组 FASTA 中，根据 pig_refGene.txt里记录的每个转录本（mRNA）的外显子坐标，拼接出每个转录本的 cDNA / mRNA 序列</strong></p>
+</blockquote>
+<p>参数说明：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"><strong>参数</strong></th>
+<th style="text-align:left"><strong>含义</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>--format refGene</code></td>
+<td style="text-align:left">输入文件是 <strong>refGene 格式（UCSC GenePred）</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--seqfile ...fa</code></td>
+<td style="text-align:left"><strong>单文件参考基因组 FASTA</strong>（不是按 chr 拆分）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>pig_refGene.txt</code></td>
+<td style="text-align:left">转录本区间定义文件</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--outfile</code></td>
+<td style="text-align:left">输出的 mRNA 序列 FASTA</td>
+</tr>
+</tbody>
+</table>
+<p>脚本会：</p>
+<ul>
+<li>按外显子坐标从 FASTA 中取序列</li>
+<li>正链直接拼接</li>
+<li>负链<strong>反向互补</strong></li>
+<li>最终得到 <strong>mRNA 序列</strong></li>
+</ul>
+<p>输出文件：<strong>FASTA 格式，每个转录本一条序列</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;NM_001001 Comment: this sequence (leftmost exon at chr1:1000) is generated by ANNOVAR on ...</span><br><span class="line">ATGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGC</span><br><span class="line">TAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGC</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&gt;NM_001001</code></td>
+<td>转录本 ID</td>
+</tr>
+<tr>
+<td>序列</td>
+<td><strong>拼接后的 mRNA / cDNA 序列</strong></td>
+</tr>
+</tbody>
+</table>
+<p>检查两个文件的转录本数目是否相同（二者必须相同）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wc -l pig_refGene.txt</span><br><span class="line"></span><br><span class="line">grep &quot;&gt;&quot; pig_refGeneMrna.fa | wc -l</span><br></pre></td></tr></table></figure>
+<h2 id="提取基因ID与名称的对应关系">提取基因ID与名称的对应关系</h2>
+<p>从 gff3 文件中提取基因ID与名称的对应关系，这是用于 annovar 注释完之后的分析。因为查找基因功能的时候往往需要使用的是基因名称，因此在 annovar 注释到基因之后需要转换成基因名称。</p>
+<p>原理：自动跳过注释行并仅提取类型为 <code>gene</code>的记录，从第九列属性中解析出 <code>ID</code>和 <code>Name</code>，自动去除 Ensembl 风格的 <code>gene:</code>前缀，最终生成一个两列（基因ID <code>\t</code>基因名）的映射文件，并在结束时打印提取到的基因总数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python pick_gene_name.py Sus_scrofa.Sscrofa10.2.89.chr.gff3 geneIDmap.txt</span><br></pre></td></tr></table></figure>
+<h1>annovar 注释</h1>
+<h2 id="官方文档">官方文档</h2>
+<p>github 文档 和 它的官网的文档应该是一致的，只是 github 可以下载下来。</p>
+<p>github文档网址：<a target="_blank" rel="noopener" href="https://github.com/WGLab/doc-ANNOVAR">https://github.com/WGLab/doc-ANNOVAR</a></p>
+<p>官网文档网址：<a target="_blank" rel="noopener" href="http://annovar.openbioinformatics.org/en/latest/user-guide/download/">http://annovar.openbioinformatics.org/en/latest/user-guide/download/</a></p>
+<h2 id="下载软件">下载软件</h2>
+<p>从 <a target="_blank" rel="noopener" href="https://www.openbioinformatics.org/annovar/annovar_download_form.php">here</a> 下载，需要注册</p>
+<h2 id="脚本说明">脚本说明</h2>
+<ul>
+<li>
+<p><code>table_annovar.pl</code> :  目前的<strong>核心脚本</strong>，可以一次调用多个数据库（如 gnomAD、dbSNP、dbNSFP）进行多功能注释，基于参数 <code>-operation</code>详解： <code>g</code>= 基因注释 (gene-based) <code>r</code>= 区域注释 (region-based) <code>f</code>= 过滤注释 (filter-based) 。其输入文件就是 VCF 文件按</p>
+<p>但是例子给的是人的，动物的不太会，目前我还是用专门做基因注释的 <code>annotate_variation.pl</code> 。</p>
+</li>
+</ul>
+<h2 id="输入文件">输入文件</h2>
+<p>这里主要介绍 ANNOVAR 可接受的文件输入格式，以及如何利用 <code>convert2annovar.pl</code>工具将其他格式的变异文件转换为 ANNOVAR 可识别的格式。</p>
+<h3 id="输入文件格式概述">输入文件格式概述</h3>
+<ul>
+<li><strong>VCF 文件</strong>：<code>table_annovar.pl</code>程序可以直接接受 VCF 文件作为输入（需加 <code>-vcfinput</code>参数）。目前 VCF 已成为大多数研究者使用的黄金标准格式。</li>
+<li><strong>ANNOVAR 输入格式 (.avinput)</strong>：<code>annotate_variation.pl</code>等程序需要一个简单的基于文本的格式（称为 ANNOVAR input format）。
+<ul>
+<li>文件中每一行对应一个变异位点。</li>
+<li>每一行的前 <strong>5 列</strong>（空格或 Tab 分隔）分别代表：<strong>染色体 (Chromosome)</strong>、<strong>起始位置 (Start)</strong>、<strong>终止位置 (End)</strong>、<strong>参考碱基 (Reference Allele)</strong>、<strong>变异碱基 (Alternative Allele)</strong>。</li>
+<li>第 5 列之后可以添加任意额外的列，这些列会在输出中被原样打印。</li>
+<li>如果参考碱基信息未知，可用 <code>0</code>填充。</li>
+<li>插入或缺失可用 <code>-</code>表示空碱基（例如 <code>TC</code>到 <code>-</code>代表缺失，<code>-</code>到 <code>AT</code>代表插入）。</li>
+<li>默认使用 <strong>1-based 坐标系统</strong>。</li>
+<li>如果 ANNOVAR 遇到无效输入行，会将其写入 <code>&lt;outfile&gt;.invalid_input</code>文件。</li>
+</ul>
+</li>
+</ul>
+<p><strong>示例 (ex1.avinput)：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1   948921   948921   T   C   comments: rs15842, a SNP in 5&#x27; UTR of ISG15</span><br><span class="line">1   13211293 13211294 TC  -   comments: rs59770105, a 2-bp deletion</span><br><span class="line">1   11403596 11403596 -   AT  comments: rs35561142, a 2-bp insertion</span><br><span class="line">13  20797176 21105944 0   -   comments: a 342kb deletion encompassing GJB6</span><br></pre></td></tr></table></figure>
+<h4 id="输入文件要求">输入文件要求</h4>
+<ul>
+<li>第5列（ALT）不能同时包含碱基和 <code>-</code>（这个我测试过了）</li>
+<li>第4列 （REF）也不能同时包含碱基和 <code>-</code> 。</li>
+</ul>
+<h3 id="格式转换工具-convert2annovar-pl">格式转换工具 <code>convert2annovar.pl</code></h3>
+<p>该脚本可将其他“基因型调用”格式转换为 ANNOVAR 的 <code>.avinput</code>格式。目前支持 Samtools pileup、Illumina CASAVA、SOLiD GFF、Complete Genomics、SOAPsnp、MAQ 和 <strong>VCF</strong> 等格式。如今 VCF 最常用，其他格式已较少使用。</p>
+<h4 id="转换-VCF-文件">转换 VCF 文件</h4>
+<p>官方案例使用 <code>-format vcf4</code>参数（实际我使用 vcf4old 参数）。</p>
+<p>输入VCF文件可以是 <code>vcf.gz</code> 压缩格式。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># 基本转换（默认只处理第一个样本）</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf &gt; ex2.avinput</span><br><span class="line"></span><br><span class="line"># 指定输出文件</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2.avinput</span><br><span class="line"></span><br><span class="line"># 转换所有样本（生成多个文件，如 ex2.NA00001.avinput, ex2.NA00002.avinput）</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -allsample</span><br><span class="line"></span><br><span class="line"># 包含 VCF 的 INFO 信息</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -includeinfo</span><br><span class="line"></span><br><span class="line"># 包含杂合性、质量、深度信息</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -withzyg</span><br><span class="line"></span><br><span class="line"># 打印基于文件内所有样本的等位基因频率（-withfreq）</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -withfreq -includeinfo</span><br><span class="line"></span><br><span class="line"># 保留 VCF 头信息</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -comment</span><br></pre></td></tr></table></figure>
+<p><em>注意：如果某个位点有多个可变等位基因（Multiple Alleles），输出会产生多行，每行对应一个变异。</em></p>
+<h4 id="vcf4-vcf4old">vcf4 &amp; vcf4old</h4>
+<p>我看之前的脚本有的使用 <code>-format vcf4old</code> ，这里和 <code>-format vcf4</code> 的区别就是输入文件 VCF 版本问题。</p>
+<blockquote>
+<p>✅ <strong>-format vcf4用于“新版 VCF（4.x）”，支持多样本、多 ALT、基因型字段</strong></p>
+<p>✅ <strong>-format vcf4old用于“老版 VCF（4.0 之前 / 简化版）”，只处理单样本、单列 ALT</strong></p>
+</blockquote>
+<p>在 misc/faq.md 文件中，作者进行了解释。</p>
+<ol>
+<li><code>vcf4old</code>：过时的全量转换模式</li>
+</ol>
+<p>该模式保留了 2013 年之前的旧逻辑。它的核心特点是**“见行就转”**：无论 VCF 中的特定样本在该位点是否有突变（即使是 <code>0/0</code>纯合参考），只要 VCF 文件中有这一行记录，它就会被转换为输出文件的一行。这种模式在现代多样本联合 Calling（Joint Calling）场景下会产生大量无意义的冗余数据，因此已被视为 <strong>Obsolete（过时）</strong>，不建议新用户使用。</p>
+<ol start="2">
+<li><code>vcf4</code>：智能的现代转换模式*</li>
+</ol>
+<p>这是目前的<strong>默认推荐模式</strong>。它理解“变异”的定义：对于一个特定样本，只有当基因型不是 <code>0/0</code>时，才算作变异。默认情况下，它只处理 VCF 中的第一个样本，并且只输出该样本真正发生突变的位点，这大大减少了无效数据。此外，<code>vcf4</code>支持通过参数扩展功能，能够优雅地处理多样本数据。</p>
+<ol start="3">
+<li>参数组合与行为对比</li>
+</ol>
+<p>下表详细列出了两种模式在处理多样本 VCF 时的行为差异：</p>
+<table>
+<thead>
+<tr>
+<th>模式 / 参数</th>
+<th>行为逻辑</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>vcf4(默认)</strong></td>
+<td><strong>仅处理第一个样本</strong>。仅输出该样本基因型非 <code>0/0</code>的位点。</td>
+<td>单样本 VCF，或只关心 VCF 文件中的第一个样本。</td>
+</tr>
+<tr>
+<td><strong>vcf4 -allsample</strong></td>
+<td><strong>处理所有样本</strong>。为每个样本生成一个独立的 <code>.avinput</code>输出文件。</td>
+<td>多样本 VCF，需要将每个人的变异数据拆分开进行独立分析。</td>
+</tr>
+<tr>
+<td><strong>vcf4 -allsample -withfreq</strong></td>
+<td><strong>全量保留 + 计算频率</strong>。保留 VCF 中的所有行（包括 <code>0/0</code>），并在输出中新增一列，计算该变异在所有样本中的等位基因频率。</td>
+<td>群体遗传学分析，需要知道每个位点在整个队列中的频率。</td>
+</tr>
+<tr>
+<td><strong>vcf4old</strong></td>
+<td><strong>全量保留</strong>。无论样本基因型如何，只要 VCF 有记录就输出。</td>
+<td><strong>极不推荐</strong>。仅用于兼容非常古老、依赖旧输出格式的特定流程。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>总结</strong>: vcf4 会丢失无变异位点，因此还是使用 vcf4old</p>
+<h2 id="基因注释">基因注释</h2>
+<p>这是最重要的一章：网址为 <a target="_blank" rel="noopener" href="https://annovar.openbioinformatics.org/en/latest/user-guide/gene/%EF%BC%8C%E4%B8%8B%E8%BD%BD%E7%9A%84">https://annovar.openbioinformatics.org/en/latest/user-guide/gene/，下载的</a> github 中为 <a target="_blank" rel="noopener" href="http://gene.md">gene.md</a> (这个貌似内容更多)</p>
+<p>本文档主要介绍 ANNOVAR 最核心的功能之一：基于基因的变异注释。即判断一个变异（SNP/Indel）落在基因组的什么位置（外显子、内含子等），以及是否引起氨基酸改变，并详细说明其输出文件和各类参数。</p>
+<h3 id="注释前准备">注释前准备</h3>
+<p>在进行基因注释前，必须将对应的基因定义文件（如 refGene.txt）和转录本 FASTA 文件（如 refGeneMrna.fa）下载到 humandb/ 目录中（你自己的某个目录中）。</p>
+<h3 id="命令及参数说明">命令及参数说明</h3>
+<p>文档压根没有一个完整的参数说明和解释。</p>
+<p>我一般使用的注释命令如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">annotate_variation.pl -buildver LS -geneanno -outfile Anno SNP.annovar /work/home/ach0yyfeio/reference/LS_na</span><br></pre></td></tr></table></figure>
+<p>命令拆解：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">annotate_variation.pl \</span><br><span class="line">  -buildver LS \</span><br><span class="line">  -geneanno \</span><br><span class="line">  -outfile Anno \</span><br><span class="line">  SNP.annovar \</span><br><span class="line">  /work/home/ach0yyfeio/reference/LS_na</span><br></pre></td></tr></table></figure>
+<p>参数解释：这里 <code>-buildver</code> 后面接的就是注释文件的前缀，输入文件为 <code>SNP.annovar</code> ，输出前缀为 <code>Anno</code> ，最后是注释文件的文件夹的路径。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"><strong>参数</strong></th>
+<th style="text-align:left"><strong>含义</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>annotate_variation.pl</code></td>
+<td style="text-align:left">ANNOVAR 的主注释脚本</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-buildver LS</code></td>
+<td style="text-align:left"><strong>指定参考基因组版本为 LS</strong> （ANNOVAR 会在数据库目录中寻找 <code>LS_refGene.txt</code>、<code>LS_refGeneMrna.fa</code>等文件）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-geneanno</code></td>
+<td style="text-align:left"><strong>只做基因注释</strong> （不跑区域注释、过滤注释等）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-outfile Anno</code></td>
+<td style="text-align:left"><strong>输出文件前缀</strong> 会生成 <code>Anno.variant_function</code>和 <code>Anno.exonic_variant_function</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SNP.annovar</code></td>
+<td style="text-align:left"><strong>输入文件</strong> ANNOVAR 专用格式（.avinput），包含染色体、位置、Ref、Alt</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/work/home/ach0yyfeio/reference/LS_na</code></td>
+<td style="text-align:left"><strong>ANNOVAR 数据库目录</strong> 必须包含 LS 物种的基因注释文件</td>
+</tr>
+</tbody>
+</table>
+<p>其他参数与说明（除了第一个，其他没看懂）</p>
+<ul>
+<li>–separate：默认只输出最高优先级的注释（如 exonic 覆盖了 intronic，只报 exonic）。加此参数会列出该变异所有符合的功能类别（每行一个）。</li>
+<li>–hgvs：让 cDNA 和蛋白变化注释符合 HGVS 命名标准（如 c.122C&gt;T 而非 c.C122T）。</li>
+<li>–transcript_function：默认第 2 列输出基因名，加此参数可输出转录本名（如 NM_ 或 ENST_ 编号）。</li>
+<li>-exonsort：当同一变异影响多个转录本时，强制按外显子序号排序输出，保证结果绝对一致（避免随机排序）。</li>
+<li>–aamatrixfile：可在错义变异后附加氨基酸替代矩阵分数（如 Grantham score）。</li>
+</ul>
+<p>基因定义系统（Database / -dbtype）</p>
+<p>ANNOVAR 支持多种基因集，只需下载对应文件并使用 -dbtype 指定（不懂其他的基因集如何使用，但是自己生成的注释文件就是使用默认的 refGene，所以这个应该不设定）：</p>
+<ul>
+<li>refGene：RefSeq 基因（经典，较少基因，质量高）。</li>
+<li>refGeneWithVer：带版本号的 RefSeq（如 NM_005101.4），推荐用于精确追踪。</li>
+<li>knownGene：UCSC Known Gene（较多，包含部分预测基因）。</li>
+<li>ensGene：Ensembl/GENCODE 基因（最全面，包含很多 lncRNA 等，hg38 建议使用 GENCODE）。</li>
+<li>ccdsGene：CCDS 基因（严格保守的核心基因集，输出只有 CCDS ID，需自行转换基因名）。</li>
+</ul>
+<p>注意：不同基因集对同一变异的注释可能不同（如某个变异在一个系统里是 synonymous，在另一个里因不同转录本可能是 nonsynonymous），ANNOVAR 允许用户灵活切换对比。</p>
+<h3 id="输出文件详解（核心）">输出文件详解（核心）</h3>
+<p>当运行基因注释（无论是通过 <code>table_annovar.pl</code>还是底层命令）时，主要生成两个关键文件：</p>
+<h3 id="variant-function（所有变异的注释）"><code>*variant_function</code>（所有变异的注释）</h3>
+<ul>
+<li>
+<p><strong>格式</strong>：在原始输入行前<strong>增加 2 列</strong>。</p>
+</li>
+<li>
+<p><strong>第 1 列（变异类型）</strong>：ANNOVAR 将基因组划分为 9 种区域，并遵循严格的<strong>优先级（Precedence）</strong>（数字越小越优先）。当一个变异同时属于多个功能区时，ANNOVAR 只报“优先级最高”的那个，而不会全都报。</p>
+<p><code>exonic</code>&gt; <code>splicing</code>&gt; <code>ncRNA</code>&gt; <code>UTR5/UTR3</code>&gt; <code>intronic</code>&gt; <code>upstream/downstream</code>&gt; <code>intergenic</code>。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><strong>优先级</strong></th>
+<th style="text-align:left"><strong>值 (Value)</strong></th>
+<th style="text-align:left"><strong>解释 (Explanation)</strong></th>
+<th style="text-align:left"><strong>序列本体 (Sequence Ontology)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>1</strong></td>
+<td style="text-align:left"><strong>exonic</strong>(外显子)</td>
+<td style="text-align:left">变异位于编码区</td>
+<td style="text-align:left"><code>exon_variant</code>(SO:0001791)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>1</strong></td>
+<td style="text-align:left"><strong>splicing</strong>(剪接)</td>
+<td style="text-align:left">变异位于剪接位点 2bp 范围内(可通过 <code>-splicing_threshold</code>修改范围)</td>
+<td style="text-align:left"><code>splicing_variant</code>(SO:0001568)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>2</strong></td>
+<td style="text-align:left"><strong>ncRNA</strong>(非编码RNA)</td>
+<td style="text-align:left">变异重叠的基因定义中无编码注释的转录本</td>
+<td style="text-align:left"><code>non_coding_transcript_variant</code>(SO:0001619)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>3</strong></td>
+<td style="text-align:left"><strong>UTR5</strong>(5’非翻译区)</td>
+<td style="text-align:left">变异重叠 5’ 端非翻译区</td>
+<td style="text-align:left"><code>5_prime_UTR_variant</code>(SO:0001623)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>3</strong></td>
+<td style="text-align:left"><strong>UTR3</strong>(3’非翻译区)</td>
+<td style="text-align:left">变异重叠 3’ 端非翻译区</td>
+<td style="text-align:left"><code>3_prime_UTR_variant</code>(SO:0001624)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>4</strong></td>
+<td style="text-align:left"><strong>intronic</strong>(内含子)</td>
+<td style="text-align:left">变异位于内含子中</td>
+<td style="text-align:left"><code>intron_variant</code>(SO:0001627)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>5</strong></td>
+<td style="text-align:left"><strong>upstream</strong>(上游)</td>
+<td style="text-align:left">变异位于转录起始位点上游 1kb 区域</td>
+<td style="text-align:left"><code>upstream_gene_variant</code>(SO:0001631)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>5</strong></td>
+<td style="text-align:left"><strong>downstream</strong>(下游)</td>
+<td style="text-align:left">变异位于转录终止位点下游 1kb 区域(可通过 <code>-neargene</code>修改范围)</td>
+<td style="text-align:left"><code>downstream_gene_variant</code>(SO:0001632)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>6</strong></td>
+<td style="text-align:left"><strong>intergenic</strong>(基因间)</td>
+<td style="text-align:left">变异位于基因间区域</td>
+<td style="text-align:left"><code>intergenic_variant</code>(SO:0001628)</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>第 2 列（基因信息）</strong>：</p>
+<ul>
+<li>若落在基因区域：给出基因名（多个基因用逗号分隔，如 <code>exonic ATG16L1,BRAF</code>）。</li>
+<li>若落在基因间区：给出两侧最近的基因名和距离（如 <code>intergenic UBIAD1(dist=43968),DISP3(dist=135699)</code>）。</li>
+</ul>
+</li>
+<li>
+<p><strong>修改优先级</strong>：可用 <code>-precedence intronic,utr5,utr3</code>等参数自定义优先级顺序。</p>
+</li>
+</ul>
+<h3 id="exonic-variant-function（仅外显子变异的详细注释）"><code>*exonic_variant_function</code>（仅外显子变异的详细注释）</h3>
+<ul>
+<li>
+<p><strong>格式</strong>：仅包含外显子上的变异，在原始输入行前<strong>增加 3 列</strong>。</p>
+</li>
+<li>
+<p><strong>第 1 列</strong>：该变异在原始输入文件中的行号（Line #）。</p>
+</li>
+<li>
+<p><strong>第 2 列（功能后果）</strong>：详细描述对蛋白的影响，包括：</p>
+<ul>
+<li><code>nonsynonymous SNV</code>（错义）、<code>synonymous SNV</code>（同义）</li>
+<li><code>frameshift insertion/deletion</code>（移码插入/缺失）</li>
+<li><code>nonframeshift insertion/deletion</code>（非移码插入/缺失）</li>
+<li><code>stopgain</code>（无义，引入终止密码子）、<code>stoploss</code>（终止密码子丢失）</li>
+<li><code>unknown</code>（未知，通常因转录本缺乏完整 ORF 或存在提前终止密码子）。</li>
+</ul>
+<p>优先级如下，默认情况下是唯一的，并且严格按照“蛋白层面优先级”只输出最高的那一个。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"><strong>优先级 (Precedence)</strong></th>
+<th style="text-align:left"><strong>注释类型 (Annotation)</strong></th>
+<th style="text-align:left"><strong>解释 (Explanation)</strong></th>
+<th style="text-align:left"><strong>序列本体 (Sequence Ontology)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>1</strong></td>
+<td style="text-align:left"><strong>移码插入</strong> (frameshift insertion)</td>
+<td style="text-align:left">插入一个或多个核苷酸，导致蛋白质编码序列发生<strong>移码变化</strong>。</td>
+<td style="text-align:left"><code>frameshift_elongation</code>(SO:0001909)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>2</strong></td>
+<td style="text-align:left"><strong>移码缺失</strong> (frameshift deletion)</td>
+<td style="text-align:left">缺失一个或多个核苷酸，导致蛋白质编码序列发生<strong>移码变化</strong>。</td>
+<td style="text-align:left"><code>frameshift_truncation</code>(SO:0001910)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>3</strong></td>
+<td style="text-align:left"><strong>移码块替换</strong> (frameshift block substitution)</td>
+<td style="text-align:left">替换一个或多个核苷酸的块，导致蛋白质编码序列发生<strong>移码变化</strong>。</td>
+<td style="text-align:left"><code>frameshift_variant</code>(SO:0001589)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>4</strong></td>
+<td style="text-align:left"><strong>无义突变</strong> (stopgain)</td>
+<td style="text-align:left">单核苷酸变异（SNV）、移码插入/缺失、非移码插入/缺失或块替换，导致在变异位点<strong>立即产生终止密码子</strong>。对于移码突变，在变异位点下游产生的终止密码子不计入“stopgain”！</td>
+<td style="text-align:left"><code>stop_gained</code>(SO:0001587)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>5</strong></td>
+<td style="text-align:left"><strong>终止密码子丢失</strong> (stoploss)</td>
+<td style="text-align:left">单核苷酸变异（SNV）、移码插入/缺失、非移码插入/缺失或块替换，导致在变异位点<strong>立即消除终止密码子</strong>。</td>
+<td style="text-align:left"><code>stop_lost</code>(SO:0001578)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>6</strong></td>
+<td style="text-align:left"><strong>非移码插入</strong> (nonframeshift insertion)</td>
+<td style="text-align:left">插入3个或3的倍数的核苷酸，<strong>不导致</strong>蛋白质编码序列发生移码变化。</td>
+<td style="text-align:left"><code>inframe_insertion</code>(SO:0001821)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>7</strong></td>
+<td style="text-align:left"><strong>非移码缺失</strong> (nonframeshift deletion)</td>
+<td style="text-align:left">缺失3个或3的倍数的核苷酸，<strong>不导致</strong>蛋白质编码序列发生移码变化。</td>
+<td style="text-align:left"><code>inframe_deletion</code>(SO:0001822)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>8</strong></td>
+<td style="text-align:left"><strong>非移码块替换</strong> (nonframeshift block substitution)</td>
+<td style="text-align:left">替换一个或多个核苷酸的块，<strong>不导致</strong>蛋白质编码序列发生移码变化。</td>
+<td style="text-align:left"><code>inframe_variant</code>(SO:0001650)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>9</strong></td>
+<td style="text-align:left"><strong>非同义 SNV</strong> (nonsynonymous SNV)</td>
+<td style="text-align:left">单个核苷酸的改变导致<strong>氨基酸发生改变</strong>。</td>
+<td style="text-align:left"><code>missense_variant</code>(SO:0001583)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>10</strong></td>
+<td style="text-align:left"><strong>同义 SNV</strong> (synonymous SNV)</td>
+<td style="text-align:left">单个核苷酸的改变<strong>不导致</strong>氨基酸发生改变。</td>
+<td style="text-align:left"><code>synonymous_variant</code>(SO:0001819)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>11</strong></td>
+<td style="text-align:left"><strong>未知</strong> (unknown)</td>
+<td style="text-align:left">功能未知（由于数据库文件中基因结构定义的多种错误）。</td>
+<td style="text-align:left"><code>sequence_variant</code>(SO:0001060)</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>第 3 列（细节）</strong>：包含 <strong>基因名:转录本ID:外显子号:cDNA变化:氨基酸变化</strong>。</p>
+<ul>
+<li>例：<code>IL23R:NM_144701:exon9:c.G1142A:p.R381Q</code>。</li>
+<li>若一个基因有多个转录本（可变剪切），会用逗号分隔列出所有情况。</li>
+</ul>
+</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/4179c984/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            python包-gmat
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/35c635e1/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">scnet超算互联网平台使用笔记</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
