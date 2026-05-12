@@ -59,7 +59,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.1k</span>
+            <span class="post-count">2.4k</span>
         </span>
     </span>
 
@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">8 分钟</span>
+            <span class="post-count">10 分钟</span>
         </span>
     </span>
 </div>
@@ -210,7 +210,7 @@
 <p>先查找一下 r</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda search r</span><br></pre></td></tr></table></figure>
 <p>安装 r</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c conda-forge r=4.4</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c conda-forge r=4.1</span><br></pre></td></tr></table></figure>
 <p>看一下版本</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">which R</span><br><span class="line">R --version</span><br></pre></td></tr></table></figure>
 <h1>安装 R 包</h1>
@@ -219,6 +219,29 @@
 <p>例如，安装常用的 R 包 <code>ggplot2</code>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install r-ggplot2</span><br></pre></td></tr></table></figure>
 <p>我之前一直使用 <code>install.packages()</code> 安装R包。</p>
+<h1>创建虚拟环境</h1>
+<p>最标准的创建语法如下，推荐指定 Python 版本以确保环境一致性：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create -n your_env_name python=3.12</span><br></pre></td></tr></table></figure>
+<p>也可以通过 -p 指定个人路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create -p /完整路径/环境名 python=3.10</span><br></pre></td></tr></table></figure>
+<h2 id="查看所有虚拟环境">查看所有虚拟环境</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda env list</span><br></pre></td></tr></table></figure>
+<h2 id="进入和退出环境（激活与停用）">进入和退出环境（激活与停用）</h2>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">1. 进入（激活）某个环境</span></span><br><span class="line">conda activate my_project</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">2. 退出当前环境（回到 base 环境）</span></span><br><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
+<h2 id="导出环境配置">导出环境配置</h2>
+<p>当你在一个环境里调试好了代码，想把它发给同事或者在另一台电脑（比如超算）上复现时，需要导出配置文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在当前环境下执行，生成一个 environment.yml 文件</span></span><br><span class="line">conda <span class="built_in">env</span> <span class="built_in">export</span> &gt; environment.yml</span><br></pre></td></tr></table></figure>
+<p>这个配置文件记录了当前环境里所有的包和精确版本号。</p>
+<p>别人可以通过 <code>environment.yml</code>文件复现环境：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda <span class="built_in">env</span> create -f environment.yml</span><br></pre></td></tr></table></figure>
+<h2 id="彻底移除环境">彻底移除环境</h2>
+<p>当你确定某个项目不再需要时，可以清理掉它以释放磁盘空间（尤其是深度学习环境很大）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除名为 my_project 的环境</span></span><br><span class="line">conda remove -n my_project --all</span><br></pre></td></tr></table></figure>
+<p><strong>注意</strong>：</p>
+<ul>
+<li>删除前必须<strong>先退出</strong>该环境（<code>conda deactivate</code>），不能在环境内部删除自己。</li>
+<li><code>--all</code>参数表示删除这个环境里的所有包和缓存。</li>
+</ul>
 <h1>重装conda</h1>
 <h2 id="重装系统">重装系统</h2>
 <p>如果是要重装系统了，那么有一个简单的方法可以保存原来的 conda 环境，首先我们将原来的 miniconda3 安装包 和 home 路径下的 <code>.bashrc</code> ，<code>.condarc</code> （如果是 root ，则可能还有 <code>/etc/profile</code> ）保存下来。</p>
