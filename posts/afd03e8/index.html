@@ -98,11 +98,11 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用现成的软件构建A阵和G阵。</p>
 <span id="more"></span>
-
-<h1 id="构建A阵"><a href="#构建A阵" class="headerlink" title="构建A阵"></a>构建A阵</h1><p>我一般使用 R 中的 <code>nadiv</code> 包构建 A阵，A逆阵，以及计算近交系数。</p>
+<h1>构建A阵</h1>
+<p>我一般使用 R 中的 <code>nadiv</code> 包构建 A阵，A逆阵，以及计算近交系数。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 使用了nadiv包</span></span><br><span class="line"><span class="comment">## 唯一一个参数是系谱文件，无标题</span></span><br><span class="line"></span><br><span class="line">args<span class="operator">&lt;-</span>commandArgs<span class="punctuation">(</span><span class="built_in">T</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">library<span class="punctuation">(</span>data.table<span class="punctuation">)</span></span><br><span class="line">ped <span class="operator">&lt;-</span> read.table<span class="punctuation">(</span>args<span class="punctuation">[</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">,</span>header <span class="operator">=</span> <span class="built_in">F</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment"># ped &lt;- read.table(&quot;pedigree.txt&quot;,header = F)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 处理系谱</span></span><br><span class="line"></span><br><span class="line">new_ped <span class="operator">&lt;-</span> ped<span class="punctuation">[</span><span class="punctuation">,</span><span class="number">1</span><span class="operator">:</span><span class="number">3</span><span class="punctuation">]</span> <span class="comment">#不要第四列</span></span><br><span class="line"></span><br><span class="line">library<span class="punctuation">(</span>nadiv<span class="punctuation">)</span></span><br><span class="line">pped <span class="operator">=</span> prepPed<span class="punctuation">(</span>new_ped<span class="punctuation">)</span><span class="comment">#给founders也增加一行系谱，然后排序系谱</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###构建A阵</span></span><br><span class="line">A <span class="operator">=</span> as.matrix<span class="punctuation">(</span>makeA<span class="punctuation">(</span>pped<span class="punctuation">)</span><span class="punctuation">)</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">#write.table(A,&quot;A.txt&quot;, quote=F, row.names=F) # 保存A阵文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###构建A逆</span></span><br><span class="line">A_inv<span class="operator">=</span> makeAinv<span class="punctuation">(</span>pped<span class="punctuation">)</span><span class="operator">$</span>Ainv<span class="comment">#可直接求A逆</span></span><br><span class="line">A_inv <span class="operator">=</span> as.matrix<span class="punctuation">(</span>A_inv<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">colnames<span class="punctuation">(</span>A_inv<span class="punctuation">)</span> <span class="operator">=</span> rownames<span class="punctuation">(</span>A_inv<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#write.table(A_inv,&quot;A_inv.txt&quot;, quote=F, row.names=F, col.names=F) # 保存A阵文件</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">### 求近交系数</span></span><br><span class="line">inbreeding <span class="operator">=</span> makeAinv<span class="punctuation">(</span>pped<span class="punctuation">)</span><span class="operator">$</span>f </span><br><span class="line"></span><br><span class="line">out <span class="operator">=</span> cbind<span class="punctuation">(</span>pped<span class="punctuation">[</span><span class="punctuation">,</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">,</span> inbreeding<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">colnames<span class="punctuation">(</span>out<span class="punctuation">)</span> <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;id&quot;</span><span class="punctuation">,</span> <span class="string">&quot;inbreeding&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">write.table<span class="punctuation">(</span>out<span class="punctuation">,</span><span class="string">&quot;inbreeding.txt&quot;</span><span class="punctuation">,</span> <span class="built_in">quote</span><span class="operator">=</span><span class="built_in">F</span><span class="punctuation">,</span> row.names<span class="operator">=</span><span class="built_in">F</span><span class="punctuation">,</span> col.names<span class="operator">=</span><span class="built_in">T</span><span class="punctuation">)</span> </span><br></pre></td></tr></table></figure>
-
-<h1 id="构建-G-阵"><a href="#构建-G-阵" class="headerlink" title="构建 G 阵"></a>构建 G 阵</h1><p>标准化的 G阵可以使用 GCTA 计算得到；</p>
+<h1>构建 G 阵</h1>
+<p>标准化的 G阵可以使用 GCTA 计算得到；</p>
 <p>中心化的 G阵可以使用 GCTA 或 PLINK 软件计算得到；</p>
  
       <!-- reward -->
@@ -151,55 +151,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -498,30 +450,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

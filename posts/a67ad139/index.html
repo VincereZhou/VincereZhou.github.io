@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.5k</span>
+            <span class="post-count">1.4k</span>
         </span>
     </span>
 
@@ -98,28 +98,84 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是一句很容易混淆的话，答案是错的，方阵的秩不一定等于非零特征值的数目。</p>
 <span id="more"></span>
-
 <p>查了一些资料，但只有一篇文章给出了严密的证明。本文内容来自于张景晓老师的文章，是一篇读书笔记。</p>
-<h1 id="反例"><a href="#反例" class="headerlink" title="反例"></a>反例</h1><p>先看一个反例</p>
-<p>对于下面的矩阵，其秩为 3 , 然而它的特征值均为 0 （三角矩阵的特征值等于对角线元素）。<br>$$<br>\mathbf{M} &#x3D; \left( \begin{array}{c}<br>0 &amp; 1 &amp; 0 &amp; 0 \<br>0 &amp; 0 &amp; 1 &amp; 0 \<br>0 &amp; 0 &amp; 0 &amp; 1 \<br>0 &amp; 0 &amp; 0 &amp; 0 \</p>
-<p>\end{array} \right)<br>$$<br>这就说明方阵的秩不一定等于非零特征值的数目。</p>
-<h1 id="矩阵的秩-r-A-和非零特征值个数-mu-A-间的关系"><a href="#矩阵的秩-r-A-和非零特征值个数-mu-A-间的关系" class="headerlink" title="矩阵的秩 $r(A)$ 和非零特征值个数 $\mu(A)$ 间的关系"></a>矩阵的秩 $r(A)$ 和非零特征值个数 $\mu(A)$ 间的关系</h1><p><strong>定理1</strong>：对于任意 $n$ 阶方阵 $\mathbf(A)$ 都有 $r(\mathbf{A}) \geq \mu(\mathbf{A})$ 。</p>
-<p>证明：当矩阵 $\mathbf{A}$ 可逆时，$r(\mathbf{A}) &#x3D; n$ ，此时我们设 $\lambda_{1}, \lambda_{2}, \cdots, \lambda_{n}$ 是矩阵 $\mathbf{A}$ 的全部特征根, 则 $|\mathbf{A}|&#x3D;\lambda_{1} \lambda_{2} \cdots \lambda_{n} \neq 0$ (证明可参考<a href="https://vincere.fun/posts/c98e6ad5/">特征值的乘积与和</a> ), 从而 $\mathbf{A}$ 有 $n$ 个非零特征值, 故 $\mu(\mathbf{A})&#x3D;n$,  此时  $r(\mathbf{A}) &#x3D; \mu(\mathbf{A})$ ，上面的定理成立。</p>
-<p>当矩阵 $\mathbf{A}$ 不可逆时，此时 $r(\mathbf{A})&#x3D;r&lt;n$ ，矩阵 $\mathbf{A}$ 的行向量组 $\alpha_{1}, \alpha_{2}, \cdots, \alpha_{n}$ 的秩是 $r$, 故该向量组中必有 $r$ 个向量线性无关，不妨设 前 $r$ 个向量 $\alpha_{1}, \alpha_{2}, \cdots, \alpha_{r}$ 线性无关,则 $\alpha_{r+1}, \alpha_{r+2}, \cdots, \alpha_{n}$ 均可由 $\alpha_{1}, \alpha_{2}, \cdots, \alpha_{r}$ 线性表出, 设 $\alpha_{i}&#x3D; k_{i 1} \alpha_{1}+k_{i 2} \alpha_{2}+\cdots+k_{i r} \alpha_{r}, \quad i&#x3D;r+1, r+2, \cdots, n $  ，则有<br>$$<br>|\lambda \boldsymbol{E}-\boldsymbol{A}|&#x3D;\left|\begin{array}{ccccccc}<br>\lambda-a_{11} &amp; -a_{12} &amp; \cdots &amp; -a_{1 r} &amp; -a_{1 (r+1)} &amp; \cdots &amp; -a_{1 n} \<br>-a_{21} &amp; \lambda-a_{22} &amp; \cdots &amp; -a_{2 r} &amp; -a_{2 (r+1)} &amp; \cdots &amp; -a_{2 n} \<br>\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>-a_{r 1} &amp; -a_{r 2} &amp; \cdots &amp; \lambda-a_{r r} &amp; -a_{r(r+1)} &amp; \cdots &amp; -a_{r n} \<br>-a_{(r+1)1} &amp; -a_{(r+1)2} &amp; \cdots &amp; -a_{(r+1) r} &amp; \lambda-a_{(r+1) (r+1)} &amp; \cdots &amp; -a_{(r+1) n} \<br>\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>-a_{n 1} &amp; -a_{n 2} &amp; \cdots &amp; -a_{n r} &amp; -a_{n (r+1)} &amp; \cdots &amp; \lambda-a_{n n}<br>\end{array}\right|<br>$$<br>将 $\mathbf{A}$ 的特征行列式的第 $j$ 行 $(j&#x3D;1,2, \cdots, r)$ 分别乘以 $-k_{i j}$ 后均加到第 $i$ 行 $(i&#x3D;r+1, r+2, \cdots, n)$ 上得（注意：这里将第某一个行的倍数加到另外一行，不会改变行列式的大小。）<br>$$<br>\begin{gathered}<br>\left|\begin{array}{ccccccc}<br>\lambda-a_{11} &amp; -a_{12} &amp; \cdots &amp; -a_{1 r} &amp; -a_{1 (r+1)} &amp; \cdots &amp; -a_{1 n} \<br>-a_{21} &amp; \lambda-a_{22} &amp; \cdots &amp; -a_{2 r} &amp; -a_{2 (r+1)} &amp; \cdots &amp; -a_{2 n} \<br>\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>-a_{r 1} &amp; -a_{r 2} &amp; \cdots &amp; \lambda-a_{r r} &amp; -a_{r (r+1)} &amp; \cdots &amp; -a_{r n} \<br>-k_{(r+1)1} \lambda &amp; -k_{(r+1)2} \lambda &amp; \cdots &amp; -k_{(r+1) r} \lambda &amp; \lambda &amp; \cdots &amp; 0 \<br>\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>-k_{n 1} \lambda &amp; -k_{n 2} \lambda &amp; \cdots &amp; -k_{n r} \lambda &amp; 0 &amp; \cdots &amp; \lambda<br>\end{array}\right|&#x3D; \<br>\lambda^{n-r}\left|\begin{array}{ccccccc}<br>\lambda-a_{11} &amp; -a_{12} &amp; \cdots &amp; -a_{1 r} &amp; -a_{1 (r+1)} &amp; \cdots &amp; -a_{1 n} \<br>-a_{21} &amp; \lambda-a_{22} &amp; \cdots &amp; -a_{2 r} &amp; -a_{2 (r+1)} &amp; \cdots &amp; -a_{2 n} \<br>\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>-a_{r 1} &amp; -a_{r 2} &amp; \cdots &amp; \lambda-a_{r r} &amp; -a_{r (r+1)} &amp; \cdots &amp; -a_{r n} \<br>-k_{(r+1) 1} &amp; -k_{(r+1) 2} &amp; \cdots &amp; -k_{(r+1) r} &amp; 1 &amp; \cdots &amp; 0 \<br>\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>-k_{n 1} &amp; -k_{n 2} &amp; \cdots &amp; -k_{n r} &amp; 0 &amp; \cdots &amp; 1<br>\end{array}\right|&#x3D;\lambda^{n-r} g(\lambda)<br>\end{gathered}<br>$$</p>
+<h1>反例</h1>
+<p>先看一个反例</p>
+<p>对于下面的矩阵，其秩为 3 , 然而它的特征值均为 0 （三角矩阵的特征值等于对角线元素）。<br>
+$$<br>
+\mathbf{M} = \left( \begin{array}{c}<br>
+0 &amp; 1 &amp; 0 &amp; 0 \<br>
+0 &amp; 0 &amp; 1 &amp; 0 \<br>
+0 &amp; 0 &amp; 0 &amp; 1 \<br>
+0 &amp; 0 &amp; 0 &amp; 0 \</p>
+<p>\end{array} \right)<br>
+$$<br>
+这就说明方阵的秩不一定等于非零特征值的数目。</p>
+<h1>矩阵的秩 $r(A)$ 和非零特征值个数 $\mu(A)$ 间的关系</h1>
+<p><strong>定理1</strong>：对于任意 $n$ 阶方阵 $\mathbf(A)$ 都有 $r(\mathbf{A}) \geq \mu(\mathbf{A})$ 。</p>
+<p>证明：当矩阵 $\mathbf{A}$ 可逆时，$r(\mathbf{A}) = n$ ，此时我们设 $\lambda_{1}, \lambda_{2}, \cdots, \lambda_{n}$ 是矩阵 $\mathbf{A}$ 的全部特征根, 则 $|\mathbf{A}|=\lambda_{1} \lambda_{2} \cdots \lambda_{n} \neq 0$ (证明可参考<a href="https://vincere.fun/posts/c98e6ad5/">特征值的乘积与和</a> ), 从而 $\mathbf{A}$ 有 $n$ 个非零特征值, 故 $\mu(\mathbf{A})=n$,  此时  $r(\mathbf{A}) = \mu(\mathbf{A})$ ，上面的定理成立。</p>
+<p>当矩阵 $\mathbf{A}$ 不可逆时，此时 $r(\mathbf{A})=r&lt;n$ ，矩阵 $\mathbf{A}$ 的行向量组 $\alpha_{1}, \alpha_{2}, \cdots, \alpha_{n}$ 的秩是 $r$, 故该向量组中必有 $r$ 个向量线性无关，不妨设 前 $r$ 个向量 $\alpha_{1}, \alpha_{2}, \cdots, \alpha_{r}$ 线性无关,则 $\alpha_{r+1}, \alpha_{r+2}, \cdots, \alpha_{n}$ 均可由 $\alpha_{1}, \alpha_{2}, \cdots, \alpha_{r}$ 线性表出, 设 $\alpha_{i}= k_{i 1} \alpha_{1}+k_{i 2} \alpha_{2}+\cdots+k_{i r} \alpha_{r}, \quad i=r+1, r+2, \cdots, n $  ，则有<br>
+$$<br>
+|\lambda \boldsymbol{E}-\boldsymbol{A}|=\left|\begin{array}{ccccccc}<br>
+\lambda-a_{11} &amp; -a_{12} &amp; \cdots &amp; -a_{1 r} &amp; -a_{1 (r+1)} &amp; \cdots &amp; -a_{1 n} \<br>
+-a_{21} &amp; \lambda-a_{22} &amp; \cdots &amp; -a_{2 r} &amp; -a_{2 (r+1)} &amp; \cdots &amp; -a_{2 n} \<br>
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>
+-a_{r 1} &amp; -a_{r 2} &amp; \cdots &amp; \lambda-a_{r r} &amp; -a_{r(r+1)} &amp; \cdots &amp; -a_{r n} \<br>
+-a_{(r+1)1} &amp; -a_{(r+1)2} &amp; \cdots &amp; -a_{(r+1) r} &amp; \lambda-a_{(r+1) (r+1)} &amp; \cdots &amp; -a_{(r+1) n} \<br>
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>
+-a_{n 1} &amp; -a_{n 2} &amp; \cdots &amp; -a_{n r} &amp; -a_{n (r+1)} &amp; \cdots &amp; \lambda-a_{n n}<br>
+\end{array}\right|<br>
+$$<br>
+将 $\mathbf{A}$ 的特征行列式的第 $j$ 行 $(j=1,2, \cdots, r)$ 分别乘以 $-k_{i j}$ 后均加到第 $i$ 行 $(i=r+1, r+2, \cdots, n)$ 上得（注意：这里将第某一个行的倍数加到另外一行，不会改变行列式的大小。）<br>
+$$<br>
+\begin{gathered}<br>
+\left|\begin{array}{ccccccc}<br>
+\lambda-a_{11} &amp; -a_{12} &amp; \cdots &amp; -a_{1 r} &amp; -a_{1 (r+1)} &amp; \cdots &amp; -a_{1 n} \<br>
+-a_{21} &amp; \lambda-a_{22} &amp; \cdots &amp; -a_{2 r} &amp; -a_{2 (r+1)} &amp; \cdots &amp; -a_{2 n} \<br>
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>
+-a_{r 1} &amp; -a_{r 2} &amp; \cdots &amp; \lambda-a_{r r} &amp; -a_{r (r+1)} &amp; \cdots &amp; -a_{r n} \<br>
+-k_{(r+1)1} \lambda &amp; -k_{(r+1)2} \lambda &amp; \cdots &amp; -k_{(r+1) r} \lambda &amp; \lambda &amp; \cdots &amp; 0 \<br>
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>
+-k_{n 1} \lambda &amp; -k_{n 2} \lambda &amp; \cdots &amp; -k_{n r} \lambda &amp; 0 &amp; \cdots &amp; \lambda<br>
+\end{array}\right|= \<br>
+\lambda^{n-r}\left|\begin{array}{ccccccc}<br>
+\lambda-a_{11} &amp; -a_{12} &amp; \cdots &amp; -a_{1 r} &amp; -a_{1 (r+1)} &amp; \cdots &amp; -a_{1 n} \<br>
+-a_{21} &amp; \lambda-a_{22} &amp; \cdots &amp; -a_{2 r} &amp; -a_{2 (r+1)} &amp; \cdots &amp; -a_{2 n} \<br>
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>
+-a_{r 1} &amp; -a_{r 2} &amp; \cdots &amp; \lambda-a_{r r} &amp; -a_{r (r+1)} &amp; \cdots &amp; -a_{r n} \<br>
+-k_{(r+1) 1} &amp; -k_{(r+1) 2} &amp; \cdots &amp; -k_{(r+1) r} &amp; 1 &amp; \cdots &amp; 0 \<br>
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>
+-k_{n 1} &amp; -k_{n 2} &amp; \cdots &amp; -k_{n r} &amp; 0 &amp; \cdots &amp; 1<br>
+\end{array}\right|=\lambda^{n-r} g(\lambda)<br>
+\end{gathered}<br>
+$$</p>
 <p>由此可知，矩阵 $\mathbf{A}$ 至少有 $n-r$ 个零特征值, 从而 $\mathbf{A}$ 至多有 $r$ 个非零特征值, 因此有 $r(\mathbf{A}) \geqslant \mu(\mathbf{A})$ 。</p>
-<h1 id="r-mathbf-A-x3D-mu-mathbf-A-的充分条件"><a href="#r-mathbf-A-x3D-mu-mathbf-A-的充分条件" class="headerlink" title="$r(\mathbf{A})&#x3D;\mu(\mathbf{A})$ 的充分条件"></a>$r(\mathbf{A})&#x3D;\mu(\mathbf{A})$ 的充分条件</h1><h2 id="1-可对角化"><a href="#1-可对角化" class="headerlink" title="1 可对角化"></a>1 可对角化</h2><p><strong>定理2</strong>： 若矩阵 $\mathbf{A}$ 可对角化,则 $r(\mathbf{A})&#x3D;\mu(\mathbf{A})$.</p>
-<p>如果 $\mathbf{A}$ 可对角化.故存在可逆阵 $T$ 使得<br>$$<br>\boldsymbol{T}^{-1} \boldsymbol{A T}&#x3D;\left(\begin{array}{llll}<br>\lambda_{1} &amp; &amp; &amp; \<br>&amp; \lambda_{2} &amp; &amp; \<br>&amp; &amp; \ddots &amp; \<br>&amp; &amp; &amp; \lambda_{\mathrm{n}}<br>\end{array}\right)<br>$$</p>
-<p>其中 $\lambda_{1}, \lambda_{2}, \cdots, \lambda_{n}$ 是矩阵 $\mathbf{A}$ 的全部特征根 ，由于矩阵 $\mathbf{T}$ 可逆，故矩阵 $\mathbf{A}$ 的秩与对角矩阵的秩相同，即等于非零特征值数目，从而有 $r(\mathbf{A})&#x3D;\mu(\mathbf{A})$ 。</p>
+<h1>$r(\mathbf{A})=\mu(\mathbf{A})$ 的充分条件</h1>
+<h2 id="1-可对角化">1 可对角化</h2>
+<p><strong>定理2</strong>： 若矩阵 $\mathbf{A}$ 可对角化,则 $r(\mathbf{A})=\mu(\mathbf{A})$.</p>
+<p>如果 $\mathbf{A}$ 可对角化.故存在可逆阵 $T$ 使得<br>
+$$<br>
+\boldsymbol{T}^{-1} \boldsymbol{A T}=\left(\begin{array}{llll}<br>
+\lambda_{1} &amp; &amp; &amp; \<br>
+&amp; \lambda_{2} &amp; &amp; \<br>
+&amp; &amp; \ddots &amp; \<br>
+&amp; &amp; &amp; \lambda_{\mathrm{n}}<br>
+\end{array}\right)<br>
+$$</p>
+<p>其中 $\lambda_{1}, \lambda_{2}, \cdots, \lambda_{n}$ 是矩阵 $\mathbf{A}$ 的全部特征根 ，由于矩阵 $\mathbf{T}$ 可逆，故矩阵 $\mathbf{A}$ 的秩与对角矩阵的秩相同，即等于非零特征值数目，从而有 $r(\mathbf{A})=\mu(\mathbf{A})$ 。</p>
 <p><strong>推论 1</strong> 若矩阵 A 的秩与它的非零特征值个数不相等 ，则矩阵 A不可对角化．</p>
 <p>该推论是定理2的逆否命题，因此成立。</p>
 <p><strong>推论 2</strong> 实对称矩阵的秩与其非零特征 值个数相同。</p>
 <p>根据谱定理，实对称矩阵均可对角化，因此该结论成立</p>
-<p><strong>推论 3</strong>  设矩阵 $\mathbf{A}$ 是 $m \times n$  的实矩阵，则有 $r(\mathbf{A})  &#x3D;  \mu(\mathbf{AA^{T}}) &#x3D;  \mu(\mathbf{A^{T}A} )$ 。</p>
-<p>证明：由于矩阵 $\mathbf{A}$  是实矩 阵 ，从 而 $\mathbf{AA^{T}}$ 和 $\mathbf{A^{T}A}$  均实对称 ，由推论 2 得，$r(\mathbf{AA^{T}}) &#x3D; \mu(\mathbf{AA^{T}})$ ，$r(\mathbf{A^{T}A}) &#x3D; \mu(\mathbf{A^{T}A})$ ，又因为 $r(\mathbf{A})&#x3D;r\left(\mathbf{A A^{T}}\right)&#x3D;r\left(\mathbf{A^{T} A}\right)$ ，因此我们有  $r(\mathbf{A})  &#x3D;  \mu(\mathbf{AA^{T}}) &#x3D;  \mu(\mathbf{A^{T}A} )$ </p>
-<h2 id="2-矩阵可逆"><a href="#2-矩阵可逆" class="headerlink" title="2 矩阵可逆"></a>2 矩阵可逆</h2><p>证明见上。</p>
-<h1 id="r-mathbf-A-x3D-mu-mathbf-A-的充分必要条件"><a href="#r-mathbf-A-x3D-mu-mathbf-A-的充分必要条件" class="headerlink" title="$r(\mathbf{A})&#x3D;\mu(\mathbf{A})$ 的充分必要条件"></a>$r(\mathbf{A})&#x3D;\mu(\mathbf{A})$ 的充分必要条件</h1><p>暂时看不懂，放着</p>
-<p><img src="/posts/a67ad139/1.png"></p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<p><strong>推论 3</strong>  设矩阵 $\mathbf{A}$ 是 $m \times n$  的实矩阵，则有 $r(\mathbf{A})  =  \mu(\mathbf{AA^{T}}) =  \mu(\mathbf{A^{T}A} )$ 。</p>
+<p>证明：由于矩阵 $\mathbf{A}$  是实矩 阵 ，从 而 $\mathbf{AA^{T}}$ 和 $\mathbf{A^{T}A}$  均实对称 ，由推论 2 得，$r(\mathbf{AA^{T}}) = \mu(\mathbf{AA^{T}})$ ，$r(\mathbf{A^{T}A}) = \mu(\mathbf{A^{T}A})$ ，又因为 $r(\mathbf{A})=r\left(\mathbf{A A^{T}}\right)=r\left(\mathbf{A^{T} A}\right)$ ，因此我们有  $r(\mathbf{A})  =  \mu(\mathbf{AA^{T}}) =  \mu(\mathbf{A^{T}A} )$</p>
+<h2 id="2-矩阵可逆">2 矩阵可逆</h2>
+<p>证明见上。</p>
+<h1>$r(\mathbf{A})=\mu(\mathbf{A})$ 的充分必要条件</h1>
+<p>暂时看不懂，放着</p>
+<p><img src="1.png" alt=""></p>
+<h1>参考文献</h1>
+<ol>
 <li>张景晓.矩阵的秩与其非零特征值个数相等的条件J.德州学院学报,2012,28(4):5-8</li>
 </ol>
  
@@ -169,55 +225,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -516,30 +524,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

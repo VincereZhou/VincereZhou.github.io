@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">719</span>
+            <span class="post-count">717</span>
         </span>
     </span>
 
@@ -98,25 +98,38 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>模型创建的思想，很大程度上取决于 <em><strong>Bias-Variance Trade-off</strong></em> 。</p>
 <span id="more"></span>
-
-<h1 id="资料"><a href="#资料" class="headerlink" title="资料"></a>资料</h1><p><a target="_blank" rel="noopener" href="https://www.statlearning.com/">An Introduction to Statistical Learning</a>，下文简称 <strong>ISL</strong></p>
+<h1>资料</h1>
+<p><a target="_blank" rel="noopener" href="https://www.statlearning.com/">An Introduction to Statistical Learning</a>，下文简称 <strong>ISL</strong></p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/38853908">https://zhuanlan.zhihu.com/p/38853908</a></p>
 <p><a target="_blank" rel="noopener" href="http://scott.fortmann-roe.com/docs/BiasVariance.html">http://scott.fortmann-roe.com/docs/BiasVariance.html</a></p>
-<h1 id="Split-Test-Error"><a href="#Split-Test-Error" class="headerlink" title="Split Test Error"></a>Split Test Error</h1><p>对于一个特定的 x<sub>0</sub> 值，它的 test MSE 期望值可以拆分为三部分：方差(the variance) , 偏差（bias）平方 ，和随机残差。<br>$$<br>E\left(y_{0}-\hat{f}\left(x_{0}\right)\right)^{2}&#x3D;\operatorname{Var}\left(\hat{f}\left(x_{0}\right)\right)+\left[\operatorname{Bias}\left(\hat{f}\left(x_{0}\right)\right)\right]^{2}+\operatorname{Var}(\epsilon)<br>$$<br>test MSE 期望值的意思是，如果我们不停地从很多的训练集中拟合模型，然后每次都计算 x0 的 test MSE 的均值。</p>
+<h1>Split Test Error</h1>
+<p>对于一个特定的 x<sub>0</sub> 值，它的 test MSE 期望值可以拆分为三部分：方差(the variance) , 偏差（bias）平方 ，和随机残差。<br>
+$$<br>
+E\left(y_{0}-\hat{f}\left(x_{0}\right)\right)^{2}=\operatorname{Var}\left(\hat{f}\left(x_{0}\right)\right)+\left[\operatorname{Bias}\left(\hat{f}\left(x_{0}\right)\right)\right]^{2}+\operatorname{Var}(\epsilon)<br>
+$$<br>
+test MSE 期望值的意思是，如果我们不停地从很多的训练集中拟合模型，然后每次都计算 x0 的 test MSE 的均值。</p>
 <p>上面的公式中，随机残差项是不可减少的，为了最小化 <em>expected test error</em> ，我们需要同时做到 <em>low variance</em> 和 <em>low bias</em> 。</p>
-<h1 id="Variance"><a href="#Variance" class="headerlink" title="Variance"></a>Variance</h1><p>方差指的是如果用了一个不一样的 training set ，拟合出来的模型的变化幅度。因为使用的 training set 不同，拟合出来的模型参数肯定不同，但是理想情况下差距不会很大。</p>
-<h1 id="Bias"><a href="#Bias" class="headerlink" title="Bias"></a>Bias</h1><blockquote>
+<h1>Variance</h1>
+<p>方差指的是如果用了一个不一样的 training set ，拟合出来的模型的变化幅度。因为使用的 training set 不同，拟合出来的模型参数肯定不同，但是理想情况下差距不会很大。</p>
+<h1>Bias</h1>
+<blockquote>
 <p><strong>Bias</strong>是用<strong>所有可能的训练数据集</strong>训练出的<strong>所有模型</strong>的输出的<strong>平均值</strong>与<strong>真实模型</strong>的输出值之间的差异。</p>
 </blockquote>
-<p>就是说，如果我们不停地拟合模型，所有拟合模型的均值和真实模型的差异。公式如下：<br>$$<br>\operatorname{bias}(\boldsymbol{x})&#x3D;\bar{f}(\boldsymbol{x})-y<br>$$<br>举个例子，如果我们用 1000 个 training set 拟合 1000 次线性模型。对这1000次模型的参数求均值，得到一个最终的模型，然后预测 test data 中 x 的预测值，减去真值，这个差值就可以视为 bias。</p>
+<p>就是说，如果我们不停地拟合模型，所有拟合模型的均值和真实模型的差异。公式如下：<br>
+$$<br>
+\operatorname{bias}(\boldsymbol{x})=\bar{f}(\boldsymbol{x})-y<br>
+$$<br>
+举个例子，如果我们用 1000 个 training set 拟合 1000 次线性模型。对这1000次模型的参数求均值，得到一个最终的模型，然后预测 test data 中 x 的预测值，减去真值，这个差值就可以视为 bias。</p>
 <p>这1000次拟合的模型参数的方差，就是方差 variance 。</p>
-<h1 id="用图形来解释"><a href="#用图形来解释" class="headerlink" title="用图形来解释"></a>用图形来解释</h1><p><img src="/posts/8a41a048/1.png" alt="1"></p>
+<h1>用图形来解释</h1>
+<p><img src="1.png" alt="1"></p>
 <p>假设红色的靶心区域是学习算法完美的正确预测值，蓝色点为训练数据集所训练出的模型对样本的预测值，当我们从靶心逐渐往外移动时，预测效果逐渐变差。</p>
 <p>bias 就是预测值均值与靶心的举例，variance 就是预测值的离散程度。</p>
 <p>上图的个人解释：左上图是理想情况，右上图是过拟合（模型过于复杂，比如采用KNN算法），左下图是欠拟合（比如采用线性模型预测非线性关系），右下图是完全失败的模型（都很差）。</p>
-<h1 id="Variance-Bias-Trade-off"><a href="#Variance-Bias-Trade-off" class="headerlink" title="Variance-Bias Trade-off"></a>Variance-Bias Trade-off</h1><p>模型越复杂，bias 会越来越小，variance 会越来越大。但是模型过于复杂，可能发生过拟合现象（bias 很小，但是 variance，拟合出来的模型对于其他数据的预测效果很差）。</p>
+<h1>Variance-Bias Trade-off</h1>
+<p>模型越复杂，bias 会越来越小，variance 会越来越大。但是模型过于复杂，可能发生过拟合现象（bias 很小，但是 variance，拟合出来的模型对于其他数据的预测效果很差）。</p>
 <p>然后总的 test error 会随着模型复杂度呈现一个 U 字型的变化。这就说明选择一个合适复杂度的模型很重要。</p>
-<p><img src="/posts/8a41a048/2.png" alt="1"></p>
+<p><img src="2.png" alt="1"></p>
  
       <!-- reward -->
       
@@ -170,55 +183,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -517,30 +482,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

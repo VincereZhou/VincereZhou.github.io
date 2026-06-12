@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.2k</span>
+            <span class="post-count">2.1k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">11 分钟</span>
+            <span class="post-count">10 分钟</span>
         </span>
     </span>
 </div>
@@ -98,46 +98,235 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>根据奇异值分解得到穆尔-彭罗斯伪逆的一个表达方式，同时证明不满秩情况下最小二乘问题的穆尔-彭罗斯伪逆的解为最小范数最小二乘解。</p>
 <span id="more"></span>
-
 <p>本章节内容主要来自于《Linear Algebra with Applications》的第七章数值线性代数。</p>
-<h1 id="奇异值分解"><a href="#奇异值分解" class="headerlink" title="奇异值分解"></a>奇异值分解</h1><p>简要介绍可见<a href="https://vincere.fun/posts/fc532062/#%E5%A5%87%E5%BC%82%E5%80%BC%E5%88%86%E8%A7%A3">PCA分析公式推导</a></p>
-<p>简单地说，任何一个矩阵 $\mathbf{A}$ ，均可以通过奇异值分解拆分为下式：<br>$$<br>\mathbf{A} &#x3D; \mathbf{U \Sigma V^{T}}<br>$$</p>
-<h1 id="穆尔-彭罗斯伪逆"><a href="#穆尔-彭罗斯伪逆" class="headerlink" title="穆尔-彭罗斯伪逆"></a>穆尔-彭罗斯伪逆</h1><p>我们知道矩阵 $\mathbf{A}$ 的一个广义逆只需要满足下式，但是这样的广义逆矩阵不是唯一的，存在明显的缺陷。<br>$$<br>\boldsymbol{A} \boldsymbol{A}^{-} \boldsymbol{A}&#x3D;\boldsymbol{A}<br>$$<br>如果一个实矩阵 $\mathbf{A}^{+}$ 满足下面四个条件 (常称 Moore-Penrose 条件)，则矩阵 $\mathbf{A}^{+}$ 是<strong>唯一</strong>的，称为穆尔-彭罗斯伪逆。</p>
-<p>(1) $\boldsymbol{A} \boldsymbol{A^+} \boldsymbol{A}&#x3D;\boldsymbol{A}$;<br>(2) $\boldsymbol{A^+} \boldsymbol{A} \boldsymbol{A^+}&#x3D;\boldsymbol{A^+} ;$<br>(3) $\boldsymbol{A A}^{+}$ 为实对称矩阵, 即 $\boldsymbol{A} \boldsymbol{A}^{+}&#x3D;\left(\boldsymbol{A} \boldsymbol{A}^{+}\right)^{\mathrm{T}}$;<br>(4) $\boldsymbol{A^+} \boldsymbol{A}$ 为实对称矩阵, 即 $\boldsymbol{A}^{+} \boldsymbol{A}&#x3D;\left(\boldsymbol{A}^{+} \boldsymbol{A}\right)^{\mathrm{T}}$ 。</p>
-<p>如果矩阵 $\mathbf{A}$ 是一个 $m \times n$ 的秩为 $r$ 的矩阵，我们将其进行奇异值分解，得到 $\mathbf{A} &#x3D; \mathbf{U \Sigma V^{T}}$ ，其中矩阵 $\mathbf{\Sigma}$ 是一个 $m \times n$ 的矩阵，并且可以拆分为 (注：矩阵 $\mathbf{A}$ 的秩等于非零的奇异值的数目)<br>$$<br>\mathbf{\Sigma}&#x3D;\left[\begin{array}{l|l}<br>\mathbf{\Sigma}<em>{1} &amp; O \<br>\hline O &amp; O<br>\end{array}\right]&#x3D;\left[\begin{array}{llll|l}<br>\sigma</em>{1} &amp; &amp; &amp; &amp; \<br>&amp; \sigma_{2} &amp; &amp; &amp; 0 \<br>&amp; &amp; \ddots &amp; &amp; \<br>\hline &amp; &amp; O &amp; &amp; 0<br>\end{array}\right]<br>$$</p>
-<p>同时我们定义 $\mathbf{\Sigma^+}$ 是一个 $n \times m $ 的矩阵<br>$$<br>\mathbf{\Sigma^+}&#x3D;\left[\begin{array}{c|c}<br>\mathbf{\Sigma}<em>{1}^{-1} &amp; O \<br>\hline O &amp; O<br>\end{array}\right]&#x3D;\left[\begin{array}{ccc|c}<br>\frac{1}{\sigma</em>{1}} &amp; \ddots &amp; &amp; O \<br>&amp; &amp; \frac{1}{\sigma_{r}} &amp; \<br>\hline &amp; &amp; O &amp; O<br>\end{array}\right]<br>$$<br>我们可以证明穆尔-彭罗斯伪逆可以表示为下式<br>$$<br>\mathbf{A^{+}}&#x3D;\mathbf{V \Sigma^{+} U^{\mathrm{T}}}<br>$$<br>易证明该式符合上面的四个条件。</p>
+<h1>奇异值分解</h1>
+<p>简要介绍可见<a href="https://vincere.fun/posts/fc532062/#%E5%A5%87%E5%BC%82%E5%80%BC%E5%88%86%E8%A7%A3">PCA分析公式推导</a></p>
+<p>简单地说，任何一个矩阵 $\mathbf{A}$ ，均可以通过奇异值分解拆分为下式：<br>
+$$<br>
+\mathbf{A} = \mathbf{U \Sigma V^{T}}<br>
+$$</p>
+<h1>穆尔-彭罗斯伪逆</h1>
+<p>我们知道矩阵 $\mathbf{A}$ 的一个广义逆只需要满足下式，但是这样的广义逆矩阵不是唯一的，存在明显的缺陷。<br>
+$$<br>
+\boldsymbol{A} \boldsymbol{A}^{-} \boldsymbol{A}=\boldsymbol{A}<br>
+$$<br>
+如果一个实矩阵 $\mathbf{A}^{+}$ 满足下面四个条件 (常称 Moore-Penrose 条件)，则矩阵 $\mathbf{A}^{+}$ 是<strong>唯一</strong>的，称为穆尔-彭罗斯伪逆。</p>
+<p>(1) $\boldsymbol{A} \boldsymbol{A^+} \boldsymbol{A}=\boldsymbol{A}$;<br>
+(2) $\boldsymbol{A^+} \boldsymbol{A} \boldsymbol{A^+}=\boldsymbol{A^+} ;$<br>
+(3) $\boldsymbol{A A}^{+}$ 为实对称矩阵, 即 $\boldsymbol{A} \boldsymbol{A}^{+}=\left(\boldsymbol{A} \boldsymbol{A}^{+}\right)^{\mathrm{T}}$;<br>
+(4) $\boldsymbol{A^+} \boldsymbol{A}$ 为实对称矩阵, 即 $\boldsymbol{A}^{+} \boldsymbol{A}=\left(\boldsymbol{A}^{+} \boldsymbol{A}\right)^{\mathrm{T}}$ 。</p>
+<p>如果矩阵 $\mathbf{A}$ 是一个 $m \times n$ 的秩为 $r$ 的矩阵，我们将其进行奇异值分解，得到 $\mathbf{A} = \mathbf{U \Sigma V^{T}}$ ，其中矩阵 $\mathbf{\Sigma}$ 是一个 $m \times n$ 的矩阵，并且可以拆分为 (注：矩阵 $\mathbf{A}$ 的秩等于非零的奇异值的数目)<br>
+$$<br>
+\mathbf{\Sigma}=\left[\begin{array}{l|l}<br>
+\mathbf{\Sigma}<em>{1} &amp; O \<br>
+\hline O &amp; O<br>
+\end{array}\right]=\left[\begin{array}{llll|l}<br>
+\sigma</em>{1} &amp; &amp; &amp; &amp; \<br>
+&amp; \sigma_{2} &amp; &amp; &amp; 0 \<br>
+&amp; &amp; \ddots &amp; &amp; \<br>
+\hline &amp; &amp; O &amp; &amp; 0<br>
+\end{array}\right]<br>
+$$</p>
+<p>同时我们定义 $\mathbf{\Sigma^+}$ 是一个 $n \times m $ 的矩阵<br>
+$$<br>
+\mathbf{\Sigma^+}=\left[\begin{array}{c|c}<br>
+\mathbf{\Sigma}<em>{1}^{-1} &amp; O \<br>
+\hline O &amp; O<br>
+\end{array}\right]=\left[\begin{array}{ccc|c}<br>
+\frac{1}{\sigma</em>{1}} &amp; \ddots &amp; &amp; O \<br>
+&amp; &amp; \frac{1}{\sigma_{r}} &amp; \<br>
+\hline &amp; &amp; O &amp; O<br>
+\end{array}\right]<br>
+$$<br>
+我们可以证明穆尔-彭罗斯伪逆可以表示为下式<br>
+$$<br>
+\mathbf{A^{+}}=\mathbf{V \Sigma^{+} U^{\mathrm{T}}}<br>
+$$<br>
+易证明该式符合上面的四个条件。</p>
 <p><strong>证明</strong>：</p>
-<p>首先易得 $\mathbf{\Sigma} \mathbf{\Sigma^{+}}$ 和 $\mathbf{\Sigma^{+}} \mathbf{\Sigma}$ 格式均为下式<br>$$<br>\left[\begin{array}{l|l}<br>\mathbf{I} &amp; O \<br>\hline O &amp; O<br>\end{array}\right]<br>$$<br>因此易得 $\mathbf{\Sigma} \mathbf{\Sigma^{+}} \mathbf{\Sigma} &#x3D; \mathbf{\Sigma}$ ， $\mathbf{\Sigma^{+}} \mathbf{\Sigma} \mathbf{\Sigma^{+}} &#x3D; \mathbf{\Sigma^{+}}$ ，同时   $\mathbf{\Sigma} \mathbf{\Sigma^{+}}$ 和 $\mathbf{\Sigma^{+}} \mathbf{\Sigma}$ 均为对称矩阵，因此  $\mathbf{\Sigma^{+}}$ 是  $\mathbf{\Sigma}$ 的穆尔-彭罗斯伪逆。</p>
-<p>然后我们证明 $ \mathbf{A^{+}}&#x3D;\mathbf{V \Sigma^{+} U^{\mathrm{T}}}$ 是 $\mathbf{A}$ 的 穆尔-彭罗斯伪逆，过程如下<br>$$<br>\begin{aligned}<br>\boldsymbol{A} \boldsymbol{A^+} \boldsymbol{A}<br>&amp; &#x3D; \mathbf{U \Sigma V^{T}} \mathbf{V \Sigma^{+} U^{\mathrm{T}}}   \mathbf{U \Sigma V^{T}} \<br>&amp;&#x3D; \mathbf{U \Sigma \Sigma^{+} \Sigma V^{T}} \<br>&amp;&#x3D; \mathbf{U \Sigma V^{T}} \<br>&amp;&#x3D; \mathbf{A} \</p>
+<p>首先易得 $\mathbf{\Sigma} \mathbf{\Sigma^{+}}$ 和 $\mathbf{\Sigma^{+}} \mathbf{\Sigma}$ 格式均为下式<br>
+$$<br>
+\left[\begin{array}{l|l}<br>
+\mathbf{I} &amp; O \<br>
+\hline O &amp; O<br>
+\end{array}\right]<br>
+$$<br>
+因此易得 $\mathbf{\Sigma} \mathbf{\Sigma^{+}} \mathbf{\Sigma} = \mathbf{\Sigma}$ ， $\mathbf{\Sigma^{+}} \mathbf{\Sigma} \mathbf{\Sigma^{+}} = \mathbf{\Sigma^{+}}$ ，同时   $\mathbf{\Sigma} \mathbf{\Sigma^{+}}$ 和 $\mathbf{\Sigma^{+}} \mathbf{\Sigma}$ 均为对称矩阵，因此  $\mathbf{\Sigma^{+}}$ 是  $\mathbf{\Sigma}$ 的穆尔-彭罗斯伪逆。</p>
+<p>然后我们证明 $ \mathbf{A^{+}}=\mathbf{V \Sigma^{+} U^{\mathrm{T}}}$ 是 $\mathbf{A}$ 的 穆尔-彭罗斯伪逆，过程如下<br>
+$$<br>
+\begin{aligned}<br>
+\boldsymbol{A} \boldsymbol{A^+} \boldsymbol{A}<br>
+&amp; = \mathbf{U \Sigma V^{T}} \mathbf{V \Sigma^{+} U^{\mathrm{T}}}   \mathbf{U \Sigma V^{T}} \<br>
+&amp;= \mathbf{U \Sigma \Sigma^{+} \Sigma V^{T}} \<br>
+&amp;= \mathbf{U \Sigma V^{T}} \<br>
+&amp;= \mathbf{A} \</p>
 <p>\</p>
-<p>\boldsymbol{A^+} \boldsymbol{A} \boldsymbol{A^+}<br>&amp;&#x3D; \mathbf{V \Sigma^{+} U^{\mathrm{T}}} \mathbf{U \Sigma V^{T}}   \mathbf{V \Sigma^{+} U^{\mathrm{T}}} \<br>&amp;&#x3D; \mathbf{V \Sigma^{+} \Sigma \Sigma^{+} U^{\mathrm{T}}} \<br>&amp;&#x3D; \mathbf{V \Sigma^{+}U^{\mathrm{T}}} \<br>&amp;&#x3D; \mathbf{A^{+}} \</p>
+<p>\boldsymbol{A^+} \boldsymbol{A} \boldsymbol{A^+}<br>
+&amp;= \mathbf{V \Sigma^{+} U^{\mathrm{T}}} \mathbf{U \Sigma V^{T}}   \mathbf{V \Sigma^{+} U^{\mathrm{T}}} \<br>
+&amp;= \mathbf{V \Sigma^{+} \Sigma \Sigma^{+} U^{\mathrm{T}}} \<br>
+&amp;= \mathbf{V \Sigma^{+}U^{\mathrm{T}}} \<br>
+&amp;= \mathbf{A^{+}} \</p>
 <p>\</p>
-<p>\left(\boldsymbol{A} \boldsymbol{A}^{+}\right)<br>&amp;&#x3D; \mathbf{U \Sigma V^{T}} \mathbf{V \Sigma^{+} U^{\mathrm{T}}} \<br>&amp;&#x3D; \mathbf{U \Sigma } \mathbf{ \Sigma^{+} U^{\mathrm{T}}} \</p>
-<p>\left(\boldsymbol{A} \boldsymbol{A}^{+}\right)^{\mathrm{T}}<br>&amp;&#x3D; (\mathbf{U \Sigma } \mathbf{ \Sigma^{+} U^{\mathrm{T}}} )^{\mathrm{T}} \<br>&amp;&#x3D; \mathbf{U} (\mathbf{ \Sigma  \Sigma^{+} })^{\mathrm{T}} \mathbf{ U^{\mathrm{T}}}  \<br>&amp;&#x3D; \mathbf{U} \mathbf{ \Sigma  \Sigma^{+} } \mathbf{ U^{\mathrm{T}}}  \<br>&amp;&#x3D; \boldsymbol{A} \boldsymbol{A}^{+}</p>
+<p>\left(\boldsymbol{A} \boldsymbol{A}^{+}\right)<br>
+&amp;= \mathbf{U \Sigma V^{T}} \mathbf{V \Sigma^{+} U^{\mathrm{T}}} \<br>
+&amp;= \mathbf{U \Sigma } \mathbf{ \Sigma^{+} U^{\mathrm{T}}} \</p>
+<p>\left(\boldsymbol{A} \boldsymbol{A}^{+}\right)^{\mathrm{T}}<br>
+&amp;= (\mathbf{U \Sigma } \mathbf{ \Sigma^{+} U^{\mathrm{T}}} )^{\mathrm{T}} \<br>
+&amp;= \mathbf{U} (\mathbf{ \Sigma  \Sigma^{+} })^{\mathrm{T}} \mathbf{ U^{\mathrm{T}}}  \<br>
+&amp;= \mathbf{U} \mathbf{ \Sigma  \Sigma^{+} } \mathbf{ U^{\mathrm{T}}}  \<br>
+&amp;= \boldsymbol{A} \boldsymbol{A}^{+}</p>
 <p>\</p>
-<p>\left(\boldsymbol{A}^{+} \boldsymbol{A}\right)<br>&amp;&#x3D; \mathbf{V \Sigma^{+} U^{\mathrm{T}}} \mathbf{U \Sigma V^{T}}   \<br>&amp;&#x3D; \mathbf{V \Sigma^{+} \Sigma V^{T}}  \</p>
-<p>\left(\boldsymbol{A}^{+} \boldsymbol{A}\right)^{\mathrm{T}}<br>&amp;&#x3D; (\mathbf{V \Sigma^{+} \Sigma V^{T}} )^{\mathrm{T}}  \<br>&amp;&#x3D; \mathbf{V (\Sigma^{+} \Sigma)^{\mathrm{T}} V^{T}} \<br>&amp;&#x3D; \mathbf{V \Sigma^{+} \Sigma V^{T}} \<br>&amp;&#x3D; \boldsymbol{A^{+}} \boldsymbol{A}\</p>
-<p>\end{aligned}<br>$$</p>
-<h1 id="满秩情况下的最小二乘解"><a href="#满秩情况下的最小二乘解" class="headerlink" title="满秩情况下的最小二乘解"></a>满秩情况下的最小二乘解</h1><p>在正规方程组 $\mathbf{A^{\mathrm{T}} A} \mathbf{x} &#x3D; \mathbf{A^{\mathrm{T}} b}$ 中，如果 $\mathbf{A}$ 是一个 $m \times n$ 且秩为 $n$ 的满秩矩阵，$\mathbf{A}$ 的奇异值分解为 $\mathbf{A} &#x3D; \mathbf{U \Sigma V^{T}}$ ，因此我们有<br>$$<br>\begin{aligned}<br>\left(\boldsymbol{A}^{\mathrm{T}} \boldsymbol{A}\right)^{-1}<br>&amp;&#x3D; (\mathbf{V \Sigma^{T} U^{T}} \mathbf{U \Sigma V^{T}})^{-1} \<br>&amp;&#x3D; (\mathbf{V \Sigma^{T} \Sigma V^{T}})^{-1} \<br>&amp;&#x3D; \mathbf{V (\Sigma^{T} \Sigma)^{-1} V^{T}} \</p>
-<p>\end{aligned}<br>$$<br>此时 $\mathbf{\Sigma}$ 的拆分形式为<br>$$<br>\mathbf{\Sigma}&#x3D;\left[\begin{array}{r}<br>\mathbf{\Sigma}<em>{1} \<br>\mathbf{0}<br>\end{array}\right]<br>$$<br>因此 $\mathbf{\Sigma^{T} \Sigma} &#x3D; \mathbf{\Sigma^{T}</em>{1} \Sigma_{1}} &#x3D; \mathbf{\Sigma_{1}^{2}}$ ，因此我们得到<br>$$<br>\left(\boldsymbol{A}^{\mathrm{T}} \boldsymbol{A}\right)^{-1} &#x3D; \mathbf{V \Sigma^{-2}_{1} V^{T}}<br>$$</p>
-<p>正规方程组的解为<br>$$<br>\begin{aligned}<br>\mathbf{x} </p>
-<p>&amp;&#x3D; \left(\boldsymbol{A}^{\mathrm{T}} \boldsymbol{A}\right)^{-1} \boldsymbol{A}^{\mathrm{T}} \boldsymbol{b}\</p>
-<p>&amp;&#x3D; \mathbf{V \Sigma^{-2}_{1} V^{T}} \mathbf{V \Sigma^{T} U^{T}} \mathbf{b} \</p>
-<p>&amp;&#x3D; \mathbf{V \Sigma^{-2}_{1}  \Sigma^{T} U^{T}} \mathbf{b} \</p>
-<p>&amp;&#x3D; \mathbf{V \Sigma^{-2}<em>{1}  \left[\begin{array}{r}<br>\mathbf{\Sigma}</em>{1} &amp;<br>\mathbf{0}<br>\end{array}\right] U^{T}} \mathbf{b} \</p>
-<p>&amp;&#x3D; \mathbf{V   \left[\begin{array}{r}<br>\mathbf{\Sigma}_{1}^{-1} &amp;<br>\mathbf{0}<br>\end{array}\right] U^{T}} \mathbf{b} \</p>
-<p>&amp;&#x3D; \mathbf{V   \Sigma^{+} U^{T} \mathbf{b}} \</p>
-<p>&amp;&#x3D; \mathbf{A^{+} b}</p>
-<p>\end{aligned}<br>$$<br>也就是说，如果 $\mathbf{A}$ 满秩，那么最小二乘问题的解为 $\mathbf{A^{+} b}$ 。</p>
-<h1 id="不满秩情况下的最小范数最小二乘解"><a href="#不满秩情况下的最小范数最小二乘解" class="headerlink" title="不满秩情况下的最小范数最小二乘解"></a>不满秩情况下的最小范数最小二乘解</h1><p>不满秩情况下，最小二乘问题有无穷多个解，我们证明  $\mathbf{A^{+} b}$  不仅是其中的一个解，而且是 L2 范数最小的解，即<strong>最小范数最小二乘解</strong>。</p>
-<p>此时设 $\mathbf{A}$ 是一个 $m \times n$ 且秩为 $r &lt; n$ 的不满秩矩阵，$\mathbf{A}$ 的奇异值分解为 $\mathbf{A} &#x3D; \mathbf{U \Sigma V^{T}}$ 。</p>
-<p>令 $\mathbf{x}$ 为 $\mathrm{R^{n}}$ 中的一个向量，并定义<br>$$<br>\mathbf{c}&#x3D;\mathbf{U}^{\mathrm{T}} \boldsymbol{b}&#x3D;\left[\begin{array}{l}<br>\boldsymbol{c}<em>{1} \<br>\boldsymbol{c}</em>{2}<br>\end{array}\right] \quad \text { , } \quad \boldsymbol{y}&#x3D;V^{\mathrm{T}} \boldsymbol{x}&#x3D;\left[\begin{array}{l}<br>\boldsymbol{y}<em>{1} \<br>\boldsymbol{y}</em>{2}<br>\end{array}\right]<br>$$<br>其中  $\mathbf{c}<em>{1}$ 和 $\mathbf{y}</em>{1}$ 均为 $\mathrm{R^{r}}$ 中的一个向量，由于 $\mathbf{U^{T}}$ 是一个正交矩阵，因此我们有<br>$$<br>\begin{aligned}<br>|\boldsymbol{b}-\mathbf{A} \boldsymbol{x}|_{2}^{2}</p>
-<p>&amp;&#x3D;|\mathbf{U}^{\mathrm{T}} (\boldsymbol{b}-\mathbf{A} \boldsymbol{x})|_{2}^{2} \</p>
-<p>&amp;&#x3D;\left|\mathbf{U}^{\mathrm{T}} \boldsymbol{b}-\mathbf{\Sigma}\left(\mathbf{V}^{\mathrm{T}} \boldsymbol{x}\right)\right|<em>{2}^{2}\<br>&amp;&#x3D;|\mathbf{c}-\mathbf{\Sigma y}|</em>{2}^{2}\<br>&amp;&#x3D;\left|\left[\begin{array}{l}<br>\mathbf{c_{1}} \<br>\mathbf{c_{2}}<br>\end{array}\right]-\left[\begin{array}{cc}<br>\mathbf{\Sigma_{1}} &amp; \mathbf{O} \<br>\mathbf{O} &amp; \mathbf{O}<br>\end{array}\right]\left[\begin{array}{l}<br>\mathbf{y_{1}} \<br>\mathbf{y_{2}}<br>\end{array}\right]\right|<em>{2}^{2}\<br>&amp;&#x3D;\left|\left[\begin{array}{c}<br>\mathbf{c</em>{1}-\Sigma_{1} y_{1}} \<br>\mathbf{c_{2}}<br>\end{array}\right]\right|<em>{2}^{2}\<br>&amp;&#x3D;\left|\mathbf{c</em>{1}-\Sigma_{1} y_{1}}\right|<em>{2}^{2}+\left|\mathbf{c</em>{2}}\right|<em>{2}^{2}<br>\end{aligned}<br>$$<br>由于 $\mathbf{c}</em>{2}$ 与 $\mathbf{x}$ (线性) 无关，可得 $|\boldsymbol{b}-\mathbf{A} \boldsymbol{x}|<em>{2}^{2}$ 取得最小值的充要条件为 $\mathbf{c</em>{1}-\Sigma_{1} y_{1} &#x3D; 0}$ 。</p>
-<p>因此最小二乘解的充要条件为 $\mathbf{x &#x3D; Vy}$ ，其中 $\mathbf{y}$ 向量的形式为<br>$$<br>\left[\begin{array}{c}<br>\mathbf{\Sigma_{1}^{-1} c_{1}} \<br>\mathbf{y_{2}}<br>\end{array}\right]<br>$$<br>当 $\mathbf{y}<em>{2} &#x3D; \mathbf{0}$ 时，此时的 $\mathbf{x}$ 为<br>$$<br>\begin{aligned}<br>\boldsymbol{x} &amp;&#x3D; \mathbf{V}\left[\begin{array}{cc}<br>\mathbf{\Sigma</em>{1}^{-1}} \boldsymbol{c}<em>{1} \<br>\mathbf{0}<br>\end{array}\right] \<br>&amp;&#x3D;\mathbf{V} \left[\begin{array}{cc}<br>\mathbf{\Sigma</em>{1}}^{-1} &amp; \mathbf{O} \<br>\mathbf{O} &amp; \mathbf{O}<br>\end{array}\right]\left[\begin{array}{l}<br>\boldsymbol{c}<em>{1} \<br>\boldsymbol{c}</em>{2}<br>\end{array}\right] \<br>&amp;&#x3D;\mathbf{V \Sigma^{+} U^{\mathrm{T}}} \boldsymbol{b} \<br>&amp;&#x3D;\mathbf{A^{+}} \boldsymbol{b}<br>\end{aligned}<br>$$<br>也就是说证明了   $\mathbf{A^{+} b}$  是其中的一个解。</p>
-<p>如果 $\mathbf{z}$ 是任何其他的解，则  $\mathbf{z}$  的形式必须为<br>$$<br>\mathbf{z}&#x3D;\mathbf{V y}&#x3D;\mathbf{V}\left[\begin{array}{l}<br>\mathbf{\Sigma_{1}^{-1} c_{1}} \<br>\mathbf{y_{2}}<br>\end{array}\right]<br>$$<br>其中 $\mathbf{y}<em>{2} \neq \mathbf{0}$  由此可得<br>$$<br>|\mathbf{z}|^{2}&#x3D;|\mathbf{y}|^{2}&#x3D;\left|\mathbf{\Sigma</em>{1}^{-1} c_{1}}\right|^{2}+\left|\mathbf{y_{2}}\right|^{2}&gt;\left|\mathbf{\Sigma_{1}^{-1} c_{1}}\right|^{2}&#x3D;|\mathbf{x}|^{2}<br>$$<br>因此我们证明了   $\mathbf{A^{+} b}$  是最小范数最小二乘解。</p>
-<h2 id="证明-mathbf-A-mathrm-’-A-A-prime-x3D-A"><a href="#证明-mathbf-A-mathrm-’-A-A-prime-x3D-A" class="headerlink" title="证明  $\mathbf{(A^{\mathrm{’}} A)^{+}A^{\prime} &#x3D; A^{+}}$"></a>证明  $\mathbf{(A^{\mathrm{’}} A)^{+}A^{\prime} &#x3D; A^{+}}$</h2><p>如果我们对正规方程组 $\mathbf{A^{\mathrm{‘}} A} \mathbf{x} &#x3D; \mathbf{A^{\mathrm{‘}} b}$ 直接求伪逆，得到 $ \mathbf{x &#x3D; (A^{\mathrm{‘}} A)^{+}A^{‘} b}$ ，因此应该存在  $\mathbf{(A^{\mathrm{‘}} A)^{+}A^{‘} &#x3D; A^{+}}$  ，证明这个式子需要用到穆尔-彭罗斯伪逆的一些性质。</p>
-<p>首先我们证明 $\left(\mathbf{A}^{\prime} \mathbf{A}\right)^{\mathbf{+}}&#x3D;\mathbf{A^+}\left(\mathbf{A^+}\right)^{\prime}$ ，根据  $\mathbf{A} &#x3D; \mathbf{U \Sigma V^{\prime}}$ ，我们得到  $\mathbf{A’A} &#x3D; \mathbf{V (\Sigma^{‘} \Sigma) V^{’}}$ ，易证明该式就是 $\mathbf{A’A}$  的奇异值分解形式，因此  $\mathbf{(A’A)^{+}} &#x3D; \mathbf{V (\Sigma^{‘} \Sigma)^{+} V^{\prime}}$ , 其中  $\mathbf{\Sigma^{‘}} \mathbf{\Sigma}$ 格式为下式<br>$$<br>\left[\begin{array}{l|l}<br>\mathbf{\Sigma_{1}^{2}} &amp; O \<br>\hline O &amp; O<br>\end{array}\right]<br>$$<br>易得  $(\mathbf{\Sigma^{‘}} \mathbf{\Sigma})^{+} &#x3D; \mathbf{\Sigma^{+}} \mathbf{(\Sigma^{‘})^{+}} &#x3D; \mathbf{\Sigma^{+}} \mathbf{(\Sigma^{+})^{‘}}$  ，因此我们得证<br>$$<br>\mathbf{(A’A)^{+}} &#x3D; \mathbf{V (\Sigma^{‘} \Sigma)^{+} V^{\prime}}  &#x3D; \mathbf{V \mathbf{\Sigma^{+}} \mathbf{(\Sigma^{+})^{‘}} V^{\prime}} &#x3D; \mathbf{V \Sigma^{+} U^{T} U (\Sigma^{+})^{‘} V^{\prime}} &#x3D;\mathbf{A^+}\left(\mathbf{A^+}\right)^{\prime}<br>$$<br>因此，我们有<br>$$<br>\begin{aligned}<br>\mathbf{(A^{\mathrm{‘}} A)^{+}A^{‘}}<br>&amp; &#x3D; \mathbf{A^+}\left(\mathbf{A^+}\right)^{\prime} \mathbf{A^{‘}} \<br>&amp; &#x3D; \mathbf{A^+}\left(\mathbf{AA^+}\right)^{\prime} \<br>&amp; &#x3D; \mathbf{A^+}\left(\mathbf{AA^+}\right) \<br>&amp;&#x3D; \mathbf{A^+} \<br>\end{aligned}<br>$$<br>得证。</p>
+<p>\left(\boldsymbol{A}^{+} \boldsymbol{A}\right)<br>
+&amp;= \mathbf{V \Sigma^{+} U^{\mathrm{T}}} \mathbf{U \Sigma V^{T}}   \<br>
+&amp;= \mathbf{V \Sigma^{+} \Sigma V^{T}}  \</p>
+<p>\left(\boldsymbol{A}^{+} \boldsymbol{A}\right)^{\mathrm{T}}<br>
+&amp;= (\mathbf{V \Sigma^{+} \Sigma V^{T}} )^{\mathrm{T}}  \<br>
+&amp;= \mathbf{V (\Sigma^{+} \Sigma)^{\mathrm{T}} V^{T}} \<br>
+&amp;= \mathbf{V \Sigma^{+} \Sigma V^{T}} \<br>
+&amp;= \boldsymbol{A^{+}} \boldsymbol{A}\</p>
+<p>\end{aligned}<br>
+$$</p>
+<h1>满秩情况下的最小二乘解</h1>
+<p>在正规方程组 $\mathbf{A^{\mathrm{T}} A} \mathbf{x} = \mathbf{A^{\mathrm{T}} b}$ 中，如果 $\mathbf{A}$ 是一个 $m \times n$ 且秩为 $n$ 的满秩矩阵，$\mathbf{A}$ 的奇异值分解为 $\mathbf{A} = \mathbf{U \Sigma V^{T}}$ ，因此我们有<br>
+$$<br>
+\begin{aligned}<br>
+\left(\boldsymbol{A}^{\mathrm{T}} \boldsymbol{A}\right)^{-1}<br>
+&amp;= (\mathbf{V \Sigma^{T} U^{T}} \mathbf{U \Sigma V^{T}})^{-1} \<br>
+&amp;= (\mathbf{V \Sigma^{T} \Sigma V^{T}})^{-1} \<br>
+&amp;= \mathbf{V (\Sigma^{T} \Sigma)^{-1} V^{T}} \</p>
+<p>\end{aligned}<br>
+$$<br>
+此时 $\mathbf{\Sigma}$ 的拆分形式为<br>
+$$<br>
+\mathbf{\Sigma}=\left[\begin{array}{r}<br>
+\mathbf{\Sigma}<em>{1} \<br>
+\mathbf{0}<br>
+\end{array}\right]<br>
+$$<br>
+因此 $\mathbf{\Sigma^{T} \Sigma} = \mathbf{\Sigma^{T}</em>{1} \Sigma_{1}} = \mathbf{\Sigma_{1}^{2}}$ ，因此我们得到<br>
+$$<br>
+\left(\boldsymbol{A}^{\mathrm{T}} \boldsymbol{A}\right)^{-1} = \mathbf{V \Sigma^{-2}_{1} V^{T}}<br>
+$$</p>
+<p>正规方程组的解为<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{x}</p>
+<p>&amp;= \left(\boldsymbol{A}^{\mathrm{T}} \boldsymbol{A}\right)^{-1} \boldsymbol{A}^{\mathrm{T}} \boldsymbol{b}\</p>
+<p>&amp;= \mathbf{V \Sigma^{-2}_{1} V^{T}} \mathbf{V \Sigma^{T} U^{T}} \mathbf{b} \</p>
+<p>&amp;= \mathbf{V \Sigma^{-2}_{1}  \Sigma^{T} U^{T}} \mathbf{b} \</p>
+<p>&amp;= \mathbf{V \Sigma^{-2}<em>{1}  \left[\begin{array}{r}<br>
+\mathbf{\Sigma}</em>{1} &amp;<br>
+\mathbf{0}<br>
+\end{array}\right] U^{T}} \mathbf{b} \</p>
+<p>&amp;= \mathbf{V   \left[\begin{array}{r}<br>
+\mathbf{\Sigma}_{1}^{-1} &amp;<br>
+\mathbf{0}<br>
+\end{array}\right] U^{T}} \mathbf{b} \</p>
+<p>&amp;= \mathbf{V   \Sigma^{+} U^{T} \mathbf{b}} \</p>
+<p>&amp;= \mathbf{A^{+} b}</p>
+<p>\end{aligned}<br>
+$$<br>
+也就是说，如果 $\mathbf{A}$ 满秩，那么最小二乘问题的解为 $\mathbf{A^{+} b}$ 。</p>
+<h1>不满秩情况下的最小范数最小二乘解</h1>
+<p>不满秩情况下，最小二乘问题有无穷多个解，我们证明  $\mathbf{A^{+} b}$  不仅是其中的一个解，而且是 L2 范数最小的解，即<strong>最小范数最小二乘解</strong>。</p>
+<p>此时设 $\mathbf{A}$ 是一个 $m \times n$ 且秩为 $r &lt; n$ 的不满秩矩阵，$\mathbf{A}$ 的奇异值分解为 $\mathbf{A} = \mathbf{U \Sigma V^{T}}$ 。</p>
+<p>令 $\mathbf{x}$ 为 $\mathrm{R^{n}}$ 中的一个向量，并定义<br>
+$$<br>
+\mathbf{c}=\mathbf{U}^{\mathrm{T}} \boldsymbol{b}=\left[\begin{array}{l}<br>
+\boldsymbol{c}<em>{1} \<br>
+\boldsymbol{c}</em>{2}<br>
+\end{array}\right] \quad \text { , } \quad \boldsymbol{y}=V^{\mathrm{T}} \boldsymbol{x}=\left[\begin{array}{l}<br>
+\boldsymbol{y}<em>{1} \<br>
+\boldsymbol{y}</em>{2}<br>
+\end{array}\right]<br>
+$$<br>
+其中  $\mathbf{c}<em>{1}$ 和 $\mathbf{y}</em>{1}$ 均为 $\mathrm{R^{r}}$ 中的一个向量，由于 $\mathbf{U^{T}}$ 是一个正交矩阵，因此我们有<br>
+$$<br>
+\begin{aligned}<br>
+|\boldsymbol{b}-\mathbf{A} \boldsymbol{x}|_{2}^{2}</p>
+<p>&amp;=|\mathbf{U}^{\mathrm{T}} (\boldsymbol{b}-\mathbf{A} \boldsymbol{x})|_{2}^{2} \</p>
+<p>&amp;=\left|\mathbf{U}^{\mathrm{T}} \boldsymbol{b}-\mathbf{\Sigma}\left(\mathbf{V}^{\mathrm{T}} \boldsymbol{x}\right)\right|<em>{2}^{2}\<br>
+&amp;=|\mathbf{c}-\mathbf{\Sigma y}|</em>{2}^{2}\<br>
+&amp;=\left|\left[\begin{array}{l}<br>
+\mathbf{c_{1}} \<br>
+\mathbf{c_{2}}<br>
+\end{array}\right]-\left[\begin{array}{cc}<br>
+\mathbf{\Sigma_{1}} &amp; \mathbf{O} \<br>
+\mathbf{O} &amp; \mathbf{O}<br>
+\end{array}\right]\left[\begin{array}{l}<br>
+\mathbf{y_{1}} \<br>
+\mathbf{y_{2}}<br>
+\end{array}\right]\right|<em>{2}^{2}\<br>
+&amp;=\left|\left[\begin{array}{c}<br>
+\mathbf{c</em>{1}-\Sigma_{1} y_{1}} \<br>
+\mathbf{c_{2}}<br>
+\end{array}\right]\right|<em>{2}^{2}\<br>
+&amp;=\left|\mathbf{c</em>{1}-\Sigma_{1} y_{1}}\right|<em>{2}^{2}+\left|\mathbf{c</em>{2}}\right|<em>{2}^{2}<br>
+\end{aligned}<br>
+$$<br>
+由于 $\mathbf{c}</em>{2}$ 与 $\mathbf{x}$ (线性) 无关，可得 $|\boldsymbol{b}-\mathbf{A} \boldsymbol{x}|<em>{2}^{2}$ 取得最小值的充要条件为 $\mathbf{c</em>{1}-\Sigma_{1} y_{1} = 0}$ 。</p>
+<p>因此最小二乘解的充要条件为 $\mathbf{x = Vy}$ ，其中 $\mathbf{y}$ 向量的形式为<br>
+$$<br>
+\left[\begin{array}{c}<br>
+\mathbf{\Sigma_{1}^{-1} c_{1}} \<br>
+\mathbf{y_{2}}<br>
+\end{array}\right]<br>
+$$<br>
+当 $\mathbf{y}<em>{2} = \mathbf{0}$ 时，此时的 $\mathbf{x}$ 为<br>
+$$<br>
+\begin{aligned}<br>
+\boldsymbol{x} &amp;= \mathbf{V}\left[\begin{array}{cc}<br>
+\mathbf{\Sigma</em>{1}^{-1}} \boldsymbol{c}<em>{1} \<br>
+\mathbf{0}<br>
+\end{array}\right] \<br>
+&amp;=\mathbf{V} \left[\begin{array}{cc}<br>
+\mathbf{\Sigma</em>{1}}^{-1} &amp; \mathbf{O} \<br>
+\mathbf{O} &amp; \mathbf{O}<br>
+\end{array}\right]\left[\begin{array}{l}<br>
+\boldsymbol{c}<em>{1} \<br>
+\boldsymbol{c}</em>{2}<br>
+\end{array}\right] \<br>
+&amp;=\mathbf{V \Sigma^{+} U^{\mathrm{T}}} \boldsymbol{b} \<br>
+&amp;=\mathbf{A^{+}} \boldsymbol{b}<br>
+\end{aligned}<br>
+$$<br>
+也就是说证明了   $\mathbf{A^{+} b}$  是其中的一个解。</p>
+<p>如果 $\mathbf{z}$ 是任何其他的解，则  $\mathbf{z}$  的形式必须为<br>
+$$<br>
+\mathbf{z}=\mathbf{V y}=\mathbf{V}\left[\begin{array}{l}<br>
+\mathbf{\Sigma_{1}^{-1} c_{1}} \<br>
+\mathbf{y_{2}}<br>
+\end{array}\right]<br>
+$$<br>
+其中 $\mathbf{y}<em>{2} \neq \mathbf{0}$  由此可得<br>
+$$<br>
+|\mathbf{z}|^{2}=|\mathbf{y}|^{2}=\left|\mathbf{\Sigma</em>{1}^{-1} c_{1}}\right|^{2}+\left|\mathbf{y_{2}}\right|^{2}&gt;\left|\mathbf{\Sigma_{1}^{-1} c_{1}}\right|^{2}=|\mathbf{x}|^{2}<br>
+$$<br>
+因此我们证明了   $\mathbf{A^{+} b}$  是最小范数最小二乘解。</p>
+<h2 id="证明-mathbf-A-mathrm-’-A-A-prime-A">证明  $\mathbf{(A^{\mathrm{’}} A)^{+}A^{\prime} = A^{+}}$</h2>
+<p>如果我们对正规方程组 $\mathbf{A^{\mathrm{‘}} A} \mathbf{x} = \mathbf{A^{\mathrm{’}} b}$ 直接求伪逆，得到 $ \mathbf{x = (A^{\mathrm{‘}} A)^{+}A^{’} b}$ ，因此应该存在  $\mathbf{(A^{\mathrm{‘}} A)^{+}A^{’} = A^{+}}$  ，证明这个式子需要用到穆尔-彭罗斯伪逆的一些性质。</p>
+<p>首先我们证明 $\left(\mathbf{A}^{\prime} \mathbf{A}\right)^{\mathbf{+}}=\mathbf{A^+}\left(\mathbf{A^+}\right)^{\prime}$ ，根据  $\mathbf{A} = \mathbf{U \Sigma V^{\prime}}$ ，我们得到  $\mathbf{A’A} = \mathbf{V (\Sigma^{‘} \Sigma) V^{’}}$ ，易证明该式就是 $\mathbf{A’A}$  的奇异值分解形式，因此  $\mathbf{(A’A)^{+}} = \mathbf{V (\Sigma^{’} \Sigma)^{+} V^{\prime}}$ , 其中  $\mathbf{\Sigma^{‘}} \mathbf{\Sigma}$ 格式为下式<br>
+$$<br>
+\left[\begin{array}{l|l}<br>
+\mathbf{\Sigma_{1}^{2}} &amp; O \<br>
+\hline O &amp; O<br>
+\end{array}\right]<br>
+$$<br>
+易得  $(\mathbf{\Sigma^{’}} \mathbf{\Sigma})^{+} = \mathbf{\Sigma^{+}} \mathbf{(\Sigma^{‘})^{+}} = \mathbf{\Sigma^{+}} \mathbf{(\Sigma^{+})^{’}}$  ，因此我们得证<br>
+$$<br>
+\mathbf{(A’A)^{+}} = \mathbf{V (\Sigma^{‘} \Sigma)^{+} V^{\prime}}  = \mathbf{V \mathbf{\Sigma^{+}} \mathbf{(\Sigma^{+})^{’}} V^{\prime}} = \mathbf{V \Sigma^{+} U^{T} U (\Sigma^{+})^{‘} V^{\prime}} =\mathbf{A^+}\left(\mathbf{A^+}\right)^{\prime}<br>
+$$<br>
+因此，我们有<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{(A^{\mathrm{’}} A)^{+}A^{‘}}<br>
+&amp; = \mathbf{A^+}\left(\mathbf{A^+}\right)^{\prime} \mathbf{A^{’}} \<br>
+&amp; = \mathbf{A^+}\left(\mathbf{AA^+}\right)^{\prime} \<br>
+&amp; = \mathbf{A^+}\left(\mathbf{AA^+}\right) \<br>
+&amp;= \mathbf{A^+} \<br>
+\end{aligned}<br>
+$$<br>
+得证。</p>
  
       <!-- reward -->
       
@@ -185,55 +374,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -532,30 +673,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

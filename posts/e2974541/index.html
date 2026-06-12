@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.5k</span>
+            <span class="post-count">2.4k</span>
         </span>
     </span>
 
@@ -98,31 +98,85 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>利用微卫星标记 (STR) 可以进行亲权鉴定，这里主要是介绍其中用到的一些指标。</p>
 <span id="more"></span>
-
-<h1 id="亲权鉴定"><a href="#亲权鉴定" class="headerlink" title="亲权鉴定"></a>亲权鉴定</h1><p>先看几个概念：</p>
+<h1>亲权鉴定</h1>
+<p>先看几个概念：</p>
 <p><strong>三联体亲权鉴定</strong> (parentage testing of trios)：被检测男子、孩子生母与孩子，或者被检测女子，孩子生父与孩子的亲权鉴定</p>
 <p><strong>二联体亲权鉴定</strong> (parentage testing of duos)：被检测男子与孩子，或被检测女子与孩子的亲权鉴定</p>
-<h2 id="排除概率"><a href="#排除概率" class="headerlink" title="排除概率"></a>排除概率</h2><p><strong>排除概率</strong> （power of exclusion, PE）：不是孩子生父或生母的随机个体，能够被遗传标记排除血缘关系的概率。简单地说，就是使用单个标记能将假父亲（非生父）正确排除的概率。</p>
-<p>排除概率是对于单个标记而言的，在 SF&#x2F;Z JD0105001-2016 《亲权鉴定技术规范》给出的公式如下（下面推导过程有更加清晰的公式）</p>
-<p><img src="/posts/e2974541/1.png"></p>
-<p><strong>累积排除概率</strong> （cumulative power of exclusion, CPE）：顾名思义，就是使用所有位点的累积排除概率，其计算公式如下，其中 $m$ 为标记数目<br>$$<br>\mathrm{CPE} &#x3D; 1  - \prod_{i&#x3D;1}^{m}(1-\mathrm{PE}<em>{i})<br>$$<br>这个公式解释一下，$1-\mathrm{PE}</em>{i}$ 就是标记 $i$ 不能排除随机样本是真实亲本的概率，所有位点连乘的结果就是所有位点都不能排除随机样本的概率，1减去这个值就是至少有一个位点能够排除随机样本的概率。</p>
+<h2 id="排除概率">排除概率</h2>
+<p><strong>排除概率</strong> （power of exclusion, PE）：不是孩子生父或生母的随机个体，能够被遗传标记排除血缘关系的概率。简单地说，就是使用单个标记能将假父亲（非生父）正确排除的概率。</p>
+<p>排除概率是对于单个标记而言的，在 SF/Z JD0105001-2016 《亲权鉴定技术规范》给出的公式如下（下面推导过程有更加清晰的公式）</p>
+<p><img src="1.png" alt=""></p>
+<p><strong>累积排除概率</strong> （cumulative power of exclusion, CPE）：顾名思义，就是使用所有位点的累积排除概率，其计算公式如下，其中 $m$ 为标记数目<br>
+$$<br>
+\mathrm{CPE} = 1  - \prod_{i=1}^{m}(1-\mathrm{PE}<em>{i})<br>
+$$<br>
+这个公式解释一下，$1-\mathrm{PE}</em>{i}$ 就是标记 $i$ 不能排除随机样本是真实亲本的概率，所有位点连乘的结果就是所有位点都不能排除随机样本的概率，1减去这个值就是至少有一个位点能够排除随机样本的概率。</p>
 <p>排除概率是针对标记而言的，标记的多态性越好则排除概率越高。</p>
 <p>如果累积排除概率较低，说明标记数目不够，需要继续增加标记数目。</p>
 <p>在《GBT27642-2011牛个体及亲子鉴定微卫星DNA法》中，CPE 需要大于等于 99.73% 。</p>
-<h3 id="排除概率公式推导过程"><a href="#排除概率公式推导过程" class="headerlink" title="排除概率公式推导过程"></a>排除概率公式推导过程</h3><p>根据 Fung (2002) 的文献，我找到了排除概率公式的推导过程。</p>
-<p>我们假设一个标记有 $n$ 个等位碱基 $A_{1}, \cdots, A_{n}$ ，相应的等位基因频率为 $p_{1}, \cdots, p_{n}$ ，假设一个孩子和其母亲在这个位点的基因型标记为 $G_{C}$ 和 $G_{M}$ ，举个例子，假设 $G_{M} &#x3D; A_{1}A_{2}$ ， $G_{C} &#x3D; A_{1}A_{1}$ ，因此任何没有 $A_{1}$ 基因的男性都可以被排除（不是这个孩子的父亲），此时的排除概率我们定义为 <code>individual probability of exclusion(IPE)</code> 为 $\mathrm{IPE} &#x3D; (1-p_{1})^{2}$ ，即 $(1-p_{1})^{2}$ 的男性群体可以被排除，即<br>$$<br>\mathrm{Pr}(\text{a random man is excluded} \ | \ G_{M},G_{C}) &#x3D; (1-p_{1})^{2}<br>$$<br>而这个母子对组合出现的概率为（计算过程）<br>$$<br>\mathrm{Pr}( G_{M}&#x3D;A_{1}A_{2},G_{C}&#x3D;A_{1}A_{1})&#x3D; \mathrm{Pr}(G_{C})  \mathrm{Pr}(G_{M}|G_{C}) &#x3D; p_{1}^{2}p_{2}<br>$$<br>因此我们可以通过对所有的母子对组合进行加权求和，从而得到 PE （这个我懒得推导了）<br>$$<br>\begin{aligned}<br>Q_1 &amp; &#x3D;\sum_{G_M, G_C} \operatorname{Pr}\left(\text { a random man is excluded } \mid G_M, G_C\right) \<br>&amp; \times \operatorname{Pr}\left(G_M, G_C\right) \<br>&amp; &#x3D;\sum_{i&#x3D;1}^n p_i\left(1-p_i+p_i^2\right)\left(1-p_i\right)^2 \<br>&amp; +\sum_{i&#x3D;1}^{n-1} \sum_{j&#x3D;i+1}^n p_i p_j\left(p_i+p_j\right)\left(1-p_i-p_j\right)^2 .<br>\end{aligned}<br>$$<br>一个等价的式子为<br>$$<br>Q_1&#x3D;\sum_{i&#x3D;1}^n p_i\left(1-p_i\right)^2-\sum_{i&#x3D;1}^{n-1} \sum_{j&#x3D;i+1}^n p_i^2 p_j^2\left(4-3 p_i-3 p_j\right)<br>$$<br>如果母本基因型未知，此时 PE 的公式如下<br>$$<br>Q_2&#x3D;\sum_{i&#x3D;1}^n p_i^2\left(1-p_i\right)^2+\sum_{i&#x3D;1}^{n-1} \sum_{j&#x3D;i+1}^n 2 p_i p_j\left(1-p_i-p_j\right)^2<br>$$<br>上面例子中的已知母本基因型换成已知父本基因型也是一样的。</p>
-<h2 id="亲权指数"><a href="#亲权指数" class="headerlink" title="亲权指数"></a>亲权指数</h2><p><strong>亲权指数</strong> (parentage index; PI) ：判断亲权关系所需的两个条件概率的似然比率。<br>$$<br>\mathrm{PI}&#x3D;\frac{\text { 概率 (检测到当事人的遗传表型 } \mid \text { 假设被检测个体是孩子的生物学父亲或母亲) }}{\text { 概率 (检测到当事人的遗传表型 } \mid \text { 假设一个随机个体是孩子的生物学父亲或母亲) }}<br>$$<br>实际上这就是 cervus 软件中计算单个位点的原始似然比，举例如下</p>
-<p><img src="/posts/e2974541/3.png"></p>
-<p><strong>累积亲权指数</strong> (parentage index; CPI) ：公式如下<br>$$<br>\mathrm{CPI} &#x3D; \prod_{i&#x3D;1}^{m}\mathrm{PI}_{i}<br>$$<br>累积亲权指数就是所有位点的原始似然值。</p>
-<p>因为 cervus 对原始似然比求了 ln ，得到 LOD值，因此我们得到二者关系为<br>$$<br>\text{CPI} &#x3D; \mathrm{e}^{\mathrm{LOD}}<br>$$<br>但是，如果存在孟德尔错误的位点，那么不同人不同软件的处理方式不一样，因此得到的结果也会有差异。比如在 SF&#x2F;Z JD0105001-2016 《亲权鉴定技术规范》，不符合遗传规律情形时亲权指数的计算方法如下图，图中 $\mu$ 为平均突变率。</p>
-<p><img src="/posts/e2974541/2.png"></p>
-<h2 id="父权相对机会"><a href="#父权相对机会" class="headerlink" title="父权相对机会"></a>父权相对机会</h2><p>父权相对机会（relative chance of paternity），有人也翻译为亲子关系相对机会，是将亲权指数 PI 换算为百分数后的一个指标。</p>
-<p>参考<a target="_blank" rel="noopener" href="https://www.zgbk.com/ecph/words?SiteID=1&ID=490853&Type=bkzyb">中国大百科全书</a>，我们设假设为 Hd 含义为候选父本不是孩子的生父，另一个假设 Hp 含义为候选父本是孩子的生父，E 是表示获得二联体或三联体遗传标记检测结果的事件，因此我们得到亲权指数可以表示为 PI &#x3D; Pr(E|Hp)&#x2F;Pr(E|Hd) 。父权相对机会便可以表示为 <code>Pr(Hp | E)</code> ，即在获得二联体或三联体遗传标记检测结果的条件下，候选父本是孩子生父的概率。根据贝叶斯公式，我们有<br>$$<br>\begin{aligned}<br>Pr(Hp | E) &amp;&#x3D; \frac{Pr(E|Hp)Pr(Hp)}{Pr(E|Hp)Pr(Hp) + Pr(E|Hd)Pr(Hd)} \<br>&amp;&#x3D;\frac{PI \ Pr(Hp)}{PI \ Pr(Hp) + Pr(Hd)} \quad \because PI &#x3D; Pr(E|Hp)&#x2F;Pr(E|Hd)  \<br>&amp;&#x3D;\frac{PI }{PI  + Pr(Hd)&#x2F;Pr(Hp)} \<br>\end{aligned}<br>$$<br>这里 Pr(Hd) 和 Pr(Hp) 分别表示候选父本不是孩子生父和候选父本是孩子生父的前概率，由于鉴定人对这两个前概率无法准确获知，故通常假设二者均为 0.5。</p>
-<p>在 SF&#x2F;Z JD0105001-2016 《亲权鉴定技术规范》中，也明确提出以下说明</p>
+<h3 id="排除概率公式推导过程">排除概率公式推导过程</h3>
+<p>根据 Fung (2002) 的文献，我找到了排除概率公式的推导过程。</p>
+<p>我们假设一个标记有 $n$ 个等位碱基 $A_{1}, \cdots, A_{n}$ ，相应的等位基因频率为 $p_{1}, \cdots, p_{n}$ ，假设一个孩子和其母亲在这个位点的基因型标记为 $G_{C}$ 和 $G_{M}$ ，举个例子，假设 $G_{M} = A_{1}A_{2}$ ， $G_{C} = A_{1}A_{1}$ ，因此任何没有 $A_{1}$ 基因的男性都可以被排除（不是这个孩子的父亲），此时的排除概率我们定义为 <code>individual probability of exclusion(IPE)</code> 为 $\mathrm{IPE} = (1-p_{1})^{2}$ ，即 $(1-p_{1})^{2}$ 的男性群体可以被排除，即<br>
+$$<br>
+\mathrm{Pr}(\text{a random man is excluded} \ | \ G_{M},G_{C}) = (1-p_{1})^{2}<br>
+$$<br>
+而这个母子对组合出现的概率为（计算过程）<br>
+$$<br>
+\mathrm{Pr}( G_{M}=A_{1}A_{2},G_{C}=A_{1}A_{1})= \mathrm{Pr}(G_{C})  \mathrm{Pr}(G_{M}|G_{C}) = p_{1}^{2}p_{2}<br>
+$$<br>
+因此我们可以通过对所有的母子对组合进行加权求和，从而得到 PE （这个我懒得推导了）<br>
+$$<br>
+\begin{aligned}<br>
+Q_1 &amp; =\sum_{G_M, G_C} \operatorname{Pr}\left(\text { a random man is excluded } \mid G_M, G_C\right) \<br>
+&amp; \times \operatorname{Pr}\left(G_M, G_C\right) \<br>
+&amp; =\sum_{i=1}^n p_i\left(1-p_i+p_i^2\right)\left(1-p_i\right)^2 \<br>
+&amp; +\sum_{i=1}^{n-1} \sum_{j=i+1}^n p_i p_j\left(p_i+p_j\right)\left(1-p_i-p_j\right)^2 .<br>
+\end{aligned}<br>
+$$<br>
+一个等价的式子为<br>
+$$<br>
+Q_1=\sum_{i=1}^n p_i\left(1-p_i\right)^2-\sum_{i=1}^{n-1} \sum_{j=i+1}^n p_i^2 p_j^2\left(4-3 p_i-3 p_j\right)<br>
+$$<br>
+如果母本基因型未知，此时 PE 的公式如下<br>
+$$<br>
+Q_2=\sum_{i=1}^n p_i^2\left(1-p_i\right)^2+\sum_{i=1}^{n-1} \sum_{j=i+1}^n 2 p_i p_j\left(1-p_i-p_j\right)^2<br>
+$$<br>
+上面例子中的已知母本基因型换成已知父本基因型也是一样的。</p>
+<h2 id="亲权指数">亲权指数</h2>
+<p><strong>亲权指数</strong> (parentage index; PI) ：判断亲权关系所需的两个条件概率的似然比率。<br>
+$$<br>
+\mathrm{PI}=\frac{\text { 概率 (检测到当事人的遗传表型 } \mid \text { 假设被检测个体是孩子的生物学父亲或母亲) }}{\text { 概率 (检测到当事人的遗传表型 } \mid \text { 假设一个随机个体是孩子的生物学父亲或母亲) }}<br>
+$$<br>
+实际上这就是 cervus 软件中计算单个位点的原始似然比，举例如下</p>
+<p><img src="3.png" alt=""></p>
+<p><strong>累积亲权指数</strong> (parentage index; CPI) ：公式如下<br>
+$$<br>
+\mathrm{CPI} = \prod_{i=1}^{m}\mathrm{PI}_{i}<br>
+$$<br>
+累积亲权指数就是所有位点的原始似然值。</p>
+<p>因为 cervus 对原始似然比求了 ln ，得到 LOD值，因此我们得到二者关系为<br>
+$$<br>
+\text{CPI} = \mathrm{e}^{\mathrm{LOD}}<br>
+$$<br>
+但是，如果存在孟德尔错误的位点，那么不同人不同软件的处理方式不一样，因此得到的结果也会有差异。比如在 SF/Z JD0105001-2016 《亲权鉴定技术规范》，不符合遗传规律情形时亲权指数的计算方法如下图，图中 $\mu$ 为平均突变率。</p>
+<p><img src="2.png" alt=""></p>
+<h2 id="父权相对机会">父权相对机会</h2>
+<p>父权相对机会（relative chance of paternity），有人也翻译为亲子关系相对机会，是将亲权指数 PI 换算为百分数后的一个指标。</p>
+<p>参考<a target="_blank" rel="noopener" href="https://www.zgbk.com/ecph/words?SiteID=1&amp;ID=490853&amp;Type=bkzyb">中国大百科全书</a>，我们设假设为 Hd 含义为候选父本不是孩子的生父，另一个假设 Hp 含义为候选父本是孩子的生父，E 是表示获得二联体或三联体遗传标记检测结果的事件，因此我们得到亲权指数可以表示为 PI = Pr(E|Hp)/Pr(E|Hd) 。父权相对机会便可以表示为 <code>Pr(Hp | E)</code> ，即在获得二联体或三联体遗传标记检测结果的条件下，候选父本是孩子生父的概率。根据贝叶斯公式，我们有<br>
+$$<br>
+\begin{aligned}<br>
+Pr(Hp | E) &amp;= \frac{Pr(E|Hp)Pr(Hp)}{Pr(E|Hp)Pr(Hp) + Pr(E|Hd)Pr(Hd)} \<br>
+&amp;=\frac{PI \ Pr(Hp)}{PI \ Pr(Hp) + Pr(Hd)} \quad \because PI = Pr(E|Hp)/Pr(E|Hd)  \<br>
+&amp;=\frac{PI }{PI  + Pr(Hd)/Pr(Hp)} \<br>
+\end{aligned}<br>
+$$<br>
+这里 Pr(Hd) 和 Pr(Hp) 分别表示候选父本不是孩子生父和候选父本是孩子生父的前概率，由于鉴定人对这两个前概率无法准确获知，故通常假设二者均为 0.5。</p>
+<p>在 SF/Z JD0105001-2016 《亲权鉴定技术规范》中，也明确提出以下说明</p>
 <blockquote>
 <p>如果在鉴定书里使用其他数学或词语的表达式时，应定义并解释其含义，使委托人或法庭了解其 意义。如要将亲权指数值转换为传统使用的父权相对机会，应同时给出转换时所采用的前概率。例如， 某案累计亲权指数为 10000 时，可以表述为本案累计亲权指数为 10000，在假定父权前概率为 0.5 时， 父权相对机会为 0.99 。</p>
 </blockquote>
-<h1 id="亲子鉴定文书规范"><a href="#亲子鉴定文书规范" class="headerlink" title="亲子鉴定文书规范"></a>亲子鉴定文书规范</h1><p>在 SF&#x2F;Z JD0105004 - 2015《亲子鉴定文书规范》中，列出了三种出具意见，下面是三联体亲权鉴定的三种意见如下</p>
+<h1>亲子鉴定文书规范</h1>
+<p>在 SF/Z JD0105004 - 2015《亲子鉴定文书规范》中，列出了三种出具意见，下面是三联体亲权鉴定的三种意见如下</p>
 <p>第一种，支持意见</p>
 <blockquote>
 <p>D19S433 等 19 个 STR 基因座均为人类的遗传标记，遵循孟德尔遗传定律，联合应用可进行亲权鉴 定，其累积非父排除概率大于 0.9999。综上检验结果分析，在每一个 STR 基因座，CC 均能提供给 BB 必需的等位基因。经计算，累积亲权指数为 XXXX（注：大于 10000）</p>
@@ -133,27 +187,37 @@
 </blockquote>
 <p>第三种，出现不符合遗传现象，仍表示支持意见</p>
 <blockquote>
-<p>D19S433 等 19 个 STR 基因座均为人类的遗传标记，遵循孟德尔遗传定律，联合应用可进行亲权鉴 定，其累积非父排除概率大于 0.9999。上述检验结果表明，除 D3S1358 基因座外，CC 均能提供给孩子 必需的等位基因。在 D3S1358 基因座，AA 的基因型为“16,18”，BB 的基因型为“16,18”，CC 的基因型 为“15,15”，CC 不能提供给孩子必需的等位基因 16 或 18，不符合遗传规律。按照 GA&#x2F;T965-2011《法 庭科学 DNA 亲子鉴定规范》和 SF&#x2F;Z JD0105001-2015《亲权鉴定技术规范》中不符合遗传规律情形时亲权指数的计算方法，XXX 基因座的亲权指数为 XXXX。综上 19 个 STR 基因座的累积亲权指数为 XXXX（注： 大于 10000）</p>
+<p>D19S433 等 19 个 STR 基因座均为人类的遗传标记，遵循孟德尔遗传定律，联合应用可进行亲权鉴 定，其累积非父排除概率大于 0.9999。上述检验结果表明，除 D3S1358 基因座外，CC 均能提供给孩子 必需的等位基因。在 D3S1358 基因座，AA 的基因型为“16,18”，BB 的基因型为“16,18”，CC 的基因型 为“15,15”，CC 不能提供给孩子必需的等位基因 16 或 18，不符合遗传规律。按照 GA/T965-2011《法 庭科学 DNA 亲子鉴定规范》和 SF/Z JD0105001-2015《亲权鉴定技术规范》中不符合遗传规律情形时亲权指数的计算方法，XXX 基因座的亲权指数为 XXXX。综上 19 个 STR 基因座的累积亲权指数为 XXXX（注： 大于 10000）</p>
 </blockquote>
 <p>其实还有一种罕见但是理论上可能出现的特殊情况，那就是出现（少量的）不符合遗传现象，并且累积亲权指数低于 10000，那么就需要增加 STR 基因型，如果仍未达到认定标准，则可以出具“不排除”意见。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p>GB&#x2F;T 37223-2018</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>GB/T 37223-2018</p>
 </li>
-<li><p>GB&#x2F;T 27642-2011</p>
+<li>
+<p>GB/T 27642-2011</p>
 </li>
-<li><p>SF&#x2F;Z JD0105001-2016 《亲权鉴定技术规范》</p>
+<li>
+<p>SF/Z JD0105001-2016 《亲权鉴定技术规范》</p>
 </li>
-<li><p>SF&#x2F;Z JD0105004 - 2015《亲子鉴定文书规范》</p>
+<li>
+<p>SF/Z JD0105004 - 2015《亲子鉴定文书规范》</p>
 </li>
-<li><p>GBT27642-2011牛个体及亲子鉴定微卫星DNA法</p>
+<li>
+<p>GBT27642-2011牛个体及亲子鉴定微卫星DNA法</p>
 </li>
-<li><p>Marshall T C, Slate J, Kruuk L E B, et al. Statistical confidence for likelihood‐based paternity inference in natural populations[J]. Molecular ecology, 1998, 7(5): 639-655.</p>
+<li>
+<p>Marshall T C, Slate J, Kruuk L E B, et al. Statistical confidence for likelihood‐based paternity inference in natural populations[J]. Molecular ecology, 1998, 7(5): 639-655.</p>
 </li>
-<li><p>Fung W K, Chung Y, Wong D. Power of exclusion revisited: probability of excluding relatives of the true father from paternity[J]. International journal of legal medicine, 2002, 116: 64-67.</p>
+<li>
+<p>Fung W K, Chung Y, Wong D. Power of exclusion revisited: probability of excluding relatives of the true father from paternity[J]. International journal of legal medicine, 2002, 116: 64-67.</p>
 </li>
-<li><p>Jamieson A. The genetics of transferrins in cattle[J]. Heredity, 1965, 20(3): 419-441.</p>
+<li>
+<p>Jamieson A. The genetics of transferrins in cattle[J]. Heredity, 1965, 20(3): 419-441.</p>
 </li>
-<li><p>Jamieson A. The effectiveness of using co‐dominant polymorphic allelic series for (1) checking pedigrees and (2) distinguishing full‐sib pair members[J]. Animal Genetics, 1994, 25(S1): 37-44.</p>
+<li>
+<p>Jamieson A. The effectiveness of using co‐dominant polymorphic allelic series for (1) checking pedigrees and (2) distinguishing full‐sib pair members[J]. Animal Genetics, 1994, 25(S1): 37-44.</p>
 </li>
 </ol>
  
@@ -203,55 +267,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -550,30 +566,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

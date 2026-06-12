@@ -98,21 +98,20 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>对 python 代码进行混淆处理。</p>
 <span id="more"></span>
-
 <p>安装包如下，这个包应该是不再更新了，所以最新版本的 python 无法安装，我之前在 3.10.5 和 3.9.5 版本中都能安装，3.13版本就不行。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装</span></span><br><span class="line">pip install pyminifier</span><br></pre></td></tr></table></figure>
-
 <p>运行命令如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生成文本混淆文件</span></span><br><span class="line">pyminifier --obfuscate in.py &gt; obfuscated.py</span><br></pre></td></tr></table></figure>
-
-<h1 id="可能的报错"><a href="#可能的报错" class="headerlink" title="可能的报错"></a>可能的报错</h1><h2 id="中文问题"><a href="#中文问题" class="headerlink" title="中文问题"></a>中文问题</h2><p>代码有中文会报错，应该默认是 GBK 编码。我怎么弄都不行，还是只能去除中文字符。</p>
-<h2 id="代码本身语法问题"><a href="#代码本身语法问题" class="headerlink" title="代码本身语法问题"></a>代码本身语法问题</h2><p>如果提示以下类似报错，这个错误是表示在解析 <code>in.py</code>文件时遇到了<strong>语法错误</strong>。错误信息 <code>EOF in multi-line statement</code>表明有一个<strong>多行语句（如括号、引号、三引号等）没有正确闭合</strong>，导致Python解析器在文件末尾还在等待闭合符号。</p>
+<h1>可能的报错</h1>
+<h2 id="中文问题">中文问题</h2>
+<p>代码有中文会报错，应该默认是 GBK 编码。我怎么弄都不行，还是只能去除中文字符。</p>
+<h2 id="代码本身语法问题">代码本身语法问题</h2>
+<p>如果提示以下类似报错，这个错误是表示在解析 <code>in.py</code>文件时遇到了<strong>语法错误</strong>。错误信息 <code>EOF in multi-line statement</code>表明有一个<strong>多行语句（如括号、引号、三引号等）没有正确闭合</strong>，导致Python解析器在文件末尾还在等待闭合符号。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">pyminifier --obfuscate in.py &gt; obfuscated.py</span></span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;D:\software\python\Scripts\pyminifier-script.py&quot;, line 33, in &lt;module&gt;</span><br><span class="line">    sys.exit(load_entry_point(&#x27;pyminifier==2.1&#x27;, &#x27;console_scripts&#x27;, &#x27;pyminifier&#x27;)())</span><br><span class="line">  File &quot;D:\software\python\lib\site-packages\pyminifier\pyminifier.py&quot;, line 396, in main</span><br><span class="line">    tokens = token_utils.listified_tokenizer(source)</span><br><span class="line">  File &quot;D:\software\python\lib\site-packages\pyminifier\token_utils.py&quot;, line 42, in listified_tokenizer</span><br><span class="line">    return [list(a) for a in tokenize.generate_tokens(io_obj.readline)]</span><br><span class="line">  File &quot;D:\software\python\lib\site-packages\pyminifier\token_utils.py&quot;, line 42, in &lt;listcomp&gt;</span><br><span class="line">    return [list(a) for a in tokenize.generate_tokens(io_obj.readline)]</span><br><span class="line">  File &quot;D:\software\python\lib\tokenize.py&quot;, line 523, in _tokenize</span><br><span class="line">    raise TokenError(&quot;EOF in multi-line statement&quot;, (lnum, 0))</span><br><span class="line">tokenize.TokenError: (&#x27;EOF in multi-line statement&#x27;, (829, 0))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 <p>此时可以用下面代码检查python代码语法问题</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查文件语法</span></span><br><span class="line">python -m py_compile in.py</span><br></pre></td></tr></table></figure>
-
-<h2 id="不能处理复杂代码"><a href="#不能处理复杂代码" class="headerlink" title="不能处理复杂代码"></a>不能处理复杂代码</h2><p>我处理了一个逻辑比较复杂的代码，结果生成的文件把正文所有代码都放在了一行，完全不能用，不清楚原因。</p>
+<h2 id="不能处理复杂代码">不能处理复杂代码</h2>
+<p>我处理了一个逻辑比较复杂的代码，结果生成的文件把正文所有代码都放在了一行，完全不能用，不清楚原因。</p>
  
       <!-- reward -->
       
@@ -160,55 +159,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -507,30 +458,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

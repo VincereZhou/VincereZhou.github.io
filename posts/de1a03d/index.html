@@ -98,25 +98,156 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>Cervus亲子鉴定计算方法，主要是公式。</p>
 <span id="more"></span>
-
-<h1 id="似然法基础公式"><a href="#似然法基础公式" class="headerlink" title="似然法基础公式"></a>似然法基础公式</h1><p>假设1 H1 ：候选亲本是真实亲本；</p>
+<h1>似然法基础公式</h1>
+<p>假设1 H1 ：候选亲本是真实亲本；</p>
 <p>假设2 H2 ：候选亲本是从群体中随机选择的一个无关个体。</p>
 <p>数据 D：trios 或 pairs 的基因型数据</p>
-<p>此时似然比为<br>$$<br>L(H_1,H_2|D) &#x3D; \frac{P(D|H_1)}{P(D|H_2)}<br>$$<br>假设母本基因型已知，$g_m,g_a,g_o$ 分别表示母本 (mother)，候选父本 (alleged father) 和子代 (offspring) 的基因型。此时假设1和假设2的似然值如下，其中 T() 函数就是按照孟德尔分配定律从亲本得到子代基因型的概率。<br>$$<br>L(H_1|g_m,g_a,g_o) &#x3D; T(g_o|g_m,g_a)P(g_m)P(g_a)<br>$$</p>
-<p>$$<br>L(H_2|g_m,g_a,g_o) &#x3D; T(g_o|g_m)P(g_m)P(g_a)<br>$$</p>
-<p>如果母本基因型未知，此时两个似然值函数如下<br>$$<br>L(H_1|g_a,g_o) &#x3D; T(g_o|g_a)P(g_a)<br>$$</p>
-<p>$$<br>L(H_2|g_a,g_o) &#x3D; P(g_o)P(g_a)<br>$$</p>
-<p>而 LOD 值是似然比的以 e 为底的对数（在 Cervus 这里）。<br>$$<br>\text{LOD} &#x3D; \ln\big[\frac{L(H_1)}{L(H_2)} \big]<br>$$</p>
-<h1 id="考虑分型错误后的似然法公式"><a href="#考虑分型错误后的似然法公式" class="headerlink" title="考虑分型错误后的似然法公式"></a>考虑分型错误后的似然法公式</h1><p>这里 Cervus 3.0 （Kalinowski, 2007）修改了之前 Cervus 1.0 和 2.0 （Marshall, 1998）的计算公式，认为之前的算法存在问题，实际上计算时会增大给定的错误率，因此有文献指出对于旧版本的 Cervus ，人为设定一个比实际情况更小的错误率结果更好。当分型错误率升高时（无论是本身数据错误率高，还是软件无意识地增大了错误率），此时出现孟德尔错误的情况更加常见，想要正确判断一个错误候选亲本是无关个体的难度更大。</p>
+<p>此时似然比为<br>
+$$<br>
+L(H_1,H_2|D) = \frac{P(D|H_1)}{P(D|H_2)}<br>
+$$<br>
+假设母本基因型已知，$g_m,g_a,g_o$ 分别表示母本 (mother)，候选父本 (alleged father) 和子代 (offspring) 的基因型。此时假设1和假设2的似然值如下，其中 T() 函数就是按照孟德尔分配定律从亲本得到子代基因型的概率。<br>
+$$<br>
+L(H_1|g_m,g_a,g_o) = T(g_o|g_m,g_a)P(g_m)P(g_a)<br>
+$$</p>
+<p>$$<br>
+L(H_2|g_m,g_a,g_o) = T(g_o|g_m)P(g_m)P(g_a)<br>
+$$</p>
+<p>如果母本基因型未知，此时两个似然值函数如下<br>
+$$<br>
+L(H_1|g_a,g_o) = T(g_o|g_a)P(g_a)<br>
+$$</p>
+<p>$$<br>
+L(H_2|g_a,g_o) = P(g_o)P(g_a)<br>
+$$</p>
+<p>而 LOD 值是似然比的以 e 为底的对数（在 Cervus 这里）。<br>
+$$<br>
+\text{LOD} = \ln\big[\frac{L(H_1)}{L(H_2)} \big]<br>
+$$</p>
+<h1>考虑分型错误后的似然法公式</h1>
+<p>这里 Cervus 3.0 （Kalinowski, 2007）修改了之前 Cervus 1.0 和 2.0 （Marshall, 1998）的计算公式，认为之前的算法存在问题，实际上计算时会增大给定的错误率，因此有文献指出对于旧版本的 Cervus ，人为设定一个比实际情况更小的错误率结果更好。当分型错误率升高时（无论是本身数据错误率高，还是软件无意识地增大了错误率），此时出现孟德尔错误的情况更加常见，想要正确判断一个错误候选亲本是无关个体的难度更大。</p>
 <p>这里我们只考虑目前  Cervus 3.0 的方法部分，这里是假设当分型错误出现时，任何一个错误基因型观测到的概率等于其在群体中的基因型频率，并且所有个体和所有位点的分型错误率是独立和不变的。这个假设很方便，而且适用于于某些情况下的分型错误，如移液，打标签或数据输入错误。</p>
-<p>假设 $g$ 是观测到的基因型，设 $\varepsilon$ 是分型错误率，$P(g)$ 是满足哈温平衡下的群体中$g$ 的基因型频率，那么此时观测到 $g$ 的基因型概率如下式，仍为 $P(g)$  ，这里第一项是没有分型错误的情况，第二项是存在分析错误并且观测到 $g$ 的情况。<br>$$<br>(1-\varepsilon) P(g) + \varepsilon P(g) &#x3D; P(g)<br>$$</p>
-<h2 id="母本已知检验候选父本"><a href="#母本已知检验候选父本" class="headerlink" title="母本已知检验候选父本"></a>母本已知检验候选父本</h2><p>假设母本基因型已知，$g_m,g_a,g_o$ 分别表示母本 (mother)，候选父本 (alleged father) 和子代 (offspring) 的基因型，此时假设1的似然值如下，这里4个子式分别表示：(1) 所有基因型都是正确的；(2) 存在1个基因型是错误的（分别是父本、母本和子代是错误的）；(3) 存在2个基因型是错误的；(3) 所有基因型都是错误的。这里下划线的部分就是对应的错误的基因型。</p>
-<p>这里每一个式子都是由两部分构成的，第一部分是三个基因型是正确或错误的概率，第二部分是满足基因型正确或错误条件下观测到这三个基因型的概率。举个例子，最后一个式子，所有基因型均错误的概率是 $\varepsilon^3$ ，当所有基因型均错误的情况下观测到 $g_m,g_a,g_o$ 的概率是 $P\left(g_m\right) P\left(g_a\right) P\left(g_o\right)$ 。<br>$$<br>\begin{aligned}<br>L\left(H_1\right)&#x3D; &amp; (1-\varepsilon)^3\left[T\left(g_o \mid g_m, g_a\right) P\left(g_m\right) P\left(g_a\right)\right] \<br>&amp; +\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_m\right) P\left(g_m\right) \underline{P\left(g_a\right)}\right. \<br>&amp; \left.+T\left(g_o \mid g_a\right) P\left(g_a\right) \underline{P\left(g_m\right)}+P\left(g_m\right) P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>&amp; +\varepsilon^2(1-\varepsilon)\left[P\left(g_m\right)\underline{ P\left(g_a\right) P\left(g_o\right)}\right. \<br>&amp; +\underline{P\left(g_m\right)} P\left(g_a\right) \underline{P\left(g_o\right)}+\left.\underline{P\left(g_m\right) P\left(g_a\right) }P\left(g_o\right)\right] \<br>&amp; +\varepsilon^3\left[\left.\underline{P\left(g_m\right) P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>\end{aligned}<br>$$<br>此时假设2的似然值如下<br>$$<br>\begin{aligned}<br>L\left(H_2\right)&#x3D; &amp; (1-\varepsilon)^3\left[T\left(g_o \mid g_m\right) P\left(g_m\right) P\left(g_a\right)\right] \<br>&amp; +\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_m\right) P\left(g_m\right) \underline{P\left(g_a\right)}\right. \<br>&amp; \left.+P\left(g_o \right) P\left(g_a\right) \underline{P\left(g_m\right)}+P\left(g_m\right) P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>&amp; +\varepsilon^2(1-\varepsilon)\left[P\left(g_m\right)\underline{ P\left(g_a\right) P\left(g_o\right)}\right. \<br>&amp; +\underline{P\left(g_m\right)} P\left(g_a\right) \underline{P\left(g_o\right)}+\left.\underline{P\left(g_m\right) P\left(g_a\right) }P\left(g_o\right)\right] \<br>&amp; +\varepsilon^3\left[\left.\underline{P\left(g_m\right) P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>\end{aligned}<br>$$</p>
-<h2 id="母本未知检验候选父本"><a href="#母本未知检验候选父本" class="headerlink" title="母本未知检验候选父本"></a>母本未知检验候选父本</h2><p>易得，此时假设1的公式为<br>$$<br>\begin{aligned}<br>L\left(H_1\right)&#x3D; &amp; (1-\varepsilon)^2\left[T\left(g_o \mid g_a\right)  P\left(g_a\right)\right] \<br>&amp; +\varepsilon(1-\varepsilon)\left[P\left(g_o\right)  \underline{P\left(g_a\right)}\right. \left.+ P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>&amp; +\varepsilon^2\left[\left.\underline{ P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>\end{aligned}<br>$$<br>假设2的公式为<br>$$<br>\begin{aligned}<br>L\left(H_2\right)&#x3D; &amp; (1-\varepsilon)^2\left[P\left(g_o\right)  P\left(g_a\right)\right] \<br>&amp; +\varepsilon(1-\varepsilon)\left[P\left(g_o\right)  \underline{P\left(g_a\right)}\right. \left.+ P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>&amp; +\varepsilon^2\left[\left.\underline{ P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>\end{aligned}<br>$$</p>
-<h2 id="同时检验候选父本和候选母本"><a href="#同时检验候选父本和候选母本" class="headerlink" title="同时检验候选父本和候选母本"></a>同时检验候选父本和候选母本</h2><p>这里将候选母本的基因型表示为了 $g_{am}$</p>
-<p>易得，此时假设1的公式为<br>$$<br>\begin{aligned}<br>L\left(H_1\right)&#x3D; &amp; (1-\varepsilon)^3\left[T\left(g_o \mid g_{am}, g_a\right) P\left(g_{am}\right) P\left(g_a\right)\right] \<br>&amp; +\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_{am}\right) P\left(g_{am}\right) \underline{P\left(g_a\right)}\right. \<br>&amp; \left.+T\left(g_o \mid g_a\right) P\left(g_a\right) \underline{P\left(g_{am}\right)}+P\left(g_{am}\right) P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>&amp; +\varepsilon^2(1-\varepsilon)\left[P\left(g_{am}\right)\underline{ P\left(g_a\right) P\left(g_o\right)}\right. \<br>&amp; +\underline{P\left(g_{am}\right)} P\left(g_a\right) \underline{P\left(g_o\right)}+\left.\underline{P\left(g_{am}\right) P\left(g_a\right) }P\left(g_o\right)\right] \<br>&amp; +\varepsilon^3\left[\left.\underline{P\left(g_{am}\right) P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>\end{aligned}<br>$$<br>假设2的公式为<br>$$<br>\begin{aligned}<br>L\left(H_2\right)&#x3D; &amp; (1-\varepsilon)^3\left[P\left(g_o \right) P\left(g_{am}\right) P\left(g_a\right)\right] \<br>&amp; +\varepsilon(1-\varepsilon)^2\left[P\left(g_o\right) P\left(g_{am}\right) \underline{P\left(g_a\right)}\right. \<br>&amp; \left.+P\left(g_o \right) P\left(g_a\right) \underline{P\left(g_{am}\right)}+P\left(g_{am}\right) P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>&amp; +\varepsilon^2(1-\varepsilon)\left[P\left(g_{am}\right)\underline{ P\left(g_a\right) P\left(g_o\right)}\right. \<br>&amp; +\underline{P\left(g_{am}\right)} P\left(g_a\right) \underline{P\left(g_o\right)}+\left.\underline{P\left(g_{am}\right) P\left(g_a\right) }P\left(g_o\right)\right] \<br>&amp; +\varepsilon^3\left[\left.\underline{P\left(g_{am}\right) P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>\end{aligned}<br>$$</p>
-<h2 id="简化后的式子"><a href="#简化后的式子" class="headerlink" title="简化后的式子"></a>简化后的式子</h2><p>母本未知检验候选父本的公式如下<br>$$<br>\begin{aligned}<br>&amp;L\left(H_1\right)&#x3D;P\left(g_a\right)\left{\begin{array}{l}<br>(1-\varepsilon)^2 T\left(g_o \mid g_a\right) \<br>+\varepsilon(1-\varepsilon) 2 P\left(g_o\right) \<br>+\varepsilon^2 P\left(g_o\right)<br>\end{array}\right}\<br>&amp;L\left(H_2\right)&#x3D;P\left(g_a\right)\left{\begin{array}{l}<br>(1-\varepsilon)^2 P\left(g_o\right) \<br>+\varepsilon(1-\varepsilon) 2 P\left(g_o\right) \<br>+\varepsilon^2 P\left(g_o\right)<br>\end{array}\right}<br>\end{aligned}<br>$$<br>母本已知检验候选父本的公式如下<br>$$<br>\begin{gathered}<br>L\left(H_1\right)&#x3D;P\left(g_m\right) P\left(g_a\right)\left{\begin{array}{l}<br>(1-\varepsilon)^3 T\left(g_o \mid g_m, g_a\right) \<br>+\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_m\right)+T\left(g_o \mid g_a\right)+P\left(g_o\right)\right] \<br>+\varepsilon^2(1-\varepsilon) 3 P\left(g_o\right) \<br>+\varepsilon^3 P\left(g_o\right)<br>\end{array}\right} \<br>L\left(H_2\right)&#x3D;P\left(g_m\right) P\left(g_a\right)\left{\begin{array}{l}<br>(1-\varepsilon)^3 T\left(g_o \mid g_m\right) \<br>+\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_m\right)+2 P\left(g_o\right)\right] \<br>\left.+\varepsilon^2 3-\varepsilon\right) 3 P\left(g_o\right) \<br>+\varepsilon^3 P\left(g_o\right)<br>\end{array}\right}<br>\end{gathered}<br>$$<br>同时检验候选父本和候选母本的公式如下<br>$$<br>\begin{gathered}<br>L\left(H_1\right)&#x3D;P\left(g_{a m}\right) P\left(g_a\right)\left{\begin{array}{l}<br>(1-\varepsilon)^3 T\left(g_o \mid g_{a m}, g_a\right) \<br>+\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_{a m}\right)+T\left(g_o \mid g_a\right)+P\left(g_o\right)\right] \<br>+\varepsilon^2(1-\varepsilon) 3 P\left(g_o\right) \<br>+\varepsilon^3 P\left(g_o\right)<br>\end{array}\right} \<br>L\left(H_2\right)&#x3D;P\left(g_{a m}\right) P\left(g_a\right)\left{\begin{array}{l}<br>(1-\varepsilon)^3 P\left(g_o\right) \<br>+\varepsilon(1-\varepsilon)^2 3 P\left(g_o\right) \<br>+\varepsilon^2(1-\varepsilon) 3 P\left(g_o\right) \<br>+\varepsilon^3 P\left(g_o\right)<br>\end{array}\right}<br>\end{gathered}<br>$$</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<p>假设 $g$ 是观测到的基因型，设 $\varepsilon$ 是分型错误率，$P(g)$ 是满足哈温平衡下的群体中$g$ 的基因型频率，那么此时观测到 $g$ 的基因型概率如下式，仍为 $P(g)$  ，这里第一项是没有分型错误的情况，第二项是存在分析错误并且观测到 $g$ 的情况。<br>
+$$<br>
+(1-\varepsilon) P(g) + \varepsilon P(g) = P(g)<br>
+$$</p>
+<h2 id="母本已知检验候选父本">母本已知检验候选父本</h2>
+<p>假设母本基因型已知，$g_m,g_a,g_o$ 分别表示母本 (mother)，候选父本 (alleged father) 和子代 (offspring) 的基因型，此时假设1的似然值如下，这里4个子式分别表示：(1) 所有基因型都是正确的；(2) 存在1个基因型是错误的（分别是父本、母本和子代是错误的）；(3) 存在2个基因型是错误的；(3) 所有基因型都是错误的。这里下划线的部分就是对应的错误的基因型。</p>
+<p>这里每一个式子都是由两部分构成的，第一部分是三个基因型是正确或错误的概率，第二部分是满足基因型正确或错误条件下观测到这三个基因型的概率。举个例子，最后一个式子，所有基因型均错误的概率是 $\varepsilon^3$ ，当所有基因型均错误的情况下观测到 $g_m,g_a,g_o$ 的概率是 $P\left(g_m\right) P\left(g_a\right) P\left(g_o\right)$ 。<br>
+$$<br>
+\begin{aligned}<br>
+L\left(H_1\right)= &amp; (1-\varepsilon)^3\left[T\left(g_o \mid g_m, g_a\right) P\left(g_m\right) P\left(g_a\right)\right] \<br>
+&amp; +\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_m\right) P\left(g_m\right) \underline{P\left(g_a\right)}\right. \<br>
+&amp; \left.+T\left(g_o \mid g_a\right) P\left(g_a\right) \underline{P\left(g_m\right)}+P\left(g_m\right) P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>
+&amp; +\varepsilon^2(1-\varepsilon)\left[P\left(g_m\right)\underline{ P\left(g_a\right) P\left(g_o\right)}\right. \<br>
+&amp; +\underline{P\left(g_m\right)} P\left(g_a\right) \underline{P\left(g_o\right)}+\left.\underline{P\left(g_m\right) P\left(g_a\right) }P\left(g_o\right)\right] \<br>
+&amp; +\varepsilon^3\left[\left.\underline{P\left(g_m\right) P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>
+\end{aligned}<br>
+$$<br>
+此时假设2的似然值如下<br>
+$$<br>
+\begin{aligned}<br>
+L\left(H_2\right)= &amp; (1-\varepsilon)^3\left[T\left(g_o \mid g_m\right) P\left(g_m\right) P\left(g_a\right)\right] \<br>
+&amp; +\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_m\right) P\left(g_m\right) \underline{P\left(g_a\right)}\right. \<br>
+&amp; \left.+P\left(g_o \right) P\left(g_a\right) \underline{P\left(g_m\right)}+P\left(g_m\right) P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>
+&amp; +\varepsilon^2(1-\varepsilon)\left[P\left(g_m\right)\underline{ P\left(g_a\right) P\left(g_o\right)}\right. \<br>
+&amp; +\underline{P\left(g_m\right)} P\left(g_a\right) \underline{P\left(g_o\right)}+\left.\underline{P\left(g_m\right) P\left(g_a\right) }P\left(g_o\right)\right] \<br>
+&amp; +\varepsilon^3\left[\left.\underline{P\left(g_m\right) P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>
+\end{aligned}<br>
+$$</p>
+<h2 id="母本未知检验候选父本">母本未知检验候选父本</h2>
+<p>易得，此时假设1的公式为<br>
+$$<br>
+\begin{aligned}<br>
+L\left(H_1\right)= &amp; (1-\varepsilon)^2\left[T\left(g_o \mid g_a\right)  P\left(g_a\right)\right] \<br>
+&amp; +\varepsilon(1-\varepsilon)\left[P\left(g_o\right)  \underline{P\left(g_a\right)}\right. \left.+ P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>
+&amp; +\varepsilon^2\left[\left.\underline{ P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>
+\end{aligned}<br>
+$$<br>
+假设2的公式为<br>
+$$<br>
+\begin{aligned}<br>
+L\left(H_2\right)= &amp; (1-\varepsilon)^2\left[P\left(g_o\right)  P\left(g_a\right)\right] \<br>
+&amp; +\varepsilon(1-\varepsilon)\left[P\left(g_o\right)  \underline{P\left(g_a\right)}\right. \left.+ P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>
+&amp; +\varepsilon^2\left[\left.\underline{ P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>
+\end{aligned}<br>
+$$</p>
+<h2 id="同时检验候选父本和候选母本">同时检验候选父本和候选母本</h2>
+<p>这里将候选母本的基因型表示为了 $g_{am}$</p>
+<p>易得，此时假设1的公式为<br>
+$$<br>
+\begin{aligned}<br>
+L\left(H_1\right)= &amp; (1-\varepsilon)^3\left[T\left(g_o \mid g_{am}, g_a\right) P\left(g_{am}\right) P\left(g_a\right)\right] \<br>
+&amp; +\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_{am}\right) P\left(g_{am}\right) \underline{P\left(g_a\right)}\right. \<br>
+&amp; \left.+T\left(g_o \mid g_a\right) P\left(g_a\right) \underline{P\left(g_{am}\right)}+P\left(g_{am}\right) P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>
+&amp; +\varepsilon^2(1-\varepsilon)\left[P\left(g_{am}\right)\underline{ P\left(g_a\right) P\left(g_o\right)}\right. \<br>
+&amp; +\underline{P\left(g_{am}\right)} P\left(g_a\right) \underline{P\left(g_o\right)}+\left.\underline{P\left(g_{am}\right) P\left(g_a\right) }P\left(g_o\right)\right] \<br>
+&amp; +\varepsilon^3\left[\left.\underline{P\left(g_{am}\right) P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>
+\end{aligned}<br>
+$$<br>
+假设2的公式为<br>
+$$<br>
+\begin{aligned}<br>
+L\left(H_2\right)= &amp; (1-\varepsilon)^3\left[P\left(g_o \right) P\left(g_{am}\right) P\left(g_a\right)\right] \<br>
+&amp; +\varepsilon(1-\varepsilon)^2\left[P\left(g_o\right) P\left(g_{am}\right) \underline{P\left(g_a\right)}\right. \<br>
+&amp; \left.+P\left(g_o \right) P\left(g_a\right) \underline{P\left(g_{am}\right)}+P\left(g_{am}\right) P\left(g_a\right) \underline{P\left(g_o\right)}\right] \<br>
+&amp; +\varepsilon^2(1-\varepsilon)\left[P\left(g_{am}\right)\underline{ P\left(g_a\right) P\left(g_o\right)}\right. \<br>
+&amp; +\underline{P\left(g_{am}\right)} P\left(g_a\right) \underline{P\left(g_o\right)}+\left.\underline{P\left(g_{am}\right) P\left(g_a\right) }P\left(g_o\right)\right] \<br>
+&amp; +\varepsilon^3\left[\left.\underline{P\left(g_{am}\right) P\left(g_a\right) P\left(g_o\right)}\right]\right.<br>
+\end{aligned}<br>
+$$</p>
+<h2 id="简化后的式子">简化后的式子</h2>
+<p>母本未知检验候选父本的公式如下<br>
+$$<br>
+\begin{aligned}<br>
+&amp;L\left(H_1\right)=P\left(g_a\right)\left{\begin{array}{l}<br>
+(1-\varepsilon)^2 T\left(g_o \mid g_a\right) \<br>
++\varepsilon(1-\varepsilon) 2 P\left(g_o\right) \<br>
++\varepsilon^2 P\left(g_o\right)<br>
+\end{array}\right}\<br>
+&amp;L\left(H_2\right)=P\left(g_a\right)\left{\begin{array}{l}<br>
+(1-\varepsilon)^2 P\left(g_o\right) \<br>
++\varepsilon(1-\varepsilon) 2 P\left(g_o\right) \<br>
++\varepsilon^2 P\left(g_o\right)<br>
+\end{array}\right}<br>
+\end{aligned}<br>
+$$<br>
+母本已知检验候选父本的公式如下<br>
+$$<br>
+\begin{gathered}<br>
+L\left(H_1\right)=P\left(g_m\right) P\left(g_a\right)\left{\begin{array}{l}<br>
+(1-\varepsilon)^3 T\left(g_o \mid g_m, g_a\right) \<br>
++\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_m\right)+T\left(g_o \mid g_a\right)+P\left(g_o\right)\right] \<br>
++\varepsilon^2(1-\varepsilon) 3 P\left(g_o\right) \<br>
++\varepsilon^3 P\left(g_o\right)<br>
+\end{array}\right} \<br>
+L\left(H_2\right)=P\left(g_m\right) P\left(g_a\right)\left{\begin{array}{l}<br>
+(1-\varepsilon)^3 T\left(g_o \mid g_m\right) \<br>
++\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_m\right)+2 P\left(g_o\right)\right] \<br>
+\left.+\varepsilon^2 3-\varepsilon\right) 3 P\left(g_o\right) \<br>
++\varepsilon^3 P\left(g_o\right)<br>
+\end{array}\right}<br>
+\end{gathered}<br>
+$$<br>
+同时检验候选父本和候选母本的公式如下<br>
+$$<br>
+\begin{gathered}<br>
+L\left(H_1\right)=P\left(g_{a m}\right) P\left(g_a\right)\left{\begin{array}{l}<br>
+(1-\varepsilon)^3 T\left(g_o \mid g_{a m}, g_a\right) \<br>
++\varepsilon(1-\varepsilon)^2\left[T\left(g_o \mid g_{a m}\right)+T\left(g_o \mid g_a\right)+P\left(g_o\right)\right] \<br>
++\varepsilon^2(1-\varepsilon) 3 P\left(g_o\right) \<br>
++\varepsilon^3 P\left(g_o\right)<br>
+\end{array}\right} \<br>
+L\left(H_2\right)=P\left(g_{a m}\right) P\left(g_a\right)\left{\begin{array}{l}<br>
+(1-\varepsilon)^3 P\left(g_o\right) \<br>
++\varepsilon(1-\varepsilon)^2 3 P\left(g_o\right) \<br>
++\varepsilon^2(1-\varepsilon) 3 P\left(g_o\right) \<br>
++\varepsilon^3 P\left(g_o\right)<br>
+\end{array}\right}<br>
+\end{gathered}<br>
+$$</p>
+<h1>参考文献</h1>
+<ol>
 <li>Marshall, TC, Slate, J, Kruuk, LEB &amp; Pemberton, JM (1998) Statistical confidence for likelihood-based paternity inference in natural populations. <em>Molecular Ecology</em> <strong>7</strong>: 639-655.</li>
 <li>Kalinowski, ST, Taper, ML &amp; Marshall, TC (2007) Revising how the computer program CERVUS accommodates genotyping error increases success in paternity assignment.</li>
 </ol>
@@ -167,55 +298,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -514,30 +597,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

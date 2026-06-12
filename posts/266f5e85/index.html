@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">915</span>
+            <span class="post-count">914</span>
         </span>
     </span>
 
@@ -95,30 +95,33 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>下载参考基因组的多线程下载工具。</p>
 <p>Axel 只能在 linux 中使用，而 aria2 可以在 linux ，windows 等多个系统使用，并且能力更强。</p>
 <span id="more"></span>
-
-<h1 id="Axel"><a href="#Axel" class="headerlink" title="Axel"></a>Axel</h1><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>非root需要用 conda 安装</p>
+<h1>Axel</h1>
+<h2 id="安装">安装</h2>
+<p>非root需要用 conda 安装</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c bioconda axel</span><br></pre></td></tr></table></figure>
-
 <p>安装完成后，输入以下命令检查是否成功：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">axel --version</span><br></pre></td></tr></table></figure>
-
-<h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p>使用 <code>-n</code>参数指定线程数（如 10 或 20），<code>-c</code>参数开启断点续传 ; 建议在命令前加 <code>nohup</code>，防止 SSH 连接断开导致下载中断：</p>
+<h2 id="下载">下载</h2>
+<p>使用 <code>-n</code>参数指定线程数（如 10 或 20），<code>-c</code>参数开启断点续传 ; 建议在命令前加 <code>nohup</code>，防止 SSH 连接断开导致下载中断：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup axel -n 10 -c 下载链接 &amp;</span><br></pre></td></tr></table></figure>
-
-<h2 id="在scnet云服务器上无法使用"><a href="#在scnet云服务器上无法使用" class="headerlink" title="在scnet云服务器上无法使用"></a>在scnet云服务器上无法使用</h2><p>首先在登录节点没法白嫖，不然会<strong>触发服务器的安全策略</strong>：下载服务器检测到单一 IP（也就是你的登录节点）发起了过高频率的连接请求（多线程下载特征），或者短时间内流量过大，直接拒绝了服务并返回 500 错误 ，示例如下</p>
+<h2 id="在scnet云服务器上无法使用">在scnet云服务器上无法使用</h2>
+<p>首先在登录节点没法白嫖，不然会<strong>触发服务器的安全策略</strong>：下载服务器检测到单一 IP（也就是你的登录节点）发起了过高频率的连接请求（多线程下载特征），或者短时间内流量过大，直接拒绝了服务并返回 500 错误 ，示例如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ERROR 500: Internal Server Error.</span><br><span class="line">Initializing download: http://muskdb.cn/api/file/download/LS/LS.gff3</span><br></pre></td></tr></table></figure>
-
 <p>计算节点不能联网，也不能用。</p>
 <p>因此只能是本地下载下来，然后上传到云服务器上。</p>
-<h1 id="aria2"><a href="#aria2" class="headerlink" title="aria2"></a>aria2</h1><h2 id="Windows-安装与使用"><a href="#Windows-安装与使用" class="headerlink" title="Windows 安装与使用"></a>Windows 安装与使用</h2><p>你不需要复杂的编译，直接下载解压就能用：</p>
+<h1>aria2</h1>
+<h2 id="Windows-安装与使用">Windows 安装与使用</h2>
+<p>你不需要复杂的编译，直接下载解压就能用：</p>
 <ol>
-<li><p><strong>下载</strong>：访问 <a target="_blank" rel="noopener" href="https://github.com/aria2/aria2/releases">aria2 GitHub 发布页</a>，找到 <code>aria2-1.37.0-win-64bit-build1.zip</code>（版本号可能更新）并下载。</p>
+<li>
+<p><strong>下载</strong>：访问 <a target="_blank" rel="noopener" href="https://github.com/aria2/aria2/releases">aria2 GitHub 发布页</a>，找到 <code>aria2-1.37.0-win-64bit-build1.zip</code>（版本号可能更新）并下载。</p>
 </li>
-<li><p><strong>解压</strong>：把里面的 <code>aria2c.exe</code>复制到<strong>环境变量</strong>文件夹。</p>
+<li>
+<p><strong>解压</strong>：把里面的 <code>aria2c.exe</code>复制到<strong>环境变量</strong>文件夹。</p>
 </li>
-<li><p><strong>使用</strong>：打开命令行窗口</p>
+<li>
+<p><strong>使用</strong>：打开命令行窗口</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aria2c.exe -x 16 -s 16 &quot;你的下载链接&quot;</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li><code>-x 16</code>：指定最大连接数为 16（多线程）。</li>
 <li><code>-s 16</code>：指定文件分成的段数。将文件<strong>预先切分成 16 块</strong>来下载。aria2 会尝试用最多 16 个连接去分别下载这些分块。</li>
@@ -126,49 +129,50 @@
 </ul>
 <p>下载参考基因组使用参数如下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aria2c.exe -x 8 -s 8</span><br></pre></td></tr></table></figure>
-
-
 </li>
-<li><p>最终提示下面信息，说明下载完成</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Status Legend:</span><br><span class="line">(OK):download completed.</span><br></pre></td></tr></table></figure></li>
+<li>
+<p>最终提示下面信息，说明下载完成</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Status Legend:</span><br><span class="line">(OK):download completed.</span><br></pre></td></tr></table></figure>
+</li>
 </ol>
-<h2 id="linux-安装与使用"><a href="#linux-安装与使用" class="headerlink" title="linux 安装与使用"></a>linux 安装与使用</h2><p>运行下面命令</p>
+<h2 id="linux-安装与使用">linux 安装与使用</h2>
+<p>运行下面命令</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c conda-forge aria2</span><br></pre></td></tr></table></figure>
-
 <p>安装完看看有没有安装上</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aria2c -v</span><br></pre></td></tr></table></figure>
-
 <p>使用命令</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aria2c -c -x 16 &quot;你的下载链接&quot;</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li>-c(continue)：这是最重要的参数。它保证如果网络断了或者你关了终端，下次接着下，不用从头开始。对于大文件（如基因组数据），这是必选项。</li>
 <li>-x 16：开启多线程加速，让下载速度跑满带宽。</li>
 </ul>
-<h2 id="与-axel-对比"><a href="#与-axel-对比" class="headerlink" title="与 axel 对比"></a>与 axel 对比</h2><table>
+<h2 id="与-axel-对比">与 axel 对比</h2>
+<table>
 <thead>
 <tr>
-<th align="left"><strong>特性</strong></th>
-<th align="left"><strong>aria2</strong></th>
-<th align="left"><strong>axel</strong></th>
+<th style="text-align:left"><strong>特性</strong></th>
+<th style="text-align:left"><strong>aria2</strong></th>
+<th style="text-align:left"><strong>axel</strong></th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left"><strong>速度与效率</strong></td>
-<td align="left"><strong>更强</strong>。支持更高的线程数（如 32 线程），且资源占用优化得更好，在面对限速严格的服务器时往往能榨取更多带宽。</td>
-<td align="left"><strong>较快</strong>。轻量级，但在极高线程数下的表现通常不如 aria2。</td>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>速度与效率</strong></td>
+<td style="text-align:left"><strong>更强</strong>。支持更高的线程数（如 32 线程），且资源占用优化得更好，在面对限速严格的服务器时往往能榨取更多带宽。</td>
+<td style="text-align:left"><strong>较快</strong>。轻量级，但在极高线程数下的表现通常不如 aria2。</td>
 </tr>
 <tr>
-<td align="left"><strong>稳定性</strong></td>
-<td align="left"><strong>极高</strong>。支持断点续传非常完善，即使网络波动中断，重新执行命令也能无缝继续，极少出现文件损坏。</td>
-<td align="left"><strong>一般</strong>。虽然也支持续传，但在某些复杂的网络环境下，偶尔会出现下载卡死或校验失败的情况。</td>
+<td style="text-align:left"><strong>稳定性</strong></td>
+<td style="text-align:left"><strong>极高</strong>。支持断点续传非常完善，即使网络波动中断，重新执行命令也能无缝继续，极少出现文件损坏。</td>
+<td style="text-align:left"><strong>一般</strong>。虽然也支持续传，但在某些复杂的网络环境下，偶尔会出现下载卡死或校验失败的情况。</td>
 </tr>
 <tr>
-<td align="left"><strong>功能丰富度</strong></td>
-<td align="left"><strong>全能型</strong>。除了 HTTP&#x2F;HTTPS&#x2F;FTP，还支持磁力链接、BT 种子，甚至可以当离线下载服务器使用。</td>
-<td align="left"><strong>轻量型</strong>。专注于单纯的 HTTP&#x2F;FTP 多线程加速，功能单一。</td>
+<td style="text-align:left"><strong>功能丰富度</strong></td>
+<td style="text-align:left"><strong>全能型</strong>。除了 HTTP/HTTPS/FTP，还支持磁力链接、BT 种子，甚至可以当离线下载服务器使用。</td>
+<td style="text-align:left"><strong>轻量型</strong>。专注于单纯的 HTTP/FTP 多线程加速，功能单一。</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>因此，在 Linux 服务器上也更推荐使用 <strong>aria2</strong>。它比 axel 更现代、更稳定，且速度上限更高。</p>
  
       <!-- reward -->
@@ -215,55 +219,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -562,30 +518,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

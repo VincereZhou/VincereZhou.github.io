@@ -98,17 +98,15 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 <code>http.client</code> 包获得网络时间。</p>
 <span id="more"></span>
-
-<h1 id="获得网络时间"><a href="#获得网络时间" class="headerlink" title="获得网络时间"></a>获得网络时间</h1><p>首先需要安装 <code>http.client</code> 这个包</p>
+<h1>获得网络时间</h1>
+<p>首先需要安装 <code>http.client</code> 这个包</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install http.client</span><br></pre></td></tr></table></figure>
-
 <p>运行下面的脚本</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> http.client</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">host = <span class="string">&#x27;www.baidu.com&#x27;</span></span><br><span class="line">conn=http.client.HTTPConnection(host)</span><br><span class="line">conn.request(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;/&quot;</span>)</span><br><span class="line">r=conn.getresponse()</span><br><span class="line">ts=  r.getheader(<span class="string">&#x27;date&#x27;</span>) <span class="comment">#获取http头date部分</span></span><br><span class="line"><span class="comment">#将GMT时间转换成北京时间</span></span><br><span class="line">ltime= time.strptime(ts[<span class="number">5</span>:<span class="number">25</span>], <span class="string">&quot;%d %b %Y %H:%M:%S&quot;</span>) <span class="comment"># GMT 时间</span></span><br><span class="line">ttime=time.localtime(time.mktime(ltime)+<span class="number">8</span>*<span class="number">60</span>*<span class="number">60</span>) <span class="comment"># 北京时间</span></span><br><span class="line">dat=<span class="string">f&quot;<span class="subst">&#123;ttime.tm_year&#125;</span>-<span class="subst">&#123;ttime.tm_mon:02d&#125;</span>-<span class="subst">&#123;ttime.tm_mday:02d&#125;</span>&quot;</span></span><br><span class="line">tm=<span class="string">f&quot;<span class="subst">&#123;ttime.tm_hour:02d&#125;</span>:<span class="subst">&#123;ttime.tm_min:02d&#125;</span>:<span class="subst">&#123;ttime.tm_sec:02d&#125;</span>&quot;</span></span><br><span class="line"><span class="built_in">print</span>(dat,tm)</span><br><span class="line"><span class="comment"># 或者也可以直接使用 strftime() 输出, 会自动补零</span></span><br><span class="line"><span class="built_in">print</span>(time.strftime(<span class="string">&quot;%Y-%m-%d&quot;</span>, ttime))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 <p>输出</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2023-02-17 13:46:54</span><br></pre></td></tr></table></figure>
-
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>参考文献</h1>
+<ol>
 <li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1570662">https://cloud.tencent.com/developer/article/1570662</a></li>
 </ol>
  
@@ -158,55 +156,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -505,30 +455,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

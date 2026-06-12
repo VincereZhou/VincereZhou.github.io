@@ -94,38 +94,38 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>用来绘制曼哈顿图和QQ图。除了正常的曼哈顿图，还可以画环形的曼哈顿图。</p>
 <span id="more"></span>
-
 <p><a target="_blank" rel="noopener" href="https://github.com/YinLiLin/CMplot">github官网</a></p>
-<h1 id="1-安装与加载"><a href="#1-安装与加载" class="headerlink" title="1. 安装与加载"></a>1. 安装与加载</h1><p><code>CMplot</code>是一个成熟的 R 语言包，可以直接通过 CRAN 安装：</p>
+<h1>1. 安装与加载</h1>
+<p><code>CMplot</code>是一个成熟的 R 语言包，可以直接通过 CRAN 安装：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 安装</span><br><span class="line">install.packages(&quot;CMplot&quot;)</span><br><span class="line"># 加载</span><br><span class="line">library(CMplot)</span><br></pre></td></tr></table></figure>
-
-<h1 id="2-准备数据"><a href="#2-准备数据" class="headerlink" title="2. 准备数据"></a>2. 准备数据</h1><p><code>CMplot</code>对输入数据格式有明确要求，通常是一个数据框（dataframe）：</p>
+<h1>2. 准备数据</h1>
+<p><code>CMplot</code>对输入数据格式有明确要求，通常是一个数据框（dataframe）：</p>
 <ul>
 <li><strong>第 1 列</strong>：SNP 名称（如 rs 编号）。</li>
-<li><strong>第 2 列</strong>：染色体编号（Chromosome，支持数字或 X&#x2F;Y）。</li>
+<li><strong>第 2 列</strong>：染色体编号（Chromosome，支持数字或 X/Y）。</li>
 <li><strong>第 3 列</strong>：SNP 物理位置（Position）。</li>
 <li><strong>后续列</strong>：对应的 P 值（可以是单性状或多性状）。</li>
 </ul>
 <p>包内自带了示例数据集 <code>pig60K</code>和 <code>cattle50K</code>，你可以直接加载查看格式：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">data(pig60K)</span><br><span class="line">head(pig60K)</span><br></pre></td></tr></table></figure>
-
-<h1 id="3-绘制曼哈顿图-Manhattan-Plot"><a href="#3-绘制曼哈顿图-Manhattan-Plot" class="headerlink" title="3. 绘制曼哈顿图 (Manhattan Plot)"></a>3. 绘制曼哈顿图 (Manhattan Plot)</h1><h2 id="双阈值-存在SNP密度图"><a href="#双阈值-存在SNP密度图" class="headerlink" title="双阈值_存在SNP密度图"></a>双阈值_存在SNP密度图</h2><p>通过设置 <code>plot.type=&quot;m&quot;</code>来绘制常规的曼哈顿图。常用参数包括设置阈值线、颜色等。</p>
+<h1>3. 绘制曼哈顿图 (Manhattan Plot)</h1>
+<h2 id="双阈值-存在SNP密度图">双阈值_存在SNP密度图</h2>
+<p>通过设置 <code>plot.type=&quot;m&quot;</code>来绘制常规的曼哈顿图。常用参数包括设置阈值线、颜色等。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">CMplot<span class="punctuation">(</span></span><br><span class="line">  pig60K<span class="punctuation">[</span><span class="punctuation">,</span> <span class="number">1</span><span class="operator">:</span><span class="number">4</span><span class="punctuation">]</span><span class="punctuation">,</span>  <span class="comment"># 输入数据：数据框，第1列SNP名，第2列染色体，第3列物理位置，第4列P值</span></span><br><span class="line">  plot.type <span class="operator">=</span> <span class="string">&quot;m&quot;</span><span class="punctuation">,</span> <span class="comment"># 绘图类型：&quot;m&quot; 表示 Manhattan plot（曼哈顿图）</span></span><br><span class="line">  LOG10 <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span>    <span class="comment"># 是否将 P 值转换为 -log10(P) 尺度：TRUE 表示转换</span></span><br><span class="line">  ylim <span class="operator">=</span> <span class="literal">NULL</span><span class="punctuation">,</span>     <span class="comment"># Y轴范围：NULL 表示根据数据自动适应，也可设为 c(min, max)</span></span><br><span class="line">  threshold <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">1e-6</span><span class="punctuation">,</span> <span class="number">1e-4</span><span class="punctuation">)</span><span class="punctuation">,</span> <span class="comment"># 显著性阈值：可设置多个阈值线（如全基因组显著和 suggestive 阈值）</span></span><br><span class="line">  threshold.lty <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">1</span><span class="punctuation">,</span> <span class="number">2</span><span class="punctuation">)</span><span class="punctuation">,</span>   <span class="comment"># 阈值线类型：1=实线，2=虚线</span></span><br><span class="line">  threshold.lwd <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">1</span><span class="punctuation">,</span> <span class="number">1</span><span class="punctuation">)</span><span class="punctuation">,</span>   <span class="comment"># 阈值线宽度：控制线条粗细</span></span><br><span class="line">  threshold.col <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;black&quot;</span><span class="punctuation">,</span> <span class="string">&quot;grey&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span> <span class="comment"># 阈值线颜色</span></span><br><span class="line">  amplify <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span>    <span class="comment"># 是否放大显著点：TRUE 表示大于最小显著性水平的点会被放大</span></span><br><span class="line">  bin.size <span class="operator">=</span> <span class="number">1e6</span><span class="punctuation">,</span>    <span class="comment"># 窗口大小（bp）：用于计算 SNP 密度的窗口大小（1 Mb）</span></span><br><span class="line">  chr.den.col <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;darkgreen&quot;</span><span class="punctuation">,</span> <span class="string">&quot;yellow&quot;</span><span class="punctuation">,</span> <span class="string">&quot;red&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span> <span class="comment"># 染色体密度颜色：从低密度到高密度的渐变色</span></span><br><span class="line">  signal.col <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;red&quot;</span><span class="punctuation">,</span> <span class="string">&quot;green&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span> <span class="comment"># 显著点颜色：分别对应不同阈值线上的显著点颜色</span></span><br><span class="line">  signal.cex <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">1.5</span><span class="punctuation">,</span> <span class="number">1.5</span><span class="punctuation">)</span><span class="punctuation">,</span>     <span class="comment"># 显著点大小：放大后的点尺寸</span></span><br><span class="line">  signal.pch <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">19</span><span class="punctuation">,</span> <span class="number">19</span><span class="punctuation">)</span><span class="punctuation">,</span>        <span class="comment"># 显著点形状：19 表示实心圆点</span></span><br><span class="line">  file <span class="operator">=</span> <span class="string">&quot;png&quot;</span><span class="punctuation">,</span>      <span class="comment"># 输出文件格式：可选 &quot;jpg&quot;, &quot;pdf&quot;, &quot;tiff&quot;, &quot;png&quot;</span></span><br><span class="line">  file.name <span class="operator">=</span> <span class="string">&quot;manhattan&quot;</span><span class="punctuation">,</span> <span class="comment"># 输出文件名：结合 plot.type 生成最终文件名；多个性状则提供多个名称</span></span><br><span class="line">  dpi <span class="operator">=</span> <span class="number">300</span><span class="punctuation">,</span>         <span class="comment"># 图片分辨率：适用于 jpg, tiff, png 格式</span></span><br><span class="line">  file.output <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span><span class="comment"># 是否输出文件：TRUE 表示保存图片到本地</span></span><br><span class="line">  verbose <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span>    <span class="comment"># 是否打印运行日志信息</span></span><br><span class="line">  width <span class="operator">=</span> <span class="number">14</span><span class="punctuation">,</span>        <span class="comment"># 输出图片的宽度（英寸）</span></span><br><span class="line">  height <span class="operator">=</span> <span class="number">6</span>         <span class="comment"># 输出图片的高度（英寸）</span></span><br><span class="line"><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-
 <p>输出结果为 Rect_Manhtn.manhattan.png ，设定的 <code>file.name</code> 其实是文件名的主体，如下图。图中下面是SNP密度（默认是计算1MB的位点数目），右上的图标就是密度的颜色渐变指示。</p>
-<p><img src="/posts/1eb2821c/1.png"></p>
-<h2 id="双阈值-无密度条图"><a href="#双阈值-无密度条图" class="headerlink" title="双阈值-无密度条图"></a>双阈值-无密度条图</h2><p>在 <code>CMplot</code>中，<strong>SNP 密度图是由 chr.den.col控制的</strong>。</p>
+<p><img src="1.png" alt=""></p>
+<h2 id="双阈值-无密度条图">双阈值-无密度条图</h2>
+<p>在 <code>CMplot</code>中，<strong>SNP 密度图是由 chr.den.col控制的</strong>。</p>
 <p>只要 <strong>不设置 chr.den.col，并把 bin.size去掉</strong>，就不会画密度条。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">CMplot<span class="punctuation">(</span></span><br><span class="line">  pig60K<span class="punctuation">[</span><span class="punctuation">,</span> <span class="number">1</span><span class="operator">:</span><span class="number">4</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  plot.type <span class="operator">=</span> <span class="string">&quot;m&quot;</span><span class="punctuation">,</span></span><br><span class="line">  LOG10 <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span></span><br><span class="line">  ylim <span class="operator">=</span> <span class="literal">NULL</span><span class="punctuation">,</span></span><br><span class="line">  threshold <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">1e-6</span><span class="punctuation">,</span> <span class="number">1e-4</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  threshold.lty <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">1</span><span class="punctuation">,</span> <span class="number">2</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  threshold.lwd <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">1</span><span class="punctuation">,</span> <span class="number">1</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  threshold.col <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;black&quot;</span><span class="punctuation">,</span> <span class="string">&quot;grey&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  amplify <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span></span><br><span class="line">  signal.col <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;red&quot;</span><span class="punctuation">,</span> <span class="string">&quot;green&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  signal.cex <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">1.5</span><span class="punctuation">,</span> <span class="number">1.5</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  signal.pch <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">19</span><span class="punctuation">,</span> <span class="number">19</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  file <span class="operator">=</span> <span class="string">&quot;png&quot;</span><span class="punctuation">,</span></span><br><span class="line">  file.name <span class="operator">=</span> <span class="string">&quot;manhattan&quot;</span><span class="punctuation">,</span></span><br><span class="line">  dpi <span class="operator">=</span> <span class="number">300</span><span class="punctuation">,</span></span><br><span class="line">  file.output <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span></span><br><span class="line">  verbose <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span></span><br><span class="line">  width <span class="operator">=</span> <span class="number">14</span><span class="punctuation">,</span></span><br><span class="line">  height <span class="operator">=</span> <span class="number">6</span></span><br><span class="line"><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/posts/1eb2821c/2.png"></p>
-<h2 id="单阈值"><a href="#单阈值" class="headerlink" title="单阈值"></a>单阈值</h2><figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">CMplot<span class="punctuation">(</span></span><br><span class="line">  pig60K<span class="punctuation">[</span><span class="punctuation">,</span> <span class="number">1</span><span class="operator">:</span><span class="number">4</span><span class="punctuation">]</span><span class="punctuation">,</span>  <span class="comment"># 输入数据：数据框，第1列SNP名，第2列染色体，第3列物理位置，第4列P值</span></span><br><span class="line">  plot.type <span class="operator">=</span> <span class="string">&quot;m&quot;</span><span class="punctuation">,</span> <span class="comment"># 绘图类型：&quot;m&quot; 表示 Manhattan plot（曼哈顿图）</span></span><br><span class="line">  LOG10 <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span>    <span class="comment"># 是否将 P 值转换为 -log10(P) 尺度：TRUE 表示转换</span></span><br><span class="line">  ylim <span class="operator">=</span> <span class="literal">NULL</span><span class="punctuation">,</span>     <span class="comment"># Y轴范围：NULL 表示根据数据自动适应，也可设为 c(min, max)</span></span><br><span class="line">  threshold <span class="operator">=</span> <span class="number">1e-6</span><span class="punctuation">,</span> <span class="comment"># 显著性阈值：设置全基因组显著性水平线（如 Bonferroni 校正后的值）</span></span><br><span class="line">  threshold.lty <span class="operator">=</span> <span class="number">1</span><span class="punctuation">,</span> <span class="comment"># 阈值线类型：1 表示实线（solid）</span></span><br><span class="line">  threshold.lwd <span class="operator">=</span> <span class="number">1</span><span class="punctuation">,</span> <span class="comment"># 阈值线宽度：控制线条粗细</span></span><br><span class="line">  threshold.col <span class="operator">=</span> <span class="string">&quot;black&quot;</span><span class="punctuation">,</span> <span class="comment"># 阈值线颜色：设置为黑色</span></span><br><span class="line">  amplify <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span>    <span class="comment"># 是否放大显著点：TRUE 表示大于阈值线的点会被放大显示</span></span><br><span class="line">  signal.col <span class="operator">=</span> <span class="string">&quot;red&quot;</span><span class="punctuation">,</span> <span class="comment"># 显著点颜色：放大后的显著点显示为红色</span></span><br><span class="line">  signal.cex <span class="operator">=</span> <span class="number">1.5</span><span class="punctuation">,</span> <span class="comment"># 显著点大小：控制放大后点的尺寸</span></span><br><span class="line">  signal.pch <span class="operator">=</span> <span class="number">19</span><span class="punctuation">,</span>   <span class="comment"># 显著点形状：19 表示实心圆点</span></span><br><span class="line">  file <span class="operator">=</span> <span class="string">&quot;png&quot;</span><span class="punctuation">,</span>      <span class="comment"># 输出文件格式：可选 &quot;jpg&quot;, &quot;pdf&quot;, &quot;tiff&quot;, &quot;png&quot;</span></span><br><span class="line">  file.name <span class="operator">=</span> <span class="string">&quot;manhattan&quot;</span><span class="punctuation">,</span> <span class="comment"># 输出文件名：结合 plot.type 生成最终文件名</span></span><br><span class="line">  dpi <span class="operator">=</span> <span class="number">300</span><span class="punctuation">,</span>         <span class="comment"># 图片分辨率：适用于 jpg, tiff, png 格式</span></span><br><span class="line">  file.output <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span><span class="comment"># 是否输出文件：TRUE 表示保存图片到本地</span></span><br><span class="line">  verbose <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span>    <span class="comment"># 是否打印运行日志信息</span></span><br><span class="line">  width <span class="operator">=</span> <span class="number">14</span><span class="punctuation">,</span>        <span class="comment"># 输出图片的宽度（英寸）</span></span><br><span class="line">  height <span class="operator">=</span> <span class="number">6</span>         <span class="comment"># 输出图片的高度（英寸）</span></span><br><span class="line"><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/posts/1eb2821c/3.png"></p>
-<h1 id="4-绘制-QQ-图-QQ-Plot"><a href="#4-绘制-QQ-图-QQ-Plot" class="headerlink" title="4. 绘制 QQ 图 (QQ Plot)"></a>4. 绘制 QQ 图 (QQ Plot)</h1><p>代码如下</p>
+<p><img src="2.png" alt=""></p>
+<h2 id="单阈值">单阈值</h2>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">CMplot<span class="punctuation">(</span></span><br><span class="line">  pig60K<span class="punctuation">[</span><span class="punctuation">,</span> <span class="number">1</span><span class="operator">:</span><span class="number">4</span><span class="punctuation">]</span><span class="punctuation">,</span>  <span class="comment"># 输入数据：数据框，第1列SNP名，第2列染色体，第3列物理位置，第4列P值</span></span><br><span class="line">  plot.type <span class="operator">=</span> <span class="string">&quot;m&quot;</span><span class="punctuation">,</span> <span class="comment"># 绘图类型：&quot;m&quot; 表示 Manhattan plot（曼哈顿图）</span></span><br><span class="line">  LOG10 <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span>    <span class="comment"># 是否将 P 值转换为 -log10(P) 尺度：TRUE 表示转换</span></span><br><span class="line">  ylim <span class="operator">=</span> <span class="literal">NULL</span><span class="punctuation">,</span>     <span class="comment"># Y轴范围：NULL 表示根据数据自动适应，也可设为 c(min, max)</span></span><br><span class="line">  threshold <span class="operator">=</span> <span class="number">1e-6</span><span class="punctuation">,</span> <span class="comment"># 显著性阈值：设置全基因组显著性水平线（如 Bonferroni 校正后的值）</span></span><br><span class="line">  threshold.lty <span class="operator">=</span> <span class="number">1</span><span class="punctuation">,</span> <span class="comment"># 阈值线类型：1 表示实线（solid）</span></span><br><span class="line">  threshold.lwd <span class="operator">=</span> <span class="number">1</span><span class="punctuation">,</span> <span class="comment"># 阈值线宽度：控制线条粗细</span></span><br><span class="line">  threshold.col <span class="operator">=</span> <span class="string">&quot;black&quot;</span><span class="punctuation">,</span> <span class="comment"># 阈值线颜色：设置为黑色</span></span><br><span class="line">  amplify <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span>    <span class="comment"># 是否放大显著点：TRUE 表示大于阈值线的点会被放大显示</span></span><br><span class="line">  signal.col <span class="operator">=</span> <span class="string">&quot;red&quot;</span><span class="punctuation">,</span> <span class="comment"># 显著点颜色：放大后的显著点显示为红色</span></span><br><span class="line">  signal.cex <span class="operator">=</span> <span class="number">1.5</span><span class="punctuation">,</span> <span class="comment"># 显著点大小：控制放大后点的尺寸</span></span><br><span class="line">  signal.pch <span class="operator">=</span> <span class="number">19</span><span class="punctuation">,</span>   <span class="comment"># 显著点形状：19 表示实心圆点</span></span><br><span class="line">  file <span class="operator">=</span> <span class="string">&quot;png&quot;</span><span class="punctuation">,</span>      <span class="comment"># 输出文件格式：可选 &quot;jpg&quot;, &quot;pdf&quot;, &quot;tiff&quot;, &quot;png&quot;</span></span><br><span class="line">  file.name <span class="operator">=</span> <span class="string">&quot;manhattan&quot;</span><span class="punctuation">,</span> <span class="comment"># 输出文件名：结合 plot.type 生成最终文件名</span></span><br><span class="line">  dpi <span class="operator">=</span> <span class="number">300</span><span class="punctuation">,</span>         <span class="comment"># 图片分辨率：适用于 jpg, tiff, png 格式</span></span><br><span class="line">  file.output <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span><span class="comment"># 是否输出文件：TRUE 表示保存图片到本地</span></span><br><span class="line">  verbose <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span>    <span class="comment"># 是否打印运行日志信息</span></span><br><span class="line">  width <span class="operator">=</span> <span class="number">14</span><span class="punctuation">,</span>        <span class="comment"># 输出图片的宽度（英寸）</span></span><br><span class="line">  height <span class="operator">=</span> <span class="number">6</span>         <span class="comment"># 输出图片的高度（英寸）</span></span><br><span class="line"><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p><img src="3.png" alt=""></p>
+<h1>4. 绘制 QQ 图 (QQ Plot)</h1>
+<p>代码如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">CMplot(</span><br><span class="line">  pig60K[, 1:4],  # 输入数据：第1列SNP名，第2列染色体，第3列物理位置，第4列P值</span><br><span class="line">  plot.type = &quot;q&quot;, # 绘图类型：&quot;q&quot; 表示 Q-Q plot（QQ图）</span><br><span class="line">  box = TRUE,     # 是否绘制图形边框：FALSE 表示不绘制, TRUE 表示绘制</span><br><span class="line">  file = &quot;png&quot;,    # 输出文件格式：可选 &quot;jpg&quot;, &quot;pdf&quot;, &quot;tiff&quot;, &quot;png&quot;</span><br><span class="line">  file.name = &quot;QQ&quot;,# 输出文件名（结合 plot.type 生成，为 QQplot.QQ.png）</span><br><span class="line">  dpi = 300,       # 输出图片的分辨率（适用于 jpg, tiff, png）</span><br><span class="line">  conf.int = FALSE,# 是否在 QQ 图中绘制置信区间：FALSE 表示不绘制</span><br><span class="line">  threshold.col = &quot;red&quot;, # 阈值线的颜色（此处用于控制 QQ 图对角线颜色）</span><br><span class="line">  threshold.lty = 1,     # 阈值线的类型：1 表示实线（solid）</span><br><span class="line">  col = &quot;blue&quot;,    # 点的颜色：设置 QQ 图中散点的颜色为蓝色</span><br><span class="line">  main = &quot;&quot;,       # 主标题：设置为空字符串以去除标题</span><br><span class="line">  axis.cex = 0.8, # 坐标轴刻度标签（数字）的大小：0.8 表示缩小显示</span><br><span class="line">  lab.cex = 0.8,  # 坐标轴标题（如 -log10(P)）的大小：0.8 表示缩小显示</span><br><span class="line">  file.output = TRUE, # 是否输出文件：TRUE 表示保存到本地</span><br><span class="line">  verbose = TRUE,  # 是否打印运行日志信息</span><br><span class="line">  width = 5,       # 输出图片的宽度（英寸）</span><br><span class="line">  height = 5       # 输出图片的高度（英寸）</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p><img src="/posts/1eb2821c/4.png"></p>
+<p><img src="4.png" alt=""></p>
  
       <!-- reward -->
       
@@ -171,55 +171,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -518,30 +470,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

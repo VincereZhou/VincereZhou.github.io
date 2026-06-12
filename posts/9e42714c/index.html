@@ -94,45 +94,74 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>GWAS 分析软件 GEMMA 官方文档笔记。</p>
 <span id="more"></span>
-
-<h1 id="GEMMA-User-Manual"><a href="#GEMMA-User-Manual" class="headerlink" title="GEMMA User Manual"></a>GEMMA User Manual</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><h3 id="缺失数据"><a href="#缺失数据" class="headerlink" title="缺失数据"></a>缺失数据</h3><h4 id="基因型缺失"><a href="#基因型缺失" class="headerlink" title="基因型缺失"></a>基因型缺失</h4><p>基因型建议先填充。如果不填充，首先会剔除缺失率较高的位点（默认 5%），之后将缺失位点填充为该位点在群体内的基因型均值。</p>
-<h4 id="表型缺失"><a href="#表型缺失" class="headerlink" title="表型缺失"></a>表型缺失</h4><p>在LMM或BSLMM分析中，会剔除缺失表型的个体，但是所有的个体都会用于构建关系矩阵。但是在构建 G阵的过程中，缺失率和MAF都只会基于<strong>分析个体</strong>（表型不为缺失的个体）进行计算，如果所有个体的表型均为缺失，此时估计的G阵元素会全是 “nan” 。</p>
-<h2 id="输入文件格式"><a href="#输入文件格式" class="headerlink" title="输入文件格式"></a>输入文件格式</h2><p>GEMMA 要求4个主要的输入文件，<strong>基因型文件、表型文件、亲缘关系文件还有协变量文件</strong>。基因型和表型文件可以是plink 格式也可以是BIMBAM格式。</p>
-<h3 id="PLINK-的二进制格式"><a href="#PLINK-的二进制格式" class="headerlink" title="PLINK 的二进制格式"></a>PLINK 的二进制格式</h3><p>fam文件 GEMMA只读取第二列个体号和第六列表型；通过 -n 改变读取表型的列（-n 1 表示还是读取第六列；-n 2 表示读取第七列，以此类推）</p>
-<p>GEMMA将plink里的位点编码为1&#x2F;0，一般是将bim文件中的第5列编码为1（minor allele），将第6列编码为0（major allele）。（看版本，好像不同版本1&#x2F;0编码可能是相反的，也就是剂量效应用的等位基因是不同的）。</p>
+<h1>GEMMA User Manual</h1>
+<h2 id="简介">简介</h2>
+<h3 id="缺失数据">缺失数据</h3>
+<h4 id="基因型缺失">基因型缺失</h4>
+<p>基因型建议先填充。如果不填充，首先会剔除缺失率较高的位点（默认 5%），之后将缺失位点填充为该位点在群体内的基因型均值。</p>
+<h4 id="表型缺失">表型缺失</h4>
+<p>在LMM或BSLMM分析中，会剔除缺失表型的个体，但是所有的个体都会用于构建关系矩阵。但是在构建 G阵的过程中，缺失率和MAF都只会基于<strong>分析个体</strong>（表型不为缺失的个体）进行计算，如果所有个体的表型均为缺失，此时估计的G阵元素会全是 “nan” 。</p>
+<h2 id="输入文件格式">输入文件格式</h2>
+<p>GEMMA 要求4个主要的输入文件，<strong>基因型文件、表型文件、亲缘关系文件还有协变量文件</strong>。基因型和表型文件可以是plink 格式也可以是BIMBAM格式。</p>
+<h3 id="PLINK-的二进制格式">PLINK 的二进制格式</h3>
+<p>fam文件 GEMMA只读取第二列个体号和第六列表型；通过 -n 改变读取表型的列（-n 1 表示还是读取第六列；-n 2 表示读取第七列，以此类推）</p>
+<p>GEMMA将plink里的位点编码为1/0，一般是将bim文件中的第5列编码为1（minor allele），将第6列编码为0（major allele）。（看版本，好像不同版本1/0编码可能是相反的，也就是剂量效应用的等位基因是不同的）。</p>
 <p><strong>GEMMA会将表型中的 -9 或者 NA 视为缺失值</strong>。如果fam文件中的表型是疾病，<strong>推荐的编码方式是control记为0，case记为1</strong>。</p>
-<h3 id="关系矩阵文件格式"><a href="#关系矩阵文件格式" class="headerlink" title="关系矩阵文件格式"></a>关系矩阵文件格式</h3><p>关系矩阵有两种形式，第一种是原始的，第二种关系矩阵的特征值和特征向量。</p>
-<h4 id="原始关系矩阵"><a href="#原始关系矩阵" class="headerlink" title="原始关系矩阵"></a>原始关系矩阵</h4><p>第一种就是n*n的矩阵形式，<strong>行和列的顺序与fam文件相同</strong>。</p>
+<h3 id="关系矩阵文件格式">关系矩阵文件格式</h3>
+<p>关系矩阵有两种形式，第一种是原始的，第二种关系矩阵的特征值和特征向量。</p>
+<h4 id="原始关系矩阵">原始关系矩阵</h4>
+<p>第一种就是n*n的矩阵形式，<strong>行和列的顺序与fam文件相同</strong>。</p>
 <p>第二种就是三列的形式（个体号-个体号-值，个体号应该是fam文件的第二列），个体号的顺序不需要和fam文件一致，未列出的值均为0。（文档没说，但应该是上三角矩阵）E</p>
 <p>plink文件格式的可以通过 -km 1 和 -km 2选择关系矩阵形式（应该1表示原始的矩阵形式，3表示3列的）</p>
-<h3 id="协变量文件（可选）"><a href="#协变量文件（可选）" class="headerlink" title="协变量文件（可选）"></a>协变量文件（可选）</h3><p>如果没有协变量，GEMMA 默认会有一个截距项（就是均值）；但是如果存在协变量文件，那么GEMMA 就不会自带一个截距项了。</p>
+<h3 id="协变量文件（可选）">协变量文件（可选）</h3>
+<p>如果没有协变量，GEMMA 默认会有一个截距项（就是均值）；但是如果存在协变量文件，那么GEMMA 就不会自带一个截距项了。</p>
 <p><strong>如果有协变量文件，协变量第一列必须是全为1的截距项</strong>，因为这个时候 GEMMA 不会自动提供截距项，所以你要自己提供。</p>
-<h4 id="GSL-ERROR-matrix-is-singular-in-lu-c-at-line-266-errno-1"><a href="#GSL-ERROR-matrix-is-singular-in-lu-c-at-line-266-errno-1" class="headerlink" title="GSL ERROR: matrix is singular in lu.c at line 266 errno 1"></a>GSL ERROR: matrix is singular in lu.c at line 266 errno 1</h4><p>如果你的某个协变量的值和部分SNP的基因型值完全相同（指乘以一个固定常数后相同），那么就会造成优化算法出错，产生 <strong>GSL errors</strong> 。为了避免这个问题，你要么先对协变量进行回归分析，然后用残差作为新的表型；要么就剔除那些与协变量相同的snp位点（采用协变量作为表型，基因型数据做为特征）。</p>
+<h4 id="GSL-ERROR-matrix-is-singular-in-lu-c-at-line-266-errno-1">GSL ERROR: matrix is singular in lu.c at line 266 errno 1</h4>
+<p>如果你的某个协变量的值和部分SNP的基因型值完全相同（指乘以一个固定常数后相同），那么就会造成优化算法出错，产生 <strong>GSL errors</strong> 。为了避免这个问题，你要么先对协变量进行回归分析，然后用残差作为新的表型；要么就剔除那些与协变量相同的snp位点（采用协变量作为表型，基因型数据做为特征）。</p>
 <blockquote>
 <p>It can happen, especially in a small GWAS data set, that some of the covariates will be identical to some of the genotypes (up to a scaling factor).  This can cause problems in the optimization algorithm  and  evoke  GSL  errors.   To  avoid  this,  one  can  either  regress  the  phenotypes  on  the covariates and use the residuals as new phenotypes, or use only SNPs that are not identical to any of the covariates for the analysis.  The later can be achieved, for example, by performing a standard linear regression in the genotype data, but with covariates as phenotypes.</p>
 </blockquote>
 <p>实际运行发现还有另一个情况也会导致这个问题，就是<strong>如果一个协变量完全没有变异</strong>，也会导致这个报错。</p>
-<h2 id="运行GEMMA"><a href="#运行GEMMA" class="headerlink" title="运行GEMMA"></a>运行GEMMA</h2><h3 id="构建关系矩阵"><a href="#构建关系矩阵" class="headerlink" title="构建关系矩阵"></a>构建关系矩阵</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -gk [num] -o [prefix]</span><br></pre></td></tr></table></figure>
-
+<h2 id="运行GEMMA">运行GEMMA</h2>
+<h3 id="构建关系矩阵">构建关系矩阵</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -gk [num] -o [prefix]</span><br></pre></td></tr></table></figure>
 <p>-bfile 二进制plink文件前缀</p>
 <p>-gk 表示构建哪种关系矩阵</p>
 <ul>
-<li>-gk 1 计算<strong>中心化</strong>的亲缘关系矩阵 (the centered relatedness matrix) </li>
+<li>-gk 1 计算<strong>中心化</strong>的亲缘关系矩阵 (the centered relatedness matrix)</li>
 <li>-gk 2  计算<strong>标准化</strong>的亲缘关系矩阵 (the standardized relatedness matrix)</li>
 </ul>
 <p>-o 输出G阵前缀</p>
-<h4 id="两种G阵"><a href="#两种G阵" class="headerlink" title="两种G阵"></a>两种G阵</h4><p>这里我们定义 $X$  为 $n \times q$ 的基因型矩阵，$n$ 为样本数，$q$ 为SNP数目（就是常规的设计矩阵，一行一个样本，一列一个特征）。</p>
+<h4 id="两种G阵">两种G阵</h4>
+<p>这里我们定义 $X$  为 $n \times q$ 的基因型矩阵，$n$ 为样本数，$q$ 为SNP数目（就是常规的设计矩阵，一行一个样本，一列一个特征）。</p>
 <p>$x_{i}$ 表示第 $i$ 列SNP的列向量，$\bar{x_{i}}$ 表示第 $i$ 列SNP的群体均值，$v_{x_{i}}$ 表示第 $i$ 列SNP的群体均值，$1_{n}$ 表示一个 $n \times 1$ 的全为1的列向量。</p>
-<p>因此两种矩阵的计算方式为 (文章中给的公式)：<br>$$<br>\begin{aligned}<br>G_{c} &amp;&#x3D;\frac{1}{p} \sum_{i&#x3D;1}^{p}\left(\mathrm{x}<em>{i}-1</em>{n} \bar{x}<em>{i}\right)\left(\mathrm{x}</em>{i}-1_{n} \bar{x}<em>{i}\right)^{T}, \<br>G</em>{s} &amp;&#x3D;\frac{1}{p} \sum_{i&#x3D;1}^{p} \frac{1}{v_{x_{i}}}\left(\mathrm{x}<em>{i}-1</em>{n} \overline{x_{i}}\right)\left(\mathrm{x}<em>{i}-1</em>{n} \overline{x_{i}}\right)^{T} .<br>\end{aligned}<br>$$<br>如果换成我们常见的G阵构建方式，如果 $Z_{1}$ 表示对 $X$ 每列进行<strong>中心化</strong>之后的矩阵，$Z_{2}$ 表示对 $X$ 每列进行<strong>标准化</strong>之后的矩阵。上面的式子可以写为下式：<br>$$<br>\mathbf{G_{c}}&#x3D;\frac{1}{p} \mathbf{Z_{1}} \mathbf{Z}_{1}^{\top}<br>$$</p>
-<p>$$<br>\mathbf{G_{s}}&#x3D;\frac{1}{p} \mathbf{Z_{2}} \mathbf{Z}_{2}^{\top}<br>$$</p>
-<p>我们发现标准化的G阵就是GCTA计算用的G阵，而中心化的G阵相比于 VanRaden 构建的G阵（见下式）常数项不同，<br>$$<br>\mathbf{G}&#x3D;\mathbf{Z Z}^{\prime} &#x2F; \sum 2 p_{i}\left(1-p_{i}\right)<br>$$<br>作者解释了一下何时使用这两种矩阵：<strong>如果MAF比较低的SNP容易有更大的效应，那么我们倾向于使用标准化的G阵</strong>，反之则倾向于中心化的G阵（理由呢？）。但是根据作者的经验，<strong>中心化的G阵对于校正群体结构效果更好。</strong>原文如下：</p>
-<p><img src="/posts/9e42714c/23.png"></p>
-<h4 id="结果文件"><a href="#结果文件" class="headerlink" title="结果文件"></a>结果文件</h4><ul>
+<p>因此两种矩阵的计算方式为 (文章中给的公式)：<br>
+$$<br>
+\begin{aligned}<br>
+G_{c} &amp;=\frac{1}{p} \sum_{i=1}^{p}\left(\mathrm{x}<em>{i}-1</em>{n} \bar{x}<em>{i}\right)\left(\mathrm{x}</em>{i}-1_{n} \bar{x}<em>{i}\right)^{T}, \<br>
+G</em>{s} &amp;=\frac{1}{p} \sum_{i=1}^{p} \frac{1}{v_{x_{i}}}\left(\mathrm{x}<em>{i}-1</em>{n} \overline{x_{i}}\right)\left(\mathrm{x}<em>{i}-1</em>{n} \overline{x_{i}}\right)^{T} .<br>
+\end{aligned}<br>
+$$<br>
+如果换成我们常见的G阵构建方式，如果 $Z_{1}$ 表示对 $X$ 每列进行<strong>中心化</strong>之后的矩阵，$Z_{2}$ 表示对 $X$ 每列进行<strong>标准化</strong>之后的矩阵。上面的式子可以写为下式：<br>
+$$<br>
+\mathbf{G_{c}}=\frac{1}{p} \mathbf{Z_{1}} \mathbf{Z}_{1}^{\top}<br>
+$$</p>
+<p>$$<br>
+\mathbf{G_{s}}=\frac{1}{p} \mathbf{Z_{2}} \mathbf{Z}_{2}^{\top}<br>
+$$</p>
+<p>我们发现标准化的G阵就是GCTA计算用的G阵，而中心化的G阵相比于 VanRaden 构建的G阵（见下式）常数项不同，<br>
+$$<br>
+\mathbf{G}=\mathbf{Z Z}^{\prime} / \sum 2 p_{i}\left(1-p_{i}\right)<br>
+$$<br>
+作者解释了一下何时使用这两种矩阵：<strong>如果MAF比较低的SNP容易有更大的效应，那么我们倾向于使用标准化的G阵</strong>，反之则倾向于中心化的G阵（理由呢？）。但是根据作者的经验，**中心化的G阵对于校正群体结构效果更好。**原文如下：</p>
+<p><img src="23.png" alt=""></p>
+<h4 id="结果文件">结果文件</h4>
+<ul>
 <li>prefix.log.txt 日志文件</li>
 <li>prefix.cXX.txt 或者 prefix.sXX.txt 是n*n 的矩阵文件。</li>
 </ul>
-<h3 id="一般线性模型"><a href="#一般线性模型" class="headerlink" title="一般线性模型"></a>一般线性模型</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -lm [num] -o [prefix]</span><br></pre></td></tr></table></figure>
-
+<h3 id="一般线性模型">一般线性模型</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -lm [num] -o [prefix]</span><br></pre></td></tr></table></figure>
 <p>-bfile :  plink 二进制文件的前缀</p>
 <p>-lm [] 表示用哪个方法进行检验（which frequentist test to use），就是得到P值的不同检验方式。</p>
 <ul>
@@ -143,12 +172,15 @@
 </ul>
 <p>-o 结果文件名称</p>
 <p>对于二分类数据，你可以将数据标记为 0 和 1 ，<strong>GEMMA 会将二分类数据视为数量性状进行分析</strong>（震惊，居然不是用逻辑回归）。这种做法的合理性，可以将这种做法视为广义线性模型的一阶泰勒展开 (?)。</p>
-<h4 id="结果文件-1"><a href="#结果文件-1" class="headerlink" title="结果文件"></a>结果文件</h4><p>结果文件会在当前目录的 <code>output</code> 文件夹中。</p>
-<h5 id="prefix-log-txt"><a href="#prefix-log-txt" class="headerlink" title="prefix.log.txt"></a>prefix.log.txt</h5><p>日志文件</p>
-<h5 id="prefix-assoc-txt"><a href="#prefix-assoc-txt" class="headerlink" title="prefix.assoc.txt"></a>prefix.assoc.txt</h5><p>关联结果，这里的 beta 估计值就是这个位点的斜率，最后一列 p_wald 表示 Wald test 计算得到的 P 值。</p>
-<p><img src="/posts/9e42714c/22.png"></p>
-<h3 id="单性状混合模型GWAS"><a href="#单性状混合模型GWAS" class="headerlink" title="单性状混合模型GWAS"></a>单性状混合模型GWAS</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -k [filename] -lmm [num] -o [prefix]</span><br></pre></td></tr></table></figure>
-
+<h4 id="结果文件-2">结果文件</h4>
+<p>结果文件会在当前目录的 <code>output</code> 文件夹中。</p>
+<h5 id="prefix-log-txt">prefix.log.txt</h5>
+<p>日志文件</p>
+<h5 id="prefix-assoc-txt">prefix.assoc.txt</h5>
+<p>关联结果，这里的 beta 估计值就是这个位点的斜率，最后一列 p_wald 表示 Wald test 计算得到的 P 值。</p>
+<p><img src="22.png" alt=""></p>
+<h3 id="单性状混合模型GWAS">单性状混合模型GWAS</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -k [filename] -lmm [num] -o [prefix]</span><br></pre></td></tr></table></figure>
 <p>-bfile 二进制plink文件前缀</p>
 <p>-k 关系矩阵名称</p>
 <p>-lm [] 表示用哪个方法进行检验（which frequentist test to use）</p>
@@ -159,20 +191,23 @@
 <li>-lm 4 表示 执行上述三种检验</li>
 </ul>
 <p>如果想检测G×E效应，可以增加 -gxe [filename]，gxe 文件中包括一列环境变量。 此时，对于每一个SNP，GEMMA 除了拟合这个 SNP 和环境变量的效应外，还会检验这二者的互作效应。</p>
-<h4 id="详细信息"><a href="#详细信息" class="headerlink" title="详细信息"></a>详细信息</h4><p>这个算法会通过极大似然估计 (<strong>MLE</strong>) 或限制极大似然估计 (<strong>REML</strong>) 方法来估计 $\lambda$  (应该是加性方差与残差的比值) ，其范围为 $1 \times 10^{-5}$ (纯粹是环境效应) 到 $1 \times 10^{5}$ (纯粹是加性效应) 。</p>
+<h4 id="详细信息">详细信息</h4>
+<p>这个算法会通过极大似然估计 (<strong>MLE</strong>) 或限制极大似然估计 (<strong>REML</strong>) 方法来估计 $\lambda$  (应该是加性方差与残差的比值) ，其范围为 $1 \times 10^{-5}$ (纯粹是环境效应) 到 $1 \times 10^{5}$ (纯粹是加性效应) 。</p>
 <p>对于二分类性状，你可以标记为 0 和 1，GEMMA 会将其视为数量性状进行计算（实锤了，没用逻辑回归）。</p>
-<h4 id="结果文件-2"><a href="#结果文件-2" class="headerlink" title="结果文件"></a>结果文件</h4><ul>
+<h4 id="结果文件-3">结果文件</h4>
+<ul>
 <li>prefix.log.txt ：日志文件，其中还包含了 PVE (遗传力) 估计值及其标准误</li>
 <li>prefix.assoc.txt ： GWAS 结果文件，示例如下图。这里新增了倒数第二列，<code>l_remle</code> 为 $\lambda$  的限制极大似然估计值（REML）。</li>
 </ul>
-<p><img src="/posts/9e42714c/25.png"></p>
-<h3 id="多性状混合模型GWAS"><a href="#多性状混合模型GWAS" class="headerlink" title="多性状混合模型GWAS"></a>多性状混合模型GWAS</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -k [filename] -lmm [num] -n [num1] [num2] [num3] -o [prefix]</span><br></pre></td></tr></table></figure>
-
+<p><img src="25.png" alt=""></p>
+<h3 id="多性状混合模型GWAS">多性状混合模型GWAS</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -k [filename] -lmm [num] -n [num1] [num2] [num3] -o [prefix]</span><br></pre></td></tr></table></figure>
 <p>这和单性状完全相同，除了 -n 选项，用于指定表型，以空格分隔。（例如 -n 1 2 就是第六列和第七列）。</p>
-<h4 id="详细信息-1"><a href="#详细信息-1" class="headerlink" title="详细信息"></a>详细信息</h4><p>如果表型中有少量缺失值，可以在进行GWAS分析先进行表型值填充（这里没说原理，但是我估计是用 GS 进行预测，我个人不建议这么做，建议剔除缺失表型）。</p>
+<h4 id="详细信息-2">详细信息</h4>
+<p>如果表型中有少量缺失值，可以在进行GWAS分析先进行表型值填充（这里没说原理，但是我估计是用 GS 进行预测，我个人不建议这么做，建议剔除缺失表型）。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -k [filename] -predict -n [num1] [num2] [num3] -o [prefix]</span><br></pre></td></tr></table></figure>
-
-<h4 id="输出文件"><a href="#输出文件" class="headerlink" title="输出文件"></a>输出文件</h4><ul>
+<h4 id="输出文件">输出文件</h4>
+<ul>
 <li>prefix.log.txt ：日志文件，其中还包含了 PVE (遗传力) 和遗传相关。</li>
 <li>prefix.assoc.txt ： GWAS 结果文件，和单性状类似，最后一列是 p 值，p 值前面是几个表型的 beta 估计值，以及这些估计值的方差矩阵 (啥叫 beta 估计值的方差矩阵?)。</li>
 </ul>
@@ -221,55 +256,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -568,30 +555,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

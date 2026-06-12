@@ -96,61 +96,50 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>bcftools 是用于处理 VCF&#x2F;BCF 文件的工具。</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>bcftools 是用于处理 VCF/BCF 文件的工具。</p>
 <span id="more"></span>
-
-<h1 id="sort"><a href="#sort" class="headerlink" title="sort"></a>sort</h1><p><code>bcftools sort</code> 命令就是将变异按照染色体和物理位置排序，最简单的例子如下，其中 <code>-o</code> 是输出文件名称。</p>
+<h1>sort</h1>
+<p><code>bcftools sort</code> 命令就是将变异按照染色体和物理位置排序，最简单的例子如下，其中 <code>-o</code> 是输出文件名称。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools sort input_file.vcf -o input_file_sorted.vcf</span><br></pre></td></tr></table></figure>
-
 <p>可以配合 <code>-O</code> （<strong>Output type</strong>）选项指定输出文件格式，有下面选项</p>
 <ul>
 <li>压缩 BCF (b) ， 后缀为 <code>.bcf</code></li>
-<li>未压缩 BCF (u),  后缀也是 <code>.bcf</code> </li>
+<li>未压缩 BCF (u),  后缀也是 <code>.bcf</code></li>
 <li>压缩 VCF (z)</li>
 <li>未压缩 VCF (v)</li>
 </ul>
-<p>如果是生成 bcftools 使用的中间文件，建议一直使用 <code>-Ou</code> 选项，即未压缩的 BCF 格式，避免运行时<strong>无谓的压缩&#x2F;解压缩操作，以及 VCF 和 BCF 转换过程</strong>。</p>
+<p>如果是生成 bcftools 使用的中间文件，建议一直使用 <code>-Ou</code> 选项，即未压缩的 BCF 格式，避免运行时<strong>无谓的压缩/解压缩操作，以及 VCF 和 BCF 转换过程</strong>。</p>
 <p>举个例子，生成 <code>vcf.gz</code> 文件如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools sort input_file.vcf -Oz -o input_file_sorted.vcf.gz</span><br></pre></td></tr></table></figure>
-
-<h1 id="index"><a href="#index" class="headerlink" title="index"></a>index</h1><p>基本所有分析第一步都是创建索引文件（除了需要 sort 的情况），类似于书籍的目录。</p>
-<p>如果输入文件是 VCF 格式，那么我们首先需要将其压缩（<code>bcftools index</code> 只接受 <code>vcf.gz</code> 或 <code>bcf</code> 格式  ）。这里你可以使用 <code>bgzip</code> 命令，也可以使用 <code>bcftools view</code> </p>
+<h1>index</h1>
+<p>基本所有分析第一步都是创建索引文件（除了需要 sort 的情况），类似于书籍的目录。</p>
+<p>如果输入文件是 VCF 格式，那么我们首先需要将其压缩（<code>bcftools index</code> 只接受 <code>vcf.gz</code> 或 <code>bcf</code> 格式  ）。这里你可以使用 <code>bgzip</code> 命令，也可以使用 <code>bcftools view</code></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bgzip -c input_file.vcf &gt; input_file.vcf.gz </span><br></pre></td></tr></table></figure>
-
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools view input_file.vcf  -Oz -o input_file.vcf.gz</span><br></pre></td></tr></table></figure>
-
 <p>然后我们创建索引文件 (默认是 CSI 格式，可以使用 <code>-t</code> 选项创建 TBI 格式的索引)</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools index input_file.vcf.gz</span><br></pre></td></tr></table></figure>
-
 <p>对于 <code>.bcf</code>，<code>bcftools index</code> 也只接受压缩格式，如果使用 <code>-Ou</code> 格式（未压缩的 BCF），则会出现以下报错信息</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">bcftools index val_all_phased.bcf</span></span><br><span class="line">[E::main_vcfindex] unknown filetype; expected bgzip compressed VCF or BCF</span><br><span class="line">[E::main_vcfindex] was the VCF/BCF compressed with bgzip?</span><br></pre></td></tr></table></figure>
-
 <p>还可以用 index 命令快速获得<strong>所有标记数目</strong> （需要事先创建好索引），只需要加上一个 <code>-n</code> 选项</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools index -n val_all_phased.bcf</span><br></pre></td></tr></table></figure>
-
-<h1 id="concat"><a href="#concat" class="headerlink" title="concat"></a>concat</h1><p>用于合并相同样本的多个 VCF&#x2F;BCF 文件（比如不同染色体的基因型），注意所有文件中的<strong>样本顺序必须保持一致</strong>，<strong>所有输入文件必须已经按照染色体和物理位置排序了</strong>，<strong>输入文件的顺序必须也得按照物理位置的顺序</strong>（比如从1号染色体到 18号染色体）</p>
+<h1>concat</h1>
+<p>用于合并相同样本的多个 VCF/BCF 文件（比如不同染色体的基因型），注意所有文件中的<strong>样本顺序必须保持一致</strong>，<strong>所有输入文件必须已经按照染色体和物理位置排序了</strong>，<strong>输入文件的顺序必须也得按照物理位置的顺序</strong>（比如从1号染色体到 18号染色体）</p>
 <p>最简单的例子如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools concat input1.bcf input2.bcf -o output.vcf</span><br></pre></td></tr></table></figure>
-
 <p>也可以使用 <code>-f</code> 选项定一个包含输入文件路径的文本文件。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools concat -f file_list.txt -o output.vcf</span><br></pre></td></tr></table></figure>
-
-<h1 id="merge"><a href="#merge" class="headerlink" title="merge"></a>merge</h1><p>合并样本不同（多个文件的样本号必须保证是不同的，不然会报错），位点相同的情况。</p>
+<h1>merge</h1>
+<p>合并样本不同（多个文件的样本号必须保证是不同的，不然会报错），位点相同的情况。</p>
 <p>注意这个命令只能用 <code>vcf.gz</code> 和 <code>bcf</code> 文件，并且必须<strong>事先创建索引</strong>。</p>
 <p>最简单的例子如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools merge input1.vcf.gz input2.vcf.gz -o output.vcf</span><br></pre></td></tr></table></figure>
-
 <p>实用写法如下，这里 <code>&#123;1..29&#125;</code>是 Bash 的大括号扩展语法，会自动展开为 1 到 29 的数字序列。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nohup bcftools concat Chr&#123;1..29&#125;_phased_snp.vcf.gz -Oz -o ref_all_phased.vcf.gz &amp;</span><br><span class="line">nohup bcftools concat Chr&#123;1..29&#125;_phased_snp.vcf.gz -Ob -o ref_all_phased.bcf &amp;</span><br></pre></td></tr></table></figure>
-
 <p>也可以使用 <code>-l</code> 选项定一个包含输入文件路径的文本文件。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools merge -l file_list.txt -o output.vcf</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="view"><a href="#view" class="headerlink" title="view"></a>view</h1><p>最简单的应用就是 VCF 和 BCF 格式的互相转换</p>
+<h1>view</h1>
+<p>最简单的应用就是 VCF 和 BCF 格式的互相转换</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bcftools view input.vcf -Ob -o output.bcf  # vcf to bcf</span><br><span class="line"></span><br><span class="line">bcftools view input.bcf -Ov -o output.vcf  # bcf to vcf</span><br></pre></td></tr></table></figure>
-
 <p>还有提取位点，SNP位置列表文件 <code>sites.txt</code>，格式有几种：</p>
 <ul>
 <li>每行一个<code>chr:pos</code>（如 <code>chr1:12345</code>），提取单个位置的位点</li>
@@ -159,35 +148,31 @@
 <li>每行一个区间如<code>chr1 1000 2000</code> （用制表符分隔）</li>
 </ul>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools view -R sites.txt input.vcf -o extracted.vcf</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="filter"><a href="#filter" class="headerlink" title="filter"></a>filter</h1><p>第一个功能是<strong>提取染色体片段</strong>，示例命令如下（这里的染色体是 Gm01 ，测试了可以接受这种异常的染色体名称）</p>
+<h1>filter</h1>
+<p>第一个功能是<strong>提取染色体片段</strong>，示例命令如下（这里的染色体是 Gm01 ，测试了可以接受这种异常的染色体名称）</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools filter test.vcf.gz --regions Gm01:1-1000 &gt; test2.vcf</span><br></pre></td></tr></table></figure>
-
 <p>可以提取多条染色体的位点</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools filter test.vcf.gz --regions Gm01,Gm02 &gt; test2.vcf</span><br></pre></td></tr></table></figure>
-
-<p>第二个功能是<strong>质控位点</strong>，下面是过滤位点缺失率大于 0.1 ， maf 小于 0.05 的位点（前提是 VCF 的 INFO 列中含有 F_MISSING 列）。 </p>
+<p>第二个功能是<strong>质控位点</strong>，下面是过滤位点缺失率大于 0.1 ， maf 小于 0.05 的位点（前提是 VCF 的 INFO 列中含有 F_MISSING 列）。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools filter -e &quot;F_MISSING &gt; 0.1 ||  MAF &lt; 0.05&quot; input.vcf.gz -Oz -o output.vcf.gz</span><br></pre></td></tr></table></figure>
-
-<h1 id="norm"><a href="#norm" class="headerlink" title="norm"></a>norm</h1><p>将多等位碱基的位点拆分为多行</p>
+<h1>norm</h1>
+<p>将多等位碱基的位点拆分为多行</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bcftools norm --multiallelics -both $&#123;result&#125;/Genotype.cohort.dbSNP.g.vcf \</span><br><span class="line">   -Oz -o $&#123;result&#125;/Genotype.cohort.dbSNP.g.vcf.gz</span><br></pre></td></tr></table></figure>
-
-<h1 id="query"><a href="#query" class="headerlink" title="query"></a>query</h1><p>使用下面命令输出所有样本号</p>
+<h1>query</h1>
+<p>使用下面命令输出所有样本号</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools query -l Holstein_phased.bcf &gt; Holstein_id3.txt</span><br></pre></td></tr></table></figure>
-
 <p>使用下面命令提取前 5 列内容</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools query -f <span class="string">&#x27;%CHROM\t%POS\t%ID\t%REF\t%ALT\n&#x27;</span> ref_all_phased.bcf &gt; first5_columns.txt</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p><a target="_blank" rel="noopener" href="https://www.biocomputix.com/post/bcftools">https://www.biocomputix.com/post/bcftools</a></p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p><a target="_blank" rel="noopener" href="https://www.biocomputix.com/post/bcftools">https://www.biocomputix.com/post/bcftools</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="http://samtools.github.io/bcftools/bcftools.html">bcftools 官方文档</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="http://samtools.github.io/bcftools/bcftools.html">bcftools 官方文档</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/266c55c87978">bcftools常用命令详解</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/266c55c87978">bcftools常用命令详解</a></p>
 </li>
 </ol>
  
@@ -237,55 +222,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -584,30 +521,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

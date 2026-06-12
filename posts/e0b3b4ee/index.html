@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">7.3k</span>
+            <span class="post-count">7.2k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">33 分钟</span>
+            <span class="post-count">32 分钟</span>
         </span>
     </span>
 </div>
@@ -98,78 +98,456 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本篇介绍第二类基因组选择方法，通过使用基因组数据构建新的关系矩阵加入到混合模型方程组中直接获得基因组估计育种值，如 GBLUP方法和 ssGBLUP 方法。</p>
 <span id="more"></span> 
-
-<h1 id="基因组关系矩阵"><a href="#基因组关系矩阵" class="headerlink" title="基因组关系矩阵"></a>基因组关系矩阵</h1><p>先看三个定义</p>
+<h1>基因组关系矩阵</h1>
+<p>先看三个定义</p>
 <ul>
 <li>共亲系数 $\theta_{\mathrm{ij}}$ ，是两个个体的任一基因座，各随机抽取一个基因同源相同 (identical by descent, IBD，指两个基因相同并且来自于同一祖先)的概率。如果是一个个体，那么是可放回抽样。</li>
 <li>近交系数 $F_{k}$，某个个体 $k$ 同一基因座的两个基因同源相同的概率</li>
-<li>分子亲缘相关，或者说加性遗传相关 $A_{\mathrm{ij}}&#x3D;2 \theta_{\mathrm{ij}}$ ，指两个个体的基因组中同源相同基因的比例，加性遗传相关的另一重含义是其为两个个体育种值的相关，即 $\operatorname{Cov}\left(u_{i}, u_{j}\right)&#x3D;2 \theta_{\mathrm{ij}} \sigma_{u}^{2}&#x3D;A_{\mathrm{ij}} \sigma_{u}^{2}$ 。</li>
+<li>分子亲缘相关，或者说加性遗传相关 $A_{\mathrm{ij}}=2 \theta_{\mathrm{ij}}$ ，指两个个体的基因组中同源相同基因的比例，加性遗传相关的另一重含义是其为两个个体育种值的相关，即 $\operatorname{Cov}\left(u_{i}, u_{j}\right)=2 \theta_{\mathrm{ij}} \sigma_{u}^{2}=A_{\mathrm{ij}} \sigma_{u}^{2}$ 。</li>
 </ul>
-<p>注意下面说到的亲缘系数均指  $A_{\mathrm{ij}}$ ，而不是 Wright 在 1922 年定义的那个亲缘系数（其中   $A_{\mathrm{ij}}$ 是其分子 ）。 </p>
-<h2 id="IBS-和-IBD"><a href="#IBS-和-IBD" class="headerlink" title="IBS 和 IBD"></a>IBS 和 IBD</h2><p>两个个体的 IBS (identity by states, 指两个基因相同) 概率，或者<strong>分子共亲系数</strong> (“molecular” coancestries) $f_{\mathrm{Mij}}$ 表示为两个个体各自随机抽取一个基因相同的概率。分子亲缘关系 (<em>molecular relationships</em>) 定义为 $r_{\mathrm{Mij}}&#x3D;2 f_{\mathrm{Mij}}$ ，这里和 $A_{\mathrm{ij}}$ 类似 ，为两个个体的基因组中相同的比例。</p>
-<p>$r_{\mathrm{Mij}}$ 和  $A_{\mathrm{ij}}$ 具有下面的关系。我们考虑从个体 $i$ 和 个体 $j$ 中各随机抽取一个基因，它们由于 IBD 相同的额概率为 $A_{\mathrm{ij}} &#x2F; 2$ ，它们不是 IBD 相同的概率为 $1-A_{\mathrm{ij}} &#x2F; 2$ 但是由于偶然相同的概率为 $p^{2} + q^{2}$ 。因此，$f_{\mathrm{Mij}}&#x3D;\theta_{\mathrm{ij}}+\left(1-\theta_{\mathrm{ij}}\right)\left(p^{2}+q^{2}\right)$ ，重排一下，我们得到：<br>$$<br>\left(1-f_{\mathrm{Mij}}\right)&#x3D;\left(1-\theta_{\mathrm{ij}}\right)\left(1-p^{2}-q^{2}\right) &#x3D; \left(1-\theta_{\mathrm{ij}}\right)\left(2pq\right)<br>$$<br>易得 $f_{\mathrm{Mij}} &gt; \theta_{\mathrm{ij}}$ ，或  $r_{\mathrm{Mij}} &gt; A_{\mathrm{ij}}$ ，因此相比于 IBD ，IBS 是向上有偏的。</p>
-<p>左右乘2，我们得到 $r_{\mathrm{Mij}}$ 和  $A_{\mathrm{ij}}$ 的关系：<br>$$<br>r_{\mathrm{Mij}}&#x3D;A_{\mathrm{ij}}+\left(2-A_{\mathrm{ij}}\right)\left(p^{2}+q^{2}\right)<br>$$<br>或者<br>$$<br>A_{\mathrm{ij}}&#x3D;\frac{r_{\mathrm{Mij}}-2 p^{2}-2 q^{2}}{2 p q}<br>$$<br>根据这个公式，我们可以从 IBS 关系中得到 IBD 关系，这个等价于 VanRaden 的 $\mathbf{G}$ 阵 (?)。</p>
-<h2 id="单个-QTL-的个体间亲缘关系"><a href="#单个-QTL-的个体间亲缘关系" class="headerlink" title="单个 QTL 的个体间亲缘关系"></a>单个 QTL 的个体间亲缘关系</h2><p>假设我们研究的物种只有一个二等位基因的基因，你获得了想要的个体的基因型之后，那么此时个体 $i$  和 $j$ 的协方差是什么呢？让我们把育种值表达为加性值 ($za$) 减去群体均值 ($\mu &#x3D; 2pa$ ) 后的差值：<br>$$<br>\begin{gathered}<br>u_{i}&#x3D;z_{i} a-2 p a&#x3D;\left(z_{i}-2 p\right) a \<br>u_{j}&#x3D;z_{j} a-2 p a&#x3D;\left(z_{j}-2 p\right) a<br>\end{gathered}<br>$$<br>这里 $z_{i}$ 为 012 编码，即参考碱基的数目。如果这个 QTL 具有先验分布，其先验方差为 $\operatorname{Var}(a)&#x3D;\sigma_{a}^{2}$ ，假设哈温平衡下的加性方差为 $2 p q \sigma_{a}^{2}$ 。根据方差和协方差的计算公式，我们有<br>$$<br>\operatorname{Cov}\left(u_{i}, u_{j}\right)&#x3D;\left(z_{i}-2 p\right)\left(z_{j}-2 p\right) \sigma_{a}^{2}<br>$$<br>如果我们定义 $z_{i}^{<em>}&#x3D;z_{i}-2 p$ ，换句话说我们采用中心化的编码方式，那么此时两个个体之间的协方差等于 $z_{i}^{</em>} z_{j}^{*} \sigma_{a}^{2}$ 。</p>
-<p>对个体间的协方差 $z_{i}^{<em>} z_{j}^{</em>} \sigma_{a}^{2}$ 除以加性方差 $2 \mathrm{pq} \sigma_{a}^{2}$ ，我们得到了根据这个 QTL 得到的加性亲缘关系，这里称为 $r_{Q_{i j}}$ 。$p&#x3D;0.5$ 和 $p&#x3D;0.25$ 的两个例子如下表所示 (这两个表感觉有问题，我计算的都对不上，第一个表 AA 和 AA 我计算应该是 2 ) ：<br>$$<br>\begin{array}{llll}<br>\hline &amp; \mathrm{AA} &amp; \mathrm{Aa} &amp; \mathrm{aa} \<br>\hline \mathrm{AA} &amp; 1 &amp; 0 &amp; -1 \<br>\mathrm{Aa} &amp; 0 &amp; 0 &amp; 0 \<br>\mathrm{aa} &amp; -1 &amp; 0 &amp; 1 \<br>\hline<br>\end{array}<br>$$</p>
-<p>$$<br>\begin{array}{llll}<br>\hline &amp; \mathrm{AA} &amp; \mathrm{Aa} &amp; \mathrm{aa} \<br>\hline \mathrm{AA} &amp; 2.25 &amp; 0.75 &amp; -0.75 \<br>\mathrm{Aa} &amp; 0.75 &amp; 0.25 &amp; -.025 \<br>\mathrm{aa} &amp; -0.75 &amp; -0.25 &amp; 0.25 \<br>\hline<br>\end{array}<br>$$</p>
+<p>注意下面说到的亲缘系数均指  $A_{\mathrm{ij}}$ ，而不是 Wright 在 1922 年定义的那个亲缘系数（其中   $A_{\mathrm{ij}}$ 是其分子 ）。</p>
+<h2 id="IBS-和-IBD">IBS 和 IBD</h2>
+<p>两个个体的 IBS (identity by states, 指两个基因相同) 概率，或者<strong>分子共亲系数</strong> (“molecular” coancestries) $f_{\mathrm{Mij}}$ 表示为两个个体各自随机抽取一个基因相同的概率。分子亲缘关系 (<em>molecular relationships</em>) 定义为 $r_{\mathrm{Mij}}=2 f_{\mathrm{Mij}}$ ，这里和 $A_{\mathrm{ij}}$ 类似 ，为两个个体的基因组中相同的比例。</p>
+<p>$r_{\mathrm{Mij}}$ 和  $A_{\mathrm{ij}}$ 具有下面的关系。我们考虑从个体 $i$ 和 个体 $j$ 中各随机抽取一个基因，它们由于 IBD 相同的额概率为 $A_{\mathrm{ij}} / 2$ ，它们不是 IBD 相同的概率为 $1-A_{\mathrm{ij}} / 2$ 但是由于偶然相同的概率为 $p^{2} + q^{2}$ 。因此，$f_{\mathrm{Mij}}=\theta_{\mathrm{ij}}+\left(1-\theta_{\mathrm{ij}}\right)\left(p^{2}+q^{2}\right)$ ，重排一下，我们得到：<br>
+$$<br>
+\left(1-f_{\mathrm{Mij}}\right)=\left(1-\theta_{\mathrm{ij}}\right)\left(1-p^{2}-q^{2}\right) = \left(1-\theta_{\mathrm{ij}}\right)\left(2pq\right)<br>
+$$<br>
+易得 $f_{\mathrm{Mij}} &gt; \theta_{\mathrm{ij}}$ ，或  $r_{\mathrm{Mij}} &gt; A_{\mathrm{ij}}$ ，因此相比于 IBD ，IBS 是向上有偏的。</p>
+<p>左右乘2，我们得到 $r_{\mathrm{Mij}}$ 和  $A_{\mathrm{ij}}$ 的关系：<br>
+$$<br>
+r_{\mathrm{Mij}}=A_{\mathrm{ij}}+\left(2-A_{\mathrm{ij}}\right)\left(p^{2}+q^{2}\right)<br>
+$$<br>
+或者<br>
+$$<br>
+A_{\mathrm{ij}}=\frac{r_{\mathrm{Mij}}-2 p^{2}-2 q^{2}}{2 p q}<br>
+$$<br>
+根据这个公式，我们可以从 IBS 关系中得到 IBD 关系，这个等价于 VanRaden 的 $\mathbf{G}$ 阵 (?)。</p>
+<h2 id="单个-QTL-的个体间亲缘关系">单个 QTL 的个体间亲缘关系</h2>
+<p>假设我们研究的物种只有一个二等位基因的基因，你获得了想要的个体的基因型之后，那么此时个体 $i$  和 $j$ 的协方差是什么呢？让我们把育种值表达为加性值 ($za$) 减去群体均值 ($\mu = 2pa$ ) 后的差值：<br>
+$$<br>
+\begin{gathered}<br>
+u_{i}=z_{i} a-2 p a=\left(z_{i}-2 p\right) a \<br>
+u_{j}=z_{j} a-2 p a=\left(z_{j}-2 p\right) a<br>
+\end{gathered}<br>
+$$<br>
+这里 $z_{i}$ 为 012 编码，即参考碱基的数目。如果这个 QTL 具有先验分布，其先验方差为 $\operatorname{Var}(a)=\sigma_{a}^{2}$ ，假设哈温平衡下的加性方差为 $2 p q \sigma_{a}^{2}$ 。根据方差和协方差的计算公式，我们有<br>
+$$<br>
+\operatorname{Cov}\left(u_{i}, u_{j}\right)=\left(z_{i}-2 p\right)\left(z_{j}-2 p\right) \sigma_{a}^{2}<br>
+$$<br>
+如果我们定义 $z_{i}^{<em>}=z_{i}-2 p$ ，换句话说我们采用中心化的编码方式，那么此时两个个体之间的协方差等于 $z_{i}^{</em>} z_{j}^{*} \sigma_{a}^{2}$ 。</p>
+<p>对个体间的协方差 $z_{i}^{<em>} z_{j}^{</em>} \sigma_{a}^{2}$ 除以加性方差 $2 \mathrm{pq} \sigma_{a}^{2}$ ，我们得到了根据这个 QTL 得到的加性亲缘关系，这里称为 $r_{Q_{i j}}$ 。$p=0.5$ 和 $p=0.25$ 的两个例子如下表所示 (这两个表感觉有问题，我计算的都对不上，第一个表 AA 和 AA 我计算应该是 2 ) ：<br>
+$$<br>
+\begin{array}{llll}<br>
+\hline &amp; \mathrm{AA} &amp; \mathrm{Aa} &amp; \mathrm{aa} \<br>
+\hline \mathrm{AA} &amp; 1 &amp; 0 &amp; -1 \<br>
+\mathrm{Aa} &amp; 0 &amp; 0 &amp; 0 \<br>
+\mathrm{aa} &amp; -1 &amp; 0 &amp; 1 \<br>
+\hline<br>
+\end{array}<br>
+$$</p>
+<p>$$<br>
+\begin{array}{llll}<br>
+\hline &amp; \mathrm{AA} &amp; \mathrm{Aa} &amp; \mathrm{aa} \<br>
+\hline \mathrm{AA} &amp; 2.25 &amp; 0.75 &amp; -0.75 \<br>
+\mathrm{Aa} &amp; 0.75 &amp; 0.25 &amp; -.025 \<br>
+\mathrm{aa} &amp; -0.75 &amp; -0.25 &amp; 0.25 \<br>
+\hline<br>
+\end{array}<br>
+$$</p>
 <p>我们看到这里有负的亲缘关系，原因是由于我们对育种值的计算过程中强行<strong>使得其为和群体均值的差值</strong>，因此这是正常的。</p>
 <p>这里的近交系数就是  $r_{Q_{i j}} - 1$ ，这里可能出现负值，说明这个个体的杂合子比例低于预期。</p>
-<h2 id="基因组关系矩阵-1"><a href="#基因组关系矩阵-1" class="headerlink" title="基因组关系矩阵"></a>基因组关系矩阵</h2><p>我们可以计算 IBS，再将其调整为 IBD 。我们先看 VanRaden 的第一种基因组关系矩阵，这里我们就是从上面的单个 QTL 推导为多个标记。为了使得育种值的均值为 0 ，我们对中心化的基因型编码，如下：<br>$$<br>\begin{array}{llll}<br>\hline \text { Genotype } &amp; 101 \text { Coding } &amp; 012 \text { Coding } &amp; \text { Centered coding } \<br>\text { aa } &amp; -a_{i} &amp; 0 &amp; -2 p_{i} a_{i} \<br>\text { Aa } &amp; 0 &amp; a_{i} &amp; \left(1-2 p_{i}\right) a_{i} \<br>\text { AA } &amp; a_{i} &amp; 2 a_{i} &amp; \left(2-2 p_{i}\right) a_{i} \<br>\hline<br>\end{array}<br>$$<br>在理论上，为了参考系谱基础群体的育种值，这里我们应该也用基础群体的等位基因频率。但是这一点基本无法实现，因此我们通常还是用已有基因型数据的基因频率。育种值计算公式为<br>$$<br>\mathbf{u}&#x3D;\mathbf{Z a}<br>$$<br> 即，个体育种值就是所有标记效应的和。我们假设标记效应的先验分布的协方差矩阵为<br>$$<br>\operatorname{Var}(\mathbf{a})&#x3D;\mathbf{D}<br>$$<br>其中<br>$$<br>\mathbf{D}&#x3D;\left(\begin{array}{cccc}<br>\sigma_{a 1}^{2} &amp; 0 &amp; \ldots &amp; 0 \<br>0 &amp; \sigma_{a 2}^{2} &amp; \cdots &amp; 0 \<br>\cdots &amp; \cdots &amp; \cdots &amp; \ldots \<br>0 &amp; 0 &amp; \ldots &amp; \sigma_{a n}^{2}<br>\end{array}\right)<br>$$<br>通常我们假设不同标记的方差相同，即 $\mathbf{D}&#x3D;\mathbf{I} \sigma_{a 0}^{2}$ 。那么，个体育种值的协方差矩阵为<br>$$<br>\operatorname{Var}(\mathbf{u})&#x3D;\mathbf{Z} \operatorname{Var}(\mathbf{a}) \mathbf{Z}^{\prime}&#x3D;\mathbf{Z D Z}&#x3D;\mathbf{Z} \mathbf{Z}^{\prime} \sigma_{a 0}^{2}<br>$$<br>但是这里还不是亲缘关系矩阵，<strong>亲缘关系矩阵是标准化的协方差矩阵</strong>，因此这里我们还要除以加性方差，即育种值的方差。如果我们假设<strong>哈温平衡</strong>和<strong>连锁平衡</strong>，我们已知存在下式<br>$$<br>\sigma_{u}^{2}&#x3D;2 \sum_{i&#x3D;1}^{\mathrm{nsnp}} p_{i} q_{i} \sigma_{a 0}^{2}<br>$$<br>因此，我们得到亲缘关系矩阵为<br>$$<br>\mathbf{G}&#x3D;\frac{\mathbf{Z} \mathbf{Z}^{\prime} \sigma_{a 0}^{2}}{\sigma_{u}^{2}} &#x3D;\frac{\mathbf{Z} \mathbf{Z}^{\prime}}{2 \sum p_{i} q_{i}}<br>$$<br>$\mathbf{G}$ 阵的对角线元素衡量一个个体的纯合子位点数目（纯合子位点数目越多，对角线元素越大），其非对角线元素衡量两个共同的碱基的数目。注意，$\mathbf{G}$ 阵可以理解是对 IBS 矩阵做了修改，从而变成了对于 IBD 关系的一个近似，这种近似比从系谱得到的近似更好，因此这就是为什么基因组预测由于系谱预测。</p>
-<h3 id="GEBV-和-SNP-效应"><a href="#GEBV-和-SNP-效应" class="headerlink" title="GEBV 和 SNP 效应"></a>GEBV 和 SNP 效应</h3><p>估计SNP效应时，我们有模型如下<br>$$<br>\mathrm{y}&#x3D;\mu+\mathrm{Za}+\mathrm{e} ; \quad \operatorname{var}(\mathrm{a})&#x3D;\mathrm{D} \sigma_{a}^{2}<br>$$<br>这里 $\mathbf{D}$ 是一个对角矩阵，表示每个 SNP 的相对方差，这个模型等价于<br>$$<br>y&#x3D;\mu+u+e ; \operatorname{var}(u)&#x3D;Z D Z^{\prime} \sigma_{a}^{2}&#x3D;G \sigma_{u}^{2}<br>$$<br>因此，我们有<br>$$<br>G&#x3D; \frac{Z D Z^{\prime} \sigma_{a}^{2}}{ \sigma_{u}^{2} }<br>$$<br>估计SNP效应得到的 GEBV 为<br>$$<br>u&#x3D;Z a<br>$$<br>我们也可以从 GBLUP 的 GEBV 值中得到 SNP 效应（Stranden and Garrick, 2009）<br>$$<br>a&#x3D;\frac{\sigma_{a}^{2} }{ \sigma_{u}^{2} } D Z^{\prime} G^{-1} u<br>$$<br>我们检查一下<br>$$<br>u&#x3D;Z a&#x3D; \frac{\sigma_{a}^{2} }{ \sigma_{u}^{2} } Z D Z^{\prime} G^{-1} u&#x3D;u<br>$$</p>
-<h3 id="G阵中使用的基因频率"><a href="#G阵中使用的基因频率" class="headerlink" title="G阵中使用的基因频率"></a>G阵中使用的基因频率</h3><p>在构建 $\mathbf{G}$ 阵的过程中，使用的基因频率有些困惑的地方。(Strandén and Christensen 2011) 证明了， $\mathbf{G}&#x3D;\mathbf{Z} \mathbf{Z}^{\prime} &#x2F; 2 \sum p_{i} q_{i}$ 中，构建 $\mathbf{Z}$ 矩阵中使用不同的基因频率是无关的，只会使得所有元素偏移了一个常数，即 $\mathbf{G}$ 阵均值偏移了一个常数。为了和系谱构建的 $\mathbf{A}$ 阵的元素范围 (<em>scale</em>) 相同，我们应该使用基础群体的基因频率。</p>
-<p>但是，分母中使用的基因频率更加重要。因为方程 $\sigma_{u}^{2}&#x3D;2 \sum_{i&#x3D;1}^{\mathrm{nsnp}} p_{i} q_{i} \sigma_{a 0}^{2}$ 中使用的加性方差和基因频率应该是同一个群体的，因此采用当前群体的基因频率表示我们参考的是当前群体的加性方差。如果系谱的基础群体和当前的基因型数据群体相差了很多世代，那么加性方差会降低。</p>
-<h3 id="G阵的性质"><a href="#G阵的性质" class="headerlink" title="G阵的性质"></a>G阵的性质</h3><ul>
-<li><p>GBLUP 的估计育种值 $\mathbf{u}$ 的均值为 0 ，这是因为 $\mathbf{Z}$ 是中心化的矩阵 (缺证明？)。</p>
+<h2 id="基因组关系矩阵">基因组关系矩阵</h2>
+<p>我们可以计算 IBS，再将其调整为 IBD 。我们先看 VanRaden 的第一种基因组关系矩阵，这里我们就是从上面的单个 QTL 推导为多个标记。为了使得育种值的均值为 0 ，我们对中心化的基因型编码，如下：<br>
+$$<br>
+\begin{array}{llll}<br>
+\hline \text { Genotype } &amp; 101 \text { Coding } &amp; 012 \text { Coding } &amp; \text { Centered coding } \<br>
+\text { aa } &amp; -a_{i} &amp; 0 &amp; -2 p_{i} a_{i} \<br>
+\text { Aa } &amp; 0 &amp; a_{i} &amp; \left(1-2 p_{i}\right) a_{i} \<br>
+\text { AA } &amp; a_{i} &amp; 2 a_{i} &amp; \left(2-2 p_{i}\right) a_{i} \<br>
+\hline<br>
+\end{array}<br>
+$$<br>
+在理论上，为了参考系谱基础群体的育种值，这里我们应该也用基础群体的等位基因频率。但是这一点基本无法实现，因此我们通常还是用已有基因型数据的基因频率。育种值计算公式为<br>
+$$<br>
+\mathbf{u}=\mathbf{Z a}<br>
+$$<br>
+即，个体育种值就是所有标记效应的和。我们假设标记效应的先验分布的协方差矩阵为<br>
+$$<br>
+\operatorname{Var}(\mathbf{a})=\mathbf{D}<br>
+$$<br>
+其中<br>
+$$<br>
+\mathbf{D}=\left(\begin{array}{cccc}<br>
+\sigma_{a 1}^{2} &amp; 0 &amp; \ldots &amp; 0 \<br>
+0 &amp; \sigma_{a 2}^{2} &amp; \cdots &amp; 0 \<br>
+\cdots &amp; \cdots &amp; \cdots &amp; \ldots \<br>
+0 &amp; 0 &amp; \ldots &amp; \sigma_{a n}^{2}<br>
+\end{array}\right)<br>
+$$<br>
+通常我们假设不同标记的方差相同，即 $\mathbf{D}=\mathbf{I} \sigma_{a 0}^{2}$ 。那么，个体育种值的协方差矩阵为<br>
+$$<br>
+\operatorname{Var}(\mathbf{u})=\mathbf{Z} \operatorname{Var}(\mathbf{a}) \mathbf{Z}^{\prime}=\mathbf{Z D Z}=\mathbf{Z} \mathbf{Z}^{\prime} \sigma_{a 0}^{2}<br>
+$$<br>
+但是这里还不是亲缘关系矩阵，<strong>亲缘关系矩阵是标准化的协方差矩阵</strong>，因此这里我们还要除以加性方差，即育种值的方差。如果我们假设<strong>哈温平衡</strong>和<strong>连锁平衡</strong>，我们已知存在下式<br>
+$$<br>
+\sigma_{u}^{2}=2 \sum_{i=1}^{\mathrm{nsnp}} p_{i} q_{i} \sigma_{a 0}^{2}<br>
+$$<br>
+因此，我们得到亲缘关系矩阵为<br>
+$$<br>
+\mathbf{G}=\frac{\mathbf{Z} \mathbf{Z}^{\prime} \sigma_{a 0}^{2}}{\sigma_{u}^{2}} =\frac{\mathbf{Z} \mathbf{Z}^{\prime}}{2 \sum p_{i} q_{i}}<br>
+$$<br>
+$\mathbf{G}$ 阵的对角线元素衡量一个个体的纯合子位点数目（纯合子位点数目越多，对角线元素越大），其非对角线元素衡量两个共同的碱基的数目。注意，$\mathbf{G}$ 阵可以理解是对 IBS 矩阵做了修改，从而变成了对于 IBD 关系的一个近似，这种近似比从系谱得到的近似更好，因此这就是为什么基因组预测由于系谱预测。</p>
+<h3 id="GEBV-和-SNP-效应">GEBV 和 SNP 效应</h3>
+<p>估计SNP效应时，我们有模型如下<br>
+$$<br>
+\mathrm{y}=\mu+\mathrm{Za}+\mathrm{e} ; \quad \operatorname{var}(\mathrm{a})=\mathrm{D} \sigma_{a}^{2}<br>
+$$<br>
+这里 $\mathbf{D}$ 是一个对角矩阵，表示每个 SNP 的相对方差，这个模型等价于<br>
+$$<br>
+y=\mu+u+e ; \operatorname{var}(u)=Z D Z^{\prime} \sigma_{a}^{2}=G \sigma_{u}^{2}<br>
+$$<br>
+因此，我们有<br>
+$$<br>
+G= \frac{Z D Z^{\prime} \sigma_{a}^{2}}{ \sigma_{u}^{2} }<br>
+$$<br>
+估计SNP效应得到的 GEBV 为<br>
+$$<br>
+u=Z a<br>
+$$<br>
+我们也可以从 GBLUP 的 GEBV 值中得到 SNP 效应（Stranden and Garrick, 2009）<br>
+$$<br>
+a=\frac{\sigma_{a}^{2} }{ \sigma_{u}^{2} } D Z^{\prime} G^{-1} u<br>
+$$<br>
+我们检查一下<br>
+$$<br>
+u=Z a= \frac{\sigma_{a}^{2} }{ \sigma_{u}^{2} } Z D Z^{\prime} G^{-1} u=u<br>
+$$</p>
+<h3 id="G阵中使用的基因频率">G阵中使用的基因频率</h3>
+<p>在构建 $\mathbf{G}$ 阵的过程中，使用的基因频率有些困惑的地方。(Strandén and Christensen 2011) 证明了， $\mathbf{G}=\mathbf{Z} \mathbf{Z}^{\prime} / 2 \sum p_{i} q_{i}$ 中，构建 $\mathbf{Z}$ 矩阵中使用不同的基因频率是无关的，只会使得所有元素偏移了一个常数，即 $\mathbf{G}$ 阵均值偏移了一个常数。为了和系谱构建的 $\mathbf{A}$ 阵的元素范围 (<em>scale</em>) 相同，我们应该使用基础群体的基因频率。</p>
+<p>但是，分母中使用的基因频率更加重要。因为方程 $\sigma_{u}^{2}=2 \sum_{i=1}^{\mathrm{nsnp}} p_{i} q_{i} \sigma_{a 0}^{2}$ 中使用的加性方差和基因频率应该是同一个群体的，因此采用当前群体的基因频率表示我们参考的是当前群体的加性方差。如果系谱的基础群体和当前的基因型数据群体相差了很多世代，那么加性方差会降低。</p>
+<h3 id="G阵的性质">G阵的性质</h3>
+<ul>
+<li>
+<p>GBLUP 的估计育种值 $\mathbf{u}$ 的均值为 0 ，这是因为 $\mathbf{Z}$ 是中心化的矩阵 (缺证明？)。</p>
 </li>
-<li><p>$\mathbf{G}$ 阵的均值为 0 。证明如下，首先我们有 $\operatorname{sum}\left(\mathbf{Z} \mathbf{Z}^{\prime}\right)&#x3D;\operatorname{sum}\left(\mathbf{Z}^{\prime} \mathbf{Z}\right)$  (缺证明)。<strong>假设连锁平衡</strong>，那么 $\mathbf{Z}^{\prime} \mathbf{Z}$ 的和为0 （因为连锁平衡，两个位点的基因型乘积之和为0，因此 $\mathbf{Z}^{\prime} \mathbf{Z}$ 的非对角线元素全为 0，但是对角线元素不是 0 啊，感觉有问题）。 </p>
+<li>
+<p>$\mathbf{G}$ 阵的均值为 0 。证明如下，首先我们有 $\operatorname{sum}\left(\mathbf{Z} \mathbf{Z}^{\prime}\right)=\operatorname{sum}\left(\mathbf{Z}^{\prime} \mathbf{Z}\right)$  (缺证明)。<strong>假设连锁平衡</strong>，那么 $\mathbf{Z}^{\prime} \mathbf{Z}$ 的和为0 （因为连锁平衡，两个位点的基因型乘积之和为0，因此 $\mathbf{Z}^{\prime} \mathbf{Z}$ 的非对角线元素全为 0，但是对角线元素不是 0 啊，感觉有问题）。</p>
 </li>
-<li><p>如果没有近交，那么 $\mathbf{G}$ 阵的对角线元素均值为 1 。  <strong>假设哈温平衡</strong>，存在 $\left.\operatorname{tr}(\mathbf{Z Z})^{\prime}\right)&#x3D;\operatorname{tr}\left(\mathbf{Z}^{\prime} \mathbf{Z}\right)$ (缺证明)。 $\operatorname{tr}\left(\mathbf{Z}^{\prime} \mathbf{Z}\right)$ 的对角线元素是某个位点对于碱基 “a” 和 “A” 的效应的协方差的平方，假设有 $m$ 个个体，位点 $i$ 的两个碱基的基因频率分布为 $1-p_{i}$  和 $p_{i}$ ，即 (没看懂)<br>$$<br>\mathbf{z}<em>{i}^{\prime} \mathbf{z}</em>{i}&#x3D;2 m\left[\left(1-p_{i}\right) p_{i}^{2}+p_{i}\left(1-p_{i}\right)^{2}\right]&#x3D;2 m p_{i}\left(1-p_{i}\right)&#x3D;2 m p_{i} q_{i}<br>$$<br>因此， $\mathbf{G}$ 阵的对角线元素均值为<br>$$<br>\frac{1}{m} \operatorname{tr}\left(\frac{\mathbf{Z} \mathbf{Z}^{\prime}}{2 \sum p_{i} q_{i}}\right)&#x3D;\frac{2 m \sum p_{i} q_{i}}{2 m \sum p_{i} q_{i}}&#x3D;1<br>$$<br>如果存在近交，那么就不满足哈温平衡，此时假设近交系数为 $F$ ，那么基因型的分布为 $\left{q^{2}+p q F, 2 p q(1-F), p^{2}+p q F\right}$ (Falconer and Mackay, 1996) 。那么此时我们有<br>$$<br>\mathbf{z}<em>{i}^{\prime} \mathbf{z}</em>{i}&#x3D;2 m\left[\left(1-2 p_{i}\right)\left(q_{i}^{2}+p_{i} q_{i} F\right)+\left(1-2 p_{i}\right)\left(2 p_{i} q_{i} F\right)+\left(2-2 p_{i}\right)\left(p_{i}^{2}+p_{i} q_{i} F\right)\right]&#x3D;2 m p_{i}\left(1-p_{i}\right)&#x3D;2 m(1+F) p_{i} q_{i}<br>$$<br>此时， $\mathbf{G}$ 阵的对角线元素均值为<br>$$<br>\frac{1}{m} \operatorname{tr}\left(\frac{\mathbf{Z Z}^{\prime}}{2 \sum p_{i} q_{i}}\right)&#x3D;\frac{(1+F) 2 m \sum p_{i} q_{i}}{2 m \sum p_{i} q_{i}}&#x3D;1+F<br>$$<br>注意，这里 $F$ 是群体内的近交系数，可以是负数，表示过多的纯合子。</p>
+<li>
+<p>如果没有近交，那么 $\mathbf{G}$ 阵的对角线元素均值为 1 。  <strong>假设哈温平衡</strong>，存在 $\left.\operatorname{tr}(\mathbf{Z Z})^{\prime}\right)=\operatorname{tr}\left(\mathbf{Z}^{\prime} \mathbf{Z}\right)$ (缺证明)。 $\operatorname{tr}\left(\mathbf{Z}^{\prime} \mathbf{Z}\right)$ 的对角线元素是某个位点对于碱基 “a” 和 “A” 的效应的协方差的平方，假设有 $m$ 个个体，位点 $i$ 的两个碱基的基因频率分布为 $1-p_{i}$  和 $p_{i}$ ，即 (没看懂)<br>
+$$<br>
+\mathbf{z}<em>{i}^{\prime} \mathbf{z}</em>{i}=2 m\left[\left(1-p_{i}\right) p_{i}^{2}+p_{i}\left(1-p_{i}\right)^{2}\right]=2 m p_{i}\left(1-p_{i}\right)=2 m p_{i} q_{i}<br>
+$$<br>
+因此， $\mathbf{G}$ 阵的对角线元素均值为<br>
+$$<br>
+\frac{1}{m} \operatorname{tr}\left(\frac{\mathbf{Z} \mathbf{Z}^{\prime}}{2 \sum p_{i} q_{i}}\right)=\frac{2 m \sum p_{i} q_{i}}{2 m \sum p_{i} q_{i}}=1<br>
+$$<br>
+如果存在近交，那么就不满足哈温平衡，此时假设近交系数为 $F$ ，那么基因型的分布为 $\left{q^{2}+p q F, 2 p q(1-F), p^{2}+p q F\right}$ (Falconer and Mackay, 1996) 。那么此时我们有<br>
+$$<br>
+\mathbf{z}<em>{i}^{\prime} \mathbf{z}</em>{i}=2 m\left[\left(1-2 p_{i}\right)\left(q_{i}^{2}+p_{i} q_{i} F\right)+\left(1-2 p_{i}\right)\left(2 p_{i} q_{i} F\right)+\left(2-2 p_{i}\right)\left(p_{i}^{2}+p_{i} q_{i} F\right)\right]=2 m p_{i}\left(1-p_{i}\right)=2 m(1+F) p_{i} q_{i}<br>
+$$<br>
+此时， $\mathbf{G}$ 阵的对角线元素均值为<br>
+$$<br>
+\frac{1}{m} \operatorname{tr}\left(\frac{\mathbf{Z Z}^{\prime}}{2 \sum p_{i} q_{i}}\right)=\frac{(1+F) 2 m \sum p_{i} q_{i}}{2 m \sum p_{i} q_{i}}=1+F<br>
+$$<br>
+注意，这里 $F$ 是群体内的近交系数，可以是负数，表示过多的纯合子。</p>
 </li>
-<li><p>$\mathbf{G}$ 阵的非对角线元素均值几乎是 0 。也就是说，如果满足哈温平衡和连锁平衡，如果样本数为 $m$ ，那么（不懂）<br>  $$<br>  \operatorname{avoff}(\mathbf{G})&#x3D;\frac{1}{m(m-1)}(\operatorname{sum}(\mathbf{G})-\operatorname{diag}(\mathbf{G}))&#x3D;\frac{m}{m(m-1)}&#x3D;\frac{1}{m-1}<br>  $$</p>
+<li>
+<p>$\mathbf{G}$ 阵的非对角线元素均值几乎是 0 。也就是说，如果满足哈温平衡和连锁平衡，如果样本数为 $m$ ，那么（不懂）<br>
+$$<br>
+\operatorname{avoff}(\mathbf{G})=\frac{1}{m(m-1)}(\operatorname{sum}(\mathbf{G})-\operatorname{diag}(\mathbf{G}))=\frac{m}{m(m-1)}=\frac{1}{m-1}<br>
+$$</p>
 </li>
 </ul>
-<h3 id="添加权重的G阵"><a href="#添加权重的G阵" class="headerlink" title="添加权重的G阵"></a>添加权重的G阵</h3><p>在贝叶斯回归方法中，我们认为不同的标记可能有不同的方差。我们可以利用下式实现<br>$$<br>\operatorname{Var}(\mathbf{u})&#x3D;\mathbf{Z} \operatorname{Var}(\mathbf{a}) \mathbf{Z}^{\prime}&#x3D;\mathbf{Z} \mathbf{D} \mathbf{Z}^{\prime}<br>$$<br>实际上，我们有另外一种简单的应用（在 BLUPF90 或 AsReml 中），我们可以通过分解加性方差，然后使用一个权重的矩阵，如 $\operatorname{Var}(\mathbf{u}) &#x3D;\mathbf{Z} \mathbf{D}<em>{w} \mathbf{Z}^{\prime} \sigma^{2}</em>{u}$ （笔误，这里的 $\sigma^{2}<em>{u}$ 应该是 $\sigma^{2}</em>{a0}$ ） ，其中<br>$$<br>\mathbf{D}<em>{w}&#x3D;\left(\begin{array}{cccc}<br>\sigma</em>{a 1}^{2} &#x2F; \sigma_{a 0}^{2} &amp; 0 &amp; \cdots &amp; 0 \<br>0 &amp; \sigma_{a 2}^{2} &#x2F; \sigma_{a 0}^{2} &amp; \cdots &amp; 0 \<br>\cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>0 &amp; 0 &amp; \cdots &amp; \sigma_{a n}^{2} &#x2F; \sigma_{a 0}^{2}<br>\end{array}\right)&#x3D;\left(\begin{array}{cccc}<br>w_{1} &amp; 0 &amp; \cdots &amp; 0 \<br>0 &amp; w_{2} &amp; \cdots &amp; 0 \<br>\cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>0 &amp; 0 &amp; \cdots &amp; w_{n}<br>\end{array}\right)<br>$$<br>注意如果 $w_{1}&#x3D;w_{2}&#x3D;\ldots&#x3D;w_{n}&#x3D;1$ ，此时就是常规的基因组矩阵。</p>
+<h3 id="添加权重的G阵">添加权重的G阵</h3>
+<p>在贝叶斯回归方法中，我们认为不同的标记可能有不同的方差。我们可以利用下式实现<br>
+$$<br>
+\operatorname{Var}(\mathbf{u})=\mathbf{Z} \operatorname{Var}(\mathbf{a}) \mathbf{Z}^{\prime}=\mathbf{Z} \mathbf{D} \mathbf{Z}^{\prime}<br>
+$$<br>
+实际上，我们有另外一种简单的应用（在 BLUPF90 或 AsReml 中），我们可以通过分解加性方差，然后使用一个权重的矩阵，如 $\operatorname{Var}(\mathbf{u}) =\mathbf{Z} \mathbf{D}<em>{w} \mathbf{Z}^{\prime} \sigma^{2}</em>{u}$ （笔误，这里的 $\sigma^{2}<em>{u}$ 应该是 $\sigma^{2}</em>{a0}$ ） ，其中<br>
+$$<br>
+\mathbf{D}<em>{w}=\left(\begin{array}{cccc}<br>
+\sigma</em>{a 1}^{2} / \sigma_{a 0}^{2} &amp; 0 &amp; \cdots &amp; 0 \<br>
+0 &amp; \sigma_{a 2}^{2} / \sigma_{a 0}^{2} &amp; \cdots &amp; 0 \<br>
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>
+0 &amp; 0 &amp; \cdots &amp; \sigma_{a n}^{2} / \sigma_{a 0}^{2}<br>
+\end{array}\right)=\left(\begin{array}{cccc}<br>
+w_{1} &amp; 0 &amp; \cdots &amp; 0 \<br>
+0 &amp; w_{2} &amp; \cdots &amp; 0 \<br>
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots \<br>
+0 &amp; 0 &amp; \cdots &amp; w_{n}<br>
+\end{array}\right)<br>
+$$<br>
+注意如果 $w_{1}=w_{2}=\ldots=w_{n}=1$ ，此时就是常规的基因组矩阵。</p>
 <p>标记的权重可以通过几种方式来得到，比如从贝叶斯回归中得到。</p>
-<h3 id="G阵是实际的亲缘关系的估计值"><a href="#G阵是实际的亲缘关系的估计值" class="headerlink" title="G阵是实际的亲缘关系的估计值"></a>G阵是实际的亲缘关系的估计值</h3><p>使用系谱构建亲缘关系矩阵时，我们假设有无穷多个不相关的基因。在每一个位点，两个全同胞可以共享2个，1个或0个碱基。但是考虑所有的位点，那么两个全同胞就正好是共享一半的基因组。但是真实情况并非如此，由于染色体数目有限，并且同一条染色体上的位点会连锁地传递给下一代，因此两个半同胞之间地差异可能比较大，如下图</p>
-<p><img src="/posts/e0b3b4ee/1.png" alt="1"></p>
-<p>举个例子，这里 son 1 和 son3 比 son2 和 son4 更像。因此，在对 son 3 的预测中，son1 应该比 son2 和 son4 给更多的权重。基于上面这个图，这4个半同胞的亲缘关系可能如下<br>$$<br>R&#x3D;\left(\begin{array}{cccc}<br>1 &amp; 0 &amp; 0.5 &amp; 0.1 \<br>0 &amp; 1 &amp; 0 &amp; 0.4 \<br>0.5 &amp; 0 &amp; 1 &amp; 0.1 \<br>0.1 &amp; 0.4 &amp; 0.1 &amp; 1<br>\end{array}\right)<br>$$<br>我们称这里的亲缘关系是实际的亲缘关系 (<em>realized relationships</em>) ，与系谱中的期望的亲缘关系相对应 (<em>expected relationships</em>) ，这里我们用 $\mathbf{R}$ 矩阵表示，我们有<br>$$<br>E\left(R_{\mathrm{ij}}\right)&#x3D;A_{\mathrm{ij}}<br>$$<br>以两个半同胞为例，其实际的亲缘关系范围是 [0, 0.5] ，其期望值为 0.25 。</p>
-<p>$\mathbf{G}$ 阵就是实际的亲缘关系的估计值（证明略），我们有<br>$$<br>E(\mathbf{G})&#x3D;\mathbf{R}<br>$$<br>由于 $E(\mathbf{R})&#x3D;\mathbf{A}$ ，因此 $E(\mathbf{G})&#x3D;\mathbf{A}$ 。因此当 $A_{ij} &#x3D; 0$ ，说明 $G_{ij}$ 的期望为 0，因此  $G_{ij}$ 可以在 0 的上下震荡，因此  $G_{ij}$  可能是负数。</p>
-<h2 id="G-阵和-A-阵-兼容问题"><a href="#G-阵和-A-阵-兼容问题" class="headerlink" title="G 阵和 A 阵 兼容问题"></a>G 阵和 A 阵 兼容问题</h2><p>构建$\mathbf{G}$ 阵时需要使用基础群体的基因频率，但是我们一般用的是当前群体的基因频率，这会导致两个问题。</p>
-<p>首先就是系谱和标记的遗传基础不一致了，在构建 G 阵时通过使用 “中心化” 的基因型编码，这会使得当前群体的育种值均值  $\overline{\mathbf{u}}&#x3D;0$ 。而在使用系谱的常规评估中，我们仅仅是使得基础群体的育种值均值 $\overline{\mathbf{u}}&#x3D;0$ 。</p>
+<h3 id="G阵是实际的亲缘关系的估计值">G阵是实际的亲缘关系的估计值</h3>
+<p>使用系谱构建亲缘关系矩阵时，我们假设有无穷多个不相关的基因。在每一个位点，两个全同胞可以共享2个，1个或0个碱基。但是考虑所有的位点，那么两个全同胞就正好是共享一半的基因组。但是真实情况并非如此，由于染色体数目有限，并且同一条染色体上的位点会连锁地传递给下一代，因此两个半同胞之间地差异可能比较大，如下图</p>
+<p><img src="1.png" alt="1"></p>
+<p>举个例子，这里 son 1 和 son3 比 son2 和 son4 更像。因此，在对 son 3 的预测中，son1 应该比 son2 和 son4 给更多的权重。基于上面这个图，这4个半同胞的亲缘关系可能如下<br>
+$$<br>
+R=\left(\begin{array}{cccc}<br>
+1 &amp; 0 &amp; 0.5 &amp; 0.1 \<br>
+0 &amp; 1 &amp; 0 &amp; 0.4 \<br>
+0.5 &amp; 0 &amp; 1 &amp; 0.1 \<br>
+0.1 &amp; 0.4 &amp; 0.1 &amp; 1<br>
+\end{array}\right)<br>
+$$<br>
+我们称这里的亲缘关系是实际的亲缘关系 (<em>realized relationships</em>) ，与系谱中的期望的亲缘关系相对应 (<em>expected relationships</em>) ，这里我们用 $\mathbf{R}$ 矩阵表示，我们有<br>
+$$<br>
+E\left(R_{\mathrm{ij}}\right)=A_{\mathrm{ij}}<br>
+$$<br>
+以两个半同胞为例，其实际的亲缘关系范围是 [0, 0.5] ，其期望值为 0.25 。</p>
+<p>$\mathbf{G}$ 阵就是实际的亲缘关系的估计值（证明略），我们有<br>
+$$<br>
+E(\mathbf{G})=\mathbf{R}<br>
+$$<br>
+由于 $E(\mathbf{R})=\mathbf{A}$ ，因此 $E(\mathbf{G})=\mathbf{A}$ 。因此当 $A_{ij} = 0$ ，说明 $G_{ij}$ 的期望为 0，因此  $G_{ij}$ 可以在 0 的上下震荡，因此  $G_{ij}$  可能是负数。</p>
+<h2 id="G-阵和-A-阵-兼容问题">G 阵和 A 阵 兼容问题</h2>
+<p>构建$\mathbf{G}$ 阵时需要使用基础群体的基因频率，但是我们一般用的是当前群体的基因频率，这会导致两个问题。</p>
+<p>首先就是系谱和标记的遗传基础不一致了，在构建 G 阵时通过使用 “中心化” 的基因型编码，这会使得当前群体的育种值均值  $\overline{\mathbf{u}}=0$ 。而在使用系谱的常规评估中，我们仅仅是使得基础群体的育种值均值 $\overline{\mathbf{u}}=0$ 。</p>
 <p>举个例子，为了比较基于系谱的 EBV 和基于基因组的 EBV，它们可能在范围 (<em>scale</em>) 上不一样，也就是说二者的 EBV 可能是相差一个常数，即绝对值有差异，但是相对大小和排名可能是一样的。</p>
 <p>第二个问题就是加性方差改变了，基于系谱的加性方差 $\sigma_{u}^{2}$  是基础群体的育种值方差，而基于标记的加性方差 $2 \sum p_{i} q_{i} \sigma_{a 0}^{2}$ 则是等位基因频率为 $p_{i}$ 的群体的方差，即当前群体的育种值方差。但是，由于漂变和选择，标记倾向于固定，因此采用当前群体的 $2 \sum p_{i} q_{i} \sigma_{a 0}^{2}$  会比基础群体更小。</p>
 <p>但是，<strong>只有当我们想要合并系谱信息和基因组信息时，这些问题才有意义</strong>。在下一步，我们采用下面的写法，$\mathbf{u}<em>{\text {base }}$ 表示系谱中的基础群体，$\mathbf{u}</em>{2}$ 表示基因型个体，$\mathbf{u}_{1}$ 表示没有基因型的个体。</p>
-<h3 id="校正-G-阵"><a href="#校正-G-阵" class="headerlink" title="校正 G 阵"></a>校正 G 阵</h3><p>根据之前的描述，使用当前群体的基因频率，对 $\mathbf{G}$ 阵分子的影响相当于增加了一个常数，对分母的影响相当于乘以了一个常数，因此我们可以用下式校正 $\mathbf{G}$ 阵。<br>$$<br>\mathbf{G}^{*}&#x3D;a+b \mathbf{G}<br>$$<br>这里 $b$ 和 $a$ 的取值有不同的说法，这里只说一种。Christensen et al. (2012) 建议根据两个式子来得到  $b$ 和 $a$ ，如下，<br>$$<br>\frac{\operatorname{tr}(\mathbf{G})}{m} b+a&#x3D;\frac{\operatorname{tr}\left(\mathbf{A}_{22}\right)}{m}<br>$$</p>
-<p>$$<br>a+b \overline{\mathbf{G}}&#x3D;\overline{\mathbf{A}}_{22}<br>$$</p>
+<h3 id="校正-G-阵">校正 G 阵</h3>
+<p>根据之前的描述，使用当前群体的基因频率，对 $\mathbf{G}$ 阵分子的影响相当于增加了一个常数，对分母的影响相当于乘以了一个常数，因此我们可以用下式校正 $\mathbf{G}$ 阵。<br>
+$$<br>
+\mathbf{G}^{*}=a+b \mathbf{G}<br>
+$$<br>
+这里 $b$ 和 $a$ 的取值有不同的说法，这里只说一种。Christensen et al. (2012) 建议根据两个式子来得到  $b$ 和 $a$ ，如下，<br>
+$$<br>
+\frac{\operatorname{tr}(\mathbf{G})}{m} b+a=\frac{\operatorname{tr}\left(\mathbf{A}_{22}\right)}{m}<br>
+$$</p>
+<p>$$<br>
+a+b \overline{\mathbf{G}}=\overline{\mathbf{A}}_{22}<br>
+$$</p>
 <p>也就是说， $\mathbf{G}$ 阵和  $\mathbf{A}_{22}$ 阵的对角线元素均值相同，所有元素均值相同（或者说非对角线元素均值相同）。</p>
-<h2 id="G-阵的奇异性问题"><a href="#G-阵的奇异性问题" class="headerlink" title="G 阵的奇异性问题"></a>G 阵的奇异性问题</h2><p>$\mathbf{G}$ 阵可能是一个奇异矩阵，有两个原因可能导致这一点。首先如果存在两个基因型完全相同的个体，那么 $\mathbf{Z}$ 矩阵就会有相同的两行，导致 $\mathbf{Z}$ 矩阵不满秩，同时 $\mathbf{G}$ 阵也不满秩。第二点，如果构建 $\mathbf{Z}$ 矩阵时采用的当前群体的基因频率，那么 $\mathbf{Z}$ 矩阵就会是一个不满秩的矩阵，因为最后一行可以从其他行得到（Strandén and Christensen 2011）。</p>
-<p>为了得到一个非奇异的 $\mathbf{G}$ 阵 ，从而可以在MME中使用 $\mathbf{G}^{-1}$ ，我们有两种处理方式。第一种是往对角线添加一个很小的数，见下式，这里 $\alpha$ 是一个很小的数，通常是 0.01 或 0.05 。<br>$$<br>\mathbf{G}<em>{w}&#x3D;(1-\alpha) \mathbf{G}+\alpha \mathbf{I}<br>$$<br>第二种方式如下，是添加   $\mathbf{A}</em>{22}$ 阵，这里的  $\alpha$ 是 0.05 。这种做法就是 BLUPF90 的做法。这种方式同时是作为剩余多基因效应，也就是这里的 $\alpha$ 是基因组不能解释的育种值比例，有些文章说添加剩余多基因效应之后交叉验证结果更好。<br>$$<br>\mathbf{G}<em>{w}&#x3D;(1-\alpha) \mathbf{G}+\alpha \mathbf{A}</em>{22}<br>$$</p>
-<h1 id="GBLUP"><a href="#GBLUP" class="headerlink" title="GBLUP"></a>GBLUP</h1><h2 id="单性状模型"><a href="#单性状模型" class="headerlink" title="单性状模型"></a>单性状模型</h2><p>在 GBLUP 中，我们其实就是用基因组构建的  $\mathbf{G}$ 阵替换了系谱构建的 $\mathbf{A}$ 阵，模型如下<br>$$<br>\mathbf{y}&#x3D;\mathbf{X b}+\mathbf{W u}+\mathbf{e}<br>$$<br>这里 $\operatorname{Var}(\mathbf{u})&#x3D;\mathbf{G} \sigma_{u}^{2}, \operatorname{Var}(\mathbf{e})&#x3D;\mathbf{R}$ 。</p>
-<p>如果假设随机向量均满足多变量正态分布，那么此时 <em>Best Predictions</em> 就是混合模型方程组的解：<br>$$<br>\left(\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{W} \<br>\mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{W}+\mathbf{G}^{-1} \sigma_{u}^{-2}<br>\end{array}\right)\left(\begin{array}{l}<br>\widehat{\mathbf{b}} \<br>\widehat{\mathbf{u}}<br>\end{array}\right)&#x3D;\left(\begin{array}{c}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right)<br>$$<br>如果 $\mathbf{R}&#x3D;\mathbf{I} \sigma_{e}^{2}$ ，那么可以进一步简化得到<br>$$<br>\left(\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{W} \<br>\mathbf{W}^{\prime} \mathbf{X} &amp; \mathbf{W}^{\prime} \mathbf{W}+\mathbf{G}^{-1} \lambda<br>\end{array}\right)\left(\begin{array}{l}<br>\widehat{\mathbf{b}} \<br>\widehat{\mathbf{u}}<br>\end{array}\right)&#x3D;\left(\begin{array}{c}<br>\mathbf{X}^{\prime} \mathbf{y} \<br>\mathbf{W}^{\prime} \mathbf{y}<br>\end{array}\right)<br>$$<br>这里 $\lambda&#x3D;\sigma_{e}^{2} &#x2F; \sigma_{u}^{2}$ 。</p>
-<h2 id="多性状模型"><a href="#多性状模型" class="headerlink" title="多性状模型"></a>多性状模型</h2><p>$$<br>\left(\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{W} \<br>\mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{W}+\mathbf{G}^{-1} \bigotimes \mathbf{G}_{0}^{-1}<br>\end{array}\right)\left(\begin{array}{l}<br>\widehat{\mathbf{b}} \<br>\widehat{\mathbf{u}}<br>\end{array}\right)&#x3D;\left(\begin{array}{c}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right)<br>$$</p>
-<p>这里 $\mathbf{G}<em>{0}$ 就是多个性状的加性方差组分矩阵，通常 $\mathbf{R}&#x3D;\mathbf{I} \bigotimes \mathbf{R}</em>{0}$ ，这里 $\mathbf{R}_{0}$ 就是多个性状的残差方差组分矩阵。</p>
-<h1 id="Single-Step-GBLUP"><a href="#Single-Step-GBLUP" class="headerlink" title="Single Step GBLUP"></a>Single Step GBLUP</h1><p>在实际的生产过程中，只有一小部分的个体有基因型。因此，最佳的方法是合并系谱和基因组关系矩阵，生成一个新的关系矩阵，由于 MME 中，这就是 ssGBLUP 的思想。</p>
-<h2 id="H-阵推导"><a href="#H-阵推导" class="headerlink" title="H 阵推导"></a>H 阵推导</h2><p>Legarra et al. (2009) 说明如果所有模型中的所有个体均有基因型，那么基因组评估会很简单。此时，我们可以将 $\mathbf{A}$ 阵视为先验的关系矩阵 (<em>prior relationship</em>) ，将 $\mathbf{G}$ 阵视为一个观测到的亲缘关系 (<em>observed relationship)</em> 。然而，现实中往往只有一部分个体有基因型，即  $\mathbf{G}$ 阵只包含一小部分个体，其相应的先验关系矩阵就是 $\mathbf{A}<em>{22}$ 阵。基于这个思想，我们可以基于无基因型的个体育种值 ($\mathbf{u}</em>{1}$) 和 有基因型的个体育种值 ($\mathbf{u}<em>{2}$) ，将有基因型个体的信息扩展到没有基因型的个体：<br>$$<br>\begin{gathered}<br>p\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right)&#x3D;p\left(\mathbf{u}</em>{2}\right) p\left(\mathbf{u}<em>{1} \mid \mathbf{u}</em>{2}\right) \<br>p\left(\mathbf{u}<em>{2}\right)&#x3D;N(\mathbf{0}, \mathbf{G} \sigma</em>{u}^{2})<br>\end{gathered}<br>$$<br>如果我们设<br>$$<br>\operatorname{var}(\mathbf{u})&#x3D;\mathbf{A} \sigma_{u}^{2}<br>$$<br>在下面的推导中，我们可以忽略 $\sigma_{u}^{2}$ 。我们将 $\mathbf{A}$ 按照无基因型个体在前，有基因型的个体在后的顺序分块如下<br>$$<br>\mathbf{A}&#x3D;\left[\begin{array}{ll}<br>\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22}<br>\end{array}\right]<br>$$<br>基于有基因型个体的育种值信息，无基因型个体育种值的条件分布为 (多元正态分布的条件分布公式为 $<br>\mu_{1 \mid 2} &#x3D;\mu_{1}+\Sigma_{12} \Sigma_{22}^{-1}\left(x_{2}-\mu_{2}\right) ,\quad<br>\Sigma_{1 \mid 2} &#x3D;\Sigma_{11}-\Sigma_{12} \Sigma_{22}^{-1} \Sigma_{21}<br>$ )<br>$$<br>p\left(\mathbf{u}<em>{1} \mid \mathbf{u}</em>{2}\right)&#x3D;N\left(\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{u}<em>{2}, \mathbf{A}</em>{11}-\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21}\right)<br>$$<br>这也可以视为<br>$$<br>\mathbf{u}</em>{1}&#x3D;\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{u}<em>{2}+\boldsymbol{\varepsilon}<br>$$<br>其中 $\boldsymbol{\varepsilon}$ 视为一个误差项，满足正态分布，其协方差矩阵为  $\operatorname{Var}(\boldsymbol{\varepsilon})&#x3D;\mathbf{A}</em>{11}-\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{A}_{21}$ 。</p>
-<p>因此，我们进一步推导得到（这就是基于基因型个体的信息的条件分布）<br>$$<br>\begin{aligned}<br>\operatorname{Var}\left(\mathbf{u}<em>{1}\right) &amp;&#x3D;\operatorname{var}\left(\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{u}</em>{2}+\varepsilon\right)&#x3D;\operatorname{Var}\left(\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{u}<em>{2}\right)+\operatorname{Var}(\varepsilon) \<br>&amp;&#x3D;\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{G A}</em>{22}^{-1} \mathbf{A}<em>{21}+\mathbf{A}</em>{11}-\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{A}_{21} \</p>
-<p>&amp;&#x3D;\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{G} \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21}-\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} \<br>&amp;&#x3D;\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{G} \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21}-\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{I} \mathbf{A}</em>{21} \<br>&amp;&#x3D;\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{G} \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21}-\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{22} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} \</p>
-<p>&amp;&#x3D;\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} \<br>\end{aligned}<br>$$<br>同时，我们有<br>$$<br>\begin{gathered}<br>\operatorname{Var}\left(\mathbf{u}<em>{2}\right)&#x3D;\mathbf{G} \<br>\operatorname{Cov}\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right)&#x3D;\operatorname{Cov}\left(\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{u}</em>{2}, \mathbf{u}<em>{2}\right)&#x3D;\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \operatorname{Var}\left(\mathbf{u}</em>{2}\right)&#x3D;\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{G}<br>\end{gathered}<br>$$<br>最终，我们把上面的这些内容放在一个矩阵中，我们得到 $\mathbf{H}$ 矩阵<br>$$<br>\begin{aligned}<br>\mathbf{H} &amp;&#x3D;\left(\begin{array}{cc}<br>\operatorname{var}\left(\mathbf{u}<em>{1}\right) &amp; \operatorname{cov}\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right) \<br>\operatorname{cov}\left(\mathbf{u}</em>{2}, \mathbf{u}<em>{1}\right) &amp; \operatorname{var}\left(\mathbf{u}</em>{2}\right)<br>\end{array}\right) \<br>&amp;&#x3D;\left(\begin{array}{cc}<br>\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} &amp; \mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{G} \<br>\mathbf{G} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} &amp; \mathbf{G}<br>\end{array}\right) \<br>&amp;&#x3D;\mathbf{A}+\left[\begin{array}{cc}<br>\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}<em>{22}\right) \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \<br>\left(\mathbf{G}-\mathbf{A}<em>{22}\right) \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{G}-\mathbf{A}</em>{22}<br>\end{array}\right]<br>\end{aligned}<br>$$<br>这也可以简化为<br>$$<br>\mathbf{H}&#x3D;\mathbf{A}+\left[\begin{array}{cc}<br>\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{I}<br>\end{array}\right]\left[\begin{array}{l}<br>\mathbf{I} \<br>\mathbf{I}<br>\end{array}\right]\left[\begin{array}{l}<br>\mathbf{G}-\mathbf{A}<em>{22}<br>\end{array}\right]\left[\begin{array}{ll}<br>\mathbf{I} &amp; \mathbf{I}]<br>\end{array}\right]\left[\begin{array}{cc}<br>\mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{I}<br>\end{array}\right]<br>$$<br>相应的逆矩阵比较简单，见下式  (Aguilar et al. 2010 ; Christensen and Lund 2010)<br>$$<br>\mathbf{H}^{-1}&#x3D;\mathbf{A}^{-1}+\left[\begin{array}{lc}<br>0 &amp; 0 \<br>0 &amp; \mathbf{G}^{-1}-\mathbf{A}</em>{22}^{-1}<br>\end{array}\right]<br>$$<br>注意这里的 $\mathbf{A}<em>{22}^{-1}$ 是要单独对 $\mathbf{A}</em>{22}$ 进行求逆得到的，而不是 $\mathbf{A}^{-1}$ 的子矩阵，因此构建 $\mathbf{H}^{-1}$ 分为下面三步：</p>
+<h2 id="G-阵的奇异性问题">G 阵的奇异性问题</h2>
+<p>$\mathbf{G}$ 阵可能是一个奇异矩阵，有两个原因可能导致这一点。首先如果存在两个基因型完全相同的个体，那么 $\mathbf{Z}$ 矩阵就会有相同的两行，导致 $\mathbf{Z}$ 矩阵不满秩，同时 $\mathbf{G}$ 阵也不满秩。第二点，如果构建 $\mathbf{Z}$ 矩阵时采用的当前群体的基因频率，那么 $\mathbf{Z}$ 矩阵就会是一个不满秩的矩阵，因为最后一行可以从其他行得到（Strandén and Christensen 2011）。</p>
+<p>为了得到一个非奇异的 $\mathbf{G}$ 阵 ，从而可以在MME中使用 $\mathbf{G}^{-1}$ ，我们有两种处理方式。第一种是往对角线添加一个很小的数，见下式，这里 $\alpha$ 是一个很小的数，通常是 0.01 或 0.05 。<br>
+$$<br>
+\mathbf{G}<em>{w}=(1-\alpha) \mathbf{G}+\alpha \mathbf{I}<br>
+$$<br>
+第二种方式如下，是添加   $\mathbf{A}</em>{22}$ 阵，这里的  $\alpha$ 是 0.05 。这种做法就是 BLUPF90 的做法。这种方式同时是作为剩余多基因效应，也就是这里的 $\alpha$ 是基因组不能解释的育种值比例，有些文章说添加剩余多基因效应之后交叉验证结果更好。<br>
+$$<br>
+\mathbf{G}<em>{w}=(1-\alpha) \mathbf{G}+\alpha \mathbf{A}</em>{22}<br>
+$$</p>
+<h1>GBLUP</h1>
+<h2 id="单性状模型">单性状模型</h2>
+<p>在 GBLUP 中，我们其实就是用基因组构建的  $\mathbf{G}$ 阵替换了系谱构建的 $\mathbf{A}$ 阵，模型如下<br>
+$$<br>
+\mathbf{y}=\mathbf{X b}+\mathbf{W u}+\mathbf{e}<br>
+$$<br>
+这里 $\operatorname{Var}(\mathbf{u})=\mathbf{G} \sigma_{u}^{2}, \operatorname{Var}(\mathbf{e})=\mathbf{R}$ 。</p>
+<p>如果假设随机向量均满足多变量正态分布，那么此时 <em>Best Predictions</em> 就是混合模型方程组的解：<br>
+$$<br>
+\left(\begin{array}{cc}<br>
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{W} \<br>
+\mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{W}+\mathbf{G}^{-1} \sigma_{u}^{-2}<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+\widehat{\mathbf{b}} \<br>
+\widehat{\mathbf{u}}<br>
+\end{array}\right)=\left(\begin{array}{c}<br>
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
+\mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
+\end{array}\right)<br>
+$$<br>
+如果 $\mathbf{R}=\mathbf{I} \sigma_{e}^{2}$ ，那么可以进一步简化得到<br>
+$$<br>
+\left(\begin{array}{cc}<br>
+\mathbf{X}^{\prime} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{W} \<br>
+\mathbf{W}^{\prime} \mathbf{X} &amp; \mathbf{W}^{\prime} \mathbf{W}+\mathbf{G}^{-1} \lambda<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+\widehat{\mathbf{b}} \<br>
+\widehat{\mathbf{u}}<br>
+\end{array}\right)=\left(\begin{array}{c}<br>
+\mathbf{X}^{\prime} \mathbf{y} \<br>
+\mathbf{W}^{\prime} \mathbf{y}<br>
+\end{array}\right)<br>
+$$<br>
+这里 $\lambda=\sigma_{e}^{2} / \sigma_{u}^{2}$ 。</p>
+<h2 id="多性状模型">多性状模型</h2>
+<p>$$<br>
+\left(\begin{array}{cc}<br>
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{W} \<br>
+\mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{W}+\mathbf{G}^{-1} \bigotimes \mathbf{G}_{0}^{-1}<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+\widehat{\mathbf{b}} \<br>
+\widehat{\mathbf{u}}<br>
+\end{array}\right)=\left(\begin{array}{c}<br>
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
+\mathbf{W}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
+\end{array}\right)<br>
+$$</p>
+<p>这里 $\mathbf{G}<em>{0}$ 就是多个性状的加性方差组分矩阵，通常 $\mathbf{R}=\mathbf{I} \bigotimes \mathbf{R}</em>{0}$ ，这里 $\mathbf{R}_{0}$ 就是多个性状的残差方差组分矩阵。</p>
+<h1>Single Step GBLUP</h1>
+<p>在实际的生产过程中，只有一小部分的个体有基因型。因此，最佳的方法是合并系谱和基因组关系矩阵，生成一个新的关系矩阵，由于 MME 中，这就是 ssGBLUP 的思想。</p>
+<h2 id="H-阵推导">H 阵推导</h2>
+<p>Legarra et al. (2009) 说明如果所有模型中的所有个体均有基因型，那么基因组评估会很简单。此时，我们可以将 $\mathbf{A}$ 阵视为先验的关系矩阵 (<em>prior relationship</em>) ，将 $\mathbf{G}$ 阵视为一个观测到的亲缘关系 (<em>observed relationship)</em> 。然而，现实中往往只有一部分个体有基因型，即  $\mathbf{G}$ 阵只包含一小部分个体，其相应的先验关系矩阵就是 $\mathbf{A}<em>{22}$ 阵。基于这个思想，我们可以基于无基因型的个体育种值 ($\mathbf{u}</em>{1}$) 和 有基因型的个体育种值 ($\mathbf{u}<em>{2}$) ，将有基因型个体的信息扩展到没有基因型的个体：<br>
+$$<br>
+\begin{gathered}<br>
+p\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right)=p\left(\mathbf{u}</em>{2}\right) p\left(\mathbf{u}<em>{1} \mid \mathbf{u}</em>{2}\right) \<br>
+p\left(\mathbf{u}<em>{2}\right)=N(\mathbf{0}, \mathbf{G} \sigma</em>{u}^{2})<br>
+\end{gathered}<br>
+$$<br>
+如果我们设<br>
+$$<br>
+\operatorname{var}(\mathbf{u})=\mathbf{A} \sigma_{u}^{2}<br>
+$$<br>
+在下面的推导中，我们可以忽略 $\sigma_{u}^{2}$ 。我们将 $\mathbf{A}$ 按照无基因型个体在前，有基因型的个体在后的顺序分块如下<br>
+$$<br>
+\mathbf{A}=\left[\begin{array}{ll}<br>
+\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>
+\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22}<br>
+\end{array}\right]<br>
+$$<br>
+基于有基因型个体的育种值信息，无基因型个体育种值的条件分布为 (多元正态分布的条件分布公式为 $<br>
+\mu_{1 \mid 2} =\mu_{1}+\Sigma_{12} \Sigma_{22}^{-1}\left(x_{2}-\mu_{2}\right) ,\quad<br>
+\Sigma_{1 \mid 2} =\Sigma_{11}-\Sigma_{12} \Sigma_{22}^{-1} \Sigma_{21}<br>
+$ )<br>
+$$<br>
+p\left(\mathbf{u}<em>{1} \mid \mathbf{u}</em>{2}\right)=N\left(\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{u}<em>{2}, \mathbf{A}</em>{11}-\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21}\right)<br>
+$$<br>
+这也可以视为<br>
+$$<br>
+\mathbf{u}</em>{1}=\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{u}<em>{2}+\boldsymbol{\varepsilon}<br>
+$$<br>
+其中 $\boldsymbol{\varepsilon}$ 视为一个误差项，满足正态分布，其协方差矩阵为  $\operatorname{Var}(\boldsymbol{\varepsilon})=\mathbf{A}</em>{11}-\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{A}_{21}$ 。</p>
+<p>因此，我们进一步推导得到（这就是基于基因型个体的信息的条件分布）<br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{Var}\left(\mathbf{u}<em>{1}\right) &amp;=\operatorname{var}\left(\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{u}</em>{2}+\varepsilon\right)=\operatorname{Var}\left(\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{u}<em>{2}\right)+\operatorname{Var}(\varepsilon) \<br>
+&amp;=\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{G A}</em>{22}^{-1} \mathbf{A}<em>{21}+\mathbf{A}</em>{11}-\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{A}_{21} \</p>
+<p>&amp;=\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{G} \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21}-\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} \<br>
+&amp;=\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{G} \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21}-\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{I} \mathbf{A}</em>{21} \<br>
+&amp;=\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{G} \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21}-\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{22} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} \</p>
+<p>&amp;=\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} \<br>
+\end{aligned}<br>
+$$<br>
+同时，我们有<br>
+$$<br>
+\begin{gathered}<br>
+\operatorname{Var}\left(\mathbf{u}<em>{2}\right)=\mathbf{G} \<br>
+\operatorname{Cov}\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right)=\operatorname{Cov}\left(\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \mathbf{u}</em>{2}, \mathbf{u}<em>{2}\right)=\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1} \operatorname{Var}\left(\mathbf{u}</em>{2}\right)=\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{G}<br>
+\end{gathered}<br>
+$$<br>
+最终，我们把上面的这些内容放在一个矩阵中，我们得到 $\mathbf{H}$ 矩阵<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{H} &amp;=\left(\begin{array}{cc}<br>
+\operatorname{var}\left(\mathbf{u}<em>{1}\right) &amp; \operatorname{cov}\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right) \<br>
+\operatorname{cov}\left(\mathbf{u}</em>{2}, \mathbf{u}<em>{1}\right) &amp; \operatorname{var}\left(\mathbf{u}</em>{2}\right)<br>
+\end{array}\right) \<br>
+&amp;=\left(\begin{array}{cc}<br>
+\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} &amp; \mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{G} \<br>
+\mathbf{G} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} &amp; \mathbf{G}<br>
+\end{array}\right) \<br>
+&amp;=\mathbf{A}+\left[\begin{array}{cc}<br>
+\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}<em>{22}\right) \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \<br>
+\left(\mathbf{G}-\mathbf{A}<em>{22}\right) \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{G}-\mathbf{A}</em>{22}<br>
+\end{array}\right]<br>
+\end{aligned}<br>
+$$<br>
+这也可以简化为<br>
+$$<br>
+\mathbf{H}=\mathbf{A}+\left[\begin{array}{cc}<br>
+\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{I}<br>
+\end{array}\right]\left[\begin{array}{l}<br>
+\mathbf{I} \<br>
+\mathbf{I}<br>
+\end{array}\right]\left[\begin{array}{l}<br>
+\mathbf{G}-\mathbf{A}<em>{22}<br>
+\end{array}\right]\left[\begin{array}{ll}<br>
+\mathbf{I} &amp; \mathbf{I}]<br>
+\end{array}\right]\left[\begin{array}{cc}<br>
+\mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{I}<br>
+\end{array}\right]<br>
+$$<br>
+相应的逆矩阵比较简单，见下式  (Aguilar et al. 2010 ; Christensen and Lund 2010)<br>
+$$<br>
+\mathbf{H}^{-1}=\mathbf{A}^{-1}+\left[\begin{array}{lc}<br>
+0 &amp; 0 \<br>
+0 &amp; \mathbf{G}^{-1}-\mathbf{A}</em>{22}^{-1}<br>
+\end{array}\right]<br>
+$$<br>
+注意这里的 $\mathbf{A}<em>{22}^{-1}$ 是要单独对 $\mathbf{A}</em>{22}$ 进行求逆得到的，而不是 $\mathbf{A}^{-1}$ 的子矩阵，因此构建 $\mathbf{H}^{-1}$ 分为下面三步：</p>
 <ol>
-<li>采用 Henderson 的方法构建 $\mathbf{A}^{-1}$ </li>
+<li>采用 Henderson 的方法构建 $\mathbf{A}^{-1}$</li>
 <li>构建 $\mathbf{G}$ 并求逆</li>
 <li>构建 $\mathbf{A}_{22}$ 并求逆</li>
 </ol>
 <p>一般来说 $\mathbf{H}^{-1}$ 阵是一个比较稀疏的矩阵，但是我们注意到 $\mathbf{G}$ 阵和 $\mathbf{G}^{-1}$ 阵是稠密矩阵，因此当基因型个体数目很多时， $\mathbf{H}^{-1}$ 阵可能也很稠密，那么此时求解 MME 计算量比较大。</p>
 <p>$\mathbf{H}$ 矩阵可以视为根据基因型亲缘关系对常规的系谱亲缘关系矩阵的一个修改。举个例子，假设两个个体在系谱中没有关系，但是由于它们的后代在 $\mathbf{G}$ 阵中有关系，因此这两个个体在 $\mathbf{H}$ 矩阵可能也有关系。</p>
 <p>在构建 $\mathbf{H}$ 矩阵时，我们需要计算 $\mathbf{G}-\mathbf{A}<em>{22}$ ，这就表明这两个矩阵需要是可比较的 (Legarra et al. 2014)。由于构建 $\mathbf{G}$ 阵时我们一般不是采用基础群体的等位基因频率，因此我们需要先将  $\mathbf{G}$ 阵的范围调整为与 $\mathbf{A}</em>{22}$ 阵一致，之后再解决  $\mathbf{G}$ 阵的奇异性问题。</p>
-<h2 id="MME"><a href="#MME" class="headerlink" title="MME"></a>MME</h2><p>考虑下面的动物模型<br>$$<br>\mathbf{y}&#x3D;\mathbf{X} \mathbf{b}+\mathbf{W u}+\mathbf{e}<br>$$<br>采用一步法的 MME 如下<br>$$<br>\left(\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{X} \sigma_{e}^{-2} &amp; \mathbf{X}^{\prime} \mathbf{W} \sigma_{e}^{-2} \<br>\mathbf{W}^{\prime} \mathbf{X} \sigma_{e}^{-2} &amp; \mathbf{W}^{\prime} \mathbf{W} \sigma_{e}^{-2}+\mathbf{H}^{-1} \sigma_{u}^{-2}<br>\end{array}\right)\left(\begin{array}{l}<br>\widehat{\mathbf{b}} \<br>\widehat{\mathbf{u}}<br>\end{array}\right)&#x3D;\left(\begin{array}{c}<br>\mathbf{X}^{\prime} \mathbf{y} \sigma_{e}^{-2} \<br>\mathbf{W}^{\prime} \mathbf{y} \sigma_{e}^{-2}<br>\end{array}\right)<br>$$</p>
-<h1 id="APY-方法-Misztal-2016"><a href="#APY-方法-Misztal-2016" class="headerlink" title="APY 方法 (Misztal, 2016)"></a>APY 方法 (Misztal, 2016)</h1><p>我们将个体拆分为核心群体 (<em>core animals</em>, “c”) 和 非核心群体 (<em>non-core animals</em>, “n”) ，</p>
-<p>我们有<br>$$<br>\operatorname{var}\left[\begin{array}{l}<br>\mathbf{u}<em>{c} \<br>\mathbf{u}</em>{n}<br>\end{array}\right]&#x3D;\mathbf{G}&#x3D;\left[\begin{array}{ll}<br>\mathbf{G}<em>{c c} &amp; \mathbf{G}</em>{c n} \<br>\mathbf{G}<em>{n c} &amp; \mathbf{G}</em>{n n}<br>\end{array}\right] \sigma_{u}^{2},<br>$$<br>此时 $\mathbf{G}^{-1}$ 计算公式如下<br>$$<br>G^{-1}&#x3D;\left[\begin{array}{cc}<br>G_{c c}^{-1} &amp; 0 \<br>0 &amp; 0<br>\end{array}\right]+\left[\begin{array}{c}</p>
+<h2 id="MME">MME</h2>
+<p>考虑下面的动物模型<br>
+$$<br>
+\mathbf{y}=\mathbf{X} \mathbf{b}+\mathbf{W u}+\mathbf{e}<br>
+$$<br>
+采用一步法的 MME 如下<br>
+$$<br>
+\left(\begin{array}{cc}<br>
+\mathbf{X}^{\prime} \mathbf{X} \sigma_{e}^{-2} &amp; \mathbf{X}^{\prime} \mathbf{W} \sigma_{e}^{-2} \<br>
+\mathbf{W}^{\prime} \mathbf{X} \sigma_{e}^{-2} &amp; \mathbf{W}^{\prime} \mathbf{W} \sigma_{e}^{-2}+\mathbf{H}^{-1} \sigma_{u}^{-2}<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+\widehat{\mathbf{b}} \<br>
+\widehat{\mathbf{u}}<br>
+\end{array}\right)=\left(\begin{array}{c}<br>
+\mathbf{X}^{\prime} \mathbf{y} \sigma_{e}^{-2} \<br>
+\mathbf{W}^{\prime} \mathbf{y} \sigma_{e}^{-2}<br>
+\end{array}\right)<br>
+$$</p>
+<h1>APY 方法 (Misztal, 2016)</h1>
+<p>我们将个体拆分为核心群体 (<em>core animals</em>, “c”) 和 非核心群体 (<em>non-core animals</em>, “n”) ，</p>
+<p>我们有<br>
+$$<br>
+\operatorname{var}\left[\begin{array}{l}<br>
+\mathbf{u}<em>{c} \<br>
+\mathbf{u}</em>{n}<br>
+\end{array}\right]=\mathbf{G}=\left[\begin{array}{ll}<br>
+\mathbf{G}<em>{c c} &amp; \mathbf{G}</em>{c n} \<br>
+\mathbf{G}<em>{n c} &amp; \mathbf{G}</em>{n n}<br>
+\end{array}\right] \sigma_{u}^{2},<br>
+$$<br>
+此时 $\mathbf{G}^{-1}$ 计算公式如下<br>
+$$<br>
+G^{-1}=\left[\begin{array}{cc}<br>
+G_{c c}^{-1} &amp; 0 \<br>
+0 &amp; 0<br>
+\end{array}\right]+\left[\begin{array}{c}</p>
 <ul>
-<li>G_{c c}^{-1} G_{c n} \<br>I<br>\end{array}\right] M^{-1}\left[-G_{n c} G_{c c}^{-1} \quad I\right]<br>$$<br>这里 $\mathbf{M}$ 矩阵是一个关于非核心群体的对角矩阵，其元素为（下面的 $i$ 为非核心群体）<br>$$<br>m_{i}&#x3D;g_{i i}-(G_{n c} G_{c c}^{-1} G_{c n})_{ii}<br>$$<br>在实际中，猪和鸡的核心群体一般为 5k，牛的核心群体一般为 10-15k （Pocrnic et al., 2016）。</li>
+<li>G_{c c}^{-1} G_{c n} \<br>
+I<br>
+\end{array}\right] M^{-1}\left[-G_{n c} G_{c c}^{-1} \quad I\right]<br>
+$$<br>
+这里 $\mathbf{M}$ 矩阵是一个关于非核心群体的对角矩阵，其元素为（下面的 $i$ 为非核心群体）<br>
+$$<br>
+m_{i}=g_{i i}-(G_{n c} G_{c c}^{-1} G_{c n})_{ii}<br>
+$$<br>
+在实际中，猪和鸡的核心群体一般为 5k，牛的核心群体一般为 10-15k （Pocrnic et al., 2016）。</li>
 </ul>
 <p>核心群体可以从所有的基因型个体中（具有高质量的基因分型）随机抽样得到。APY 方法得到 GEBV 通常比常规求逆方法的可靠性会提高 1-3% (估计是理论准确性)，原因可能是减少了采样噪音。</p>
-<p>对于大群体， $\mathbf{G}^{-1}$ 是一个稀疏矩阵，但是  $\mathbf{A}<em>{22}^{-1}$ 可能是一个稠密矩阵 (Faux and Genegler, 2013)。 此时我们可以通过一个间接的方式得到   $\mathbf{A}</em>{22}^{-1}$ （Stranden and Mantysaari, 2014）（应该就是根据矩阵求逆的公式）<br>$$<br>A_{22}^{-1}&#x3D;A^{22}-\left(A^{12}\right)^{\prime}\left(A^{11}\right)^{-1}\left(A^{12}\right)<br>$$<br>其中右手项的所有元素均是 $\mathbf{A}^{-1}$ 矩阵的子矩阵，即<br>$$<br>\mathbf{A}&#x3D;\left[\begin{array}{ll}<br>\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22}<br>\end{array}\right] \text { and } \mathbf{A}^{-1}&#x3D;\left[\begin{array}{cc}<br>\mathbf{A}^{11} &amp; \mathbf{A}^{12} \<br>\mathbf{A}^{21} &amp; \mathbf{A}^{22}<br>\end{array}\right]<br>$$<br>如果我们采用 PCG 算法，我们只需要计算下式，只涉及到矩阵和向量的乘积<br>$$<br>A_{22}^{-1} q&#x3D;A^{22} q-\left(A^{12}\right)^{\prime}\left[\left(A^{11}\right)^{-1}\left[A^{12} q\right]\right]<br>$$</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<p>对于大群体， $\mathbf{G}^{-1}$ 是一个稀疏矩阵，但是  $\mathbf{A}<em>{22}^{-1}$ 可能是一个稠密矩阵 (Faux and Genegler, 2013)。 此时我们可以通过一个间接的方式得到   $\mathbf{A}</em>{22}^{-1}$ （Stranden and Mantysaari, 2014）（应该就是根据矩阵求逆的公式）<br>
+$$<br>
+A_{22}^{-1}=A^{22}-\left(A^{12}\right)^{\prime}\left(A^{11}\right)^{-1}\left(A^{12}\right)<br>
+$$<br>
+其中右手项的所有元素均是 $\mathbf{A}^{-1}$ 矩阵的子矩阵，即<br>
+$$<br>
+\mathbf{A}=\left[\begin{array}{ll}<br>
+\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>
+\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22}<br>
+\end{array}\right] \text { and } \mathbf{A}^{-1}=\left[\begin{array}{cc}<br>
+\mathbf{A}^{11} &amp; \mathbf{A}^{12} \<br>
+\mathbf{A}^{21} &amp; \mathbf{A}^{22}<br>
+\end{array}\right]<br>
+$$<br>
+如果我们采用 PCG 算法，我们只需要计算下式，只涉及到矩阵和向量的乘积<br>
+$$<br>
+A_{22}^{-1} q=A^{22} q-\left(A^{12}\right)^{\prime}\left[\left(A^{11}\right)^{-1}\left[A^{12} q\right]\right]<br>
+$$</p>
+<h1>参考文献</h1>
+<ol>
 <li><a target="_blank" rel="noopener" href="http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=gsip.pdf">http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=gsip.pdf</a></li>
 <li><a target="_blank" rel="noopener" href="http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=andres_part2.pdf">http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=andres_part2.pdf</a></li>
 <li>de Los Campos G, Hickey J M, Pong-Wong R, et al. Whole-genome regression and prediction methods applied to plant and animal breeding[J]. Genetics, 2013, 193(2): 327-345.</li>
@@ -221,55 +599,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -568,30 +898,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

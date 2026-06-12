@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">618</span>
+            <span class="post-count">617</span>
         </span>
     </span>
 
@@ -94,31 +94,31 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>解决新版 blupf90 的 Intel Fortran 运行时库和 MKL 环境问题。</p>
 <span id="more"></span>
-
-<h1 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h1><p>下载页面：<a target="_blank" rel="noopener" href="https://nce.ads.uga.edu/wiki/doku.php?id=distribution">https://nce.ads.uga.edu/wiki/doku.php?id=distribution</a></p>
+<h1>下载</h1>
+<p>下载页面：<a target="_blank" rel="noopener" href="https://nce.ads.uga.edu/wiki/doku.php?id=distribution">https://nce.ads.uga.edu/wiki/doku.php?id=distribution</a></p>
 <p>我下载的地址：<a target="_blank" rel="noopener" href="https://nce.ads.uga.edu/html/projects/programs/Linux/64bit/">https://nce.ads.uga.edu/html/projects/programs/Linux/64bit/</a></p>
 <p>直接运行报错</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">zhouziwen) [ach0yyfeio@login04 lib]$ /work/home/ach0yyfeio/zhouziwen/lib/blupf90_new/blupf90+</span><br><span class="line">/work/home/ach0yyfeio/zhouziwen/lib/blupf90_new/blupf90+: error while loading shared libraries: libmkl_intel_lp64.so.2: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
-
-<h1 id="用conda安装环境"><a href="#用conda安装环境" class="headerlink" title="用conda安装环境"></a>用conda安装环境</h1><h2 id="🛠️-安装步骤"><a href="#🛠️-安装步骤" class="headerlink" title="🛠️ 安装步骤"></a>🛠️ 安装步骤</h2><p>在你的 SCNet 集群终端中，依次执行以下命令即可完成安装。</p>
-<p><strong>1. 添加 Intel Conda 频道</strong><br>这一步是为了让 Conda 能够从 Intel 的官方频道下载所需要的安装包（下面是 intel 的新地址）。</p>
+<h1>用conda安装环境</h1>
+<h2 id="🛠️-安装步骤">🛠️ 安装步骤</h2>
+<p>在你的 SCNet 集群终端中，依次执行以下命令即可完成安装。</p>
+<p><strong>1. 添加 Intel Conda 频道</strong><br>
+这一步是为了让 Conda 能够从 Intel 的官方频道下载所需要的安装包（下面是 intel 的新地址）。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda config --add channels https://software.repos.intel.com/python/conda/</span><br><span class="line">conda config --add channels conda-forge</span><br></pre></td></tr></table></figure>
-
-<p><strong>2. 安装 Intel 运行时环境</strong><br>这是最关键的一步。它会安装 <code>blupf90+</code> 程序运行所必需的 Intel Fortran 运行时库 (<code>intel-fortran-rt</code>) 和 Intel MKL 数学库 (<code>mkl</code>)。</p>
+<p><strong>2. 安装 Intel 运行时环境</strong><br>
+这是最关键的一步。它会安装 <code>blupf90+</code> 程序运行所必需的 Intel Fortran 运行时库 (<code>intel-fortran-rt</code>) 和 Intel MKL 数学库 (<code>mkl</code>)。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install intel-fortran-rt mkl</span><br></pre></td></tr></table></figure>
-
-<p><strong>3. 安装 Intel OpenMP 运行时库</strong><br>这个库是 MKL 实现高性能并行计算所依赖的，建议一并安装以确保最佳性能。我这发现安装前两个库的时候已经安装上这个了，就不需要单独安装这个了。</p>
+<p><strong>3. 安装 Intel OpenMP 运行时库</strong><br>
+这个库是 MKL 实现高性能并行计算所依赖的，建议一并安装以确保最佳性能。我这发现安装前两个库的时候已经安装上这个了，就不需要单独安装这个了。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#conda install -c conda-forge intel-openmp</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="💡-安装完成后仍然提示找不到库文件"><a href="#💡-安装完成后仍然提示找不到库文件" class="headerlink" title="💡 安装完成后仍然提示找不到库文件"></a>💡 安装完成后仍然提示找不到库文件</h2><p>请检查 <code>~/anaconda3/lib</code> 目录下是否存在 <code>libmkl_intel_lp64.so</code> 或 <code>libifcore.so.5</code> 等文件。如果存在但还是报错，那你可能需要确认 <code>LD_LIBRARY_PATH</code> 设置的路径是否完全正确。</p>
-<p><code>LD_LIBRARY_PATH</code> 是 Linux&#x2F;Unix 系统中的一个<strong>环境变量</strong>，它的作用是告诉操作系统：”当程序需要找共享库（<code>.so</code> 文件）时，除了系统默认目录，也要去我指定的这些目录里找一找。”</p>
+<h2 id="💡-安装完成后仍然提示找不到库文件">💡 安装完成后仍然提示找不到库文件</h2>
+<p>请检查 <code>~/anaconda3/lib</code> 目录下是否存在 <code>libmkl_intel_lp64.so</code> 或 <code>libifcore.so.5</code> 等文件。如果存在但还是报错，那你可能需要确认 <code>LD_LIBRARY_PATH</code> 设置的路径是否完全正确。</p>
+<p><code>LD_LIBRARY_PATH</code> 是 Linux/Unix 系统中的一个<strong>环境变量</strong>，它的作用是告诉操作系统：“当程序需要找共享库（<code>.so</code> 文件）时，除了系统默认目录，也要去我指定的这些目录里找一找。”</p>
 <p><strong>步骤 1：确认库文件位置</strong></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">激活你的 conda 环境</span></span><br><span class="line">conda activate zhouziwen</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 lib 目录下是否有相关的 .so 文件</span></span><br><span class="line">ls $CONDA_PREFIX/lib | grep -E &quot;libiomp5|libmkl&quot;</span><br></pre></td></tr></table></figure>
-
 <p><strong>步骤 2：设置库路径（如果需要）</strong></p>
 <p>通常，激活 conda 环境后，<code>$CONDA_PREFIX/lib</code> 会自动加入 <code>LD_LIBRARY_PATH</code>。如果程序还是找不到库，可以手动设置（不过这是临时设置，只对当前终端会话生效；加到  <code>~/.bashrc</code> 文件中 可以永久生效，但是可能导致库版本冲突（比如程序A需要libv1，但程序B需要libv2，系统可能找到错误的版本） ）：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH</span><br></pre></td></tr></table></figure>
-
 <p><strong>步骤 3：运行你的程序</strong></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/work/home/ach0yyfeio/zhouziwen/lib/blupf90_new/blupf90+</span><br></pre></td></tr></table></figure> 
       <!-- reward -->
@@ -165,55 +165,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -512,30 +464,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

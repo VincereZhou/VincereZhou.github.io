@@ -98,30 +98,72 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是我重新整理方差组分算法的博客，主要是关于 EM-REML 和 AI-REML 算法。这是第一篇博客，介绍估计方差组分的一般思路。</p>
 <span id="more"></span>
-
-<h1 id="一般思路"><a href="#一般思路" class="headerlink" title="一般思路"></a>一般思路</h1><p>我们采用似然方法，查找使得<strong>对数似然函数</strong>最大化的一组方差组分，这本身是一个优化问题，严格来说是一个<strong>有约束条件</strong>的优化问题，因为找到的方差组分需要在给定的参数空间内。</p>
+<h1>一般思路</h1>
+<p>我们采用似然方法，查找使得<strong>对数似然函数</strong>最大化的一组方差组分，这本身是一个优化问题，严格来说是一个<strong>有约束条件</strong>的优化问题，因为找到的方差组分需要在给定的参数空间内。</p>
 <p>我们是要关注对数似然函数值本身，而不是其一阶导数，这里有两个原因，第一是使得似然函数一阶导数等于0的位点可能是<strong>局部最小值，局部最大值和鞍点</strong>，仅仅是查看一阶导数，我们无法区分这三者；第二是在迭代过程中，随着一阶导数趋于0，我们可以通过对数似然函数值查看其值是否也在不断变大，从而检查我们是不是收敛于一个局部最大值。</p>
 <p>如果我们采用一阶导数进行方差组分估计，对于最简单的模型（应该指的是单性状模型），最大值可能在参数空间的边界线找到；对于随机效应之间存在协方差的模型，情况更加复杂，对数似然函数的表面可能会有局部最优解。</p>
 <p>一般的解决思路是使用目标函数的一阶导数或者二阶导数从而进行迭代，而这些迭代方法均有共同的特征，首先他们必须提供一个初始值，然后使用这个初始值通过迭代得到下一组值，循环这个过程直到根据某种规则停止迭代，然后将最后一组值视为 ML 或 REML 估计值。</p>
 <p>因此一个好的迭代方法应该至少具有三个特征：受到初始值影响小（指初始值的变化，不影响迭代方法收敛于全局最大值），每个迭代过程计算速度快，迭代次数短。但是可惜的是，没有一个已知的技术可以保证从任意的一个初始值均可以收敛到全局最大值（<strong>说明迭代方法均受到初始值的影响</strong>）。</p>
-<h1 id="基于导数的迭代方法"><a href="#基于导数的迭代方法" class="headerlink" title="基于导数的迭代方法"></a>基于导数的迭代方法</h1><p>基于导数的迭代方法在数值分析文献中统称为<strong>导数方法</strong>（gradient methods）</p>
-<h2 id="方法基础"><a href="#方法基础" class="headerlink" title="方法基础"></a>方法基础</h2><p>任何一个迭代方法的核心就是如何使用当前的参数估计值找到下一组估计值，实际上是需要做两个决定，往哪个方向走，以及走多远的问题，我们称为 <em>step direction</em> 和 <em>step size</em> 。</p>
+<h1>基于导数的迭代方法</h1>
+<p>基于导数的迭代方法在数值分析文献中统称为<strong>导数方法</strong>（gradient methods）</p>
+<h2 id="方法基础">方法基础</h2>
+<p>任何一个迭代方法的核心就是如何使用当前的参数估计值找到下一组估计值，实际上是需要做两个决定，往哪个方向走，以及走多远的问题，我们称为 <em>step direction</em> 和 <em>step size</em> 。</p>
 <p>一个合理的方向选择是对数似然函数值增加最快的方向，一个合理的步长是使得似然函数值增加最大的长度。我们可以证明，似然函数增加最快的方向就是一阶导数向量指向的方向，我们称为<strong>梯度</strong>。按照这种方法进行迭代的方法称为<strong>最速上升法</strong>，但是不幸的是在实践中最速上升法效果很糟糕，需要很多次迭代才能收敛。</p>
-<p>然而我们还是可以通过梯度来定义方向，通过我们会对梯度乘以一个矩阵 $\mathbf{M}$ 来适度修改方向，因此此时的方向为 $\mathbf{M} \Delta l$ 。如果 $\boldsymbol{\theta}^{(m)}$ 表示第 $m$ 次迭代的参数向量，那么我们可以得到迭代方程为：<br>$$<br>\boldsymbol{\theta}^{(m+1)} &#x3D; \boldsymbol{\theta}^{(m)} + s^{(m)} \mathbf{M}^{(m)} \frac{\partial{l}}{\partial{\boldsymbol{\theta}}}\bigg|_{\boldsymbol{\theta}^{(m)}}<br>$$<br> 在这个公式中， $s^{(m)}$ 是一个标量，表示第 $m$ 步的步长。</p>
+<p>然而我们还是可以通过梯度来定义方向，通过我们会对梯度乘以一个矩阵 $\mathbf{M}$ 来适度修改方向，因此此时的方向为 $\mathbf{M} \Delta l$ 。如果 $\boldsymbol{\theta}^{(m)}$ 表示第 $m$ 次迭代的参数向量，那么我们可以得到迭代方程为：<br>
+$$<br>
+\boldsymbol{\theta}^{(m+1)} = \boldsymbol{\theta}^{(m)} + s^{(m)} \mathbf{M}^{(m)} \frac{\partial{l}}{\partial{\boldsymbol{\theta}}}\bigg|_{\boldsymbol{\theta}^{(m)}}<br>
+$$<br>
+在这个公式中， $s^{(m)}$ 是一个标量，表示第 $m$ 步的步长。</p>
 <p>Bard (1974) 证明只要  $\mathbf{M}^{(m)}$ 是正定矩阵并且没有收敛到全局最大值，那么均存在一个步长   $s^{(m)}$  使得似然值继续增加。</p>
-<h2 id="牛顿法"><a href="#牛顿法" class="headerlink" title="牛顿法"></a>牛顿法</h2><p>吴恩达老师对牛顿法的解释比较简单明了，放置如下：</p>
-<p>假设存在一个函数 f(θ): R → R，你想找到一个θ值，使得 f(θ) &#x3D; 0 。 我们可以用牛顿方法使用下式来不断更新 θ 值<br>$$<br>\theta:&#x3D;\theta-\frac{f(\theta)}{f^{\prime}(\theta)}<br>$$<br>后面这部分就相当于目前位置与切线和X轴交点的距离。<br>$$<br>\frac{f(\theta)-0}{f^{\prime}(\theta)} &#x3D; \frac{\Delta f}{f^{\prime}(\theta)} &#x3D; {\Delta \theta}<br>$$<br>因此每一次就是迭代到切线与X轴的交点，画图如下</p>
-<p><img src="/posts/372fb709/1.png"></p>
-<p>如果你要找某个函数的最大值或最小值，比如似然函数 L(θ) 。你需要计算<strong>一阶导数等于0</strong>的地方，因此你可以将上面的 f(θ) 替换为 L’(θ)<br>$$<br>\theta:&#x3D;\theta-\frac{\ell^{\prime}(\theta)}{\ell^{\prime \prime}(\theta)}<br>$$<br> 上面的 θ 只是单个数字，我们将其推广为一般化的向量。<br>$$<br>\boldsymbol{\theta}:&#x3D;\boldsymbol{\theta}-\mathbf{H}^{-1} \nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta})<br>$$<br>这里 H 是 <strong>Hessian</strong> 矩阵，其元素为：<br>$$<br>H_{i j}&#x3D;\frac{\partial^{2} \ell(\theta)}{\partial \theta_{i} \partial \theta_{j}}<br>$$<br>牛顿法的优点是迭代次数少，其缺点是需要计算二阶导数，每一轮迭代计算速度慢。</p>
-<p>Marquardt (1963) 年提出了一种综合牛顿法和最速上升法的一种方法，公式如下<br>$$<br>\boldsymbol{\theta}^{(m+1)} &#x3D; \boldsymbol{\theta}^{(m)} -\left( \mathbf{H}^{(m)} +  \tau^{(m)} \mathbf{I}^{(m)}\right)^{-1} \frac{\partial{l}}{\partial{\boldsymbol{\theta}}}\bigg|_{\boldsymbol{\theta}^{(m)}}<br>$$<br>其中 $\tau^{(m)}$ 是一个标量，如果  $\tau^{(m)}$ 很小，那么就近似于牛顿法；如果   $\tau^{(m)}$ 比较大，那么就接近最速上升法的方法。通常的建议是随着似然函数值的不断增加，  $\tau^{(m)}$ 逐渐变小（越来越趋于牛顿法）。如果似然函数值没有增加，那么需要不断增加  $\tau^{(m)}$ 的值，直到似然函数值增加。</p>
-<h2 id="scoring-法"><a href="#scoring-法" class="headerlink" title="scoring 法"></a>scoring 法</h2><p>为了减少计算二级导数的计算量，我们可以将 $-\mathbf{H}^{-1}$ 替换为信息矩阵的逆矩阵，即将黑塞矩阵替换为其期望，公式如下<br>$$<br>\boldsymbol{\theta}^{(m+1)} &#x3D; \boldsymbol{\theta}^{(m)} + \left[\mathbf{I}(\boldsymbol{\theta}^{(m)})\right]^{-1} \frac{\partial{l}}{\partial{\boldsymbol{\theta}}}\bigg|_{\boldsymbol{\theta}^{(m)}}<br>$$</p>
-<h2 id="超出参数空间的补救"><a href="#超出参数空间的补救" class="headerlink" title="超出参数空间的补救"></a>超出参数空间的补救</h2><p>如果在某次迭代中出现负数 ($\mathbf{G}$ 或 $\mathbf{R}$ 或 <strong>AI</strong> 矩阵不正定)，Jennrich and Schluchter (1986) 建议使用 “step-halving” 方法，即将步长减半，如果下一次得到了合理的结果则继续往下迭代，不然则将步长继续减半。例如在 AI 算法，我们可以添加一个步长的参数 $\lambda &lt; 1$ ，使得 $\mathbf{\kappa}^{(m+1)} &#x3D; \mathbf{\kappa}^{(m)} + \lambda \mathbf{I}(\mathbf{\kappa}^{(m)})^{-1}\mathbf{U}(\mathbf{\kappa}^{(m)})$  。某软件就采用了控制步长的方式来避免 <code>overshooting</code> ，一开始 AI 算法的 $\lambda$ 值设为  0.1 ，随着每一步的迭代逐渐接近 1 。</p>
+<h2 id="牛顿法">牛顿法</h2>
+<p>吴恩达老师对牛顿法的解释比较简单明了，放置如下：</p>
+<p>假设存在一个函数 f(θ): R → R，你想找到一个θ值，使得 f(θ) = 0 。 我们可以用牛顿方法使用下式来不断更新 θ 值<br>
+$$<br>
+\theta:=\theta-\frac{f(\theta)}{f^{\prime}(\theta)}<br>
+$$<br>
+后面这部分就相当于目前位置与切线和X轴交点的距离。<br>
+$$<br>
+\frac{f(\theta)-0}{f^{\prime}(\theta)} = \frac{\Delta f}{f^{\prime}(\theta)} = {\Delta \theta}<br>
+$$<br>
+因此每一次就是迭代到切线与X轴的交点，画图如下</p>
+<p><img src="1.png" alt=""></p>
+<p>如果你要找某个函数的最大值或最小值，比如似然函数 L(θ) 。你需要计算<strong>一阶导数等于0</strong>的地方，因此你可以将上面的 f(θ) 替换为 L’(θ)<br>
+$$<br>
+\theta:=\theta-\frac{\ell^{\prime}(\theta)}{\ell^{\prime \prime}(\theta)}<br>
+$$<br>
+上面的 θ 只是单个数字，我们将其推广为一般化的向量。<br>
+$$<br>
+\boldsymbol{\theta}:=\boldsymbol{\theta}-\mathbf{H}^{-1} \nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta})<br>
+$$<br>
+这里 H 是 <strong>Hessian</strong> 矩阵，其元素为：<br>
+$$<br>
+H_{i j}=\frac{\partial^{2} \ell(\theta)}{\partial \theta_{i} \partial \theta_{j}}<br>
+$$<br>
+牛顿法的优点是迭代次数少，其缺点是需要计算二阶导数，每一轮迭代计算速度慢。</p>
+<p>Marquardt (1963) 年提出了一种综合牛顿法和最速上升法的一种方法，公式如下<br>
+$$<br>
+\boldsymbol{\theta}^{(m+1)} = \boldsymbol{\theta}^{(m)} -\left( \mathbf{H}^{(m)} +  \tau^{(m)} \mathbf{I}^{(m)}\right)^{-1} \frac{\partial{l}}{\partial{\boldsymbol{\theta}}}\bigg|_{\boldsymbol{\theta}^{(m)}}<br>
+$$<br>
+其中 $\tau^{(m)}$ 是一个标量，如果  $\tau^{(m)}$ 很小，那么就近似于牛顿法；如果   $\tau^{(m)}$ 比较大，那么就接近最速上升法的方法。通常的建议是随着似然函数值的不断增加，  $\tau^{(m)}$ 逐渐变小（越来越趋于牛顿法）。如果似然函数值没有增加，那么需要不断增加  $\tau^{(m)}$ 的值，直到似然函数值增加。</p>
+<h2 id="scoring-法">scoring 法</h2>
+<p>为了减少计算二级导数的计算量，我们可以将 $-\mathbf{H}^{-1}$ 替换为信息矩阵的逆矩阵，即将黑塞矩阵替换为其期望，公式如下<br>
+$$<br>
+\boldsymbol{\theta}^{(m+1)} = \boldsymbol{\theta}^{(m)} + \left[\mathbf{I}(\boldsymbol{\theta}^{(m)})\right]^{-1} \frac{\partial{l}}{\partial{\boldsymbol{\theta}}}\bigg|_{\boldsymbol{\theta}^{(m)}}<br>
+$$</p>
+<h2 id="超出参数空间的补救">超出参数空间的补救</h2>
+<p>如果在某次迭代中出现负数 ($\mathbf{G}$ 或 $\mathbf{R}$ 或 <strong>AI</strong> 矩阵不正定)，Jennrich and Schluchter (1986) 建议使用 “step-halving” 方法，即将步长减半，如果下一次得到了合理的结果则继续往下迭代，不然则将步长继续减半。例如在 AI 算法，我们可以添加一个步长的参数 $\lambda &lt; 1$ ，使得 $\mathbf{\kappa}^{(m+1)} = \mathbf{\kappa}^{(m)} + \lambda \mathbf{I}(\mathbf{\kappa}^{(m)})^{-1}\mathbf{U}(\mathbf{\kappa}^{(m)})$  。某软件就采用了控制步长的方式来避免 <code>overshooting</code> ，一开始 AI 算法的 $\lambda$ 值设为  0.1 ，随着每一步的迭代逐渐接近 1 。</p>
 <p>另外一种补救方式是改成使用 EM 算法（初始值使用上一次 EM 算法的估计值）来获得更好的初始值。</p>
-<p>还有一种情况是，如果AI 估计值其与上次的参数估计值差距过大（计算公式如下，我们称其为 <em>convergence criterion</em>），那么此时也可以更换使用 EM 算法。<br>$$<br>\Delta^{(m)} &#x3D; \sqrt{\frac{\sum \left( \theta_{i}^{(m)} - \theta_{i}^{(m-1)}  \right)^{2}}{\sum \theta_{i}^{(m)^{2}}}}<br>$$</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p>Searle S R, Casella G, McCulloch C E. Variance components[M]. John Wiley &amp; Sons, 2009.</p>
+<p>还有一种情况是，如果AI 估计值其与上次的参数估计值差距过大（计算公式如下，我们称其为 <em>convergence criterion</em>），那么此时也可以更换使用 EM 算法。<br>
+$$<br>
+\Delta^{(m)} = \sqrt{\frac{\sum \left( \theta_{i}^{(m)} - \theta_{i}^{(m-1)}  \right)^{2}}{\sum \theta_{i}^{(m)^{2}}}}<br>
+$$</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>Searle S R, Casella G, McCulloch C E. Variance components[M]. John Wiley &amp; Sons, 2009.</p>
 </li>
-<li><p>Ng A. CS229 Lecture notes[J]. CS229 Lecture notes, 2000.</p>
+<li>
+<p>Ng A. CS229 Lecture notes[J]. CS229 Lecture notes, 2000.</p>
 </li>
 </ol>
  
@@ -171,55 +213,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -518,30 +512,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

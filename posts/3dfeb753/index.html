@@ -94,22 +94,23 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>snpflip 也是一个已经停止更新维护的包，用于比对bim文件和参考基因组，查找翻转的位点。</p>
 <span id="more"></span>
-
-<h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>snpflip 用 <strong>参考基因组 FASTA</strong> 把每个 SNP 位点的 <strong>REF 碱基</strong>查出来，然后判断：</p>
-<p>这个 SNP 的 A1&#x2F;A2 是在 forward 链上、reverse 链上、还是根本分不清。</p>
+<h1>目的</h1>
+<p>snpflip 用 <strong>参考基因组 FASTA</strong> 把每个 SNP 位点的 <strong>REF 碱基</strong>查出来，然后判断：</p>
+<p>这个 SNP 的 A1/A2 是在 forward 链上、reverse 链上、还是根本分不清。</p>
 <p>输出给你两张关键名单：</p>
 <ul>
-<li><strong>哪些 SNP 要 –flip</strong></li>
+<li><strong>哪些 SNP 要 --flip</strong></li>
 <li><strong>哪些 SNP 是“ambiguous（分不清链）”应该考虑剔除</strong></li>
 </ul>
-<p>其实就是进行碱基的比对而已，自己也能写，逻辑就是用参考基因组REF 与 A1&#x2F;A2 的关系，推断链状态。</p>
-<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>就是用参考基因组REF 与 A1&#x2F;A2 的关系，推断链状态。</p>
+<p>其实就是进行碱基的比对而已，自己也能写，逻辑就是用参考基因组REF 与 A1/A2 的关系，推断链状态。</p>
+<h1>原理</h1>
+<p>就是用参考基因组REF 与 A1/A2 的关系，推断链状态。</p>
 <p>记：</p>
 <ul>
-<li><code>REF</code> &#x3D; FASTA 查出来的参考碱基（A&#x2F;T&#x2F;C&#x2F;G）</li>
-<li><code>REF_rev</code> &#x3D; 互补(<code>complement(REF)</code>)</li>
+<li><code>REF</code> = FASTA 查出来的参考碱基（A/T/C/G）</li>
+<li><code>REF_rev</code> = 互补(<code>complement(REF)</code>)</li>
 </ul>
-<p>snpflip 本质上在做 <strong>集合&#x2F;匹配</strong>：</p>
+<p>snpflip 本质上在做 <strong>集合/匹配</strong>：</p>
 <table>
 <thead>
 <tr>
@@ -118,7 +119,8 @@
 <th>为什么</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><code>A1==REF</code> 或 <code>A2==REF</code></td>
 <td><strong>forward</strong></td>
 <td>至少一个 allele 匹配 forward-strand REF ⇒ SNP 已在参考链</td>
@@ -131,32 +133,39 @@
 <tr>
 <td>两者都不成立</td>
 <td><strong>（通常会报 mismatch）</strong></td>
-<td>最可能：坐标&#x2F;版本不一致，或 REF&#x3D;N，或数据不是同一组装</td>
+<td>最可能：坐标/版本不一致，或 REF=N，或数据不是同一组装</td>
 </tr>
 <tr>
-<td><strong>A&#x2F;T 或 C&#x2F;G 且你只靠“等位基因相等”无法区分链</strong></td>
+<td><strong>A/T 或 C/G 且你只靠“等位基因相等”无法区分链</strong></td>
 <td><strong>ambiguous</strong></td>
 <td>因为 <code>complement(A)==T</code>，正向反向“看起来都对”</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <blockquote>
-<p>更直白地说：<strong>它不是一个复杂模型，就是一个“REF 查表 + 等位基因匹配&#x2F;互补匹配 + 二义性判断”的过程。</strong></p>
+<p>更直白地说：<strong>它不是一个复杂模型，就是一个“REF 查表 + 等位基因匹配/互补匹配 + 二义性判断”的过程。</strong></p>
 </blockquote>
 <hr>
-<h1 id="输出文件"><a href="#输出文件" class="headerlink" title="输出文件"></a>输出文件</h1><p>默认输出目录类似 <code>snpflip_output/</code>，里面常见：</p>
+<h1>输出文件</h1>
+<p>默认输出目录类似 <code>snpflip_output/</code>，里面常见：</p>
 <ul>
-<li>**<code>.reverse</code>**：写在 reverse strand 的 SNP 列表<br>→ 你接着用  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --bfile mydata --flip snpflip_output.reverse --make-bed --out flipped</span><br></pre></td></tr></table></figure></li>
-<li><strong><code>.ambiguous</code><strong>：链无法确定的 SNP 列表<br>→ 通常做法是</strong>检查后决定保留&#x2F;剔除</strong>（很多管线会选择剔除 A&#x2F;T、C&#x2F;G 的 ambiguous SNP）</li>
-<li>**<code>.annotated_bim</code>**：把 forward&#x2F;reverse&#x2F;ambiguous 标回去的表，方便人工检查</li>
+<li><strong><code>.reverse</code></strong>：写在 reverse strand 的 SNP 列表<br>
+→ 你接着用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plink --bfile mydata --flip snpflip_output.reverse --make-bed --out flipped</span><br></pre></td></tr></table></figure>
+</li>
+<li><strong><code>.ambiguous</code></strong>：链无法确定的 SNP 列表<br>
+→ 通常做法是<strong>检查后决定保留/剔除</strong>（很多管线会选择剔除 A/T、C/G 的 ambiguous SNP）</li>
+<li><strong><code>.annotated_bim</code></strong>：把 forward/reverse/ambiguous 标回去的表，方便人工检查</li>
 </ul>
-<h1 id="问题-不匹配W-x2F-Z染色体"><a href="#问题-不匹配W-x2F-Z染色体" class="headerlink" title="问题-不匹配W&#x2F;Z染色体"></a>问题-不匹配W&#x2F;Z染色体</h1><p>我使用 <code>0.06</code> 版本，其说明如下，这里已经说了，<code>bim</code> 文件和 <code>fasta</code> 中的染色体只能是数字和 <code>X, Y, M</code> （<code>fasta</code> 中的染色体可以有 <code>chr</code> 前缀，分析的时候会自动剔除 <code>chr</code> 前缀）。</p>
+<h1>问题-不匹配W/Z染色体</h1>
+<p>我使用 <code>0.06</code> 版本，其说明如下，这里已经说了，<code>bim</code> 文件和 <code>fasta</code> 中的染色体只能是数字和 <code>X, Y, M</code> （<code>fasta</code> 中的染色体可以有 <code>chr</code> 前缀，分析的时候会自动剔除 <code>chr</code> 前缀）。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">$ snpflip --help</span><br><span class="line">snpflip</span><br><span class="line"></span><br><span class="line">Report reverse and ambiguous strand SNPs.</span><br><span class="line">(Visit github.com/endrebak/snpflip for examples and help.)</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">    snpflip --fasta-genome=FA --bim-file=BIM [--output-prefix=PRE]</span><br><span class="line">    snpflip --help</span><br><span class="line">    snpflip --version</span><br><span class="line"></span><br><span class="line">Arguments:</span><br><span class="line">    -f FA --fasta-genome=FA     fasta genome</span><br><span class="line">    -b BIM --bim-file=BIM       plink bed file (extended variant information)</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">    -h --help                   show this message</span><br><span class="line">    -v --version                show the version number</span><br><span class="line">    -o PRE --output-prefix=PRE  the prefix of the output-files</span><br><span class="line">                                (./snpflip_output/&lt;bim_basename&gt; by default)</span><br><span class="line"></span><br><span class="line">Note:</span><br><span class="line">    To enable snpflip to match the chromosomes in the `.bim` and `.fa` files, the</span><br><span class="line">    chromosomes in the `.bim` file must be called `1, 2, ... X, Y, M`</span><br><span class="line">    while the chromosomes in the fasta file must be called the same, or</span><br><span class="line">    `chr1, chr2, ... chrX, chrY, chrM`</span><br><span class="line"></span><br><span class="line">    If there is whitespace after the chromosome name in the fasta file,</span><br><span class="line">    additional text is allowed, e.g. the below fasta id is accepted:</span><br><span class="line">    &gt;1 dna:chromosome chromosome:GRCh37:1:1:249250621:1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>实际测试发现，鸡的W&#x2F;Z染色体会导致它直接无法分析。</p>
+<p>实际测试发现，鸡的W/Z染色体会导致它直接无法分析。</p>
 <p>查看代码是 <code>reference_genome.py</code> 其中这两个函数的问题，源代码如下。</p>
 <ul>
-<li><code>convert_fa_chromosome_names(fasta_dict)</code>  是这三个函数的主函数，调用了另外2个函数，其作用是修改 fasta 染色体名称，并提取需要的染色体。<ul>
-<li>输入参数 <code>fasta_dict</code> 是一个字典，键为 <code>fasta</code> 文件中的染色体，值为序列。<ul>
+<li><code>convert_fa_chromosome_names(fasta_dict)</code>  是这三个函数的主函数，调用了另外2个函数，其作用是修改 fasta 染色体名称，并提取需要的染色体。
+<ul>
+<li>输入参数 <code>fasta_dict</code> 是一个字典，键为 <code>fasta</code> 文件中的染色体，值为序列。
+<ul>
 <li>输出是提取修改后的字典，按照原本代码的意思是只保留提取数字和 <code>X, Y, M</code> 的染色体（如果有 前缀<code>chr</code> 则剔除<code>chr</code> ，有后缀 <code>T</code> 也剔除）</li>
 </ul>
 </li>
@@ -166,7 +175,6 @@
 <li><code>_convert_fa_name(name)</code> : 对常规染色体进行转换，进行标准化。这里使用了一个正则表达式，允许的染色体格式是 <code>chr</code> 开头，数字或 <code>X, Y, M</code> 为中间字符，以 <code>T</code> 结尾的格式，然后提取其中数字或 <code>X, Y, M</code> 作为标准化后的染色体。这里问题就是，由于这里没有对染色体进行进一步的校验，如果染色体既不是上面的非法染色体（存在 <code>_</code> 或 <code>.</code>的染色体），也不是符合正则表达式的格式，那么这里会直接报错退出。</li>
 </ul>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">convert_fa_chromosome_names</span>(<span class="params">fasta_dict</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;_convert_fa_name(k): fasta_dict[k] <span class="keyword">for</span> k <span class="keyword">in</span> fasta_dict.keys()</span><br><span class="line">            <span class="keyword">if</span> _is_valid_chromosome(k)&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_is_valid_chromosome</span>(<span class="params">name</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> c <span class="keyword">in</span> <span class="string">&quot;_.&quot;</span>:</span><br><span class="line">        <span class="keyword">if</span> c <span class="keyword">in</span> name.split(<span class="literal">None</span>, <span class="number">1</span>)[<span class="number">0</span>]:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_convert_fa_name</span>(<span class="params">name</span>):</span><br><span class="line"></span><br><span class="line">    bim_name = re.<span class="built_in">compile</span>(<span class="string">r&quot;(chr)?(?P&lt;chr_symbol&gt;\d+|X|Y|M)(?:T)?&quot;</span>)</span><br><span class="line">    result = bim_name.<span class="keyword">match</span>(name).group(<span class="string">&quot;chr_symbol&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
-
 <p>修改后的代码如下，这里修改了第1个和第3个代码，修改点如下</p>
 <ol>
 <li><code>_convert_fa_name()</code> 中的正则表达式加入   W 和 Z 和 MT，加入鸡的染色体。</li>
@@ -217,55 +225,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -564,30 +524,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

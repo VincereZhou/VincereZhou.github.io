@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">217</span>
+            <span class="post-count">218</span>
         </span>
     </span>
 
@@ -98,14 +98,12 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>pedigreemm 是处理系谱构建A阵，A逆阵等的一个 R 包，但是基于实操发现这个R包不能处理数据量较大的系谱。</p>
 <span id="more"></span>
-
-<h1 id="构建A阵"><a href="#构建A阵" class="headerlink" title="构建A阵"></a>构建A阵</h1><p>我本来的目的就是用这个包构建A阵，代码如下</p>
-<p>其中 <code>editPed()</code> 函数用于处理系谱数据，<code>pedigree()</code> 用于构建“pedigree”类的对象，<code>getA()</code> 用于生成A阵 </p>
+<h1>构建A阵</h1>
+<p>我本来的目的就是用这个包构建A阵，代码如下</p>
+<p>其中 <code>editPed()</code> 函数用于处理系谱数据，<code>pedigree()</code> 用于构建“pedigree”类的对象，<code>getA()</code> 用于生成A阵</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">library<span class="punctuation">(</span>pedigreemm<span class="punctuation">)</span></span><br><span class="line"><span class="comment"># 处理系谱，构建 A阵</span></span><br><span class="line">pedigree_file <span class="operator">=</span> read.table<span class="punctuation">(</span><span class="string">&quot;pedigree_uncode&quot;</span><span class="punctuation">,</span> header<span class="operator">=</span><span class="built_in">F</span><span class="punctuation">,</span> na.strings<span class="operator">=</span><span class="string">&quot;0&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">pede <span class="operator">=</span> editPed<span class="punctuation">(</span>sire<span class="operator">=</span>pedigree_file<span class="operator">$</span>V2<span class="punctuation">,</span>dam<span class="operator">=</span>pedigree_file<span class="operator">$</span>V3<span class="punctuation">,</span>label<span class="operator">=</span>pedigree_file<span class="operator">$</span>V1<span class="punctuation">)</span></span><br><span class="line">ped <span class="operator">&lt;-</span> pedigree<span class="punctuation">(</span>sire <span class="operator">=</span> pede<span class="operator">$</span>sire<span class="punctuation">,</span>dam <span class="operator">=</span> pede<span class="operator">$</span>dam<span class="punctuation">,</span>label <span class="operator">=</span> pede<span class="operator">$</span>label<span class="punctuation">)</span></span><br><span class="line">A <span class="operator">=</span> getA<span class="punctuation">(</span>ped<span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-
 <p>但是最后一步遇到了报错，提示数据量太大</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">&gt;</span> A <span class="operator">=</span> getA<span class="punctuation">(</span>ped<span class="punctuation">)</span></span><br><span class="line">Error <span class="keyword">in</span> .local<span class="punctuation">(</span>x<span class="punctuation">,</span> y <span class="operator">=</span> y<span class="punctuation">,</span> ...<span class="punctuation">)</span> <span class="operator">:</span></span><br><span class="line">  Cholmod error <span class="string">&#x27;problem too large&#x27;</span> at file ..<span class="operator">/</span>Core<span class="operator">/</span>cholmod_sparse.c<span class="punctuation">,</span> line <span class="number">89</span></span><br></pre></td></tr></table></figure>
-
 <p>这里系谱行数为 141199 。</p>
 <p>此时可以改用 <code>nadiv</code> 包构建A阵，  <code>nadiv</code> 包没有限制系谱数目。</p>
  
@@ -155,55 +153,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -502,30 +452,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

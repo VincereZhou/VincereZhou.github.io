@@ -98,11 +98,11 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>学习一代测序和二代测序的基础原理。</p>
 <span id="more"></span>
-
-<h1 id="一代测序-Sanger-测序"><a href="#一代测序-Sanger-测序" class="headerlink" title="一代测序 - Sanger 测序"></a>一代测序 - Sanger 测序</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/75408383">https://zhuanlan.zhihu.com/p/75408383</a></p>
+<h1>一代测序 - Sanger 测序</h1>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/75408383">https://zhuanlan.zhihu.com/p/75408383</a></p>
 <p>采用 ddNTP，均不含羟基，如果合成了一个 ddNTP之后，DNA合成过程就中止了。</p>
 <p>一代测序需要4个 DNA 合成反应体系（A C G T 各一个），原理如下图</p>
-<p><img src="/posts/d6ae1355/1.jpg" alt="1"></p>
+<p><img src="1.jpg" alt="1"></p>
 <p>优点：</p>
 <ul>
 <li>测序读长可达1,000bp</li>
@@ -113,23 +113,28 @@
 <li>成本高</li>
 <li>通量低</li>
 </ul>
-<h1 id="二代测序"><a href="#二代测序" class="headerlink" title="二代测序"></a>二代测序</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/20702684">https://zhuanlan.zhihu.com/p/20702684</a></p>
+<h1>二代测序</h1>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/20702684">https://zhuanlan.zhihu.com/p/20702684</a></p>
 <p>优酷视频</p>
 <p><a target="_blank" rel="noopener" href="https://v.youku.com/v_show/id_XNzEzNzk1NTA0.html">https://v.youku.com/v_show/id_XNzEzNzk1NTA0.html</a></p>
 <p>二代测序目前的主流是 illumina 测序</p>
-<h2 id="建库"><a href="#建库" class="headerlink" title="建库"></a>建库</h2><p>由于Illumina测序策略本身的问题，导致其测序长度不可能太长。</p>
+<h2 id="建库">建库</h2>
+<p>由于Illumina测序策略本身的问题，导致其测序长度不可能太长。</p>
 <p>所谓的建库就是把基因组打断成一定长度的片段。</p>
 <p>打断后，补齐末端，然后再3‘段添加一个碱基A，之后再加上 adapter</p>
-<h2 id="桥式PCR"><a href="#桥式PCR" class="headerlink" title="桥式PCR"></a>桥式PCR</h2><p>这个看视频更形象一点。</p>
+<h2 id="桥式PCR">桥式PCR</h2>
+<p>这个看视频更形象一点。</p>
 <p>最终就是在 flowcell 中 形成了一个具有完全相同序列的簇，一般叫 cluster</p>
-<h2 id="测序"><a href="#测序" class="headerlink" title="测序"></a>测序</h2><p>这个也是看视频更形象一点。</p>
+<h2 id="测序">测序</h2>
+<p>这个也是看视频更形象一点。</p>
 <p>它是边合成，边测序。</p>
 <p>它用于测序的碱基有两个特殊的地方，一是脱氧核糖3号位加入了叠氮基团而不是常规的羟基，类似于一代测序的ddNTP，保证一次只能添加一个碱基；二是碱基部分添加了荧光基团，不同的碱基有不同的颜色。</p>
 <p>在测序过程中，每1轮测序，保证只有1个碱基加入的当前测序链。这时候测序仪会发出激发光，并扫描荧光。因为一个cluster中所有的序列是一样的，所以理论上，这时候cluster中发出的荧光应该颜色一致。一个测序扫描图片如下：</p>
-<p><img src="/posts/d6ae1355/2.jpg" alt="1"></p>
+<p><img src="2.jpg" alt="1"></p>
 <p>然后洗脱多余的没有附着上的脱氧核糖和聚合酶，加入特殊试剂，将脱氧核糖3号位的—N2改变成—OH，然后切掉部分荧光基团，使其在下一轮反应中，不再发出荧光。</p>
 <p>如此反复，测出所有reads每个位置的序列。</p>
-<h2 id="为什么Illumina测序会有长度限制呢"><a href="#为什么Illumina测序会有长度限制呢" class="headerlink" title="为什么Illumina测序会有长度限制呢"></a>为什么Illumina测序会有长度限制呢</h2><blockquote>
+<h2 id="为什么Illumina测序会有长度限制呢">为什么Illumina测序会有长度限制呢</h2>
+<blockquote>
 <ol>
 <li>测序时，经过长时间的PCR，会有不同步的情况。通俗一点讲，比如一开始1个cluster中是100个完全一样的DNA链，但是经过1轮增加碱基，其中99个都加入了1个碱基，显示了红色，另外1个没有加入碱基，不显示颜色。这时候整体为红色，我们可以顺利得到结果。随后，在第2轮再加入碱基进行合成的时候，就变成了，之前没有加入的加入了1个碱基显示红色，剩下的99个显示绿色，这个时候就会出现杂信号。当测序长度不断延长，这个杂信号会越来越多，最后很有可能出现，50个红，50个绿色，这时候我们判断不出来到底是什么碱基被合成。</li>
 <li>测序过程中，使用的碱基是特殊处理的，有一个非常大的荧光基团修饰。在使用DNA ploymerase的时候，酶的状态也会受到底物的影响，越来越差。</li>
@@ -183,55 +188,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -530,30 +487,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

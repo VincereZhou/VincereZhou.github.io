@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.1k</span>
+            <span class="post-count">1k</span>
         </span>
     </span>
 
@@ -98,27 +98,74 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>利用微卫星标记 (STR) 可以进行个体识别的指标介绍。</p>
 <span id="more"></span>
-
-<h1 id="个体识别能力"><a href="#个体识别能力" class="headerlink" title="个体识别能力"></a>个体识别能力</h1><p>个体识别能力 (discrimination power, DP) 是指<strong>针对某个遗传标记</strong>，从调查群体中随机抽取两个个体，两个个体的基因型不相同的概率，是衡量遗传标记系统识别不同个体效能大小的指标，常见计算公式如下：<br>$$<br>DP &#x3D; 1- Pm &#x3D; 1 - \sum_{i&#x3D;1}^{m} f_{i}^{2}<br>$$<br>其中 $m$ 为基因型数目，$f_{i}$ 是第 $i$ 个基因型的频率，$Pm$（probability of matching,  <strong>随机匹配概率</strong>） 是指调查群体中随机抽取两个无关个体在某一个基因座上二者表型纯粹由于机会而一致的概率（定义与 DP 相反，二者之和为 1）。</p>
-<p>如果我们假设哈温平衡，那么个体识别能力也可以基于等位基因频率进行计算，纯合子的 $Pm$ 值为 $\sum_{i&#x3D;1}^{n} (p_{i}^{2})^{2}$ ，杂合子的  $Pm$ 值为 $\sum_{i&#x3D;1}^{n} \sum_{j&#x3D;i+1}^{n}(2p_{i}p_{j})^{2}$ ，因此我们得到<br>$$<br>\begin{aligned}<br>DP &amp;&#x3D; 1 - \sum_{i&#x3D;1}^{n} (p_{i}^{2})^{2} - \sum_{i&#x3D;1}^{n} \sum_{j&#x3D;i+1}^{n}(2p_{i}p_{j})^{2} \<br>&amp;&#x3D; 1-2 \times \left( \sum_{i&#x3D;1}^{n} p_{i}^{2}\right)^{2} + \sum_{i&#x3D;1}^{n} p_{i}^{4}<br>\end{aligned}<br>$$<br>上面的公式是对于单个遗传标记而言的，对于一组遗传标记，其累积个体识别能力 (total discrimination power, TDP)  计算公式如下<br>$$<br>\begin{aligned}<br>TDP &amp;&#x3D; 1 - \Pi_{j&#x3D;1}^{k}(1-DP_{K}) \<br>&amp;&#x3D; 1 - \Pi_{j&#x3D;1}^{k}{Pm}_{K}<br>\end{aligned}<br>$$<br>其中 $k$ 为标记数目。</p>
-<p>相似的，我们定义累积匹配概率 (cumulative match probability, CPM) 如下<br>$$<br>\begin{aligned}<br>CPM &amp;&#x3D; 1-TDP \<br>&amp;&#x3D; \Pi_{j&#x3D;1}^{k}(1-DP_{K}) \<br>&amp;&#x3D; \Pi_{j&#x3D;1}^{k}{Pm}_{K} \<br>\end{aligned}<br>$$</p>
-<p>在《GBT27642-2011牛个体及亲子鉴定微卫星DNA法》中，当 CPM 小于 $5×10^{-9}$ 时，认定两份样本来源于同一个个体。  </p>
-<h1 id="似然率计算"><a href="#似然率计算" class="headerlink" title="似然率计算"></a>似然率计算</h1><p>个体识别的似然率，或者称为似然比（likelihood ratio, LR）计算公式如下<br>$$<br>LR &#x3D; \frac{Pr(E|Hp)}{Pr(E|Hd)}<br>$$<br>这里 E 表示出现这个个体基因型的事件，Hp 表示是同一个个体的假设，Hd 表示是随机个体的假设。</p>
-<p>例如，我们假设现场血痕DNA和一名嫌疑人血样DNA表型组合均为E，如果是同一个人的话，那么出现这种事件的概率就为1，即 $Pr(E|Hp) &#x3D; 1$ ；如果是随机个体偶然基因型完全一样，这种概率 $Pr(E|Hd) &#x3D; CPM$ ，因此我们得到似然比的实际计算公式为<br>$$<br>LR &#x3D; \frac{1}{CPM}<br>$$<br>统计学上似然比超过 1 则支持假设 $Hp$ ，反之则支持假设 $Hd$ 。在法医学个体识别实践 中，当LR在数值上超过全球人口总数时，表明证据有足够强度支持原告假设（Hp）。</p>
-<h1 id="杂合度"><a href="#杂合度" class="headerlink" title="杂合度"></a>杂合度</h1><p>指调查群体中某遗传标记所有基因型中杂合子的占比。杂合度越高，说明该遗传标记的杂合性越大，<br>在法医学个人识别中的应用价值越大。杂合度分为观察杂合度（observed heterozygosity, Hobs ）和期望杂<br>合度（expected heterozygosity, Hexp ）。计算公式分别如下：<br>$$<br>H_{obs} &#x3D; \frac{杂合子个体数}{调查个体数}<br>$$</p>
-<p>$$<br>H_{exp} &#x3D; \frac{N}{N-1} (1-\sum_{i&#x3D;1}^{n} p_{i}^{2})<br>$$</p>
+<h1>个体识别能力</h1>
+<p>个体识别能力 (discrimination power, DP) 是指<strong>针对某个遗传标记</strong>，从调查群体中随机抽取两个个体，两个个体的基因型不相同的概率，是衡量遗传标记系统识别不同个体效能大小的指标，常见计算公式如下：<br>
+$$<br>
+DP = 1- Pm = 1 - \sum_{i=1}^{m} f_{i}^{2}<br>
+$$<br>
+其中 $m$ 为基因型数目，$f_{i}$ 是第 $i$ 个基因型的频率，$Pm$（probability of matching,  <strong>随机匹配概率</strong>） 是指调查群体中随机抽取两个无关个体在某一个基因座上二者表型纯粹由于机会而一致的概率（定义与 DP 相反，二者之和为 1）。</p>
+<p>如果我们假设哈温平衡，那么个体识别能力也可以基于等位基因频率进行计算，纯合子的 $Pm$ 值为 $\sum_{i=1}^{n} (p_{i}^{2})^{2}$ ，杂合子的  $Pm$ 值为 $\sum_{i=1}^{n} \sum_{j=i+1}^{n}(2p_{i}p_{j})^{2}$ ，因此我们得到<br>
+$$<br>
+\begin{aligned}<br>
+DP &amp;= 1 - \sum_{i=1}^{n} (p_{i}^{2})^{2} - \sum_{i=1}^{n} \sum_{j=i+1}^{n}(2p_{i}p_{j})^{2} \<br>
+&amp;= 1-2 \times \left( \sum_{i=1}^{n} p_{i}^{2}\right)^{2} + \sum_{i=1}^{n} p_{i}^{4}<br>
+\end{aligned}<br>
+$$<br>
+上面的公式是对于单个遗传标记而言的，对于一组遗传标记，其累积个体识别能力 (total discrimination power, TDP)  计算公式如下<br>
+$$<br>
+\begin{aligned}<br>
+TDP &amp;= 1 - \Pi_{j=1}^{k}(1-DP_{K}) \<br>
+&amp;= 1 - \Pi_{j=1}^{k}{Pm}_{K}<br>
+\end{aligned}<br>
+$$<br>
+其中 $k$ 为标记数目。</p>
+<p>相似的，我们定义累积匹配概率 (cumulative match probability, CPM) 如下<br>
+$$<br>
+\begin{aligned}<br>
+CPM &amp;= 1-TDP \<br>
+&amp;= \Pi_{j=1}^{k}(1-DP_{K}) \<br>
+&amp;= \Pi_{j=1}^{k}{Pm}_{K} \<br>
+\end{aligned}<br>
+$$</p>
+<p>在《GBT27642-2011牛个体及亲子鉴定微卫星DNA法》中，当 CPM 小于 $5×10^{-9}$ 时，认定两份样本来源于同一个个体。</p>
+<h1>似然率计算</h1>
+<p>个体识别的似然率，或者称为似然比（likelihood ratio, LR）计算公式如下<br>
+$$<br>
+LR = \frac{Pr(E|Hp)}{Pr(E|Hd)}<br>
+$$<br>
+这里 E 表示出现这个个体基因型的事件，Hp 表示是同一个个体的假设，Hd 表示是随机个体的假设。</p>
+<p>例如，我们假设现场血痕DNA和一名嫌疑人血样DNA表型组合均为E，如果是同一个人的话，那么出现这种事件的概率就为1，即 $Pr(E|Hp) = 1$ ；如果是随机个体偶然基因型完全一样，这种概率 $Pr(E|Hd) = CPM$ ，因此我们得到似然比的实际计算公式为<br>
+$$<br>
+LR = \frac{1}{CPM}<br>
+$$<br>
+统计学上似然比超过 1 则支持假设 $Hp$ ，反之则支持假设 $Hd$ 。在法医学个体识别实践 中，当LR在数值上超过全球人口总数时，表明证据有足够强度支持原告假设（Hp）。</p>
+<h1>杂合度</h1>
+<p>指调查群体中某遗传标记所有基因型中杂合子的占比。杂合度越高，说明该遗传标记的杂合性越大，<br>
+在法医学个人识别中的应用价值越大。杂合度分为观察杂合度（observed heterozygosity, Hobs ）和期望杂<br>
+合度（expected heterozygosity, Hexp ）。计算公式分别如下：<br>
+$$<br>
+H_{obs} = \frac{杂合子个体数}{调查个体数}<br>
+$$</p>
+<p>$$<br>
+H_{exp} = \frac{N}{N-1} (1-\sum_{i=1}^{n} p_{i}^{2})<br>
+$$</p>
 <p>其中 N 为调查群体中的等位基因总数（对于二倍体生物，就是非缺失的样本数乘2），n 为等位基因种类的数目。</p>
 <p>这里的期望杂合度公式我不太清楚是怎么来的，但是通过比较发现这应该就是 CERVUS 使用的计算公式。</p>
-<h1 id="鉴定意见"><a href="#鉴定意见" class="headerlink" title="鉴定意见"></a>鉴定意见</h1><ul>
+<h1>鉴定意见</h1>
+<ul>
 <li>如果存在分型不一致，则判定为“排除两者来自同一个体”</li>
 <li>如果<strong>分型完全一致</strong>，则进一步计算 LR ，鉴定意见可表述为“支持两者来源于同一个体，LR 值为 XXX”。</li>
 </ul>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p>SF&#x2F;Z JD0105012——2018 《个体识别技术规范》</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>SF/Z JD0105012——2018 《个体识别技术规范》</p>
 </li>
-<li><p>SF&#x2F;Z JD0105010——2018 《常染色体 STR 基因座的法医学参数计算规范》</p>
+<li>
+<p>SF/Z JD0105010——2018 《常染色体 STR 基因座的法医学参数计算规范》</p>
 </li>
-<li><p>GBT27642-2011牛个体及亲子鉴定微卫星DNA法</p>
+<li>
+<p>GBT27642-2011牛个体及亲子鉴定微卫星DNA法</p>
 </li>
 </ol>
  
@@ -168,55 +215,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -515,30 +514,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

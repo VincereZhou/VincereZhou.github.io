@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">13.4k</span>
+            <span class="post-count">13k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">76 分钟</span>
+            <span class="post-count">73 分钟</span>
         </span>
     </span>
 </div>
@@ -98,76 +98,1033 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是方差组分估计方法的第四篇博客，介绍 EM-REML 算法。</p>
 <span id="more"></span>
-
-<h1 id="混合线性模型的一般式子"><a href="#混合线性模型的一般式子" class="headerlink" title="混合线性模型的一般式子"></a>混合线性模型的一般式子</h1><p>我们将混合线性模型写为<br>$$<br>\mathbf{y} &#x3D; \mathbf{X}\boldsymbol{\beta}+\mathbf{Zu}+\mathbf{e}<br>$$<br>其中 $\mathbf{u}$ 和 $\mathbf{e}$ 的联合分布为<br>$$<br>\left[\begin{array}{l}<br>\mathbf{u} \<br>\mathbf{e}<br>\end{array}\right] \sim \mathrm{N}\left(\left[\begin{array}{l}<br>\mathbf{0} \<br>\mathbf{0}<br>\end{array}\right], \theta\left[\begin{array}{cc}<br>\mathbf{G} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{R}<br>\end{array}\right]\right)<br>$$<br>其中 $\mathbf{G} &#x3D; \mathbf{G}(\boldsymbol{\gamma})$ ， $\mathbf{R} &#x3D; \sigma^{2} \mathbf{\Sigma}$ ，$\mathbf{\Sigma} &#x3D; \mathbf{\Sigma}(\boldsymbol{\phi})$ 。这里我们假定这三个矩阵均为<strong>正定</strong>矩阵。</p>
-<p>这里的 $\boldsymbol{\gamma}$ 和 $\boldsymbol{\phi}$ 是与随机效应 $\mathbf{u}$ 和 $\mathbf{e}$ 相关的方差组分的向量，而标量参数  $\sigma^{2}$  和 $\theta$ 是与残差和全部方差组分的缩放系数。因此我们需要估计的方差参数为 $\theta$ 和 $\boldsymbol{\kappa} &#x3D; (\boldsymbol{\gamma}^{\prime},  \sigma^{2}, \boldsymbol{\phi}^{\prime} )^{\prime}$ 。</p>
-<p>因为 $\mathbf{y}$ 的分布为<br>$$<br>\mathbf{y} \sim \mathrm{N}(\mathbf{X}\boldsymbol{\beta}, \theta\mathbf{H})<br>$$<br>其中 $\mathbf{H} &#x3D; \mathbf{ZGZ^{\prime}}+\mathbf{R}$ 是一个正定矩阵。</p>
-<p>这里的标量参数 $\sigma^{2}$  和  $\theta$  均是用于缩放的参数，我们发现如果我们同时包含这两个参数，那么这两个参数的值便均无法确定，因为此时 $\mathrm{Var}(\mathbf{u}) &#x3D; \theta \mathbf{G}(\boldsymbol{\gamma})$ ，$\mathrm{Var}(\mathbf{e}) &#x3D; \theta \sigma^{2} \mathbf{\Sigma}(\boldsymbol{\phi})$  。实际上我们至少会将其中一个参数设定为 1 。</p>
-<p>按照育种模型的一般思路，这里我将  $\sigma^{2}$  和  $\theta$ 均设为 1， 此时 $\mathrm{Var}(\mathbf{y}) &#x3D; \mathbf{V} &#x3D;  \mathbf{ZGZ^{\prime}}+\mathbf{R} &#x3D;  \mathbf{ZG(\boldsymbol{\gamma})Z^{\prime}}+\mathbf{\Sigma}(\boldsymbol{\phi})$ ，我们需要估计的参数为  $\boldsymbol{\kappa} &#x3D; (\boldsymbol{\gamma}^{\prime}, \boldsymbol{\phi}^{\prime} )^{\prime}$  。</p>
-<p>假设我们有 $s$ 个随机效应，即 $\mathbf{u} &#x3D; (\mathbf{u}<em>{1}^{\prime}, \mathbf{u}</em>{2}^{\prime}, \cdots, \mathbf{u}<em>{s}^{\prime})^{\prime}$ ，因此此时随机效应的协方差矩阵可以写为<br>$$<br>\mathbf{G} &#x3D; \oplus</em>{i&#x3D;1}^{s}\mathbf{G}<em>{i} &#x3D; \left[\begin{array}{ccccc}<br>\mathbf{G}<em>1 &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{0} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{G}<em>2 &amp; \cdots &amp; \mathbf{0} &amp; \mathbf{0} \<br>\vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots \<br>\mathbf{0} &amp; \mathbf{0} &amp; \ldots &amp; \mathbf{G}</em>{s-1} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{0} &amp; \mathbf{G}<em>s<br>\end{array}\right]<br>$$<br>此时的方差组分 $\boldsymbol{\gamma}$ 也可以进行相应的分块，例如 $\mathbf{G}</em>{i} &#x3D; \mathbf{G}</em>{i}(\boldsymbol{\gamma}</em>{i})$ ，因此我们有 $\boldsymbol{\gamma} &#x3D; (\boldsymbol{\gamma}<em>{1}^{\prime}, \boldsymbol{\gamma}</em>{2}^{\prime}, \cdots, \boldsymbol{\gamma}_{s}^{\prime})^{\prime}$ 。</p>
+<h1>混合线性模型的一般式子</h1>
+<p>我们将混合线性模型写为<br>
+$$<br>
+\mathbf{y} = \mathbf{X}\boldsymbol{\beta}+\mathbf{Zu}+\mathbf{e}<br>
+$$<br>
+其中 $\mathbf{u}$ 和 $\mathbf{e}$ 的联合分布为<br>
+$$<br>
+\left[\begin{array}{l}<br>
+\mathbf{u} \<br>
+\mathbf{e}<br>
+\end{array}\right] \sim \mathrm{N}\left(\left[\begin{array}{l}<br>
+\mathbf{0} \<br>
+\mathbf{0}<br>
+\end{array}\right], \theta\left[\begin{array}{cc}<br>
+\mathbf{G} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{R}<br>
+\end{array}\right]\right)<br>
+$$<br>
+其中 $\mathbf{G} = \mathbf{G}(\boldsymbol{\gamma})$ ， $\mathbf{R} = \sigma^{2} \mathbf{\Sigma}$ ，$\mathbf{\Sigma} = \mathbf{\Sigma}(\boldsymbol{\phi})$ 。这里我们假定这三个矩阵均为<strong>正定</strong>矩阵。</p>
+<p>这里的 $\boldsymbol{\gamma}$ 和 $\boldsymbol{\phi}$ 是与随机效应 $\mathbf{u}$ 和 $\mathbf{e}$ 相关的方差组分的向量，而标量参数  $\sigma^{2}$  和 $\theta$ 是与残差和全部方差组分的缩放系数。因此我们需要估计的方差参数为 $\theta$ 和 $\boldsymbol{\kappa} = (\boldsymbol{\gamma}^{\prime},  \sigma^{2}, \boldsymbol{\phi}^{\prime} )^{\prime}$ 。</p>
+<p>因为 $\mathbf{y}$ 的分布为<br>
+$$<br>
+\mathbf{y} \sim \mathrm{N}(\mathbf{X}\boldsymbol{\beta}, \theta\mathbf{H})<br>
+$$<br>
+其中 $\mathbf{H} = \mathbf{ZGZ^{\prime}}+\mathbf{R}$ 是一个正定矩阵。</p>
+<p>这里的标量参数 $\sigma^{2}$  和  $\theta$  均是用于缩放的参数，我们发现如果我们同时包含这两个参数，那么这两个参数的值便均无法确定，因为此时 $\mathrm{Var}(\mathbf{u}) = \theta \mathbf{G}(\boldsymbol{\gamma})$ ，$\mathrm{Var}(\mathbf{e}) = \theta \sigma^{2} \mathbf{\Sigma}(\boldsymbol{\phi})$  。实际上我们至少会将其中一个参数设定为 1 。</p>
+<p>按照育种模型的一般思路，这里我将  $\sigma^{2}$  和  $\theta$ 均设为 1， 此时 $\mathrm{Var}(\mathbf{y}) = \mathbf{V} =  \mathbf{ZGZ^{\prime}}+\mathbf{R} =  \mathbf{ZG(\boldsymbol{\gamma})Z^{\prime}}+\mathbf{\Sigma}(\boldsymbol{\phi})$ ，我们需要估计的参数为  $\boldsymbol{\kappa} = (\boldsymbol{\gamma}^{\prime}, \boldsymbol{\phi}^{\prime} )^{\prime}$  。</p>
+<p>假设我们有 $s$ 个随机效应，即 $\mathbf{u} = (\mathbf{u}<em>{1}^{\prime}, \mathbf{u}</em>{2}^{\prime}, \cdots, \mathbf{u}<em>{s}^{\prime})^{\prime}$ ，因此此时随机效应的协方差矩阵可以写为<br>
+$$<br>
+\mathbf{G} = \oplus</em>{i=1}^{s}\mathbf{G}<em>{i} = \left[\begin{array}{ccccc}<br>
+\mathbf{G}<em>1 &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{G}<em>2 &amp; \cdots &amp; \mathbf{0} &amp; \mathbf{0} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots \<br>
+\mathbf{0} &amp; \mathbf{0} &amp; \ldots &amp; \mathbf{G}</em>{s-1} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{0} &amp; \mathbf{G}<em>s<br>
+\end{array}\right]<br>
+$$<br>
+此时的方差组分 $\boldsymbol{\gamma}$ 也可以进行相应的分块，例如 $\mathbf{G}</em>{i} = \mathbf{G}</em>{i}(\boldsymbol{\gamma}</em>{i})$ ，因此我们有 $\boldsymbol{\gamma} = (\boldsymbol{\gamma}<em>{1}^{\prime}, \boldsymbol{\gamma}</em>{2}^{\prime}, \cdots, \boldsymbol{\gamma}_{s}^{\prime})^{\prime}$ 。</p>
 <p>但是对于残差，我们通常还是认为所有数据来自与一个数据集，即残差是均质的，其协方差矩阵不用分块。</p>
-<h1 id="推导-C-逆矩阵"><a href="#推导-C-逆矩阵" class="headerlink" title="推导 C 逆矩阵"></a>推导 C 逆矩阵</h1><p>假设 $\mathbf{X}$ 矩阵满秩，则混合线性模型的系数矩阵 $\mathbf{C}$ 可逆。</p>
-<p>我们将原始的系数矩阵分块为<br>$$<br>\begin{aligned}<br>\mathbf{C} &amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22} \<br>\end{array}\right] \<br>&amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{X^{\prime}R^{-1}X} &amp; \mathbf{X^{\prime}R^{-1}Z} \<br>\mathbf{Z^{\prime}R^{-1}X} &amp; \mathbf{Z^{\prime}R^{-1}Z+G^{-1}} \<br>\end{array}\right] \<br>\end{aligned}<br>$$<br>根据舒尔补公式，系数矩阵逆矩阵可以写为<br>$$<br>\begin{aligned}<br>\mathbf{C}^{-1} &amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{C}^{11} &amp; \mathbf{C}^{12} \<br>\mathbf{C}^{21} &amp; \mathbf{C}^{22} \<br>\end{array}\right] \<br>&amp;&#x3D; \left[\begin{array}{c}<br>(\mathbf{C}<em>{11}  - \mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21})^{-1} &amp; -(\mathbf{C}<em>{11}  - \mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21})^{-1}\mathbf{C}<em>{12}\mathbf{C}</em>{22}^{-1} \<br>-\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21}(\mathbf{C}<em>{11}  - \mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21})^{-1} &amp; \mathbf{C}<em>{22}^{-1}+\mathbf{C}</em>{22}^{-1}\mathbf{C}<em>{21}(\mathbf{C}</em>{11}  - \mathbf{C}<em>{12}\mathbf{C}</em>{22}^{-1}\mathbf{C}<em>{21})^{-1}\mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1} \<br>\end{array}\right] \<br>&amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{C}^{11} &amp; -\mathbf{C}^{11}\mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1} \<br>-\mathbf{C}</em>{22}^{-1}\mathbf{C}<em>{21}\mathbf{C}^{11} &amp; \mathbf{C}</em>{22}^{-1}+\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21}\mathbf{C}^{11}\mathbf{C}<em>{12}\mathbf{C}</em>{22}^{-1} \<br>\end{array}\right] \<br>\end{aligned}<br>$$<br>在之前的推导中，我们已经得到<br>$$<br>\mathbf{C^{11}} &#x3D; (\mathbf{C}<em>{11}  - \mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21})^{-1} &#x3D; (\mathbf{X^{\prime}V^{-1}X})^{-1}<br>$$<br>根据附录1，我们有 $\mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} &#x3D; \mathbf{GZ^{\prime}(R+ZGZ^{\prime})^{-1}}&#x3D; \mathbf{GZ^{\prime}V^{-1}}$ ，因此其它分块子矩阵推导如下<br>$$<br>\begin{aligned}<br>\mathbf{C}^{12} &amp;&#x3D; -\mathbf{C}^{11}\mathbf{C}<em>{12}\mathbf{C}</em>{22}^{-1}  \<br>&amp;&#x3D; -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X^{\prime}R^{-1}Z}(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1} \<br>&amp;&#x3D; -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{V^{-1}ZG} \<br>\mathbf{C}^{21} &amp;&#x3D; (\mathbf{C}^{12})^{\prime} \<br>&amp;&#x3D; -\mathbf{GZ^{\prime}V^{-1}} \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1}   \<br>\mathbf{C}^{22} &amp;&#x3D; \mathbf{C}<em>{22}^{-1}+\mathbf{C}</em>{22}^{-1}\mathbf{C}<em>{21}\mathbf{C}^{11}\mathbf{C}</em>{12}\mathbf{C}_{22}^{-1} \<br>&amp;&#x3D; (\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}\mathbf{Z^{\prime}R^{-1}X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}R^{-1}Z} (\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1} \<br>&amp;&#x3D;(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{GZ^{\prime}V^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{V^{-1}ZG} \<br>&amp;&#x3D;(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{GZ^{\prime}}\mathbf{(V^{-1}-P)} \mathbf{ZG} \quad \because \mathbf{P}&#x3D;\mathbf{V}^{-1}-\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \<br>&amp;&#x3D;(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{GZ^{\prime}}\mathbf{V^{-1}} \mathbf{ZG}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>&amp;&#x3D;(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}}  \mathbf{ZG}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>&amp;&#x3D;(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}(\mathbf{I}+\mathbf{Z^{\prime}R^{-1}}  \mathbf{ZG})- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>&amp;&#x3D;(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}(\mathbf{G}^{-1}+\mathbf{Z^{\prime}R^{-1}}  \mathbf{Z})\mathbf{G}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>&amp;&#x3D;\mathbf{G}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>\end{aligned}<br>$$<br>因此我们得到<br>$$<br>\begin{aligned}<br>\mathbf{C}^{-1} &amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{C}^{11} &amp; \mathbf{C}^{12} \<br>\mathbf{C}^{21} &amp; \mathbf{C}^{22} \<br>\end{array}\right] \<br> &amp;&#x3D; \left[\begin{array}{c}<br>(\mathbf{X^{\prime}V^{-1}X})^{-1} &amp;  -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{V^{-1}ZG} \<br>-\mathbf{GZ^{\prime}V^{-1}} \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} &amp; \mathbf{G}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>\end{array}\right] \</p>
-<p>\end{aligned}<br>$$</p>
-<h1 id="推导-P-矩阵"><a href="#推导-P-矩阵" class="headerlink" title="推导 P 矩阵"></a>推导 P 矩阵</h1><p> 之前我们得到了两个 P 矩阵的式子，如下（$\mathbf{K}$ 为满足 $\mathbf{K’X}&#x3D;0$ 的一个矩阵）<br>$$<br>\mathbf{P}&#x3D;\mathbf{V}^{-1}-\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1}&#x3D;\mathbf{K}\left(\mathbf{K}^{\prime} \mathbf{V} \mathbf{K}\right)^{-1} \mathbf{K}^{\prime}<br>$$<br>这里我们推导第三个式子<br>$$<br>\mathbf{P} &#x3D; \mathbf{R^{-1}-R^{-1}WC^{-1}W^{\prime}R^{-1}}<br>$$<br>其中 $\mathbf{W} &#x3D; \left[\begin{array}{l} \mathbf{X} &amp; \mathbf{Z} \end{array}\right]$ ，$\mathbf{C}$ 为系数矩阵。</p>
-<h2 id="证明过程"><a href="#证明过程" class="headerlink" title="证明过程"></a>证明过程</h2><p>根据下面的附录1，我们有<br>$$<br>\mathbf{R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}} &#x3D; \mathbf{(R+ZGZ^{\prime})^{-1}ZG}<br>$$<br>我们可以将其写为<br>$$<br>\mathbf{R^{-1}ZM} &#x3D; \mathbf{V^{-1}ZG}<br>$$<br>其中 $\mathbf{M}&#x3D;\mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}}$ 。</p>
-<p>我们也可以用 $\mathbf{M}$ 来表示 $\mathbf{V}^{-1}$<br>$$<br>\begin{aligned}<br>\mathbf{V^{-1}}  &amp;&#x3D; \mathbf{R^{-1}-R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \<br>&amp;&#x3D;\mathbf{R^{-1}-R^{-1}ZMZ^{\prime}R^{-1}}<br>\end{aligned}<br>$$<br>我们同样可以用  $\mathbf{M}$ 来表示 $\mathbf{C}^{-1}$ 矩阵的元素<br>$$<br>\begin{aligned}<br>\mathbf{C}^{12} &amp;&#x3D; -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{V^{-1}ZG} \<br>&amp;&#x3D; -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM} \<br>\mathbf{C}^{21} &amp;&#x3D;  -\mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1} \<br>\mathbf{C}^{22} &amp;&#x3D;(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{GZ^{\prime}V^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{V^{-1}ZG} \<br>&amp;&#x3D;\mathbf{M}+ \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \</p>
-<p>\end{aligned}<br>$$<br> 因此系数矩阵逆矩阵可以表示为<br>$$<br>\begin{aligned}<br>\mathbf{C}^{-1}<br> &amp;&#x3D; \left[\begin{array}{c}<br>(\mathbf{X^{\prime}V^{-1}X})^{-1} &amp;  -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM} \<br> -\mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}  &amp; \mathbf{M}+ \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \<br>\end{array}\right] \</p>
-<p>\end{aligned}<br>$$<br>因此，我们有<br>$$<br>\begin{aligned}<br>\mathbf{WC^{-1}W^{\prime} }<br> &amp;&#x3D;  \left[\begin{array}{l} \mathbf{X} &amp; \mathbf{Z} \end{array}\right]<br> \left[\begin{array}{c}<br>(\mathbf{X^{\prime}V^{-1}X})^{-1} &amp;  -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM} \<br> -\mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}  &amp; \mathbf{M}+ \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \<br>\end{array}\right]<br> \left[\begin{array}{l} \mathbf{X}^{\prime} \ \mathbf{Z}^{\prime} \end{array}\right] \<br> &amp;&#x3D;  \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} - \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM}\mathbf{Z}^{\prime} - \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} \<br> &amp; \quad + \mathbf{Z}\mathbf{M} \mathbf{Z}^{\prime} + \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \mathbf{Z}^{\prime}<br>\end{aligned}<br>$$<br>因此<br>$$<br>\begin{aligned}<br>&amp;\mathbf{R^{-1}-R^{-1}WC^{-1}W^{\prime}R^{-1}} \<br>&amp;&#x3D;  \mathbf{R^{-1}} -\mathbf{R^{-1}} \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} \mathbf{R^{-1}} + \mathbf{R^{-1}} \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM}\mathbf{Z}^{\prime} \mathbf{R^{-1}} + \mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} \mathbf{R^{-1}} \<br> &amp; \quad - \mathbf{R^{-1}} \mathbf{Z}\mathbf{M} \mathbf{Z}^{\prime} \mathbf{R^{-1}} - \mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \mathbf{Z}^{\prime} \mathbf{R^{-1}} \<br> &amp;&#x3D;  \mathbf{R^{-1}} - \mathbf{R^{-1}} \mathbf{Z}\mathbf{M} \mathbf{Z}^{\prime} \mathbf{R^{-1}} - (\mathbf{R^{-1}}-\mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}} ) \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} \mathbf{R^{-1}}\<br> &amp;+ (\mathbf{R^{-1}}-\mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}) \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM}\mathbf{Z}^{\prime} \mathbf{R^{-1}}<br>\ </p>
-<p>  &amp;&#x3D;  \mathbf{R^{-1}} - \mathbf{R^{-1}} \mathbf{Z}\mathbf{M} \mathbf{Z}^{\prime} \mathbf{R^{-1}} \<br> &amp; - (\mathbf{R^{-1}}-\mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}} ) \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} (\mathbf{R^{-1}} -\mathbf{R^{-1}ZM}\mathbf{Z}^{\prime} \mathbf{R^{-1}} )\<br> &amp;&#x3D;  \mathbf{V}^{-1} </p>
+<h1>推导 C 逆矩阵</h1>
+<p>假设 $\mathbf{X}$ 矩阵满秩，则混合线性模型的系数矩阵 $\mathbf{C}$ 可逆。</p>
+<p>我们将原始的系数矩阵分块为<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{C} &amp;= \left[\begin{array}{c}<br>
+\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>
+\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22} \<br>
+\end{array}\right] \<br>
+&amp;= \left[\begin{array}{c}<br>
+\mathbf{X^{\prime}R^{-1}X} &amp; \mathbf{X^{\prime}R^{-1}Z} \<br>
+\mathbf{Z^{\prime}R^{-1}X} &amp; \mathbf{Z^{\prime}R^{-1}Z+G^{-1}} \<br>
+\end{array}\right] \<br>
+\end{aligned}<br>
+$$<br>
+根据舒尔补公式，系数矩阵逆矩阵可以写为<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{C}^{-1} &amp;= \left[\begin{array}{c}<br>
+\mathbf{C}^{11} &amp; \mathbf{C}^{12} \<br>
+\mathbf{C}^{21} &amp; \mathbf{C}^{22} \<br>
+\end{array}\right] \<br>
+&amp;= \left[\begin{array}{c}<br>
+(\mathbf{C}<em>{11}  - \mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21})^{-1} &amp; -(\mathbf{C}<em>{11}  - \mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21})^{-1}\mathbf{C}<em>{12}\mathbf{C}</em>{22}^{-1} \<br>
+-\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21}(\mathbf{C}<em>{11}  - \mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21})^{-1} &amp; \mathbf{C}<em>{22}^{-1}+\mathbf{C}</em>{22}^{-1}\mathbf{C}<em>{21}(\mathbf{C}</em>{11}  - \mathbf{C}<em>{12}\mathbf{C}</em>{22}^{-1}\mathbf{C}<em>{21})^{-1}\mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1} \<br>
+\end{array}\right] \<br>
+&amp;= \left[\begin{array}{c}<br>
+\mathbf{C}^{11} &amp; -\mathbf{C}^{11}\mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1} \<br>
+-\mathbf{C}</em>{22}^{-1}\mathbf{C}<em>{21}\mathbf{C}^{11} &amp; \mathbf{C}</em>{22}^{-1}+\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21}\mathbf{C}^{11}\mathbf{C}<em>{12}\mathbf{C}</em>{22}^{-1} \<br>
+\end{array}\right] \<br>
+\end{aligned}<br>
+$$<br>
+在之前的推导中，我们已经得到<br>
+$$<br>
+\mathbf{C^{11}} = (\mathbf{C}<em>{11}  - \mathbf{C}</em>{12}\mathbf{C}<em>{22}^{-1}\mathbf{C}</em>{21})^{-1} = (\mathbf{X^{\prime}V^{-1}X})^{-1}<br>
+$$<br>
+根据附录1，我们有 $\mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} = \mathbf{GZ^{\prime}(R+ZGZ^{\prime})^{-1}}= \mathbf{GZ^{\prime}V^{-1}}$ ，因此其它分块子矩阵推导如下<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{C}^{12} &amp;= -\mathbf{C}^{11}\mathbf{C}<em>{12}\mathbf{C}</em>{22}^{-1}  \<br>
+&amp;= -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X^{\prime}R^{-1}Z}(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1} \<br>
+&amp;= -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{V^{-1}ZG} \<br>
+\mathbf{C}^{21} &amp;= (\mathbf{C}^{12})^{\prime} \<br>
+&amp;= -\mathbf{GZ^{\prime}V^{-1}} \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1}   \<br>
+\mathbf{C}^{22} &amp;= \mathbf{C}<em>{22}^{-1}+\mathbf{C}</em>{22}^{-1}\mathbf{C}<em>{21}\mathbf{C}^{11}\mathbf{C}</em>{12}\mathbf{C}_{22}^{-1} \<br>
+&amp;= (\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}\mathbf{Z^{\prime}R^{-1}X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}R^{-1}Z} (\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1} \<br>
+&amp;=(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{GZ^{\prime}V^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{V^{-1}ZG} \<br>
+&amp;=(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{GZ^{\prime}}\mathbf{(V^{-1}-P)} \mathbf{ZG} \quad \because \mathbf{P}=\mathbf{V}^{-1}-\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \<br>
+&amp;=(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{GZ^{\prime}}\mathbf{V^{-1}} \mathbf{ZG}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>
+&amp;=(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}}  \mathbf{ZG}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>
+&amp;=(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}(\mathbf{I}+\mathbf{Z^{\prime}R^{-1}}  \mathbf{ZG})- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>
+&amp;=(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}(\mathbf{G}^{-1}+\mathbf{Z^{\prime}R^{-1}}  \mathbf{Z})\mathbf{G}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>
+&amp;=\mathbf{G}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>
+\end{aligned}<br>
+$$<br>
+因此我们得到<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{C}^{-1} &amp;= \left[\begin{array}{c}<br>
+\mathbf{C}^{11} &amp; \mathbf{C}^{12} \<br>
+\mathbf{C}^{21} &amp; \mathbf{C}^{22} \<br>
+\end{array}\right] \<br>
+&amp;= \left[\begin{array}{c}<br>
+(\mathbf{X^{\prime}V^{-1}X})^{-1} &amp;  -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{V^{-1}ZG} \<br>
+-\mathbf{GZ^{\prime}V^{-1}} \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} &amp; \mathbf{G}- \mathbf{GZ^{\prime}}\mathbf{P} \mathbf{ZG} \<br>
+\end{array}\right] \</p>
+<p>\end{aligned}<br>
+$$</p>
+<h1>推导 P 矩阵</h1>
+<p>之前我们得到了两个 P 矩阵的式子，如下（$\mathbf{K}$ 为满足 $\mathbf{K’X}=0$ 的一个矩阵）<br>
+$$<br>
+\mathbf{P}=\mathbf{V}^{-1}-\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1}=\mathbf{K}\left(\mathbf{K}^{\prime} \mathbf{V} \mathbf{K}\right)^{-1} \mathbf{K}^{\prime}<br>
+$$<br>
+这里我们推导第三个式子<br>
+$$<br>
+\mathbf{P} = \mathbf{R^{-1}-R^{-1}WC^{-1}W^{\prime}R^{-1}}<br>
+$$<br>
+其中 $\mathbf{W} = \left[\begin{array}{l} \mathbf{X} &amp; \mathbf{Z} \end{array}\right]$ ，$\mathbf{C}$ 为系数矩阵。</p>
+<h2 id="证明过程">证明过程</h2>
+<p>根据下面的附录1，我们有<br>
+$$<br>
+\mathbf{R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}} = \mathbf{(R+ZGZ^{\prime})^{-1}ZG}<br>
+$$<br>
+我们可以将其写为<br>
+$$<br>
+\mathbf{R^{-1}ZM} = \mathbf{V^{-1}ZG}<br>
+$$<br>
+其中 $\mathbf{M}=\mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}}$ 。</p>
+<p>我们也可以用 $\mathbf{M}$ 来表示 $\mathbf{V}^{-1}$<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{V^{-1}}  &amp;= \mathbf{R^{-1}-R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \<br>
+&amp;=\mathbf{R^{-1}-R^{-1}ZMZ^{\prime}R^{-1}}<br>
+\end{aligned}<br>
+$$<br>
+我们同样可以用  $\mathbf{M}$ 来表示 $\mathbf{C}^{-1}$ 矩阵的元素<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{C}^{12} &amp;= -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{V^{-1}ZG} \<br>
+&amp;= -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM} \<br>
+\mathbf{C}^{21} &amp;=  -\mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1} \<br>
+\mathbf{C}^{22} &amp;=(\mathbf{Z^{\prime}R^{-1}Z+G^{-1}})^{-1}+ \mathbf{GZ^{\prime}V^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{V^{-1}ZG} \<br>
+&amp;=\mathbf{M}+ \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \</p>
+<p>\end{aligned}<br>
+$$<br>
+因此系数矩阵逆矩阵可以表示为<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{C}^{-1}<br>
+&amp;= \left[\begin{array}{c}<br>
+(\mathbf{X^{\prime}V^{-1}X})^{-1} &amp;  -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM} \<br>
+-\mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}  &amp; \mathbf{M}+ \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \<br>
+\end{array}\right] \</p>
+<p>\end{aligned}<br>
+$$<br>
+因此，我们有<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{WC^{-1}W^{\prime} }<br>
+&amp;=  \left[\begin{array}{l} \mathbf{X} &amp; \mathbf{Z} \end{array}\right]<br>
+\left[\begin{array}{c}<br>
+(\mathbf{X^{\prime}V^{-1}X})^{-1} &amp;  -(\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM} \<br>
+-\mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}  &amp; \mathbf{M}+ \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \<br>
+\end{array}\right]<br>
+\left[\begin{array}{l} \mathbf{X}^{\prime} \ \mathbf{Z}^{\prime} \end{array}\right] \<br>
+&amp;=  \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} - \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM}\mathbf{Z}^{\prime} - \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} \<br>
+&amp; \quad + \mathbf{Z}\mathbf{M} \mathbf{Z}^{\prime} + \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \mathbf{Z}^{\prime}<br>
+\end{aligned}<br>
+$$<br>
+因此<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{R^{-1}-R^{-1}WC^{-1}W^{\prime}R^{-1}} \<br>
+&amp;=  \mathbf{R^{-1}} -\mathbf{R^{-1}} \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} \mathbf{R^{-1}} + \mathbf{R^{-1}} \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM}\mathbf{Z}^{\prime} \mathbf{R^{-1}} + \mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} \mathbf{R^{-1}} \<br>
+&amp; \quad - \mathbf{R^{-1}} \mathbf{Z}\mathbf{M} \mathbf{Z}^{\prime} \mathbf{R^{-1}} - \mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}\mathbf{X}(\mathbf{X^{\prime}V^{-1}X})^{-1}\mathbf{X^{\prime}} \mathbf{R^{-1}ZM} \mathbf{Z}^{\prime} \mathbf{R^{-1}} \<br>
+&amp;=  \mathbf{R^{-1}} - \mathbf{R^{-1}} \mathbf{Z}\mathbf{M} \mathbf{Z}^{\prime} \mathbf{R^{-1}} - (\mathbf{R^{-1}}-\mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}} ) \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} \mathbf{R^{-1}}\<br>
+&amp;+ (\mathbf{R^{-1}}-\mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}}) \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1}  \mathbf{X}^{\prime}\mathbf{R^{-1}ZM}\mathbf{Z}^{\prime} \mathbf{R^{-1}}<br>
+\</p>
+<p>&amp;=  \mathbf{R^{-1}} - \mathbf{R^{-1}} \mathbf{Z}\mathbf{M} \mathbf{Z}^{\prime} \mathbf{R^{-1}} \<br>
+&amp; - (\mathbf{R^{-1}}-\mathbf{R^{-1}} \mathbf{Z} \mathbf{MZ^{\prime}R^{-1}} ) \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime} (\mathbf{R^{-1}} -\mathbf{R^{-1}ZM}\mathbf{Z}^{\prime} \mathbf{R^{-1}} )\<br>
+&amp;=  \mathbf{V}^{-1}</p>
 <ul>
-<li>\mathbf{V}^{-1}  \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime}  \mathbf{V}^{-1} \<br>&amp;&#x3D; \mathbf{P}</li>
+<li>\mathbf{V}^{-1}  \mathbf{X} (\mathbf{X^{\prime}V^{-1}X})^{-1} \mathbf{X}^{\prime}  \mathbf{V}^{-1} \<br>
+&amp;= \mathbf{P}</li>
 </ul>
-<p>\end{aligned}<br>$$<br>证明完毕</p>
-<h1 id="EM-REML"><a href="#EM-REML" class="headerlink" title="EM-REML"></a>EM-REML</h1><p>在之前的DF-REML 推导中，我们得到 REML 的一个似然函数的式子如下：<br>$$<br>l(\mathbf{y}<em>{2})<br>&#x3D; -\frac{1}{2}\left( \ln |\mathbf{V}| + \ln |\mathbf{X^{\prime}V^{-1}X}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right)<br>$$<br>对于某个参数 $\boldsymbol{\kappa}</em>{i}$ 进行求导，如下：<br>$$<br>\begin{aligned}<br>U(\kappa_{i}) &amp;&#x3D; \frac{\partial{l_{R}(\mathbf{y}<em>{2})}}{\partial{\kappa</em>{i}}} \<br>&amp;&#x3D; -\frac{1}{2}\left( \frac{\partial\ln |\mathbf{V}|}{\partial{\kappa_{i}}} + \frac{\partial\ln |\mathbf{X^{\prime}V^{-1}X}|}{\partial{\kappa_{i}}}+\frac{\partial\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} }{\partial{\kappa_{i}}} \right)<br>\end{aligned}<br>$$<br>我们定义 $\dot{\mathbf{V}}<em>{i} &#x3D; \frac{\partial \mathbf{V}}{\partial \kappa</em>{i}}$ ，并且使用下面的求导公式<br>$$<br>\begin{aligned}<br>\frac{\partial \log |\mathbf{V}|}{\partial \kappa_i} &amp; &#x3D;\operatorname{tr}\left(\mathbf{V}^{-1} \dot{\mathbf{V}}_i\right) \<br>\frac{\partial \mathbf{V}^{-1}}{\partial \kappa_i} &amp; &#x3D;-\mathbf{V}^{-1} \dot{\mathbf{V}}_i \mathbf{V}^{-1}<br>\end{aligned}<br>$$<br>因此我们得到<br>$$<br>\begin{aligned}<br>&amp; \frac{\partial \log |\mathbf{V}|}{\partial \kappa_i}+\frac{\partial \log \left|\boldsymbol{X}^{\prime} \mathbf{V}^{-1} \boldsymbol{X}\right|}{\partial \kappa_i} \<br>&amp; &#x3D;\operatorname{tr}\left(\mathbf{V}^{-1} \dot{\mathbf{V}}_i\right)-\operatorname{tr}\left(\left(\boldsymbol{X}^{\prime} \mathbf{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \mathbf{V}^{-1} \dot{\mathbf{V}}_i \mathbf{V}^{-1} \boldsymbol{X}\right) \<br>&amp; &#x3D;\operatorname{tr}\left(\mathbf{V}^{-1} \dot{\mathbf{V}}_i-\mathbf{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \mathbf{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \mathbf{V}^{-1} \dot{\mathbf{V}}_i\right) \<br>&amp; &#x3D;\operatorname{tr}\left(\boldsymbol{P} \dot{\mathbf{V}}_i\right)<br>\end{aligned}<br>$$</p>
-<p>$$<br>\begin{aligned}<br>\frac{\partial \boldsymbol{y}^{\prime} \boldsymbol{P} \boldsymbol{y}}{\partial \kappa_i} &amp; &#x3D;\boldsymbol{y}^{\prime} \frac{\partial \boldsymbol{P}}{\partial \kappa_i} \boldsymbol{y} \<br>&amp; &#x3D;-\boldsymbol{y}^{\prime} \boldsymbol{P} \dot{\boldsymbol{V}}_i \boldsymbol{P} \boldsymbol{y}<br>\end{aligned}<br>$$</p>
-<p>因此我们得到 REML score 式子：<br>$$<br>U(\kappa_{i}) &#x3D; - \frac{1}{2} \Big( \operatorname{tr}\left(\mathbf{P} \dot{\mathbf{V}}<em>{i}\right)-\mathbf{y}^{\prime} \mathbf{P} \dot{\mathbf{V}}</em>{i} \mathbf{P} \mathbf{y} \Big)<br>$$<br>下面我们要考虑 REML score 对于 $\boldsymbol{\gamma}$ 和 $\boldsymbol{\phi}$ 的具体式子。</p>
-<p>对于一个与 $\mathbf{G}<em>{i}$ 相关的方差组分 $\gamma</em>{ij}$ ，$\mathbf{V}<em>{ij}$ 推导如下<br>$$<br>\begin{aligned}<br>\boldsymbol{V}</em>{i j} &amp; &#x3D;\frac{\partial \boldsymbol{V}}{\partial \gamma_{i j}} \<br>&amp; &#x3D;\frac{\partial \boldsymbol{Z G Z}^{\prime}}{\partial \gamma_{i j}} \<br>&amp; &#x3D;\frac{\partial}{\partial \gamma_{i j}}\left(\boldsymbol{Z}_1 \boldsymbol{G}_1 \boldsymbol{Z}_1^{\prime}+\ldots+\boldsymbol{Z}_i \boldsymbol{G}_i \boldsymbol{Z}_i^{\prime}+\ldots \boldsymbol{Z}_s \boldsymbol{G}_s \boldsymbol{Z}_s^{\prime}\right) \<br>&amp; &#x3D;\boldsymbol{Z}_i \frac{\partial \boldsymbol{G}<em>i}{\partial \gamma</em>{i j}} \boldsymbol{Z}_i^{\prime} \<br>&amp; &#x3D;\boldsymbol{Z}<em>i \dot{\boldsymbol{G}}</em>{i j} \boldsymbol{Z}<em>i^{\prime}<br>\end{aligned}<br>$$<br>其中 $\dot{\mathbf{G}}</em>{i j} &#x3D; \frac{\partial \mathbf{G}<em>i}{\partial \gamma</em>{i j}}$ 。</p>
-<p>如果模型中只有一个随机组分，则有：<br>$$<br>\begin{aligned}<br>\boldsymbol{V}<em>{i} &amp; &#x3D;\frac{\partial \boldsymbol{V}}{\partial \gamma</em>{i}} \</p>
-<p>&amp; &#x3D;\boldsymbol{Z} \frac{\partial \boldsymbol{G}<em>i}{\partial \gamma</em>{i}} \boldsymbol{Z}^{\prime} \<br>&amp; &#x3D;\boldsymbol{Z} \dot{\boldsymbol{G}}<em>{i} \boldsymbol{Z}^{\prime}<br>\end{aligned}<br>$$<br>对于残差的方差组分 $\phi</em>{i}$ 则有<br>$$<br>\begin{aligned}<br>&amp;\frac{\partial \boldsymbol{V}}{\partial \phi_{i}} \<br>&amp; &#x3D; \frac{\partial \boldsymbol{\Sigma}}{\partial \phi_{i}} \<br>&amp; &#x3D; \dot{\boldsymbol{\Sigma}}<em>{i}<br>\end{aligned}<br>$$<br>因此我们得到对于 $\gamma</em>{ij}$ 的 REML score 式子为：<br>$$<br>U(\gamma_{ij}) &#x3D; - \frac{1}{2} \Big( \operatorname{tr}\left(\mathbf{P} \mathbf{Z}<em>i \dot{\mathbf{G}}</em>{i j} \mathbf{Z}<em>i^{\prime}\right)-\mathbf{y}^{\prime} \mathbf{P} \mathbf{Z}<em>i \dot{\mathbf{G}}</em>{i j} \mathbf{Z}<em>i^{\prime} \mathbf{P} \mathbf{y} \Big)<br>$$<br>我们定义 $\mathbf{S}</em>{i}$ 是一个 $(p+q) \times q</em>{i}$ 的矩阵（$p,q$ 为所有固定因子和所有随机因子的水平数目，$q_{i}$ 是第 $i$ 个随机因子的水平数目 ），并且满足 $\mathbf{W}\mathbf{S}<em>{i}&#x3D;\mathbf{Z}</em>{i}$ ，因此  $\mathbf{S}<em>{i}$ 中只有对应 $\mathbf{Z}</em>{i}$ 在 $\mathbf{W}$ 中的位置存在一个单位矩阵，其它元素全是 0 （因为矩阵向量乘积可以理解为矩阵的列的线性组合，因此   $\mathbf{S}<em>{i}$ 每一列只有一个对应 $\mathbf{Z}</em>{i}$ 的列号的元素为1，其它为0 ）。 </p>
-<p>我们将系数矩阵 $\mathbf{C}$ 写为<br>$$<br>\mathbf{C} &#x3D; \mathbf{W^{\prime}R^{-1}W} + \mathbf{G}^{<em>}<br>$$<br>其中<br>$$<br>\mathbf{G}^{</em>} &#x3D; \left[\begin{array}{c}<br>\mathbf{0} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{G}^{-1} \<br>\end{array}\right]<br>$$<br>我们对上面式子进一步推导，得到<br>$$<br>\begin{aligned}<br>&amp;\operatorname{tr}\left( \mathbf{PZ_{i}\dot{\mathbf{G}}<em>{i j}Z</em>{i}^{\prime}}\right) \<br>&amp;&#x3D; \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}Z</em>{i}^{\prime}PZ_{i}}\right) \<br>&amp;&#x3D; \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}W^{\prime}PWS_{i}}\right) \<br>&amp;&#x3D; \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}W^{\prime}(R^{-1}-R^{-1}WC^{-1}W^{\prime}R^{-1})WS_{i}}\right) \<br>&amp;&#x3D; \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}(W^{\prime}R^{-1}W-W^{\prime}R^{-1}WC^{-1}W^{\prime}R^{-1}W)S_{i}}\right) \<br>&amp;&#x3D; \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}W^{\prime}R^{-1}WC^{-1}(C-W^{\prime}R^{-1}W)S_{i}}\right) \<br>&amp;&#x3D; \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}(C-G^{<em>})C^{-1}G^{</em>}S_{i}}\right) \<br>&amp;&#x3D; \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}G^{<em>}S_{i}}\right) - \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}G^{</em>}C^{-1}G^{*}S_{i}}\right) \</p>
-<p>\end{aligned}<br>$$<br>其中 $\mathbf{G^{<em>}C^{-1}G^{</em>}}$ 可以写为：<br>$$<br>\begin{aligned}<br>\mathbf{G^{<em>}C^{-1}G^{</em>}} &amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{0} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{G}^{-1} \<br>\end{array}\right]  \left[\begin{array}{c}<br>\mathbf{C}^{XX} &amp; \mathbf{C}^{XZ} \<br>\mathbf{C}^{ZX} &amp; \mathbf{C}^{ZZ} \<br>\end{array}\right] \left[\begin{array}{c}<br>\mathbf{0} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{G}^{-1} \<br>\end{array}\right] \<br>&amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{0} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{G}^{-1} \mathbf{C}^{ZZ} \mathbf{G}^{-1} \<br>\end{array}\right] </p>
-<p>\end{aligned}<br>$$<br> 这里 $\mathbf{C}^{ZZ}$ 就是$\mathbf{C}^{-1}$ 中对应着随机效应的部分，由于我们可以有多个随机效应 ，因此 $\mathbf{C}^{ZZ}$ 可以进一步分块为（其中 $s$ 为随机效应数目）：<br>$$<br>\mathbf{C}^{ZZ} &#x3D; \left[\begin{array}{c}<br>\mathbf{C}^{Z_{1}Z_{1}} &amp; \mathbf{C}^{Z_{1}Z_{2}} &amp; \cdots &amp; \mathbf{C}^{Z_{1}Z_{s}} \<br>\mathbf{C}^{Z_{2}Z_{1}} &amp; \mathbf{C}^{Z_{2}Z_{2}} &amp; \cdots &amp; \mathbf{C}^{Z_{2}Z_{s}} \<br>\vdots &amp; \vdots &amp; \ddots &amp;\vdots \<br>\mathbf{C}^{Z_{s}Z_{1}} &amp; \mathbf{C}^{Z_{s}Z_{2}} &amp; \cdots &amp; \mathbf{C}^{Z_{s}Z_{s}} \<br>\end{array}\right]<br>$$<br>其中 $\mathbf{C}^{Z_{i}Z_{i}}$ 就是对应着第 $i$ 个随机效应 $\mathbf{u}_{i}$ 的部分。</p>
-<p>同样的道理，我们可以将 $\mathbf{G}$ 矩阵分块为：<br>$$<br>\mathbf{G} &#x3D; \left[\begin{array}{c}<br>\mathbf{G}<em>{1} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{G}</em>{2} &amp; \cdots &amp; \mathbf{0} \<br>\vdots &amp; \vdots &amp; \ddots &amp;\vdots \<br>\mathbf{0} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{G}<em>{s} \<br>\end{array}\right]<br>$$<br>因此我们得到<br>$$<br>\mathbf{G}^{-1}\mathbf{C}^{ZZ}\mathbf{G}^{-1} &#x3D; \left[\begin{array}{c}<br>\mathbf{G}</em>{1}^{-1}\mathbf{C}^{Z_{1}Z_{1}}\mathbf{G}<em>{1}^{-1} &amp; \mathbf{G}</em>{1}^{-1}\mathbf{C}^{Z_{1}Z_{2}}\mathbf{G}<em>{2}^{-1} &amp; \cdots &amp; \mathbf{G}</em>{1}^{-1}\mathbf{C}^{Z_{1}Z_{s}}\mathbf{G}<em>{s}^{-1} \<br>\mathbf{G}</em>{2}^{-1}\mathbf{C}^{Z_{2}Z_{1}}\mathbf{G}<em>{1}^{-1} &amp; \mathbf{G}</em>{2}^{-1}\mathbf{C}^{Z_{2}Z_{2}}\mathbf{G}<em>{2}^{-1} &amp; \cdots &amp; \mathbf{G}</em>{2}^{-1}\mathbf{C}^{Z_{2}Z_{s}}\mathbf{G}<em>{s}^{-1} \<br>\vdots &amp; \vdots &amp; \ddots &amp;\vdots \<br>\mathbf{G}</em>{s}^{-1}\mathbf{C}^{Z_{s}Z_{1}}\mathbf{G}<em>{1}^{-1} &amp; \mathbf{G}</em>{s}^{-1}\mathbf{C}^{Z_{s}Z_{2}}\mathbf{G}<em>{2}^{-1} &amp; \cdots &amp; \mathbf{G}</em>{s}^{-1}\mathbf{C}^{Z_{s}Z_{s}}\mathbf{G}<em>{s}^{-1} \<br>\end{array}\right]<br>$$<br>因为   $\mathbf{S}</em>{i}$ 中只有对应 $\mathbf{Z}<em>{i}$ 在 $\mathbf{W}$ 中的位置存在一个单位矩阵，其它元素全是 0 ，因此我们得到<br>$$<br>\mathbf{S}</em>{i}^{\prime}\mathbf{G^{<em>}C^{-1}G^{</em>}}\mathbf{S}<em>{i} &#x3D; \mathbf{G}</em>{i}^{-1}\mathbf{C}^{Z_{i}Z_{i}}\mathbf{G}_{i}^{-1}<br>$$</p>
-<p>$$<br>\mathbf{S}<em>{i}^{\prime}\mathbf{G}^{*}\mathbf{S}</em>{i} &#x3D; \mathbf{G}_{i}^{-1}<br>$$</p>
-<p>因此，$\operatorname{tr}\left( \mathbf{PZ_{i}\dot{\mathbf{G}}<em>{i j}Z</em>{i}^{\prime}}\right)$ 可以进一步推导得到<br>$$<br>\begin{aligned}<br>&amp;\operatorname{tr}\left( \mathbf{PZ_{i}\dot{\mathbf{G}}<em>{i j}Z</em>{i}^{\prime}}\right)\<br>&amp;&#x3D; \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}G^{<em>}S_{i}}\right) - \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}G^{</em>}C^{-1}G^{*}S_{i}}\right) \<br>&amp;&#x3D; \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}G^{-1}</em>{i}}\right) - \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}}\mathbf{G}</em>{i}^{-1}\mathbf{C}^{Z_{i}Z_{i}}\mathbf{G}_{i}^{-1}\right) \</p>
-<p>\end{aligned}<br>$$<br>对第二个式子推导前，我们先用 $\mathbf{P}$ 得到随机效应 $\mathbf{u}$ 的式子，根据BLUP方法，我们有<br>$$<br>\mathbf{u}&#x3D;\mathbf{GZ^{\prime}V^{-1}(y-X\boldsymbol{\beta})}<br>$$<br>同时我们有<br>$$<br>\mathbf{Py} &#x3D; \mathbf{V^{-1}(y-X\boldsymbol{\beta})}<br>$$<br>因此，我们得到<br>$$<br>\begin{aligned}<br>\mathbf{u}&amp;&#x3D;\mathbf{GZ^{\prime}Py} \<br>&amp;&#x3D;\left[\begin{array}{c}<br>\mathbf{G}<em>{1} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{G}</em>{2} &amp; \cdots &amp; \mathbf{0} \<br>\vdots &amp; \vdots &amp; \ddots &amp;\vdots \<br>\mathbf{0} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{G}<em>{s} \<br>\end{array}\right]  \left[\begin{array}{c}<br>\mathbf{Z}</em>{1}^{\prime}  \<br>\mathbf{Z}<em>{2}^{\prime}  \<br>\vdots \<br>\mathbf{Z}</em>{s}^{\prime}  \<br>\end{array}\right]\mathbf{Py} \<br>&amp;&#x3D;\left[\begin{array}{c}<br>\mathbf{G}<em>{1}\mathbf{Z}</em>{1}^{\prime} \mathbf{Py} \<br>\mathbf{G}<em>{2}\mathbf{Z}</em>{2}^{\prime} \mathbf{Py} \<br>\vdots \<br>\mathbf{G}<em>{s}\mathbf{Z}</em>{s}^{\prime}\mathbf{Py}  \<br>\end{array}\right] \</p>
-<p>\end{aligned}<br>$$<br>我们同时得到<br>$$<br>\mathbf{u}<em>{i} &#x3D; \mathbf{G}</em>{i}\mathbf{Z}<em>{i}^{\prime} \mathbf{Py}<br>$$<br>因此，对右手项推导得到<br>$$<br>\begin{aligned}<br>&amp;\mathbf{y}^{\prime} \mathbf{P} \mathbf{Z}</em>{i} \dot{\mathbf{G}}<em>{i j} \mathbf{Z}</em>{i}^{\prime} \mathbf{P} \mathbf{y} \<br>&amp;&#x3D; \mathbf{y}^{\prime} \mathbf{P} \mathbf{Z}<em>{i} \mathbf{G}</em>{i} \mathbf{G}<em>{i}^{-1} \dot{\mathbf{G}}</em>{i j} \mathbf{G}<em>{i}^{-1} \mathbf{G}</em>{i}  \mathbf{Z}<em>{i}^{\prime} \mathbf{P} \mathbf{y} \<br>&amp;&#x3D; \mathbf{u}</em>{i}^{\prime} \mathbf{G}<em>{i}^{-1} \dot{\mathbf{G}}</em>{i j} \mathbf{G}<em>{i}^{-1} \mathbf{u}</em>{i}\<br>\end{aligned}<br>$$<br>因此，我们得到对于 $\gamma_{ij}$ 的 REML score 式子可以写为：<br>$$<br>U(\gamma_{ij}) &#x3D; - \frac{1}{2} \Big( \operatorname{tr}\left( \mathbf{G^{-1}<em>{i}\dot{G}</em>{i j}}\right) - \operatorname{tr}\left( \mathbf{C}^{Z_{i}Z_{i}}\mathbf{G}<em>{i}^{-1}\mathbf{\dot{G}</em>{i j}}\mathbf{G}<em>{i}^{-1}\right)-\mathbf{u}</em>{i}^{\prime} \mathbf{G}<em>{i}^{-1} \dot{\mathbf{G}}</em>{i j} \mathbf{G}<em>{i}^{-1} \mathbf{u}</em>{i} \Big)<br>$$<br>如果模型中只有一个随机效应，则有<br>$$<br>U(\gamma_{i}) &#x3D; - \frac{1}{2} \Big( \operatorname{tr}\left( \mathbf{G^{-1}\dot{G}<em>{i }}\right) - \operatorname{tr}\left( \mathbf{C}^{ZZ}\mathbf{G}^{-1}\mathbf{\dot{G}</em>{i}}\mathbf{G}^{-1}\right)-\mathbf{u}^{\prime} \mathbf{G}^{-1} \dot{\mathbf{G}}<em>{i} \mathbf{G}^{-1} \mathbf{u} \Big)<br>$$<br>对于残差的方差组分 $\phi</em>{i}$ ，我们将 $\dot{\mathbf{V}}<em>{i} &#x3D; \dot{\mathbf{\Sigma}}</em>{i}$  代入 $U(\kappa_{i}) &#x3D; - \frac{1}{2} \Big( \operatorname{tr}\left(\mathbf{P} \dot{\mathbf{V}}<em>{i}\right)-\mathbf{y}^{\prime} \mathbf{P} \dot{\mathbf{V}}</em>{i} \mathbf{P} \mathbf{y} \Big)$ 得到<br>$$<br>U(\phi_{i}) &#x3D; - \frac{1}{2} \Big( \operatorname{tr}\left(\mathbf{P} \dot{\mathbf{\Sigma}}<em>{i}\right)-\mathbf{y}^{\prime} \mathbf{P} \dot{\mathbf{\Sigma}}</em>{i} \mathbf{P} \mathbf{y} \Big)<br>$$<br>我们对其进行推导得到：<br>$$<br>\begin{aligned}<br>&amp;\operatorname{tr}\left(\mathbf{P} \dot{\mathbf{\Sigma}}<em>{i}\right) \<br>&amp;&#x3D; \operatorname{tr} \left( \left(\mathbf{R^{-1}-R^{-1}WC^{-1}W^{\prime}R^{-1}} \right) \dot{\mathbf{\Sigma}}</em>{i}\right) \<br>&amp;&#x3D; \operatorname{tr} \left( \left(\mathbf{\Sigma^{-1}-\Sigma^{-1}WC^{-1}W^{\prime}\Sigma^{-1}} \right) \dot{\mathbf{\Sigma}}<em>{i}\right) \<br>&amp;&#x3D; \operatorname{tr}  \left(\mathbf{\Sigma^{-1}\dot{\mathbf{\Sigma}}</em>{i}-\Sigma^{-1}WC^{-1}W^{\prime}\Sigma^{-1}}\dot{\mathbf{\Sigma}}_{i} \right)  \<br>&amp;\<br>\end{aligned}<br>$$<br>对于第二个式子，首先我们推导 $\mathbf{Py}&#x3D;\mathbf{R^{-1}e}$ ，如下<br>$$<br>\begin{aligned}<br>&amp;\mathbf{Py} \<br>&amp;&#x3D; \mathbf{V^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>&amp;&#x3D; \left( \mathbf{R^{-1}-R^{-1}Z\left(Z^{\prime}R^{-1}Z+G^{-1}\right)^{-1}Z^{\prime}R^{-1}} \right)(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>&amp;&#x3D; \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})- \mathbf{R^{-1}Z\left(Z^{\prime}R^{-1}Z+G^{-1}\right)^{-1}Z^{\prime}R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>&amp;&#x3D; \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})- \mathbf{R^{-1}Z}\mathbf{u} \quad \because \mathbf{u} &#x3D;\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta})  \<br>&amp;&#x3D; \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta} -\mathbf{Z}\mathbf{u}) \<br>&amp;&#x3D; \mathbf{R^{-1}}\mathbf{e} \<br>&amp;&#x3D; \mathbf{\Sigma^{-1}}\mathbf{e} \</p>
-<p>\end{aligned}<br>$$<br>因此，我们得到<br>$$<br>\mathbf{y}^{\prime} \mathbf{P} \dot{\mathbf{\Sigma}}<em>{i} \mathbf{P} \mathbf{y}<br>&#x3D; \mathbf{e}^{\prime}\mathbf{\Sigma^{-1}} \dot{\mathbf{\Sigma}}</em>{i}\mathbf{\Sigma^{-1}}\mathbf{e}<br>$$<br>因此我们得到关于 $\phi_{i}$ 的 REML score 式子如下<br>$$<br>U(\phi_{i}) &#x3D; - \frac{1}{2} \Big( \operatorname{tr}  \left(\mathbf{\Sigma^{-1}\dot{\mathbf{\Sigma}}<em>{i}}\right) -\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\Sigma^{-1}}\dot{\mathbf{\Sigma}}</em>{i}\mathbf{\Sigma^{-1}W} \right)-\mathbf{e}^{\prime}\mathbf{\Sigma^{-1}} \dot{\mathbf{\Sigma}}_{i}\mathbf{\Sigma^{-1}}\mathbf{e} \Big)<br>$$</p>
-<h1 id="单性状模型的迭代公式"><a href="#单性状模型的迭代公式" class="headerlink" title="单性状模型的迭代公式"></a>单性状模型的迭代公式</h1><p>对于单性状模型（<strong>假设所有随机因子之间均不存在相关</strong>），我们将 $U(\gamma_{ij})$ 设为 0， 推导一下，我们得到：<br>$$<br>q_{i}&#x2F;\sigma_{i}^{2} - \operatorname{tr}\left( \mathbf{C}^{Z_{i}Z_{i}}\mathbf{A}<em>{i}^{-1}\right)&#x2F;\sigma</em>{i}^{4} &#x3D; \mathbf{u}<em>{i}^{\prime} \mathbf{A}</em>{i}^{-1} \mathbf{u}<em>{i}&#x2F;\sigma</em>{i}^{4}<br>$$<br>整理一下，我们得到（其中 $q_{i}$ 为 $u_{i}$ 的水平数目，或者说是  $\mathbf{Z}<em>{i}$ 的列数）<br>$$<br>\hat{\sigma}</em>{i}^{2}&#x3D;\left(\hat{\mathbf{u}}<em>{i}^{\prime} \mathbf{A}</em>{i}^{-1} \hat{\mathbf{u}}<em>{i}+\operatorname{tr}\left( \mathbf{C}^{Z</em>{i}Z_{i}}\mathbf{A}<em>{i}^{-1}\right)\right) &#x2F; q</em>{i}<br>$$<br>一个收敛更快的迭代公式为<br>$$<br>\hat{\sigma}<em>{i}^{2}&#x3D;\frac{\hat{\mathbf{u}}</em>{i}^{\prime} \mathbf{A}<em>{i}^{-1} \hat{\mathbf{u}}</em>{i}}{q_{i}- \operatorname{tr}\left( \mathbf{C}^{Z_{i}Z_{i}}\mathbf{A}<em>{i}^{-1}\right)&#x2F;\hat{\sigma}</em>{i}^{2} }<br>$$<br>联合使用之前推导得到的残差计算公式(其中 <strong>$N$ 是表型数目，$r$ 为 $\mathbf{X}$ 的秩</strong>，只适合单性状模型)，我们便得到了完整的 EM-REML 估计公式<br>$$<br>\hat{\sigma}<em>{0}^{2}&#x3D;\left(\mathbf{y}^{\prime} \mathbf{y}-\mathbf{y}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}-\mathbf{y}^{\prime} \mathbf{Z} \hat{\mathbf{u}}\right) &#x2F;(N-r)<br>$$<br>这里我们还有残差的另外两种推导公式，如下<br>$$<br>\begin{aligned}<br>\sigma</em>{0}^{2} &amp;&#x3D; \frac{1}{n}(\mathbf{e}^{\prime}\mathbf{e}+ \operatorname{tr}(\mathbf{WC^{-1}W^{\prime}})) \<br>\text{or}&amp;\<br>\sigma_{0}^{2} &amp;&#x3D; \frac{1}{n}\left(\sigma_{0}^{2}\left(p+q\right)- \sigma_{0}^{2} \operatorname{tr}\left(\mathbf{G^{-1}C^{ZZ}}\right) + \mathbf{e}^{\prime}\mathbf{e}\right)<br>\end{aligned}<br>$$<br>将 $U(\phi_{i})$ 设为0，我们得到<br>$$<br>\frac{n}{\sigma_{0}^{2}}-\frac{\operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}} \right)}{\sigma_{0}^{4}} &#x3D; \frac{\mathbf{e^{\prime}e}}{\sigma_{0}^{4}}<br>$$<br>因此可以得到第一个式子，我们对其中 $\operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}} \right)&#x2F;\sigma_{0}^{2}$ 推导如下<br>$$<br>\begin{aligned}<br>&amp;\operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}} \right)&#x2F;\sigma_{0}^{2} \<br>&amp;&#x3D;\operatorname{tr}\left(\mathbf{W^{\prime}R^{-1}WC^{-1}} \right) \<br>&amp;&#x3D;\operatorname{tr}\left(\mathbf{(C-G^{<em>})C^{-1}} \right) \quad \because \mathbf{C} &#x3D; \mathbf{W^{\prime}R^{-1}W} + \mathbf{G}^{</em>} \<br>&amp;&#x3D;\operatorname{tr}\left(\mathbf{I_{p+q}-G^{<em>}C^{-1}} \right)\<br>&amp;&#x3D; p+q-\operatorname{tr}\left(\mathbf{G^{</em>}C^{-1}} \right)\<br>\end{aligned}<br>$$<br>对于 $\mathbf{G^{<em>}C^{-1}}$ ，我们对其推导得到<br>$$<br>\begin{aligned}<br>\mathbf{G^{</em>}C^{-1}} &amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{0} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{G}^{-1} \<br>\end{array}\right] \left[\begin{array}{c}<br>\mathbf{C}^{XX} &amp; \mathbf{C}^{XZ} \<br>\mathbf{C}^{ZX} &amp; \mathbf{C}^{ZZ} \<br>\end{array}\right] \<br>&amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{0} &amp; \mathbf{0} \<br>\mathbf{G}^{-1}\mathbf{C}^{ZX} &amp; \mathbf{G}^{-1}\mathbf{C}^{ZZ} \<br>\end{array}\right] \<br>\end{aligned}<br>$$<br>因此，我们得到<br>$$<br>\operatorname{tr}(\mathbf{G^{*}C^{-1}}) &#x3D; \operatorname{tr}(\mathbf{G^{-1}C^{ZZ}})<br>$$<br>因此我们得到<br>$$<br>\operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}} \right)&#x2F;\sigma_{0}^{2} &#x3D; p+q-\operatorname{tr}(\mathbf{G^{-1}C^{ZZ}})<br>$$<br>代入上式，我们得到<br>$$<br>\frac{n-p-q+\operatorname{tr}(\mathbf{G^{-1}C^{ZZ}})}{\sigma_{0}^{2}} &#x3D; \frac{\mathbf{e^{\prime}e}}{\sigma_{0}^{4}}<br>$$<br>因此可以得到第二个式子。</p>
-<h1 id="多性状模型的迭代公式"><a href="#多性状模型的迭代公式" class="headerlink" title="多性状模型的迭代公式"></a>多性状模型的迭代公式</h1><h2 id="随机效应"><a href="#随机效应" class="headerlink" title="随机效应"></a>随机效应</h2><p>对于多性状模型，假设只有一个随机因子（其实多个因子同理，只是这样不用写 $\mathbf{G}$ 矩阵的下标了，符号更加清晰），按照性状排序， 则有<br>$$<br>\mathbf{G} &#x3D;  \mathbf{G}<em>{k} \otimes  \mathbf{A}<br>$$<br>其中 $\mathbf{G}</em>{k}$ 就是相应的方差组分的矩阵形式，如下所示，即反过来 $\boldsymbol{\gamma} &#x3D; \mathrm{vec}(\mathbf{G}<em>{k})$ ，其中 $k$ 为性状数目。<br>$$<br>\boldsymbol{G}<em>k&#x3D;\left[\begin{array}{cccc}<br>\gamma</em>{11} &amp; \gamma</em>{12} &amp; \cdots &amp; \gamma_{1 k} \<br>\gamma_{12} &amp; \gamma_{22} &amp; \cdots &amp; \gamma_{2 k} \<br>\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>\gamma_{1 k} &amp; \gamma_{2 k} &amp; \cdots &amp; \gamma_{k k}<br>\end{array}\right]<br>$$<br>对于随机因子 $\mathbf{u}$ ，假设对于<strong>每个性状的随机因子水平数目均为 $m$</strong> ，则 $\mathbf{u}$ 也可以表示为一个 $m \times k$ 的矩阵 $\mathbf{U}$ ，其中每一列代表一个性状的所有水平，如下<br>$$<br>\mathbf{U} &#x3D;\left[\begin{array}{cccc}<br>u_{11} &amp; u_{12} &amp; \cdots &amp; u_{1 k} \<br>u_{21} &amp; u_{22} &amp; \cdots &amp; u_{2 k} \<br>\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>u_{m1} &amp; u_{m2} &amp; \cdots &amp; u_{m k}<br>\end{array}\right] &#x3D; \left[\begin{array}{cccc}<br>\mathbf{u}<em>{1} &amp; \mathbf{u}</em>{2} &amp; \cdots &amp; \mathbf{u}_{ k} \<br>\end{array}\right]<br>$$<br>反过来则有 $\mathbf{u} &#x3D; \mathrm{vec} (\mathbf{U})$ 。</p>
-<p>对于 $\gamma_{ij}$ ，我们有公式<br>$$<br>U(\gamma_{ij}) &#x3D; - \frac{1}{2} \Big( \operatorname{tr}\left( \mathbf{G^{-1}\dot{G}<em>{i j}}\right) - \operatorname{tr}\left( \mathbf{C}^{ZZ}\mathbf{G}^{-1}\mathbf{\dot{G}</em>{i j}}\mathbf{G}<em>{i}^{-1}\right)-\mathbf{u}^{\prime} \mathbf{G}^{-1} \dot{\mathbf{G}}</em>{i j} \mathbf{G}^{-1} \mathbf{u} \Big)<br>$$<br>因为  $\mathbf{\dot{G}<em>{i j}}$ 相应 $(m,n)$ 位置的元素 就是 $\partial g</em>{mn} &#x2F; \partial \gamma_{ij}$ ，所有易得 $\mathbf{\dot{G}<em>{i j}} &#x3D; \mathbf{\dot{G}</em>{k_{i j}}} \otimes \mathbf{A}$ ，其中 $\mathbf{\dot{G}<em>{k</em>{i j}}} &#x3D; \frac{\partial \mathbf{G}<em>{k}}{\partial \gamma</em>{ij}}$  。</p>
-<p>因此，我们推导得到。<br>$$<br>\begin{aligned}<br>&amp; \mathbf{G^{-1}\dot{G}<em>{i j}} \<br>&amp;&#x3D; \left(  \mathbf{G}</em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \left(\mathbf{\dot{G}}<em>{k</em>{i j}} \otimes \mathbf{A}\right) \<br>&amp;&#x3D; \left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \otimes \mathbf{I}<em>{m} \right)<br>&amp;\<br>&amp;\<br>&amp; \operatorname{tr} (\mathbf{G^{-1}\dot{G}</em>{i j}}) \<br>&amp;&#x3D; \operatorname{tr}\left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \otimes \mathbf{I}<em>{m} \right) \<br>&amp;&#x3D; m \operatorname{tr}\left(  \mathbf{G}</em>{k}^{-1} \mathbf{\dot{G}}<em>{k</em>{i j}} \right) \<br>&amp;\<br>&amp;\<br>&amp;\mathbf{G}^{-1} \dot{\mathbf{G}}<em>{i j} \mathbf{G}^{-1} \<br>&amp;&#x3D; \left(  \mathbf{G}</em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \left(\mathbf{\dot{G}}<em>{k</em>{i j}} \otimes \mathbf{A}\right) \left(  \mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right)\<br>&amp;&#x3D; \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}_{k}^{-1}  \otimes \mathbf{A}^{-1} \right) </p>
-<p>&amp;\<br>&amp;\<br>&amp;\mathbf{u}^{\prime} \mathbf{G}^{-1} \dot{\mathbf{G}}<em>{i j} \mathbf{G}^{-1} \mathbf{u} \<br>&amp;&#x3D; \mathrm{vec}(\mathbf{U})^{\prime} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}_{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \mathrm{vec}(\mathbf{U}) \</p>
-<p>&amp;&#x3D; \mathrm{tr}(\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1} \mathbf{U}^{\prime} \mathbf{A}^{-1} \mathbf{U}) \quad \because \mathrm{vec}(\mathbf{A})^{\prime} (\mathbf{B} \otimes \mathbf{C}) \mathrm{vec}(\mathbf{A}) &#x3D; \mathrm{tr}(\mathbf{B^{\prime}A^{\prime}CA}) \<br>&amp;&#x3D; \mathrm{tr}(\mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}_{k}^{-1} \mathbf{\Delta} ) \<br>\end{aligned}<br>$$</p>
-<p>最后一个式子中，我们设 $\mathbf{\Delta} &#x3D; \mathbf{U}^{\prime} \mathbf{A}^{-1} \mathbf{U}$ 。</p>
-<p>代入 $U(\gamma_{ij})$ 得到<br>$$<br>\begin{aligned}<br>U(\gamma_{ij}) &amp;&#x3D; - \frac{1}{2} \Big( m \operatorname{tr}\left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \right) - \operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right)-\mathrm{tr}(\mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1} \mathbf{\Delta} )  \Big)\<br>\end{aligned}<br>$$<br>我们需要对这个式子进一步简化，我们知道  $\mathbf{G}</em>{k}$ 是一个对称矩阵，因此  $\mathbf{G}<em>{k}^{-1}$ 也是一个对称矩阵，  我们将   $\mathbf{G}</em>{k}^{-1}$ 中的元素表示为 $\gamma^{ij}$ ($i \leq j$ ) 。</p>
-<p>首先我们考虑 $\operatorname{tr}\left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \right)$ 这一项，当  $i&#x3D;j$ 时，矩阵 $\mathbf{\dot{G}}<em>{k</em>{i j}}$ 只有 $(i,i)$ 位置元素为1，其它位置元素均为 0 。因此 $\mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}}$ 只有第 $i$ 列元素为 $\mathbf{G}<em>{k}^{-1}$ 的第 $i$ 列元素，其它元素为 0 。因此，我们得到<br>$$<br>\operatorname{tr}\left(  \mathbf{G}</em>{k}^{-1} \mathbf{\dot{G}}<em>{k</em>{i j}} \right) &#x3D; \gamma^{ii}<br>$$<br>当   $i \neq j$  时, 矩阵 $\mathbf{\dot{G}}<em>{k</em>{i j}}$ 只有 $(i,j)$ 和 $(j,i)$ 位置为 1，其它位置元素为 0 。因此  $\mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}}$ 其第 $i$ 列为 $\mathbf{G}<em>{k}^{-1}$ 的第 $j$  列， 其第 $j$ 列为 $\mathbf{G}</em>{k}^{-1}$ 的第 $i$  列，其它位置元素为 0 。因此我们得到<br>$$<br>\operatorname{tr}\left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \right) &#x3D; \gamma^{ij} + \gamma^{ji} &#x3D; 2 \gamma^{ij}<br>$$<br>即我们得到<br>$$<br>\operatorname{tr}\left(\boldsymbol{G}<em>k^{-1} \dot{\boldsymbol{G}}</em>{k_{i j}}\right)&#x3D;\left{\begin{array}{cc}<br>\gamma^{i i}, &amp; i&#x3D;j \<br>2 \gamma^{i j}, &amp; i \neq j<br>\end{array}\right.<br>$$<br>我们现在考虑第三项，如下<br>$$<br>\begin{aligned}<br>\mathrm{tr}(\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1} \mathbf{\Delta}) &amp; &#x3D; \mathrm{tr}(\mathbf{G}</em>{k}^{-1} \mathbf{\Delta}\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}) \<br>&amp; &#x3D; \mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}})   \<br>\end{aligned}<br>$$<br>其中我们设 $\mathbf{\Delta}^{</em>} &#x3D; \mathbf{G}<em>{k}^{-1} \mathbf{\Delta}\mathbf{G}</em>{k}^{-1} &#x3D; { \delta_{ij}^{*}}$ 。</p>
-<p>当 $i&#x3D;j$  时，矩阵  $\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}}$ 只有第 $i$ 列元素为 $\mathbf{\Delta}^{</em>}$ 的第 $i$ 列元素 ，其它位置元素为 0 。因此，我们得到<br>$$<br>\mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}}) &#x3D; \delta_{ii}^{</em>}<br>$$<br>当   $i \neq j$  时, 矩阵  $\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}}$ 其第 $i$ 列为 $\mathbf{\Delta}^{</em>}$ 的第 $j$  列， 其第 $j$ 列为 $\mathbf{\Delta}^{<em>}$ 的第 $i$  列，其它位置元素为 0 。因此，我们得到 (因为  $\mathbf{\Delta}^{</em>}$ 对称)<br>$$<br>\mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}}) &#x3D; \delta_{ij}^{</em>} + \delta_{ji}^{<em>} &#x3D; 2 \delta_{ij}^{</em>}<br>$$<br>综上，我们有<br>$$<br>\mathrm{tr}(\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1} \mathbf{\Delta})&#x3D;\left{\begin{array}{cc}<br>\delta^{*}</em>{i i}, &amp; i&#x3D;j \<br>2 \delta^{*}<em>{i j}, &amp; i \neq j<br>\end{array}\right.<br>$$<br>我们现在考虑第二项，我们将 $\mathbf{C}^{ZZ}$ 按照性状分块为 $k^{2}$ 个 $m \times m$ 的子矩阵，如下<br>$$<br>\mathbf{C}^{ZZ} &#x3D;\left[\begin{array}{cccc}<br>\mathbf{C}^{ZZ}</em>{11} &amp; \mathbf{C}^{ZZ}<em>{12} &amp; \cdots &amp; \mathbf{C}^{ZZ}</em>{1 k} \<br>\mathbf{C}^{ZZ}<em>{21} &amp; \mathbf{C}^{ZZ}</em>{22} &amp; \cdots &amp; \mathbf{C}^{ZZ}<em>{2 k} \<br>\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>\mathbf{C}^{ZZ}</em>{k1} &amp; \mathbf{C}^{ZZ}<em>{k2} &amp; \cdots &amp; \mathbf{C}^{ZZ}</em>{k k}<br>\end{array}\right]<br>$$<br>处于简化的目的，我们这里考虑 $k&#x3D;3$ 的情况（这个不影响推导出来的结果），根据矩阵乘法，当 $i&#x3D;j$  时，我们有<br>$$<br>\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1} &#x3D; \left[\begin{array}{cccc}<br>\gamma^{1i}\gamma^{i1} &amp; \gamma^{1i}\gamma^{i2} &amp; \gamma^{1i}\gamma^{i3} \<br>\gamma^{2i}\gamma^{i1} &amp; \gamma^{2i}\gamma^{i2} &amp; \gamma^{2i}\gamma^{i3} \<br>\gamma^{3i}\gamma^{i1} &amp; \gamma^{3i}\gamma^{i2} &amp; \gamma^{3i}\gamma^{i3}<br>\end{array}\right]<br>$$<br>因此，我们得到<br>$$<br>\begin{aligned}<br>&amp; \mathbf{C}^{ZZ} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \<br>&amp;&#x3D; \left[\begin{array}{cccc}<br>\mathbf{C}^{ZZ}</em>{11} &amp; \mathbf{C}^{ZZ}<em>{12} &amp; \mathbf{C}^{ZZ}</em>{1 3} \<br>\mathbf{C}^{ZZ}<em>{21} &amp; \mathbf{C}^{ZZ}</em>{22} &amp; \mathbf{C}^{ZZ}<em>{2 3} \<br>\mathbf{C}^{ZZ}</em>{31} &amp; \mathbf{C}^{ZZ}<em>{32} &amp; \mathbf{C}^{ZZ}</em>{3 3}<br>\end{array}\right] \left[\begin{array}{cccc}<br>\gamma^{1i}\gamma^{i1} \mathbf{A}^{-1} &amp; \gamma^{1i}\gamma^{i2} \mathbf{A}^{-1}&amp; \gamma^{1i}\gamma^{i3} \mathbf{A}^{-1}\<br>\gamma^{2i}\gamma^{i1} \mathbf{A}^{-1}&amp; \gamma^{2i}\gamma^{i2}\mathbf{A}^{-1} &amp; \gamma^{2i}\gamma^{i3} \mathbf{A}^{-1}\<br>\gamma^{3i}\gamma^{i1} \mathbf{A}^{-1}&amp; \gamma^{3i}\gamma^{i2} \mathbf{A}^{-1} &amp; \gamma^{3i}\gamma^{i3} \mathbf{A}^{-1}<br>\end{array}\right]<br>\<br>\end{aligned}<br>$$<br>利用迹函数的性质，我们得到<br>$$<br>\begin{aligned}<br>\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right) &amp;&#x3D; \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3} \operatorname{tr} (\mathbf{C}^{ZZ}<em>{st} \gamma^{ti}\gamma^{is}\mathbf{A}^{-1}) \<br>&amp;&#x3D; \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3}\gamma^{it}\gamma^{si} \operatorname{tr} (\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}) \<br>\end{aligned}<br>$$<br>当 $i \neq j$  时, 我们有<br>$$<br>\mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1} &#x3D; \left[\begin{array}{cccc}<br>\gamma^{1j}\gamma^{i1}+\gamma^{1i}\gamma^{j1} &amp; \gamma^{1j}\gamma^{i2}+\gamma^{1i}\gamma^{j2} &amp; \gamma^{1j}\gamma^{i3}+\gamma^{1i}\gamma^{j3} \<br>\gamma^{2j}\gamma^{i1}+\gamma^{2i}\gamma^{j1} &amp; \gamma^{2j}\gamma^{i2}+\gamma^{2i}\gamma^{j2} &amp; \gamma^{2j}\gamma^{i3}+\gamma^{2i}\gamma^{j3} \<br>\gamma^{3j}\gamma^{i1}+\gamma^{3i}\gamma^{j1} &amp; \gamma^{3j}\gamma^{i2}+\gamma^{3i}\gamma^{j2} &amp; \gamma^{3j}\gamma^{i3}+\gamma^{3i}\gamma^{j3}<br>\end{array}\right]<br>$$<br>因此<br>$$<br>\begin{aligned}<br>&amp; \mathbf{C}^{ZZ} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \<br>&amp;&#x3D; \left[\begin{array}{cccc}<br>\mathbf{C}^{ZZ}</em>{11} &amp; \mathbf{C}^{ZZ}<em>{12} &amp; \mathbf{C}^{ZZ}</em>{1 3} \<br>\mathbf{C}^{ZZ}<em>{21} &amp; \mathbf{C}^{ZZ}</em>{22} &amp; \mathbf{C}^{ZZ}<em>{2 3} \<br>\mathbf{C}^{ZZ}</em>{31} &amp; \mathbf{C}^{ZZ}<em>{32} &amp; \mathbf{C}^{ZZ}</em>{3 3}<br>\end{array}\right]   \left[\begin{array}{cccc}<br>(\gamma^{1j}\gamma^{i1}+\gamma^{1i}\gamma^{j1})\mathbf{A}^{-1} &amp; (\gamma^{1j}\gamma^{i2}+\gamma^{1i}\gamma^{j2})\mathbf{A}^{-1} &amp; (\gamma^{1j}\gamma^{i3}+\gamma^{1i}\gamma^{j3})\mathbf{A}^{-1} \<br>(\gamma^{2j}\gamma^{i1}+\gamma^{2i}\gamma^{j1})\mathbf{A}^{-1} &amp; (\gamma^{2j}\gamma^{i2}+\gamma^{2i}\gamma^{j2})\mathbf{A}^{-1} &amp; (\gamma^{2j}\gamma^{i3}+\gamma^{2i}\gamma^{j3})\mathbf{A}^{-1} \<br>(\gamma^{3j}\gamma^{i1}+\gamma^{3i}\gamma^{j1})\mathbf{A}^{-1} &amp; (\gamma^{3j}\gamma^{i2}+\gamma^{3i}\gamma^{j2})\mathbf{A}^{-1} &amp; (\gamma^{3j}\gamma^{i3}+\gamma^{3i}\gamma^{j3})\mathbf{A}^{-1}<br>\end{array}\right]</p>
-<p>\<br>\end{aligned}<br>$$<br>因此我们得到<br>$$<br>\begin{aligned}<br>\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right) &amp;&#x3D; \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3} \operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \left(\gamma^{tj}\gamma^{is}+\gamma^{ti}\gamma^{js}\right)\mathbf{A}^{-1}\right) \<br>&amp;&#x3D; \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3} \left(\gamma^{tj}\gamma^{is}+\gamma^{ti}\gamma^{js}\right) \operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right) \<br>&amp;&#x3D; \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3}\gamma^{tj}\gamma^{is}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right) +  \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3}\gamma^{ti}\gamma^{js}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right)<br>\end{aligned}<br>$$<br>我们对需要求和的第一项交换 $s$ 和 $t$ ，并且我们知道 $\gamma^{ij} &#x3D; \gamma^{ji}$ , $\mathbf{C}^{ZZ}</em>{st} &#x3D; (\mathbf{C}^{ZZ}<em>{ts})^{T}$  ，因此我们继续推导得到<br>$$<br>\begin{aligned}<br>\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right)<br>&amp;&#x3D; \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3}\gamma^{tj}\gamma^{is}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right) +  \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3}\gamma^{ti}\gamma^{js}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right)  \<br>&amp; &#x3D; \sum</em>{t&#x3D;1}^{3}\sum_{s&#x3D;1}^{3}\gamma^{sj}\gamma^{it}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{ts} \mathbf{A}^{-1}\right) +  \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3}\gamma^{ti}\gamma^{js}\operatorname{tr} \left(\mathbf{A}^{-1}\mathbf{C}^{ZZ}<em>{ts} \right)  \<br>&amp; &#x3D; \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3}\gamma^{sj}\gamma^{it}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{ts} \mathbf{A}^{-1}\right) +  \sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3}\gamma^{ti}\gamma^{js}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{ts} \mathbf{A}^{-1}\right)  \<br>&amp; &#x3D; 2\sum</em>{s&#x3D;1}^{3}\sum_{t&#x3D;1}^{3}\gamma^{it}\gamma^{sj}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{ts} \mathbf{A}^{-1}\right)  \<br>\end{aligned}<br>$$<br>综上，我们将 $k&#x3D;3$ 改为一般的 $k$ ，我们得到<br>$$<br>\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right)&#x3D;\left{\begin{array}{cc}<br>\sum</em>{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\gamma^{it}\gamma^{si} \operatorname{tr} (\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}), &amp; i&#x3D;j \<br>2\sum</em>{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\gamma^{it}\gamma^{sj}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right), &amp; i \neq j<br>\end{array}\right.<br>$$<br>现在我们定义 $\mathbf{\Psi}$ 是一个 $k \times k$ 的矩阵，其元素为 $\Psi</em>{ij} &#x3D; \operatorname{tr}(\mathbf{C}<em>{ij}^{ZZ}\mathbf{A}^{-1})$ ，根据矩阵乘法性质（假设 $\mathbf{A,B,C}$ 均为 $n \times n$ 的矩阵，则 $\mathbf{ABC} &#x3D; {\sum</em>{s&#x3D;1}^{n}\sum_{t&#x3D;1}^{n}a_{it}b_{ts}c_{sj}}$ ），我们发现<br>$$<br>\begin{aligned}<br>\mathbf{G}<em>{k}^{-1} \mathbf{\Psi}\mathbf{G}</em>{k}^{-1} &amp;&#x3D; \left {\sum_{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\gamma^{it}\operatorname{tr}(\mathbf{C}<em>{ts}^{ZZ}\mathbf{A}^{-1})\gamma^{sj} \right}\<br>&amp;&#x3D; \left {\sum</em>{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\gamma^{it}\gamma^{sj}\operatorname{tr}(\mathbf{C}_{ts}^{ZZ}\mathbf{A}^{-1}) \right}\</p>
-<p>\end{aligned}<br>$$<br> 我们定义 $\psi_{ij}^{<em>}$ 是 $\mathbf{\Psi}^{</em>} &#x3D; \mathbf{G}<em>{k}^{-1} \mathbf{\Psi}\mathbf{G}</em>{k}^{-1}$ 的元素，即 $\psi_{ij}^{*} &#x3D; \left{ \mathbf{G}<em>{k}^{-1} \mathbf{\Psi}\mathbf{G}</em>{k}^{-1} \right}_{ij}$ 。</p>
-<p>因此，我们得到<br>$$<br>\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right)&#x3D;\left{\begin{array}{cc}<br>\psi</em>{ii}^{<em>}, &amp; i&#x3D;j \<br>2\psi_{ij}^{</em>}, &amp; i \neq j<br>\end{array}\right.<br>$$<br>将上面的式子代入 $U(\gamma_{ij})$ ，进一步简化得到<br>$$<br>U(\gamma_{ij}) &#x3D;\left{\begin{array}{cc}</p>
+<p>\end{aligned}<br>
+$$<br>
+证明完毕</p>
+<h1>EM-REML</h1>
+<p>在之前的DF-REML 推导中，我们得到 REML 的一个似然函数的式子如下：<br>
+$$<br>
+l(\mathbf{y}<em>{2})<br>
+= -\frac{1}{2}\left( \ln |\mathbf{V}| + \ln |\mathbf{X^{\prime}V^{-1}X}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right)<br>
+$$<br>
+对于某个参数 $\boldsymbol{\kappa}</em>{i}$ 进行求导，如下：<br>
+$$<br>
+\begin{aligned}<br>
+U(\kappa_{i}) &amp;= \frac{\partial{l_{R}(\mathbf{y}<em>{2})}}{\partial{\kappa</em>{i}}} \<br>
+&amp;= -\frac{1}{2}\left( \frac{\partial\ln |\mathbf{V}|}{\partial{\kappa_{i}}} + \frac{\partial\ln |\mathbf{X^{\prime}V^{-1}X}|}{\partial{\kappa_{i}}}+\frac{\partial\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} }{\partial{\kappa_{i}}} \right)<br>
+\end{aligned}<br>
+$$<br>
+我们定义 $\dot{\mathbf{V}}<em>{i} = \frac{\partial \mathbf{V}}{\partial \kappa</em>{i}}$ ，并且使用下面的求导公式<br>
+$$<br>
+\begin{aligned}<br>
+\frac{\partial \log |\mathbf{V}|}{\partial \kappa_i} &amp; =\operatorname{tr}\left(\mathbf{V}^{-1} \dot{\mathbf{V}}_i\right) \<br>
+\frac{\partial \mathbf{V}^{-1}}{\partial \kappa_i} &amp; =-\mathbf{V}^{-1} \dot{\mathbf{V}}_i \mathbf{V}^{-1}<br>
+\end{aligned}<br>
+$$<br>
+因此我们得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp; \frac{\partial \log |\mathbf{V}|}{\partial \kappa_i}+\frac{\partial \log \left|\boldsymbol{X}^{\prime} \mathbf{V}^{-1} \boldsymbol{X}\right|}{\partial \kappa_i} \<br>
+&amp; =\operatorname{tr}\left(\mathbf{V}^{-1} \dot{\mathbf{V}}_i\right)-\operatorname{tr}\left(\left(\boldsymbol{X}^{\prime} \mathbf{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \mathbf{V}^{-1} \dot{\mathbf{V}}_i \mathbf{V}^{-1} \boldsymbol{X}\right) \<br>
+&amp; =\operatorname{tr}\left(\mathbf{V}^{-1} \dot{\mathbf{V}}_i-\mathbf{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \mathbf{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \mathbf{V}^{-1} \dot{\mathbf{V}}_i\right) \<br>
+&amp; =\operatorname{tr}\left(\boldsymbol{P} \dot{\mathbf{V}}_i\right)<br>
+\end{aligned}<br>
+$$</p>
+<p>$$<br>
+\begin{aligned}<br>
+\frac{\partial \boldsymbol{y}^{\prime} \boldsymbol{P} \boldsymbol{y}}{\partial \kappa_i} &amp; =\boldsymbol{y}^{\prime} \frac{\partial \boldsymbol{P}}{\partial \kappa_i} \boldsymbol{y} \<br>
+&amp; =-\boldsymbol{y}^{\prime} \boldsymbol{P} \dot{\boldsymbol{V}}_i \boldsymbol{P} \boldsymbol{y}<br>
+\end{aligned}<br>
+$$</p>
+<p>因此我们得到 REML score 式子：<br>
+$$<br>
+U(\kappa_{i}) = - \frac{1}{2} \Big( \operatorname{tr}\left(\mathbf{P} \dot{\mathbf{V}}<em>{i}\right)-\mathbf{y}^{\prime} \mathbf{P} \dot{\mathbf{V}}</em>{i} \mathbf{P} \mathbf{y} \Big)<br>
+$$<br>
+下面我们要考虑 REML score 对于 $\boldsymbol{\gamma}$ 和 $\boldsymbol{\phi}$ 的具体式子。</p>
+<p>对于一个与 $\mathbf{G}<em>{i}$ 相关的方差组分 $\gamma</em>{ij}$ ，$\mathbf{V}<em>{ij}$ 推导如下<br>
+$$<br>
+\begin{aligned}<br>
+\boldsymbol{V}</em>{i j} &amp; =\frac{\partial \boldsymbol{V}}{\partial \gamma_{i j}} \<br>
+&amp; =\frac{\partial \boldsymbol{Z G Z}^{\prime}}{\partial \gamma_{i j}} \<br>
+&amp; =\frac{\partial}{\partial \gamma_{i j}}\left(\boldsymbol{Z}_1 \boldsymbol{G}_1 \boldsymbol{Z}_1^{\prime}+\ldots+\boldsymbol{Z}_i \boldsymbol{G}_i \boldsymbol{Z}_i^{\prime}+\ldots \boldsymbol{Z}_s \boldsymbol{G}_s \boldsymbol{Z}_s^{\prime}\right) \<br>
+&amp; =\boldsymbol{Z}_i \frac{\partial \boldsymbol{G}<em>i}{\partial \gamma</em>{i j}} \boldsymbol{Z}_i^{\prime} \<br>
+&amp; =\boldsymbol{Z}<em>i \dot{\boldsymbol{G}}</em>{i j} \boldsymbol{Z}<em>i^{\prime}<br>
+\end{aligned}<br>
+$$<br>
+其中 $\dot{\mathbf{G}}</em>{i j} = \frac{\partial \mathbf{G}<em>i}{\partial \gamma</em>{i j}}$ 。</p>
+<p>如果模型中只有一个随机组分，则有：<br>
+$$<br>
+\begin{aligned}<br>
+\boldsymbol{V}<em>{i} &amp; =\frac{\partial \boldsymbol{V}}{\partial \gamma</em>{i}} \</p>
+<p>&amp; =\boldsymbol{Z} \frac{\partial \boldsymbol{G}<em>i}{\partial \gamma</em>{i}} \boldsymbol{Z}^{\prime} \<br>
+&amp; =\boldsymbol{Z} \dot{\boldsymbol{G}}<em>{i} \boldsymbol{Z}^{\prime}<br>
+\end{aligned}<br>
+$$<br>
+对于残差的方差组分 $\phi</em>{i}$ 则有<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\frac{\partial \boldsymbol{V}}{\partial \phi_{i}} \<br>
+&amp; = \frac{\partial \boldsymbol{\Sigma}}{\partial \phi_{i}} \<br>
+&amp; = \dot{\boldsymbol{\Sigma}}<em>{i}<br>
+\end{aligned}<br>
+$$<br>
+因此我们得到对于 $\gamma</em>{ij}$ 的 REML score 式子为：<br>
+$$<br>
+U(\gamma_{ij}) = - \frac{1}{2} \Big( \operatorname{tr}\left(\mathbf{P} \mathbf{Z}<em>i \dot{\mathbf{G}}</em>{i j} \mathbf{Z}<em>i^{\prime}\right)-\mathbf{y}^{\prime} \mathbf{P} \mathbf{Z}<em>i \dot{\mathbf{G}}</em>{i j} \mathbf{Z}<em>i^{\prime} \mathbf{P} \mathbf{y} \Big)<br>
+$$<br>
+我们定义 $\mathbf{S}</em>{i}$ 是一个 $(p+q) \times q</em>{i}$ 的矩阵（$p,q$ 为所有固定因子和所有随机因子的水平数目，$q_{i}$ 是第 $i$ 个随机因子的水平数目 ），并且满足 $\mathbf{W}\mathbf{S}<em>{i}=\mathbf{Z}</em>{i}$ ，因此  $\mathbf{S}<em>{i}$ 中只有对应 $\mathbf{Z}</em>{i}$ 在 $\mathbf{W}$ 中的位置存在一个单位矩阵，其它元素全是 0 （因为矩阵向量乘积可以理解为矩阵的列的线性组合，因此   $\mathbf{S}<em>{i}$ 每一列只有一个对应 $\mathbf{Z}</em>{i}$ 的列号的元素为1，其它为0 ）。</p>
+<p>我们将系数矩阵 $\mathbf{C}$ 写为<br>
+$$<br>
+\mathbf{C} = \mathbf{W^{\prime}R^{-1}W} + \mathbf{G}^{<em>}<br>
+$$<br>
+其中<br>
+$$<br>
+\mathbf{G}^{</em>} = \left[\begin{array}{c}<br>
+\mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{G}^{-1} \<br>
+\end{array}\right]<br>
+$$<br>
+我们对上面式子进一步推导，得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\operatorname{tr}\left( \mathbf{PZ_{i}\dot{\mathbf{G}}<em>{i j}Z</em>{i}^{\prime}}\right) \<br>
+&amp;= \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}Z</em>{i}^{\prime}PZ_{i}}\right) \<br>
+&amp;= \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}W^{\prime}PWS_{i}}\right) \<br>
+&amp;= \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}W^{\prime}(R^{-1}-R^{-1}WC^{-1}W^{\prime}R^{-1})WS_{i}}\right) \<br>
+&amp;= \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}(W^{\prime}R^{-1}W-W^{\prime}R^{-1}WC^{-1}W^{\prime}R^{-1}W)S_{i}}\right) \<br>
+&amp;= \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}W^{\prime}R^{-1}WC^{-1}(C-W^{\prime}R^{-1}W)S_{i}}\right) \<br>
+&amp;= \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}(C-G^{<em>})C^{-1}G^{</em>}S_{i}}\right) \<br>
+&amp;= \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}G^{<em>}S_{i}}\right) - \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}G^{</em>}C^{-1}G^{*}S_{i}}\right) \</p>
+<p>\end{aligned}<br>
+$$<br>
+其中 $\mathbf{G^{<em>}C^{-1}G^{</em>}}$ 可以写为：<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{G^{<em>}C^{-1}G^{</em>}} &amp;= \left[\begin{array}{c}<br>
+\mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{G}^{-1} \<br>
+\end{array}\right]  \left[\begin{array}{c}<br>
+\mathbf{C}^{XX} &amp; \mathbf{C}^{XZ} \<br>
+\mathbf{C}^{ZX} &amp; \mathbf{C}^{ZZ} \<br>
+\end{array}\right] \left[\begin{array}{c}<br>
+\mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{G}^{-1} \<br>
+\end{array}\right] \<br>
+&amp;= \left[\begin{array}{c}<br>
+\mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{G}^{-1} \mathbf{C}^{ZZ} \mathbf{G}^{-1} \<br>
+\end{array}\right]</p>
+<p>\end{aligned}<br>
+$$<br>
+这里 $\mathbf{C}^{ZZ}$ 就是$\mathbf{C}^{-1}$ 中对应着随机效应的部分，由于我们可以有多个随机效应 ，因此 $\mathbf{C}^{ZZ}$ 可以进一步分块为（其中 $s$ 为随机效应数目）：<br>
+$$<br>
+\mathbf{C}^{ZZ} = \left[\begin{array}{c}<br>
+\mathbf{C}^{Z_{1}Z_{1}} &amp; \mathbf{C}^{Z_{1}Z_{2}} &amp; \cdots &amp; \mathbf{C}^{Z_{1}Z_{s}} \<br>
+\mathbf{C}^{Z_{2}Z_{1}} &amp; \mathbf{C}^{Z_{2}Z_{2}} &amp; \cdots &amp; \mathbf{C}^{Z_{2}Z_{s}} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp;\vdots \<br>
+\mathbf{C}^{Z_{s}Z_{1}} &amp; \mathbf{C}^{Z_{s}Z_{2}} &amp; \cdots &amp; \mathbf{C}^{Z_{s}Z_{s}} \<br>
+\end{array}\right]<br>
+$$<br>
+其中 $\mathbf{C}^{Z_{i}Z_{i}}$ 就是对应着第 $i$ 个随机效应 $\mathbf{u}_{i}$ 的部分。</p>
+<p>同样的道理，我们可以将 $\mathbf{G}$ 矩阵分块为：<br>
+$$<br>
+\mathbf{G} = \left[\begin{array}{c}<br>
+\mathbf{G}<em>{1} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{G}</em>{2} &amp; \cdots &amp; \mathbf{0} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp;\vdots \<br>
+\mathbf{0} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{G}<em>{s} \<br>
+\end{array}\right]<br>
+$$<br>
+因此我们得到<br>
+$$<br>
+\mathbf{G}^{-1}\mathbf{C}^{ZZ}\mathbf{G}^{-1} = \left[\begin{array}{c}<br>
+\mathbf{G}</em>{1}^{-1}\mathbf{C}^{Z_{1}Z_{1}}\mathbf{G}<em>{1}^{-1} &amp; \mathbf{G}</em>{1}^{-1}\mathbf{C}^{Z_{1}Z_{2}}\mathbf{G}<em>{2}^{-1} &amp; \cdots &amp; \mathbf{G}</em>{1}^{-1}\mathbf{C}^{Z_{1}Z_{s}}\mathbf{G}<em>{s}^{-1} \<br>
+\mathbf{G}</em>{2}^{-1}\mathbf{C}^{Z_{2}Z_{1}}\mathbf{G}<em>{1}^{-1} &amp; \mathbf{G}</em>{2}^{-1}\mathbf{C}^{Z_{2}Z_{2}}\mathbf{G}<em>{2}^{-1} &amp; \cdots &amp; \mathbf{G}</em>{2}^{-1}\mathbf{C}^{Z_{2}Z_{s}}\mathbf{G}<em>{s}^{-1} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp;\vdots \<br>
+\mathbf{G}</em>{s}^{-1}\mathbf{C}^{Z_{s}Z_{1}}\mathbf{G}<em>{1}^{-1} &amp; \mathbf{G}</em>{s}^{-1}\mathbf{C}^{Z_{s}Z_{2}}\mathbf{G}<em>{2}^{-1} &amp; \cdots &amp; \mathbf{G}</em>{s}^{-1}\mathbf{C}^{Z_{s}Z_{s}}\mathbf{G}<em>{s}^{-1} \<br>
+\end{array}\right]<br>
+$$<br>
+因为   $\mathbf{S}</em>{i}$ 中只有对应 $\mathbf{Z}<em>{i}$ 在 $\mathbf{W}$ 中的位置存在一个单位矩阵，其它元素全是 0 ，因此我们得到<br>
+$$<br>
+\mathbf{S}</em>{i}^{\prime}\mathbf{G^{<em>}C^{-1}G^{</em>}}\mathbf{S}<em>{i} = \mathbf{G}</em>{i}^{-1}\mathbf{C}^{Z_{i}Z_{i}}\mathbf{G}_{i}^{-1}<br>
+$$</p>
+<p>$$<br>
+\mathbf{S}<em>{i}^{\prime}\mathbf{G}^{*}\mathbf{S}</em>{i} = \mathbf{G}_{i}^{-1}<br>
+$$</p>
+<p>因此，$\operatorname{tr}\left( \mathbf{PZ_{i}\dot{\mathbf{G}}<em>{i j}Z</em>{i}^{\prime}}\right)$ 可以进一步推导得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\operatorname{tr}\left( \mathbf{PZ_{i}\dot{\mathbf{G}}<em>{i j}Z</em>{i}^{\prime}}\right)\<br>
+&amp;= \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}G^{<em>}S_{i}}\right) - \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}S</em>{i}^{\prime}G^{</em>}C^{-1}G^{*}S_{i}}\right) \<br>
+&amp;= \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}G^{-1}</em>{i}}\right) - \operatorname{tr}\left( \mathbf{\dot{G}<em>{i j}}\mathbf{G}</em>{i}^{-1}\mathbf{C}^{Z_{i}Z_{i}}\mathbf{G}_{i}^{-1}\right) \</p>
+<p>\end{aligned}<br>
+$$<br>
+对第二个式子推导前，我们先用 $\mathbf{P}$ 得到随机效应 $\mathbf{u}$ 的式子，根据BLUP方法，我们有<br>
+$$<br>
+\mathbf{u}=\mathbf{GZ^{\prime}V^{-1}(y-X\boldsymbol{\beta})}<br>
+$$<br>
+同时我们有<br>
+$$<br>
+\mathbf{Py} = \mathbf{V^{-1}(y-X\boldsymbol{\beta})}<br>
+$$<br>
+因此，我们得到<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{u}&amp;=\mathbf{GZ^{\prime}Py} \<br>
+&amp;=\left[\begin{array}{c}<br>
+\mathbf{G}<em>{1} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{G}</em>{2} &amp; \cdots &amp; \mathbf{0} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp;\vdots \<br>
+\mathbf{0} &amp; \mathbf{0} &amp; \cdots &amp; \mathbf{G}<em>{s} \<br>
+\end{array}\right]  \left[\begin{array}{c}<br>
+\mathbf{Z}</em>{1}^{\prime}  \<br>
+\mathbf{Z}<em>{2}^{\prime}  \<br>
+\vdots \<br>
+\mathbf{Z}</em>{s}^{\prime}  \<br>
+\end{array}\right]\mathbf{Py} \<br>
+&amp;=\left[\begin{array}{c}<br>
+\mathbf{G}<em>{1}\mathbf{Z}</em>{1}^{\prime} \mathbf{Py} \<br>
+\mathbf{G}<em>{2}\mathbf{Z}</em>{2}^{\prime} \mathbf{Py} \<br>
+\vdots \<br>
+\mathbf{G}<em>{s}\mathbf{Z}</em>{s}^{\prime}\mathbf{Py}  \<br>
+\end{array}\right] \</p>
+<p>\end{aligned}<br>
+$$<br>
+我们同时得到<br>
+$$<br>
+\mathbf{u}<em>{i} = \mathbf{G}</em>{i}\mathbf{Z}<em>{i}^{\prime} \mathbf{Py}<br>
+$$<br>
+因此，对右手项推导得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{y}^{\prime} \mathbf{P} \mathbf{Z}</em>{i} \dot{\mathbf{G}}<em>{i j} \mathbf{Z}</em>{i}^{\prime} \mathbf{P} \mathbf{y} \<br>
+&amp;= \mathbf{y}^{\prime} \mathbf{P} \mathbf{Z}<em>{i} \mathbf{G}</em>{i} \mathbf{G}<em>{i}^{-1} \dot{\mathbf{G}}</em>{i j} \mathbf{G}<em>{i}^{-1} \mathbf{G}</em>{i}  \mathbf{Z}<em>{i}^{\prime} \mathbf{P} \mathbf{y} \<br>
+&amp;= \mathbf{u}</em>{i}^{\prime} \mathbf{G}<em>{i}^{-1} \dot{\mathbf{G}}</em>{i j} \mathbf{G}<em>{i}^{-1} \mathbf{u}</em>{i}\<br>
+\end{aligned}<br>
+$$<br>
+因此，我们得到对于 $\gamma_{ij}$ 的 REML score 式子可以写为：<br>
+$$<br>
+U(\gamma_{ij}) = - \frac{1}{2} \Big( \operatorname{tr}\left( \mathbf{G^{-1}<em>{i}\dot{G}</em>{i j}}\right) - \operatorname{tr}\left( \mathbf{C}^{Z_{i}Z_{i}}\mathbf{G}<em>{i}^{-1}\mathbf{\dot{G}</em>{i j}}\mathbf{G}<em>{i}^{-1}\right)-\mathbf{u}</em>{i}^{\prime} \mathbf{G}<em>{i}^{-1} \dot{\mathbf{G}}</em>{i j} \mathbf{G}<em>{i}^{-1} \mathbf{u}</em>{i} \Big)<br>
+$$<br>
+如果模型中只有一个随机效应，则有<br>
+$$<br>
+U(\gamma_{i}) = - \frac{1}{2} \Big( \operatorname{tr}\left( \mathbf{G^{-1}\dot{G}<em>{i }}\right) - \operatorname{tr}\left( \mathbf{C}^{ZZ}\mathbf{G}^{-1}\mathbf{\dot{G}</em>{i}}\mathbf{G}^{-1}\right)-\mathbf{u}^{\prime} \mathbf{G}^{-1} \dot{\mathbf{G}}<em>{i} \mathbf{G}^{-1} \mathbf{u} \Big)<br>
+$$<br>
+对于残差的方差组分 $\phi</em>{i}$ ，我们将 $\dot{\mathbf{V}}<em>{i} = \dot{\mathbf{\Sigma}}</em>{i}$  代入 $U(\kappa_{i}) = - \frac{1}{2} \Big( \operatorname{tr}\left(\mathbf{P} \dot{\mathbf{V}}<em>{i}\right)-\mathbf{y}^{\prime} \mathbf{P} \dot{\mathbf{V}}</em>{i} \mathbf{P} \mathbf{y} \Big)$ 得到<br>
+$$<br>
+U(\phi_{i}) = - \frac{1}{2} \Big( \operatorname{tr}\left(\mathbf{P} \dot{\mathbf{\Sigma}}<em>{i}\right)-\mathbf{y}^{\prime} \mathbf{P} \dot{\mathbf{\Sigma}}</em>{i} \mathbf{P} \mathbf{y} \Big)<br>
+$$<br>
+我们对其进行推导得到：<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\operatorname{tr}\left(\mathbf{P} \dot{\mathbf{\Sigma}}<em>{i}\right) \<br>
+&amp;= \operatorname{tr} \left( \left(\mathbf{R^{-1}-R^{-1}WC^{-1}W^{\prime}R^{-1}} \right) \dot{\mathbf{\Sigma}}</em>{i}\right) \<br>
+&amp;= \operatorname{tr} \left( \left(\mathbf{\Sigma^{-1}-\Sigma^{-1}WC^{-1}W^{\prime}\Sigma^{-1}} \right) \dot{\mathbf{\Sigma}}<em>{i}\right) \<br>
+&amp;= \operatorname{tr}  \left(\mathbf{\Sigma^{-1}\dot{\mathbf{\Sigma}}</em>{i}-\Sigma^{-1}WC^{-1}W^{\prime}\Sigma^{-1}}\dot{\mathbf{\Sigma}}_{i} \right)  \<br>
+&amp;\<br>
+\end{aligned}<br>
+$$<br>
+对于第二个式子，首先我们推导 $\mathbf{Py}=\mathbf{R^{-1}e}$ ，如下<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{Py} \<br>
+&amp;= \mathbf{V^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>
+&amp;= \left( \mathbf{R^{-1}-R^{-1}Z\left(Z^{\prime}R^{-1}Z+G^{-1}\right)^{-1}Z^{\prime}R^{-1}} \right)(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>
+&amp;= \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})- \mathbf{R^{-1}Z\left(Z^{\prime}R^{-1}Z+G^{-1}\right)^{-1}Z^{\prime}R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>
+&amp;= \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})- \mathbf{R^{-1}Z}\mathbf{u} \quad \because \mathbf{u} =\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta})  \<br>
+&amp;= \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta} -\mathbf{Z}\mathbf{u}) \<br>
+&amp;= \mathbf{R^{-1}}\mathbf{e} \<br>
+&amp;= \mathbf{\Sigma^{-1}}\mathbf{e} \</p>
+<p>\end{aligned}<br>
+$$<br>
+因此，我们得到<br>
+$$<br>
+\mathbf{y}^{\prime} \mathbf{P} \dot{\mathbf{\Sigma}}<em>{i} \mathbf{P} \mathbf{y}<br>
+= \mathbf{e}^{\prime}\mathbf{\Sigma^{-1}} \dot{\mathbf{\Sigma}}</em>{i}\mathbf{\Sigma^{-1}}\mathbf{e}<br>
+$$<br>
+因此我们得到关于 $\phi_{i}$ 的 REML score 式子如下<br>
+$$<br>
+U(\phi_{i}) = - \frac{1}{2} \Big( \operatorname{tr}  \left(\mathbf{\Sigma^{-1}\dot{\mathbf{\Sigma}}<em>{i}}\right) -\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\Sigma^{-1}}\dot{\mathbf{\Sigma}}</em>{i}\mathbf{\Sigma^{-1}W} \right)-\mathbf{e}^{\prime}\mathbf{\Sigma^{-1}} \dot{\mathbf{\Sigma}}_{i}\mathbf{\Sigma^{-1}}\mathbf{e} \Big)<br>
+$$</p>
+<h1>单性状模型的迭代公式</h1>
+<p>对于单性状模型（<strong>假设所有随机因子之间均不存在相关</strong>），我们将 $U(\gamma_{ij})$ 设为 0， 推导一下，我们得到：<br>
+$$<br>
+q_{i}/\sigma_{i}^{2} - \operatorname{tr}\left( \mathbf{C}^{Z_{i}Z_{i}}\mathbf{A}<em>{i}^{-1}\right)/\sigma</em>{i}^{4} = \mathbf{u}<em>{i}^{\prime} \mathbf{A}</em>{i}^{-1} \mathbf{u}<em>{i}/\sigma</em>{i}^{4}<br>
+$$<br>
+整理一下，我们得到（其中 $q_{i}$ 为 $u_{i}$ 的水平数目，或者说是  $\mathbf{Z}<em>{i}$ 的列数）<br>
+$$<br>
+\hat{\sigma}</em>{i}^{2}=\left(\hat{\mathbf{u}}<em>{i}^{\prime} \mathbf{A}</em>{i}^{-1} \hat{\mathbf{u}}<em>{i}+\operatorname{tr}\left( \mathbf{C}^{Z</em>{i}Z_{i}}\mathbf{A}<em>{i}^{-1}\right)\right) / q</em>{i}<br>
+$$<br>
+一个收敛更快的迭代公式为<br>
+$$<br>
+\hat{\sigma}<em>{i}^{2}=\frac{\hat{\mathbf{u}}</em>{i}^{\prime} \mathbf{A}<em>{i}^{-1} \hat{\mathbf{u}}</em>{i}}{q_{i}- \operatorname{tr}\left( \mathbf{C}^{Z_{i}Z_{i}}\mathbf{A}<em>{i}^{-1}\right)/\hat{\sigma}</em>{i}^{2} }<br>
+$$<br>
+联合使用之前推导得到的残差计算公式(其中 <strong>$N$ 是表型数目，$r$ 为 $\mathbf{X}$ 的秩</strong>，只适合单性状模型)，我们便得到了完整的 EM-REML 估计公式<br>
+$$<br>
+\hat{\sigma}<em>{0}^{2}=\left(\mathbf{y}^{\prime} \mathbf{y}-\mathbf{y}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}-\mathbf{y}^{\prime} \mathbf{Z} \hat{\mathbf{u}}\right) /(N-r)<br>
+$$<br>
+这里我们还有残差的另外两种推导公式，如下<br>
+$$<br>
+\begin{aligned}<br>
+\sigma</em>{0}^{2} &amp;= \frac{1}{n}(\mathbf{e}^{\prime}\mathbf{e}+ \operatorname{tr}(\mathbf{WC^{-1}W^{\prime}})) \<br>
+\text{or}&amp;\<br>
+\sigma_{0}^{2} &amp;= \frac{1}{n}\left(\sigma_{0}^{2}\left(p+q\right)- \sigma_{0}^{2} \operatorname{tr}\left(\mathbf{G^{-1}C^{ZZ}}\right) + \mathbf{e}^{\prime}\mathbf{e}\right)<br>
+\end{aligned}<br>
+$$<br>
+将 $U(\phi_{i})$ 设为0，我们得到<br>
+$$<br>
+\frac{n}{\sigma_{0}^{2}}-\frac{\operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}} \right)}{\sigma_{0}^{4}} = \frac{\mathbf{e^{\prime}e}}{\sigma_{0}^{4}}<br>
+$$<br>
+因此可以得到第一个式子，我们对其中 $\operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}} \right)/\sigma_{0}^{2}$ 推导如下<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}} \right)/\sigma_{0}^{2} \<br>
+&amp;=\operatorname{tr}\left(\mathbf{W^{\prime}R^{-1}WC^{-1}} \right) \<br>
+&amp;=\operatorname{tr}\left(\mathbf{(C-G^{<em>})C^{-1}} \right) \quad \because \mathbf{C} = \mathbf{W^{\prime}R^{-1}W} + \mathbf{G}^{</em>} \<br>
+&amp;=\operatorname{tr}\left(\mathbf{I_{p+q}-G^{<em>}C^{-1}} \right)\<br>
+&amp;= p+q-\operatorname{tr}\left(\mathbf{G^{</em>}C^{-1}} \right)\<br>
+\end{aligned}<br>
+$$<br>
+对于 $\mathbf{G^{<em>}C^{-1}}$ ，我们对其推导得到<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{G^{</em>}C^{-1}} &amp;= \left[\begin{array}{c}<br>
+\mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{G}^{-1} \<br>
+\end{array}\right] \left[\begin{array}{c}<br>
+\mathbf{C}^{XX} &amp; \mathbf{C}^{XZ} \<br>
+\mathbf{C}^{ZX} &amp; \mathbf{C}^{ZZ} \<br>
+\end{array}\right] \<br>
+&amp;= \left[\begin{array}{c}<br>
+\mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{G}^{-1}\mathbf{C}^{ZX} &amp; \mathbf{G}^{-1}\mathbf{C}^{ZZ} \<br>
+\end{array}\right] \<br>
+\end{aligned}<br>
+$$<br>
+因此，我们得到<br>
+$$<br>
+\operatorname{tr}(\mathbf{G^{*}C^{-1}}) = \operatorname{tr}(\mathbf{G^{-1}C^{ZZ}})<br>
+$$<br>
+因此我们得到<br>
+$$<br>
+\operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}} \right)/\sigma_{0}^{2} = p+q-\operatorname{tr}(\mathbf{G^{-1}C^{ZZ}})<br>
+$$<br>
+代入上式，我们得到<br>
+$$<br>
+\frac{n-p-q+\operatorname{tr}(\mathbf{G^{-1}C^{ZZ}})}{\sigma_{0}^{2}} = \frac{\mathbf{e^{\prime}e}}{\sigma_{0}^{4}}<br>
+$$<br>
+因此可以得到第二个式子。</p>
+<h1>多性状模型的迭代公式</h1>
+<h2 id="随机效应">随机效应</h2>
+<p>对于多性状模型，假设只有一个随机因子（其实多个因子同理，只是这样不用写 $\mathbf{G}$ 矩阵的下标了，符号更加清晰），按照性状排序， 则有<br>
+$$<br>
+\mathbf{G} =  \mathbf{G}<em>{k} \otimes  \mathbf{A}<br>
+$$<br>
+其中 $\mathbf{G}</em>{k}$ 就是相应的方差组分的矩阵形式，如下所示，即反过来 $\boldsymbol{\gamma} = \mathrm{vec}(\mathbf{G}<em>{k})$ ，其中 $k$ 为性状数目。<br>
+$$<br>
+\boldsymbol{G}<em>k=\left[\begin{array}{cccc}<br>
+\gamma</em>{11} &amp; \gamma</em>{12} &amp; \cdots &amp; \gamma_{1 k} \<br>
+\gamma_{12} &amp; \gamma_{22} &amp; \cdots &amp; \gamma_{2 k} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>
+\gamma_{1 k} &amp; \gamma_{2 k} &amp; \cdots &amp; \gamma_{k k}<br>
+\end{array}\right]<br>
+$$<br>
+对于随机因子 $\mathbf{u}$ ，假设对于<strong>每个性状的随机因子水平数目均为 $m$</strong> ，则 $\mathbf{u}$ 也可以表示为一个 $m \times k$ 的矩阵 $\mathbf{U}$ ，其中每一列代表一个性状的所有水平，如下<br>
+$$<br>
+\mathbf{U} =\left[\begin{array}{cccc}<br>
+u_{11} &amp; u_{12} &amp; \cdots &amp; u_{1 k} \<br>
+u_{21} &amp; u_{22} &amp; \cdots &amp; u_{2 k} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>
+u_{m1} &amp; u_{m2} &amp; \cdots &amp; u_{m k}<br>
+\end{array}\right] = \left[\begin{array}{cccc}<br>
+\mathbf{u}<em>{1} &amp; \mathbf{u}</em>{2} &amp; \cdots &amp; \mathbf{u}_{ k} \<br>
+\end{array}\right]<br>
+$$<br>
+反过来则有 $\mathbf{u} = \mathrm{vec} (\mathbf{U})$ 。</p>
+<p>对于 $\gamma_{ij}$ ，我们有公式<br>
+$$<br>
+U(\gamma_{ij}) = - \frac{1}{2} \Big( \operatorname{tr}\left( \mathbf{G^{-1}\dot{G}<em>{i j}}\right) - \operatorname{tr}\left( \mathbf{C}^{ZZ}\mathbf{G}^{-1}\mathbf{\dot{G}</em>{i j}}\mathbf{G}<em>{i}^{-1}\right)-\mathbf{u}^{\prime} \mathbf{G}^{-1} \dot{\mathbf{G}}</em>{i j} \mathbf{G}^{-1} \mathbf{u} \Big)<br>
+$$<br>
+因为  $\mathbf{\dot{G}<em>{i j}}$ 相应 $(m,n)$ 位置的元素 就是 $\partial g</em>{mn} / \partial \gamma_{ij}$ ，所有易得 $\mathbf{\dot{G}<em>{i j}} = \mathbf{\dot{G}</em>{k_{i j}}} \otimes \mathbf{A}$ ，其中 $\mathbf{\dot{G}<em>{k</em>{i j}}} = \frac{\partial \mathbf{G}<em>{k}}{\partial \gamma</em>{ij}}$  。</p>
+<p>因此，我们推导得到。<br>
+$$<br>
+\begin{aligned}<br>
+&amp; \mathbf{G^{-1}\dot{G}<em>{i j}} \<br>
+&amp;= \left(  \mathbf{G}</em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \left(\mathbf{\dot{G}}<em>{k</em>{i j}} \otimes \mathbf{A}\right) \<br>
+&amp;= \left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \otimes \mathbf{I}<em>{m} \right)<br>
+&amp;\<br>
+&amp;\<br>
+&amp; \operatorname{tr} (\mathbf{G^{-1}\dot{G}</em>{i j}}) \<br>
+&amp;= \operatorname{tr}\left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \otimes \mathbf{I}<em>{m} \right) \<br>
+&amp;= m \operatorname{tr}\left(  \mathbf{G}</em>{k}^{-1} \mathbf{\dot{G}}<em>{k</em>{i j}} \right) \<br>
+&amp;\<br>
+&amp;\<br>
+&amp;\mathbf{G}^{-1} \dot{\mathbf{G}}<em>{i j} \mathbf{G}^{-1} \<br>
+&amp;= \left(  \mathbf{G}</em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \left(\mathbf{\dot{G}}<em>{k</em>{i j}} \otimes \mathbf{A}\right) \left(  \mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right)\<br>
+&amp;= \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}_{k}^{-1}  \otimes \mathbf{A}^{-1} \right)</p>
+<p>&amp;\<br>
+&amp;\<br>
+&amp;\mathbf{u}^{\prime} \mathbf{G}^{-1} \dot{\mathbf{G}}<em>{i j} \mathbf{G}^{-1} \mathbf{u} \<br>
+&amp;= \mathrm{vec}(\mathbf{U})^{\prime} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}_{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \mathrm{vec}(\mathbf{U}) \</p>
+<p>&amp;= \mathrm{tr}(\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1} \mathbf{U}^{\prime} \mathbf{A}^{-1} \mathbf{U}) \quad \because \mathrm{vec}(\mathbf{A})^{\prime} (\mathbf{B} \otimes \mathbf{C}) \mathrm{vec}(\mathbf{A}) = \mathrm{tr}(\mathbf{B^{\prime}A^{\prime}CA}) \<br>
+&amp;= \mathrm{tr}(\mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}_{k}^{-1} \mathbf{\Delta} ) \<br>
+\end{aligned}<br>
+$$</p>
+<p>最后一个式子中，我们设 $\mathbf{\Delta} = \mathbf{U}^{\prime} \mathbf{A}^{-1} \mathbf{U}$ 。</p>
+<p>代入 $U(\gamma_{ij})$ 得到<br>
+$$<br>
+\begin{aligned}<br>
+U(\gamma_{ij}) &amp;= - \frac{1}{2} \Big( m \operatorname{tr}\left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \right) - \operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right)-\mathrm{tr}(\mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1} \mathbf{\Delta} )  \Big)\<br>
+\end{aligned}<br>
+$$<br>
+我们需要对这个式子进一步简化，我们知道  $\mathbf{G}</em>{k}$ 是一个对称矩阵，因此  $\mathbf{G}<em>{k}^{-1}$ 也是一个对称矩阵，  我们将   $\mathbf{G}</em>{k}^{-1}$ 中的元素表示为 $\gamma^{ij}$ ($i \leq j$ ) 。</p>
+<p>首先我们考虑 $\operatorname{tr}\left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \right)$ 这一项，当  $i=j$ 时，矩阵 $\mathbf{\dot{G}}<em>{k</em>{i j}}$ 只有 $(i,i)$ 位置元素为1，其它位置元素均为 0 。因此 $\mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}}$ 只有第 $i$ 列元素为 $\mathbf{G}<em>{k}^{-1}$ 的第 $i$ 列元素，其它元素为 0 。因此，我们得到<br>
+$$<br>
+\operatorname{tr}\left(  \mathbf{G}</em>{k}^{-1} \mathbf{\dot{G}}<em>{k</em>{i j}} \right) = \gamma^{ii}<br>
+$$<br>
+当   $i \neq j$  时, 矩阵 $\mathbf{\dot{G}}<em>{k</em>{i j}}$ 只有 $(i,j)$ 和 $(j,i)$ 位置为 1，其它位置元素为 0 。因此  $\mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}}$ 其第 $i$ 列为 $\mathbf{G}<em>{k}^{-1}$ 的第 $j$  列， 其第 $j$ 列为 $\mathbf{G}</em>{k}^{-1}$ 的第 $i$  列，其它位置元素为 0 。因此我们得到<br>
+$$<br>
+\operatorname{tr}\left(  \mathbf{G}<em>{k}^{-1} \mathbf{\dot{G}}</em>{k_{i j}} \right) = \gamma^{ij} + \gamma^{ji} = 2 \gamma^{ij}<br>
+$$<br>
+即我们得到<br>
+$$<br>
+\operatorname{tr}\left(\boldsymbol{G}<em>k^{-1} \dot{\boldsymbol{G}}</em>{k_{i j}}\right)=\left{\begin{array}{cc}<br>
+\gamma^{i i}, &amp; i=j \<br>
+2 \gamma^{i j}, &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+我们现在考虑第三项，如下<br>
+$$<br>
+\begin{aligned}<br>
+\mathrm{tr}(\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1} \mathbf{\Delta}) &amp; = \mathrm{tr}(\mathbf{G}</em>{k}^{-1} \mathbf{\Delta}\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}) \<br>
+&amp; = \mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}})   \<br>
+\end{aligned}<br>
+$$<br>
+其中我们设 $\mathbf{\Delta}^{</em>} = \mathbf{G}<em>{k}^{-1} \mathbf{\Delta}\mathbf{G}</em>{k}^{-1} = { \delta_{ij}^{*}}$ 。</p>
+<p>当 $i=j$  时，矩阵  $\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}}$ 只有第 $i$ 列元素为 $\mathbf{\Delta}^{</em>}$ 的第 $i$ 列元素 ，其它位置元素为 0 。因此，我们得到<br>
+$$<br>
+\mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}}) = \delta_{ii}^{</em>}<br>
+$$<br>
+当   $i \neq j$  时, 矩阵  $\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}}$ 其第 $i$ 列为 $\mathbf{\Delta}^{</em>}$ 的第 $j$  列， 其第 $j$ 列为 $\mathbf{\Delta}^{<em>}$ 的第 $i$  列，其它位置元素为 0 。因此，我们得到 (因为  $\mathbf{\Delta}^{</em>}$ 对称)<br>
+$$<br>
+\mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{G}}<em>{k</em>{i j}}) = \delta_{ij}^{</em>} + \delta_{ji}^{<em>} = 2 \delta_{ij}^{</em>}<br>
+$$<br>
+综上，我们有<br>
+$$<br>
+\mathrm{tr}(\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1} \mathbf{\Delta})=\left{\begin{array}{cc}<br>
+\delta^{*}</em>{i i}, &amp; i=j \<br>
+2 \delta^{*}<em>{i j}, &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+我们现在考虑第二项，我们将 $\mathbf{C}^{ZZ}$ 按照性状分块为 $k^{2}$ 个 $m \times m$ 的子矩阵，如下<br>
+$$<br>
+\mathbf{C}^{ZZ} =\left[\begin{array}{cccc}<br>
+\mathbf{C}^{ZZ}</em>{11} &amp; \mathbf{C}^{ZZ}<em>{12} &amp; \cdots &amp; \mathbf{C}^{ZZ}</em>{1 k} \<br>
+\mathbf{C}^{ZZ}<em>{21} &amp; \mathbf{C}^{ZZ}</em>{22} &amp; \cdots &amp; \mathbf{C}^{ZZ}<em>{2 k} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>
+\mathbf{C}^{ZZ}</em>{k1} &amp; \mathbf{C}^{ZZ}<em>{k2} &amp; \cdots &amp; \mathbf{C}^{ZZ}</em>{k k}<br>
+\end{array}\right]<br>
+$$<br>
+处于简化的目的，我们这里考虑 $k=3$ 的情况（这个不影响推导出来的结果），根据矩阵乘法，当 $i=j$  时，我们有<br>
+$$<br>
+\mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1} = \left[\begin{array}{cccc}<br>
+\gamma^{1i}\gamma^{i1} &amp; \gamma^{1i}\gamma^{i2} &amp; \gamma^{1i}\gamma^{i3} \<br>
+\gamma^{2i}\gamma^{i1} &amp; \gamma^{2i}\gamma^{i2} &amp; \gamma^{2i}\gamma^{i3} \<br>
+\gamma^{3i}\gamma^{i1} &amp; \gamma^{3i}\gamma^{i2} &amp; \gamma^{3i}\gamma^{i3}<br>
+\end{array}\right]<br>
+$$<br>
+因此，我们得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp; \mathbf{C}^{ZZ} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \<br>
+&amp;= \left[\begin{array}{cccc}<br>
+\mathbf{C}^{ZZ}</em>{11} &amp; \mathbf{C}^{ZZ}<em>{12} &amp; \mathbf{C}^{ZZ}</em>{1 3} \<br>
+\mathbf{C}^{ZZ}<em>{21} &amp; \mathbf{C}^{ZZ}</em>{22} &amp; \mathbf{C}^{ZZ}<em>{2 3} \<br>
+\mathbf{C}^{ZZ}</em>{31} &amp; \mathbf{C}^{ZZ}<em>{32} &amp; \mathbf{C}^{ZZ}</em>{3 3}<br>
+\end{array}\right] \left[\begin{array}{cccc}<br>
+\gamma^{1i}\gamma^{i1} \mathbf{A}^{-1} &amp; \gamma^{1i}\gamma^{i2} \mathbf{A}^{-1}&amp; \gamma^{1i}\gamma^{i3} \mathbf{A}^{-1}\<br>
+\gamma^{2i}\gamma^{i1} \mathbf{A}^{-1}&amp; \gamma^{2i}\gamma^{i2}\mathbf{A}^{-1} &amp; \gamma^{2i}\gamma^{i3} \mathbf{A}^{-1}\<br>
+\gamma^{3i}\gamma^{i1} \mathbf{A}^{-1}&amp; \gamma^{3i}\gamma^{i2} \mathbf{A}^{-1} &amp; \gamma^{3i}\gamma^{i3} \mathbf{A}^{-1}<br>
+\end{array}\right]<br>
+\<br>
+\end{aligned}<br>
+$$<br>
+利用迹函数的性质，我们得到<br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right) &amp;= \sum</em>{s=1}^{3}\sum_{t=1}^{3} \operatorname{tr} (\mathbf{C}^{ZZ}<em>{st} \gamma^{ti}\gamma^{is}\mathbf{A}^{-1}) \<br>
+&amp;= \sum</em>{s=1}^{3}\sum_{t=1}^{3}\gamma^{it}\gamma^{si} \operatorname{tr} (\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}) \<br>
+\end{aligned}<br>
+$$<br>
+当 $i \neq j$  时, 我们有<br>
+$$<br>
+\mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1} = \left[\begin{array}{cccc}<br>
+\gamma^{1j}\gamma^{i1}+\gamma^{1i}\gamma^{j1} &amp; \gamma^{1j}\gamma^{i2}+\gamma^{1i}\gamma^{j2} &amp; \gamma^{1j}\gamma^{i3}+\gamma^{1i}\gamma^{j3} \<br>
+\gamma^{2j}\gamma^{i1}+\gamma^{2i}\gamma^{j1} &amp; \gamma^{2j}\gamma^{i2}+\gamma^{2i}\gamma^{j2} &amp; \gamma^{2j}\gamma^{i3}+\gamma^{2i}\gamma^{j3} \<br>
+\gamma^{3j}\gamma^{i1}+\gamma^{3i}\gamma^{j1} &amp; \gamma^{3j}\gamma^{i2}+\gamma^{3i}\gamma^{j2} &amp; \gamma^{3j}\gamma^{i3}+\gamma^{3i}\gamma^{j3}<br>
+\end{array}\right]<br>
+$$<br>
+因此<br>
+$$<br>
+\begin{aligned}<br>
+&amp; \mathbf{C}^{ZZ} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \<br>
+&amp;= \left[\begin{array}{cccc}<br>
+\mathbf{C}^{ZZ}</em>{11} &amp; \mathbf{C}^{ZZ}<em>{12} &amp; \mathbf{C}^{ZZ}</em>{1 3} \<br>
+\mathbf{C}^{ZZ}<em>{21} &amp; \mathbf{C}^{ZZ}</em>{22} &amp; \mathbf{C}^{ZZ}<em>{2 3} \<br>
+\mathbf{C}^{ZZ}</em>{31} &amp; \mathbf{C}^{ZZ}<em>{32} &amp; \mathbf{C}^{ZZ}</em>{3 3}<br>
+\end{array}\right]   \left[\begin{array}{cccc}<br>
+(\gamma^{1j}\gamma^{i1}+\gamma^{1i}\gamma^{j1})\mathbf{A}^{-1} &amp; (\gamma^{1j}\gamma^{i2}+\gamma^{1i}\gamma^{j2})\mathbf{A}^{-1} &amp; (\gamma^{1j}\gamma^{i3}+\gamma^{1i}\gamma^{j3})\mathbf{A}^{-1} \<br>
+(\gamma^{2j}\gamma^{i1}+\gamma^{2i}\gamma^{j1})\mathbf{A}^{-1} &amp; (\gamma^{2j}\gamma^{i2}+\gamma^{2i}\gamma^{j2})\mathbf{A}^{-1} &amp; (\gamma^{2j}\gamma^{i3}+\gamma^{2i}\gamma^{j3})\mathbf{A}^{-1} \<br>
+(\gamma^{3j}\gamma^{i1}+\gamma^{3i}\gamma^{j1})\mathbf{A}^{-1} &amp; (\gamma^{3j}\gamma^{i2}+\gamma^{3i}\gamma^{j2})\mathbf{A}^{-1} &amp; (\gamma^{3j}\gamma^{i3}+\gamma^{3i}\gamma^{j3})\mathbf{A}^{-1}<br>
+\end{array}\right]</p>
+<p>\<br>
+\end{aligned}<br>
+$$<br>
+因此我们得到<br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right) &amp;= \sum</em>{s=1}^{3}\sum_{t=1}^{3} \operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \left(\gamma^{tj}\gamma^{is}+\gamma^{ti}\gamma^{js}\right)\mathbf{A}^{-1}\right) \<br>
+&amp;= \sum</em>{s=1}^{3}\sum_{t=1}^{3} \left(\gamma^{tj}\gamma^{is}+\gamma^{ti}\gamma^{js}\right) \operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right) \<br>
+&amp;= \sum</em>{s=1}^{3}\sum_{t=1}^{3}\gamma^{tj}\gamma^{is}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right) +  \sum</em>{s=1}^{3}\sum_{t=1}^{3}\gamma^{ti}\gamma^{js}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right)<br>
+\end{aligned}<br>
+$$<br>
+我们对需要求和的第一项交换 $s$ 和 $t$ ，并且我们知道 $\gamma^{ij} = \gamma^{ji}$ , $\mathbf{C}^{ZZ}</em>{st} = (\mathbf{C}^{ZZ}<em>{ts})^{T}$  ，因此我们继续推导得到<br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right)<br>
+&amp;= \sum</em>{s=1}^{3}\sum_{t=1}^{3}\gamma^{tj}\gamma^{is}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right) +  \sum</em>{s=1}^{3}\sum_{t=1}^{3}\gamma^{ti}\gamma^{js}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right)  \<br>
+&amp; = \sum</em>{t=1}^{3}\sum_{s=1}^{3}\gamma^{sj}\gamma^{it}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{ts} \mathbf{A}^{-1}\right) +  \sum</em>{s=1}^{3}\sum_{t=1}^{3}\gamma^{ti}\gamma^{js}\operatorname{tr} \left(\mathbf{A}^{-1}\mathbf{C}^{ZZ}<em>{ts} \right)  \<br>
+&amp; = \sum</em>{s=1}^{3}\sum_{t=1}^{3}\gamma^{sj}\gamma^{it}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{ts} \mathbf{A}^{-1}\right) +  \sum</em>{s=1}^{3}\sum_{t=1}^{3}\gamma^{ti}\gamma^{js}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{ts} \mathbf{A}^{-1}\right)  \<br>
+&amp; = 2\sum</em>{s=1}^{3}\sum_{t=1}^{3}\gamma^{it}\gamma^{sj}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{ts} \mathbf{A}^{-1}\right)  \<br>
+\end{aligned}<br>
+$$<br>
+综上，我们将 $k=3$ 改为一般的 $k$ ，我们得到<br>
+$$<br>
+\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}</em>{k}^{-1}\mathbf{\dot{G}}<em>{k</em>{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right)=\left{\begin{array}{cc}<br>
+\sum</em>{s=1}^{k}\sum_{t=1}^{k}\gamma^{it}\gamma^{si} \operatorname{tr} (\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}), &amp; i=j \<br>
+2\sum</em>{s=1}^{k}\sum_{t=1}^{k}\gamma^{it}\gamma^{sj}\operatorname{tr} \left(\mathbf{C}^{ZZ}<em>{st} \mathbf{A}^{-1}\right), &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+现在我们定义 $\mathbf{\Psi}$ 是一个 $k \times k$ 的矩阵，其元素为 $\Psi</em>{ij} = \operatorname{tr}(\mathbf{C}<em>{ij}^{ZZ}\mathbf{A}^{-1})$ ，根据矩阵乘法性质（假设 $\mathbf{A,B,C}$ 均为 $n \times n$ 的矩阵，则 $\mathbf{ABC} = {\sum</em>{s=1}^{n}\sum_{t=1}^{n}a_{it}b_{ts}c_{sj}}$ ），我们发现<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{G}<em>{k}^{-1} \mathbf{\Psi}\mathbf{G}</em>{k}^{-1} &amp;= \left {\sum_{s=1}^{k}\sum_{t=1}^{k}\gamma^{it}\operatorname{tr}(\mathbf{C}<em>{ts}^{ZZ}\mathbf{A}^{-1})\gamma^{sj} \right}\<br>
+&amp;= \left {\sum</em>{s=1}^{k}\sum_{t=1}^{k}\gamma^{it}\gamma^{sj}\operatorname{tr}(\mathbf{C}_{ts}^{ZZ}\mathbf{A}^{-1}) \right}\</p>
+<p>\end{aligned}<br>
+$$<br>
+我们定义 $\psi_{ij}^{<em>}$ 是 $\mathbf{\Psi}^{</em>} = \mathbf{G}<em>{k}^{-1} \mathbf{\Psi}\mathbf{G}</em>{k}^{-1}$ 的元素，即 $\psi_{ij}^{*} = \left{ \mathbf{G}<em>{k}^{-1} \mathbf{\Psi}\mathbf{G}</em>{k}^{-1} \right}_{ij}$ 。</p>
+<p>因此，我们得到<br>
+$$<br>
+\operatorname{tr}\left(\mathbf{C}^{ZZ} \left(  \mathbf{G}<em>{k}^{-1}\mathbf{\dot{G}}</em>{k_{i j}}\mathbf{G}<em>{k}^{-1}  \otimes \mathbf{A}^{-1} \right) \right)=\left{\begin{array}{cc}<br>
+\psi</em>{ii}^{<em>}, &amp; i=j \<br>
+2\psi_{ij}^{</em>}, &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+将上面的式子代入 $U(\gamma_{ij})$ ，进一步简化得到<br>
+$$<br>
+U(\gamma_{ij}) =\left{\begin{array}{cc}</p>
 <ul>
-<li>\frac{1}{2} \Big(m\gamma^{ii} - \psi_{ii}^{<em>}- \delta_{ii}^{</em>} \big), &amp; i&#x3D;j \</li>
-<li>\frac{1}{2} \Big(2m\gamma^{ij} - 2\psi_{ij}^{<em>}- 2\delta_{ij}^{</em>} \big), &amp; i \neq j<br>\end{array}\right.<br>$$<br>将之设为0， 对 $\gamma^{ij}$ 求解得到 EM 推导公式<br>$$<br>m\gamma^{ij} &#x3D; \psi_{ij}^{<em>} + \delta_{ij}^{</em>}<br>$$<br>使用矩阵格式，我们得到<br>$$<br>\begin{aligned}<br>m\mathbf{G}<em>{k}^{-1} &amp;&#x3D; \mathbf{\Psi}^{<em>} + \mathbf{\Delta}^{</em>} \<br>&amp;&#x3D; \mathbf{G}</em>{k}^{-1} \mathbf{\Psi}\mathbf{G}<em>{k}^{-1} + \mathbf{G}</em>{k}^{-1} \mathbf{\Delta}\mathbf{G}<em>{k}^{-1}<br>\end{aligned}<br>$$<br>左右均乘以 $\mathbf{G}</em>{k}^{-1}$ ，得到<br>$$<br>m\mathbf{G}<em>{k}&#x3D;  \mathbf{\Psi} +  \mathbf{\Delta}<br>$$<br>因此，我们得到 EM 推导公式<br>$$<br>m\gamma</em>{ij}^{(m+1)} &#x3D; \psi_{ij}^{(m)} + \delta_{ij}^{(m)}<br>$$<br>因为  $\psi_{ij} &#x3D; \operatorname{tr}(\mathbf{C}<em>{ij}^{ZZ}\mathbf{A}^{-1})$ ，  $\mathbf{\Delta} &#x3D; \mathbf{U}^{\prime} \mathbf{A}^{-1} \mathbf{U}$  可以进一步分块为：<br>$$<br>\mathbf{\Delta} &#x3D; \mathbf{U}^{\prime} \mathbf{A}^{-1} \mathbf{U} &#x3D;\left[\begin{array}{cccc}<br>\mathbf{u}</em>{1}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{1} &amp; \mathbf{u}</em>{1}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{2} &amp; \cdots &amp; \mathbf{u}</em>{1}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{k} \<br>\mathbf{u}</em>{2}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{1} &amp; \mathbf{u}</em>{2}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{2} &amp; \cdots &amp; \mathbf{u}</em>{2}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{k} \<br>\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>\mathbf{u}</em>{k}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{1} &amp; \mathbf{u}</em>{k}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{2} &amp; \cdots &amp; \mathbf{u}</em>{k}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{k} \<br>\end{array}\right]<br>$$<br>因此 $\delta</em>{ij} &#x3D; \mathbf{u}<em>{i}^{\prime}\mathbf{A}^{-1}\mathbf{u}</em>{j}$ 。因此上面的 EM 推导公式可以写为<br>$$<br>\gamma_{ij}^{(m+1)} &#x3D; \frac{1}{m} \left(\operatorname{tr}(\mathbf{C}<em>{ij}^{ZZ^{(m)}}\mathbf{A}^{-1}) + \mathbf{u}</em>{i}^{(m)^{\prime}}\mathbf{A}^{-1}\mathbf{u}_{j}^{(m)} \right)<br>$$<br>这个式子和单性状模型的推导公式正好具有相同的格式。</li>
+<li>\frac{1}{2} \Big(m\gamma^{ii} - \psi_{ii}^{<em>}- \delta_{ii}^{</em>} \big), &amp; i=j \</li>
+<li>\frac{1}{2} \Big(2m\gamma^{ij} - 2\psi_{ij}^{<em>}- 2\delta_{ij}^{</em>} \big), &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+将之设为0， 对 $\gamma^{ij}$ 求解得到 EM 推导公式<br>
+$$<br>
+m\gamma^{ij} = \psi_{ij}^{<em>} + \delta_{ij}^{</em>}<br>
+$$<br>
+使用矩阵格式，我们得到<br>
+$$<br>
+\begin{aligned}<br>
+m\mathbf{G}<em>{k}^{-1} &amp;= \mathbf{\Psi}^{<em>} + \mathbf{\Delta}^{</em>} \<br>
+&amp;= \mathbf{G}</em>{k}^{-1} \mathbf{\Psi}\mathbf{G}<em>{k}^{-1} + \mathbf{G}</em>{k}^{-1} \mathbf{\Delta}\mathbf{G}<em>{k}^{-1}<br>
+\end{aligned}<br>
+$$<br>
+左右均乘以 $\mathbf{G}</em>{k}^{-1}$ ，得到<br>
+$$<br>
+m\mathbf{G}<em>{k}=  \mathbf{\Psi} +  \mathbf{\Delta}<br>
+$$<br>
+因此，我们得到 EM 推导公式<br>
+$$<br>
+m\gamma</em>{ij}^{(m+1)} = \psi_{ij}^{(m)} + \delta_{ij}^{(m)}<br>
+$$<br>
+因为  $\psi_{ij} = \operatorname{tr}(\mathbf{C}<em>{ij}^{ZZ}\mathbf{A}^{-1})$ ，  $\mathbf{\Delta} = \mathbf{U}^{\prime} \mathbf{A}^{-1} \mathbf{U}$  可以进一步分块为：<br>
+$$<br>
+\mathbf{\Delta} = \mathbf{U}^{\prime} \mathbf{A}^{-1} \mathbf{U} =\left[\begin{array}{cccc}<br>
+\mathbf{u}</em>{1}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{1} &amp; \mathbf{u}</em>{1}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{2} &amp; \cdots &amp; \mathbf{u}</em>{1}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{k} \<br>
+\mathbf{u}</em>{2}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{1} &amp; \mathbf{u}</em>{2}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{2} &amp; \cdots &amp; \mathbf{u}</em>{2}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{k} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>
+\mathbf{u}</em>{k}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{1} &amp; \mathbf{u}</em>{k}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{2} &amp; \cdots &amp; \mathbf{u}</em>{k}^{\prime}\mathbf{A}^{-1}\mathbf{u}<em>{k} \<br>
+\end{array}\right]<br>
+$$<br>
+因此 $\delta</em>{ij} = \mathbf{u}<em>{i}^{\prime}\mathbf{A}^{-1}\mathbf{u}</em>{j}$ 。因此上面的 EM 推导公式可以写为<br>
+$$<br>
+\gamma_{ij}^{(m+1)} = \frac{1}{m} \left(\operatorname{tr}(\mathbf{C}<em>{ij}^{ZZ^{(m)}}\mathbf{A}^{-1}) + \mathbf{u}</em>{i}^{(m)^{\prime}}\mathbf{A}^{-1}\mathbf{u}_{j}^{(m)} \right)<br>
+$$<br>
+这个式子和单性状模型的推导公式正好具有相同的格式。</li>
 </ul>
-<h2 id="残差"><a href="#残差" class="headerlink" title="残差"></a>残差</h2><p>按照性状排序， 此时我们有下式成立，其中 $n$ 为表型行数，$\mathbf{\Sigma}<em>{k}$ 为需要估计的协方差组分的矩阵。<br>$$<br>\mathbf{\Sigma} &#x3D;  \mathbf{\Sigma}</em>{k} \otimes  \mathbf{I}<em>{n}<br>$$<br>$\mathbf{\Sigma}</em>{k}$ 形式如下（这里我们使用 $\phi_{ij}$ ，与上面的随机效应格式相同 ）。<br>$$<br>\boldsymbol{\Sigma}<em>k&#x3D;\left[\begin{array}{cccc}<br>\phi</em>{11} &amp; \phi_{12} &amp; \cdots &amp; \phi_{1 k} \<br>\phi_{12} &amp; \phi_{22} &amp; \cdots &amp; \phi_{2 k} \<br>\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>\phi_{1 k} &amp; \phi_{2 k} &amp; \cdots &amp; \phi_{k k}<br>\end{array}\right]<br>$$<br>对于随机因子 $\mathbf{e}$ ，同上，$\mathbf{e}$ 也可以表示为一个 $n \times k$ 的矩阵 $\mathbf{E}$ ，其中每一列代表一个性状的所有残差，如下<br>$$<br>\mathbf{E} &#x3D;\left[\begin{array}{cccc}<br>e_{11} &amp; e_{12} &amp; \cdots &amp; e_{1 k} \<br>e_{21} &amp; e_{22} &amp; \cdots &amp; e_{2 k} \<br>\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>e_{n1} &amp; e_{n2} &amp; \cdots &amp; e_{n k}<br>\end{array}\right] &#x3D; \left[\begin{array}{cccc}<br>\mathbf{e}<em>{1} &amp; \mathbf{e}</em>{2} &amp; \cdots &amp; \mathbf{e}_{ k} \<br>\end{array}\right]<br>$$<br>反过来则有 $\mathbf{e} &#x3D; \mathrm{vec} (\mathbf{E})$ 。</p>
-<p>对于 $\phi_{ij}$ ，我们有公式<br>$$<br>U(\phi_{ij}) &#x3D; - \frac{1}{2} \Big( \operatorname{tr}  \left(\mathbf{\Sigma^{-1}\dot{\mathbf{\Sigma}}<em>{ij}}\right) -\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\Sigma^{-1}}\dot{\mathbf{\Sigma}}</em>{ij}\mathbf{\Sigma^{-1}W} \right)-\mathbf{e}^{\prime}\mathbf{\Sigma^{-1}} \dot{\mathbf{\Sigma}}<em>{ij}\mathbf{\Sigma^{-1}}\mathbf{e} \Big)<br>$$<br>易得 $\mathbf{\dot{\Sigma}</em>{i j}} &#x3D; \mathbf{\dot{\Sigma}<em>{k</em>{i j}}} \otimes \mathbf{I}<em>{n}$ ，其中 $\mathbf{\dot{\Sigma}</em>{k_{i j}}} &#x3D; \frac{\partial \mathbf{\Sigma}<em>{k}}{\partial \phi</em>{ij}}$  。</p>
-<p>因此，我们推导得到<br>$$<br>\begin{aligned}<br>&amp; \mathbf{\Sigma^{-1}\dot{\Sigma}<em>{i j}} \<br>&amp;&#x3D; \left(  \mathbf{\Sigma}</em>{k}^{-1}  \otimes \mathbf{I}^{-1} \right) \left(\mathbf{\dot{\Sigma}}<em>{k</em>{i j}} \otimes \mathbf{I}\right) \<br>&amp;&#x3D; \left(  \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\dot{\Sigma}}</em>{k_{i j}} \otimes \mathbf{I}<em>{n} \right)<br>&amp;\<br>&amp;\<br>&amp; \operatorname{tr} (\mathbf{\Sigma^{-1}\dot{\Sigma}</em>{i j}}) \<br>&amp;&#x3D; \operatorname{tr}\left(  \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\dot{\Sigma}}</em>{k_{i j}} \otimes \mathbf{I}<em>{n} \right) \<br>&amp;&#x3D; n \operatorname{tr}\left(  \mathbf{\Sigma}</em>{k}^{-1} \mathbf{\dot{\Sigma}}<em>{k</em>{i j}} \right) \<br>&amp;\<br>&amp;\<br>&amp;\mathbf{\Sigma}^{-1} \dot{\mathbf{\Sigma}}<em>{i j} \mathbf{\Sigma}^{-1} \<br>&amp;&#x3D; \left(  \mathbf{\Sigma}</em>{k}^{-1}  \otimes \mathbf{I}^{-1} \right) \left(\mathbf{\dot{\Sigma}}<em>{k</em>{i j}} \otimes \mathbf{I}\right) \left(  \mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I}^{-1} \right)\<br>&amp;&#x3D; \left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}_{k}^{-1}  \otimes \mathbf{I} \right) </p>
-<p>&amp;\<br>&amp;\<br>&amp;\mathbf{e}^{\prime} \mathbf{\Sigma}^{-1} \dot{\mathbf{\Sigma}}<em>{i j} \mathbf{\Sigma}^{-1} \mathbf{e} \<br>&amp;&#x3D; \mathrm{vec}(\mathbf{E})^{\prime} \left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) \mathrm{vec}(\mathbf{E}) \<br>&amp;&#x3D; \mathrm{tr}(\mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1} \mathbf{E}^{\prime}  \mathbf{E}) \quad \because \mathrm{vec}(\mathbf{A})^{\prime} (\mathbf{B} \otimes \mathbf{C}) \mathrm{vec}(\mathbf{A}) &#x3D; \mathrm{tr}(\mathbf{B^{\prime}A^{\prime}CA}) \<br>&amp;&#x3D; \mathrm{tr}(\mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}_{k}^{-1} \mathbf{\Delta} ) \<br>\end{aligned}<br>$$<br>最后一个式子中，我们设 $\mathbf{\Delta} &#x3D; \mathbf{E}^{\prime} \mathbf{E}$ 。</p>
-<p>代入 $U(\phi_{ij})$ 得到<br>$$<br>U(\phi_{ij}) &#x3D; - \frac{1}{2} \Big( n \operatorname{tr}\left(  \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\dot{\Sigma}}</em>{k_{i j}} \right) -\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\left(  \mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) W} \right)-\mathrm{tr}(\mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Delta} ) \Big)<br>$$<br>我们需要对这个式子进一步简化，我们知道  $\mathbf{\Sigma}</em>{k}$ 是一个对称矩阵，因此  $\mathbf{\Sigma}<em>{k}^{-1}$ 也是一个对称矩阵，  我们将   $\mathbf{\Sigma}</em>{k}^{-1}$ 中的元素表示为 $\phi^{ij}$ ($i \leq j$ ) 。</p>
-<p>首先我们考虑第一项 $\operatorname{tr}\left(  \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\dot{\Sigma}}</em>{k_{i j}} \right)$ ，同上，我们可以得到<br>$$<br>\operatorname{tr}\left(\boldsymbol{\Sigma}<em>k^{-1} \dot{\boldsymbol{\Sigma}}</em>{k_{i j}}\right)&#x3D;\left{\begin{array}{cc}<br>\phi^{i i}, &amp; i&#x3D;j \<br>2 \phi^{i j}, &amp; i \neq j<br>\end{array}\right.<br>$$<br>我们现在考虑第三项，如下<br>$$<br>\begin{aligned}<br>\mathrm{tr}(\mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Delta}) &amp; &#x3D; \mathrm{tr}(\mathbf{\Sigma}</em>{k}^{-1} \mathbf{\Delta}\mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}) \<br>&amp; &#x3D; \mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}})   \<br>\end{aligned}<br>$$<br>其中我们设 $\mathbf{\Delta}^{</em>} &#x3D; \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Delta}\mathbf{\Sigma}</em>{k}^{-1} &#x3D; { \delta_{ij}^{*}}$ 。</p>
-<p>当 $i&#x3D;j$  时，矩阵  $\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}$ 只有第 $i$ 列元素为 $\mathbf{\Delta}^{</em>}$ 的第 $i$ 列元素 ，其它位置元素为 0 。因此，我们得到<br>$$<br>\mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}) &#x3D; \delta_{ii}^{</em>}<br>$$<br>当   $i \neq j$  时, 矩阵  $\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}$ 其第 $i$ 列为 $\mathbf{\Delta}^{</em>}$ 的第 $j$  列， 其第 $j$ 列为 $\mathbf{\Delta}^{<em>}$ 的第 $i$  列，其它位置元素为 0 。因此，我们得到 (因为  $\mathbf{\Delta}^{</em>}$ 对称)<br>$$<br>\mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}) &#x3D; \delta_{ij}^{</em>} + \delta_{ji}^{<em>} &#x3D; 2 \delta_{ij}^{</em>}<br>$$<br>综上，我们有<br>$$<br>\mathrm{tr}(\mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Delta})&#x3D;\left{\begin{array}{cc}<br>\delta^{*}</em>{i i}, &amp; i&#x3D;j \<br>2 \delta^{*}<em>{i j}, &amp; i \neq j<br>\end{array}\right.<br>$$<br>对于第二项，首先我们对 $\mathbf{WC^{-1}W^{\prime}}$ 进行推导如下<br>$$<br>\begin{aligned}<br>&amp;\mathbf{WC^{-1}W^{\prime}}\<br>&amp;&#x3D; \left[\begin{array}{c}<br>\mathbf{X} &amp; \mathbf{Z}<br>\end{array}\right] \left[\begin{array}{c}<br>\mathbf{C}^{XX} &amp; \mathbf{C}^{XZ} \<br>\mathbf{C}^{ZX} &amp; \mathbf{C}^{ZZ} \<br>\end{array}\right] \left[\begin{array}{c}<br>\mathbf{X}^{\prime} \<br>\mathbf{Z}^{\prime}<br>\end{array}\right] \<br>&amp;&#x3D;\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime}+\mathbf{X}\mathbf{C}^{XZ}\mathbf{Z}^{\prime}+\mathbf{Z}\mathbf{C}^{ZX}\mathbf{X}^{\prime}+\mathbf{Z}\mathbf{C}^{ZZ}\mathbf{Z}^{\prime} \<br>\end{aligned}<br>$$<br>因此，第二项推导得到<br>$$<br>\begin{aligned}<br>&amp;\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) W} \right) \<br>&amp;&#x3D; \operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) } \right) \<br>&amp;&#x3D; \operatorname{tr}\left(\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right)  \right) + \operatorname{tr}\left(\mathbf{X}\mathbf{C}^{XZ}\mathbf{Z}^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right)  \right) + \operatorname{tr}\left(\mathbf{Z}\mathbf{C}^{ZX}\mathbf{X}^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right)  \right) + \operatorname{tr}\left(\mathbf{Z}\mathbf{C}^{ZZ}\mathbf{Z}^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}_{k}^{-1}  \otimes \mathbf{I} \right)  \right)</p>
-<p>\end{aligned}<br>$$<br>对于第二项的第一项进行推导（其余项同理可得），假设 $k&#x3D;3$  ，则 $\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime}$  可以分解为<br>$$<br>\begin{aligned}<br>&amp;\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime} \<br>&amp;&#x3D; \left[\begin{array}{cccc}<br>\mathbf{X}<em>{1} &amp; \mathbf{0}  &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{X}</em>{2}  &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{0}  &amp; \mathbf{X}<em>{3} \<br>\end{array}\right]<br>\left[\begin{array}{cccc}<br>\mathbf{C}^{XX}</em>{11} &amp; \mathbf{C}^{XX}<em>{12}  &amp; \mathbf{C}^{XX}</em>{13} \<br>\mathbf{C}^{XX}<em>{21} &amp; \mathbf{C}^{XX}</em>{22}  &amp; \mathbf{C}^{XX}<em>{23} \<br>\mathbf{C}^{XX}</em>{31} &amp; \mathbf{C}^{XX}<em>{32}  &amp; \mathbf{C}^{XX}</em>{33} \<br>\end{array}\right] \left[\begin{array}{cccc}<br>\mathbf{X}<em>{1}^{\prime} &amp; \mathbf{0}  &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{X}</em>{2}^{\prime}  &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{0}  &amp; \mathbf{X}<em>{3}^{\prime} \<br>\end{array}\right] \<br>&amp;&#x3D; \left[\begin{array}{cccc}<br>\mathbf{X}</em>{1}\mathbf{C}^{XX}<em>{11}\mathbf{X}</em>{1}^{\prime} &amp; \mathbf{X}<em>{1}\mathbf{C}^{XX}</em>{12}\mathbf{X}<em>{2}^{\prime}  &amp; \mathbf{X}</em>{1}\mathbf{C}^{XX}<em>{13}\mathbf{X}</em>{3}^{\prime} \<br>\mathbf{X}<em>{2}\mathbf{C}^{XX}</em>{21}\mathbf{X}<em>{1}^{\prime} &amp; \mathbf{X}</em>{2}\mathbf{C}^{XX}<em>{22}\mathbf{X}</em>{2}^{\prime}  &amp; \mathbf{X}<em>{2}\mathbf{C}^{XX}</em>{23}\mathbf{X}<em>{3}^{\prime} \<br>\mathbf{X}</em>{3}\mathbf{C}^{XX}<em>{31}\mathbf{X}</em>{1}^{\prime} &amp; \mathbf{X}<em>{3}\mathbf{C}^{XX}</em>{32}\mathbf{X}<em>{2}^{\prime}  &amp; \mathbf{X}</em>{3}\mathbf{C}^{XX}<em>{33}\mathbf{X}</em>{3}^{\prime} \<br>\end{array}\right]<br>\end{aligned}<br>$$<br>类似与随机效应，我们可以得到（推导过程略）<br>$$<br>\operatorname{tr}\left(\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime}\left(  \mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right)  \right)&#x3D;\left{\begin{array}{cc}<br>\sum</em>{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\phi^{it}\phi^{si} \operatorname{tr} (\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} ), &amp; i&#x3D;j \<br>\sum</em>{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\phi^{it}\phi^{sj} \left( \operatorname{tr} \left(\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime}\right) +  \operatorname{tr} \left(\mathbf{X}</em>{t}\mathbf{C}^{XX}<em>{ts}\mathbf{X}</em>{s}^{\prime}\right)\right) , &amp; i \neq j<br>\end{array}\right.<br>$$<br>因此，我们得到（同上，我们有 $\mathbf{C}^{AB}<em>{st} &#x3D; (\mathbf{C}^{BA}</em>{ts})^{T}$  ）<br>$$<br>\begin{aligned}<br>&amp;\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\left(  \mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) W} \right)\<br>&amp;&#x3D;\left{\begin{array}{cc}<br>\sum</em>{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\phi^{it}\phi^{si} \operatorname{tr} (\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} + \mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} ), &amp; i&#x3D;j \<br>\sum_{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\phi^{it}\phi^{sj} \left( \operatorname{tr} \left(\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} +\mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} +\mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} \right) + \operatorname{tr} \left(\mathbf{X}<em>{t}\mathbf{C}^{XX}</em>{ts}\mathbf{X}<em>{s}^{\prime}+\mathbf{X}</em>{t}\mathbf{C}^{XZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime}+\mathbf{Z}<em>{t}\mathbf{C}^{ZX}</em>{ts}\mathbf{X}<em>{s}^{\prime}+\mathbf{Z}</em>{t}\mathbf{C}^{ZZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime}\right) \right), &amp; i \neq j<br>\end{array}\right. \<br>&amp;&#x3D;\left{\begin{array}{cc}<br>\sum_{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\phi^{it}\phi^{si} \operatorname{tr} (\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} + \mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} ), &amp; i&#x3D;j \<br>\sum_{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\phi^{it}\phi^{sj} 2 \operatorname{tr} \left(\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} +\mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} +\mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime}  \right), &amp; i \neq j<br>\end{array}\right. \</p>
-<p>\end{aligned}<br>$$<br>现在我们定义 $\mathbf{\Psi}$ 是一个 $k \times k$ 的矩阵，其元素为 $\psi_{ij} &#x3D;  \operatorname{tr} \left(\mathbf{X}<em>{i}\mathbf{C}^{XX}</em>{ij}\mathbf{X}<em>{j}^{\prime} + \mathbf{X}</em>{i}\mathbf{C}^{XZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime} +\mathbf{Z}<em>{i}\mathbf{C}^{ZX}</em>{ij}\mathbf{X}<em>{j}^{\prime} +\mathbf{Z}</em>{i}\mathbf{C}^{ZZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime}  \right)$，根据矩阵乘法性质（假设 $\mathbf{A,B,C}$ 均为 $n \times n$ 的矩阵，则 $\mathbf{ABC} &#x3D; {\sum_{s&#x3D;1}^{n}\sum_{t&#x3D;1}^{n}a_{it}b_{ts}c_{sj}}$ ），我们发现<br>$$<br>\begin{aligned}<br>\mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Psi}\mathbf{\Sigma}</em>{k}^{-1} &amp;&#x3D; \left {\sum_{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\phi^{it}\operatorname{tr} \left(\mathbf{X}<em>{t}\mathbf{C}^{XX}</em>{ts}\mathbf{X}<em>{s}^{\prime} + \mathbf{X}</em>{t}\mathbf{C}^{XZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime} +\mathbf{Z}<em>{t}\mathbf{C}^{ZX}</em>{ts}\mathbf{X}<em>{s}^{\prime} +\mathbf{Z}</em>{t}\mathbf{C}^{ZZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime}  \right)\phi^{sj} \right}\<br>&amp;&#x3D; \left {\sum_{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\phi^{it}\phi^{sj}\operatorname{tr} \left(\mathbf{X}<em>{t}\mathbf{C}^{XX}</em>{ts}\mathbf{X}<em>{s}^{\prime} + \mathbf{X}</em>{t}\mathbf{C}^{XZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime} +\mathbf{Z}<em>{t}\mathbf{C}^{ZX}</em>{ts}\mathbf{X}<em>{s}^{\prime} +\mathbf{Z}</em>{t}\mathbf{C}^{ZZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime}  \right)\right}\<br>&amp;&#x3D; \left {\sum_{s&#x3D;1}^{k}\sum_{t&#x3D;1}^{k}\phi^{it}\phi^{sj}\operatorname{tr} \left(\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} +\mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} +\mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime}  \right)\right}\<br>\end{aligned}<br>$$<br> 我们定义 $\psi_{ij}^{<em>}$ 是 $\mathbf{\Psi}^{</em>} &#x3D; \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Psi}\mathbf{\Sigma}</em>{k}^{-1}$ 的元素，即 $\psi_{ij}^{*} &#x3D; \left{ \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Psi}\mathbf{\Sigma}</em>{k}^{-1} \right}_{ij}$ 。</p>
-<p>因此，我们得到<br>$$<br>\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\left(  \mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) W} \right)&#x3D;\left{\begin{array}{cc}<br>\psi</em>{ii}^{<em>}, &amp; i&#x3D;j \<br>2\psi_{ij}^{</em>}, &amp; i \neq j<br>\end{array}\right.<br>$$<br>将上面的式子代入 $U(\phi_{ij})$ ，进一步简化得到<br>$$<br>U(\phi_{ij}) &#x3D;\left{\begin{array}{cc}</p>
+<h2 id="残差">残差</h2>
+<p>按照性状排序， 此时我们有下式成立，其中 $n$ 为表型行数，$\mathbf{\Sigma}<em>{k}$ 为需要估计的协方差组分的矩阵。<br>
+$$<br>
+\mathbf{\Sigma} =  \mathbf{\Sigma}</em>{k} \otimes  \mathbf{I}<em>{n}<br>
+$$<br>
+$\mathbf{\Sigma}</em>{k}$ 形式如下（这里我们使用 $\phi_{ij}$ ，与上面的随机效应格式相同 ）。<br>
+$$<br>
+\boldsymbol{\Sigma}<em>k=\left[\begin{array}{cccc}<br>
+\phi</em>{11} &amp; \phi_{12} &amp; \cdots &amp; \phi_{1 k} \<br>
+\phi_{12} &amp; \phi_{22} &amp; \cdots &amp; \phi_{2 k} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>
+\phi_{1 k} &amp; \phi_{2 k} &amp; \cdots &amp; \phi_{k k}<br>
+\end{array}\right]<br>
+$$<br>
+对于随机因子 $\mathbf{e}$ ，同上，$\mathbf{e}$ 也可以表示为一个 $n \times k$ 的矩阵 $\mathbf{E}$ ，其中每一列代表一个性状的所有残差，如下<br>
+$$<br>
+\mathbf{E} =\left[\begin{array}{cccc}<br>
+e_{11} &amp; e_{12} &amp; \cdots &amp; e_{1 k} \<br>
+e_{21} &amp; e_{22} &amp; \cdots &amp; e_{2 k} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>
+e_{n1} &amp; e_{n2} &amp; \cdots &amp; e_{n k}<br>
+\end{array}\right] = \left[\begin{array}{cccc}<br>
+\mathbf{e}<em>{1} &amp; \mathbf{e}</em>{2} &amp; \cdots &amp; \mathbf{e}_{ k} \<br>
+\end{array}\right]<br>
+$$<br>
+反过来则有 $\mathbf{e} = \mathrm{vec} (\mathbf{E})$ 。</p>
+<p>对于 $\phi_{ij}$ ，我们有公式<br>
+$$<br>
+U(\phi_{ij}) = - \frac{1}{2} \Big( \operatorname{tr}  \left(\mathbf{\Sigma^{-1}\dot{\mathbf{\Sigma}}<em>{ij}}\right) -\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\Sigma^{-1}}\dot{\mathbf{\Sigma}}</em>{ij}\mathbf{\Sigma^{-1}W} \right)-\mathbf{e}^{\prime}\mathbf{\Sigma^{-1}} \dot{\mathbf{\Sigma}}<em>{ij}\mathbf{\Sigma^{-1}}\mathbf{e} \Big)<br>
+$$<br>
+易得 $\mathbf{\dot{\Sigma}</em>{i j}} = \mathbf{\dot{\Sigma}<em>{k</em>{i j}}} \otimes \mathbf{I}<em>{n}$ ，其中 $\mathbf{\dot{\Sigma}</em>{k_{i j}}} = \frac{\partial \mathbf{\Sigma}<em>{k}}{\partial \phi</em>{ij}}$  。</p>
+<p>因此，我们推导得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp; \mathbf{\Sigma^{-1}\dot{\Sigma}<em>{i j}} \<br>
+&amp;= \left(  \mathbf{\Sigma}</em>{k}^{-1}  \otimes \mathbf{I}^{-1} \right) \left(\mathbf{\dot{\Sigma}}<em>{k</em>{i j}} \otimes \mathbf{I}\right) \<br>
+&amp;= \left(  \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\dot{\Sigma}}</em>{k_{i j}} \otimes \mathbf{I}<em>{n} \right)<br>
+&amp;\<br>
+&amp;\<br>
+&amp; \operatorname{tr} (\mathbf{\Sigma^{-1}\dot{\Sigma}</em>{i j}}) \<br>
+&amp;= \operatorname{tr}\left(  \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\dot{\Sigma}}</em>{k_{i j}} \otimes \mathbf{I}<em>{n} \right) \<br>
+&amp;= n \operatorname{tr}\left(  \mathbf{\Sigma}</em>{k}^{-1} \mathbf{\dot{\Sigma}}<em>{k</em>{i j}} \right) \<br>
+&amp;\<br>
+&amp;\<br>
+&amp;\mathbf{\Sigma}^{-1} \dot{\mathbf{\Sigma}}<em>{i j} \mathbf{\Sigma}^{-1} \<br>
+&amp;= \left(  \mathbf{\Sigma}</em>{k}^{-1}  \otimes \mathbf{I}^{-1} \right) \left(\mathbf{\dot{\Sigma}}<em>{k</em>{i j}} \otimes \mathbf{I}\right) \left(  \mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I}^{-1} \right)\<br>
+&amp;= \left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}_{k}^{-1}  \otimes \mathbf{I} \right)</p>
+<p>&amp;\<br>
+&amp;\<br>
+&amp;\mathbf{e}^{\prime} \mathbf{\Sigma}^{-1} \dot{\mathbf{\Sigma}}<em>{i j} \mathbf{\Sigma}^{-1} \mathbf{e} \<br>
+&amp;= \mathrm{vec}(\mathbf{E})^{\prime} \left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) \mathrm{vec}(\mathbf{E}) \<br>
+&amp;= \mathrm{tr}(\mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1} \mathbf{E}^{\prime}  \mathbf{E}) \quad \because \mathrm{vec}(\mathbf{A})^{\prime} (\mathbf{B} \otimes \mathbf{C}) \mathrm{vec}(\mathbf{A}) = \mathrm{tr}(\mathbf{B^{\prime}A^{\prime}CA}) \<br>
+&amp;= \mathrm{tr}(\mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}_{k}^{-1} \mathbf{\Delta} ) \<br>
+\end{aligned}<br>
+$$<br>
+最后一个式子中，我们设 $\mathbf{\Delta} = \mathbf{E}^{\prime} \mathbf{E}$ 。</p>
+<p>代入 $U(\phi_{ij})$ 得到<br>
+$$<br>
+U(\phi_{ij}) = - \frac{1}{2} \Big( n \operatorname{tr}\left(  \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\dot{\Sigma}}</em>{k_{i j}} \right) -\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\left(  \mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) W} \right)-\mathrm{tr}(\mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Delta} ) \Big)<br>
+$$<br>
+我们需要对这个式子进一步简化，我们知道  $\mathbf{\Sigma}</em>{k}$ 是一个对称矩阵，因此  $\mathbf{\Sigma}<em>{k}^{-1}$ 也是一个对称矩阵，  我们将   $\mathbf{\Sigma}</em>{k}^{-1}$ 中的元素表示为 $\phi^{ij}$ ($i \leq j$ ) 。</p>
+<p>首先我们考虑第一项 $\operatorname{tr}\left(  \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\dot{\Sigma}}</em>{k_{i j}} \right)$ ，同上，我们可以得到<br>
+$$<br>
+\operatorname{tr}\left(\boldsymbol{\Sigma}<em>k^{-1} \dot{\boldsymbol{\Sigma}}</em>{k_{i j}}\right)=\left{\begin{array}{cc}<br>
+\phi^{i i}, &amp; i=j \<br>
+2 \phi^{i j}, &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+我们现在考虑第三项，如下<br>
+$$<br>
+\begin{aligned}<br>
+\mathrm{tr}(\mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Delta}) &amp; = \mathrm{tr}(\mathbf{\Sigma}</em>{k}^{-1} \mathbf{\Delta}\mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}) \<br>
+&amp; = \mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}})   \<br>
+\end{aligned}<br>
+$$<br>
+其中我们设 $\mathbf{\Delta}^{</em>} = \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Delta}\mathbf{\Sigma}</em>{k}^{-1} = { \delta_{ij}^{*}}$ 。</p>
+<p>当 $i=j$  时，矩阵  $\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}$ 只有第 $i$ 列元素为 $\mathbf{\Delta}^{</em>}$ 的第 $i$ 列元素 ，其它位置元素为 0 。因此，我们得到<br>
+$$<br>
+\mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}) = \delta_{ii}^{</em>}<br>
+$$<br>
+当   $i \neq j$  时, 矩阵  $\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}$ 其第 $i$ 列为 $\mathbf{\Delta}^{</em>}$ 的第 $j$  列， 其第 $j$ 列为 $\mathbf{\Delta}^{<em>}$ 的第 $i$  列，其它位置元素为 0 。因此，我们得到 (因为  $\mathbf{\Delta}^{</em>}$ 对称)<br>
+$$<br>
+\mathrm{tr}(\mathbf{\Delta}^{<em>}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}) = \delta_{ij}^{</em>} + \delta_{ji}^{<em>} = 2 \delta_{ij}^{</em>}<br>
+$$<br>
+综上，我们有<br>
+$$<br>
+\mathrm{tr}(\mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Delta})=\left{\begin{array}{cc}<br>
+\delta^{*}</em>{i i}, &amp; i=j \<br>
+2 \delta^{*}<em>{i j}, &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+对于第二项，首先我们对 $\mathbf{WC^{-1}W^{\prime}}$ 进行推导如下<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{WC^{-1}W^{\prime}}\<br>
+&amp;= \left[\begin{array}{c}<br>
+\mathbf{X} &amp; \mathbf{Z}<br>
+\end{array}\right] \left[\begin{array}{c}<br>
+\mathbf{C}^{XX} &amp; \mathbf{C}^{XZ} \<br>
+\mathbf{C}^{ZX} &amp; \mathbf{C}^{ZZ} \<br>
+\end{array}\right] \left[\begin{array}{c}<br>
+\mathbf{X}^{\prime} \<br>
+\mathbf{Z}^{\prime}<br>
+\end{array}\right] \<br>
+&amp;=\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime}+\mathbf{X}\mathbf{C}^{XZ}\mathbf{Z}^{\prime}+\mathbf{Z}\mathbf{C}^{ZX}\mathbf{X}^{\prime}+\mathbf{Z}\mathbf{C}^{ZZ}\mathbf{Z}^{\prime} \<br>
+\end{aligned}<br>
+$$<br>
+因此，第二项推导得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) W} \right) \<br>
+&amp;= \operatorname{tr}\left(\mathbf{WC^{-1}W^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) } \right) \<br>
+&amp;= \operatorname{tr}\left(\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right)  \right) + \operatorname{tr}\left(\mathbf{X}\mathbf{C}^{XZ}\mathbf{Z}^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right)  \right) + \operatorname{tr}\left(\mathbf{Z}\mathbf{C}^{ZX}\mathbf{X}^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right)  \right) + \operatorname{tr}\left(\mathbf{Z}\mathbf{C}^{ZZ}\mathbf{Z}^{\prime}\left(  \mathbf{\Sigma}</em>{k}^{-1}\mathbf{\dot{\Sigma}}<em>{k</em>{i j}}\mathbf{\Sigma}_{k}^{-1}  \otimes \mathbf{I} \right)  \right)</p>
+<p>\end{aligned}<br>
+$$<br>
+对于第二项的第一项进行推导（其余项同理可得），假设 $k=3$  ，则 $\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime}$  可以分解为<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime} \<br>
+&amp;= \left[\begin{array}{cccc}<br>
+\mathbf{X}<em>{1} &amp; \mathbf{0}  &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{X}</em>{2}  &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{0}  &amp; \mathbf{X}<em>{3} \<br>
+\end{array}\right]<br>
+\left[\begin{array}{cccc}<br>
+\mathbf{C}^{XX}</em>{11} &amp; \mathbf{C}^{XX}<em>{12}  &amp; \mathbf{C}^{XX}</em>{13} \<br>
+\mathbf{C}^{XX}<em>{21} &amp; \mathbf{C}^{XX}</em>{22}  &amp; \mathbf{C}^{XX}<em>{23} \<br>
+\mathbf{C}^{XX}</em>{31} &amp; \mathbf{C}^{XX}<em>{32}  &amp; \mathbf{C}^{XX}</em>{33} \<br>
+\end{array}\right] \left[\begin{array}{cccc}<br>
+\mathbf{X}<em>{1}^{\prime} &amp; \mathbf{0}  &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{X}</em>{2}^{\prime}  &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{0}  &amp; \mathbf{X}<em>{3}^{\prime} \<br>
+\end{array}\right] \<br>
+&amp;= \left[\begin{array}{cccc}<br>
+\mathbf{X}</em>{1}\mathbf{C}^{XX}<em>{11}\mathbf{X}</em>{1}^{\prime} &amp; \mathbf{X}<em>{1}\mathbf{C}^{XX}</em>{12}\mathbf{X}<em>{2}^{\prime}  &amp; \mathbf{X}</em>{1}\mathbf{C}^{XX}<em>{13}\mathbf{X}</em>{3}^{\prime} \<br>
+\mathbf{X}<em>{2}\mathbf{C}^{XX}</em>{21}\mathbf{X}<em>{1}^{\prime} &amp; \mathbf{X}</em>{2}\mathbf{C}^{XX}<em>{22}\mathbf{X}</em>{2}^{\prime}  &amp; \mathbf{X}<em>{2}\mathbf{C}^{XX}</em>{23}\mathbf{X}<em>{3}^{\prime} \<br>
+\mathbf{X}</em>{3}\mathbf{C}^{XX}<em>{31}\mathbf{X}</em>{1}^{\prime} &amp; \mathbf{X}<em>{3}\mathbf{C}^{XX}</em>{32}\mathbf{X}<em>{2}^{\prime}  &amp; \mathbf{X}</em>{3}\mathbf{C}^{XX}<em>{33}\mathbf{X}</em>{3}^{\prime} \<br>
+\end{array}\right]<br>
+\end{aligned}<br>
+$$<br>
+类似与随机效应，我们可以得到（推导过程略）<br>
+$$<br>
+\operatorname{tr}\left(\mathbf{X}\mathbf{C}^{XX}\mathbf{X}^{\prime}\left(  \mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right)  \right)=\left{\begin{array}{cc}<br>
+\sum</em>{s=1}^{k}\sum_{t=1}^{k}\phi^{it}\phi^{si} \operatorname{tr} (\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} ), &amp; i=j \<br>
+\sum</em>{s=1}^{k}\sum_{t=1}^{k}\phi^{it}\phi^{sj} \left( \operatorname{tr} \left(\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime}\right) +  \operatorname{tr} \left(\mathbf{X}</em>{t}\mathbf{C}^{XX}<em>{ts}\mathbf{X}</em>{s}^{\prime}\right)\right) , &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+因此，我们得到（同上，我们有 $\mathbf{C}^{AB}<em>{st} = (\mathbf{C}^{BA}</em>{ts})^{T}$  ）<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\left(  \mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) W} \right)\<br>
+&amp;=\left{\begin{array}{cc}<br>
+\sum</em>{s=1}^{k}\sum_{t=1}^{k}\phi^{it}\phi^{si} \operatorname{tr} (\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} + \mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} ), &amp; i=j \<br>
+\sum_{s=1}^{k}\sum_{t=1}^{k}\phi^{it}\phi^{sj} \left( \operatorname{tr} \left(\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} +\mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} +\mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} \right) + \operatorname{tr} \left(\mathbf{X}<em>{t}\mathbf{C}^{XX}</em>{ts}\mathbf{X}<em>{s}^{\prime}+\mathbf{X}</em>{t}\mathbf{C}^{XZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime}+\mathbf{Z}<em>{t}\mathbf{C}^{ZX}</em>{ts}\mathbf{X}<em>{s}^{\prime}+\mathbf{Z}</em>{t}\mathbf{C}^{ZZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime}\right) \right), &amp; i \neq j<br>
+\end{array}\right. \<br>
+&amp;=\left{\begin{array}{cc}<br>
+\sum_{s=1}^{k}\sum_{t=1}^{k}\phi^{it}\phi^{si} \operatorname{tr} (\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} + \mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} ), &amp; i=j \<br>
+\sum_{s=1}^{k}\sum_{t=1}^{k}\phi^{it}\phi^{sj} 2 \operatorname{tr} \left(\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} +\mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} +\mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime}  \right), &amp; i \neq j<br>
+\end{array}\right. \</p>
+<p>\end{aligned}<br>
+$$<br>
+现在我们定义 $\mathbf{\Psi}$ 是一个 $k \times k$ 的矩阵，其元素为 $\psi_{ij} =  \operatorname{tr} \left(\mathbf{X}<em>{i}\mathbf{C}^{XX}</em>{ij}\mathbf{X}<em>{j}^{\prime} + \mathbf{X}</em>{i}\mathbf{C}^{XZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime} +\mathbf{Z}<em>{i}\mathbf{C}^{ZX}</em>{ij}\mathbf{X}<em>{j}^{\prime} +\mathbf{Z}</em>{i}\mathbf{C}^{ZZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime}  \right)$，根据矩阵乘法性质（假设 $\mathbf{A,B,C}$ 均为 $n \times n$ 的矩阵，则 $\mathbf{ABC} = {\sum_{s=1}^{n}\sum_{t=1}^{n}a_{it}b_{ts}c_{sj}}$ ），我们发现<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Psi}\mathbf{\Sigma}</em>{k}^{-1} &amp;= \left {\sum_{s=1}^{k}\sum_{t=1}^{k}\phi^{it}\operatorname{tr} \left(\mathbf{X}<em>{t}\mathbf{C}^{XX}</em>{ts}\mathbf{X}<em>{s}^{\prime} + \mathbf{X}</em>{t}\mathbf{C}^{XZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime} +\mathbf{Z}<em>{t}\mathbf{C}^{ZX}</em>{ts}\mathbf{X}<em>{s}^{\prime} +\mathbf{Z}</em>{t}\mathbf{C}^{ZZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime}  \right)\phi^{sj} \right}\<br>
+&amp;= \left {\sum_{s=1}^{k}\sum_{t=1}^{k}\phi^{it}\phi^{sj}\operatorname{tr} \left(\mathbf{X}<em>{t}\mathbf{C}^{XX}</em>{ts}\mathbf{X}<em>{s}^{\prime} + \mathbf{X}</em>{t}\mathbf{C}^{XZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime} +\mathbf{Z}<em>{t}\mathbf{C}^{ZX}</em>{ts}\mathbf{X}<em>{s}^{\prime} +\mathbf{Z}</em>{t}\mathbf{C}^{ZZ}<em>{ts}\mathbf{Z}</em>{s}^{\prime}  \right)\right}\<br>
+&amp;= \left {\sum_{s=1}^{k}\sum_{t=1}^{k}\phi^{it}\phi^{sj}\operatorname{tr} \left(\mathbf{X}<em>{s}\mathbf{C}^{XX}</em>{st}\mathbf{X}<em>{t}^{\prime} + \mathbf{X}</em>{s}\mathbf{C}^{XZ}<em>{st}\mathbf{Z}</em>{t}^{\prime} +\mathbf{Z}<em>{s}\mathbf{C}^{ZX}</em>{st}\mathbf{X}<em>{t}^{\prime} +\mathbf{Z}</em>{s}\mathbf{C}^{ZZ}<em>{st}\mathbf{Z}</em>{t}^{\prime}  \right)\right}\<br>
+\end{aligned}<br>
+$$<br>
+我们定义 $\psi_{ij}^{<em>}$ 是 $\mathbf{\Psi}^{</em>} = \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Psi}\mathbf{\Sigma}</em>{k}^{-1}$ 的元素，即 $\psi_{ij}^{*} = \left{ \mathbf{\Sigma}<em>{k}^{-1} \mathbf{\Psi}\mathbf{\Sigma}</em>{k}^{-1} \right}_{ij}$ 。</p>
+<p>因此，我们得到<br>
+$$<br>
+\operatorname{tr}\left(\mathbf{C^{-1}W^{\prime}\left(  \mathbf{\Sigma}<em>{k}^{-1}\mathbf{\dot{\Sigma}}</em>{k_{i j}}\mathbf{\Sigma}<em>{k}^{-1}  \otimes \mathbf{I} \right) W} \right)=\left{\begin{array}{cc}<br>
+\psi</em>{ii}^{<em>}, &amp; i=j \<br>
+2\psi_{ij}^{</em>}, &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+将上面的式子代入 $U(\phi_{ij})$ ，进一步简化得到<br>
+$$<br>
+U(\phi_{ij}) =\left{\begin{array}{cc}</p>
 <ul>
-<li>\frac{1}{2} \Big(n\phi^{ii} - \psi_{ii}^{<em>}- \delta_{ii}^{</em>} \big), &amp; i&#x3D;j \</li>
-<li>\frac{1}{2} \Big(2n\phi^{ij} - 2\psi_{ij}^{<em>}- 2\delta_{ij}^{</em>} \big), &amp; i \neq j<br>\end{array}\right.<br>$$<br>将之设为0， 对 $\gamma^{ij}$ 求解得到 EM 推导公式<br>$$<br>n\phi^{ij} &#x3D; \psi_{ij}^{<em>} + \delta_{ij}^{</em>}<br>$$<br>使用矩阵格式，我们得到<br>$$<br>\begin{aligned}<br>n\mathbf{\Sigma}<em>{k}^{-1} &amp;&#x3D; \mathbf{\Psi}^{<em>} + \mathbf{\Delta}^{</em>} \<br>&amp;&#x3D; \mathbf{\Sigma}</em>{k}^{-1} \mathbf{\Psi}\mathbf{\Sigma}<em>{k}^{-1} + \mathbf{\Sigma}</em>{k}^{-1} \mathbf{\Delta}\mathbf{\Sigma}<em>{k}^{-1}<br>\end{aligned}<br>$$<br>左右均乘以 $\mathbf{\Sigma}</em>{k}$ ，得到<br>$$<br>n\mathbf{\Sigma}<em>{k}&#x3D;  \mathbf{\Psi} +  \mathbf{\Delta}<br>$$<br>因此，我们得到<br>$$<br>n\phi</em>{ij} &#x3D; \psi_{ij} + \delta_{ij}<br>$$<br>因为  $\psi_{ij} &#x3D; \operatorname{tr} \left(\mathbf{X}<em>{i}\mathbf{C}^{XX}</em>{ij}\mathbf{X}<em>{j}^{\prime} + \mathbf{X}</em>{i}\mathbf{C}^{XZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime} +\mathbf{Z}<em>{i}\mathbf{C}^{ZX}</em>{ij}\mathbf{X}<em>{j}^{\prime} +\mathbf{Z}</em>{i}\mathbf{C}^{ZZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime}  \right)$ ，  $\mathbf{\Delta} &#x3D; \mathbf{E}^{\prime} \mathbf{E}$  可以进一步分块为：<br>$$<br>\mathbf{\Delta} &#x3D; \mathbf{E}^{\prime}  \mathbf{E} &#x3D;\left[\begin{array}{cccc}<br>\mathbf{e}<em>{1}^{\prime}\mathbf{e}</em>{1} &amp; \mathbf{e}<em>{1}^{\prime}\mathbf{e}</em>{2} &amp; \cdots &amp; \mathbf{e}<em>{1}^{\prime}\mathbf{e}</em>{k} \<br>\mathbf{e}<em>{2}^{\prime}\mathbf{e}</em>{1} &amp; \mathbf{e}<em>{2}^{\prime}\mathbf{e}</em>{2} &amp; \cdots &amp; \mathbf{e}<em>{2}^{\prime}\mathbf{e}</em>{k} \<br>\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>\mathbf{e}<em>{k}^{\prime}\mathbf{e}</em>{1} &amp; \mathbf{e}<em>{k}^{\prime}\mathbf{e}</em>{2} &amp; \cdots &amp; \mathbf{e}<em>{k}^{\prime}\mathbf{e}</em>{k} \<br>\end{array}\right]<br>$$<br>因此 $\delta_{ij} &#x3D; \mathbf{e}<em>{i}^{\prime}\mathbf{e}</em>{j}$ 。因此上面的 EM 推导公式可以写为<br>$$<br>\phi_{ij} &#x3D; \frac{1}{n} \left(\operatorname{tr} \left(\mathbf{X}<em>{i}\mathbf{C}^{XX}</em>{ij}\mathbf{X}<em>{j}^{\prime} + \mathbf{X}</em>{i}\mathbf{C}^{XZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime} +\mathbf{Z}<em>{i}\mathbf{C}^{ZX}</em>{ij}\mathbf{X}<em>{j}^{\prime} +\mathbf{Z}</em>{i}\mathbf{C}^{ZZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime}  \right) + \mathbf{e}<em>{i}^{\prime}\mathbf{e}</em>{j} \right)<br>$$<br>如果我们设 $\mathbf{W}<em>{i} &#x3D; \left[\begin{array}{c}<br>\mathbf{X}</em>{i} &amp; \mathbf{Z}<em>{i}<br>\end{array}\right]$ ,   $\mathbf{W}</em>{j} &#x3D; \left[\begin{array}{c}<br>\mathbf{X}<em>{j} &amp; \mathbf{Z}</em>{j}<br>\end{array}\right]$ ,  $\mathbf{C}^{ij} &#x3D; \left[\begin{array}{c}<br>\mathbf{C}^{XX}<em>{ij} &amp; \mathbf{C}^{XZ}</em>{ij} \<br>\mathbf{C}^{ZX}<em>{ij} &amp; \mathbf{C}^{ZZ}</em>{ij} \<br>\end{array}\right]$ ，则我们有<br>$$<br>\psi_{ij} &#x3D; \operatorname{tr} \left(\mathbf{X}<em>{i}\mathbf{C}^{XX}</em>{ij}\mathbf{X}<em>{j}^{\prime} + \mathbf{X}</em>{i}\mathbf{C}^{XZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime} +\mathbf{Z}<em>{i}\mathbf{C}^{ZX}</em>{ij}\mathbf{X}<em>{j}^{\prime} +\mathbf{Z}</em>{i}\mathbf{C}^{ZZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime}  \right) &#x3D; \operatorname{tr} \left( \mathbf{W}<em>{i} \mathbf{C}^{ij} \mathbf{W}</em>{j}^{\prime} \right)<br>$$<br>则 $\phi_{ij}$ 的 EM 推导公式可以写为<br>$$<br>\phi_{ij} &#x3D; \frac{1}{n} \left(\operatorname{tr} \left( \mathbf{W}<em>{i} \mathbf{C}^{ij} \mathbf{W}</em>{j}^{\prime} \right) + \mathbf{e}<em>{i}^{\prime}\mathbf{e}</em>{j} \right)<br>$$</li>
+<li>\frac{1}{2} \Big(n\phi^{ii} - \psi_{ii}^{<em>}- \delta_{ii}^{</em>} \big), &amp; i=j \</li>
+<li>\frac{1}{2} \Big(2n\phi^{ij} - 2\psi_{ij}^{<em>}- 2\delta_{ij}^{</em>} \big), &amp; i \neq j<br>
+\end{array}\right.<br>
+$$<br>
+将之设为0， 对 $\gamma^{ij}$ 求解得到 EM 推导公式<br>
+$$<br>
+n\phi^{ij} = \psi_{ij}^{<em>} + \delta_{ij}^{</em>}<br>
+$$<br>
+使用矩阵格式，我们得到<br>
+$$<br>
+\begin{aligned}<br>
+n\mathbf{\Sigma}<em>{k}^{-1} &amp;= \mathbf{\Psi}^{<em>} + \mathbf{\Delta}^{</em>} \<br>
+&amp;= \mathbf{\Sigma}</em>{k}^{-1} \mathbf{\Psi}\mathbf{\Sigma}<em>{k}^{-1} + \mathbf{\Sigma}</em>{k}^{-1} \mathbf{\Delta}\mathbf{\Sigma}<em>{k}^{-1}<br>
+\end{aligned}<br>
+$$<br>
+左右均乘以 $\mathbf{\Sigma}</em>{k}$ ，得到<br>
+$$<br>
+n\mathbf{\Sigma}<em>{k}=  \mathbf{\Psi} +  \mathbf{\Delta}<br>
+$$<br>
+因此，我们得到<br>
+$$<br>
+n\phi</em>{ij} = \psi_{ij} + \delta_{ij}<br>
+$$<br>
+因为  $\psi_{ij} = \operatorname{tr} \left(\mathbf{X}<em>{i}\mathbf{C}^{XX}</em>{ij}\mathbf{X}<em>{j}^{\prime} + \mathbf{X}</em>{i}\mathbf{C}^{XZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime} +\mathbf{Z}<em>{i}\mathbf{C}^{ZX}</em>{ij}\mathbf{X}<em>{j}^{\prime} +\mathbf{Z}</em>{i}\mathbf{C}^{ZZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime}  \right)$ ，  $\mathbf{\Delta} = \mathbf{E}^{\prime} \mathbf{E}$  可以进一步分块为：<br>
+$$<br>
+\mathbf{\Delta} = \mathbf{E}^{\prime}  \mathbf{E} =\left[\begin{array}{cccc}<br>
+\mathbf{e}<em>{1}^{\prime}\mathbf{e}</em>{1} &amp; \mathbf{e}<em>{1}^{\prime}\mathbf{e}</em>{2} &amp; \cdots &amp; \mathbf{e}<em>{1}^{\prime}\mathbf{e}</em>{k} \<br>
+\mathbf{e}<em>{2}^{\prime}\mathbf{e}</em>{1} &amp; \mathbf{e}<em>{2}^{\prime}\mathbf{e}</em>{2} &amp; \cdots &amp; \mathbf{e}<em>{2}^{\prime}\mathbf{e}</em>{k} \<br>
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \<br>
+\mathbf{e}<em>{k}^{\prime}\mathbf{e}</em>{1} &amp; \mathbf{e}<em>{k}^{\prime}\mathbf{e}</em>{2} &amp; \cdots &amp; \mathbf{e}<em>{k}^{\prime}\mathbf{e}</em>{k} \<br>
+\end{array}\right]<br>
+$$<br>
+因此 $\delta_{ij} = \mathbf{e}<em>{i}^{\prime}\mathbf{e}</em>{j}$ 。因此上面的 EM 推导公式可以写为<br>
+$$<br>
+\phi_{ij} = \frac{1}{n} \left(\operatorname{tr} \left(\mathbf{X}<em>{i}\mathbf{C}^{XX}</em>{ij}\mathbf{X}<em>{j}^{\prime} + \mathbf{X}</em>{i}\mathbf{C}^{XZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime} +\mathbf{Z}<em>{i}\mathbf{C}^{ZX}</em>{ij}\mathbf{X}<em>{j}^{\prime} +\mathbf{Z}</em>{i}\mathbf{C}^{ZZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime}  \right) + \mathbf{e}<em>{i}^{\prime}\mathbf{e}</em>{j} \right)<br>
+$$<br>
+如果我们设 $\mathbf{W}<em>{i} = \left[\begin{array}{c}<br>
+\mathbf{X}</em>{i} &amp; \mathbf{Z}<em>{i}<br>
+\end{array}\right]$ ,   $\mathbf{W}</em>{j} = \left[\begin{array}{c}<br>
+\mathbf{X}<em>{j} &amp; \mathbf{Z}</em>{j}<br>
+\end{array}\right]$ ,  $\mathbf{C}^{ij} = \left[\begin{array}{c}<br>
+\mathbf{C}^{XX}<em>{ij} &amp; \mathbf{C}^{XZ}</em>{ij} \<br>
+\mathbf{C}^{ZX}<em>{ij} &amp; \mathbf{C}^{ZZ}</em>{ij} \<br>
+\end{array}\right]$ ，则我们有<br>
+$$<br>
+\psi_{ij} = \operatorname{tr} \left(\mathbf{X}<em>{i}\mathbf{C}^{XX}</em>{ij}\mathbf{X}<em>{j}^{\prime} + \mathbf{X}</em>{i}\mathbf{C}^{XZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime} +\mathbf{Z}<em>{i}\mathbf{C}^{ZX}</em>{ij}\mathbf{X}<em>{j}^{\prime} +\mathbf{Z}</em>{i}\mathbf{C}^{ZZ}<em>{ij}\mathbf{Z}</em>{j}^{\prime}  \right) = \operatorname{tr} \left( \mathbf{W}<em>{i} \mathbf{C}^{ij} \mathbf{W}</em>{j}^{\prime} \right)<br>
+$$<br>
+则 $\phi_{ij}$ 的 EM 推导公式可以写为<br>
+$$<br>
+\phi_{ij} = \frac{1}{n} \left(\operatorname{tr} \left( \mathbf{W}<em>{i} \mathbf{C}^{ij} \mathbf{W}</em>{j}^{\prime} \right) + \mathbf{e}<em>{i}^{\prime}\mathbf{e}</em>{j} \right)<br>
+$$</li>
 </ul>
-<h1 id="附录1-V逆相关推导"><a href="#附录1-V逆相关推导" class="headerlink" title="附录1: V逆相关推导"></a>附录1: V逆相关推导</h1><p>根据舒尔补公式 $\mathbf{(D+CA^{-1}B)^{-1}&#x3D;D^{-1}-D^{-1}C(A+BD^{-1}C)^{-1}BD^{-1}}$ ， 我们可以得到<br>$$<br>\mathbf{V^{-1}}  &#x3D; \mathbf{(R+ZGZ^{\prime})^{-1}} &#x3D; \mathbf{R^{-1}-R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}}<br>$$<br>两边左乘 $\mathbf{GZ^{\prime}}$ 得到<br>$$<br>\begin{aligned}<br>&amp; \quad \mathbf{GZ^{\prime}(R+ZGZ^{\prime})^{-1}} \<br>&amp;&#x3D; \mathbf{GZ^{\prime}R^{-1}-GZ^{\prime}R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}}\<br>&amp;&#x3D; \mathbf{GZ^{\prime}R^{-1}-G(Z^{\prime}R^{-1}Z+G^{-1})(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}+(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \<br>&amp;&#x3D; \mathbf{GZ^{\prime}R^{-1}-GZ^{\prime}R^{-1}+(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \<br>&amp;&#x3D; \mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \<br>\end{aligned}<br>$$<br>因此我们得到<br>$$<br>\mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} &#x3D; \mathbf{GZ^{\prime}(R+ZGZ^{\prime})^{-1}}<br>$$<br>转置一下，得到<br>$$<br>\mathbf{R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}} &#x3D; \mathbf{(R+ZGZ^{\prime})^{-1}ZG}<br>$$</p>
-<h1 id="附录2：P-矩阵对方差组分的导数"><a href="#附录2：P-矩阵对方差组分的导数" class="headerlink" title="附录2：P 矩阵对方差组分的导数"></a>附录2：P 矩阵对方差组分的导数</h1><p> 我们有<br>$$<br>\frac{\partial \boldsymbol{P}}{\partial \kappa_i}&#x3D;-\boldsymbol{P} \boldsymbol{V}_i \boldsymbol{P}<br>$$<br>证明如下：<br>$$<br>\begin{aligned}<br>\frac{\partial \boldsymbol{P}}{\partial \kappa_i}&#x3D; &amp; \frac{\partial}{\partial \kappa_i}\left(\boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}\right) \<br>&#x3D; &amp; \frac{\partial \boldsymbol{V}^{-1}}{\partial \kappa_i}-\frac{\partial \boldsymbol{V}^{-1}}{\partial \kappa_i} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X} \frac{\partial\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1}}{\partial \kappa_i} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \<br>&amp; \quad-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \frac{\partial \boldsymbol{V}^{-1}}{\partial \kappa_i} \<br>&#x3D; &amp; -\boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{V}^{-1}+\boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \<br>&amp; \quad-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X} \boldsymbol{V}^{-1} \<br>&amp; \quad+\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{V}^{-1} \<br>&#x3D; &amp; -\boldsymbol{V}^{-1} \boldsymbol{V}_i\left(\boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}\right)\right. \<br>&amp; \quad+\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{V}_i\left(\boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}\right) \<br>&#x3D; &amp; -\boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{P}+\boldsymbol{V}^{-1} \boldsymbol{X}^{\prime}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{P} \<br>&#x3D; &amp; -\left(\boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}\right) \boldsymbol{V}_i \boldsymbol{P} \<br>&#x3D; &amp; -\boldsymbol{P} \boldsymbol{V}_i \boldsymbol{P}<br>\end{aligned}<br>$$</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>附录1: V逆相关推导</h1>
+<p>根据舒尔补公式 $\mathbf{(D+CA^{-1}B)^{-1}=D^{-1}-D^{-1}C(A+BD^{-1}C)^{-1}BD^{-1}}$ ， 我们可以得到<br>
+$$<br>
+\mathbf{V^{-1}}  = \mathbf{(R+ZGZ^{\prime})^{-1}} = \mathbf{R^{-1}-R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}}<br>
+$$<br>
+两边左乘 $\mathbf{GZ^{\prime}}$ 得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp; \quad \mathbf{GZ^{\prime}(R+ZGZ^{\prime})^{-1}} \<br>
+&amp;= \mathbf{GZ^{\prime}R^{-1}-GZ^{\prime}R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}}\<br>
+&amp;= \mathbf{GZ^{\prime}R^{-1}-G(Z^{\prime}R^{-1}Z+G^{-1})(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}+(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \<br>
+&amp;= \mathbf{GZ^{\prime}R^{-1}-GZ^{\prime}R^{-1}+(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \<br>
+&amp;= \mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \<br>
+\end{aligned}<br>
+$$<br>
+因此我们得到<br>
+$$<br>
+\mathbf{(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} = \mathbf{GZ^{\prime}(R+ZGZ^{\prime})^{-1}}<br>
+$$<br>
+转置一下，得到<br>
+$$<br>
+\mathbf{R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}} = \mathbf{(R+ZGZ^{\prime})^{-1}ZG}<br>
+$$</p>
+<h1>附录2：P 矩阵对方差组分的导数</h1>
+<p>我们有<br>
+$$<br>
+\frac{\partial \boldsymbol{P}}{\partial \kappa_i}=-\boldsymbol{P} \boldsymbol{V}_i \boldsymbol{P}<br>
+$$<br>
+证明如下：<br>
+$$<br>
+\begin{aligned}<br>
+\frac{\partial \boldsymbol{P}}{\partial \kappa_i}= &amp; \frac{\partial}{\partial \kappa_i}\left(\boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}\right) \<br>
+= &amp; \frac{\partial \boldsymbol{V}^{-1}}{\partial \kappa_i}-\frac{\partial \boldsymbol{V}^{-1}}{\partial \kappa_i} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X} \frac{\partial\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1}}{\partial \kappa_i} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \<br>
+&amp; \quad-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \frac{\partial \boldsymbol{V}^{-1}}{\partial \kappa_i} \<br>
+= &amp; -\boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{V}^{-1}+\boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \<br>
+&amp; \quad-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X} \boldsymbol{V}^{-1} \<br>
+&amp; \quad+\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{V}^{-1} \<br>
+= &amp; -\boldsymbol{V}^{-1} \boldsymbol{V}_i\left(\boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}\right)\right. \<br>
+&amp; \quad+\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{V}_i\left(\boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}\right) \<br>
+= &amp; -\boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{P}+\boldsymbol{V}^{-1} \boldsymbol{X}^{\prime}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{P} \<br>
+= &amp; -\left(\boldsymbol{V}^{-1}-\boldsymbol{V}^{-1} \boldsymbol{X}\left(\boldsymbol{X}^{\prime} \boldsymbol{V}^{-1} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\prime} \boldsymbol{V}^{-1}\right) \boldsymbol{V}_i \boldsymbol{P} \<br>
+= &amp; -\boldsymbol{P} \boldsymbol{V}_i \boldsymbol{P}<br>
+\end{aligned}<br>
+$$</p>
+<h1>参考文献</h1>
+<ol>
 <li>Knight E. Improved iterative schemes for REML estimation of variance parameters in linear mixed models[D]. , 2008.</li>
 </ol>
  
@@ -217,55 +1174,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -564,30 +1473,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

@@ -98,13 +98,14 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这算是<a href="https://vincere.fun/posts/c4bb4461/">批量下载R包</a>的续篇了。</p>
 <span id="more"></span>
-
-<h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><ol>
+<h1>现状</h1>
+<ol>
 <li>安装 R 包报错稀奇古怪，根据报错信息在网络上找不到多少教程，或者按照网上的教程去做也不一定。<strong>往往因为一个或几个安装不上的 R 包，要花上个把小时的时间</strong>，甚至最终还是解决不了，令人火大，效率低下。</li>
 <li>R 包之间可能存在冲突。举个例子，最近新安装了 <code>GenomicRanges</code> 包之后，发现之前安装的 <code>tidyverse</code> 就自动没了，而且之后死活安装不上。</li>
 <li>使用 <code>conda</code> 安装 R 包可行，但是可能会弄乱环境，可能使得其它已经安装的 R 包无法正常使用（因为 <code>conda</code> 权限太高，过于霸道，会自动安装、卸载，更改（版本）其它R包和软件）。甚至于我用 <code>conda</code> 卸载别的软件，它顺带把我的 R 也卸载了。</li>
 </ol>
-<h1 id="方法论"><a href="#方法论" class="headerlink" title="方法论"></a>方法论</h1><p>因为安装 R 包存在的种种问题，结合飞哥的启发，我整理了一套解决R包安装失败的方法论。</p>
+<h1>方法论</h1>
+<p>因为安装 R 包存在的种种问题，结合飞哥的启发，我整理了一套解决R包安装失败的方法论。</p>
 <ol>
 <li>备份之前的 <code>library</code> 文件夹，如果存在这个 R 包，则直接将其文件夹 (及附属R包) 复制过来，测试是否成功（注意 R 版本必须<strong>完全</strong>保持一致，比如我目前都是用的 4.1.0 版本 ）。</li>
 <li>还是根据报错信息在网上找教程，稍微尝试几下，注意不要花太多时间，敢于放弃。</li>
@@ -113,7 +114,6 @@
 </ol>
 <p>示例脚本如下，更详细的脚本和解释见<a href="https://vincere.fun/posts/5375f878/">软件学习-conda</a></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">conda create --name R4.1 python=3.9.10</span><br><span class="line">conda activate R4.1</span><br><span class="line">conda search r</span><br><span class="line">conda install r-base=4.1.0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进入 R 环境</span> </span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/envs/R4.1/bin/R</span><br><span class="line">install.packages(&quot;&quot;)</span><br><span class="line">BiocManager::install(&quot;&quot;) </span><br><span class="line">packageVersion(&quot;&quot;)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 conda 安装</span></span><br><span class="line">conda search r-showtext</span><br><span class="line">conda install r-showtext</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果无法使用，则卸载，重新安装一个版本比较低的</span></span><br><span class="line">conda uninstall r-showtext</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">退出虚拟环境</span></span><br><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
-
  
       <!-- reward -->
       
@@ -161,55 +161,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -508,30 +460,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

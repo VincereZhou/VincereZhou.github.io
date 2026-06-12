@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">781</span>
+            <span class="post-count">772</span>
         </span>
     </span>
 
@@ -98,9 +98,67 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在<a href="https://vincere.fun/posts/e0b3b4ee/">基因组选择模型介绍下</a>提到了H逆矩阵，这里是补上证明。</p>
 <span id="more"></span>
-
-<h1 id="H逆证明"><a href="#H逆证明" class="headerlink" title="H逆证明"></a>H逆证明</h1><p>首先，按照无基因型个体在前，有基因型个体在后的顺序，H 阵的公式为<br>$$<br>\begin{aligned}<br>\mathbf{H} &amp;&#x3D;\left(\begin{array}{cc}<br>\operatorname{var}\left(\mathbf{u}<em>{1}\right) &amp; \operatorname{cov}\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right) \<br>\operatorname{cov}\left(\mathbf{u}</em>{2}, \mathbf{u}<em>{1}\right) &amp; \operatorname{var}\left(\mathbf{u}</em>{2}\right)<br>\end{array}\right) \<br>&amp;&#x3D;\left(\begin{array}{cc}<br>\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} &amp; \mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{G} \<br>\mathbf{G} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} &amp; \mathbf{G}<br>\end{array}\right) \<br>&amp;&#x3D;\mathbf{A}+\left[\begin{array}{cc}<br>\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}<em>{22}\right) \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \<br>\left(\mathbf{G}-\mathbf{A}<em>{22}\right) \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{G}-\mathbf{A}</em>{22}<br>\end{array}\right]<br>\end{aligned}<br>$$<br>如果我们按照有基因型个体在前，无基因型个体在后的顺序，我们有<br>$$<br>\begin{aligned}<br>\mathbf{H} &amp;&#x3D;\left(\begin{array}{cc}<br>\operatorname{var}\left(\mathbf{u}<em>{1}\right) &amp; \operatorname{cov}\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right) \<br>\operatorname{cov}\left(\mathbf{u}</em>{2}, \mathbf{u}<em>{1}\right) &amp; \operatorname{var}\left(\mathbf{u}</em>{2}\right)<br>\end{array}\right) \<br>&amp;&#x3D;\left(\begin{array}{cc}<br>\mathbf{G} &amp; \mathbf{G} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}   \<br>\mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} \mathbf{G} &amp; \mathbf{A}<em>{22}+\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{11}\right) \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}<br>\end{array}\right) \<br>\end{aligned}<br>$$<br>相应的 $\mathbf{A}$ 阵分块为<br>$$<br>\mathbf{A} &#x3D; \left(\begin{array}{cc}<br>\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22} \<br>\end{array}\right)<br>$$<br> 根据分块矩阵求逆的一般规则 (<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/47760591/answer/331976386">分块矩阵求逆公式</a> ，如果 $\mathbf{A}<em>{11}$ 和 $\mathbf{A}</em>{22}-\mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} \mathbf{A}<em>{12}$ 可逆，我们有<br>$$<br>\mathbf{A}^{-1}&#x3D;\left[\begin{array}{cc}<br>\mathbf{A}</em>{11}^{-1}+\mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} &amp; -\mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \<br>-\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} &amp; \left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1}<br>\end{array}\right]<br>$$<br>同样地，对于 $\mathbf{H}$ 矩阵，应用相同的规则，化简后得到<br>$$<br>\begin{aligned}<br>&amp;\mathbf{H}^{-1} \<br>&amp;&#x3D;\left[\begin{array}{cc}<br>\mathbf{G}^{-1}+\mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} &amp; -\mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \<br>-\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} &amp; \left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1}<br>\end{array}\right] \<br>&amp;&#x3D;\left[\begin{array}{cc}<br>\mathbf{G}^{-1}-\mathbf{A}_{11}^{-1} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{0}<br>\end{array}\right]+\mathbf{A}^{-1}<br>\end{aligned}<br>$$</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>H逆证明</h1>
+<p>首先，按照无基因型个体在前，有基因型个体在后的顺序，H 阵的公式为<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{H} &amp;=\left(\begin{array}{cc}<br>
+\operatorname{var}\left(\mathbf{u}<em>{1}\right) &amp; \operatorname{cov}\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right) \<br>
+\operatorname{cov}\left(\mathbf{u}</em>{2}, \mathbf{u}<em>{1}\right) &amp; \operatorname{var}\left(\mathbf{u}</em>{2}\right)<br>
+\end{array}\right) \<br>
+&amp;=\left(\begin{array}{cc}<br>
+\mathbf{A}<em>{11}+\mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} &amp; \mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1} \mathbf{G} \<br>
+\mathbf{G} \mathbf{A}<em>{22}^{-1} \mathbf{A}</em>{21} &amp; \mathbf{G}<br>
+\end{array}\right) \<br>
+&amp;=\mathbf{A}+\left[\begin{array}{cc}<br>
+\mathbf{A}<em>{12} \mathbf{A}</em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}<em>{22}\right) \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{A}</em>{12} \mathbf{A}<em>{22}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{22}\right) \<br>
+\left(\mathbf{G}-\mathbf{A}<em>{22}\right) \mathbf{A}</em>{22}^{-1} \mathbf{A}<em>{21} &amp; \mathbf{G}-\mathbf{A}</em>{22}<br>
+\end{array}\right]<br>
+\end{aligned}<br>
+$$<br>
+如果我们按照有基因型个体在前，无基因型个体在后的顺序，我们有<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{H} &amp;=\left(\begin{array}{cc}<br>
+\operatorname{var}\left(\mathbf{u}<em>{1}\right) &amp; \operatorname{cov}\left(\mathbf{u}</em>{1}, \mathbf{u}<em>{2}\right) \<br>
+\operatorname{cov}\left(\mathbf{u}</em>{2}, \mathbf{u}<em>{1}\right) &amp; \operatorname{var}\left(\mathbf{u}</em>{2}\right)<br>
+\end{array}\right) \<br>
+&amp;=\left(\begin{array}{cc}<br>
+\mathbf{G} &amp; \mathbf{G} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}   \<br>
+\mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} \mathbf{G} &amp; \mathbf{A}<em>{22}+\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1}\left(\mathbf{G}-\mathbf{A}</em>{11}\right) \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}<br>
+\end{array}\right) \<br>
+\end{aligned}<br>
+$$<br>
+相应的 $\mathbf{A}$ 阵分块为<br>
+$$<br>
+\mathbf{A} = \left(\begin{array}{cc}<br>
+\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>
+\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22} \<br>
+\end{array}\right)<br>
+$$<br>
+根据分块矩阵求逆的一般规则 (<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/47760591/answer/331976386">分块矩阵求逆公式</a> ，如果 $\mathbf{A}<em>{11}$ 和 $\mathbf{A}</em>{22}-\mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} \mathbf{A}<em>{12}$ 可逆，我们有<br>
+$$<br>
+\mathbf{A}^{-1}=\left[\begin{array}{cc}<br>
+\mathbf{A}</em>{11}^{-1}+\mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} &amp; -\mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \<br>
+-\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} &amp; \left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1}<br>
+\end{array}\right]<br>
+$$<br>
+同样地，对于 $\mathbf{H}$ 矩阵，应用相同的规则，化简后得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{H}^{-1} \<br>
+&amp;=\left[\begin{array}{cc}<br>
+\mathbf{G}^{-1}+\mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} &amp; -\mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \<br>
+-\left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1} \mathbf{A}<em>{21} \mathbf{A}</em>{11}^{-1} &amp; \left(\mathbf{A}<em>{22}-\mathbf{A}</em>{21} \mathbf{A}<em>{11}^{-1} \mathbf{A}</em>{12}\right)^{-1}<br>
+\end{array}\right] \<br>
+&amp;=\left[\begin{array}{cc}<br>
+\mathbf{G}^{-1}-\mathbf{A}_{11}^{-1} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{0}<br>
+\end{array}\right]+\mathbf{A}^{-1}<br>
+\end{aligned}<br>
+$$</p>
+<h1>参考文献</h1>
+<ol>
 <li>Christensen O F, Lund M S. Genomic prediction when some animals are not genotyped[J]. Genetics Selection Evolution, 2010, 42(1): 1-8.</li>
 <li>Aguilar I, Misztal I, Johnson D L, et al. Hot topic: a unified approach to utilize phenotypic, full pedigree, and genomic information for genetic evaluation of Holstein final score[J]. Journal of dairy science, 2010, 93(2): 743-752.</li>
 </ol>
@@ -151,55 +209,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -498,30 +508,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

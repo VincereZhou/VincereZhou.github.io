@@ -98,60 +98,74 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>比较两个软件的执行时间可以使用多种方法，其中使用 <code>time</code> 命令是一个常见且有效的方法。<code>time</code> 命令提供了程序运行时的各种时间统计信息，包括用户时间（User time）和系统时间（System time）。</p>
 <span id="more"></span>
-
-<h1 id="time-命令的输出"><a href="#time-命令的输出" class="headerlink" title="time 命令的输出"></a><code>time</code> 命令的输出</h1><p>当你在 Unix&#x2F;Linux 系统上使用 <code>time</code> 命令运行一个程序时，通常会得到以下几项信息：</p>
+<h1><code>time</code> 命令的输出</h1>
+<p>当你在 Unix/Linux 系统上使用 <code>time</code> 命令运行一个程序时，通常会得到以下几项信息：</p>
 <ul>
 <li><strong>user time</strong>: 该程序在用户模式下消耗的 CPU 时间，表示程序实际执行代码所花费的时间。</li>
-<li><strong>sys time</strong>: 该程序在内核模式下消耗的 CPU 时间，表示程序与操作系统进行交互（如 I&#x2F;O 操作）所花费的时间。</li>
-<li><strong>real time</strong>: 从程序开始到结束的总经过时间，这个时间包括其他进程的等待时间、I&#x2F;O 等。</li>
+<li><strong>sys time</strong>: 该程序在内核模式下消耗的 CPU 时间，表示程序与操作系统进行交互（如 I/O 操作）所花费的时间。</li>
+<li><strong>real time</strong>: 从程序开始到结束的总经过时间，这个时间包括其他进程的等待时间、I/O 等。</li>
 </ul>
-<h1 id="比较两个软件的执行时间"><a href="#比较两个软件的执行时间" class="headerlink" title="比较两个软件的执行时间"></a>比较两个软件的执行时间</h1><p>如果仅仅是想要比较两个软件的执行速度，可以考虑以下方法：</p>
+<h1>比较两个软件的执行时间</h1>
+<p>如果仅仅是想要比较两个软件的执行速度，可以考虑以下方法：</p>
 <ol>
-<li><p>**使用 <code>time</code> 命令并关注 <code>real time</code>**：</p>
+<li>
+<p><strong>使用 <code>time</code> 命令并关注 <code>real time</code></strong>：</p>
 <ul>
-<li><p>直接使用 <code>real time</code> 是一种简单而直观的比较方式，因为它反映了程序从开始到结束所需的实际墙钟时间。</p>
+<li>
+<p>直接使用 <code>real time</code> 是一种简单而直观的比较方式，因为它反映了程序从开始到结束所需的实际墙钟时间。</p>
 </li>
-<li><p>例如：</p>
+<li>
+<p>例如：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bash复制代码/usr/bin/time ./software1</span><br><span class="line">/usr/bin/time ./software2</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>在输出中，你可以看到每个软件的 <code>real</code> 时间，直接比较这两个值即可。</p>
+<li>
+<p>在输出中，你可以看到每个软件的 <code>real</code> 时间，直接比较这两个值即可。</p>
 </li>
 </ul>
 </li>
-<li><p><strong>使用 <code>user time</code> 和 <code>sys time</code> 的总和</strong>：</p>
+<li>
+<p><strong>使用 <code>user time</code> 和 <code>sys time</code> 的总和</strong>：</p>
 <ul>
 <li>如果你对 CPU 使用效率感兴趣，使用 <code>user time</code> + <code>sys time</code> 之和也很有用。这可以帮助你了解程序实际使用 CPU 资源的多少。</li>
-<li>在大多数情况下，将二者相加可以给出一个关于 CPU 时间的粗略估计，但请注意，这并不代表程序的总体性能，因为它无法反映 I&#x2F;O 等待时间。</li>
+<li>在大多数情况下，将二者相加可以给出一个关于 CPU 时间的粗略估计，但请注意，这并不代表程序的总体性能，因为它无法反映 I/O 等待时间。</li>
 </ul>
 </li>
 </ol>
-<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>假设你使用 <code>time</code> 命令运行两个程序，输出可能如下：</p>
+<h2 id="示例">示例</h2>
+<p>假设你使用 <code>time</code> 命令运行两个程序，输出可能如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bash复制代码$ /usr/bin/time ./software1</span><br><span class="line">real    0m1.234s</span><br><span class="line">user    0m0.456s</span><br><span class="line">sys     0m0.123s</span><br><span class="line"></span><br><span class="line">$ /usr/bin/time ./software2</span><br><span class="line">real    0m2.345s</span><br><span class="line">user    0m1.234s</span><br><span class="line">sys     0m0.321s</span><br></pre></td></tr></table></figure>
-
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<h1>总结</h1>
+<ul>
 <li><strong>比较方式</strong>：可以直接使用 <code>real time</code> 进行比较，也可以比较 <code>user time</code> + <code>sys time</code> 的总和。</li>
 <li><strong>选择依据</strong>：如果你关注的是程序在现实世界中的反应速度，使用 <code>real time</code> 更合适。如果关注的是 CPU 的使用情况，可以考虑 <code>user time</code> 和 <code>sys time</code>。</li>
 </ul>
-<h1 id="user-time-和-sys-time-的总和的称呼"><a href="#user-time-和-sys-time-的总和的称呼" class="headerlink" title="user time 和 sys time 的总和的称呼"></a>user time 和 sys time 的总和的称呼</h1><p><code>user time</code> 和 <code>sys time</code> 的总和在中文中通常被称为 <strong>“CPU时间”</strong> 或 **”总CPU时间”**。有时也可以见到的表述是 **”用户时间与系统时间之和”**，但最常用和简洁的说法就是 **”CPU时间”**。</p>
-<h2 id="CPU时间和执行时间"><a href="#CPU时间和执行时间" class="headerlink" title="CPU时间和执行时间"></a>CPU时间和执行时间</h2><p>将 <code>user time</code> 和 <code>sys time</code> 的总和称为 <strong>执行时间</strong>（或 <strong>总执行时间</strong>）在某些上下文中是可以接受的，但更常见的术语是 <strong>CPU时间</strong>。这两者之间的细微差别在于它们所关注的内容和计算方式。</p>
-<h3 id="定义区分"><a href="#定义区分" class="headerlink" title="定义区分"></a>定义区分</h3><ol>
-<li><strong>CPU时间 (CPU Time)</strong>:<ul>
+<h1>user time 和 sys time 的总和的称呼</h1>
+<p><code>user time</code> 和 <code>sys time</code> 的总和在中文中通常被称为 <strong>“CPU时间”</strong> 或 <strong>“总CPU时间”</strong>。有时也可以见到的表述是 <strong>“用户时间与系统时间之和”</strong>，但最常用和简洁的说法就是 <strong>“CPU时间”</strong>。</p>
+<h2 id="CPU时间和执行时间">CPU时间和执行时间</h2>
+<p>将 <code>user time</code> 和 <code>sys time</code> 的总和称为 <strong>执行时间</strong>（或 <strong>总执行时间</strong>）在某些上下文中是可以接受的，但更常见的术语是 <strong>CPU时间</strong>。这两者之间的细微差别在于它们所关注的内容和计算方式。</p>
+<h3 id="定义区分">定义区分</h3>
+<ol>
+<li><strong>CPU时间 (CPU Time)</strong>:
+<ul>
 <li>指程序在 CPU 上实际运行的时间，包括用户模式下的时间 (<code>user time</code>) 和内核模式下的时间 (<code>sys time</code>)。</li>
 <li>用于评估程序对 CPU 资源的使用。</li>
 </ul>
 </li>
-<li><strong>执行时间 (Execution Time)</strong>:<ul>
+<li><strong>执行时间 (Execution Time)</strong>:
+<ul>
 <li>一般来说，执行时间通常指从程序开始执行到完成所耗费的总时间（包括 <code>real time</code>），但有时也可以用于描述 CPU 时间，即只包含用户时间和系统时间之和。</li>
 <li>在一些文献或非正式讨论中，可能会有人把 CPU 时间称为执行时间，但这种用法不够严格。</li>
 </ul>
 </li>
 </ol>
-<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><ul>
+<h3 id="总结">总结</h3>
+<ul>
 <li>在技术文献和性能分析中，更推荐使用 <strong>CPU时间</strong> 来明确表达 <code>user time</code> 和 <code>sys time</code> 的总和。</li>
 <li>如果你在与他人交流时使用 <strong>执行时间</strong>，最好先确认对方理解你所说的是 CPU 时间的意思，以避免混淆。</li>
 </ul>
 <p>因此，虽然将 <code>user time</code> 和 <code>sys time</code> 的总和称为 <strong>执行时间</strong> 在某些情况下可以被接受，但在专业的讨论中，使用 <strong>CPU时间</strong> 会更加精确和清晰。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>参考文献</h1>
+<ol>
 <li><a target="_blank" rel="noopener" href="https://blog.csdn.net/z_ssyy/article/details/123069566">https://blog.csdn.net/z_ssyy/article/details/123069566</a></li>
 <li>chatgpt 3.5</li>
 </ol>
@@ -202,55 +216,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -549,30 +515,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

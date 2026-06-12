@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">616</span>
+            <span class="post-count">608</span>
         </span>
     </span>
 
@@ -98,16 +98,17 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>GLIMPSE2 是一个有参的低深度重测序填充软件。</p>
 <span id="more"></span>
-
-<h1 id="下载网址"><a href="#下载网址" class="headerlink" title="下载网址"></a>下载网址</h1><p><a target="_blank" rel="noopener" href="https://github.com/odelaneau/glimpse/releases">https://github.com/odelaneau/glimpse/releases</a></p>
-<h1 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a>官方文档</h1><p><a target="_blank" rel="noopener" href="https://odelaneau.github.io/GLIMPSE/docs/documentation">https://odelaneau.github.io/GLIMPSE/docs/documentation</a></p>
-<h2 id="chunk"><a href="#chunk" class="headerlink" title="chunk"></a>chunk</h2><p>对参考群每条染色体划分小片段（chunks）</p>
+<h1>下载网址</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/odelaneau/glimpse/releases">https://github.com/odelaneau/glimpse/releases</a></p>
+<h1>官方文档</h1>
+<p><a target="_blank" rel="noopener" href="https://odelaneau.github.io/GLIMPSE/docs/documentation">https://odelaneau.github.io/GLIMPSE/docs/documentation</a></p>
+<h2 id="chunk">chunk</h2>
+<p>对参考群每条染色体划分小片段（chunks）</p>
 <p>示例如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GLIMPSE2_chunk --input chr$&#123;chr_array[$&#123;i&#125;]&#125;_AC.vcf.gz --region $&#123;chr_array[$&#123;i&#125;]&#125;  --sequential --output chunks.chr$&#123;chr_array[$&#123;i&#125;]&#125;.txt</span><br></pre></td></tr></table></figure>
-
 <p>其中：</p>
 <ul>
-<li><code>--input</code> :  VCF&#x2F;BCF 文件 (这里是参考面板)</li>
+<li><code>--input</code> :  VCF/BCF 文件 (这里是参考面板)</li>
 <li><code>--region</code> ： 染色体</li>
 <li><code>--sequential</code> :  模型参数，<code>Recommended. Sequential algorithm</code></li>
 <li><code>--output</code>:  输出文件名称</li>
@@ -115,14 +116,13 @@
 <p>这里没有提到输出文件的格式（第1列是片段ID，第2列是染色体，第3列是包含了buffers的区域，第4列是实际填充区域）</p>
 <p>输出文件举例如下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0	1	1:1-3501227	1:1-2501163	2.50102	2501025	22137	22137</span><br><span class="line">1	1	1:1501188-6001294	1:2501164-5001259	2.50005	2500050	26348	26348</span><br><span class="line">2	1	1:4000994-8501366	1:5001260-7501419	2.50008	2500083	27288	27288</span><br></pre></td></tr></table></figure>
-
-<h2 id="split-reference"><a href="#split-reference" class="headerlink" title="split_reference"></a>split_reference</h2><p>将参考群每条染色体拆分成小片段并处理成二进制格式，用于节约读取时间</p>
+<h2 id="split-reference">split_reference</h2>
+<p>将参考群每条染色体拆分成小片段并处理成二进制格式，用于节约读取时间</p>
 <p>举例如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GLIMPSE2_split_reference --reference $&#123;REF&#125; --input-region $&#123;IRG&#125; --output-region $&#123;ORG&#125; --output chr$&#123;chr_array[$&#123;i&#125;]&#125;</span><br></pre></td></tr></table></figure>
-
 <p>其中：</p>
 <ul>
-<li><code>--reference</code> :  VCF&#x2F;BCF 文件</li>
+<li><code>--reference</code> :  VCF/BCF 文件</li>
 <li><code>--input-region</code> :  <code>Imputation region with buffers</code></li>
 <li><code>--output-region</code> : <code>Imputation region without buffers</code></li>
 <li><code>--output</code>:  输出文件名称</li>
@@ -130,28 +130,30 @@
 <li><code>--threads</code> ： 线程数目</li>
 </ul>
 <p>输出文件名称举例为 <code>chr1_1_1_3501227.bin</code> , <code>chr1_1_1501188_6001294.bin</code> （后缀应该是<code>染色体_起始位置_终止位置</code>(包含buffers)）。</p>
-<h2 id="phase"><a href="#phase" class="headerlink" title="phase"></a>phase</h2><p>填充。</p>
+<h2 id="phase">phase</h2>
+<p>填充。</p>
 <p>示例如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GLIMPSE2_phase --bam-list bams_1.0x.txt --reference binary_reference_panel_chr20_7702567_12266861.bin --output imputed_glimpse2_rp140k_1.0x_chr20_7702567_12266861.bcf --threads 4</span><br></pre></td></tr></table></figure>
-
 <p>其中：</p>
 <ul>
 <li><code>--bam-list</code> ： BAM文件路径的文件，一行是一个BAM文件路径。第二列可以是样本名称，不然会直接用文件名称作为样本名称。</li>
-<li><code>--reference</code> :  参考面板的VCF&#x2F;BCF 文件，或者二进制文件</li>
-<li><code>--output</code>:  输出文件名称，VCF&#x2F;BCF&#x2F;BGEN 格式</li>
+<li><code>--reference</code> :  参考面板的VCF/BCF 文件，或者二进制文件</li>
+<li><code>--output</code>:  输出文件名称，VCF/BCF/BGEN 格式</li>
 <li><code>--ne</code> ： 有效群体数目，默认为100000</li>
 </ul>
-<h2 id="ligate"><a href="#ligate" class="headerlink" title="ligate"></a>ligate</h2><p>将多个小片段的填充结果合并一整条染色体的文件。</p>
+<h2 id="ligate">ligate</h2>
+<p>将多个小片段的填充结果合并一整条染色体的文件。</p>
 <p>举例如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">ls</span> -1v <span class="keyword">in</span> order to keep the order within the chromosome</span></span><br><span class="line">ls -1v chr20/*.imputed.bcf &gt; list_imputed_files_chr20.txt</span><br><span class="line"></span><br><span class="line">GLIMPSE2_ligate --input list_imputed_files_chr20.txt --output ligated_chr20.bcf --threads 2</span><br></pre></td></tr></table></figure>
-
 <p>其中：</p>
 <ul>
-<li><code>--input</code> :  需要合并的VCF&#x2F;BCF文件的列表文件，一行是一个VCF&#x2F;BCF文件</li>
-<li><code>--output</code>:  输出文件名称，VCF&#x2F;BCF 格式</li>
+<li><code>--input</code> :  需要合并的VCF/BCF文件的列表文件，一行是一个VCF/BCF文件</li>
+<li><code>--output</code>:  输出文件名称，VCF/BCF 格式</li>
 </ul>
-<h2 id="concordance"><a href="#concordance" class="headerlink" title="concordance"></a>concordance</h2><p>这个是用来计算填充准确性的软件，用的指标是 R2 （剂量效应的相关系数的平方），具体如何使用没有太看懂，使用自写脚本计算的准确性。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h2 id="concordance">concordance</h2>
+<p>这个是用来计算填充准确性的软件，用的指标是 R2 （剂量效应的相关系数的平方），具体如何使用没有太看懂，使用自写脚本计算的准确性。</p>
+<h1>参考文献</h1>
+<ol>
 <li><a target="_blank" rel="noopener" href="https://odelaneau.github.io/GLIMPSE/">https://odelaneau.github.io/GLIMPSE/</a></li>
 </ol>
  
@@ -201,55 +203,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -548,30 +502,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

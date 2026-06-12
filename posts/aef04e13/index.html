@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">13 分钟</span>
+            <span class="post-count">12 分钟</span>
         </span>
     </span>
 </div>
@@ -98,60 +98,166 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节介绍 <em>the minimum degree algorithm</em> ，我个人将其翻译为最小度数算法。这里我们看如何用商图表示和转换消元图。</p>
 <span id="more"></span>
-
-<h1 id="Computer-Representation-of-Elimination-Graphs"><a href="#Computer-Representation-of-Elimination-Graphs" class="headerlink" title="Computer Representation of Elimination Graphs"></a>Computer Representation of Elimination Graphs</h1><p>在这一章节汇总，我们研究如何在计算中表示和转换 <em>elimination graphs</em> 。</p>
-<h2 id="Explicit-and-Implicit-Representations"><a href="#Explicit-and-Implicit-Representations" class="headerlink" title="Explicit and Implicit Representations"></a>Explicit and Implicit Representations</h2><p>让我们回顾一下消元的转换过程，$\mathcal{G}<em>{i}$ 是从 $\mathcal{G}</em>{i-1}$ 消除节点 $x_{i}$ 得到的图，$\mathcal{G}_{i}$ 的相邻结构可以按照下面的方式获得：</p>
+<h1>Computer Representation of Elimination Graphs</h1>
+<p>在这一章节汇总，我们研究如何在计算中表示和转换 <em>elimination graphs</em> 。</p>
+<h2 id="Explicit-and-Implicit-Representations">Explicit and Implicit Representations</h2>
+<p>让我们回顾一下消元的转换过程，$\mathcal{G}<em>{i}$ 是从 $\mathcal{G}</em>{i-1}$ 消除节点 $x_{i}$ 得到的图，$\mathcal{G}_{i}$ 的相邻结构可以按照下面的方式获得：</p>
 <ol>
-<li><p>获得  $\mathcal{G}<em>{i-1}$ 中的相邻集合 $Adj</em>{\mathcal{G}<em>{i-1}}(x</em>{i})$ </p>
+<li>
+<p>获得  $\mathcal{G}<em>{i-1}$ 中的相邻集合 $Adj</em>{\mathcal{G}<em>{i-1}}(x</em>{i})$</p>
 </li>
-<li><p>从相邻结构中移除节点 $x_{i}$ 及其相邻列表</p>
+<li>
+<p>从相邻结构中移除节点 $x_{i}$ 及其相邻列表</p>
 </li>
-<li><p>对于任何一个节点 $y \in Adj_{\mathcal{G}<em>{i-1}}(x</em>{i})$ ，$y$  在 $\mathcal{G}<em>{i}$ 中新的相邻列表通过合并两个子集得到<br>$$<br>Adj</em>{\mathcal{G}<em>{i-1}}(y) - {x</em>{i}} \text{ and } Adj_{\mathcal{G}<em>{i-1}}(x</em>{i}) - { y }<br>$$</p>
+<li>
+<p>对于任何一个节点 $y \in Adj_{\mathcal{G}<em>{i-1}}(x</em>{i})$ ，$y$  在 $\mathcal{G}<em>{i}$ 中新的相邻列表通过合并两个子集得到<br>
+$$<br>
+Adj</em>{\mathcal{G}<em>{i-1}}(y) - {x</em>{i}} \text{ and } Adj_{\mathcal{G}<em>{i-1}}(x</em>{i}) - { y }<br>
+$$</p>
 </li>
 </ol>
 <p>这里有两点需要注意，首先在相邻结构中用于存储 $Adj_{\mathcal{G}<em>{i-1}}(x</em>{i})$ 的空间可以在第二步之后重复使用；第二，$\mathcal{G}<em>{i}$ 可能会比 $\mathcal{G}</em>{i-1}$ 占用更多的空间。</p>
 <p>我们需要一种更加灵活的数据结构，用于存储在 <em>elimination graphs</em>  中结构的动态变化，比如之前提到的 <em>adjacency linked list</em> 。</p>
-<h2 id="Quotient-Graph-Model"><a href="#Quotient-Graph-Model" class="headerlink" title="Quotient Graph Model"></a>Quotient Graph Model</h2><p>让我们首先对下面的图进行消元，我们消除节点 $x_{1}$ 到 $x_{5}$ 之后得到右边的消元图。</p>
-<p><img src="/posts/aef04e13/64.png" alt="1"></p>
-<p>设 $S &#x3D; { x_{1}, x_{2}, x_{3},x_{4}, x_{5}}$ ，在 <em>implicit model</em> 中，为了发现 $x_{6} \in Reach(x_{7}, S)$ ，我们必须先找到路径 $(x_{7}, x_{4}, x_{2},x_{5}, x_{6})$ 。相似地， $x_{8} \in Reach(x_{7}, S)$ 也是因为存在路径 $(x_{7}, x_{4}, x_{2},x_{5}, x_{1}, x_{8})$ 。注意这两个路径的长度分别为 4 和 5 。</p>
+<h2 id="Quotient-Graph-Model">Quotient Graph Model</h2>
+<p>让我们首先对下面的图进行消元，我们消除节点 $x_{1}$ 到 $x_{5}$ 之后得到右边的消元图。</p>
+<p><img src="64.png" alt="1"></p>
+<p>设 $S = { x_{1}, x_{2}, x_{3},x_{4}, x_{5}}$ ，在 <em>implicit model</em> 中，为了发现 $x_{6} \in Reach(x_{7}, S)$ ，我们必须先找到路径 $(x_{7}, x_{4}, x_{2},x_{5}, x_{6})$ 。相似地， $x_{8} \in Reach(x_{7}, S)$ 也是因为存在路径 $(x_{7}, x_{4}, x_{2},x_{5}, x_{1}, x_{8})$ 。注意这两个路径的长度分别为 4 和 5 。</p>
 <p>我们有两个观测结果：</p>
 <ol>
 <li>如果未消元的节点间的 reachable path 的长度可以缩减，那么生成 reachable sets 的工作量会降低</li>
 <li>如果上面的这些路径可以缩减到极端的情况，那么我们就可以得到 <em>explicit elimination graphs</em> 。</li>
 </ol>
 <p>我们寻求一个妥协，通过聚集连接的消除的节点，我们获得了一个新的图结构。举个例子，在上面的图中，在图 $\mathcal{G}(S)$ 中存在两个连通组分，分别为 ${ x_{1}, x_{2}, x_{4}, x_{5} }$ 和 ${x_{3}}$ 。通过形成两个 “supernodes”，我们获得下面的图</p>
-<p><img src="/posts/aef04e13/65.png" alt="1"></p>
-<p>为了方便，我们设  $\bar{x}<em>{5} &#x3D; { x</em>{1}, x_{2}, x_{4}, x_{5} }$ 和 $\bar{x}<em>{3} &#x3D;{x</em>{3}}$ 来表示 $S$ 中的这两个连通组分。在这个新图中，我们注意到存在路径<br>$$<br>(x_{7}, \bar{x}<em>{5}, x</em>{6})<br>$$<br>和<br>$$<br>(x_{7}, \bar{x}<em>{5}, x</em>{8})<br>$$<br>这两条路径的长度为 2，一般来说，如果采用这种策略，那么所有这样的路径的长度均会小于等于 2 。</p>
+<p><img src="65.png" alt="1"></p>
+<p>为了方便，我们设  $\bar{x}<em>{5} = { x</em>{1}, x_{2}, x_{4}, x_{5} }$ 和 $\bar{x}<em>{3} ={x</em>{3}}$ 来表示 $S$ 中的这两个连通组分。在这个新图中，我们注意到存在路径<br>
+$$<br>
+(x_{7}, \bar{x}<em>{5}, x</em>{6})<br>
+$$<br>
+和<br>
+$$<br>
+(x_{7}, \bar{x}<em>{5}, x</em>{8})<br>
+$$<br>
+这两条路径的长度为 2，一般来说，如果采用这种策略，那么所有这样的路径的长度均会小于等于 2 。</p>
 <p>这种策略的另一个优势可以 <em>implemented in-place</em> ，也就是说，这种方式不会占用比原始的图结构更多的空间。</p>
-<p>为了正式描述这种消元方式，我们引入<strong>商图</strong> (<em>quotient graphs</em>) 。设 $\mathcal{G} &#x3D; (X,E)$ 是一个给定的图，设 $\mathcal{P}$ 是一种基于节点集合 $X$ 的分隔形式<br>$$<br>\mathcal{P} &#x3D; {Y_{1},Y_{2},\cdots,Y_{p}}<br>$$<br> 即 $\cup_{k&#x3D;1}^{p} Y_{k} &#x3D; X$ , $Y_{i} \cap Y_{j} &#x3D; \phi, i \neq j$  </p>
-<p>我们定义 $\mathcal{G}$ 基于 $\mathcal{P}$ 的商图为图 $(\mathcal{P}, \mathcal{\xi})$，其中当且仅当 $Adj(Y_{i}) \cap Y_{j} \neq \phi$ 时 ${ Y_{i}, Y_{j}} \in \xi$ 。通常我们将这个图标记为 $\mathcal{G&#x2F;P}$ 。</p>
-<p>上面图 5.3.2 就是一个商图，其切分方式为<br>$$<br>{ x_{1}, x_{2}, x_{4}, x_{5} },{x_{3}},{x_{6}},{x_{7}},{x_{8}},{x_{9}}<br>$$<br>设  $\mathcal{G} &#x3D; (X,E)$ 是一个给定的图，我们考虑消元的一个阶段，其中 $S$ 是已经消除的节点集合。我们现在将其联系为一个基于 $S$ 的商图，定义集合<br>$$<br>\mathcal{C}(S) &#x3D; { C \subset S \mid \mathcal{G}(C) \text{ is a connected component in the subgraph } \mathcal{G}(S) }<br>$$<br>对 $X$ 的切分为<br>$$<br>\mathcal{\bar{C}}(S) &#x3D; { {y} \mid y \in X-S  } \cup \mathcal{C}(S)<br>$$<br>则可以唯一地定义商图<br>$$<br>\mathcal{G} &#x2F; \mathcal{\bar{C}}(S)<br>$$<br>则可以视为对 $S$ 中的聚集的连通集合得到的图，图 5.3.2 就是对 $S &#x3D; { x_{1}, x_{2}, x_{3},x_{4}, x_{5}}$ 生成的商图。我们现在研究消元过程中的商图间的相关性。设 $x_{1}, x_{2}, \cdots, x_{n}$ 为给定图  $\mathcal{G}$  消元的一系列节点，就像之前一样，设<br>$$<br>S_{i} &#x3D; { x_{1}, x_{2}, \cdots, x_{i}}, \quad 1 \leq i \leq n<br>$$<br>对于每一个 $i$  ，子集 $S_{i}$ 可以推导出分隔方式 $\mathcal{\bar{C}}(S_{i})$ ，而相应的商图为<br>$$<br>\boldsymbol{\mathcal{G}}<em>{i} &#x3D; \mathcal{G}&#x2F;\mathcal{\bar{C}}(S</em>{i}) &#x3D; (\mathcal{\bar{C}}(S_{i}), \mathcal{\xi}<em>{i})<br>$$<br>用这种方式，我们可以得到一系列商图<br>$$<br>\boldsymbol{\mathcal{G}}</em>{1} \rightarrow \boldsymbol{\mathcal{G}}<em>{2} \rightarrow \cdots \rightarrow \boldsymbol{\mathcal{G}}</em>{n}<br>$$<br>下图就是上面例子中的这一系列商图。</p>
-<p><img src="/posts/aef04e13/66.png" alt="1"></p>
+<p>为了正式描述这种消元方式，我们引入<strong>商图</strong> (<em>quotient graphs</em>) 。设 $\mathcal{G} = (X,E)$ 是一个给定的图，设 $\mathcal{P}$ 是一种基于节点集合 $X$ 的分隔形式<br>
+$$<br>
+\mathcal{P} = {Y_{1},Y_{2},\cdots,Y_{p}}<br>
+$$<br>
+即 $\cup_{k=1}^{p} Y_{k} = X$ , $Y_{i} \cap Y_{j} = \phi, i \neq j$</p>
+<p>我们定义 $\mathcal{G}$ 基于 $\mathcal{P}$ 的商图为图 $(\mathcal{P}, \mathcal{\xi})$，其中当且仅当 $Adj(Y_{i}) \cap Y_{j} \neq \phi$ 时 ${ Y_{i}, Y_{j}} \in \xi$ 。通常我们将这个图标记为 $\mathcal{G/P}$ 。</p>
+<p>上面图 5.3.2 就是一个商图，其切分方式为<br>
+$$<br>
+{ x_{1}, x_{2}, x_{4}, x_{5} },{x_{3}},{x_{6}},{x_{7}},{x_{8}},{x_{9}}<br>
+$$<br>
+设  $\mathcal{G} = (X,E)$ 是一个给定的图，我们考虑消元的一个阶段，其中 $S$ 是已经消除的节点集合。我们现在将其联系为一个基于 $S$ 的商图，定义集合<br>
+$$<br>
+\mathcal{C}(S) = { C \subset S \mid \mathcal{G}© \text{ is a connected component in the subgraph } \mathcal{G}(S) }<br>
+$$<br>
+对 $X$ 的切分为<br>
+$$<br>
+\mathcal{\bar{C}}(S) = { {y} \mid y \in X-S  } \cup \mathcal{C}(S)<br>
+$$<br>
+则可以唯一地定义商图<br>
+$$<br>
+\mathcal{G} / \mathcal{\bar{C}}(S)<br>
+$$<br>
+则可以视为对 $S$ 中的聚集的连通集合得到的图，图 5.3.2 就是对 $S = { x_{1}, x_{2}, x_{3},x_{4}, x_{5}}$ 生成的商图。我们现在研究消元过程中的商图间的相关性。设 $x_{1}, x_{2}, \cdots, x_{n}$ 为给定图  $\mathcal{G}$  消元的一系列节点，就像之前一样，设<br>
+$$<br>
+S_{i} = { x_{1}, x_{2}, \cdots, x_{i}}, \quad 1 \leq i \leq n<br>
+$$<br>
+对于每一个 $i$  ，子集 $S_{i}$ 可以推导出分隔方式 $\mathcal{\bar{C}}(S_{i})$ ，而相应的商图为<br>
+$$<br>
+\boldsymbol{\mathcal{G}}<em>{i} = \mathcal{G}/\mathcal{\bar{C}}(S</em>{i}) = (\mathcal{\bar{C}}(S_{i}), \mathcal{\xi}<em>{i})<br>
+$$<br>
+用这种方式，我们可以得到一系列商图<br>
+$$<br>
+\boldsymbol{\mathcal{G}}</em>{1} \rightarrow \boldsymbol{\mathcal{G}}<em>{2} \rightarrow \cdots \rightarrow \boldsymbol{\mathcal{G}}</em>{n}<br>
+$$<br>
+下图就是上面例子中的这一系列商图。</p>
+<p><img src="66.png" alt="1"></p>
 <p>下图的定理说明了上面商图其实就是 <em>elimination  graphs</em> 的另一种表示。</p>
-<p><strong>定理 5.3.1</strong>：对于任意 $y \in X - S_{i}$ ，我们有<br>$$<br>Reach_{\mathcal{G}}(y, S_{i}) &#x3D; Reach_{\boldsymbol{\mathcal{G}}<em>{i}}(y, \mathcal{C}(S</em>{i}))<br>$$<br>证明略</p>
+<p><strong>定理 5.3.1</strong>：对于任意 $y \in X - S_{i}$ ，我们有<br>
+$$<br>
+Reach_{\mathcal{G}}(y, S_{i}) = Reach_{\boldsymbol{\mathcal{G}}<em>{i}}(y, \mathcal{C}(S</em>{i}))<br>
+$$<br>
+证明略</p>
 <p>确定在商图 $\mathcal{G}<em>{i}$ 的 <em>reachable set</em> 很直接，对于一个给定的节点 $y \notin \mathcal{C}(S</em>{i})$  ，下面的算法会返回集合 $Reach_{\mathcal{G}<em>{i}}(y, \mathcal{C}(S</em>{i}))$ ，注意这里应用了商图的 <em>reachable path</em> 长度最多为 2 的特性 。</p>
-<p><img src="/posts/aef04e13/67.png" alt="1"></p>
+<p><img src="67.png" alt="1"></p>
 <p>实际上我们可以从商图中获得 <em>elimination graph</em> ，算法如下：</p>
-<p><img src="/posts/aef04e13/68.png" alt="1"></p>
+<p><img src="68.png" alt="1"></p>
 <p>为了说明这个事先，我们考虑上例中从 $\boldsymbol{\mathcal{G}}<em>{4}$ 生成 $\mathcal{G}</em>{4}$ 的过程（加粗表示商图，不加粗表示 <em>elimination graph</em> ），见下图</p>
-<p><img src="/posts/aef04e13/69.png" alt="1"></p>
+<p><img src="69.png" alt="1"></p>
 <p>商图模型处于两种模型的中间</p>
-<p><img src="/posts/aef04e13/70.png" alt="1"></p>
+<p><img src="70.png" alt="1"></p>
 <p>这三种模型的对应关系总结如下表</p>
-<p><img src="/posts/aef04e13/71.png" alt="1"></p>
-<h2 id="Implementation-of-the-Quotient-Graph-Model"><a href="#Implementation-of-the-Quotient-Graph-Model" class="headerlink" title="Implementation of the Quotient Graph Model"></a>Implementation of the Quotient Graph Model</h2><p>我们考虑由消除的节点集合 $S$ 形成的商图 $\boldsymbol{\mathcal{G}}<em>{i} &#x3D; \mathcal{G}&#x2F;\mathcal{\bar{C}}(S</em>{i})$ ，如果 $s \in S$ ，我们采用符号 $\bar{s}$ 来表明在子图 $\mathcal{G}(S)$ 中的包含 $s$ 的连通组分。比如，在上面的例子中<br>$$<br>\bar{x}<em>{5} &#x3D; \bar{x}</em>{1} &#x3D; \bar{x}<em>{2} &#x3D; \bar{x}</em>{4} &#x3D; { x_1,x_2,x_4,x_5}<br>$$<br>换句话说，对于一个给定的连通组分 $C \subset \mathcal{C}(S)$ ，我们可以选择 $C$ 中的任意一个节点 $x$ ，然后使用 $x$ 来表示 $C$ ，即 $\bar{x} &#x3D; C$ 。在我们讨论如何选择 $x$ 之前，我们先证明商图模型可以 <em>implemented in-place</em> ，也就是说，只利用原始图的相邻结构的空间。</p>
-<p><strong>引理 5.3.2</strong>：设 $\mathcal{G} &#x3D; (X,E)$ , $C \subset X$ ，其中 $\mathcal{G}(C)$ 是一个连通的子图，那么我们有<br>$$<br>\sum_{x \in C}|Adj(x)| \geq |Adj(C)| + 2(|C| - 1)<br>$$<br><strong>证明</strong>：因为  $\mathcal{G}(C)$ 是一个连通子图，因此在   $\mathcal{G}(C)$ 中至少有 $|C|-1$ 条边，这些边在 $\sum_{x \in C}|Adj(x)|$ 中会计算两次，得证。</p>
-<p>设 $x_{1},x_{2},\cdots, x_{n}$ 是节点序列，$S_{i} &#x3D; { x_{1},\cdots,x_{i}}$ ，对于 $1 \leq i \leq n$ ，我们有：<br>$$<br>\boldsymbol{\mathcal{G}}<em>{i} &#x3D; \mathcal{G}&#x2F;\mathcal{\bar{C}}(S</em>{i}) &#x3D; (\mathcal{\bar{C}}(S_{i}), \mathcal{\xi}<em>{i})<br>$$<br><strong>引理 5.3.3</strong>：设 $y \in X - S</em>{i}$ ，那么<br>$$<br>|Adj_{\mathcal{G}}(y)| \geq |Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)|<br>$$<br>证明：$y$ 的相邻节点可以分为两类，属于 $S</em>{i}$ 和 不属于  $S_{i}$ 的节点。对于不属于  $S_{i}$ 的节点，原图和商图均不受影响；对于属于 $S_{i}$ 的节点，商图可能会合并成一个 “supernode”，因此数目会减少。因此得证 $|Adj_{\mathcal{G}}(y)| \geq |Adj_{\boldsymbol{\mathcal{G}}_{i}}(y)|$ 。</p>
-<p>同时容易证明 $|Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)| \geq |Adj</em>{\boldsymbol{\mathcal{G}}<em>{i+1}}(y)|$ ，如果 $x</em>{i+1} \notin Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)$ ，那么 无论$x</em>{i+1}$ 是否与其它节点进行合并，都不会影响 $y$ 的相邻节点数目，因此 $|Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)| &#x3D; |Adj</em>{\boldsymbol{\mathcal{G}}<em>{i+1}}(y)|$。如果  $x</em>{i+1} \in Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)$ ，此时如果 $x</em>{i+1}$ 是孤立的，那么 $y$ 的相邻节点不变，如果  $x_{i+1}$ 与其它节点进行合并，那么此时 $y$ 的相邻节点数目要么不变，要么会减1。因此得证成立。 </p>
-<p><strong>定理 5.3.4</strong>：<br>$$<br>\max_{i \leq i \leq n} |\mathcal{\xi}<em>{i}| \leq |E|<br>$$<br>证明：考虑商图 $\boldsymbol{\mathcal{G}}</em>{i}$ 和 $\boldsymbol{\mathcal{G}}<em>{i+1}$ ，如果 $x</em>{i+1}$ 在子图 $\mathcal{G}(S_{i+1})$ 中是孤立的，那么显然 $|\mathcal{\xi}<em>{i+1}| &#x3D; |\mathcal{\xi}</em>{i}|$ ；否则 $x_{i+1}$ 会合并到 $S_{i}$ 的某个连通组分中，形成 $S_{i+1}$ ，那么消元节点内的边数目不变，而根据  $|Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)| \geq |Adj</em>{\boldsymbol{\mathcal{G}}<em>{i+1}}(y)|$  ，说明不属于 $S</em>{i+1}$ 的节点的边的数目最多和之前相等，再加上减少的  $x_{i+1}$ 的边，因此得到  $|\mathcal{\xi}<em>{i+1}| &lt; |\mathcal{\xi}</em>{i}|$ ，因此在所有的情况中均存在  $|\mathcal{\xi}<em>{i+1}| \leq |\mathcal{\xi}</em>{i}|$ ，因此得证 $\max_{i \leq i \leq n} |\mathcal{\xi}_{i}| \leq |E|$ 。</p>
+<p><img src="71.png" alt="1"></p>
+<h2 id="Implementation-of-the-Quotient-Graph-Model">Implementation of the Quotient Graph Model</h2>
+<p>我们考虑由消除的节点集合 $S$ 形成的商图 $\boldsymbol{\mathcal{G}}<em>{i} = \mathcal{G}/\mathcal{\bar{C}}(S</em>{i})$ ，如果 $s \in S$ ，我们采用符号 $\bar{s}$ 来表明在子图 $\mathcal{G}(S)$ 中的包含 $s$ 的连通组分。比如，在上面的例子中<br>
+$$<br>
+\bar{x}<em>{5} = \bar{x}</em>{1} = \bar{x}<em>{2} = \bar{x}</em>{4} = { x_1,x_2,x_4,x_5}<br>
+$$<br>
+换句话说，对于一个给定的连通组分 $C \subset \mathcal{C}(S)$ ，我们可以选择 $C$ 中的任意一个节点 $x$ ，然后使用 $x$ 来表示 $C$ ，即 $\bar{x} = C$ 。在我们讨论如何选择 $x$ 之前，我们先证明商图模型可以 <em>implemented in-place</em> ，也就是说，只利用原始图的相邻结构的空间。</p>
+<p><strong>引理 5.3.2</strong>：设 $\mathcal{G} = (X,E)$ , $C \subset X$ ，其中 $\mathcal{G}©$ 是一个连通的子图，那么我们有<br>
+$$<br>
+\sum_{x \in C}|Adj(x)| \geq |Adj©| + 2(|C| - 1)<br>
+$$<br>
+<strong>证明</strong>：因为  $\mathcal{G}©$ 是一个连通子图，因此在   $\mathcal{G}©$ 中至少有 $|C|-1$ 条边，这些边在 $\sum_{x \in C}|Adj(x)|$ 中会计算两次，得证。</p>
+<p>设 $x_{1},x_{2},\cdots, x_{n}$ 是节点序列，$S_{i} = { x_{1},\cdots,x_{i}}$ ，对于 $1 \leq i \leq n$ ，我们有：<br>
+$$<br>
+\boldsymbol{\mathcal{G}}<em>{i} = \mathcal{G}/\mathcal{\bar{C}}(S</em>{i}) = (\mathcal{\bar{C}}(S_{i}), \mathcal{\xi}<em>{i})<br>
+$$<br>
+<strong>引理 5.3.3</strong>：设 $y \in X - S</em>{i}$ ，那么<br>
+$$<br>
+|Adj_{\mathcal{G}}(y)| \geq |Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)|<br>
+$$<br>
+证明：$y$ 的相邻节点可以分为两类，属于 $S</em>{i}$ 和 不属于  $S_{i}$ 的节点。对于不属于  $S_{i}$ 的节点，原图和商图均不受影响；对于属于 $S_{i}$ 的节点，商图可能会合并成一个 “supernode”，因此数目会减少。因此得证 $|Adj_{\mathcal{G}}(y)| \geq |Adj_{\boldsymbol{\mathcal{G}}_{i}}(y)|$ 。</p>
+<p>同时容易证明 $|Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)| \geq |Adj</em>{\boldsymbol{\mathcal{G}}<em>{i+1}}(y)|$ ，如果 $x</em>{i+1} \notin Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)$ ，那么 无论$x</em>{i+1}$ 是否与其它节点进行合并，都不会影响 $y$ 的相邻节点数目，因此 $|Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)| = |Adj</em>{\boldsymbol{\mathcal{G}}<em>{i+1}}(y)|$。如果  $x</em>{i+1} \in Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)$ ，此时如果 $x</em>{i+1}$ 是孤立的，那么 $y$ 的相邻节点不变，如果  $x_{i+1}$ 与其它节点进行合并，那么此时 $y$ 的相邻节点数目要么不变，要么会减1。因此得证成立。</p>
+<p><strong>定理 5.3.4</strong>：<br>
+$$<br>
+\max_{i \leq i \leq n} |\mathcal{\xi}<em>{i}| \leq |E|<br>
+$$<br>
+证明：考虑商图 $\boldsymbol{\mathcal{G}}</em>{i}$ 和 $\boldsymbol{\mathcal{G}}<em>{i+1}$ ，如果 $x</em>{i+1}$ 在子图 $\mathcal{G}(S_{i+1})$ 中是孤立的，那么显然 $|\mathcal{\xi}<em>{i+1}| = |\mathcal{\xi}</em>{i}|$ ；否则 $x_{i+1}$ 会合并到 $S_{i}$ 的某个连通组分中，形成 $S_{i+1}$ ，那么消元节点内的边数目不变，而根据  $|Adj_{\boldsymbol{\mathcal{G}}<em>{i}}(y)| \geq |Adj</em>{\boldsymbol{\mathcal{G}}<em>{i+1}}(y)|$  ，说明不属于 $S</em>{i+1}$ 的节点的边的数目最多和之前相等，再加上减少的  $x_{i+1}$ 的边，因此得到  $|\mathcal{\xi}<em>{i+1}| &lt; |\mathcal{\xi}</em>{i}|$ ，因此在所有的情况中均存在  $|\mathcal{\xi}<em>{i+1}| \leq |\mathcal{\xi}</em>{i}|$ ，因此得证 $\max_{i \leq i \leq n} |\mathcal{\xi}_{i}| \leq |E|$ 。</p>
 <p>这个定理说明通过消元生成的商图占用的空间不会超过原始的图，而且通过引理 5.3.2，对于 $|C| &gt;1$ ，会富裕出 $2(|C| - 1)$ 个位置。</p>
-<p>设 $x_{1},x_{2},\cdots, x_{n}$ 是节点序列，$C \in C(S)$ 。我们选择 $x_{r} \in C$ 作为 $C$的代表，其中<br>$$<br>r &#x3D; \max{j \mid x_{j} \in  C}<br>$$<br>也就是说，$x_{r}$ 是 $C$ 中最后消除的节点。</p>
+<p>设 $x_{1},x_{2},\cdots, x_{n}$ 是节点序列，$C \in C(S)$ 。我们选择 $x_{r} \in C$ 作为 $C$的代表，其中<br>
+$$<br>
+r = \max{j \mid x_{j} \in  C}<br>
+$$<br>
+也就是说，$x_{r}$ 是 $C$ 中最后消除的节点。</p>
 <p>到此为止，我们描述了商图的数据结构以及如何表示 <em>supernodes</em> ，另一个重要的部分就是在消元的过程中商图的转换。下面的算法展现了如何从  $\boldsymbol{\mathcal{G}}<em>{i-1}$ 中剔除节点 $x</em>{i}$ 得到  $\boldsymbol{\mathcal{G}}_{i}$ 。</p>
-<p><img src="/posts/aef04e13/72.png" alt="1"></p>
-<p>让我们用图 5.3.3 中从  $\boldsymbol{\mathcal{G}}<em>{4}$ 到 $\boldsymbol{\mathcal{G}}</em>{5}$ 的过程为例，在  $\boldsymbol{\mathcal{G}}<em>{4}$ 中 $C(S</em>{4}) &#x3D; {\bar{x}<em>{1},\bar{x}</em>{3},\bar{x}<em>{4}}$ ，我们对 $x</em>{5}$ 采用第一步，得到<br>$$<br>T &#x3D; {\bar{x}<em>{1},\bar{x}</em>{4}}<br>$$<br>和<br>$$<br>R &#x3D; {x_{6},x_{7},x_{8}}<br>$$<br>因此，新的 ”supernode“ 为<br>$$<br>\bar{x}<em>{5} &#x3D; { x</em>{5} } \cup \bar{x}<em>{1} \cup \bar{x}</em>{4} &#x3D; { x_{1},x_{2},x_{4},x_{5}}<br>$$<br>新的拆分方式为<br>$$<br>C(S_{5}) &#x3D;  { \bar{x}<em>{3}, \bar{x}</em>{5} }<br>$$<br>最后，在第三步我们更新相邻集合，得到<br>$$<br>Adj_{\boldsymbol{\mathcal{G}}<em>{5}}(\bar{x}</em>{5}) &#x3D; R &#x3D; {x_{6},x_{7},x_{8}}<br>$$<br>和<br>$$<br>\begin{aligned}<br>Adj_{\boldsymbol{\mathcal{G}}<em>{5}}(x</em>{6}) &amp;&#x3D; { \bar{x}<em>{5}, x</em>{8}} \<br>Adj_{\boldsymbol{\mathcal{G}}<em>{5}}(x</em>{7}) &amp;&#x3D; { \bar{x}<em>{5}} \<br>Adj</em>{\boldsymbol{\mathcal{G}}<em>{5}}(x</em>{8}) &amp;&#x3D; { \bar{x}<em>{3} , \bar{x}</em>{5} , x_{6} , x_{9} } \<br>\end{aligned}<br>$$<br>商图转换的效果可以通过一个例子来说明，采用图 5.3.3 中的例子，其中我们其相邻结构如图 5.3.6 所示。图 5.3.7 展示生成商图的一些步骤，在  $\boldsymbol{\mathcal{G}}<em>{1}$ 到 $\boldsymbol{\mathcal{G}}</em>{3}$ 的形成过程中，相邻结构没有改变。而从  $\boldsymbol{\mathcal{G}}<em>{3}$ 到 $\boldsymbol{\mathcal{G}}</em>{4}$ 的转换过程中，节点 $x_{2}$ 和 $x_{4}$ 聚合到了一起，因此在 $\boldsymbol{\mathcal{G}}<em>{4}$ 中，节点 $x</em>{4}$ 的新的相邻结构包含了原图中 ${x_{2}, x_{4}}$ 的相邻结构。这里 $x_{4}$ 的相邻列表的最后位置采用了一个链表（貌似是其相邻节点排好序，先放到 $x_{4}$ 的相邻列表中第1个到倒数第二个位置，还有多的再放到其它节点的相邻列表中。<strong>此时最后一个位置的链接采用负数，这里就是 -2</strong> 。将相邻节点最后一个位置之后的一个位置<strong>设为0</strong>，表示终止位置，对应下图中划线的方块 ）。注意在 $x_{5}$ 的相邻列表中，其相邻节点 $x_{2}$ 在 $\boldsymbol{\mathcal{G}}<em>{4}$ 中改为了 $x</em>{4}$ ，因此此时 $x_{4}$ 已经变成了子集 ${x_{2}, x_{4}}$ 的代表。</p>
-<p><img src="/posts/aef04e13/73.png" alt="1"></p>
-<p><img src="/posts/aef04e13/74.png" alt="1"></p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<p><img src="72.png" alt="1"></p>
+<p>让我们用图 5.3.3 中从  $\boldsymbol{\mathcal{G}}<em>{4}$ 到 $\boldsymbol{\mathcal{G}}</em>{5}$ 的过程为例，在  $\boldsymbol{\mathcal{G}}<em>{4}$ 中 $C(S</em>{4}) = {\bar{x}<em>{1},\bar{x}</em>{3},\bar{x}<em>{4}}$ ，我们对 $x</em>{5}$ 采用第一步，得到<br>
+$$<br>
+T = {\bar{x}<em>{1},\bar{x}</em>{4}}<br>
+$$<br>
+和<br>
+$$<br>
+R = {x_{6},x_{7},x_{8}}<br>
+$$<br>
+因此，新的 ”supernode“ 为<br>
+$$<br>
+\bar{x}<em>{5} = { x</em>{5} } \cup \bar{x}<em>{1} \cup \bar{x}</em>{4} = { x_{1},x_{2},x_{4},x_{5}}<br>
+$$<br>
+新的拆分方式为<br>
+$$<br>
+C(S_{5}) =  { \bar{x}<em>{3}, \bar{x}</em>{5} }<br>
+$$<br>
+最后，在第三步我们更新相邻集合，得到<br>
+$$<br>
+Adj_{\boldsymbol{\mathcal{G}}<em>{5}}(\bar{x}</em>{5}) = R = {x_{6},x_{7},x_{8}}<br>
+$$<br>
+和<br>
+$$<br>
+\begin{aligned}<br>
+Adj_{\boldsymbol{\mathcal{G}}<em>{5}}(x</em>{6}) &amp;= { \bar{x}<em>{5}, x</em>{8}} \<br>
+Adj_{\boldsymbol{\mathcal{G}}<em>{5}}(x</em>{7}) &amp;= { \bar{x}<em>{5}} \<br>
+Adj</em>{\boldsymbol{\mathcal{G}}<em>{5}}(x</em>{8}) &amp;= { \bar{x}<em>{3} , \bar{x}</em>{5} , x_{6} , x_{9} } \<br>
+\end{aligned}<br>
+$$<br>
+商图转换的效果可以通过一个例子来说明，采用图 5.3.3 中的例子，其中我们其相邻结构如图 5.3.6 所示。图 5.3.7 展示生成商图的一些步骤，在  $\boldsymbol{\mathcal{G}}<em>{1}$ 到 $\boldsymbol{\mathcal{G}}</em>{3}$ 的形成过程中，相邻结构没有改变。而从  $\boldsymbol{\mathcal{G}}<em>{3}$ 到 $\boldsymbol{\mathcal{G}}</em>{4}$ 的转换过程中，节点 $x_{2}$ 和 $x_{4}$ 聚合到了一起，因此在 $\boldsymbol{\mathcal{G}}<em>{4}$ 中，节点 $x</em>{4}$ 的新的相邻结构包含了原图中 ${x_{2}, x_{4}}$ 的相邻结构。这里 $x_{4}$ 的相邻列表的最后位置采用了一个链表（貌似是其相邻节点排好序，先放到 $x_{4}$ 的相邻列表中第1个到倒数第二个位置，还有多的再放到其它节点的相邻列表中。<strong>此时最后一个位置的链接采用负数，这里就是 -2</strong> 。将相邻节点最后一个位置之后的一个位置<strong>设为0</strong>，表示终止位置，对应下图中划线的方块 ）。注意在 $x_{5}$ 的相邻列表中，其相邻节点 $x_{2}$ 在 $\boldsymbol{\mathcal{G}}<em>{4}$ 中改为了 $x</em>{4}$ ，因此此时 $x_{4}$ 已经变成了子集 ${x_{2}, x_{4}}$ 的代表。</p>
+<p><img src="73.png" alt="1"></p>
+<p><img src="74.png" alt="1"></p>
+<h1>参考文献</h1>
+<ol>
 <li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
 </ol>
  
@@ -201,55 +307,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -548,30 +606,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

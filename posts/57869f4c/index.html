@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">759</span>
+            <span class="post-count">753</span>
         </span>
     </span>
 
@@ -98,37 +98,47 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节是介绍 George and Liu 书中 Envelope Method 的应用</p>
 <span id="more"></span>
-
-<h1 id="ESFCT"><a href="#ESFCT" class="headerlink" title="ESFCT"></a>ESFCT</h1><h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>ESFCT，用于计算 Cholesky 分解 $\mathbf{LL^{T}}$ ，将 $\mathbf{L}$ 矩阵按照 <em>envelope storage scheme</em> 格式存储。</p>
-<p>Cholesky 分解的方法是 bordering method ，假设矩阵 $\mathbf{A}$ 可以分块为<br>$$<br>\boldsymbol{A}&#x3D;\left(\begin{array}{ll}<br>\boldsymbol{M} &amp; \boldsymbol{u} \<br>\boldsymbol{u}^{T} &amp; s<br>\end{array}\right)<br>$$<br>其中 $\mathbf{M}$ 可以分解为 $\mathbf{L_{M}L_{M}^{T}}$ ，因此 $\mathbf{A}$ 的分解因子为<br>$$<br>\boldsymbol{L}&#x3D;\left(\begin{array}{ll}<br>\boldsymbol{L_{M}} &amp; \boldsymbol{0} \<br>\boldsymbol{w}^{T} &amp; t<br>\end{array}\right)<br>$$<br>其中 $\mathbf{L_{M}w &#x3D; u}$ ，$\mathbf{t &#x3D; (s - w^{T}w)^{1&#x2F;2}}$ ，因此 $\mathbf{A}$ 的分解因子 $\mathbf{L}$ 可以<strong>逐行</strong>计算。以下图为例，假设我们已经完成了前 $i-1$ 步的分解，因此 $\mathbf{A}$ 的左上角的 $(i-1) \times (i-1)$ 的子矩阵已经完成了分解。为了计算 $\mathbf{L}$ 矩阵的第 $i$ 行，我们需要计算  $\mathbf{L_{M}w &#x3D; u}$ 。但是，实际上 $\mathbf{u}$ 只有一部分 envelope 区域需要计算，因此实际使用和计算的 $\mathbf{\bar{L}}$ 和 $\mathbf{\bar{u}^{T}}$ 如右图，因此此时 <strong>ELSLV</strong> 可以对这个 <strong>IBAND</strong> 大小的三角方程组进行求解</p>
-<p><img src="/posts/57869f4c/52.png" alt="1"></p>
-<h1 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h1><p>具体脚本如下：</p>
-<p><img src="/posts/57869f4c/53.png" alt="1"></p>
-<p><img src="/posts/57869f4c/54.png" alt="1"></p>
-<p><img src="/posts/57869f4c/55.png" alt="1"></p>
+<h1>ESFCT</h1>
+<h1>原理</h1>
+<p>ESFCT，用于计算 Cholesky 分解 $\mathbf{LL^{T}}$ ，将 $\mathbf{L}$ 矩阵按照 <em>envelope storage scheme</em> 格式存储。</p>
+<p>Cholesky 分解的方法是 bordering method ，假设矩阵 $\mathbf{A}$ 可以分块为<br>
+$$<br>
+\boldsymbol{A}=\left(\begin{array}{ll}<br>
+\boldsymbol{M} &amp; \boldsymbol{u} \<br>
+\boldsymbol{u}^{T} &amp; s<br>
+\end{array}\right)<br>
+$$<br>
+其中 $\mathbf{M}$ 可以分解为 $\mathbf{L_{M}L_{M}^{T}}$ ，因此 $\mathbf{A}$ 的分解因子为<br>
+$$<br>
+\boldsymbol{L}=\left(\begin{array}{ll}<br>
+\boldsymbol{L_{M}} &amp; \boldsymbol{0} \<br>
+\boldsymbol{w}^{T} &amp; t<br>
+\end{array}\right)<br>
+$$<br>
+其中 $\mathbf{L_{M}w = u}$ ，$\mathbf{t = (s - w^{T}w)^{1/2}}$ ，因此 $\mathbf{A}$ 的分解因子 $\mathbf{L}$ 可以<strong>逐行</strong>计算。以下图为例，假设我们已经完成了前 $i-1$ 步的分解，因此 $\mathbf{A}$ 的左上角的 $(i-1) \times (i-1)$ 的子矩阵已经完成了分解。为了计算 $\mathbf{L}$ 矩阵的第 $i$ 行，我们需要计算  $\mathbf{L_{M}w = u}$ 。但是，实际上 $\mathbf{u}$ 只有一部分 envelope 区域需要计算，因此实际使用和计算的 $\mathbf{\bar{L}}$ 和 $\mathbf{\bar{u}^{T}}$ 如右图，因此此时 <strong>ELSLV</strong> 可以对这个 <strong>IBAND</strong> 大小的三角方程组进行求解</p>
+<p><img src="52.png" alt="1"></p>
+<h1>脚本</h1>
+<p>具体脚本如下：</p>
+<p><img src="53.png" alt="1"></p>
+<p><img src="54.png" alt="1"></p>
+<p><img src="55.png" alt="1"></p>
 <p>现在开始逐行解析。</p>
 <p>首先对第一行进行分解，如果对角线元素小于等于0则程序中止</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">IF ( DIAG(1) .LE. 0.0E0) GO TO 400</span><br><span class="line">DIAG(1) = SQRT(DIAG(1))</span><br><span class="line">IF( NEQNS .EQ. 1) RETURN</span><br></pre></td></tr></table></figure>
-
 <p>对第二行及之后的行进行分解，IXENV 是 ENV 向量中第 $i$ 行第一个元素的位置，TEMP 是矩阵第 $i$ 行的对角线元素，如果 IBAND 等于 0，则跳过三角方程组求解这一步，<code>GO TO 200</code> 。</p>
 <p>IFIRST 是第 $i$ 行第一个元素所在列。</p>
-<p>之后调用 ELSLV 求解得到 $\mathbf{w}$ 。 这里就用到了子矩阵求解的方法，方程数目为 IBAND，<code>XENV(IFIRST)</code> 表示其第一个未知数是 IFIRST所在行&#x2F;列的未知数，<code>DIAG(IFIRST)</code>，其右手项是本行的非零元素，第一个元素为 <code>ENV(IXENV)</code> 。 </p>
+<p>之后调用 ELSLV 求解得到 $\mathbf{w}$ 。 这里就用到了子矩阵求解的方法，方程数目为 IBAND，<code>XENV(IFIRST)</code> 表示其第一个未知数是 IFIRST所在行/列的未知数，<code>DIAG(IFIRST)</code>，其右手项是本行的非零元素，第一个元素为 <code>ENV(IXENV)</code> 。</p>
 <p>因此调用结束后会更新右手项的值，即更新 ENV 向量</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">DO 300 I = 2, NEQNS</span><br><span class="line">  IXENV = XENV(I)</span><br><span class="line">  IBAND = XENV(I+1) - IXENV</span><br><span class="line">  TEMP = DIAG(I)</span><br><span class="line">  IF (IBAND .EQ. 0) GO TO 200</span><br><span class="line">    IFIRST = I - IBAND</span><br><span class="line">    CALL ELSLV( IBAND, XENV(IFIRST), ENV, DIAG(IFIRST), ENV(IXENV))</span><br></pre></td></tr></table></figure>
-
 <p>下一步，我们计算 t ，首先我们从对角线元素中减去  $\mathbf{w}$ 的内积。</p>
 <p>JSTOP 是 ENV 向量中第 $i$ 行最后一个元素的位置，<code>DO 100</code> 循环遍历了ENV 向量中第 $i$ 行的全部位置，<code>TEMP = TEMP - S * S</code> 便是对角线元素减去了   $\mathbf{w}$ 的内积</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">	      JSTOP = XENV(I+1) - 1</span><br><span class="line">	      DO 100 J = IXENV, JSTOP</span><br><span class="line">	      	S = ENV(J)</span><br><span class="line">	      	TEMP = TEMP - S * S</span><br><span class="line">100	      CONTINUE</span><br></pre></td></tr></table></figure>
-
 <p>然后求开方，如果 TEMP 小于等于0，程序中止。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">200    	IF(TEMP .LE.  0.0E0) GO TO 400</span><br><span class="line">		  DIAG(I) = SQRT(TEMP)</span><br><span class="line">		  COUNT = IBAND </span><br><span class="line">		  OPS = OPS + COUNT </span><br><span class="line">300	  CONTINUE</span><br><span class="line">	  RETURN </span><br></pre></td></tr></table></figure>
-
 <p>如果存在对角线元素小于等于0的情况，程序中止，IFLAG 设为 1</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">400   IFLAG = 1</span><br><span class="line">	  RETURN</span><br><span class="line">	  END</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>参考文献</h1>
+<ol>
 <li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
 </ol>
  
@@ -178,55 +188,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -525,30 +487,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

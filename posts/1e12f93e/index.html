@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3k</span>
+            <span class="post-count">2.9k</span>
         </span>
     </span>
 
@@ -77,7 +77,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">12 分钟</span>
+            <span class="post-count">11 分钟</span>
         </span>
     </span>
 </div>
@@ -96,50 +96,109 @@
 <p>但是在我们对基因型数据进行PCA分析时，我们使用的常规软件 (例如plink 和 GCTA)，其算法都是对<strong>G阵</strong>(可以理解为样本的协方差矩阵)进行特征值分解，然后得到的特征向量直接就是主成分。这里主要以 GCTA 文章为例，推导这种做法的合理性。</p>
 <p>建议先看上一篇 <a href="https://vincere.fun/posts/fc532062/">PCA分析公式推导</a></p>
 <span id="more"></span> 
-
-<h1 id="GCTA算法-1"><a href="#GCTA算法-1" class="headerlink" title="GCTA算法[1]"></a>GCTA算法<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="GCTA: A Tool for Genome-wide Complex Trait Analysis">[1]</span></a></sup></h1><p>这里我稍微改了一些文章中使用的符号，为了与我之前的符号习惯，或者说吴老师的符号习惯一致。</p>
-<h2 id="构建G阵"><a href="#构建G阵" class="headerlink" title="构建G阵"></a>构建G阵</h2><p>假设我们使用混合线性模型如下：<br>$$<br>\mathbf{y}&#x3D;\mathbf{K} \boldsymbol{\beta}+\mathbf{X} \mathbf{u}+\varepsilon \text { with } \operatorname{var}(\mathbf{y})&#x3D;\mathbf{V}&#x3D;\mathbf{X} \mathbf{X}^{\prime} \sigma_{\mathrm{u}}^{2}+\mathbf{I} \sigma_{\varepsilon}^{2},<br>$$<br>$\mathbf{y}$ 为 $m \times 1$ 的表型向量，$m$ 为表型数目。$\mathbf{\beta}$ 为固定效应，如PCA的主成分;  $\mathbf{K}$ 为相应的设计矩阵。$\mu$ 为  $n \times 1$ 的SNP 效应向量（$n$ 为SNP数目，也就是机器学习的特征数目），为随机效应，服从分布 $\mathbf{u} \sim N\left(0, \mathbf{I} \sigma_{\mathrm{u}}^{2}\right)$ ；$\mathbf{X}$ 为相应的设计矩阵。</p>
+<h1>GCTA算法<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="GCTA: A Tool for Genome-wide Complex Trait Analysis">[1]</span></a></sup></h1>
+<p>这里我稍微改了一些文章中使用的符号，为了与我之前的符号习惯，或者说吴老师的符号习惯一致。</p>
+<h2 id="构建G阵">构建G阵</h2>
+<p>假设我们使用混合线性模型如下：<br>
+$$<br>
+\mathbf{y}=\mathbf{K} \boldsymbol{\beta}+\mathbf{X} \mathbf{u}+\varepsilon \text { with } \operatorname{var}(\mathbf{y})=\mathbf{V}=\mathbf{X} \mathbf{X}^{\prime} \sigma_{\mathrm{u}}^{2}+\mathbf{I} \sigma_{\varepsilon}^{2},<br>
+$$<br>
+$\mathbf{y}$ 为 $m \times 1$ 的表型向量，$m$ 为表型数目。$\mathbf{\beta}$ 为固定效应，如PCA的主成分;  $\mathbf{K}$ 为相应的设计矩阵。$\mu$ 为  $n \times 1$ 的SNP 效应向量（$n$ 为SNP数目，也就是机器学习的特征数目），为随机效应，服从分布 $\mathbf{u} \sim N\left(0, \mathbf{I} \sigma_{\mathrm{u}}^{2}\right)$ ；$\mathbf{X}$ 为相应的设计矩阵。</p>
 <p>这里着重说一下 $\mathbf{X}$ 矩阵，其维度为 $m \times n$ ，也就是说一行表示一个样本，一列是一个SNP。这个矩阵的构建分为两步:</p>
 <ol>
 <li>我们统计每个SNP中指定碱基（文章中指定是<code>reference allele</code>，但这一点无所谓）的数目，作为中间矩阵的元素，此时这个矩阵元素只可能是0,1和 2 ；</li>
 <li>我们对上面这个矩阵的每一列（SNP）进行<strong>标准化</strong> ，便得到了   $\mathbf{X}$ 矩阵。</li>
 </ol>
-<p>这里我们假设第一步构建的中间矩阵为  $\mathbf{M}$， 则  $\mathbf{X}$ 矩阵的元素 $x_{i j}&#x3D;\left(m_{i j}-2 p_{j}\right)&#x2F;\sqrt{2 p_{j}\left(1-p_{j}\right)}$ ，这里 $p_{j}$ 为第 $j$ 列 SNP 指定碱基的基因频率。也就是说，这里设第 $j$ 列 SNP的均值为 $2p_{j}$ ，其方差为 $2p_{j}(1-p_{j})$ ，下面开始证明这两点。</p>
+<p>这里我们假设第一步构建的中间矩阵为  $\mathbf{M}$， 则  $\mathbf{X}$ 矩阵的元素 $x_{i j}=\left(m_{i j}-2 p_{j}\right)/\sqrt{2 p_{j}\left(1-p_{j}\right)}$ ，这里 $p_{j}$ 为第 $j$ 列 SNP 指定碱基的基因频率。也就是说，这里设第 $j$ 列 SNP的均值为 $2p_{j}$ ，其方差为 $2p_{j}(1-p_{j})$ ，下面开始证明这两点。</p>
 <p>我们设第 $j$ 列 SNP中0,1,2三种基因型在样本中出现的频率分别为 $a,b,c$ ，因此我们有</p>
-<p>$$<br>\begin{aligned}<br>&amp;a+b+c&#x3D;1 \<br>&amp;\frac{1}{2} b+c&#x3D;p_{j}<br>\end{aligned}<br>$$</p>
+<p>$$<br>
+\begin{aligned}<br>
+&amp;a+b+c=1 \<br>
+&amp;\frac{1}{2} b+c=p_{j}<br>
+\end{aligned}<br>
+$$</p>
 <p>则很容易计算 $\mathbf{M}$ 矩阵第 $j$ 列的均值</p>
-<p>$$<br>E(M_{j})&#x3D;0 \times a+1 \times b+2 \times c&#x3D;2 p_{j}<br>$$</p>
-<p>证明 $\mathbf{M}$ 矩阵第 $j$ 列的方差则需要<strong>哈温平衡假设</strong>。当群体处于哈温平衡时，此时存在：<br>$$<br>\begin{aligned}<br>&amp;a&#x3D;\left(1-p_{j}\right)^{2} \<br>&amp;b&#x3D;2 p_{j}\left(1-p_{j}\right) \<br>&amp;c&#x3D;p_{j}^{2}<br>\end{aligned}<br>$$<br>第 $j$ 列的方差为：<br>$$<br>\begin{aligned}<br>\operatorname{Var}\left(M_{j}\right) &amp;&#x3D;E\left(M_{j}^{2}\right)-\left(E\left(M_{j}\right)\right)^{2} \<br>&amp;&#x3D;\left(0 \times a+1 \times b +4 \times c\right)-4 p_{j}^{2} \<br>&amp;&#x3D;2 p_{j}+2 c-4 p_{j}^{2} \quad \because 哈温平衡假设\<br>&amp;&#x3D;2 p_{j}+2 p_{j}^{2}-4 p_{i}^{2} \<br>&amp;&#x3D;2 p_{j}\left(1-p_{j}\right)<br>\end{aligned}<br>$$</p>
+<p>$$<br>
+E(M_{j})=0 \times a+1 \times b+2 \times c=2 p_{j}<br>
+$$</p>
+<p>证明 $\mathbf{M}$ 矩阵第 $j$ 列的方差则需要<strong>哈温平衡假设</strong>。当群体处于哈温平衡时，此时存在：<br>
+$$<br>
+\begin{aligned}<br>
+&amp;a=\left(1-p_{j}\right)^{2} \<br>
+&amp;b=2 p_{j}\left(1-p_{j}\right) \<br>
+&amp;c=p_{j}^{2}<br>
+\end{aligned}<br>
+$$<br>
+第 $j$ 列的方差为：<br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{Var}\left(M_{j}\right) &amp;=E\left(M_{j}^{2}\right)-\left(E\left(M_{j}\right)\right)^{2} \<br>
+&amp;=\left(0 \times a+1 \times b +4 \times c\right)-4 p_{j}^{2} \<br>
+&amp;=2 p_{j}+2 c-4 p_{j}^{2} \quad \because 哈温平衡假设\<br>
+&amp;=2 p_{j}+2 p_{j}^{2}-4 p_{i}^{2} \<br>
+&amp;=2 p_{j}\left(1-p_{j}\right)<br>
+\end{aligned}<br>
+$$</p>
 <p>这里我们得到的  $\mathbf{X}$ 矩阵与机器学习中使用的设计矩阵 $\mathbf{X}$ 矩阵一模一样，都是 $m \times n$ 的矩阵，并且对特征进行了标准。</p>
-<p>我们定义<strong>亲缘关系矩阵 (genetic relationship matrix, GRM)</strong>   $\mathbf{G}$ 矩阵如下<br>$$<br>\mathbf{G}&#x3D;\frac{1}{n} \mathbf{X} \mathbf{X}^{\top}<br>$$</p>
-<p>我们发现这里定义的 $\mathbf{G}$ 矩阵 看上去和机器学习中使用的协方差矩阵 $\mathbf{\Sigma}$ 很像，如果我们不管常数项，这里就是矩阵乘积的顺序换了。<br>$$<br>\mathbf{\Sigma}&#x3D;\frac{1}{m} \mathbf{X}^{\top} \mathbf{X}<br>$$</p>
+<p>我们定义<strong>亲缘关系矩阵 (genetic relationship matrix, GRM)</strong>   $\mathbf{G}$ 矩阵如下<br>
+$$<br>
+\mathbf{G}=\frac{1}{n} \mathbf{X} \mathbf{X}^{\top}<br>
+$$</p>
+<p>我们发现这里定义的 $\mathbf{G}$ 矩阵 看上去和机器学习中使用的协方差矩阵 $\mathbf{\Sigma}$ 很像，如果我们不管常数项，这里就是矩阵乘积的顺序换了。<br>
+$$<br>
+\mathbf{\Sigma}=\frac{1}{m} \mathbf{X}^{\top} \mathbf{X}<br>
+$$</p>
 <p>我们知道协方差矩阵 $\mathbf{\Sigma}$ 是一个 $n \times n$ 的矩阵，<strong>其元素  $\Sigma_{ij}$ 为特征 $i$ 和特征 $j$ 的协方差</strong>；那么这里类似的，  $\mathbf{G}$ 矩阵是一个 $m \times m$ 的矩阵，<strong>其元素  $G_{ij}$ 便可解释为个体 $i$ 和个体 $j$ 的协方差</strong>， $\mathbf{G}$ 矩阵可以理解为个体间的协方差矩阵。</p>
-<p>同时定义 $\sigma_{g}^{2}$ 为所有SNP 解释的方差，比如 $\sigma_{\mathrm{g}}^{2}&#x3D;n \sigma_{\mathrm{u}}^{2}$ ，此时上面的模型等价于<br>$$<br>\mathbf{y}&#x3D;\mathbf{K} \boldsymbol{\beta}+\mathbf{g}+\varepsilon \text { with } \mathbf{V}&#x3D;\mathbf{G} \sigma_{\mathrm{g}}^{2}+\mathbf{I} \sigma_{\varepsilon}^{2}<br>$$<br>这里 $\mathrm{g}$ 是一个 $m \times 1$ 的个体的总的加性效应向量，服从分布 $\mathbf{g} \sim N\left(0, \mathbf{G} \sigma_{\mathrm{g}}^{2}\right)$ 。我们注意到，我们上面说 $\mathbf{G}$ 矩阵可以理解为个体间的协方差矩阵，那为什么这里个体间的协方差矩阵用的是 $\mathbf{G} \sigma_{\mathrm{g}}^{2}$ 呢？个人理解，因为构建 $\mathbf{X}$ 矩阵进行了标准化，因此 $\mathbf{G}$ 矩阵中的方差或协方差相比于个体间真实的方差或协方差的取值范围不一样，因此需要乘以  $\sigma_{g}^{2}$  来还原。</p>
-<h2 id="PCA分析"><a href="#PCA分析" class="headerlink" title="PCA分析"></a>PCA分析</h2><p>PCA 做起来非常简单，就一步，就是对上面的$\mathbf{G}$ 矩阵进行特征值分解，得到的前 $k$ 个特征向量就是我们需要的主成分。</p>
-<p>这里我们与一般的PCA分析进行比较，首先我们先看一个简单的性质。当你对矩阵 $A$ 乘以一个常数 $\alpha$ $( \alpha &gt; 0)$ 时，设 $A$ 的一组特征值和特征向量分别为 $\lambda$ 和 $\mu$,  则 $\alpha \lambda$ 和 $\mu$ 为 $\alpha A$ 的特征值和特征向量。证明很简单，见下。<br>$$<br>\begin{aligned}<br>\alpha A \mu &amp;&#x3D; \alpha \lambda \mu \quad 左右各乘以一个 \alpha \<br>(\alpha A) \mu &amp;&#x3D; (\alpha \lambda) \mu \<br>\end{aligned}<br>$$<br>因此，这说明大于$0$的常数项不会影响我们提取前$k$ 个特征向量的结果（特征值绝对大小改变，但是相对大小和排名不变；特征向量不变），因此我们可以忽略 $1&#x2F;m$ ，$1&#x2F;n$ 。我们就只需要比较 $ \mathbf{X} \mathbf{X}^{\top}$ 和 $ \mathbf{X}^{\top} \mathbf{X}$ 特征值分解的异同。</p>
+<p>同时定义 $\sigma_{g}^{2}$ 为所有SNP 解释的方差，比如 $\sigma_{\mathrm{g}}^{2}=n \sigma_{\mathrm{u}}^{2}$ ，此时上面的模型等价于<br>
+$$<br>
+\mathbf{y}=\mathbf{K} \boldsymbol{\beta}+\mathbf{g}+\varepsilon \text { with } \mathbf{V}=\mathbf{G} \sigma_{\mathrm{g}}^{2}+\mathbf{I} \sigma_{\varepsilon}^{2}<br>
+$$<br>
+这里 $\mathrm{g}$ 是一个 $m \times 1$ 的个体的总的加性效应向量，服从分布 $\mathbf{g} \sim N\left(0, \mathbf{G} \sigma_{\mathrm{g}}^{2}\right)$ 。我们注意到，我们上面说 $\mathbf{G}$ 矩阵可以理解为个体间的协方差矩阵，那为什么这里个体间的协方差矩阵用的是 $\mathbf{G} \sigma_{\mathrm{g}}^{2}$ 呢？个人理解，因为构建 $\mathbf{X}$ 矩阵进行了标准化，因此 $\mathbf{G}$ 矩阵中的方差或协方差相比于个体间真实的方差或协方差的取值范围不一样，因此需要乘以  $\sigma_{g}^{2}$  来还原。</p>
+<h2 id="PCA分析">PCA分析</h2>
+<p>PCA 做起来非常简单，就一步，就是对上面的$\mathbf{G}$ 矩阵进行特征值分解，得到的前 $k$ 个特征向量就是我们需要的主成分。</p>
+<p>这里我们与一般的PCA分析进行比较，首先我们先看一个简单的性质。当你对矩阵 $A$ 乘以一个常数 $\alpha$ $( \alpha &gt; 0)$ 时，设 $A$ 的一组特征值和特征向量分别为 $\lambda$ 和 $\mu$,  则 $\alpha \lambda$ 和 $\mu$ 为 $\alpha A$ 的特征值和特征向量。证明很简单，见下。<br>
+$$<br>
+\begin{aligned}<br>
+\alpha A \mu &amp;= \alpha \lambda \mu \quad 左右各乘以一个 \alpha \<br>
+(\alpha A) \mu &amp;= (\alpha \lambda) \mu \<br>
+\end{aligned}<br>
+$$<br>
+因此，这说明大于$0$的常数项不会影响我们提取前$k$ 个特征向量的结果（特征值绝对大小改变，但是相对大小和排名不变；特征向量不变），因此我们可以忽略 $1/m$ ，$1/n$ 。我们就只需要比较 $ \mathbf{X} \mathbf{X}^{\top}$ 和 $ \mathbf{X}^{\top} \mathbf{X}$ 特征值分解的异同。</p>
 <p>我们再回顾一个性质，<strong>矩阵 $A A^{T}$ 和矩阵 $A^{T} A$ 的非零特征值相同</strong>，证明如下<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="https://math.stackexchange.com/questions/1249497/largest-eigenvalues-of-aa-equals-to-aa">[2]</span></a></sup></p>
 <blockquote>
-<p>For any $m \times n$ and $n \times m$ matrices $A$ and $B$, the nonzero eigenvalues of $A B$ and $B A$ are the same. Namely, if $A B v&#x3D;\lambda v$ with $\lambda \neq 0$ and $v \neq 0$, then $B v \neq 0$ （因为 $A B v&#x3D;\lambda v \neq 0$ ，如果 $B v &#x3D; 0$，则 $ABv &#x3D; 0$，与原条件相悖，因此  $B v \neq 0$  ）and $B A(B v)&#x3D;B(A B v)&#x3D;\lambda B v$  ，即 $\lambda$ 同样为 $BA$ 的特征值，因此 $AB$ 和 $BA$ 的非零特征值相同。</p>
+<p>For any $m \times n$ and $n \times m$ matrices $A$ and $B$, the nonzero eigenvalues of $A B$ and $B A$ are the same. Namely, if $A B v=\lambda v$ with $\lambda \neq 0$ and $v \neq 0$, then $B v \neq 0$ （因为 $A B v=\lambda v \neq 0$ ，如果 $B v = 0$，则 $ABv = 0$，与原条件相悖，因此  $B v \neq 0$  ）and $B A(B v)=B(A B v)=\lambda B v$  ，即 $\lambda$ 同样为 $BA$ 的特征值，因此 $AB$ 和 $BA$ 的非零特征值相同。</p>
 </blockquote>
 <p>因此，我们知道 $ \mathbf{X} \mathbf{X}^{\top}$ 和 $ \mathbf{X}^{\top} \mathbf{X}$ 特征值相同，而且根据上面的证明过程，二者的特征向量存在下面的关系。</p>
-<p>若 $(\lambda, \mu)$ 为   $ \mathbf{X}^{\top} \mathbf{X}$ 的一组特征值和特征向量，则 $(\lambda, X\mu)$ 为  $ \mathbf{X} \mathbf{X}^{\top}$ 的一组特征值和特征向量。也就是我们对 $\mathbf{G}$ 矩阵和 $\mathbf{\Sigma}$ 矩阵进行特征值分解，其特征向量的关系为：<br>$$<br>\mu_{G} &#x3D; X \mu_{\Sigma}<br>$$<br>  其中，$\mu_{G}$  表示为$\mathbf{G}$ 矩阵的一个特征向量，  $\mu_ {\Sigma}$ 表示为相应的 $\mathbf{\Sigma}$ 矩阵的一个特征向量。</p>
+<p>若 $(\lambda, \mu)$ 为   $ \mathbf{X}^{\top} \mathbf{X}$ 的一组特征值和特征向量，则 $(\lambda, X\mu)$ 为  $ \mathbf{X} \mathbf{X}^{\top}$ 的一组特征值和特征向量。也就是我们对 $\mathbf{G}$ 矩阵和 $\mathbf{\Sigma}$ 矩阵进行特征值分解，其特征向量的关系为：<br>
+$$<br>
+\mu_{G} = X \mu_{\Sigma}<br>
+$$<br>
+其中，$\mu_{G}$  表示为$\mathbf{G}$ 矩阵的一个特征向量，  $\mu_ {\Sigma}$ 表示为相应的 $\mathbf{\Sigma}$ 矩阵的一个特征向量。</p>
 <p>而，$X \mu_{\Sigma}$ 就是<strong>所有样本在这个新坐标轴的坐标组成的向量</strong>（$\mu_ {\Sigma}$ 可以理解为新的坐标系的某一个轴）。这就和我们之前提到的先对<strong>特征的协方差矩阵</strong> $\Sigma$ 进行特征值分解，得到特征向量 $\left{w_{1}, w_{2}, \ldots, w_{n}\right}$  后，再利用特征向量与特征的内积，计算样本点的新坐标 $z$ ，这个过程是一致的。</p>
 <p>因此，这里证明了直接对 $\mathbf{G}$ 矩阵进行特征值分解，其特征向量直接就是主成分，这种做法和常规的PCA分析做法是一致的。</p>
-<h1 id="疑问"><a href="#疑问" class="headerlink" title="疑问"></a>疑问</h1><h2 id="构建G阵的假设有哪些？"><a href="#构建G阵的假设有哪些？" class="headerlink" title="构建G阵的假设有哪些？"></a>构建G阵的假设有哪些？</h2><p>第一，构建G阵<strong>最重要的假设就是群体处于哈温平衡状态</strong>。在上面推导每一列SNP的方差时便需要用到哈温平衡的假设，但是这个假设我感觉很难成立。与之有关的另一个问题是使用的等位基因频率。我的理解是我们使用的基因型样本可以视为对总体的一个抽样，我们是用我们手上的样本的等位基因频率去估计总体的等位基因频率，那么只有符合哈温平衡时我们这么做才合理。因此只有符合哈温平衡时，不同的世代的等位基因频率才保持不变，因此对当前世代或当前群体的等位基因频率就可以有效地估计总体的等位基因频率。</p>
+<h1>疑问</h1>
+<h2 id="构建G阵的假设有哪些？">构建G阵的假设有哪些？</h2>
+<p>第一，构建G阵<strong>最重要的假设就是群体处于哈温平衡状态</strong>。在上面推导每一列SNP的方差时便需要用到哈温平衡的假设，但是这个假设我感觉很难成立。与之有关的另一个问题是使用的等位基因频率。我的理解是我们使用的基因型样本可以视为对总体的一个抽样，我们是用我们手上的样本的等位基因频率去估计总体的等位基因频率，那么只有符合哈温平衡时我们这么做才合理。因此只有符合哈温平衡时，不同的世代的等位基因频率才保持不变，因此对当前世代或当前群体的等位基因频率就可以有效地估计总体的等位基因频率。</p>
 <p>第二，标记之间彼此独立，换句话说，不存在连锁不平衡，因为这里我们假设所有SNP的分布为  $\mathbf{u} \sim N\left(0, \mathbf{I} \sigma_{\mathrm{u}}^{2}\right)$ 。</p>
 <p>应该没有别的假设了。</p>
-<h2 id="当基因型存在缺失时，如何构建的G阵？"><a href="#当基因型存在缺失时，如何构建的G阵？" class="headerlink" title="当基因型存在缺失时，如何构建的G阵？"></a>当基因型存在缺失时，如何构建的G阵？</h2><p>当我们使用 plink 或 GCTA 进行PCA分析时，我们可以直接用下机的基因型数据进行分析，而不需要填充，那么问题来了，此时基因型存在缺失，怎么构建的G阵呢？</p>
+<h2 id="当基因型存在缺失时，如何构建的G阵？">当基因型存在缺失时，如何构建的G阵？</h2>
+<p>当我们使用 plink 或 GCTA 进行PCA分析时，我们可以直接用下机的基因型数据进行分析，而不需要填充，那么问题来了，此时基因型存在缺失，怎么构建的G阵呢？</p>
 <p>GCTA文章指向了 EIGENSTART 软件，然后我就看了这边软件的文章<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Principal components analysis corrects for stratification in genome-wide association studies ">[3]</span></a></sup>，原文见下图。</p>
 <p>我个人理解是，</p>
 <ol>
-<li><p>首先计算每一列SNP的等位基因频率 $p_{j}$ 时剔除缺失位点。</p>
+<li>
+<p>首先计算每一列SNP的等位基因频率 $p_{j}$ 时剔除缺失位点。</p>
 </li>
-<li><p>然后我们对每一列SNP进行标准化，在标准化过程中直接将 $X$ 矩阵中基因型缺失的地方设为 0（按照图中的说法，顺序是先进行中心化，再将缺失位点的值调整为0，最后除以标准差）。<br> $$<br> x_{i j}&#x3D; \begin{cases}\left(m_{i j}-2 p_{j}\right)&#x2F;\sqrt{2 p_{j}\left(1-p_{j}\right)} &amp; \text { if } x_{i j} \text{ 不为缺失}  \ 0 &amp; \text { if } x_{i j} \text{ 缺失}\end{cases}<br> $$</p>
+<li>
+<p>然后我们对每一列SNP进行标准化，在标准化过程中直接将 $X$ 矩阵中基因型缺失的地方设为 0（按照图中的说法，顺序是先进行中心化，再将缺失位点的值调整为0，最后除以标准差）。<br>
+$$<br>
+x_{i j}= \begin{cases}\left(m_{i j}-2 p_{j}\right)/\sqrt{2 p_{j}\left(1-p_{j}\right)} &amp; \text { if } x_{i j} \text{ 不为缺失}  \ 0 &amp; \text { if } x_{i j} \text{ 缺失}\end{cases}<br>
+$$</p>
 </li>
 </ol>
 <p>注意，下图中的  $X$ 矩阵是一个 $n \times m$ 的矩阵，和本文中使用的 $X$ 矩阵不是同一个，二者是互为转置的关系。</p>
-<p>这种做法就仍然是采用了极大似然估计的思想，当基因型数据存在缺失，这里用最可能出现的值去填补，也就是用群体均值。那么，这种做法和对基因型进行填充再构建G阵的做法，这两种做法那种更好呢？我个人认为是后者，举个例子，假设某个SNP在群体里中的等位基因频率 $p_j &#x3D; 0.3$ ，那么当这个位点存在缺失时，按上面的做法相当于我们将其基因型填补为 0.6 ，这百分百是一个错误的估计值，因为一个位点的基因型只能是0,1,2。但是，当我们对基因型进行填充时，利用位点间的连锁不平衡或样本间的亲缘关系，我们有很大的几率将其填充为正确的基因型。当然，在基因型缺失率比较低的情况下，这两种做法结果区别不大。</p>
-<p><img src="/posts/1e12f93e/1.png" alt="1"></p>
+<p>这种做法就仍然是采用了极大似然估计的思想，当基因型数据存在缺失，这里用最可能出现的值去填补，也就是用群体均值。那么，这种做法和对基因型进行填充再构建G阵的做法，这两种做法那种更好呢？我个人认为是后者，举个例子，假设某个SNP在群体里中的等位基因频率 $p_j = 0.3$ ，那么当这个位点存在缺失时，按上面的做法相当于我们将其基因型填补为 0.6 ，这百分百是一个错误的估计值，因为一个位点的基因型只能是0,1,2。但是，当我们对基因型进行填充时，利用位点间的连锁不平衡或样本间的亲缘关系，我们有很大的几率将其填充为正确的基因型。当然，在基因型缺失率比较低的情况下，这两种做法结果区别不大。</p>
+<p><img src="1.png" alt="1"></p>
 <div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">GCTA: A Tool for Genome-wide Complex Trait Analysis<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">https://math.stackexchange.com/questions/1249497/largest-eigenvalues-of-aa-equals-to-aa<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Principal components analysis corrects for stratification in genome-wide association studies<a href="#fnref:3" rev="footnote"> ↩</a></span></li></ol></div></div> 
       <!-- reward -->
       
@@ -185,55 +244,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -532,30 +543,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

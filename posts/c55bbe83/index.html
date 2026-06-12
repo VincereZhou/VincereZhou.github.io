@@ -94,21 +94,21 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>下面信息来自于 AI ，还没有测试。</p>
 <span id="more"></span>
-
 <p>你提到的 EMLGP 研究，其核心之一就是 <strong>Boruta 算法</strong>。简单来说，它就像一个“自动筛选器”，能帮助我们找出基因组中那些真正影响性状的“关键信号”，并把随机出现的“背景噪音”剔除掉。</p>
 <p>Boruta 的核心目标不是寻找一个“最小的”最优特征子集（这是很多传统方法，如RFE、LASSO做的事），而是找到与目标性状相关的<strong>所有</strong>特征。在生物学等领域，理解复杂机制远比追求模型极致精简更重要，这正是 Boruta 的核心优势。</p>
 <hr>
-<h1 id="💡-核心原理：为何-Boruta-能如此精准？"><a href="#💡-核心原理：为何-Boruta-能如此精准？" class="headerlink" title="💡 核心原理：为何 Boruta 能如此精准？"></a>💡 核心原理：为何 Boruta 能如此精准？</h1><p>Boruta 算法的机制，可以看作一轮轮公开、公正的“选拔考试”。</p>
+<h1>💡 核心原理：为何 Boruta 能如此精准？</h1>
+<p>Boruta 算法的机制，可以看作一轮轮公开、公正的“选拔考试”。</p>
 <ol>
 <li><strong>引入“考官”——影子特征</strong>：为每个原始特征（比如SNP位点），随机打乱其顺序（即破坏它与目标性状的关系）后生成一个“影子副本”。这些“影子”是纯粹的噪音，充当比较的基准。</li>
 <li><strong>进行“选拔考试”</strong>：将原始特征和影子特征放在一起训练随机森林模型，并计算每个特征对预测的“贡献度”（即特征重要性）。</li>
-<li><strong>关键一步：比较与淘汰</strong>：如果原始特征的贡献度 <strong>高于</strong> 所有影子特征的最高水平（或其某个高百分位），意味着它做出了不可替代的贡献，将被判定为 **“重要” (Confirmed)**。如果其贡献度 <strong>显著低于</strong> 影子特征，说明和随机噪音没区别，就会被判为 **“不重要” (Rejected)**。</li>
+<li><strong>关键一步：比较与淘汰</strong>：如果原始特征的贡献度 <strong>高于</strong> 所有影子特征的最高水平（或其某个高百分位），意味着它做出了不可替代的贡献，将被判定为 <strong>“重要” (Confirmed)</strong>。如果其贡献度 <strong>显著低于</strong> 影子特征，说明和随机噪音没区别，就会被判为 <strong>“不重要” (Rejected)</strong>。</li>
 <li><strong>循环与裁决</strong>：重复这个过程多达上百次。算法会持续跟踪每个特征在每轮中是“胜出”还是“落败”，并通过假设检验来决定其最终命运。</li>
 </ol>
-<h1 id="⚙️-在基因组选择中的实践"><a href="#⚙️-在基因组选择中的实践" class="headerlink" title="⚙️ 在基因组选择中的实践"></a>⚙️ 在基因组选择中的实践</h1><p>在EMLGP框架中，Boruta的作用是<strong>对第一步LD修剪后剩余的SNP进行二次精筛，最终锁定真正与目标性状（如产量、抗逆等）相关的核心分子标记。</strong> 这一步为模型输入提供了高质量的数据。</p>
+<h1>⚙️ 在基因组选择中的实践</h1>
+<p>在EMLGP框架中，Boruta的作用是<strong>对第一步LD修剪后剩余的SNP进行二次精筛，最终锁定真正与目标性状（如产量、抗逆等）相关的核心分子标记。</strong> 这一步为模型输入提供了高质量的数据。</p>
 <p>在Python中实现Boruta通常很便捷，<code>boruta_py</code>是一个流行的实现：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 需要安装 boruta_py: pip install boruta_py</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.ensemble <span class="keyword">import</span> RandomForestRegressor</span><br><span class="line"><span class="keyword">from</span> boruta <span class="keyword">import</span> BorutaPy</span><br><span class="line"></span><br><span class="line"><span class="comment"># X 代表你的基因型数据，y 代表你的表型数据</span></span><br><span class="line"><span class="comment"># X = your_genotype_data</span></span><br><span class="line"><span class="comment"># y = your_phenotype_data</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 定义一个随机森林模型</span></span><br><span class="line"><span class="comment"># 对于基因组数据，建议设置较小的 max_depth 和足够大的 n_estimators</span></span><br><span class="line">rf = RandomForestRegressor(n_jobs=-<span class="number">1</span>, max_depth=<span class="number">7</span>, n_estimators=<span class="number">500</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 初始化 Boruta 选择器</span></span><br><span class="line"><span class="comment"># n_estimators=&#x27;auto&#x27; 让算法自动决定迭代次数，perc 是影子特征的比较阈值</span></span><br><span class="line">feat_selector = BorutaPy(</span><br><span class="line">    estimator=rf,</span><br><span class="line">    n_estimators=<span class="string">&#x27;auto&#x27;</span>,  <span class="comment"># 自动决定需要的迭代次数</span></span><br><span class="line">    perc=<span class="number">100</span>,             <span class="comment"># 通常设为100，代表与最佳影子特征比较</span></span><br><span class="line">    verbose=<span class="number">2</span>,            <span class="comment"># 输出详细过程</span></span><br><span class="line">    random_state=<span class="number">42</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 执行特征选择</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;开始Boruta特征选择...&quot;</span>)</span><br><span class="line">feat_selector.fit(X, y)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;特征选择完成！&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 查看结果</span></span><br><span class="line"><span class="comment"># 哪些特征是重要的 (True) 或不重要的 (False)</span></span><br><span class="line">selected_features_mask = feat_selector.support_</span><br><span class="line"><span class="comment"># 特征的重要性排名，1为最重要，数字越小排名越靠前</span></span><br><span class="line">ranking = feat_selector.ranking_</span><br></pre></td></tr></table></figure>
-
 <p>Boruta的精度和识别潜在信号的能力是其主要优势，但计算开销大是其最大的局限性，需要权衡。</p>
 <ul>
 <li><strong>优势</strong>：作为一种综合性的特征选择方法，Boruta 对数据和模型的适应性强，能很好地应对噪音和缺失值，并且往往能识别出最多的潜在关键特征。</li>
@@ -159,55 +159,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -506,30 +458,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

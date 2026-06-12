@@ -99,40 +99,37 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p><code>glob</code> 是一个内置模块， 其提供了一个函数用于从目录中搜索匹配的文件路径名模式，它可以帮助你快速找到符合条件的文件路径。</p>
 <p>递归查找所有文件的利器。</p>
 <span id="more"></span>
-
-<h1 id="glob"><a href="#glob" class="headerlink" title="glob"></a>glob</h1><p>使用 <code>glob</code> 模块需要先导入：</p>
+<h1>glob</h1>
+<p>使用 <code>glob</code> 模块需要先导入：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import glob</span><br></pre></td></tr></table></figure>
-
 <p>然后可以使用 <code>glob.glob()</code> 函数来搜索匹配的文件路径，该函数接受一个文件路径模式作为参数，返回符合模式的所有文件路径<strong>列表</strong>。</p>
 <p>以下是 <code>glob</code> 模块的一些示例用法：</p>
 <ol>
 <li>查找当前目录下所有的 <code>.txt</code> 文件：</li>
 </ol>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> glob</span><br><span class="line"></span><br><span class="line">txt_files = glob.glob(<span class="string">&quot;*.txt&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(txt_files)</span><br></pre></td></tr></table></figure>
-
 <ol start="2">
 <li>查找指定路径下所有的 <code>.py</code> 文件：</li>
 </ol>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> glob</span><br><span class="line"></span><br><span class="line">py_files = glob.glob(<span class="string">&quot;/path/to/dir/*.py&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(py_files)</span><br></pre></td></tr></table></figure>
-
 <ol start="3">
 <li>查找多个后缀名的文件：</li>
 </ol>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> glob</span><br><span class="line"></span><br><span class="line">files = glob.glob(<span class="string">&quot;*.[png,jpg,gif]&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(files)</span><br></pre></td></tr></table></figure>
-
 <ol start="4">
 <li>查找所有子目录下的所有 <code>.txt</code> 文件：</li>
 </ol>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> glob</span><br><span class="line"></span><br><span class="line">base_path = <span class="string">&quot;/path/to/dir&quot;</span></span><br><span class="line">txt_files = glob.glob(os.path.join(base_path, <span class="string">&quot;**/*.txt&quot;</span>), recursive=<span class="literal">True</span>)</span><br><span class="line"><span class="built_in">print</span>(txt_files)</span><br></pre></td></tr></table></figure>
-
 <p>在第四个示例中，我们使用了 <code>os.path.join()</code> 来构造完整的查询路径，并且设置了 <code>recursive=True</code> 来递归查找所有子目录（默认是 False ，即仅搜索指定目录中符合条件的文件路径名）。</p>
-<h1 id="两个-号"><a href="#两个-号" class="headerlink" title="两个*号"></a>两个*号</h1><p><code>**</code> 是一个特殊的通配符，在 <code>glob</code> 模块中表示匹配多级子目录。具体来说，<code>**</code> 可以匹配任意层数的子目录，例如：</p>
+<h1>两个*号</h1>
+<p><code>**</code> 是一个特殊的通配符，在 <code>glob</code> 模块中表示匹配多级子目录。具体来说，<code>**</code> 可以匹配任意层数的子目录，例如：</p>
 <ul>
 <li><code>/path/to/dir/**/*.txt</code>：匹配 <code>/path/to/dir</code> 目录下以及其所有子目录中的所有 <code>.txt</code> 文件。</li>
 <li><code>/path/to/dir/**/foo/*.txt</code>：匹配 <code>/path/to/dir</code> 目录下以及其所有子目录中名为 <code>foo</code> 的子目录中的所有 <code>.txt</code> 文件。</li>
 </ul>
 <p>需要注意的是，在 Windows 系统中使用 <code>**</code> 时需要开启 <code>recursive=True</code> 参数，而在类 Unix 系统中则不需要（也就是说在  Unix 系统中用<code>**</code> 不用设置 <code>recursive=True</code> 参数 ）。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>参考文献</h1>
+<ol>
 <li>Chat机器人</li>
 </ol>
  
@@ -182,55 +179,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -529,30 +478,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

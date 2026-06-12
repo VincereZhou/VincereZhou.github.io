@@ -98,47 +98,44 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 cython 编译 python 脚本。</p>
 <span id="more"></span>
-
-<h1 id="安装-cython"><a href="#安装-cython" class="headerlink" title="安装 cython"></a>安装 cython</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install cython</span><br></pre></td></tr></table></figure>
-
+<h1>安装 cython</h1>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install cython</span><br></pre></td></tr></table></figure>
 <p>然后查看是否安装上</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">cython -V</span></span><br><span class="line">Cython version 0.29.33</span><br></pre></td></tr></table></figure>
-
-<h1 id="修改-pyx-脚本"><a href="#修改-pyx-脚本" class="headerlink" title="修改 pyx 脚本"></a>修改 pyx 脚本</h1><p>以下面的程序为例，这个程序是计算一个对称矩阵和一个输入向量的乘积，这个矩阵的上三角元素按照三元组的形式存储在 <code>(row_list, col_list, data_list)</code> 中，<code>x</code> 为输入向量，函数返回乘积 <code>b</code> 。</p>
+<h1>修改 pyx 脚本</h1>
+<p>以下面的程序为例，这个程序是计算一个对称矩阵和一个输入向量的乘积，这个矩阵的上三角元素按照三元组的形式存储在 <code>(row_list, col_list, data_list)</code> 中，<code>x</code> 为输入向量，函数返回乘积 <code>b</code> 。</p>
 <p>首先需要用 <code>cimport cython</code> 导入模块。</p>
 <p>将 <code>row_list</code> 和 <code>col_list</code> 的数据类型定义为 <code>np.intc</code> ，与 C 语言中的 <code>int</code> 类型对应；将 <code>data_list</code>的数据类型定义为 <code>np.double</code> ，与 C 语言中的 <code>double</code> 类型对应。这里就是要保证数据类型一致，具体的 numpy 与 C 语言所有数据类型的对应关系可见官网 <a target="_blank" rel="noopener" href="https://www.numpy.org.cn/user/basics/types.html">数组类型之间的转换</a>。</p>
 <p>通过网上发现 numpy.double 等同于 numpy.float64 ,  numpy.intc 等同于 numpy.int32， 证明如下：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">1</span>]: <span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">In [<span class="number">2</span>]: np.double <span class="keyword">is</span> np.float64</span><br><span class="line">Out[<span class="number">2</span>]: <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">3</span>]: np.intc <span class="keyword">is</span> np.int32</span><br><span class="line">Out[<span class="number">3</span>]: <span class="literal">True</span></span><br></pre></td></tr></table></figure>
-
 <p><code>@cython.wraparound(False)</code> 和 <code>@cython.boundscheck(False)</code> 这两句是说不再检查循环变量 (<code>i</code> ) 的范围。</p>
 <p><code>@cython.cdivision(True)</code> 是说使用 C 语言中的除法，而不是 python 的除法。注意如果是两个整数相除，C 语言的除法会取整，想要得到正确的结果，需要将一个数改为浮点数，比如将 <code>x</code> 改为 <code>&lt;double&gt;  (x)</code> 。</p>
 <p>然后我们看函数内部 ，首先就是将数据类型改为与 C 语言一致，<code>x = x.astype(np.double)</code> 。然后数组对象需要放到缓存中，这样就能将 python 的数组对象转为 C 语言直接处理的对象，比如 <code>cdef int[:] row_list_view = row_list</code>（对 <code>row_list_view</code> 的处理，<code>row_list</code> 也会出现相应的改变）。标量可以直接定义，注意这里涉及数据维度的地方也需要提前定义，因为数组维度对象也是 python 对象，比如 <code>cdef int element_num = row_list.shape[0]</code> 。对于循环变量，定义为 <code>cdef Py_ssize_t</code> 。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">cimport cython</span><br><span class="line"></span><br><span class="line">row_list = np.array(row_list, dtype = np.intc)   </span><br><span class="line">col_list = np.array(col_list, dtype = np.intc)          </span><br><span class="line">data_list = np.array(data_list, dtype = np.double)          </span><br><span class="line"></span><br><span class="line"><span class="meta">@cython.wraparound(<span class="params"><span class="literal">False</span></span>)</span></span><br><span class="line"><span class="meta">@cython.boundscheck(<span class="params"><span class="literal">False</span></span>)</span></span><br><span class="line"><span class="meta">@cython.cdivision(<span class="params"><span class="literal">True</span></span>) </span><span class="comment"># 使用 c 的除法</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">Ax</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="comment"># lhs_dict2 为 A 的字典, 0-index</span></span><br><span class="line">    <span class="comment"># x 为需要乘的向量，输出 Ax</span></span><br><span class="line">    <span class="comment"># x = x.astype(np.double) # 转换类型</span></span><br><span class="line">    b = np.zeros_like(x, dtype = np.double)</span><br><span class="line">    cdef <span class="built_in">int</span>[:] row_list_view = row_list <span class="comment"># 存入缓存中</span></span><br><span class="line">    cdef <span class="built_in">int</span>[:] col_list_view = col_list <span class="comment"># 存入缓存中</span></span><br><span class="line">    cdef double[:] data_list_view = data_list <span class="comment"># 存入缓存中</span></span><br><span class="line">    cdef double[:] x_view = x <span class="comment"># 存入缓存中</span></span><br><span class="line">    cdef double[:] b_view = b <span class="comment"># 存入缓存中</span></span><br><span class="line"></span><br><span class="line">    cdef <span class="built_in">int</span> element_num = row_list.shape[<span class="number">0</span>]</span><br><span class="line">    cdef Py_ssize_t i <span class="comment"># 循环变量</span></span><br><span class="line">    cdef <span class="built_in">int</span> row_index,col_index</span><br><span class="line">    cdef double data</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(element_num):</span><br><span class="line">        row_index = row_list_view[i] - <span class="number">1</span> <span class="comment"># 0-index</span></span><br><span class="line">        col_index = col_list_view[i] - <span class="number">1</span> <span class="comment"># 0-index</span></span><br><span class="line">        data = data_list_view[i]</span><br><span class="line">        b_view[row_index] += data * x_view[col_index]</span><br><span class="line">        <span class="keyword">if</span> (row_index != col_index): <span class="comment"># 非对角线元素</span></span><br><span class="line">            b_view[col_index] += data * x_view[row_index]</span><br><span class="line">            <span class="keyword">return</span> b</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="查看修改效果"><a href="#查看修改效果" class="headerlink" title="查看修改效果"></a>查看修改效果</h1><p>Cython 程序的扩展名是 .pyx ，使用下面的命令会生成一个同名的 html ，这个文件中黄色部分就是和 python 进行交互的地方，也就是拖累性能的地方。</p>
+<h1>查看修改效果</h1>
+<p>Cython 程序的扩展名是 .pyx ，使用下面的命令会生成一个同名的 html ，这个文件中黄色部分就是和 python 进行交互的地方，也就是拖累性能的地方。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cython -a *.pyx</span><br></pre></td></tr></table></figure>
-
-<p>如果遇到提示 <code>FutureWarning: Cython directive &#39;language_level&#39; not set, using 2 for now (Py2).</code> 。只需要在 pyx 文件开头增加一条注释，指明使用 python3 即可。</p>
+<p>如果遇到提示 <code>FutureWarning: Cython directive 'language_level' not set, using 2 for now (Py2).</code> 。只需要在 pyx 文件开头增加一条注释，指明使用 python3 即可。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cython: language_level=3</span></span><br></pre></td></tr></table></figure>
-
 <p>这里只要循环部分不是黄的，就可以了，比如上面的函数的 html 文件如下：</p>
-<p><img src="/posts/7e15d6ea/1.png"></p>
-<h1 id="使用-cython-编译-py-文件"><a href="#使用-cython-编译-py-文件" class="headerlink" title="使用 cython 编译 py 文件"></a>使用 cython 编译 py 文件</h1><p>创建一个临时的 py 文件，比如 setup.py，其中内容如下</p>
+<p><img src="1.png" alt=""></p>
+<h1>使用 cython 编译 py 文件</h1>
+<p>创建一个临时的 py 文件，比如 <a target="_blank" rel="noopener" href="http://setup.py">setup.py</a>，其中内容如下</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> distutils.core <span class="keyword">import</span> setup</span><br><span class="line"><span class="keyword">from</span> distutils.extension <span class="keyword">import</span> Extension</span><br><span class="line"><span class="keyword">from</span> Cython.Build <span class="keyword">import</span> cythonize</span><br><span class="line"></span><br><span class="line"><span class="comment"># 多个文件</span></span><br><span class="line"><span class="comment"># 第一个参数 recode 是输出模块的前缀，第二个列表是所有需要编译的源文件</span></span><br><span class="line">extensions=[</span><br><span class="line"> Extension(<span class="string">&quot;recode&quot;</span>, [<span class="string">&quot;recode_so.py&quot;</span>]),  <span class="comment"># 配置需要cython编译的源文件</span></span><br><span class="line"> Extension(<span class="string">&quot;blup&quot;</span>, [<span class="string">&quot;blup_so.py&quot;</span>]),</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">setup(ext_modules=cythonize(extensions, language_level=<span class="number">3</span>))</span><br><span class="line"><span class="comment"># 里面的 language_level=3 表示只需要兼容 python3 即可, 而默认是 2 和 3 都兼容</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 <p>然后运行脚本进行编译</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.py build</span><br></pre></td></tr></table></figure>
-
 <p>在我们执行命令之后，运行成功结尾就是 <code>.so</code>。并且在当前目录会多出一个 build 目录，里面的 <code>.so</code> 文件就是编译后的文件（windows 系统中是 <code>.pyd</code> ）</p>
 <p>实际使用发现，cython 不能和 numba 联合使用。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/traditional/p/13213173.html">https://www.cnblogs.com/traditional/p/13213173.html</a></p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/traditional/p/13213173.html">https://www.cnblogs.com/traditional/p/13213173.html</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9053dacee822">https://www.jianshu.com/p/9053dacee822</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9053dacee822">https://www.jianshu.com/p/9053dacee822</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1NF411i74S?p=1&vd_source=584d44ba7fed271fb82848e7894a53c8">https://www.bilibili.com/video/BV1NF411i74S?p=1&amp;vd_source=584d44ba7fed271fb82848e7894a53c8</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1NF411i74S?p=1&amp;vd_source=584d44ba7fed271fb82848e7894a53c8">https://www.bilibili.com/video/BV1NF411i74S?p=1&amp;vd_source=584d44ba7fed271fb82848e7894a53c8</a></p>
 </li>
 </ol>
  
@@ -188,55 +185,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -535,30 +484,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

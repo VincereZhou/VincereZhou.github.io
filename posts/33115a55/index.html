@@ -94,46 +94,95 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>《深度学习》笔记，看了个开头弃了。</p>
 <span id="more"></span>
-
-<h1 id="第四章-数值计算"><a href="#第四章-数值计算" class="headerlink" title="第四章 数值计算"></a>第四章 数值计算</h1><p>机器学习算法通常需要大量的数值计算。这通常是指通过迭代过程更新解的估计值来解决数学问题的算法，而不是通过解析过程推导出公式来提供正确解的方法。常见的操作包括优化和线性方程组的求解。对数字计算机来说实数无法在有限内存下精确表示，因此仅仅是计算涉及实数的函数也是困难的。</p>
-<h2 id="4-1-上溢和下溢"><a href="#4-1-上溢和下溢" class="headerlink" title="4.1 上溢和下溢"></a>4.1 上溢和下溢</h2><p>我们在计算机表示实数时需要通过有限数量的位模式来表示，因此几乎总会引入一些近似误差。在许多情况下，这仅仅是舍入误差。但是舍入误差的累积在实践中有可能会导致算法失效。</p>
+<h1>第四章 数值计算</h1>
+<p>机器学习算法通常需要大量的数值计算。这通常是指通过迭代过程更新解的估计值来解决数学问题的算法，而不是通过解析过程推导出公式来提供正确解的方法。常见的操作包括优化和线性方程组的求解。对数字计算机来说实数无法在有限内存下精确表示，因此仅仅是计算涉及实数的函数也是困难的。</p>
+<h2 id="4-1-上溢和下溢">4.1 上溢和下溢</h2>
+<p>我们在计算机表示实数时需要通过有限数量的位模式来表示，因此几乎总会引入一些近似误差。在许多情况下，这仅仅是舍入误差。但是舍入误差的累积在实践中有可能会导致算法失效。</p>
 <p>一种极具毁灭性的舍入误差是<strong>下溢</strong> (underflow)。当接近0的数被四舍五入位0时发生下溢，而许多函数在其参数为零而不是一个很小的正数时才会表现出质的不同。例如，除法中分母需要避免是0，不能对0取对数。</p>
 <p>另一个极具破坏力的数值错误形式是<strong>上溢</strong> (overflow) 。当大量级的数被近似为 ∞ 或 -∞ 时发生上溢。进一步的运算通常会导致这些无限值变成非数字。</p>
 <p>必须对上溢和下溢进行数值稳定的一个例子是 <strong>softmax</strong> 函数，其定义为</p>
-<p>$$<br>\operatorname{softmax}(\mathbf{x})<em>{i} &#x3D; \frac{\exp(x_i)}{\sum</em>{j&#x3D;1}^{n} \exp(x_j)}<br>$$</p>
-<p>假设所有 $x_{i}$ 均等于常数 $c$ ，对于 $\exp(c)$ 函数，如果 $c$ 很大则会产生上溢，如果 $c$ 是个很小的负数则会产生下溢出。</p>
+<p>$$<br>
+\operatorname{softmax}(\mathbf{x})<em>{i} = \frac{\exp(x_i)}{\sum</em>{j=1}^{n} \exp(x_j)}<br>
+$$</p>
+<p>假设所有 $x_{i}$ 均等于常数 $c$ ，对于 $\exp©$ 函数，如果 $c$ 很大则会产生上溢，如果 $c$ 是个很小的负数则会产生下溢出。</p>
 <p>这里可以通过从 $x_{i}$ 减去 $\max{x_{i}}$ 解决，此时 exp 的最大参数为 0，排除了上溢的可能性。通过分母中至少有一个值为 1 的项，这排除了因分母下溢而导致被零除的可能性。</p>
 <p>但是还有一个小问题，分子中的下溢仍可以导致整体表达式被计算为 0 。这意味着，如果我们在计算 $\log \text{softmax}(x)$ 时，先计算 <code>softmax</code> 再把结果传给 <code>log</code> 函数，会错误地得到 -∞ 。相反，我们必须实现一个单独的函数，并以数值稳定的方式计算 $\log \text{softmax}(x)$ 。</p>
 <p>在大多数情况下，我们没有明确地对本书描述的各种算法所涉及的数值考虑进行详细说明。底层库的开发者在实现深度学习算法时应该牢记数值问题。本书的大多数读者可以简单地依赖保证数值稳定的底层库。</p>
-<h2 id="4-2-病态条件"><a href="#4-2-病态条件" class="headerlink" title="4.2 病态条件"></a>4.2 病态条件</h2><p>条件数表征函数对于输入的微小变化而变化的快慢程度。输入被轻微扰动而迅速改变的函数对于科学计算来说可能是有问题的，因为输入中的舍入误差可能导致输出的巨大变化。</p>
-<p>考虑函数 $f(\mathbf{x}) &#x3D; \mathbf{A}^{-1}\mathbf{x}$ ，当 $\mathbf{A} \in \mathbb{R}^{n \times n} $ 具有特征值分解时，其条件数为<br>$$<br>\max_{i, j} \left| \frac{\lambda_{i}}{\lambda_{j}} \right|<br>$$<br>这就是最大和最小特征值的模之比。当该数很大时，矩阵求逆对输入的误差特别敏感。</p>
+<h2 id="4-2-病态条件">4.2 病态条件</h2>
+<p>条件数表征函数对于输入的微小变化而变化的快慢程度。输入被轻微扰动而迅速改变的函数对于科学计算来说可能是有问题的，因为输入中的舍入误差可能导致输出的巨大变化。</p>
+<p>考虑函数 $f(\mathbf{x}) = \mathbf{A}^{-1}\mathbf{x}$ ，当 $\mathbf{A} \in \mathbb{R}^{n \times n} $ 具有特征值分解时，其条件数为<br>
+$$<br>
+\max_{i, j} \left| \frac{\lambda_{i}}{\lambda_{j}} \right|<br>
+$$<br>
+这就是最大和最小特征值的模之比。当该数很大时，矩阵求逆对输入的误差特别敏感。</p>
 <p>这种敏感性是矩阵本身的固有特性，而不是矩阵求逆期间舍入误差的结果。即使我们乘以完全正确的矩阵逆，病态条件的矩阵也会放大预先存在的误差。在实践中，该错误将与求逆过程本身的数值误差进一步复合。</p>
-<h2 id="4-3-基于梯度的优化方法"><a href="#4-3-基于梯度的优化方法" class="headerlink" title="4.3 基于梯度的优化方法"></a>4.3 基于梯度的优化方法</h2><p>大多数深度学习算法都涉及某种形式的优化。优化指改变 $\mathbf{x}$ 以最小化或最大化某个函数 $f(\mathbf{x})$ 的任务。我们通常以最小化 $f(\mathbf{x})$ 指代大多数最优化问题。</p>
+<h2 id="4-3-基于梯度的优化方法">4.3 基于梯度的优化方法</h2>
+<p>大多数深度学习算法都涉及某种形式的优化。优化指改变 $\mathbf{x}$ 以最小化或最大化某个函数 $f(\mathbf{x})$ 的任务。我们通常以最小化 $f(\mathbf{x})$ 指代大多数最优化问题。</p>
 <p>我们把最小化或最大化的函数称为<strong>目标函数</strong> (objective function) 或<strong>准则</strong> (criterion) 。当我们对其进行最小化时，我们也把它称为<strong>代价函数</strong>  (cost function)、<strong>损失函数</strong> (loss function) 或 <strong>误差函数</strong> (error function)。虽然有些机器学习著作赋予这些名称特殊的意义，但在本书中我们交替使用这些术语。</p>
-<p>我们通过使用一个上标 *  表示最小化或最大化函数的 $\mathbf{x}$ 值，如我们记  $\mathbf{x}^{*} &#x3D; \arg \min f(\mathbf{x})$ 。</p>
-<p><strong>梯度下降法</strong>描述略过，当 $f’(x) &#x3D; 0$ 时，导数无法提供往哪个方向移动的信息。 $f’(x) &#x3D; 0$ 的点称为<strong>临界点</strong> (critical point) 或<strong>驻点</strong> (stationary point)，有三种情况，分别时<strong>局部极小点</strong> (local minimum) ，<strong>局部最大点</strong> (local maximum) 和 <strong>鞍点</strong> (saddle point)。下图是各种临界点的例子。</p>
-<p><img src="/posts/33115a55/1.png"></p>
+<p>我们通过使用一个上标 *  表示最小化或最大化函数的 $\mathbf{x}$ 值，如我们记  $\mathbf{x}^{*} = \arg \min f(\mathbf{x})$ 。</p>
+<p><strong>梯度下降法</strong>描述略过，当 $f’(x) = 0$ 时，导数无法提供往哪个方向移动的信息。 $f’(x) = 0$ 的点称为<strong>临界点</strong> (critical point) 或<strong>驻点</strong> (stationary point)，有三种情况，分别时<strong>局部极小点</strong> (local minimum) ，<strong>局部最大点</strong> (local maximum) 和 <strong>鞍点</strong> (saddle point)。下图是各种临界点的例子。</p>
+<p><img src="1.png" alt=""></p>
 <p>使 $f(x)$ 取得绝对的最小值的点是<strong>全局最小点</strong> (global minimum)。函数可能只有一个全局最小点或存在多个全局最小点，还可能存在不是全局最优的局部极小点。在深度学习的背景下，我们要优化的函数可能含有序多不是最优的局部极小点，或者还有很多出于非常平坦的区域内的鞍点。尤其是当输入是多维时，所有这些都将使得优化变得困难。因此，我们通常寻找使 $f$ 非常小的点，当这在任何形式意义下并不一定是最小。见下图的例子。</p>
-<p><img src="/posts/33115a55/2.png"></p>
+<p><img src="2.png" alt=""></p>
 <p>当输入为多维时，我们需要用到<strong>偏导数</strong> (partial derivative) 的概念，偏导数 $\frac{\partial}{\partial x_{i}}f(\mathbf{x})$ 衡量点 $\mathbf{x}$ 处只有 $x_{i}$ 增加时 $f(\mathbf{x})$ 如何变化。<strong>梯度</strong> (gradient) 是包含所有偏导数的向量，记为 $\nabla_{\mathbf{x}} f(\mathbf{x})$ 。在多维情况下，临界点是梯度中所有元素都为零的点。</p>
-<p>在 $\mathbf{u}$ (单位向量)方向的<strong>方向导数</strong> (directional deritative) 是函数 $f$ 在 $\mathbf{u}$ 方向的斜率。换句话说，方向导数是函数 $f(\mathbf{x}+\alpha \mathbf{u})$ 关于 $\alpha$ 的导数（在 $\alpha &#x3D; 0$ 时取得）。使用链式法则，我们可以看到  $\alpha &#x3D; 0$ 时，$\frac{\partial}{\partial \alpha} f(\mathbf{x} + \alpha \mathbf{u})  &#x3D; \mathbf{u}^{T} \nabla_{\mathbf{x}} f(\mathbf{x})$ (缺证明)。</p>
+<p>在 $\mathbf{u}$ (单位向量)方向的<strong>方向导数</strong> (directional deritative) 是函数 $f$ 在 $\mathbf{u}$ 方向的斜率。换句话说，方向导数是函数 $f(\mathbf{x}+\alpha \mathbf{u})$ 关于 $\alpha$ 的导数（在 $\alpha = 0$ 时取得）。使用链式法则，我们可以看到  $\alpha = 0$ 时，$\frac{\partial}{\partial \alpha} f(\mathbf{x} + \alpha \mathbf{u})  = \mathbf{u}^{T} \nabla_{\mathbf{x}} f(\mathbf{x})$ (缺证明)。</p>
 <p>为了最小化 $f$ ，我们希望找到使 $f$ 下降最快的方向。计算方向导数：</p>
-<p>$$<br>\begin{aligned}<br>&amp;\min_{u,\ u^{\top}u&#x3D;1} u^{\top}\nabla_{!x} f(x) \<br>&amp;&#x3D;\min_{u,\ u^{\top}u&#x3D;1} |u|<em>{2} \left|\nabla</em>{!x} f(x)\right|<em>{2} \cos\theta\<br>&amp;&#x3D;\min</em>{u,\ u^{\top}u&#x3D;1}  \left|\nabla_{!x} f(x)\right|<em>{2} \cos\theta\<br>&amp;&#x3D;\min</em>{u,\ u^{\top}u&#x3D;1}   \cos\theta \quad \because \left|\nabla_{!x} f(x)\right|_{2} \text{ 是一个常量}  \</p>
-<p>\end{aligned}<br>$$</p>
+<p>$$<br>
+\begin{aligned}<br>
+&amp;\min_{u,\ u^{\top}u=1} u^{\top}\nabla_{!x} f(x) \<br>
+&amp;=\min_{u,\ u^{\top}u=1} |u|<em>{2} \left|\nabla</em>{!x} f(x)\right|<em>{2} \cos\theta\<br>
+&amp;=\min</em>{u,\ u^{\top}u=1}  \left|\nabla_{!x} f(x)\right|<em>{2} \cos\theta\<br>
+&amp;=\min</em>{u,\ u^{\top}u=1}   \cos\theta \quad \because \left|\nabla_{!x} f(x)\right|_{2} \text{ 是一个常量}  \</p>
+<p>\end{aligned}<br>
+$$</p>
 <p>这在 $\mathbf{u}$ 与梯度方向相反时取得最小。换句话说，梯度向量指向上坡，负梯度方向指向下坡。我们在负梯度方向上移动可以减小 $f$ 。这被称为<strong>最速下降法</strong> (mothod of steepest descent) 或 <strong>梯度下降</strong> (gradient descent) 。</p>
-<p>最速下降法建议新的点为<br>$$<br>x’ &#x3D; x - \epsilon \nabla_x f(x)<br>$$<br>这里 $\epsilon$ 为<strong>学习率</strong> (learning rate) ，是一个确定步长大小的正标量。我们可以通过几种不同的方式选择学习率。普遍的方式是选择一个小常数。有时我们通过计算，选择使方向导数消失的步长。还有一种方法是根据几个 $\epsilon$ 计算 $f(x - \epsilon \nabla_x f(x))$ ，并选择其中能产生最小目标函数值的 $\epsilon$ ，这种策略被称为线搜索。</p>
+<p>最速下降法建议新的点为<br>
+$$<br>
+x’ = x - \epsilon \nabla_x f(x)<br>
+$$<br>
+这里 $\epsilon$ 为<strong>学习率</strong> (learning rate) ，是一个确定步长大小的正标量。我们可以通过几种不同的方式选择学习率。普遍的方式是选择一个小常数。有时我们通过计算，选择使方向导数消失的步长。还有一种方法是根据几个 $\epsilon$ 计算 $f(x - \epsilon \nabla_x f(x))$ ，并选择其中能产生最小目标函数值的 $\epsilon$ ，这种策略被称为线搜索。</p>
 <p>最速下降法在梯度的每一个元素为0时收敛（在实践中是很接近0时）。</p>
-<h3 id="梯度之上：Jacobian-和-Hessian-矩阵"><a href="#梯度之上：Jacobian-和-Hessian-矩阵" class="headerlink" title="梯度之上：Jacobian 和 Hessian 矩阵"></a>梯度之上：Jacobian 和 Hessian 矩阵</h3><p>有时我们需要计算输入和输出都为向量的函数的所有偏导数。包含所有这样的偏导数的矩阵被称为 <strong>Jacobian</strong> 矩阵。具体地说，如果我们有一个函数：$\boldsymbol{f}: \mathbb{R}^{m} \rightarrow \mathbb{R}^{n}$ ，$\boldsymbol{f}$ 的 <code>Jacobian</code> 矩阵定义为 $\boldsymbol{J}<em>{i,j} &#x3D; \frac{\partial} { \partial x</em>{j}} \boldsymbol{f}(\boldsymbol{x})_{i}$ 。</p>
+<h3 id="梯度之上：Jacobian-和-Hessian-矩阵">梯度之上：Jacobian 和 Hessian 矩阵</h3>
+<p>有时我们需要计算输入和输出都为向量的函数的所有偏导数。包含所有这样的偏导数的矩阵被称为 <strong>Jacobian</strong> 矩阵。具体地说，如果我们有一个函数：$\boldsymbol{f}: \mathbb{R}^{m} \rightarrow \mathbb{R}^{n}$ ，$\boldsymbol{f}$ 的 <code>Jacobian</code> 矩阵定义为 $\boldsymbol{J}<em>{i,j} = \frac{\partial} { \partial x</em>{j}} \boldsymbol{f}(\boldsymbol{x})_{i}$ 。</p>
 <p>有时，我们也对导数的导数感兴趣，即<strong>二阶导数</strong> (second derivative) 。例如，有一个函数 $f: \mathbb{R}^{m} \rightarrow \mathbb{R}$ ，$f$ 的一阶导数 (关于 $x_{j}$ ) 关于 $x_{i}$ 的导数记为 $\frac{\partial^{2}}{\partial x_{i}\partial x_{j}}\boldsymbol{f}$ 。二阶导数告诉我们，一阶导数将如何随着输入的变化而改变。它表示只基于梯度信息的梯度下降步骤是否会产生如我们预期的那样大的改善，因此它是重要的。</p>
-<p>当我们的函数具有多维输入时，二阶导数也有很多。我们可以将这些导数合并成一个矩阵，称为<strong>Hessian</strong>矩阵。Hessian 矩阵 $\boldsymbol{H}(f)(\boldsymbol{x})$ 定义为<br>$$<br>\boldsymbol{H}(f)(\boldsymbol{x})<em>{i,j} &#x3D; \frac{\partial^{2}}{\partial x</em>{i} \partial x_{j}} f(\boldsymbol{x})<br>$$<br>Hessian 矩阵等价于梯度的 <code>Jacobian</code> 矩阵（不对，看定义，它们两个的 $i,j$ 是相反的）。</p>
-<p>微分算子在任何二阶偏导连续的点处可交换，也就是他们的顺序可以互换：<br>$$<br>\frac{\partial^{2}}{\partial x_{i} \partial x_{j}} f(\boldsymbol{x}) &#x3D;<br>\frac{\partial^{2}}{\partial x_{j} \partial x_{i}} f(\boldsymbol{x})<br>$$<br>这意味着对于连续的点，存在 $H_{i,j} &#x3D; H_{j,i}$ 。在深度学习背景下，我们遇到的大多数函数的 Hessian 矩阵几乎处处都是对称的。因为 Hessian 矩阵是实对称的，我们可以将其分解成一组实特征值和一组特征向量的正交基。在特定方向 $\boldsymbol{d}$ 上的二阶导数可以写成 $\boldsymbol{d}^{\mathsf{T}}\boldsymbol{H}\boldsymbol{d}$ （缺证明）。当 $\boldsymbol{d}$ 是 $\boldsymbol{H}$ 的一个特征向量时，这个方向的二阶导数就是对应的特征值。对于其他的方向 $\boldsymbol{d}$ ，方向二阶导数是所有特征值的加权平均，权重在 0 和 1 之间，且与 $\boldsymbol{d}$ 夹角越小的特征向量的权重越大。最大特征值确定最大二阶导数，最小特征值确定最小二阶导数。</p>
-<p>我们可以通过（方向）二阶导数预期一个梯度下降步骤能表现得多好。我们在当前点 $x^{(0)}$ 处作函数 $f(x)$ 的近似二阶泰勒级数：<br>$$<br>f(x)\approx f\left(x^{(0)}\right)+\left(x-x^{(0)}\right)^{\top} g+\frac{1}{2}\left(x-x^{(0)}\right)^{\top} H\left(x-x^{(0)}\right)<br>$$<br>其中 $g$ 是梯度，$H$ 是$x^{(0)}$ 处的Hessian。</p>
-<p>如果我们使用学习率 $\epsilon$  , 那么新的点 $x$ 就是 $x^{(0)} - \epsilon g$ 。代入上述的近似，可得<br>$$<br>f\left(\mathbf{x}^{(0)} - \epsilon \mathbf{g}\right) \approx f\left(\mathbf{x}^{(0)}\right) - \epsilon \mathbf{g}^{\top} \mathbf{g} + \frac{1}{2} \epsilon^{2} \mathbf{g}^{\top} \mathbf{H} \mathbf{g}<br>$$<br>其中有 3 项：函数的原始值、函数斜率导致的预期改善、函数曲率导致的校正。当最后一项太大时，梯度下降实际上是可能向上移动的。当 $\mathbf{g}^{\top} \mathbf{H} \mathbf{g}$ 为零或负时，此时增加 $\epsilon$ 将永远使得 $f$ 下降（但是在实践中，泰勒级数不会在 $\epsilon$ 大的时候也保持准确 ）。当 $\mathbf{g}^{\top} \mathbf{H} \mathbf{g}$ 为正时，通过计算可得（解二次方程的最低点，$y&#x3D;ax^2+bx+c$， $x&#x3D;-b&#x2F;2a$ ），使得近似泰勒级数下降最多的最优步长为<br>$$<br>\epsilon^{<em>} &#x3D; \frac{\mathbf{g}^{\top} \mathbf{g}}{\mathbf{g}^{\top} \mathbf{H} \mathbf{g}}<br>$$<br>二阶导数还可以用于确定一个临界点是否是局部极大点、局部极小点或鞍点。回想一下，在临界点 $f’(x) &#x3D; 0$ ，而 $f’’(x) &gt; 0$ 说明我们向右移动 $f’(x)$ 会增大，向左移动 $f’(x)$ 会减小，易得此时 $x$ 是一个<strong>局部极小点</strong>。同理，在临界点 $f’(x) &#x3D; 0$ ，而 $f’’(x) &lt; 0$ 时，  $x$ 是一个<strong>局部极大点</strong>。这就是所谓的*<em>二阶导数测试</em></em> (second derivative test) 。不幸的是，当  $f’’(x) &#x3D; 0$ 测试是不确定的。在这种情况下，$x$ 可以是一个鞍点或平坦区域的一部分。</p>
-<p>在多维情况下，当 Hessian 矩阵是正定的（所有特征值都是正的），则该临界点是局部极小点。证明如下，此时由于是临界点，因此梯度 $\boldsymbol{g} &#x3D; \boldsymbol{0}$ ，基于近似二阶泰勒级数得到下式，因此 $x$ 无论往哪里移动，函数值均会增加，因此该临界点是局部极小点。<br>$$<br>\begin{aligned}<br>f(x) &amp; \approx f\left(x^{(0)}\right)+\left(x-x^{(0)}\right)^{\top} g+\frac{1}{2}\left(x-x^{(0)}\right)^{\top} H\left(x-x^{(0)}\right)\<br>&amp; \approx f\left(x^{(0)}\right)+\frac{1}{2}\left(x-x^{(0)}\right)^{\top} H\left(x-x^{(0)}\right)\<br>\end{aligned}<br>$$<br>同理，当 Hessian 矩阵负定（所有特征值都是负的），该临界点是局部极大点。</p>
+<p>当我们的函数具有多维输入时，二阶导数也有很多。我们可以将这些导数合并成一个矩阵，称为<strong>Hessian</strong>矩阵。Hessian 矩阵 $\boldsymbol{H}(f)(\boldsymbol{x})$ 定义为<br>
+$$<br>
+\boldsymbol{H}(f)(\boldsymbol{x})<em>{i,j} = \frac{\partial^{2}}{\partial x</em>{i} \partial x_{j}} f(\boldsymbol{x})<br>
+$$<br>
+Hessian 矩阵等价于梯度的 <code>Jacobian</code> 矩阵（不对，看定义，它们两个的 $i,j$ 是相反的）。</p>
+<p>微分算子在任何二阶偏导连续的点处可交换，也就是他们的顺序可以互换：<br>
+$$<br>
+\frac{\partial^{2}}{\partial x_{i} \partial x_{j}} f(\boldsymbol{x}) =<br>
+\frac{\partial^{2}}{\partial x_{j} \partial x_{i}} f(\boldsymbol{x})<br>
+$$<br>
+这意味着对于连续的点，存在 $H_{i,j} = H_{j,i}$ 。在深度学习背景下，我们遇到的大多数函数的 Hessian 矩阵几乎处处都是对称的。因为 Hessian 矩阵是实对称的，我们可以将其分解成一组实特征值和一组特征向量的正交基。在特定方向 $\boldsymbol{d}$ 上的二阶导数可以写成 $\boldsymbol{d}^{\mathsf{T}}\boldsymbol{H}\boldsymbol{d}$ （缺证明）。当 $\boldsymbol{d}$ 是 $\boldsymbol{H}$ 的一个特征向量时，这个方向的二阶导数就是对应的特征值。对于其他的方向 $\boldsymbol{d}$ ，方向二阶导数是所有特征值的加权平均，权重在 0 和 1 之间，且与 $\boldsymbol{d}$ 夹角越小的特征向量的权重越大。最大特征值确定最大二阶导数，最小特征值确定最小二阶导数。</p>
+<p>我们可以通过（方向）二阶导数预期一个梯度下降步骤能表现得多好。我们在当前点 $x^{(0)}$ 处作函数 $f(x)$ 的近似二阶泰勒级数：<br>
+$$<br>
+f(x)\approx f\left(x^{(0)}\right)+\left(x-x^{(0)}\right)^{\top} g+\frac{1}{2}\left(x-x^{(0)}\right)^{\top} H\left(x-x^{(0)}\right)<br>
+$$<br>
+其中 $g$ 是梯度，$H$ 是$x^{(0)}$ 处的Hessian。</p>
+<p>如果我们使用学习率 $\epsilon$  , 那么新的点 $x$ 就是 $x^{(0)} - \epsilon g$ 。代入上述的近似，可得<br>
+$$<br>
+f\left(\mathbf{x}^{(0)} - \epsilon \mathbf{g}\right) \approx f\left(\mathbf{x}^{(0)}\right) - \epsilon \mathbf{g}^{\top} \mathbf{g} + \frac{1}{2} \epsilon^{2} \mathbf{g}^{\top} \mathbf{H} \mathbf{g}<br>
+$$<br>
+其中有 3 项：函数的原始值、函数斜率导致的预期改善、函数曲率导致的校正。当最后一项太大时，梯度下降实际上是可能向上移动的。当 $\mathbf{g}^{\top} \mathbf{H} \mathbf{g}$ 为零或负时，此时增加 $\epsilon$ 将永远使得 $f$ 下降（但是在实践中，泰勒级数不会在 $\epsilon$ 大的时候也保持准确 ）。当 $\mathbf{g}^{\top} \mathbf{H} \mathbf{g}$ 为正时，通过计算可得（解二次方程的最低点，$y=ax^2+bx+c$， $x=-b/2a$ ），使得近似泰勒级数下降最多的最优步长为<br>
+$$<br>
+\epsilon^{*} = \frac{\mathbf{g}^{\top} \mathbf{g}}{\mathbf{g}^{\top} \mathbf{H} \mathbf{g}}<br>
+$$<br>
+二阶导数还可以用于确定一个临界点是否是局部极大点、局部极小点或鞍点。回想一下，在临界点 $f’(x) = 0$ ，而 $f’’(x) &gt; 0$ 说明我们向右移动 $f’(x)$ 会增大，向左移动 $f’(x)$ 会减小，易得此时 $x$ 是一个<strong>局部极小点</strong>。同理，在临界点 $f’(x) = 0$ ，而 $f’’(x) &lt; 0$ 时，  $x$ 是一个<strong>局部极大点</strong>。这就是所谓的<strong>二阶导数测试</strong> (second derivative test) 。不幸的是，当  $f’’(x) = 0$ 测试是不确定的。在这种情况下，$x$ 可以是一个鞍点或平坦区域的一部分。</p>
+<p>在多维情况下，当 Hessian 矩阵是正定的（所有特征值都是正的），则该临界点是局部极小点。证明如下，此时由于是临界点，因此梯度 $\boldsymbol{g} = \boldsymbol{0}$ ，基于近似二阶泰勒级数得到下式，因此 $x$ 无论往哪里移动，函数值均会增加，因此该临界点是局部极小点。<br>
+$$<br>
+\begin{aligned}<br>
+f(x) &amp; \approx f\left(x^{(0)}\right)+\left(x-x^{(0)}\right)^{\top} g+\frac{1}{2}\left(x-x^{(0)}\right)^{\top} H\left(x-x^{(0)}\right)\<br>
+&amp; \approx f\left(x^{(0)}\right)+\frac{1}{2}\left(x-x^{(0)}\right)^{\top} H\left(x-x^{(0)}\right)\<br>
+\end{aligned}<br>
+$$<br>
+同理，当 Hessian 矩阵负定（所有特征值都是负的），该临界点是局部极大点。</p>
 <p>如果 Hessian 的特征值至少一个是正的且至少一个是负的，那么 $x$ 是 $f$ 某个横截面的局部极大点，却是另一个横截面的局部极小点，因此这个临界点就是一个鞍点，如下图所示。</p>
-<p><img src="/posts/33115a55/3.png"></p>
+<p><img src="3.png" alt=""></p>
 <p>如果 Hessian 所有非零特征值是同号的，且至少有一个特征值是0时，这个检测就是不确定的。这是因为单变量的二阶导数在零特征值对应的截面上是不确定的。</p>
-<h1 id="放弃"><a href="#放弃" class="headerlink" title="放弃"></a>放弃</h1><p>这本书看不太懂，不清晰，放弃了</p>
+<h1>放弃</h1>
+<p>这本书看不太懂，不清晰，放弃了</p>
  
       <!-- reward -->
       
@@ -179,55 +228,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -526,30 +527,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

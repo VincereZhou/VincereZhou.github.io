@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">453</span>
+            <span class="post-count">452</span>
         </span>
     </span>
 
@@ -98,20 +98,18 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>如何使用 <code>pysam</code> 库直接读取 <code>bgzip</code> 压缩的 <code>vcf.gz</code> 文件。</p>
 <span id="more"></span>
-
 <p>使用 <code>pysam</code> 库处理 <code>vcf.gz</code> 文件可以实现对压缩的 VCF 文件进行读取、写入和查询等操作。以下是一些常见的 <code>pysam</code> 操作示例：</p>
-<h1 id="读取-vcf-gz-文件："><a href="#读取-vcf-gz-文件：" class="headerlink" title="读取 vcf.gz 文件："></a>读取 <code>vcf.gz</code> 文件：</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打开压缩的 VCF 文件</span></span><br><span class="line">vcf_file = pysam.VariantFile(<span class="string">&#x27;file.vcf.gz&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历所有记录</span></span><br><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> vcf_file:</span><br><span class="line">    <span class="comment"># 处理每个记录</span></span><br><span class="line">    f = <span class="built_in">str</span>(record).split()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">vcf_file.close()</span><br></pre></td></tr></table></figure>
-
+<h1>读取 <code>vcf.gz</code> 文件：</h1>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打开压缩的 VCF 文件</span></span><br><span class="line">vcf_file = pysam.VariantFile(<span class="string">&#x27;file.vcf.gz&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历所有记录</span></span><br><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> vcf_file:</span><br><span class="line">    <span class="comment"># 处理每个记录</span></span><br><span class="line">    f = <span class="built_in">str</span>(record).split()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">vcf_file.close()</span><br></pre></td></tr></table></figure>
 <p>在上面的代码中，我们使用 <code>VariantFile</code> 类来打开 <code>vcf.gz</code> 文件，并使用 <code>for</code> 循环遍历每个记录。你可以根据需要处理每个记录。</p>
 <p>注意需要读取的 <code>vcf.gz</code> 文件必须事先 index 。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools index file.vcf.gz</span><br></pre></td></tr></table></figure>
-
-<h1 id="写入-vcf-gz-文件："><a href="#写入-vcf-gz-文件：" class="headerlink" title="写入 vcf.gz 文件："></a>写入 <code>vcf.gz</code> 文件：</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个新的 VCF 文件</span></span><br><span class="line">vcf_out = pysam.VariantFile(<span class="string">&#x27;output.vcf.gz&#x27;</span>, <span class="string">&#x27;w&#x27;</span>, header=vcf_file.header)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历原始 VCF 文件的记录并写入新文件</span></span><br><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> vcf_file:</span><br><span class="line">    f = <span class="built_in">str</span>(record).split()</span><br><span class="line">    vcf_out.write(record)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">vcf_out.close()</span><br><span class="line">vcf_file.close()</span><br></pre></td></tr></table></figure>
-
+<h1>写入 <code>vcf.gz</code> 文件：</h1>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个新的 VCF 文件</span></span><br><span class="line">vcf_out = pysam.VariantFile(<span class="string">&#x27;output.vcf.gz&#x27;</span>, <span class="string">&#x27;w&#x27;</span>, header=vcf_file.header)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历原始 VCF 文件的记录并写入新文件</span></span><br><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> vcf_file:</span><br><span class="line">    f = <span class="built_in">str</span>(record).split()</span><br><span class="line">    vcf_out.write(record)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">vcf_out.close()</span><br><span class="line">vcf_file.close()</span><br></pre></td></tr></table></figure>
 <p>在上面的代码中，我们创建了一个新的 <code>VariantFile</code> 对象用于写入记录，并通过指定 <code>header</code> 参数设置了相同的头部信息。然后，我们遍历原始 <code>vcf.gz</code> 文件的记录，并将每个记录写入新文件。</p>
-<h1 id="查询特定区域的记录："><a href="#查询特定区域的记录：" class="headerlink" title="查询特定区域的记录："></a>查询特定区域的记录：</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打开压缩的 VCF 文件</span></span><br><span class="line">vcf_file = pysam.VariantFile(<span class="string">&#x27;file.vcf.gz&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查询特定区域的记录（例如：染色体1，位置从1000到2000）</span></span><br><span class="line">region_records = vcf_file.fetch(<span class="string">&#x27;1&#x27;</span>, <span class="number">1000</span>, <span class="number">2000</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历查询结果</span></span><br><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> region_records:</span><br><span class="line">    <span class="comment"># 处理每个记录</span></span><br><span class="line">    f = <span class="built_in">str</span>(record).split()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">vcf_file.close()</span><br></pre></td></tr></table></figure>
-
-<p>在上面的代码中，我们使用 <code>fetch()</code> 方法查询 <code>vcf.gz</code> 文件中某个特定区域的记录。通过指定染色体名称和起始&#x2F;结束位置，可以获取该区域的记录。</p>
+<h1>查询特定区域的记录：</h1>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打开压缩的 VCF 文件</span></span><br><span class="line">vcf_file = pysam.VariantFile(<span class="string">&#x27;file.vcf.gz&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查询特定区域的记录（例如：染色体1，位置从1000到2000）</span></span><br><span class="line">region_records = vcf_file.fetch(<span class="string">&#x27;1&#x27;</span>, <span class="number">1000</span>, <span class="number">2000</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历查询结果</span></span><br><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> region_records:</span><br><span class="line">    <span class="comment"># 处理每个记录</span></span><br><span class="line">    f = <span class="built_in">str</span>(record).split()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">vcf_file.close()</span><br></pre></td></tr></table></figure>
+<p>在上面的代码中，我们使用 <code>fetch()</code> 方法查询 <code>vcf.gz</code> 文件中某个特定区域的记录。通过指定染色体名称和起始/结束位置，可以获取该区域的记录。</p>
  
       <!-- reward -->
       
@@ -159,55 +157,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -506,30 +456,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

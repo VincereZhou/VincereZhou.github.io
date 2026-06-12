@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">903</span>
+            <span class="post-count">875</span>
         </span>
     </span>
 
@@ -96,28 +96,74 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>基于GBLUP&#x2F;ssGBLUP的育种值计算 SNP 效应。</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>基于GBLUP/ssGBLUP的育种值计算 SNP 效应。</p>
 <span id="more"></span>
-
-<h1 id="估计SNP效应"><a href="#估计SNP效应" class="headerlink" title="估计SNP效应"></a>估计SNP效应</h1><p>一步法中的 $\mathbf{H}^{-1}$ 公式为<br>$$<br>\mathbf{H}^{-1}&#x3D;\mathbf{A}^{-1}+\left[\begin{array}{lc}<br>0 &amp; 0 \<br>0 &amp; \mathbf{G}^{-1}-\mathbf{A}<em>{22}^{-1}<br>\end{array}\right]<br>$$<br>其中 $\mathbf{G}$ 是校正到与 $\mathbf{A}</em>{22}$ 矩阵规模相同后的矩阵。</p>
-<p>我们将个体育种值分为基因型个体 ($\mathbf{a_{g}}$) 和 非基因型个体 ($\mathbf{a_{n}}$) ， 基因型个体的育种值可以视为所有 snp 效应之和，即：<br>$$<br>\mathbf{a_{g}} &#x3D; \mathbf{Z}\mathbf{u}<br>$$<br>这里 $\mathbf{Z}$ 是 SNP 效应的系数矩阵（<strong>中心化</strong>的系数矩阵），$\mathbf{u}$ 是 SNP 效应向量。</p>
-<p>因此，个体加性效应的方差为<br>$$<br>\operatorname{var}(\mathbf{a_{g}}) &#x3D; \operatorname{var}(\mathbf{Z}\mathbf{u}) &#x3D; \mathbf{Z} \mathbf{D} \mathbf{Z}^{\prime} \sigma_{u}^{2} &#x3D; \mathbf{G}^{<em>}\sigma_{a}^{2}<br>$$<br>这里 $\mathbf{D}$ 是位点的权重的对角矩阵（GBLUP 中为 $\mathbf{I}$ ），$\sigma_{u}^{2}$ 是位点的加性方差，$\mathbf{G}^{</em>}$ 是有权重的基因组亲缘关系矩阵。</p>
-<p>基因型个体的育种值 $\mathbf{a_{g}}$ 和 SNP 效应 $\mathbf{u}$ 的联合协方差矩阵为<br>$$<br>\operatorname{var}\left[\begin{array}{lc}<br>\mathbf{a_{g}} \<br>\mathbf{u}<br>\end{array}\right] &#x3D; \left[\begin{array}{lc}<br>\mathbf{ZDZ^{\prime}} &amp; \mathbf{ZD^{\prime}} \<br>\mathbf{DZ^{\prime}} &amp; \mathbf{D}<br>\end{array}\right] \sigma_{u}^{2}<br>$$<br>因此<br>$$<br>\mathbf{G}^{*} &#x3D; \frac{\operatorname{var}(\mathbf{a_{g}})} {\sigma_{a}^{2}} &#x3D; \frac{\operatorname{var}(\mathbf{Zu})} {\sigma_{a}^{2}} &#x3D; \mathbf{ZDZ^{\prime}} \frac{\sigma_{u}^{2}}{\sigma_{a}^{2}} &#x3D; \mathbf{ZDZ^{\prime}}\lambda<br>$$<br>其中 $\lambda$ 是一个方差比值，基于 VanRaden 2009 ，存在公式<br>$$<br>\lambda &#x3D; \frac{\sigma_{u}^{2}}{\sigma_{a}^{2}} &#x3D; \frac{1}{\sum_{i&#x3D;1}^{M}2p_{i}(1-p_{i})}<br>$$<br>这里 $M$ 是位点数目，$p_{i}$ 是等位基因频率。</p>
-<p>基于 Stranden &amp; Garrick (2009) ，可以推导出公式<br>$$<br>\hat{\mathbf{u}}  &#x3D; \lambda \mathbf{DZ^{\prime}G^{*-1}\mathbf{\hat{a}<em>{g}}} &#x3D; \mathbf{DZ^{\prime}(ZDZ^{\prime})^{-1}\mathbf{\hat{a}</em>{g}}}<br>$$<br>我们可以检查一下， 没有问题<br>$$<br>\mathbf{\hat{a}<em>{g}} &#x3D; \mathbf{Zu} &#x3D;\mathbf{ZDZ^{\prime}(ZDZ^{\prime})^{-1}\mathbf{\hat{a}</em>{g}}} &#x3D; \mathbf{\hat{a}_{g}}<br>$$</p>
-<h1 id="估计SNP效应的方差"><a href="#估计SNP效应的方差" class="headerlink" title="估计SNP效应的方差"></a>估计SNP效应的方差</h1><p>每一个 SNP 效应的方差估计值为 （Zhang, 2010）<br>$$<br>\hat{\sigma}<em>{u,i}^{2} &#x3D; \hat{u}</em>{i}^{2}2p_{i}(1-p_{i})<br>$$<br>根据上面的公式可以构建一个估计一步法的 $\mathbf{D}$ 矩阵的算法，定义 $t$ 是迭代次数，$i$ 第 $i$ 个 SNP ，算法流程如下（这也是 blupf90 进行 ssGWAS 的流程）：</p>
+<h1>估计SNP效应</h1>
+<p>一步法中的 $\mathbf{H}^{-1}$ 公式为<br>
+$$<br>
+\mathbf{H}^{-1}=\mathbf{A}^{-1}+\left[\begin{array}{lc}<br>
+0 &amp; 0 \<br>
+0 &amp; \mathbf{G}^{-1}-\mathbf{A}<em>{22}^{-1}<br>
+\end{array}\right]<br>
+$$<br>
+其中 $\mathbf{G}$ 是校正到与 $\mathbf{A}</em>{22}$ 矩阵规模相同后的矩阵。</p>
+<p>我们将个体育种值分为基因型个体 ($\mathbf{a_{g}}$) 和 非基因型个体 ($\mathbf{a_{n}}$) ， 基因型个体的育种值可以视为所有 snp 效应之和，即：<br>
+$$<br>
+\mathbf{a_{g}} = \mathbf{Z}\mathbf{u}<br>
+$$<br>
+这里 $\mathbf{Z}$ 是 SNP 效应的系数矩阵（<strong>中心化</strong>的系数矩阵），$\mathbf{u}$ 是 SNP 效应向量。</p>
+<p>因此，个体加性效应的方差为<br>
+$$<br>
+\operatorname{var}(\mathbf{a_{g}}) = \operatorname{var}(\mathbf{Z}\mathbf{u}) = \mathbf{Z} \mathbf{D} \mathbf{Z}^{\prime} \sigma_{u}^{2} = \mathbf{G}^{<em>}\sigma_{a}^{2}<br>
+$$<br>
+这里 $\mathbf{D}$ 是位点的权重的对角矩阵（GBLUP 中为 $\mathbf{I}$ ），$\sigma_{u}^{2}$ 是位点的加性方差，$\mathbf{G}^{</em>}$ 是有权重的基因组亲缘关系矩阵。</p>
+<p>基因型个体的育种值 $\mathbf{a_{g}}$ 和 SNP 效应 $\mathbf{u}$ 的联合协方差矩阵为<br>
+$$<br>
+\operatorname{var}\left[\begin{array}{lc}<br>
+\mathbf{a_{g}} \<br>
+\mathbf{u}<br>
+\end{array}\right] = \left[\begin{array}{lc}<br>
+\mathbf{ZDZ^{\prime}} &amp; \mathbf{ZD^{\prime}} \<br>
+\mathbf{DZ^{\prime}} &amp; \mathbf{D}<br>
+\end{array}\right] \sigma_{u}^{2}<br>
+$$<br>
+因此<br>
+$$<br>
+\mathbf{G}^{*} = \frac{\operatorname{var}(\mathbf{a_{g}})} {\sigma_{a}^{2}} = \frac{\operatorname{var}(\mathbf{Zu})} {\sigma_{a}^{2}} = \mathbf{ZDZ^{\prime}} \frac{\sigma_{u}^{2}}{\sigma_{a}^{2}} = \mathbf{ZDZ^{\prime}}\lambda<br>
+$$<br>
+其中 $\lambda$ 是一个方差比值，基于 VanRaden 2009 ，存在公式<br>
+$$<br>
+\lambda = \frac{\sigma_{u}^{2}}{\sigma_{a}^{2}} = \frac{1}{\sum_{i=1}^{M}2p_{i}(1-p_{i})}<br>
+$$<br>
+这里 $M$ 是位点数目，$p_{i}$ 是等位基因频率。</p>
+<p>基于 Stranden &amp; Garrick (2009) ，可以推导出公式<br>
+$$<br>
+\hat{\mathbf{u}}  = \lambda \mathbf{DZ^{\prime}G^{*-1}\mathbf{\hat{a}<em>{g}}} = \mathbf{DZ^{\prime}(ZDZ^{\prime})^{-1}\mathbf{\hat{a}</em>{g}}}<br>
+$$<br>
+我们可以检查一下， 没有问题<br>
+$$<br>
+\mathbf{\hat{a}<em>{g}} = \mathbf{Zu} =\mathbf{ZDZ^{\prime}(ZDZ^{\prime})^{-1}\mathbf{\hat{a}</em>{g}}} = \mathbf{\hat{a}_{g}}<br>
+$$</p>
+<h1>估计SNP效应的方差</h1>
+<p>每一个 SNP 效应的方差估计值为 （Zhang, 2010）<br>
+$$<br>
+\hat{\sigma}<em>{u,i}^{2} = \hat{u}</em>{i}^{2}2p_{i}(1-p_{i})<br>
+$$<br>
+根据上面的公式可以构建一个估计一步法的 $\mathbf{D}$ 矩阵的算法，定义 $t$ 是迭代次数，$i$ 第 $i$ 个 SNP ，算法流程如下（这也是 blupf90 进行 ssGWAS 的流程）：</p>
 <ol>
-<li>$t&#x3D;0$ ，$\mathbf{D}<em>{(t)} &#x3D; \mathbf{I}$ ， $\mathbf{G}^{*}</em>{(t)} &#x3D; \mathbf{Z} \mathbf{D}_{(t)} \mathbf{Z}^{\prime} \lambda$ </li>
-<li>使用 ssGBLUP 计算 $\mathbf{\hat{a}_{g}}$ </li>
-<li>计算 $\hat{\mathbf{u}<em>{(t)}}  &#x3D; \lambda \mathbf{D</em>{(t)}Z^{\prime}G^{*-1}<em>{(t)}\mathbf{\hat{a}</em>{g}}}$</li>
-<li>对每一个位点，计算 $d^{<em>}<em>{i(t+1)} &#x3D; \hat{u}</em>{i(t)}^{2}2p_{i}(1-p_{i})$ ，得到 $\mathbf{D}^{</em>}_{(t+1)}$ 矩阵</li>
-<li>标准化 $\mathbf{D}<em>{(t+1)} &#x3D; \frac{\operatorname{tr} (\mathbf{D}</em>{(0)})}{\operatorname{tr} (\mathbf{D}^{<em>}_{(t+1)})} \mathbf{D}^{</em>}_{(t+1)}$ </li>
-<li>计算 $\mathbf{G}^{*}<em>{(t+1)} &#x3D; \mathbf{ZD</em>{(t+1)}Z^{\prime}} \lambda$ </li>
-<li>$t &#x3D; t+1$ </li>
+<li>$t=0$ ，$\mathbf{D}<em>{(t)} = \mathbf{I}$ ， $\mathbf{G}^{*}</em>{(t)} = \mathbf{Z} \mathbf{D}_{(t)} \mathbf{Z}^{\prime} \lambda$</li>
+<li>使用 ssGBLUP 计算 $\mathbf{\hat{a}_{g}}$</li>
+<li>计算 $\hat{\mathbf{u}<em>{(t)}}  = \lambda \mathbf{D</em>{(t)}Z^{\prime}G^{*-1}<em>{(t)}\mathbf{\hat{a}</em>{g}}}$</li>
+<li>对每一个位点，计算 $d^{<em>}<em>{i(t+1)} = \hat{u}</em>{i(t)}^{2}2p_{i}(1-p_{i})$ ，得到 $\mathbf{D}^{</em>}_{(t+1)}$ 矩阵</li>
+<li>标准化 $\mathbf{D}<em>{(t+1)} = \frac{\operatorname{tr} (\mathbf{D}</em>{(0)})}{\operatorname{tr} (\mathbf{D}^{<em>}_{(t+1)})} \mathbf{D}^{</em>}_{(t+1)}$</li>
+<li>计算 $\mathbf{G}^{*}<em>{(t+1)} = \mathbf{ZD</em>{(t+1)}Z^{\prime}} \lambda$</li>
+<li>$t = t+1$</li>
 <li>退出程序，或循环跳到第二步或第三步。</li>
 </ol>
 <p>如果循环跳到第三步，则每一次计算均使用相同的  $\mathbf{\hat{a}_{g}}$ 。</p>
 <p>具体是跳到第二步或第三步 ，还有循环次数均需要根据具体情况确定。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>参考文献</h1>
+<ol>
 <li>Wang H, Misztal I, Aguilar I, et al. Genome-wide association mapping including phenotypes from relatives without genotypes[J]. Genetics research, 2012, 94(2): 73-83.</li>
 <li>VanRaden P M, Van Tassell C P, Wiggans G R, et al. Invited review: Reliability of genomic predictions for North American Holstein bulls[J]. Journal of dairy science, 2009, 92(1): 16-24.</li>
 <li>Strandén I, Garrick D J. Derivation of equivalent computing algorithms for genomic predictions and reliabilities of animal merit[J]. Journal of dairy science, 2009, 92(6): 2971-2975.</li>
@@ -170,55 +216,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -517,30 +515,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

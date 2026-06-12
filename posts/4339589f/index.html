@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">856</span>
+            <span class="post-count">844</span>
         </span>
     </span>
 
@@ -98,30 +98,60 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节是介绍 George and Liu 书中 RCM 算法脚本的第一篇。</p>
 <span id="more"></span>
-
-<h1 id="RCM理论简介"><a href="#RCM理论简介" class="headerlink" title="RCM理论简介"></a>RCM理论简介</h1><p>The Reverse Cuthill-McKee Algorithm，简称 RCM 算法，是对于稀疏矩阵进行排序的算法，其目的是希望将所有非零元素聚集在对角线附近，这样之后进行 Cholesky 分解得到的 $\mathbf{L}$ 矩阵也会有类似性质</p>
+<h1>RCM理论简介</h1>
+<p>The Reverse Cuthill-McKee Algorithm，简称 RCM 算法，是对于稀疏矩阵进行排序的算法，其目的是希望将所有非零元素聚集在对角线附近，这样之后进行 Cholesky 分解得到的 $\mathbf{L}$ 矩阵也会有类似性质</p>
 <p>其对于一个<strong>连通图</strong>的步骤如下：</p>
-<p><img src="/posts/4339589f/18.png" alt="18"></p>
-<p>如果 $\mathcal{G}^{\mathbf{A}}$ 是不连通的，我们可以对其每一个连通组分采用上面的算法。对于一个给定的起始节点，这个算法很简单。举例见下图，假设我们将节点 “g” 选为起始节点，即 $x_{1} &#x3D; g$ 。</p>
-<p><img src="/posts/4339589f/19.png" alt="1"></p>
+<p><img src="18.png" alt="18"></p>
+<p>如果 $\mathcal{G}^{\mathbf{A}}$ 是不连通的，我们可以对其每一个连通组分采用上面的算法。对于一个给定的起始节点，这个算法很简单。举例见下图，假设我们将节点 “g” 选为起始节点，即 $x_{1} = g$ 。</p>
+<p><img src="19.png" alt="1"></p>
 <p>下图说明了算法第二步中所有节点是如何排序的</p>
-<p><img src="/posts/4339589f/20.png" alt="1"></p>
+<p><img src="20.png" alt="1"></p>
 <p>下图说明了第三步的结果（翻转顺序），最终 envelope size (右图框起来的元素数目)等于 22</p>
-<p><img src="/posts/4339589f/21.png" alt="1"></p>
+<p><img src="21.png" alt="1"></p>
 <p>起始节点的选择会显著影响这个排序算法的效果，在这个例子中，如果我们选择 “a” 作为起始节点，效果会更好， envelope size 等于 18。</p>
-<h1 id="查找初始位点"><a href="#查找初始位点" class="headerlink" title="查找初始位点"></a>查找初始位点</h1><p>我们现在看如何查找 RCM 算法的起始节点。</p>
-<p>回顾一下，一条长度为 $k$ ，从节点 $x_{0}$ 到 $x_{k}$ 的通路是由不同的节点组成的有序集合 $(x_{0},x_{1},\cdots,x_{k})$ ，其中 $x_{i} \in Adj(x_{i+1})$ 。两个节点 $x$ 和 $y$ 的距离 $d(x,y)$ 定义为二者最短通路的长度。我们进一步定义节点 $x$ 的 <em><strong>eccentricity</strong></em> 为<br>$$<br>\ell(x)&#x3D;\max {d(x, y) \mid y \in X}<br>$$<br> <em><strong>diameter</strong></em> <em>of $\mathcal{G}$</em> 为<br>$$<br>\delta(\mathcal{G})&#x3D;\max {\ell(x) \mid x \in X}<br>$$<br>或者等价于<br>$$<br>\delta(\mathcal{G})&#x3D;\max {d(x, y) \mid x,y \in X}<br>$$<br>如果一个节点 $x$ 的 <em>eccentricity</em> 等于 图的 <em>diameter</em> ，即 $\ell(x) &#x3D; \delta(\mathcal{G})$ ，那么我们称其为一个 <em><strong>peripheral</strong></em> <em>node</em> 。</p>
+<h1>查找初始位点</h1>
+<p>我们现在看如何查找 RCM 算法的起始节点。</p>
+<p>回顾一下，一条长度为 $k$ ，从节点 $x_{0}$ 到 $x_{k}$ 的通路是由不同的节点组成的有序集合 $(x_{0},x_{1},\cdots,x_{k})$ ，其中 $x_{i} \in Adj(x_{i+1})$ 。两个节点 $x$ 和 $y$ 的距离 $d(x,y)$ 定义为二者最短通路的长度。我们进一步定义节点 $x$ 的 <em><strong>eccentricity</strong></em> 为<br>
+$$<br>
+\ell(x)=\max {d(x, y) \mid y \in X}<br>
+$$<br>
+<em><strong>diameter</strong></em> <em>of $\mathcal{G}$</em> 为<br>
+$$<br>
+\delta(\mathcal{G})=\max {\ell(x) \mid x \in X}<br>
+$$<br>
+或者等价于<br>
+$$<br>
+\delta(\mathcal{G})=\max {d(x, y) \mid x,y \in X}<br>
+$$<br>
+如果一个节点 $x$ 的 <em>eccentricity</em> 等于 图的 <em>diameter</em> ，即 $\ell(x) = \delta(\mathcal{G})$ ，那么我们称其为一个 <em><strong>peripheral</strong></em> <em>node</em> 。</p>
 <p>下图中的图有 8 个节点，其 <em>diameter</em> 等于 5，节点 $x_{2},x_{5},x_{7}$ 为 <em><strong>peripheral</strong></em> <em>node</em> 。</p>
-<p><img src="/posts/4339589f/22.png" alt="1"></p>
+<p><img src="22.png" alt="1"></p>
 <p>我们这一小节的目标就是得到一个有效的<strong>启发式</strong>算法，来找到 <em><strong>eccentricity</strong></em> 很高的节点。注意，我们的算法不一定能找到  <em><strong>peripheral</strong></em> <em>node</em> ，但是我们找到的节点往往具有很高的 <em><strong>eccentricity</strong></em> ，适合作为初始节点。进一步地说，在实际应用中， <em><strong>peripheral</strong></em> <em>node</em> 貌似也没有比算法找到的初始节点有任何优势。最后查找  <em><strong>peripheral</strong></em> <em>node</em> 可能是非常耗时的。</p>
-<p>在下面的章节中，我们称用这个算法找到的节点为 <em>pseudo-peripheral</em> nodes 。这个算法的关键是 <em>rooted level structure</em> ，给定一个节点 $x \in X$ ，<em>the level structure rooted at x</em> 就是 <em>partitioning</em> $\mathcal{L}(x)$ ，满足：<br>$$<br>\mathcal{L}(x) &#x3D; { L_{0}(x), L_{1}(x),\cdots,L_{\ell(x)}(x)}<br>$$<br>其中<br>$$<br>L_{0}(x) &#x3D; { x }, L_{1}(x) &#x3D; Adj(L_{0}(x))<br>$$<br>并且<br>$$<br>L_{i}(x) &#x3D; Adj(L_{i-1}(x)) - L_{i-2}(x), \quad i&#x3D;2,3,\cdots,\ell(x)<br>$$<br><em>eccentricity</em> $\ell(x)$ 称为 $\mathcal{L}(x)$ 的<strong>长度</strong> (<em>length</em>) 。 $\mathcal{L}(x)$ 的<strong>宽度</strong> (<em>width</em>) 定义为：<br>$$<br>w(x)&#x3D;\max \left{\left|L_{i}(x)\right| \mid 0 \leq i \leq \ell(x)\right}<br>$$<br>下图中我们展示了一个  <em>rooted level structure</em> at $x_{6}$ ，我们注意到 $\ell(x_{6}) &#x3D; 3$ ，$w(x_{6}) &#x3D; 3$ 。</p>
-<p><img src="/posts/4339589f/23.png" alt="1"></p>
+<p>在下面的章节中，我们称用这个算法找到的节点为 <em>pseudo-peripheral</em> nodes 。这个算法的关键是 <em>rooted level structure</em> ，给定一个节点 $x \in X$ ，<em>the level structure rooted at x</em> 就是 <em>partitioning</em> $\mathcal{L}(x)$ ，满足：<br>
+$$<br>
+\mathcal{L}(x) = { L_{0}(x), L_{1}(x),\cdots,L_{\ell(x)}(x)}<br>
+$$<br>
+其中<br>
+$$<br>
+L_{0}(x) = { x }, L_{1}(x) = Adj(L_{0}(x))<br>
+$$<br>
+并且<br>
+$$<br>
+L_{i}(x) = Adj(L_{i-1}(x)) - L_{i-2}(x), \quad i=2,3,\cdots,\ell(x)<br>
+$$<br>
+<em>eccentricity</em> $\ell(x)$ 称为 $\mathcal{L}(x)$ 的<strong>长度</strong> (<em>length</em>) 。 $\mathcal{L}(x)$ 的<strong>宽度</strong> (<em>width</em>) 定义为：<br>
+$$<br>
+w(x)=\max \left{\left|L_{i}(x)\right| \mid 0 \leq i \leq \ell(x)\right}<br>
+$$<br>
+下图中我们展示了一个  <em>rooted level structure</em> at $x_{6}$ ，我们注意到 $\ell(x_{6}) = 3$ ，$w(x_{6}) = 3$ 。</p>
+<p><img src="23.png" alt="1"></p>
 <p>我们现在可以描述 <em>pseudo-peripheral</em> nodes finding algorithm 了，如下</p>
-<p> <img src="/posts/4339589f/24.png" alt="1"></p>
-<p><img src="/posts/4339589f/25.png" alt="1"></p>
+<p><img src="24.png" alt="1"></p>
+<p><img src="25.png" alt="1"></p>
 <p>下图是其中的一个例子，<em>the level structures</em> 的第 $i$ 层标记为 $i$ 。</p>
-<p><img src="/posts/4339589f/26.png" alt="1"></p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<p><img src="26.png" alt="1"></p>
+<h1>参考文献</h1>
+<ol>
 <li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
 </ol>
  
@@ -171,55 +201,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -518,30 +500,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

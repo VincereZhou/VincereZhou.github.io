@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">932</span>
+            <span class="post-count">929</span>
         </span>
     </span>
 
@@ -98,8 +98,8 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>介绍一下母体效应模型的基础知识</p>
 <span id="more"></span>
-
-<h1 id="简要介绍"><a href="#简要介绍" class="headerlink" title="简要介绍"></a>简要介绍</h1><p>有一些性状在后代中的表现，例如断奶重，会受到个体母本提供适宜环境的能力的影响，这里所谓的环境是以母本提供的营养的形式存在（母畜的泌乳能力）。这里母本对后代表型的影响分为两种方式：第一种是可以传递给后代的遗传效应；第二种是通过母畜构建的环境造成的环境效应。</p>
+<h1>简要介绍</h1>
+<p>有一些性状在后代中的表现，例如断奶重，会受到个体母本提供适宜环境的能力的影响，这里所谓的环境是以母本提供的营养的形式存在（母畜的泌乳能力）。这里母本对后代表型的影响分为两种方式：第一种是可以传递给后代的遗传效应；第二种是通过母畜构建的环境造成的环境效应。</p>
 <p>下面我说一下我自己的理解，以断奶重为例，母畜对个体断奶重的影响就是母畜的泌乳能力造成的。然后母畜的泌乳能力有一部分是可以遗传给后代的，这一部分就是母体遗传效应；另外一部分是作为环境因素造成的，又可以进一步分为永久环境效应和暂时环境效应。母体遗传效应这一部分只有当其雌性后代也具有后代时才会表现出来（只有雌性后代分娩后才能体现出其泌乳能力）。</p>
 <p>在一般的母体效应模型中，表型一般会拆分为以下部分：</p>
 <ol>
@@ -108,15 +108,44 @@
 <li>母体永久环境效应部分，母本构建环境的能力中由环境因素造成的永久环境效应部分。</li>
 <li>残差</li>
 </ol>
-<h1 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h1><p>母体遗传效应模型如下<br>$$<br>\mathbf{y&#x3D;Xb+Zu+Wm+Spe+e}<br>$$<br>这里 $\mathbf{m}$ 是母体遗传效应，$\mathbf{pe}$ 是母体永久环境效应。</p>
-<p>随机效应协方差矩阵假设如下，即我们假设个体加性效应和母体加性效应存在加性协方差。<br>$$<br>\operatorname{var}\left[\begin{array}{r}<br>\mathbf{u} \<br>\mathbf{m} \<br>\mathbf{p e} \<br>\mathbf{e}<br>\end{array}\right]&#x3D;\left[\begin{array}{cccc}<br>g_{11} \mathbf{A} &amp; g_{12} \mathbf{A} &amp; 0 &amp; 0 \<br>g_{21} \mathbf{A} &amp; g_{22} \mathbf{A} &amp; 0 &amp; 0 \<br>0 &amp; 0 &amp; \mathbf{I} \sigma_{p e}^2 &amp; 0 \<br>0 &amp; 0 &amp; 0 &amp; \mathbf{I} \sigma_e^2<br>\end{array}\right]<br>$$</p>
-<h1 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h1><p>假设我们有下面的数据，其中 herds 和 pen 是固定因子，采用母体效应模型。</p>
-<p><img src="/posts/dac1bfe0/1.png"></p>
-<p>首先构建设计矩阵，我们看固定因子的设计矩阵 $\mathbf{X}$ ，其前 3 列是 herds 的因子，后 2 列是 pen 的因子，转置后如下，这里一列表示一行表型。<br>$$<br>\mathbf{X}^{\prime}&#x3D;\left[\begin{array}{llllllllll}<br>1 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \<br>0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \<br>0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \<br>1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 \<br>0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 1<br>\end{array}\right]<br>$$</p>
+<h1>模型</h1>
+<p>母体遗传效应模型如下<br>
+$$<br>
+\mathbf{y=Xb+Zu+Wm+Spe+e}<br>
+$$<br>
+这里 $\mathbf{m}$ 是母体遗传效应，$\mathbf{pe}$ 是母体永久环境效应。</p>
+<p>随机效应协方差矩阵假设如下，即我们假设个体加性效应和母体加性效应存在加性协方差。<br>
+$$<br>
+\operatorname{var}\left[\begin{array}{r}<br>
+\mathbf{u} \<br>
+\mathbf{m} \<br>
+\mathbf{p e} \<br>
+\mathbf{e}<br>
+\end{array}\right]=\left[\begin{array}{cccc}<br>
+g_{11} \mathbf{A} &amp; g_{12} \mathbf{A} &amp; 0 &amp; 0 \<br>
+g_{21} \mathbf{A} &amp; g_{22} \mathbf{A} &amp; 0 &amp; 0 \<br>
+0 &amp; 0 &amp; \mathbf{I} \sigma_{p e}^2 &amp; 0 \<br>
+0 &amp; 0 &amp; 0 &amp; \mathbf{I} \sigma_e^2<br>
+\end{array}\right]<br>
+$$</p>
+<h1>举例</h1>
+<p>假设我们有下面的数据，其中 herds 和 pen 是固定因子，采用母体效应模型。</p>
+<p><img src="1.png" alt=""></p>
+<p>首先构建设计矩阵，我们看固定因子的设计矩阵 $\mathbf{X}$ ，其前 3 列是 herds 的因子，后 2 列是 pen 的因子，转置后如下，这里一列表示一行表型。<br>
+$$<br>
+\mathbf{X}^{\prime}=\left[\begin{array}{llllllllll}<br>
+1 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \<br>
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \<br>
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \<br>
+1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 \<br>
+0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 1<br>
+\end{array}\right]<br>
+$$</p>
 <p>个体加性效应 $\mathbf{Z}$ 其维度是 $14 \times 14$ ，前4行是全0行（没有表型的祖先个体），剔除前4行后是一个单位矩阵。</p>
 <p><strong>重点来了</strong>，$\mathbf{W}$ 和 $\mathbf{S}$ 矩阵都是关于母体效应的，但是母体遗传效应是可遗传的（从亲本到子代），因此所有个体都需要估计其母体遗传效应；而估计母体永久环境效应只需要针对表型中个体的母本。<strong>因此这里 $\mathbf{W}$ 中的因子数目是全部个体数 14 ，而 $\mathbf{S}$ 矩阵的因子数目仅为 4 （个母本）。</strong></p>
-<p><img src="/posts/dac1bfe0/2.png"></p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<p><img src="2.png" alt=""></p>
+<h1>参考文献</h1>
+<ol>
 <li>Mrode R A. Linear models for the prediction of animal breeding values[M]. 2005.</li>
 </ol>
  
@@ -166,55 +195,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -513,30 +494,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">883</span>
+            <span class="post-count">880</span>
         </span>
     </span>
 
@@ -92,28 +92,30 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p><strong>GFF3 (General Feature Format Version 3)</strong> 是一种纯文本文件格式，用来描述基因组上<strong>特征（Features）</strong>的位置和属性。简单说，它就是一张<strong>基因组的“地图”</strong>，告诉你哪里有基因、哪里有外显子、以及它们之间的关系。</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p><strong>GFF3 (General Feature Format Version 3)</strong> 是一种纯文本文件格式，用来描述基因组上<strong>特征（Features）<strong>的位置和属性。简单说，它就是一张</strong>基因组的“地图”</strong>，告诉你哪里有基因、哪里有外显子、以及它们之间的关系。</p>
 <span id="more"></span>
-
 <hr>
-<h3 id="一、-文件结构：三大部分"><a href="#一、-文件结构：三大部分" class="headerlink" title="一、 文件结构：三大部分"></a>一、 文件结构：三大部分</h3><p>一个标准的 GFF3 文件由三部分组成，顺序不能乱：</p>
-<h4 id="1-文件头-Header"><a href="#1-文件头-Header" class="headerlink" title="1. 文件头 (Header)"></a>1. 文件头 (Header)</h4><p>文件的第一行<strong>必须</strong>是版本声明（不然会报错，我就遇到了一次，从客户链接下载的 gff3 文件没有表头，导致报错，手动添加这一行就好了）。</p>
+<h3 id="一、-文件结构：三大部分">一、 文件结构：三大部分</h3>
+<p>一个标准的 GFF3 文件由三部分组成，顺序不能乱：</p>
+<h4 id="1-文件头-Header">1. 文件头 (Header)</h4>
+<p>文件的第一行<strong>必须</strong>是版本声明（不然会报错，我就遇到了一次，从客户链接下载的 gff3 文件没有表头，导致报错，手动添加这一行就好了）。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">##gff-version 3</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li><strong>作用</strong>：告诉解析软件（如 <code>gff3ToGenePred</code>）“请按照 GFF3 的规则来读我”。</li>
 <li><strong>你的坑</strong>：如果没有这一行，很多严格的软件会<strong>直接报错</strong>或<strong>忽略第一行数据</strong>，导致它找不到你明明写在最前面的 <code>gene</code>记录。</li>
 </ul>
-<h4 id="2-注释与序列信息-Optional"><a href="#2-注释与序列信息-Optional" class="headerlink" title="2. 注释与序列信息 (Optional)"></a>2. 注释与序列信息 (Optional)</h4><p>通常以 <code>##</code>开头，用来描述参考序列。</p>
+<h4 id="2-注释与序列信息-Optional">2. 注释与序列信息 (Optional)</h4>
+<p>通常以 <code>##</code>开头，用来描述参考序列。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">##sequence-region Contig1 1 1000000</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li><strong>作用</strong>：声明某条染色体或 Contig 的长度范围。虽然不是强制的，但写了更规范。</li>
 </ul>
-<h4 id="3-数据行-Data-Rows-——-核心内容"><a href="#3-数据行-Data-Rows-——-核心内容" class="headerlink" title="3. 数据行 (Data Rows) —— 核心内容"></a>3. 数据行 (Data Rows) —— <strong>核心内容</strong></h4><p>每一行代表基因组上的<strong>一个特征</strong>（如一个基因、一个外显子）。</p>
+<h4 id="3-数据行-Data-Rows-——-核心内容">3. 数据行 (Data Rows) —— <strong>核心内容</strong></h4>
+<p>每一行代表基因组上的<strong>一个特征</strong>（如一个基因、一个外显子）。</p>
 <p>它由 <strong>9 个用 Tab (制表符) 分隔的列</strong> 组成。</p>
 <hr>
-<h3 id="二、-核心：9-列详解-The-9-Columns"><a href="#二、-核心：9-列详解-The-9-Columns" class="headerlink" title="二、 核心：9 列详解 (The 9 Columns)"></a>二、 核心：9 列详解 (The 9 Columns)</h3><p>这是 GFF3 的“骨架”。无论是什么特征，都严格遵守这 9 列的顺序。</p>
+<h3 id="二、-核心：9-列详解-The-9-Columns">二、 核心：9 列详解 (The 9 Columns)</h3>
+<p>这是 GFF3 的“骨架”。无论是什么特征，都严格遵守这 9 列的顺序。</p>
 <table>
 <thead>
 <tr>
@@ -123,11 +125,12 @@
 <th>含义解释</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><strong>1</strong></td>
 <td><strong>Seqid</strong></td>
 <td><code>Contig1</code></td>
-<td><strong>序列ID</strong>。对应参考基因组的哪条序列（染色体&#x2F; scaffold）。</td>
+<td><strong>序列ID</strong>。对应参考基因组的哪条序列（染色体/ scaffold）。</td>
 </tr>
 <tr>
 <td><strong>2</strong></td>
@@ -138,7 +141,7 @@
 <tr>
 <td><strong>3</strong></td>
 <td><strong>Type</strong></td>
-<td><code>gene</code>&#x2F; <code>mRNA</code></td>
+<td><code>gene</code>/ <code>mRNA</code></td>
 <td><strong>类型</strong>。特征的分类，必须是 SO (Sequence Ontology) 术语。</td>
 </tr>
 <tr>
@@ -177,29 +180,35 @@
 <td><code>ID=...;Parent=...</code></td>
 <td><strong>属性</strong>。这是 GFF3 的灵魂，用键值对描述细节。</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <blockquote>
 <p>⚠️ <strong>注意</strong>：列与列之间必须是 <strong>Tab键</strong>，不能是空格，否则软件读不懂。</p>
 </blockquote>
 <hr>
-<h3 id="三、-灵魂：第-9-列-Attributes"><a href="#三、-灵魂：第-9-列-Attributes" class="headerlink" title="三、 灵魂：第 9 列 (Attributes)"></a>三、 灵魂：第 9 列 (Attributes)</h3><p>这一列用 <code>;</code>分隔不同的属性，格式是 <code>key=value</code>。</p>
-<h4 id="1-ID-身份证号"><a href="#1-ID-身份证号" class="headerlink" title="1. ID (身份证号)"></a>1. ID (身份证号)</h4><ul>
+<h3 id="三、-灵魂：第-9-列-Attributes">三、 灵魂：第 9 列 (Attributes)</h3>
+<p>这一列用 <code>;</code>分隔不同的属性，格式是 <code>key=value</code>。</p>
+<h4 id="1-ID-身份证号">1. ID (身份证号)</h4>
+<ul>
 <li><strong>作用</strong>：给每个特征一个<strong>唯一</strong>的名字。</li>
 <li><strong>示例</strong>：<code>ID=MberContig1G0001</code></li>
 <li><strong>重要性</strong>：软件靠这个 ID 来区分不同的行。</li>
 <li><strong>要求</strong>：文件内唯一。</li>
 <li><strong>Ensembl 特例</strong>：为了区分基因（Gene）、转录本（Transcript）和蛋白（Protein），Ensembl 会在 ID 前加上 <code>gene:</code>、<code>transcript:</code>或 <code>protein:</code>作为前缀（估计也是为了特例）。</li>
 </ul>
-<h4 id="2-Parent-父子关系"><a href="#2-Parent-父子关系" class="headerlink" title="2. Parent (父子关系)"></a>2. Parent (父子关系)</h4><ul>
+<h4 id="2-Parent-父子关系">2. Parent (父子关系)</h4>
+<ul>
 <li><strong>作用</strong>：建立特征之间的<strong>层级关系</strong>。这是 GFF3 最强大的地方。</li>
-<li><strong>逻辑</strong>：<ul>
+<li><strong>逻辑</strong>：
+<ul>
 <li><code>mRNA</code>的 Parent 是 <code>gene</code>（因为 mRNA 属于基因）。</li>
-<li><code>exon</code>&#x2F; <code>CDS</code>的 Parent 是 <code>mRNA</code>（因为外显子属于转录本）。</li>
+<li><code>exon</code>/ <code>CDS</code>的 Parent 是 <code>mRNA</code>（因为外显子属于转录本）。</li>
 </ul>
 </li>
 </ul>
 <hr>
-<h3 id="四、-层级结构示例-Hierarchical-Structure"><a href="#四、-层级结构示例-Hierarchical-Structure" class="headerlink" title="四、 层级结构示例 (Hierarchical Structure)"></a>四、 层级结构示例 (Hierarchical Structure)</h3><p>GFF3 不是扁平的列表，而是<strong>树状结构</strong>。结合你刚才的文件内容，标准结构应该是这样的：</p>
+<h3 id="四、-层级结构示例-Hierarchical-Structure">四、 层级结构示例 (Hierarchical Structure)</h3>
+<p>GFF3 不是扁平的列表，而是<strong>树状结构</strong>。结合你刚才的文件内容，标准结构应该是这样的：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">##gff-version 3</span><br><span class="line">##sequence-region Contig1 1 1000000</span><br><span class="line"></span><br><span class="line"># 1. 基因 (根节点)</span><br><span class="line">Contig1  EVM  gene  187400  197430  .  -  .  ID=MberContig1G0001;Name=GeneA</span><br><span class="line"></span><br><span class="line"># 2. 转录本 (子节点，Parent 指向上面的 ID)</span><br><span class="line">Contig1  EVM  mRNA  187400  197430  .  -  .  ID=MberContig1T0001;Parent=MberContig1G0001</span><br><span class="line"></span><br><span class="line"># 3. 外显子 (叶子节点，Parent 指向 mRNA 的 ID)</span><br><span class="line">Contig1  EVM  exon  195765  197430  .  -  .  ID=exon1;Parent=MberContig1T0001</span><br><span class="line"></span><br><span class="line"># 4. CDS (编码区)</span><br><span class="line">Contig1  EVM  CDS   195765  197430  .  -  0  ID=cds1;Parent=MberContig1T0001</span><br></pre></td></tr></table></figure> 
       <!-- reward -->
       
@@ -245,55 +254,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -592,30 +553,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

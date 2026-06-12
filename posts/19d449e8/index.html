@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">359</span>
+            <span class="post-count">352</span>
         </span>
     </span>
 
@@ -98,13 +98,25 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>介绍多态信息含量PIC的计算公式</p>
 <span id="more"></span>
-
 <p>多态信息含量 (polymorphism information content，PIC) 是衡量遗传标记多态性的一个指标，类似的常见指标还有最小等位基因频率。</p>
-<p>Bostein 在 1980 年提出 PIC 的计算公式如下<br>$$<br>1-\sum_{i&#x3D;1}^{n}p_{i}^{2}-\sum_{i&#x3D;1}^{n-1}\sum_{j&#x3D;i+1}^{n}2p_{i}^{2}p_{j}^{2}<br>$$<br>其中 $p_{i}$ 和 $p_{j}$ 分别是第 $i$ 个和第 $j$ 个等位基因型的频率，$n$ 是等位基因数目</p>
-<h1 id="二等位标记的PIC"><a href="#二等位标记的PIC" class="headerlink" title="二等位标记的PIC"></a>二等位标记的PIC</h1><p>对于二等位标记，例如 SNP，设其最小等位基因频率 (MAF) 为 $x$ , 则 PIC 关于 MAF 的函数如下<br>$$<br>\begin{aligned}<br>\text{PIC} &amp;&#x3D; 1 - x^{2} - (1-x)^{2} - 2x^{2}(1-x)^{2} \<br>&amp;&#x3D; -2x^{4} + 4x^{3}-4x^{2} + 2x<br>\end{aligned}<br>$$<br>我想看看这个函数的图像是什么样子，通过求一阶导和二阶导也没有很快看出来，就找了一个<a target="_blank" rel="noopener" href="https://www.desmos.com/calculator?lang=zh-CN">函数作图网站</a> ，其函数图像如下，看上去最高点应该是 (0.5, 0.375) ，将 $x&#x3D;0.5$ 代入其一阶导可以得到一阶导为 0，所以证明其最大值就是  $f(0.5) &#x3D; 0.375$ 。</p>
+<p>Bostein 在 1980 年提出 PIC 的计算公式如下<br>
+$$<br>
+1-\sum_{i=1}^{n}p_{i}^{2}-\sum_{i=1}^{n-1}\sum_{j=i+1}^{n}2p_{i}^{2}p_{j}^{2}<br>
+$$<br>
+其中 $p_{i}$ 和 $p_{j}$ 分别是第 $i$ 个和第 $j$ 个等位基因型的频率，$n$ 是等位基因数目</p>
+<h1>二等位标记的PIC</h1>
+<p>对于二等位标记，例如 SNP，设其最小等位基因频率 (MAF) 为 $x$ , 则 PIC 关于 MAF 的函数如下<br>
+$$<br>
+\begin{aligned}<br>
+\text{PIC} &amp;= 1 - x^{2} - (1-x)^{2} - 2x^{2}(1-x)^{2} \<br>
+&amp;= -2x^{4} + 4x^{3}-4x^{2} + 2x<br>
+\end{aligned}<br>
+$$<br>
+我想看看这个函数的图像是什么样子，通过求一阶导和二阶导也没有很快看出来，就找了一个<a target="_blank" rel="noopener" href="https://www.desmos.com/calculator?lang=zh-CN">函数作图网站</a> ，其函数图像如下，看上去最高点应该是 (0.5, 0.375) ，将 $x=0.5$ 代入其一阶导可以得到一阶导为 0，所以证明其最大值就是  $f(0.5) = 0.375$ 。</p>
 <p>因此对于二等位标记，PIC 和 MAF 是成正比的，MAF 越大，PIC 也越大。</p>
-<p><img src="/posts/19d449e8/1.png"></p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<p><img src="1.png" alt=""></p>
+<h1>参考文献</h1>
+<ol>
 <li>Botstein D, White R L, Skolnick M, et al. Construction of a genetic linkage map in man using restriction fragment length polymorphisms[J]. American journal of human genetics, 1980, 32(3): 314.</li>
 </ol>
  
@@ -154,55 +166,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -501,30 +465,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

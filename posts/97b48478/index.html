@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">4.4k</span>
+            <span class="post-count">4.3k</span>
         </span>
     </span>
 
@@ -96,14 +96,178 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>基因组选择方法，大体上可以分为两类，第一类方法是通过参考群数据获得标记效应从而间接<br>获得基因组估计育种值；第二类方法是通过使用基因组数据构建新的关系矩阵加<br>入到混合模型方程组中直接获得基因组估计育种值，如 GBLUP方法。</p>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>基因组选择方法，大体上可以分为两类，第一类方法是通过参考群数据获得标记效应从而间接<br>
+获得基因组估计育种值；第二类方法是通过使用基因组数据构建新的关系矩阵加<br>
+入到混合模型方程组中直接获得基因组估计育种值，如 GBLUP方法。</p>
 <p>本篇主要介绍第一类方法。</p>
 <span id="more"></span>
-
-<h1 id="单标记选择"><a href="#单标记选择" class="headerlink" title="单标记选择"></a>单标记选择</h1><p>我们先看单个标记的模型，再扩展到全基因组的基因组选择。</p>
-<p>假设存在一个标记与某个 QTL 处于完全连锁状态，那么我们可以将这个标记当作固定效应加入到模型中，即<br>$$<br>y_{i} &#x3D; \text{marker effect in animal }i + e_{i}<br>$$<br>我们也可以往模型中添加一个<strong>剩余多基因效应</strong> (<em>additional polygenic genetic value</em>) 。<br>$$<br>y_{i} &#x3D; \text{marker effect in animal } i + \text{polygenic genetic value of animal } i + e_{i}<br>$$<br>我们下面看一些例子，首先假设我们有一个 4 等位基因 (A,B,C,D)的标，三个个体的基因型分别为 BC, AA, BD。那么我们可以估计每个等位基因的效应，建立矩阵如下<br>$$<br>\boldsymbol{Z} \boldsymbol{a}&#x3D;\left(\begin{array}{llll}<br>0 &amp; 1 &amp; 1 &amp; 0 \<br>2 &amp; 0 &amp; 0 &amp; 0 \<br>0 &amp; 1 &amp; 0 &amp; 1<br>\end{array}\right)\left(\begin{array}{l}<br>a_{A} \<br>a_{B} \<br>a_{C} \<br>a_{D}<br>\end{array}\right)<br>$$<br>假设三个基因型个体的表型为 (12,35,6) ，则可以构建一个模型如下<br>$$<br>\begin{gathered}<br>\boldsymbol{y}&#x3D;\boldsymbol{X} \boldsymbol{b}+\boldsymbol{Z} \boldsymbol{a}+\boldsymbol{e} \<br>\left(\begin{array}{c}<br>12 \<br>35 \<br>6<br>\end{array}\right)&#x3D;\left(\begin{array}{l}<br>1 \<br>1 \<br>1<br>\end{array}\right) \mu+\left(\begin{array}{llll}<br>0 &amp; 1 &amp; 1 &amp; 0 \<br>2 &amp; 0 &amp; 0 &amp; 0 \<br>0 &amp; 1 &amp; 0 &amp; 1<br>\end{array}\right)\left(\begin{array}{l}<br>a_{A} \<br>a_{B} \<br>a_{C} \<br>a_{D}<br>\end{array}\right)+\left(\begin{array}{l}<br>e_{1} \<br>e_{2} \<br>e_{3}<br>\end{array}\right)<br>\end{gathered}<br>$$<br>这个模型是一个固定模型，可以通过最小二乘法进行求解。</p>
-<p>如果我们考虑剩余多基因效应，则模型为<br>$$<br>\begin{gathered}<br>\boldsymbol{y}&#x3D;\boldsymbol{X} \boldsymbol{b}+\boldsymbol{Z} \boldsymbol{a}+\boldsymbol{W} \boldsymbol{u}+\boldsymbol{e} \<br>\left(\begin{array}{c}<br>12 \<br>35 \<br>6<br>\end{array}\right)&#x3D;\left(\begin{array}{l}<br>1 \<br>1 \<br>1<br>\end{array}\right) \mu+\left(\begin{array}{llll}<br>0 &amp; 1 &amp; 1 &amp; 0 \<br>2 &amp; 0 &amp; 0 &amp; 0 \<br>0 &amp; 1 &amp; 0 &amp; 1<br>\end{array}\right)\left(\begin{array}{l}<br>a_{A} \<br>a_{B} \<br>a_{C} \<br>a_{D}<br>\end{array}\right)+\left(\begin{array}{l}<br>u_{1} \<br>u_{2} \<br>u_{3}<br>\end{array}\right)+\left(\begin{array}{l}<br>e_{1} \<br>e_{2} \<br>e_{3}<br>\end{array}\right)<br>\end{gathered}<br>$$<br>其中 $\operatorname{Var}(\boldsymbol{u})&#x3D;\boldsymbol{A} \sigma_{u}^{2}$ ，此时模型为混合线性模型，可以用 BLUP 方法求解。</p>
-<p>我们可以轻松扩展到 2 个标记的模型，即<br>$$<br>\begin{aligned}<br>&amp;\mathbf{y&#x3D;X b+Z_{1} a_{1}+Z_{2} a_{2}+W u+e}\<br>&amp;\left(\begin{array}{c}<br>12 \<br>35 \<br>6<br>\end{array}\right)&#x3D;\left(\begin{array}{l}<br>1 \<br>1 \<br>1<br>\end{array}\right) \mu+\left(\begin{array}{llll}<br>0 &amp; 1 &amp; 1 &amp; 0 \<br>2 &amp; 0 &amp; 0 &amp; 0 \<br>0 &amp; 1 &amp; 0 &amp; 1<br>\end{array}\right)\left(\begin{array}{l}<br>a_{A 1} \<br>a_{B 1} \<br>a_{C 1} \<br>a_{D 1}<br>\end{array}\right)+\left(\begin{array}{ll}<br>1 &amp; 1 \<br>0 &amp; 2 \<br>2 &amp; 0<br>\end{array}\right)\left(\begin{array}{l}<br>a_{C 2} \<br>a_{G 2}<br>\end{array}\right)+\left(\begin{array}{l}<br>u_{1} \<br>u_{2} \<br>u_{3}<br>\end{array}\right)+\left(\begin{array}{l}<br>e_{1} \<br>e_{2} \<br>e_{3}<br>\end{array}\right)<br>\end{aligned}<br>$$<br>然后到 $n$ 个标记的模型<br>$$<br>\mathbf{y&#x3D;X b+Z_{1} a_{1}+Z_{2} a_{2}+\cdots W u+e}<br>$$<br>如果所有标记只有 2 个等位基因，例如 SNP ，假设两个 SNP 的碱基分别为 A&#x2F;B, E&#x2F;F ，按照上面的表示方式，我们需要将三个个体的标记效应表示为<br>$$<br>\boldsymbol{Z} \boldsymbol{a}&#x3D;\left(\begin{array}{ccccc}<br>1 &amp; 1 &amp; \vdots &amp; 2 &amp; 0 \<br>2 &amp; 0 &amp; \vdots &amp; 1 &amp; 1 \<br>0 &amp; 2 &amp; \vdots &amp; 0 &amp; 2<br>\end{array}\right)\left(\begin{array}{c}<br>a_{A} \<br>a_{B} \<br>\cdots \<br>a_{E} \<br>a_{F}<br>\end{array}\right)<br>$$<br>但是由于标记只有 2 个碱基，此时这种表达方式存在冗余，一个标记可以只估计一个效应，我们得到<br>$$<br>\boldsymbol{Z a}&#x3D;\left(\begin{array}{ccc}<br>1 &amp; \vdots &amp; 2 \<br>2 &amp; \vdots &amp; 1 \<br>0 &amp; \vdots &amp; 0<br>\end{array}\right)\left(\begin{array}{l}<br>a_{A} \<br>\cdots \<br>a_{E}<br>\end{array}\right)<br>$$<br>或者 （可以任意挑选某个碱基进行计数）<br>$$<br>\boldsymbol{Z} \boldsymbol{a}&#x3D;\left(\begin{array}{ccc}<br>1 &amp; \vdots &amp; 0 \<br>0 &amp; \vdots &amp; 1 \<br>2 &amp; \vdots &amp; 2<br>\end{array}\right)\left(\begin{array}{l}<br>a_{B} \<br>\cdots \<br>a_{F}<br>\end{array}\right)<br>$$<br>此时我们面临下面几个问题</p>
+<h1>单标记选择</h1>
+<p>我们先看单个标记的模型，再扩展到全基因组的基因组选择。</p>
+<p>假设存在一个标记与某个 QTL 处于完全连锁状态，那么我们可以将这个标记当作固定效应加入到模型中，即<br>
+$$<br>
+y_{i} = \text{marker effect in animal }i + e_{i}<br>
+$$<br>
+我们也可以往模型中添加一个<strong>剩余多基因效应</strong> (<em>additional polygenic genetic value</em>) 。<br>
+$$<br>
+y_{i} = \text{marker effect in animal } i + \text{polygenic genetic value of animal } i + e_{i}<br>
+$$<br>
+我们下面看一些例子，首先假设我们有一个 4 等位基因 (A,B,C,D)的标，三个个体的基因型分别为 BC, AA, BD。那么我们可以估计每个等位基因的效应，建立矩阵如下<br>
+$$<br>
+\boldsymbol{Z} \boldsymbol{a}=\left(\begin{array}{llll}<br>
+0 &amp; 1 &amp; 1 &amp; 0 \<br>
+2 &amp; 0 &amp; 0 &amp; 0 \<br>
+0 &amp; 1 &amp; 0 &amp; 1<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+a_{A} \<br>
+a_{B} \<br>
+a_{C} \<br>
+a_{D}<br>
+\end{array}\right)<br>
+$$<br>
+假设三个基因型个体的表型为 (12,35,6) ，则可以构建一个模型如下<br>
+$$<br>
+\begin{gathered}<br>
+\boldsymbol{y}=\boldsymbol{X} \boldsymbol{b}+\boldsymbol{Z} \boldsymbol{a}+\boldsymbol{e} \<br>
+\left(\begin{array}{c}<br>
+12 \<br>
+35 \<br>
+6<br>
+\end{array}\right)=\left(\begin{array}{l}<br>
+1 \<br>
+1 \<br>
+1<br>
+\end{array}\right) \mu+\left(\begin{array}{llll}<br>
+0 &amp; 1 &amp; 1 &amp; 0 \<br>
+2 &amp; 0 &amp; 0 &amp; 0 \<br>
+0 &amp; 1 &amp; 0 &amp; 1<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+a_{A} \<br>
+a_{B} \<br>
+a_{C} \<br>
+a_{D}<br>
+\end{array}\right)+\left(\begin{array}{l}<br>
+e_{1} \<br>
+e_{2} \<br>
+e_{3}<br>
+\end{array}\right)<br>
+\end{gathered}<br>
+$$<br>
+这个模型是一个固定模型，可以通过最小二乘法进行求解。</p>
+<p>如果我们考虑剩余多基因效应，则模型为<br>
+$$<br>
+\begin{gathered}<br>
+\boldsymbol{y}=\boldsymbol{X} \boldsymbol{b}+\boldsymbol{Z} \boldsymbol{a}+\boldsymbol{W} \boldsymbol{u}+\boldsymbol{e} \<br>
+\left(\begin{array}{c}<br>
+12 \<br>
+35 \<br>
+6<br>
+\end{array}\right)=\left(\begin{array}{l}<br>
+1 \<br>
+1 \<br>
+1<br>
+\end{array}\right) \mu+\left(\begin{array}{llll}<br>
+0 &amp; 1 &amp; 1 &amp; 0 \<br>
+2 &amp; 0 &amp; 0 &amp; 0 \<br>
+0 &amp; 1 &amp; 0 &amp; 1<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+a_{A} \<br>
+a_{B} \<br>
+a_{C} \<br>
+a_{D}<br>
+\end{array}\right)+\left(\begin{array}{l}<br>
+u_{1} \<br>
+u_{2} \<br>
+u_{3}<br>
+\end{array}\right)+\left(\begin{array}{l}<br>
+e_{1} \<br>
+e_{2} \<br>
+e_{3}<br>
+\end{array}\right)<br>
+\end{gathered}<br>
+$$<br>
+其中 $\operatorname{Var}(\boldsymbol{u})=\boldsymbol{A} \sigma_{u}^{2}$ ，此时模型为混合线性模型，可以用 BLUP 方法求解。</p>
+<p>我们可以轻松扩展到 2 个标记的模型，即<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{y=X b+Z_{1} a_{1}+Z_{2} a_{2}+W u+e}\<br>
+&amp;\left(\begin{array}{c}<br>
+12 \<br>
+35 \<br>
+6<br>
+\end{array}\right)=\left(\begin{array}{l}<br>
+1 \<br>
+1 \<br>
+1<br>
+\end{array}\right) \mu+\left(\begin{array}{llll}<br>
+0 &amp; 1 &amp; 1 &amp; 0 \<br>
+2 &amp; 0 &amp; 0 &amp; 0 \<br>
+0 &amp; 1 &amp; 0 &amp; 1<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+a_{A 1} \<br>
+a_{B 1} \<br>
+a_{C 1} \<br>
+a_{D 1}<br>
+\end{array}\right)+\left(\begin{array}{ll}<br>
+1 &amp; 1 \<br>
+0 &amp; 2 \<br>
+2 &amp; 0<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+a_{C 2} \<br>
+a_{G 2}<br>
+\end{array}\right)+\left(\begin{array}{l}<br>
+u_{1} \<br>
+u_{2} \<br>
+u_{3}<br>
+\end{array}\right)+\left(\begin{array}{l}<br>
+e_{1} \<br>
+e_{2} \<br>
+e_{3}<br>
+\end{array}\right)<br>
+\end{aligned}<br>
+$$<br>
+然后到 $n$ 个标记的模型<br>
+$$<br>
+\mathbf{y=X b+Z_{1} a_{1}+Z_{2} a_{2}+\cdots W u+e}<br>
+$$<br>
+如果所有标记只有 2 个等位基因，例如 SNP ，假设两个 SNP 的碱基分别为 A/B, E/F ，按照上面的表示方式，我们需要将三个个体的标记效应表示为<br>
+$$<br>
+\boldsymbol{Z} \boldsymbol{a}=\left(\begin{array}{ccccc}<br>
+1 &amp; 1 &amp; \vdots &amp; 2 &amp; 0 \<br>
+2 &amp; 0 &amp; \vdots &amp; 1 &amp; 1 \<br>
+0 &amp; 2 &amp; \vdots &amp; 0 &amp; 2<br>
+\end{array}\right)\left(\begin{array}{c}<br>
+a_{A} \<br>
+a_{B} \<br>
+\cdots \<br>
+a_{E} \<br>
+a_{F}<br>
+\end{array}\right)<br>
+$$<br>
+但是由于标记只有 2 个碱基，此时这种表达方式存在冗余，一个标记可以只估计一个效应，我们得到<br>
+$$<br>
+\boldsymbol{Z a}=\left(\begin{array}{ccc}<br>
+1 &amp; \vdots &amp; 2 \<br>
+2 &amp; \vdots &amp; 1 \<br>
+0 &amp; \vdots &amp; 0<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+a_{A} \<br>
+\cdots \<br>
+a_{E}<br>
+\end{array}\right)<br>
+$$<br>
+或者 （可以任意挑选某个碱基进行计数）<br>
+$$<br>
+\boldsymbol{Z} \boldsymbol{a}=\left(\begin{array}{ccc}<br>
+1 &amp; \vdots &amp; 0 \<br>
+0 &amp; \vdots &amp; 1 \<br>
+2 &amp; \vdots &amp; 2<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+a_{B} \<br>
+\cdots \<br>
+a_{F}<br>
+\end{array}\right)<br>
+$$<br>
+此时我们面临下面几个问题</p>
 <ul>
 <li>我们应该放多少个标记到模型中？</li>
 <li>基因组中总共有多少个 QTL ？</li>
@@ -111,15 +275,55 @@
 </ul>
 <p>根据之前的研究结果，我们发现只用发现的 QTL，我们会遗漏很多的遗传变异。例如在 GWAS 分析中，当样本数为 1000 ，位点数为 50k ，经过 Bonferroni 校正后，找到的解释遗传方差比例超过 1% 的 QTL 只有 4% ，换句话说，如果群体中存在 100 个 QTL ，GWAS 只能找到 4 个显著的 QTL。</p>
 <p>另外，我们发现的 QTL 效应一般都是夸大的，即其真实效应小于估计效应 (<em>Beavis effect</em>)。因为估计效应等于真实效应加上估计噪音，为了选择估计效应很大的 QTL ，我们就很容易选中实际是估计噪音很大的 QTL 。如果真实情况是只有少数几个QTL的效应很大，那么此时 <em>Beavis effect</em> 是可以忽略的，但是实际情况往往不是这样。当位点数目很多，就会出现某些位点的估计噪音很大，使得这些位点的估计效应比真实效应大得多，这个问题在 GWAS 分析中很严重。</p>
-<h1 id="全基因组选择"><a href="#全基因组选择" class="headerlink" title="全基因组选择"></a>全基因组选择</h1><h1 id="贝叶斯估计，或标记效应的最佳估计"><a href="#贝叶斯估计，或标记效应的最佳估计" class="headerlink" title="贝叶斯估计，或标记效应的最佳估计"></a>贝叶斯估计，或标记效应的最佳估计</h1><p>我们已知标记辅助选择会导致选择出现偏差，那么如果我们不对 QTL 区域进行选择，我们就可以避免这个偏差。因此此时的估计育种值就是整个基因组所有区域的效应之和，即我们认为基因组的所有区域可能都有效应，这种思想就是全基因组选择。那么我们如何估计整个基因组所有区域的效应呢？</p>
-<p>最简单的方法就是扩展单标记选择扩展为多标记选择，估计每一个标记的效应。但是由于此时我们采用覆盖全基因组的标记，问题在于标记数目太多了（标记数目很可能大于样本数目），此时用最小二乘法估计标记效应是很糟糕的。<br>$$<br>\boldsymbol{y}&#x3D;\boldsymbol{X} \boldsymbol{b}+\boldsymbol{Z} \boldsymbol{a}+\boldsymbol{e} \<br>$$<br>另外，即便我们有非常多的样本，我们还没有用上一个先验信息，即大部分的 SNP 效应都不大。那么我们如何进行改善呢？</p>
-<p>我们可以利用 <em>Best Prediction</em> 的理论（最小化估计值和真实值的举例）， <em>Best Prediction</em>  也可以视为一个贝叶斯估计值，我们需要知道标记效应的先验分布 $p(\mathbf{a})$ ，给定标记效应的表型数据的似然值 $p(\mathbf{y|a})$ ，此时估计的标记效应值为<br>$$<br>\hat{\mathbf{a}}&#x3D;E(\mathbf{a} \mid \mathbf{y})&#x3D;\frac{\int \mathbf{a} p(\mathbf{y} \mid \mathbf{a}) p(\mathbf{a}) d \mathbf{a}}{\int p(\mathbf{y} \mid \mathbf{a}) p(\mathbf{a}) d \mathbf{a}}<br>$$<br>第二个等号推导如下<br>$$<br>\begin{aligned}<br>E(\mathbf{a} \mid \mathbf{y}) &amp;&#x3D; \int  \mathbf{a} p(\mathbf{a} \mid \mathbf{y}) d \mathbf{a} \quad &amp; \because p(\mathbf{a} \mid \mathbf{y}) &#x3D; \frac{p(\mathbf{a} , \mathbf{y}) }{p(\mathbf{y})} &#x3D; \frac{p(\mathbf{y|a}) p( \mathbf{a}) }{ \int p(\mathbf{y,a}) d \mathbf{a}} &#x3D; \frac{p(\mathbf{y|a}) p( \mathbf{a}) }{ \int p(\mathbf{y|a}) p(\mathbf{a}) d \mathbf{a}}   \<br>&amp;&#x3D; \frac{\int \mathbf{a} p(\mathbf{y} \mid \mathbf{a}) p(\mathbf{a}) d \mathbf{a}}{\int p(\mathbf{y} \mid \mathbf{a}) p(\mathbf{a}) d \mathbf{a}} \</p>
-<p>\end{aligned}<br>$$<br> <em>Best Prediction</em> 方法相比于最小二乘方法具有更大的优势，是一个最优解，因为它用了所有可用的信息 (Gianola and Fernando 1986) 。先验分布  $p(\mathbf{a})$ 可以使得估计值向我们的先验值（通常为0）进行回归，这个过程称为 <em>shrinkage</em> 。</p>
+<h1>全基因组选择</h1>
+<h1>贝叶斯估计，或标记效应的最佳估计</h1>
+<p>我们已知标记辅助选择会导致选择出现偏差，那么如果我们不对 QTL 区域进行选择，我们就可以避免这个偏差。因此此时的估计育种值就是整个基因组所有区域的效应之和，即我们认为基因组的所有区域可能都有效应，这种思想就是全基因组选择。那么我们如何估计整个基因组所有区域的效应呢？</p>
+<p>最简单的方法就是扩展单标记选择扩展为多标记选择，估计每一个标记的效应。但是由于此时我们采用覆盖全基因组的标记，问题在于标记数目太多了（标记数目很可能大于样本数目），此时用最小二乘法估计标记效应是很糟糕的。<br>
+$$<br>
+\boldsymbol{y}=\boldsymbol{X} \boldsymbol{b}+\boldsymbol{Z} \boldsymbol{a}+\boldsymbol{e} \<br>
+$$<br>
+另外，即便我们有非常多的样本，我们还没有用上一个先验信息，即大部分的 SNP 效应都不大。那么我们如何进行改善呢？</p>
+<p>我们可以利用 <em>Best Prediction</em> 的理论（最小化估计值和真实值的举例）， <em>Best Prediction</em>  也可以视为一个贝叶斯估计值，我们需要知道标记效应的先验分布 $p(\mathbf{a})$ ，给定标记效应的表型数据的似然值 $p(\mathbf{y|a})$ ，此时估计的标记效应值为<br>
+$$<br>
+\hat{\mathbf{a}}=E(\mathbf{a} \mid \mathbf{y})=\frac{\int \mathbf{a} p(\mathbf{y} \mid \mathbf{a}) p(\mathbf{a}) d \mathbf{a}}{\int p(\mathbf{y} \mid \mathbf{a}) p(\mathbf{a}) d \mathbf{a}}<br>
+$$<br>
+第二个等号推导如下<br>
+$$<br>
+\begin{aligned}<br>
+E(\mathbf{a} \mid \mathbf{y}) &amp;= \int  \mathbf{a} p(\mathbf{a} \mid \mathbf{y}) d \mathbf{a} \quad &amp; \because p(\mathbf{a} \mid \mathbf{y}) = \frac{p(\mathbf{a} , \mathbf{y}) }{p(\mathbf{y})} = \frac{p(\mathbf{y|a}) p( \mathbf{a}) }{ \int p(\mathbf{y,a}) d \mathbf{a}} = \frac{p(\mathbf{y|a}) p( \mathbf{a}) }{ \int p(\mathbf{y|a}) p(\mathbf{a}) d \mathbf{a}}   \<br>
+&amp;= \frac{\int \mathbf{a} p(\mathbf{y} \mid \mathbf{a}) p(\mathbf{a}) d \mathbf{a}}{\int p(\mathbf{y} \mid \mathbf{a}) p(\mathbf{a}) d \mathbf{a}} \</p>
+<p>\end{aligned}<br>
+$$<br>
+<em>Best Prediction</em> 方法相比于最小二乘方法具有更大的优势，是一个最优解，因为它用了所有可用的信息 (Gianola and Fernando 1986) 。先验分布  $p(\mathbf{a})$ 可以使得估计值向我们的先验值（通常为0）进行回归，这个过程称为 <em>shrinkage</em> 。</p>
 <p>贝叶斯回归方法中，一般普遍假设残差的分布为正态分布，即 $p(\boldsymbol{e}) \sim \mathbf{N}(\mathbf{0}, \boldsymbol{R})$ ，似然函数 $p(\mathbf{y} \mid \mathbf{a}) \sim M V N(\mathbf{X} \mathbf{b}+\mathbf{Z} \mathbf{a}, \mathbf{R})$ 。但是不同的人对于标记效应的先验分布 $p(\boldsymbol{a})$ 的假设不一样，从而得到不同的贝叶斯方法，如 (Bayes A, B, C, R, S… Bayesian Lasso……)   。因此，贝叶斯回归的效果很大程度上受到标记效应的先验分布的影响，我们需要找到一个合适的先验分布，不然估计的标记效应就可能 <code>too much shrunken</code> (所有标记的效应估计值都非常小)，又或者 <code>too little shrunken</code> ，以至于标记效应的估计值中包含了太多的错误甚至是完全错误的。</p>
-<h2 id="加性方差和标记方差"><a href="#加性方差和标记方差" class="headerlink" title="加性方差和标记方差"></a>加性方差和标记方差</h2><p>假设个体育种值的加性方差为 $\operatorname{Var}(u)&#x3D;\sigma_{u}^{2}$ 。如果一个标记的效应为 $a_{i}$ ，即每增加一个参考碱基的效应为  $a_{i}$  ，因此我们有 $p^{2}$ 个个体在这个标记的效应为 $u&#x3D;+2 a_{i}$ ， $q^{2}$ 个个体在这个标记的效应为 $u&#x3D; 0$ ， $2pq$ 个个体在这个标记的效应为 $u&#x3D; a_{i}$ （假设哈温平衡）。根据方差公式 $\operatorname{Var}(u)&#x3D;E\left(u^{2}\right)-E(u)^{2}$ ，我们得到下表<br>$$<br>\begin{array}{llll}<br>\hline \text { Genotype } &amp; \text { Frequency } &amp; u^{2} &amp; u \<br>\hline \text { AA } &amp; p^{2} &amp; 4 a_{i}^{2} &amp; 2 a_{i} \<br>\text { Aa } &amp; 2 p q &amp; a_{i}^{2} &amp; a_{i} \<br>\text { aa } &amp; q^{2} &amp; 0 &amp; 0 \<br>\text { Average } &amp; &amp; 4 p^{2} a_{i}^{2}+2 p q a_{i}^{2} &amp; 2 p a_{i} \<br>\hline<br>\end{array}<br>$$<br>因此，单个标记解释的方差为 $4 p^{2} a_{i}^{2}+2 p q a_{i}^{2}-\left(2 p  a_{i}\right)^{2}&#x3D;2 p q a_{i}^{2}$ 。由于 $2pq$ 在 $p &#x3D; 0.5$ 时最大，因此 MAF 越大的标记解释的遗传方差一般也越大，因此这解释了可以忽略MAF比较低的标记的原因。</p>
-<p>假设我们只有两个标记并且知道它们的效应大小，因此一个个体的育种值可以表示为 $u&#x3D;z_{1} a_{1}+z_{2} a_{2}$ ，那么 $\operatorname{Var}(u)&#x3D;\operatorname{Var}\left(z_{1}\right) a_{1}^{2}+\operatorname{Var}\left(z_{2}\right) a_{2}^{2}+2 \operatorname{Cov}\left(z_{1}, z_{2}\right) a_{1} a_{2} $ 。<strong>假设哈维平衡</strong>，易得 $\operatorname{Var}\left(z_{1}\right)&#x3D;2 p_{1} q_{1}$ ， $\operatorname{Var}\left(z_{2}\right)&#x3D;2 p_{2} q_{2}$ 。$\operatorname{Cov}\left(z_{1}, z_{2}\right)$ 这一项证明为 $2 r \sqrt{p_{1} q_{1} p_{2} q_{2}}$ ，其中 $r$ 为衡量连锁不平衡的相关系数（这里 $r$ 应该就是两列基因型的相关系数），另外这里的 $a_{1}a_{2}$ 项表示两个位点的效应必须方向一致，这样 $2 \operatorname{Cov}\left(z_{1}, z_{2}\right) a_{1} a_{2}$ 才是一个正数。因此我们一般不考虑协方差这一项，即<strong>假设连锁平衡</strong>。</p>
-<p>假设连锁平衡，或者说假设位点间彼此不相关，此时 $\operatorname{Var}(u)&#x3D;\operatorname{Var}\left(z_{1}\right) a_{1}^{2}+\operatorname{Var}\left(z_{2}\right) a_{2}^{2}&#x3D;2 p_{1} q_{1} a_{1}^{2}+2 p_{2} q_{2} a_{2}^{2}$ ，也就是说每一个标记的方差是可以累加的。我们将这个结论一般化，得到加性方差用标记方差表达的公式：<br>$$<br>\sigma_{u}^{2}&#x3D;\operatorname{Var}(u)&#x3D;2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i} a_{i}^{2}<br>$$<br>但是在很多情况下，我们不知道标记效应大小。但是我们可能对标记效应有一些先验知识，比如我们一般认为其均值为0，有一个先验的方差。在这种情况下，我们可以将 $a_{i}^{2}$ 替换为其先验的期望值，即 $\sigma_{\mathrm{ai}}^{2}$ ，因此我们有<br>$$<br>\sigma_{u}^{2}&#x3D;\operatorname{Var}(u)&#x3D;2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i} \sigma_{\mathrm{ai}}^{2}<br>$$<br>如果我们假设所有的标记具有相同的先验方差 $\sigma_{\mathrm{a0}}^{2}$ ，那么 $\sigma_{u}^{2}&#x3D;2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i} \sigma_{a0}^{2}&#x3D;2 \sigma_{a0}^{2} \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i}$ ，因此我们得到<br>$$<br>\sigma_{a 0}^{2}&#x3D;\frac{\sigma_{u}^{2}}{2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i}}<br>$$</p>
-<h2 id="SNP-BLUP"><a href="#SNP-BLUP" class="headerlink" title="SNP-BLUP"></a>SNP-BLUP</h2><p>如果假设标记效应的先验分布为正态分布，即 $a_{i} \sim N\left(0, \sigma_{a}^{2}\right)$ ， $p(\mathbf{a})&#x3D;M V N(\mathbf{0}, \mathbf{D}) ; \operatorname{Var}(\mathbf{a})&#x3D;\mathbf{D}&#x3D;\mathbf{I} \sigma_{a }^{2}$(即假设标记之间彼此独立)，此时我们假设绝大部分标记的效应均很小，这种方法我们称为 SNP-BLUP 方法 (等价于频率学派中的岭回归方法，<em>ridge regression</em> ，即在最小二乘中添加 $\lambda \sum a_{i}^{2}$ 的惩罚项 ) 。此时绝大部分标记的效应在 0 附近，只有少量标记的效应可能比较大。</p>
+<h2 id="加性方差和标记方差">加性方差和标记方差</h2>
+<p>假设个体育种值的加性方差为 $\operatorname{Var}(u)=\sigma_{u}^{2}$ 。如果一个标记的效应为 $a_{i}$ ，即每增加一个参考碱基的效应为  $a_{i}$  ，因此我们有 $p^{2}$ 个个体在这个标记的效应为 $u=+2 a_{i}$ ， $q^{2}$ 个个体在这个标记的效应为 $u= 0$ ， $2pq$ 个个体在这个标记的效应为 $u= a_{i}$ （假设哈温平衡）。根据方差公式 $\operatorname{Var}(u)=E\left(u^{2}\right)-E(u)^{2}$ ，我们得到下表<br>
+$$<br>
+\begin{array}{llll}<br>
+\hline \text { Genotype } &amp; \text { Frequency } &amp; u^{2} &amp; u \<br>
+\hline \text { AA } &amp; p^{2} &amp; 4 a_{i}^{2} &amp; 2 a_{i} \<br>
+\text { Aa } &amp; 2 p q &amp; a_{i}^{2} &amp; a_{i} \<br>
+\text { aa } &amp; q^{2} &amp; 0 &amp; 0 \<br>
+\text { Average } &amp; &amp; 4 p^{2} a_{i}^{2}+2 p q a_{i}^{2} &amp; 2 p a_{i} \<br>
+\hline<br>
+\end{array}<br>
+$$<br>
+因此，单个标记解释的方差为 $4 p^{2} a_{i}^{2}+2 p q a_{i}^{2}-\left(2 p  a_{i}\right)^{2}=2 p q a_{i}^{2}$ 。由于 $2pq$ 在 $p = 0.5$ 时最大，因此 MAF 越大的标记解释的遗传方差一般也越大，因此这解释了可以忽略MAF比较低的标记的原因。</p>
+<p>假设我们只有两个标记并且知道它们的效应大小，因此一个个体的育种值可以表示为 $u=z_{1} a_{1}+z_{2} a_{2}$ ，那么 $\operatorname{Var}(u)=\operatorname{Var}\left(z_{1}\right) a_{1}^{2}+\operatorname{Var}\left(z_{2}\right) a_{2}^{2}+2 \operatorname{Cov}\left(z_{1}, z_{2}\right) a_{1} a_{2} $ 。<strong>假设哈维平衡</strong>，易得 $\operatorname{Var}\left(z_{1}\right)=2 p_{1} q_{1}$ ， $\operatorname{Var}\left(z_{2}\right)=2 p_{2} q_{2}$ 。$\operatorname{Cov}\left(z_{1}, z_{2}\right)$ 这一项证明为 $2 r \sqrt{p_{1} q_{1} p_{2} q_{2}}$ ，其中 $r$ 为衡量连锁不平衡的相关系数（这里 $r$ 应该就是两列基因型的相关系数），另外这里的 $a_{1}a_{2}$ 项表示两个位点的效应必须方向一致，这样 $2 \operatorname{Cov}\left(z_{1}, z_{2}\right) a_{1} a_{2}$ 才是一个正数。因此我们一般不考虑协方差这一项，即<strong>假设连锁平衡</strong>。</p>
+<p>假设连锁平衡，或者说假设位点间彼此不相关，此时 $\operatorname{Var}(u)=\operatorname{Var}\left(z_{1}\right) a_{1}^{2}+\operatorname{Var}\left(z_{2}\right) a_{2}^{2}=2 p_{1} q_{1} a_{1}^{2}+2 p_{2} q_{2} a_{2}^{2}$ ，也就是说每一个标记的方差是可以累加的。我们将这个结论一般化，得到加性方差用标记方差表达的公式：<br>
+$$<br>
+\sigma_{u}^{2}=\operatorname{Var}(u)=2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i} a_{i}^{2}<br>
+$$<br>
+但是在很多情况下，我们不知道标记效应大小。但是我们可能对标记效应有一些先验知识，比如我们一般认为其均值为0，有一个先验的方差。在这种情况下，我们可以将 $a_{i}^{2}$ 替换为其先验的期望值，即 $\sigma_{\mathrm{ai}}^{2}$ ，因此我们有<br>
+$$<br>
+\sigma_{u}^{2}=\operatorname{Var}(u)=2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i} \sigma_{\mathrm{ai}}^{2}<br>
+$$<br>
+如果我们假设所有的标记具有相同的先验方差 $\sigma_{\mathrm{a0}}^{2}$ ，那么 $\sigma_{u}^{2}=2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i} \sigma_{a0}^{2}=2 \sigma_{a0}^{2} \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i}$ ，因此我们得到<br>
+$$<br>
+\sigma_{a 0}^{2}=\frac{\sigma_{u}^{2}}{2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i}}<br>
+$$</p>
+<h2 id="SNP-BLUP">SNP-BLUP</h2>
+<p>如果假设标记效应的先验分布为正态分布，即 $a_{i} \sim N\left(0, \sigma_{a}^{2}\right)$ ， $p(\mathbf{a})=M V N(\mathbf{0}, \mathbf{D}) ; \operatorname{Var}(\mathbf{a})=\mathbf{D}=\mathbf{I} \sigma_{a }^{2}$(即假设标记之间彼此独立)，此时我们假设绝大部分标记的效应均很小，这种方法我们称为 SNP-BLUP 方法 (等价于频率学派中的岭回归方法，<em>ridge regression</em> ，即在最小二乘中添加 $\lambda \sum a_{i}^{2}$ 的惩罚项 ) 。此时绝大部分标记的效应在 0 附近，只有少量标记的效应可能比较大。</p>
 <p>在假设标记效应的先验分布为正态分布的前提下，下面的三个方法实际内容相同：</p>
 <ul>
 <li>SNP-BLUP</li>
@@ -127,10 +331,45 @@
 <li>ridge regression</li>
 </ul>
 <p>也就是说估计SNP效应的方法中的岭回归和SNP-BLUP，和构建基因组关系矩阵 (G阵) 来估计育种值的 GBLUP 方法，这三者其实是等价的。</p>
-<p>SNP-BLUP 的估计值就是 BLUP 值，其混合模型方程组如下<br>$$<br>\left[\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{D}^{-1}<br>\end{array}\right]\left[\begin{array}{l}<br>\hat{\mathbf{b}} \<br>\hat{\mathbf{a}}<br>\end{array}\right]&#x3D;\left[\begin{array}{l}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right]<br>$$<br>其中 $\mathbf{D} &#x3D; \mathbf{I} \sigma_{a}^{2}$ 。通常我们假设 $\operatorname{Var}(\mathbf{e})&#x3D;\mathbf{R}&#x3D;\mathbf{I} \sigma_{e}^{2}$ ，因此可以进一步简化为<br>$$<br>\left(\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{Z} \<br>\mathbf{Z}^{\prime} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{Z}+\mathbf{I} \lambda<br>\end{array}\right)\left(\begin{array}{l}<br>\widehat{\mathbf{b}} \<br>\widehat{\mathbf{a}}<br>\end{array}\right)&#x3D;\left(\begin{array}{l}<br>\mathbf{X}^{\prime} \mathbf{y} \<br>\mathbf{Z}^{\prime} \mathbf{y}<br>\end{array}\right)<br>$$<br>其中 $\lambda&#x3D;\sigma_{e}^{2} &#x2F; \sigma_{a }^{2}$ 。这里的系数矩阵的行数或列数是<strong>固定效应数目+位点数目</strong>，与样本数目无关。第二，这里的系数矩阵是稠密的，因为 $\mathbf{Z}^{\prime} \mathbf{Z}$ 是稠密的（$\mathbf{Z}$ 矩阵是由012编码或-101编码组成的）。</p>
-<p>这里我们需要已知 $\sigma_{e}^{2}$ 和 $\sigma_{a}^{2}$ ，我们有两种策略来得到这两个方差组分，最常用的方法是根据加性方差和先验的标记方差的关系，利用下面的公式得到  $\sigma_{a}^{2}$<br>$$<br>\sigma_{a 0}^{2}&#x3D;\frac{\sigma_{u}^{2}}{2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i}}<br>$$<br>这里的  $\sigma_{u}^{2}$ 是加性方差估计值，可以通过对系谱表型用REML方法估计得到；$p$ 是等位基因频率（注意，这里的等位基因频率必须是估计加性方差的群体的基因频率，比如<strong>系谱中的基础群体</strong>）。但是，我们直接用当前数据的基因频率 $p$ ，因此这里存在一些误差（虽然经常可以忽略）。至于残差方差  $\sigma_{e}^{2}$ ，我们可以从之前的研究得到（应该是对系谱表型用REML方法估计得到的残差方差）。 </p>
+<p>SNP-BLUP 的估计值就是 BLUP 值，其混合模型方程组如下<br>
+$$<br>
+\left[\begin{array}{cc}<br>
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{D}^{-1}<br>
+\end{array}\right]\left[\begin{array}{l}<br>
+\hat{\mathbf{b}} \<br>
+\hat{\mathbf{a}}<br>
+\end{array}\right]=\left[\begin{array}{l}<br>
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
+\end{array}\right]<br>
+$$<br>
+其中 $\mathbf{D} = \mathbf{I} \sigma_{a}^{2}$ 。通常我们假设 $\operatorname{Var}(\mathbf{e})=\mathbf{R}=\mathbf{I} \sigma_{e}^{2}$ ，因此可以进一步简化为<br>
+$$<br>
+\left(\begin{array}{cc}<br>
+\mathbf{X}^{\prime} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{Z} \<br>
+\mathbf{Z}^{\prime} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{Z}+\mathbf{I} \lambda<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+\widehat{\mathbf{b}} \<br>
+\widehat{\mathbf{a}}<br>
+\end{array}\right)=\left(\begin{array}{l}<br>
+\mathbf{X}^{\prime} \mathbf{y} \<br>
+\mathbf{Z}^{\prime} \mathbf{y}<br>
+\end{array}\right)<br>
+$$<br>
+其中 $\lambda=\sigma_{e}^{2} / \sigma_{a }^{2}$ 。这里的系数矩阵的行数或列数是<strong>固定效应数目+位点数目</strong>，与样本数目无关。第二，这里的系数矩阵是稠密的，因为 $\mathbf{Z}^{\prime} \mathbf{Z}$ 是稠密的（$\mathbf{Z}$ 矩阵是由012编码或-101编码组成的）。</p>
+<p>这里我们需要已知 $\sigma_{e}^{2}$ 和 $\sigma_{a}^{2}$ ，我们有两种策略来得到这两个方差组分，最常用的方法是根据加性方差和先验的标记方差的关系，利用下面的公式得到  $\sigma_{a}^{2}$<br>
+$$<br>
+\sigma_{a 0}^{2}=\frac{\sigma_{u}^{2}}{2 \sum_{i}^{\mathrm{nsnp}} p_{i} q_{i}}<br>
+$$<br>
+这里的  $\sigma_{u}^{2}$ 是加性方差估计值，可以通过对系谱表型用REML方法估计得到；$p$ 是等位基因频率（注意，这里的等位基因频率必须是估计加性方差的群体的基因频率，比如<strong>系谱中的基础群体</strong>）。但是，我们直接用当前数据的基因频率 $p$ ，因此这里存在一些误差（虽然经常可以忽略）。至于残差方差  $\sigma_{e}^{2}$ ，我们可以从之前的研究得到（应该是对系谱表型用REML方法估计得到的残差方差）。</p>
 <p>第二种方法我们可以直接从标记数据中来估计方差组分，典型方法是 GREML 。</p>
-<h2 id="贝叶斯回归方法简介"><a href="#贝叶斯回归方法简介" class="headerlink" title="贝叶斯回归方法简介"></a>贝叶斯回归方法简介</h2><p>Bayes A 方法的先验分布为 <code>Scaled-t density</code>，见下式。相比于正态分布的先验分布， 这种方法的先验分布有两条”肥尾巴“，即认为效应很大的标记出现概率更大。<br>$$<br>p\left(a_{i} \mid \sigma_{a 0}^{2}, \nu_{a}\right)&#x3D;\sigma_{a 0} t\left(0, \nu_{a}\right)<br>$$<br>Bayes B 方法在 Bayes A 方法的基础上进一步认为基因组上并没有很多 QTLs ，因此很多标记由于并不和 QTL 连锁，因此其效应为 0。即设定比例为 $\pi$ 的位点的效应为0 ，其他位点的效应服从 <code>Scaled-t density</code> ， 即此时 $a_{i} \sim \pi(0)+(1-\pi) t\left(0, v, \sigma_{a}^{2}\right)$  。</p>
+<h2 id="贝叶斯回归方法简介">贝叶斯回归方法简介</h2>
+<p>Bayes A 方法的先验分布为 <code>Scaled-t density</code>，见下式。相比于正态分布的先验分布， 这种方法的先验分布有两条”肥尾巴“，即认为效应很大的标记出现概率更大。<br>
+$$<br>
+p\left(a_{i} \mid \sigma_{a 0}^{2}, \nu_{a}\right)=\sigma_{a 0} t\left(0, \nu_{a}\right)<br>
+$$<br>
+Bayes B 方法在 Bayes A 方法的基础上进一步认为基因组上并没有很多 QTLs ，因此很多标记由于并不和 QTL 连锁，因此其效应为 0。即设定比例为 $\pi$ 的位点的效应为0 ，其他位点的效应服从 <code>Scaled-t density</code> ， 即此时 $a_{i} \sim \pi(0)+(1-\pi) t\left(0, v, \sigma_{a}^{2}\right)$  。</p>
 <p>Bayes C(Pi) 方法认为比例为 $\pi$ 的位点的效应为0 ，其他位点的效应服从正态分布，即 $a_{i} \sim \pi(0)+(1-\pi) N\left(0, \sigma_{a}^{2}\right)$ 。</p>
 <p>Bayes Lasso 方法的先验分布为 <code>Double-Exponential</code> 分布，即 $a_{i} \sim \frac{\lambda}{2} \exp \left(-\lambda\left|a_{i}\right|\right)$   (等价于频率学派中的Lasso方法，即在最小二乘中添加 $\lambda \sum |a_{i}|$ 的惩罚项 ) 。</p>
 <p>不同方法的先验分布总结如下：</p>
@@ -146,7 +385,8 @@
 </ol>
 </blockquote>
 <p>贝叶斯回归方法的缺点是计算缓慢。根据大量实验，假设标记效应的先验分布为正态分布是一个好的假设。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>参考文献</h1>
+<ol>
 <li><a target="_blank" rel="noopener" href="http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=gsip.pdf">http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=gsip.pdf</a></li>
 <li><a target="_blank" rel="noopener" href="http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=andres_part2.pdf">http://nce.ads.uga.edu/wiki/lib/exe/fetch.php?media=andres_part2.pdf</a></li>
 <li>de Los Campos G, Hickey J M, Pong-Wong R, et al. Whole-genome regression and prediction methods applied to plant and animal breeding[J]. Genetics, 2013, 193(2): 327-345.</li>
@@ -198,55 +438,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -545,30 +737,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

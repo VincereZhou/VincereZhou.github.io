@@ -98,54 +98,64 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>asreml 分析阈值性状笔记。</p>
 <span id="more"></span>
-
-<h1 id="理论"><a href="#理论" class="headerlink" title="理论"></a>理论</h1><p>asreml 使用广义线性模型来分析阈值性状（通过为二分类性状，通常呈现二项分布）。对应《ASReml-R Reference Manual Version 4》书中的 39 页。</p>
-<h2 id="广义线性模型"><a href="#广义线性模型" class="headerlink" title="广义线性模型"></a>广义线性模型</h2><p>广义线性模型（Generalized Linear Model, GLM）可以被人为是传统一般线性模型的延伸。</p>
+<h1>理论</h1>
+<p>asreml 使用广义线性模型来分析阈值性状（通过为二分类性状，通常呈现二项分布）。对应《ASReml-R Reference Manual Version 4》书中的 39 页。</p>
+<h2 id="广义线性模型">广义线性模型</h2>
+<p>广义线性模型（Generalized Linear Model, GLM）可以被人为是传统一般线性模型的延伸。</p>
 <p>广义线性模型包括以下几个部分：</p>
 <ol>
-<li><p>因变量：因变量不同取值间相互独立，服从指定数族概率分布。即，不局限于正态分布一种情形。</p>
+<li>
+<p>因变量：因变量不同取值间相互独立，服从指定数族概率分布。即，不局限于正态分布一种情形。</p>
 </li>
-<li><p>线性部分：该部分和传统线性部分没有什么区别：<br>$$<br>\eta_{i} &#x3D; x_{i}^{\prime} \beta<br>$$</p>
+<li>
+<p>线性部分：该部分和传统线性部分没有什么区别：<br>
+$$<br>
+\eta_{i} = x_{i}^{\prime} \beta<br>
+$$</p>
 </li>
-<li><p>连接函数：用于描述因变量的期望是怎样和线性预测值 $\eta_{i}$ 相关联的。</p>
+<li>
+<p>连接函数：用于描述因变量的期望是怎样和线性预测值 $\eta_{i}$ 相关联的。</p>
 </li>
 </ol>
-<p>$$<br>g(\mu_{i}) &#x3D; \eta_{i} &#x3D; x_{i}^{\prime} \beta<br>$$</p>
+<p>$$<br>
+g(\mu_{i}) = \eta_{i} = x_{i}^{\prime} \beta<br>
+$$</p>
 <p>广义线性模型在以下方面做了扩展：</p>
 <ol>
 <li>放松因变量的限制，因变量分布由正态分布扩展到二项分布、Poisson 分布、负二项分布等指数分布族</li>
 <li>通过连接函数，把因变量取值变换到自变量的线性预测的取值范围$(-\infty, +\infty)$。</li>
 </ol>
 <p>如果观测值之间存在相关性（非独立），那么我们就需要使用<strong>广义线性混合模型</strong>（Generalized Linear Mixed Model, GLMM），模型中可以对残差项进行相关性的定义。</p>
-<p>下图是 asreml 支持的数据类型和连接函数，这里 $\Phi$ 表示累积标准正态分布函数。（其实我感觉这个表说的不清楚，而且还少了 <code>multinomial</code> 分布，其可用的连接函数与 <code>binomial</code> 相同） </p>
-<p><img src="/posts/2c1f0d50/1.png"></p>
+<p>下图是 asreml 支持的数据类型和连接函数，这里 $\Phi$ 表示累积标准正态分布函数。（其实我感觉这个表说的不清楚，而且还少了 <code>multinomial</code> 分布，其可用的连接函数与 <code>binomial</code> 相同）</p>
+<p><img src="1.png" alt=""></p>
 <p>这里的写法就是补充一个 family 语句，后面 <code>asr_*</code> 中后<code>*</code> 就是因变量的分布类型的名称，之后括号中就是连接函数。</p>
 <p>这里下面提到对于二分类性状，两个连接函数的模型公式如下（我不清楚 Logit 模型中的 <code>exp()</code> 函数哪里来的，和上面的公式不一样）</p>
-<p><img src="/posts/2c1f0d50/2.png"></p>
-<h1 id="实操"><a href="#实操" class="headerlink" title="实操"></a>实操</h1><p>现在我不太想自己测试一下，先把代码放上来吧。</p>
-<h2 id="二分类性状"><a href="#二分类性状" class="headerlink" title="二分类性状"></a>二分类性状</h2><p>数据部分：表型中为 0 和 1。</p>
+<p><img src="2.png" alt=""></p>
+<h1>实操</h1>
+<p>现在我不太想自己测试一下，先把代码放上来吧。</p>
+<h2 id="二分类性状">二分类性状</h2>
+<p>数据部分：表型中为 0 和 1。</p>
 <p>代码部分：可以选 logistic模型和probit模型 ，二者只是加一个 <code>family</code> 语句而已。</p>
-<p>但是需要注意的是，logistic模型算出的方差组分，计算遗传力的时候，残差要改为 本身的值乘以$\pi^{2}&#x2F;3$ （不清楚原因，本身残差的结果均为1，应该是设定好的残差是1），举例代码如下（probit模型计算遗传力的时候不用改）</p>
+<p>但是需要注意的是，logistic模型算出的方差组分，计算遗传力的时候，残差要改为 本身的值乘以$\pi^{2}/3$ （不清楚原因，本身残差的结果均为1，应该是设定好的残差是1），举例代码如下（probit模型计算遗传力的时候不用改）</p>
 <p>（这里直接加的 <code>pi^2/3</code> ，应该写成 <code>V2*pi^2/3</code> 比较好）</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### 二分类logistic模型</span></span><br><span class="line"><span class="built_in">str</span>(dat)</span><br><span class="line">m2 = asreml(y1_bio ~ G + Sex + Shidai,</span><br><span class="line">            random = ~ vm(ID,ainv),</span><br><span class="line">            family = asr_binomial(link=<span class="string">&quot;logit&quot;</span>),</span><br><span class="line">            <span class="comment"># residual = ~ idv(units),</span></span><br><span class="line">            na.action = na.method(x = <span class="string">&quot;include&quot;</span>,y = <span class="string">&quot;include&quot;</span>),</span><br><span class="line">            data=dat)</span><br><span class="line">m2 = update(m2)</span><br><span class="line">summary(m2)$varcomp</span><br><span class="line">vpredict(m2, h2 ~ V1/(V1+pi^<span class="number">2</span>/<span class="number">3</span>)) <span class="comment"># logit的残差为pi^2/3</span></span><br></pre></td></tr></table></figure>
-
 <p>提取育种值结果就和正常分析一样，举例如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 育种值</span></span><br><span class="line">hblup_y1 <span class="operator">=</span> as.data.frame<span class="punctuation">(</span>coef<span class="punctuation">(</span>mod_y1<span class="punctuation">)</span><span class="operator">$</span>random<span class="punctuation">)</span></span><br><span class="line">head<span class="punctuation">(</span>hblup_y1<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">hblup_y1 <span class="operator">=</span> hblup_y1 <span class="operator">%&gt;%</span> mutate<span class="punctuation">(</span>tid <span class="operator">=</span> rownames<span class="punctuation">(</span>.<span class="punctuation">)</span><span class="punctuation">)</span> <span class="operator">%&gt;%</span> separate<span class="punctuation">(</span>tid<span class="punctuation">,</span>into <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;type&quot;</span><span class="punctuation">,</span><span class="string">&quot;ID&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span>sep<span class="operator">=</span><span class="string">&quot;_&quot;</span><span class="punctuation">)</span> <span class="operator">%&gt;%</span> select<span class="punctuation">(</span>type<span class="punctuation">,</span>ID<span class="punctuation">,</span>effect<span class="punctuation">)</span></span><br><span class="line">head<span class="punctuation">(</span>hblup_y1<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">fwrite<span class="punctuation">(</span>hblup_y1<span class="punctuation">,</span><span class="string">&quot;re_hblup_y1.csv&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="多分类性状"><a href="#多分类性状" class="headerlink" title="多分类性状"></a>多分类性状</h2><p>表型：<strong>性状必须转为 factor</strong> (好像012或123这两种都可以，官方貌似建议012这种标记方式)</p>
+<h2 id="多分类性状">多分类性状</h2>
+<p>表型：<strong>性状必须转为 factor</strong> (好像012或123这两种都可以，官方貌似建议012这种标记方式)</p>
 <p>代码：<code>asr_binomial</code> 改为 <code>asr_multinomial</code> ，举例如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mul_logit <span class="operator">=</span> asreml<span class="punctuation">(</span>mulb<span class="operator">~</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">                   random<span class="operator">=</span><span class="operator">~</span> Sire<span class="operator">+</span>Family<span class="punctuation">,</span></span><br><span class="line">                   family<span class="operator">=</span>asr_multinomial<span class="punctuation">(</span>link<span class="operator">=</span><span class="string">&quot;logit&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span> </span><br><span class="line">                   data<span class="operator">=</span>data<span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="连续性状和阈值性状多性状模型"><a href="#连续性状和阈值性状多性状模型" class="headerlink" title="连续性状和阈值性状多性状模型"></a><strong>连续性状和阈值性状多性状模型</strong></h2><p>表型：同上</p>
+<h2 id="连续性状和阈值性状多性状模型"><strong>连续性状和阈值性状多性状模型</strong></h2>
+<p>表型：同上</p>
 <p>代码：和普通多性状模型类似，不同的是增加了性状的分布函数，也就是还是 <code>family</code> 语句部分。</p>
 <p>举例如下，这里第一个是二分类阈值性状，第二类为服从正态分布的连续性状，因此 <code>family</code> 语句 中按照相应顺序去写 。这里没有指定连接函数，因此就是默认函数，二分类性状就是 logistic模型，连续性状就是 identity 模型。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mod3 = asreml(cbind(score4,norm) ~ trait + trait:(Sex + Grp + year), </span><br><span class="line"></span><br><span class="line">              random = ~ us(trait):Sire, </span><br><span class="line"></span><br><span class="line">              family = <span class="built_in">list</span>(asr_binomial(),asr_gaussian()),</span><br><span class="line"></span><br><span class="line">              maxit = <span class="number">100</span>,</span><br><span class="line"></span><br><span class="line">              data=dat)</span><br></pre></td></tr></table></figure>
-
-<p>但是视频中有个问题，视频中计算遗传相关和表型相关的时候是按照正常的方式算的，没有考虑 logistic模型单性状模型中的 $\pi^{2}&#x2F;3$ 的系数，不清楚原因（我感觉有可能是视频中搞错了，不过不清楚残差协方差是不是和残差方差一样校正，不过好像这个广义线性模型算出来的遗传力啥的本身就可能不太可靠）。 </p>
-<h2 id="阈值性状和阈值性状多性状模型"><a href="#阈值性状和阈值性状多性状模型" class="headerlink" title="阈值性状和阈值性状多性状模型"></a><strong>阈值性状和阈值性状多性状模型</strong></h2><p>同上，还是改一下 <code>family</code> 语句部分 ，举例如下</p>
+<p>但是视频中有个问题，视频中计算遗传相关和表型相关的时候是按照正常的方式算的，没有考虑 logistic模型单性状模型中的 $\pi^{2}/3$ 的系数，不清楚原因（我感觉有可能是视频中搞错了，不过不清楚残差协方差是不是和残差方差一样校正，不过好像这个广义线性模型算出来的遗传力啥的本身就可能不太可靠）。</p>
+<h2 id="阈值性状和阈值性状多性状模型"><strong>阈值性状和阈值性状多性状模型</strong></h2>
+<p>同上，还是改一下 <code>family</code> 语句部分 ，举例如下</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mod2 = asreml(cbind(score4,rot) ~ trait + trait:(Sex + Grp + year), </span><br><span class="line"></span><br><span class="line">              random = ~ us(trait):Sire, </span><br><span class="line"></span><br><span class="line">              family = <span class="built_in">list</span>(asr_binomial(),asr_binomial()),</span><br><span class="line"></span><br><span class="line">              maxit = <span class="number">100</span>,</span><br><span class="line"></span><br><span class="line">              data=dat)</span><br></pre></td></tr></table></figure>
-
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>1.<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1oi4y1p7uX/">https://www.bilibili.com/video/BV1oi4y1p7uX/</a></p>
+<h1>参考文献</h1>
+<p>1.<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1oi4y1p7uX/">https://www.bilibili.com/video/BV1oi4y1p7uX/</a></p>
 <p>2.<a target="_blank" rel="noopener" href="https://www.bilibili.com/opus/965825234531778579">https://www.bilibili.com/opus/965825234531778579</a></p>
 <p>3.《ASReml-R Reference Manual Version 4》</p>
  
@@ -195,55 +205,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -542,30 +504,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

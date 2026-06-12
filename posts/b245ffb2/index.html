@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3.7k</span>
+            <span class="post-count">3.6k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">16 分钟</span>
+            <span class="post-count">15 分钟</span>
         </span>
     </span>
 </div>
@@ -98,54 +98,204 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这里主要是涉及 <strong>Takahashi et al (1971)</strong> 的稀疏矩阵求逆算法，但是没有找到最初的文献或书籍。</p>
 <span id="more"></span>
-
-<h1 id="Erisman-1975"><a href="#Erisman-1975" class="headerlink" title="Erisman_1975"></a>Erisman_1975</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>新算法有两个基本的优势，一是不会计算 $\mathbf{L}^{-1}$ ，这可以利用矩阵的稀疏性；二是他会在逆矩阵的元素间产生新的依赖关系，从而可以有效计算这些元素的子集。举个例子，对称矩阵逆矩阵的对角元素的计算可能只需要分解矩阵的非零元素在逆矩阵中的值。</p>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>假设 $\mathbf{A}$ 是一个 $n \times n$ 的非奇异矩阵，并且已经分解为 $\mathbf{A &#x3D; LDU} \quad (1)$ 。</p>
-<p>假设  $\mathbf{A}$ 矩阵的逆矩阵为 $\mathbf{Z}$ ，Takahashi 给出下面两个公式<br>$$<br>\begin{aligned}<br>\mathbf{Z} &amp;&#x3D; \mathbf{D^{-1}L^{-1} + (I-U)Z} \quad (2) \<br>\mathbf{Z} &amp;&#x3D; \mathbf{U^{-1}D^{-1} + Z(I-L)} \quad (3) \<br>\end{aligned}<br>$$<br> 证明过程很简单，略过。注意这里 $\mathbf{(I-U)}$ 和  $\mathbf{(I-L)}$ 是严格上三角和严格下三角矩阵。通过公式 (2) 可以获得 $\mathbf{Z}$ 的上三角矩阵的元素（因为 $\mathbf{D^{-1}L^{-1}}$ 为下三角矩阵，因此 $\mathbf{Z}$ 的上三角矩阵元素均在 $\mathbf{(I-U)Z}$ 中) 。同理，通过公式 (3) 获得下三角矩阵的元素。因此在计算过程中，我们不需要使用 $\mathbf{L^{-1}}$ 和 $\mathbf{U^{-1}}$ 。因此这两个公式提供了一种使用之前计算的 $\mathbf{Z}$ 矩阵和  $\mathbf{L}$ 矩阵， $\mathbf{U}$ 矩阵来计算 $z_{ij}$ 的方式。其中我们利用矩阵的稀疏性减少计算量。</p>
-<p>对于对称的  $\mathbf{A}$ 矩阵，此时我们有  $\mathbf{A &#x3D; LDL^{T}}$ ，因此上面的两个公式可以替换为下面这一个公式。<br>$$<br>\mathbf{Z} &#x3D; \mathbf{D^{-1}L^{-1} + (I-L^{T})Z} \quad (4)<br>$$<br> 这里我们同样需要利用 $\mathbf{Z}$ 矩阵的对称性，即只计算上三角矩阵的元素。</p>
-<p>为了形成依赖关系，定义相邻矩阵 $\mathbf{C}$ 更加方便，其中<br>$$<br>c_{ij} &#x3D; \left{<br>\begin{aligned}<br>&amp;1, \quad l_{ij} \text{ or } u_{ij} \neq 0\<br>&amp;0, \quad \text{otherwise.}<br>\end{aligned}<br>\right.<br>$$<br>那么 $\mathbf{C}$ 具有 $\mathbf{L} + \mathbf{U}$ 的的稀疏特征。注意 $\mathbf{C}$ 中的对角线元素均为 1。</p>
-<p>根据消元图的性质，对于任意 $k,j &gt; i$ ，如果 $c_{ki} &#x3D; 1$ ， $c_{ij} &#x3D; 1$，那么  $c_{kj} &#x3D; 1$ 。  </p>
-<p><strong>定理 1</strong>：任何一个满足 $c_{ji} &#x3D; 1$ 的 $z_{ij}$ 均可以通过 $\mathbf{L}$ ，$\mathbf{U}$ 和满足 $c_{qp} &#x3D; 1, q \geq j, p \geq i$ 的 $z_{pq}$ 的元素进行计算。</p>
-<p><strong>证明</strong>：假设 $i &lt; j$ ，那么根据公式 (2) ，我们有<br>$$<br>z_{ij} &#x3D; - \sum_{k&#x3D;i+1}^{n} u_{ik} z_{kj}<br>$$<br>如果 $u_{ip} \neq 0$ ，那么 我们就需要 $z_{pj}$ 。但是 $c_{ji} &#x3D;1$ 和 $c_{ip} &#x3D;1$ ，根据 $\mathbf{C}$ 矩阵的性质，我们有 $c_{jp} &#x3D; 1$ 。因此 $z_{pj}$ 也满足定理 1 的条件 (也就是说，对于上三角矩阵的元素，其计算首先需要其所在列下方非零元素的 $z_{pj}$ 值)。对于 $j &lt; i$ 也有类似的结果，即此时计算 $z_{ij}$ 我们需要 $l_{qj} \neq 0$ 的 $z_{ip}$  。对于 $j &#x3D; i$ ，使用公式 (2) ，我们有（$\mathbf{L}^{-1}$ 仍为单位下三角矩阵）<br>$$<br>z_{ii} &#x3D; 1&#x2F;d_{ii} -\sum_{k&#x3D;i+1}^{n} u_{ik} z_{ki}<br>$$<br>对于每一个非零元素 $u_{ik}$ ，则有 $c_{ik} &#x3D; 1$，并且 $z_{ki}$ 也满足定理中的条件。</p>
-<p>但是，计算 $z_{ij}$ 不会用到满足   $c_{qp} &#x3D; 1, q \geq j, p \geq i$ 的 $z_{pq}$ 的全部元素，只会用到一部分元素。</p>
+<h1>Erisman_1975</h1>
+<h2 id="引言">引言</h2>
+<p>新算法有两个基本的优势，一是不会计算 $\mathbf{L}^{-1}$ ，这可以利用矩阵的稀疏性；二是他会在逆矩阵的元素间产生新的依赖关系，从而可以有效计算这些元素的子集。举个例子，对称矩阵逆矩阵的对角元素的计算可能只需要分解矩阵的非零元素在逆矩阵中的值。</p>
+<h2 id="算法">算法</h2>
+<p>假设 $\mathbf{A}$ 是一个 $n \times n$ 的非奇异矩阵，并且已经分解为 $\mathbf{A = LDU} \quad (1)$ 。</p>
+<p>假设  $\mathbf{A}$ 矩阵的逆矩阵为 $\mathbf{Z}$ ，Takahashi 给出下面两个公式<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{Z} &amp;= \mathbf{D^{-1}L^{-1} + (I-U)Z} \quad (2) \<br>
+\mathbf{Z} &amp;= \mathbf{U^{-1}D^{-1} + Z(I-L)} \quad (3) \<br>
+\end{aligned}<br>
+$$<br>
+证明过程很简单，略过。注意这里 $\mathbf{(I-U)}$ 和  $\mathbf{(I-L)}$ 是严格上三角和严格下三角矩阵。通过公式 (2) 可以获得 $\mathbf{Z}$ 的上三角矩阵的元素（因为 $\mathbf{D^{-1}L^{-1}}$ 为下三角矩阵，因此 $\mathbf{Z}$ 的上三角矩阵元素均在 $\mathbf{(I-U)Z}$ 中) 。同理，通过公式 (3) 获得下三角矩阵的元素。因此在计算过程中，我们不需要使用 $\mathbf{L^{-1}}$ 和 $\mathbf{U^{-1}}$ 。因此这两个公式提供了一种使用之前计算的 $\mathbf{Z}$ 矩阵和  $\mathbf{L}$ 矩阵， $\mathbf{U}$ 矩阵来计算 $z_{ij}$ 的方式。其中我们利用矩阵的稀疏性减少计算量。</p>
+<p>对于对称的  $\mathbf{A}$ 矩阵，此时我们有  $\mathbf{A = LDL^{T}}$ ，因此上面的两个公式可以替换为下面这一个公式。<br>
+$$<br>
+\mathbf{Z} = \mathbf{D^{-1}L^{-1} + (I-L^{T})Z} \quad (4)<br>
+$$<br>
+这里我们同样需要利用 $\mathbf{Z}$ 矩阵的对称性，即只计算上三角矩阵的元素。</p>
+<p>为了形成依赖关系，定义相邻矩阵 $\mathbf{C}$ 更加方便，其中<br>
+$$<br>
+c_{ij} = \left{<br>
+\begin{aligned}<br>
+&amp;1, \quad l_{ij} \text{ or } u_{ij} \neq 0\<br>
+&amp;0, \quad \text{otherwise.}<br>
+\end{aligned}<br>
+\right.<br>
+$$<br>
+那么 $\mathbf{C}$ 具有 $\mathbf{L} + \mathbf{U}$ 的的稀疏特征。注意 $\mathbf{C}$ 中的对角线元素均为 1。</p>
+<p>根据消元图的性质，对于任意 $k,j &gt; i$ ，如果 $c_{ki} = 1$ ， $c_{ij} = 1$，那么  $c_{kj} = 1$ 。</p>
+<p><strong>定理 1</strong>：任何一个满足 $c_{ji} = 1$ 的 $z_{ij}$ 均可以通过 $\mathbf{L}$ ，$\mathbf{U}$ 和满足 $c_{qp} = 1, q \geq j, p \geq i$ 的 $z_{pq}$ 的元素进行计算。</p>
+<p><strong>证明</strong>：假设 $i &lt; j$ ，那么根据公式 (2) ，我们有<br>
+$$<br>
+z_{ij} = - \sum_{k=i+1}^{n} u_{ik} z_{kj}<br>
+$$<br>
+如果 $u_{ip} \neq 0$ ，那么 我们就需要 $z_{pj}$ 。但是 $c_{ji} =1$ 和 $c_{ip} =1$ ，根据 $\mathbf{C}$ 矩阵的性质，我们有 $c_{jp} = 1$ 。因此 $z_{pj}$ 也满足定理 1 的条件 (也就是说，对于上三角矩阵的元素，其计算首先需要其所在列下方非零元素的 $z_{pj}$ 值)。对于 $j &lt; i$ 也有类似的结果，即此时计算 $z_{ij}$ 我们需要 $l_{qj} \neq 0$ 的 $z_{ip}$  。对于 $j = i$ ，使用公式 (2) ，我们有（$\mathbf{L}^{-1}$ 仍为单位下三角矩阵）<br>
+$$<br>
+z_{ii} = 1/d_{ii} -\sum_{k=i+1}^{n} u_{ik} z_{ki}<br>
+$$<br>
+对于每一个非零元素 $u_{ik}$ ，则有 $c_{ik} = 1$，并且 $z_{ki}$ 也满足定理中的条件。</p>
+<p>但是，计算 $z_{ij}$ 不会用到满足   $c_{qp} = 1, q \geq j, p \geq i$ 的 $z_{pq}$ 的全部元素，只会用到一部分元素。</p>
 <p><strong>推论</strong>：$\mathbf{Z}$ 矩阵中相应于在 $\mathbf{C}^{T}$ 的非零位置元素的子集可以直接通过 $\mathbf{L}$, $\mathbf{U}$ 及 $\mathbf{Z}$ 中这个子集中的其它元素计算得到。</p>
-<p>证明：在定理1中设 $i&#x3D;j&#x3D;1$ ，得证。</p>
-<p>为了计算 $\mathbf{Z}$ 矩阵中相应于在 $\mathbf{C}^{T}$ 的非零位置元素的任何子集，上面的定理均提供一种计算方法。为了计算 $z_{ij}$ ，需要从 $(n,n)$ 位置开始，一直向上计算得到 $z_{ij}$ 。需要注意的是，这个定理提供了获得 $z_{ij}$ 必须事先得到的一个充足的集合，但是我们可能不会需要计算其中的全部元素。举个例子，如果 $\mathbf{A}$ 具有以下的格式<br>$$<br>A&#x3D;\left[\begin{array}{lllll}<br>\mathrm{x} &amp; 0 &amp; 0 &amp; 0 &amp; \mathrm{x} \<br>0 &amp; \mathrm{x} &amp; \mathrm{x} &amp; \mathrm{x} &amp; 0 \<br>0 &amp; \mathrm{x} &amp; \mathrm{x} &amp; \mathrm{x} &amp; 0 \<br>0 &amp; 0 &amp; 0 &amp; \mathrm{x} &amp; \mathrm{x} \<br>\mathrm{x} &amp; 0 &amp; \mathrm{x} &amp; \mathrm{x} &amp; \mathrm{x}<br>\end{array}\right]<br>$$<br>这里可以证明 $z_{11}$ 的计算只需要 $\mathbf{L}$ , $\mathbf{U}$, $z_{51}$ 和 $z_{55}$ (不知道怎么证明的)。</p>
-<p>为了计算 $c_{ji} &#x3D; 0$ 的 $z_{ij}$ ，经过修改 $\mathbf{C}$ 矩阵之后可以再应用这个定理。此时我们需要设置 $c_{ji} &#x3D; 1$，并利用对 $\mathbf{C}$ 矩阵的假设（对于任意 $k,j &gt; i$ ，如果 $c_{ki} &#x3D; 1$ ， $c_{ij} &#x3D; 1$，那么  $c_{kj} &#x3D; 1$ ），在  $\mathbf{C}$ 矩阵可能需要生成其它非零元素。</p>
-<h2 id="计算次数"><a href="#计算次数" class="headerlink" title="计算次数"></a>计算次数</h2><p>这里我们比较这个算法和通常的求逆算法的时间复杂度。</p>
-<p>设 $\delta_{i}$ 是 $\mathbf{U}$ 矩阵的第 $i$ 行的非零元素的数目，$\gamma_{i}$ 是 $\mathbf{L}$ 矩阵第 $i$ 列的非零元素数目。那么根据公式 (2) 计算 $\mathbf{Z}$ 的上三角元素的计算次数为 $\sum_{i&#x3D;1}^{n-1}(n-i) \delta_{i}$ ，根据公式 (3) 计算 $\mathbf{Z}$ 的下三角矩阵的计算次数为  $\sum_{i&#x3D;1}^{n-1}(n-i) \gamma_{i}$ 。</p>
-<p>因为 $\mathbf{Z}$ 矩阵的对角线元素可以通过公式 (2) 或者 公式 (3) 来计算，最有效的方式的计算次数为 $\sum_{i&#x3D;1}^{n-1} \min ( \delta_{i}, \gamma_{i})$ 。</p>
-<p>我们采用通常的向前替换求解的方式来计算 $\mathbf{(LD)^{-1}}$ （每次右手项均只有一个非零元素，得到的解是  $\mathbf{(LD)^{-1}}$ 的一列），假设这一步会生成一个满的下三角矩阵，其计算次数为 $\sum_{i&#x3D;1}^{n-1} i \gamma_{i}$ （实际计算次数小于这个数）。我们对每一个向量采用一个完全的向后替换求解 ( $\mathbf{U^{-1} (LD)^{-1} &#x3D; Z}$，因此 $\mathbf{UZ&#x3D;(LD)^{-1}}$ )，其计算次数为  $n\sum_{i&#x3D;1}^{n-1}  \delta_{i}$ ，因此使用公式 (2) 和 公式 (3) 对于稀疏矩阵节约的计算量是明显的（我没感觉到啊）。</p>
-<p>对于密集矩阵而言，$\delta_{i} &#x3D; \gamma_{i} &#x3D; n-i$，此时两种方式的计算次数均为 $2n^{3}&#x2F;3$ 。 </p>
-<h1 id="Misztal-1993"><a href="#Misztal-1993" class="headerlink" title="Misztal_1993"></a>Misztal_1993</h1><h2 id="引言-1"><a href="#引言-1" class="headerlink" title="引言"></a>引言</h2><p>对于动物育种模型，REML 是用于估计方差组分的算法，其中获得 REML 估计值的两个主流方法是 EM 和 DF 方法。EM 方法需要似然函数的一阶导，因此需要稀疏矩阵逆矩阵的相应元素。</p>
+<p>证明：在定理1中设 $i=j=1$ ，得证。</p>
+<p>为了计算 $\mathbf{Z}$ 矩阵中相应于在 $\mathbf{C}^{T}$ 的非零位置元素的任何子集，上面的定理均提供一种计算方法。为了计算 $z_{ij}$ ，需要从 $(n,n)$ 位置开始，一直向上计算得到 $z_{ij}$ 。需要注意的是，这个定理提供了获得 $z_{ij}$ 必须事先得到的一个充足的集合，但是我们可能不会需要计算其中的全部元素。举个例子，如果 $\mathbf{A}$ 具有以下的格式<br>
+$$<br>
+A=\left[\begin{array}{lllll}<br>
+\mathrm{x} &amp; 0 &amp; 0 &amp; 0 &amp; \mathrm{x} \<br>
+0 &amp; \mathrm{x} &amp; \mathrm{x} &amp; \mathrm{x} &amp; 0 \<br>
+0 &amp; \mathrm{x} &amp; \mathrm{x} &amp; \mathrm{x} &amp; 0 \<br>
+0 &amp; 0 &amp; 0 &amp; \mathrm{x} &amp; \mathrm{x} \<br>
+\mathrm{x} &amp; 0 &amp; \mathrm{x} &amp; \mathrm{x} &amp; \mathrm{x}<br>
+\end{array}\right]<br>
+$$<br>
+这里可以证明 $z_{11}$ 的计算只需要 $\mathbf{L}$ , $\mathbf{U}$, $z_{51}$ 和 $z_{55}$ (不知道怎么证明的)。</p>
+<p>为了计算 $c_{ji} = 0$ 的 $z_{ij}$ ，经过修改 $\mathbf{C}$ 矩阵之后可以再应用这个定理。此时我们需要设置 $c_{ji} = 1$，并利用对 $\mathbf{C}$ 矩阵的假设（对于任意 $k,j &gt; i$ ，如果 $c_{ki} = 1$ ， $c_{ij} = 1$，那么  $c_{kj} = 1$ ），在  $\mathbf{C}$ 矩阵可能需要生成其它非零元素。</p>
+<h2 id="计算次数">计算次数</h2>
+<p>这里我们比较这个算法和通常的求逆算法的时间复杂度。</p>
+<p>设 $\delta_{i}$ 是 $\mathbf{U}$ 矩阵的第 $i$ 行的非零元素的数目，$\gamma_{i}$ 是 $\mathbf{L}$ 矩阵第 $i$ 列的非零元素数目。那么根据公式 (2) 计算 $\mathbf{Z}$ 的上三角元素的计算次数为 $\sum_{i=1}^{n-1}(n-i) \delta_{i}$ ，根据公式 (3) 计算 $\mathbf{Z}$ 的下三角矩阵的计算次数为  $\sum_{i=1}^{n-1}(n-i) \gamma_{i}$ 。</p>
+<p>因为 $\mathbf{Z}$ 矩阵的对角线元素可以通过公式 (2) 或者 公式 (3) 来计算，最有效的方式的计算次数为 $\sum_{i=1}^{n-1} \min ( \delta_{i}, \gamma_{i})$ 。</p>
+<p>我们采用通常的向前替换求解的方式来计算 $\mathbf{(LD)^{-1}}$ （每次右手项均只有一个非零元素，得到的解是  $\mathbf{(LD)^{-1}}$ 的一列），假设这一步会生成一个满的下三角矩阵，其计算次数为 $\sum_{i=1}^{n-1} i \gamma_{i}$ （实际计算次数小于这个数）。我们对每一个向量采用一个完全的向后替换求解 ( $\mathbf{U^{-1} (LD)^{-1} = Z}$，因此 $\mathbf{UZ=(LD)^{-1}}$ )，其计算次数为  $n\sum_{i=1}^{n-1}  \delta_{i}$ ，因此使用公式 (2) 和 公式 (3) 对于稀疏矩阵节约的计算量是明显的（我没感觉到啊）。</p>
+<p>对于密集矩阵而言，$\delta_{i} = \gamma_{i} = n-i$，此时两种方式的计算次数均为 $2n^{3}/3$ 。</p>
+<h1>Misztal_1993</h1>
+<h2 id="引言-2">引言</h2>
+<p>对于动物育种模型，REML 是用于估计方差组分的算法，其中获得 REML 估计值的两个主流方法是 EM 和 DF 方法。EM 方法需要似然函数的一阶导，因此需要稀疏矩阵逆矩阵的相应元素。</p>
 <p>DF 方法不需要求逆，但是 DF 具有更差的数值性质，其可能不会找到全局最优解，因为这个算法不能区分斜率较小的区域的点。因此 Press 建议 DF 算法收敛之后需要再次运行。<strong>对于多性状模型，DF REML 算法的表现更为糟糕</strong>。当使用不同的初始值时，DF 算法的某些解可能相差 20% 以上。虽然没有程序证明 EM 算法没有这个问题，但是对于简单的数据 EM 算法比 DF 算法会收敛到一个更加准确的结果。</p>
 <p>本文是想证明，如果使用稀疏矩阵求逆，EM 和 DF 算法的计算量是相似的。</p>
-<h2 id="数据和方法"><a href="#数据和方法" class="headerlink" title="数据和方法"></a>数据和方法</h2><p>设 $\mathbf{W}$ 是MME 的系数矩阵，设 $\mathbf{C}$ 是其逆矩阵。出于一般化考虑，$\mathbf{W}$ 假设是满秩的。在 EM 算法中，迹具有以下形式<br>$$<br>\begin{aligned}<br>\mathrm{tr}(\mathbf{C^{aa}}\mathbf{G^{a}}) &amp;&#x3D; \sum_{i,j} c_{ij}^{aa}g_{ij}^{a} \<br>&amp;&#x3D; \sum_{i} c_{i}^{aa}g_{i}^{a} + 2 \sum_{i,j&gt;i} c_{ij}^{aa} g_{ij}^{a}<br>\end{aligned}<br>$$<br>其中 $\mathbf{G^{a}}$ 是随机向量 $\mathbf{a}$ 的协方差矩阵的逆矩阵，$\mathbf{C^{aa}}$ 定义为 $\mathbf{C}$ 中对应这个随机向量的子矩阵。在这个式子中，求和的上限是 q(a) ，即效应 a 的水平数目。为了计算迹，这里我们只需要 $\mathbf{C}$ 上&#x2F;下三角中对应 $\mathbf{G^{a}}$ 的非零元素位置的元素。因为所有需要的 $\mathbf{C}$ 中的元素均在 $\mathbf{W}$ 矩阵中，因此我们只需要知道所有  $\mathbf{W}$ 矩阵中的非零元素位置的逆矩阵元素（上三角或下三角），我们就可以计算这个迹。</p>
-<p>对于直接求解方法，$\mathbf{W}$ 首先会重排来减少 fill-ins 的数目，然后这个矩阵会经过 cholesky 分解，得到<br>$$<br>\mathbf{W &#x3D; U’DU}<br>$$<br>DF 方法需要的行列式可以直接通过 $\mathbf{D}$ 矩阵对角线元素的乘积得到。</p>
-<p>$\mathbf{W}$ 的逆矩阵元素可以通过 Takahashi 公式得到<br>$$<br>\mathbf{W}^{-1} &#x3D; \mathbf{C} &#x3D; \mathbf{D^{-1}U^{-T} + (I-U)C}<br>$$<br>因为矩阵对称，$\mathbf{C}$ 中的元素可以不需要对 $\mathbf{U}$ 进行求逆得到。进一步，相应于$\mathbf{U}$ 矩阵非零元素位置的 $\mathbf{C}$ 矩阵的元素的计算不需要使用  $\mathbf{C}$ 矩阵其它位置的元素。相应于$\mathbf{U}$ 矩阵非零元素位置的 $\mathbf{C}$ 矩阵的元素集合也称为 <strong>“sparse inverse”</strong> ，下面翻译为稀疏逆。根据 Takahashi 公式，稀疏逆元素可以通过下面的公式得到 (右手项涉及 C 矩阵元素均可以从第 i 列得到。)<br>$$<br>\begin{aligned}<br>c_{ii} &amp;&#x3D; 1&#x2F;d_{ii} - \sum_{k&#x3D;i+1}^{n} u_{ik} c_{ki} \<br>c_{ij} &amp;&#x3D; c_{ji}&#x3D; - \sum_{k&#x3D;j+1}^{n} u_{jk} c_{ki} \<br>\end{aligned}<br>$$<br>其中 $i &#x3D; n,n-1,\cdots,1$ ，$j&#x3D;i-1,i-2,\cdots,1$ 。因为在 $\mathbf{U}$ 中存在 fill-ins，稀疏逆 $\mathbf{C}$  比 $\mathbf{W}$ 具有更多的非零元素。</p>
+<h2 id="数据和方法">数据和方法</h2>
+<p>设 $\mathbf{W}$ 是MME 的系数矩阵，设 $\mathbf{C}$ 是其逆矩阵。出于一般化考虑，$\mathbf{W}$ 假设是满秩的。在 EM 算法中，迹具有以下形式<br>
+$$<br>
+\begin{aligned}<br>
+\mathrm{tr}(\mathbf{C^{aa}}\mathbf{G^{a}}) &amp;= \sum_{i,j} c_{ij}^{aa}g_{ij}^{a} \<br>
+&amp;= \sum_{i} c_{i}^{aa}g_{i}^{a} + 2 \sum_{i,j&gt;i} c_{ij}^{aa} g_{ij}^{a}<br>
+\end{aligned}<br>
+$$<br>
+其中 $\mathbf{G^{a}}$ 是随机向量 $\mathbf{a}$ 的协方差矩阵的逆矩阵，$\mathbf{C^{aa}}$ 定义为 $\mathbf{C}$ 中对应这个随机向量的子矩阵。在这个式子中，求和的上限是 q(a) ，即效应 a 的水平数目。为了计算迹，这里我们只需要 $\mathbf{C}$ 上/下三角中对应 $\mathbf{G^{a}}$ 的非零元素位置的元素。因为所有需要的 $\mathbf{C}$ 中的元素均在 $\mathbf{W}$ 矩阵中，因此我们只需要知道所有  $\mathbf{W}$ 矩阵中的非零元素位置的逆矩阵元素（上三角或下三角），我们就可以计算这个迹。</p>
+<p>对于直接求解方法，$\mathbf{W}$ 首先会重排来减少 fill-ins 的数目，然后这个矩阵会经过 cholesky 分解，得到<br>
+$$<br>
+\mathbf{W = U’DU}<br>
+$$<br>
+DF 方法需要的行列式可以直接通过 $\mathbf{D}$ 矩阵对角线元素的乘积得到。</p>
+<p>$\mathbf{W}$ 的逆矩阵元素可以通过 Takahashi 公式得到<br>
+$$<br>
+\mathbf{W}^{-1} = \mathbf{C} = \mathbf{D^{-1}U^{-T} + (I-U)C}<br>
+$$<br>
+因为矩阵对称，$\mathbf{C}$ 中的元素可以不需要对 $\mathbf{U}$ 进行求逆得到。进一步，相应于$\mathbf{U}$ 矩阵非零元素位置的 $\mathbf{C}$ 矩阵的元素的计算不需要使用  $\mathbf{C}$ 矩阵其它位置的元素。相应于$\mathbf{U}$ 矩阵非零元素位置的 $\mathbf{C}$ 矩阵的元素集合也称为 <strong>“sparse inverse”</strong> ，下面翻译为稀疏逆。根据 Takahashi 公式，稀疏逆元素可以通过下面的公式得到 (右手项涉及 C 矩阵元素均可以从第 i 列得到。)<br>
+$$<br>
+\begin{aligned}<br>
+c_{ii} &amp;= 1/d_{ii} - \sum_{k=i+1}^{n} u_{ik} c_{ki} \<br>
+c_{ij} &amp;= c_{ji}= - \sum_{k=j+1}^{n} u_{jk} c_{ki} \<br>
+\end{aligned}<br>
+$$<br>
+其中 $i = n,n-1,\cdots,1$ ，$j=i-1,i-2,\cdots,1$ 。因为在 $\mathbf{U}$ 中存在 fill-ins，稀疏逆 $\mathbf{C}$  比 $\mathbf{W}$ 具有更多的非零元素。</p>
 <p>为了高效应用该算法，稀疏逆需要存储和获取 $\mathbf{C}$ 矩阵的一个维度，$\mathbf{U}$ 矩阵的两个维度（为啥？）。因此，稀疏逆计算消耗的内存比数值分解高两到三倍，因为数值分解过程只需要存储和获取 $\mathbf{U}$ 矩阵的一个维度。稀疏逆相比于数值分解的计算次数的倍数小于等于 3，这取决于 $\mathbf{W}$ 的稀疏结构。</p>
 <p>逆矩阵的某些元素也可以通过<strong>稀疏向量方法</strong>得到，但是 Takahashi 的方法更快，因此这里不考虑其它方法。</p>
-<h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><p>考虑下面的重排后的矩阵<br>$$<br>\mathbf{W}&#x3D;\left[\begin{array}{ccccc}<br>5 &amp; 0 &amp; 0 &amp; 3 &amp; 0 \<br>&amp; 3 &amp; 0 &amp; 0 &amp; 1 \<br>&amp; &amp; 4 &amp; 1 &amp; 1 \<br>\text { symmetric } &amp; &amp; &amp; 4 &amp; 0 \<br>&amp; &amp; &amp; &amp; 2<br>\end{array}\right]<br>$$<br>分解后得到<br>$$<br>\mathbf{D}&#x3D;\operatorname{diag}\left[\begin{array}{lllll}<br>5.0 &amp; 3.0 &amp; 4.0 &amp; 1.95 &amp; 1.38<br>\end{array}\right]<br>$$<br>$$<br>\mathbf{U}&#x3D;\left[\begin{array}{rrrrr}<br>1.00 &amp; .00 &amp; .00 &amp; .60 &amp; .00 \<br>.00 &amp; 1.00 &amp; .00 &amp; .00 &amp; .33 \<br>.00 &amp; .00 &amp; 1.00 &amp; .25 &amp; .25 \<br>.00 &amp; .00 &amp; .00 &amp; 1.00 &amp; -.13 \<br>.00 &amp; .00 &amp; .00 &amp; .00 &amp; 1.00<br>\end{array}\right]<br>$$<br>其行列式为<br>$$<br>\begin{aligned}<br>|\mathbf{W}|&#x3D;&amp; 5.0 \times 3.0 \times 4.0 \times 1.95 \<br>&amp; \times 1.38&#x3D;161.5 .<br>\end{aligned}<br>$$<br>按照上面的算法计算稀疏逆<br>$$<br>\begin{aligned}<br>&amp;c_{55}&#x3D;1 &#x2F; \mathrm{d}<em>{55}&#x3D;.72 \text {, } \<br>&amp;\mathrm{c}</em>{45}&#x3D;-\mathrm{u}<em>{45} \mathrm{c}</em>{55}&#x3D;.09 \text {, } \<br>&amp;\mathrm{c}<em>{35}&#x3D;-\mathrm{u}</em>{35} \mathrm{c}<em>{55}-\mathrm{u}</em>{34} \mathrm{c}<em>{45}&#x3D;-.20 \text {, } \<br>&amp;c</em>{25}&#x3D;-\mathrm{u}<em>{25} \mathrm{c}</em>{55}&#x3D;-.24 \text {, } \<br>&amp;\mathrm{c}<em>{44}&#x3D;1 &#x2F; \mathrm{d}</em>{44}-\mathrm{u}<em>{45} \mathrm{c}</em>{54}&#x3D;.52 \text {, } \<br>&amp;\mathrm{c}<em>{34}&#x3D;-\mathrm{u}</em>{35} \mathrm{c}<em>{54}-\mathrm{u}</em>{34} \mathrm{c}<em>{44}&#x3D;-.15 \text {, } \<br>&amp;\mathrm{c}</em>{14}&#x3D;-\mathrm{u}<em>{14} \mathrm{c}</em>{44}&#x3D;-.31 \text {, } \<br>&amp;\mathrm{c}<em>{33}&#x3D;1 &#x2F; \mathrm{d}</em>{33}-\mathrm{u}<em>{35} \mathrm{c}</em>{53}-\mathrm{u}<em>{34} \mathrm{c}</em>{43}&#x3D;.34 \text {, } \<br>&amp;\mathrm{c}<em>{22}&#x3D;1 &#x2F; \mathrm{d}</em>{22}-\mathrm{u}<em>{25} \mathrm{c}</em>{52}&#x3D;.41 \text {, } \<br>&amp;\mathrm{c}<em>{11}&#x3D;1 &#x2F; \mathrm{d}</em>{11}-\mathrm{u}<em>{14} \mathrm{c}</em>{41}&#x3D;.39  \<br>&amp;<br>\end{aligned}<br>$$<br>$$<br>\mathbf{C}&#x3D;\left[\begin{array}{ccccc}<br>.39 &amp; &lt;&gt; &amp; &lt;&gt; &amp; -.31 &amp; &lt;&gt; \<br>&amp; .41 &amp; &lt;&gt; &amp; &lt;&gt; &amp; -.24 \<br>&amp; &amp; .34 &amp; -.15 &amp; -.20 \<br>\text { symmetric } &amp; &amp; &amp; .52 &amp; .09 \<br>&amp; &amp; &amp; &amp; .72<br>\end{array}\right]<br>$$</p>
-<p> 其中 &lt;&gt; 表示没有计算。</p>
-<h2 id="数值测试"><a href="#数值测试" class="headerlink" title="数值测试"></a>数值测试</h2><p>使用实际数据比较数值分解和计算稀疏逆使用内存和计算时间的比较。</p>
-<h2 id="结果和讨论"><a href="#结果和讨论" class="headerlink" title="结果和讨论"></a>结果和讨论</h2><p>计算稀疏逆在内存和计算时间上，基本上是数值分解消耗的 2-3 倍</p>
+<h2 id="举例">举例</h2>
+<p>考虑下面的重排后的矩阵<br>
+$$<br>
+\mathbf{W}=\left[\begin{array}{ccccc}<br>
+5 &amp; 0 &amp; 0 &amp; 3 &amp; 0 \<br>
+&amp; 3 &amp; 0 &amp; 0 &amp; 1 \<br>
+&amp; &amp; 4 &amp; 1 &amp; 1 \<br>
+\text { symmetric } &amp; &amp; &amp; 4 &amp; 0 \<br>
+&amp; &amp; &amp; &amp; 2<br>
+\end{array}\right]<br>
+$$<br>
+分解后得到<br>
+$$<br>
+\mathbf{D}=\operatorname{diag}\left[\begin{array}{lllll}<br>
+5.0 &amp; 3.0 &amp; 4.0 &amp; 1.95 &amp; 1.38<br>
+\end{array}\right]<br>
+$$<br>
+$$<br>
+\mathbf{U}=\left[\begin{array}{rrrrr}<br>
+1.00 &amp; .00 &amp; .00 &amp; .60 &amp; .00 \<br>
+.00 &amp; 1.00 &amp; .00 &amp; .00 &amp; .33 \<br>
+.00 &amp; .00 &amp; 1.00 &amp; .25 &amp; .25 \<br>
+.00 &amp; .00 &amp; .00 &amp; 1.00 &amp; -.13 \<br>
+.00 &amp; .00 &amp; .00 &amp; .00 &amp; 1.00<br>
+\end{array}\right]<br>
+$$<br>
+其行列式为<br>
+$$<br>
+\begin{aligned}<br>
+|\mathbf{W}|=&amp; 5.0 \times 3.0 \times 4.0 \times 1.95 \<br>
+&amp; \times 1.38=161.5 .<br>
+\end{aligned}<br>
+$$<br>
+按照上面的算法计算稀疏逆<br>
+$$<br>
+\begin{aligned}<br>
+&amp;c_{55}=1 / \mathrm{d}<em>{55}=.72 \text {, } \<br>
+&amp;\mathrm{c}</em>{45}=-\mathrm{u}<em>{45} \mathrm{c}</em>{55}=.09 \text {, } \<br>
+&amp;\mathrm{c}<em>{35}=-\mathrm{u}</em>{35} \mathrm{c}<em>{55}-\mathrm{u}</em>{34} \mathrm{c}<em>{45}=-.20 \text {, } \<br>
+&amp;c</em>{25}=-\mathrm{u}<em>{25} \mathrm{c}</em>{55}=-.24 \text {, } \<br>
+&amp;\mathrm{c}<em>{44}=1 / \mathrm{d}</em>{44}-\mathrm{u}<em>{45} \mathrm{c}</em>{54}=.52 \text {, } \<br>
+&amp;\mathrm{c}<em>{34}=-\mathrm{u}</em>{35} \mathrm{c}<em>{54}-\mathrm{u}</em>{34} \mathrm{c}<em>{44}=-.15 \text {, } \<br>
+&amp;\mathrm{c}</em>{14}=-\mathrm{u}<em>{14} \mathrm{c}</em>{44}=-.31 \text {, } \<br>
+&amp;\mathrm{c}<em>{33}=1 / \mathrm{d}</em>{33}-\mathrm{u}<em>{35} \mathrm{c}</em>{53}-\mathrm{u}<em>{34} \mathrm{c}</em>{43}=.34 \text {, } \<br>
+&amp;\mathrm{c}<em>{22}=1 / \mathrm{d}</em>{22}-\mathrm{u}<em>{25} \mathrm{c}</em>{52}=.41 \text {, } \<br>
+&amp;\mathrm{c}<em>{11}=1 / \mathrm{d}</em>{11}-\mathrm{u}<em>{14} \mathrm{c}</em>{41}=.39  \<br>
+&amp;<br>
+\end{aligned}<br>
+$$<br>
+$$<br>
+\mathbf{C}=\left[\begin{array}{ccccc}<br>
+.39 &amp; &lt;&gt; &amp; &lt;&gt; &amp; -.31 &amp; &lt;&gt; \<br>
+&amp; .41 &amp; &lt;&gt; &amp; &lt;&gt; &amp; -.24 \<br>
+&amp; &amp; .34 &amp; -.15 &amp; -.20 \<br>
+\text { symmetric } &amp; &amp; &amp; .52 &amp; .09 \<br>
+&amp; &amp; &amp; &amp; .72<br>
+\end{array}\right]<br>
+$$</p>
+<p>其中 &lt;&gt; 表示没有计算。</p>
+<h2 id="数值测试">数值测试</h2>
+<p>使用实际数据比较数值分解和计算稀疏逆使用内存和计算时间的比较。</p>
+<h2 id="结果和讨论">结果和讨论</h2>
+<p>计算稀疏逆在内存和计算时间上，基本上是数值分解消耗的 2-3 倍</p>
 <p>使用稀疏逆方法，EM 和 DF 方法单次迭代的计算消耗是相似地，因此总计算量取决于迭代次数。因此在 EM 和 DF 的选择上，我们可以优先考虑数值性质，而不是计算量。</p>
-<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><p>稀疏逆和数值分解的计算量。</p>
-<p>设 $p_{i}$ 是 $\mathbf{U}$ 矩阵第 $i$ 行的非零元素数目，将 $\mathbf{W}$ 矩阵分解为 $\mathbf{U}$ 和 $\mathbf{D}$ 的计算次数为 (Duff, 1989)<br>$$<br>N_{fact} &#x3D; \sum_{i&#x3D;1}^{n-1}(p_{i}^{2} + \frac{1}{2} p_{i}))<br>$$<br>一旦分解完成之后，根据 Dempster (1977)，计算稀疏逆的计算次数为<br>$$<br>N_{inv} &#x3D; 2n + 2 \sum_{i&#x3D;1}^{n-1} p_{i}^{2}<br>$$<br>因此对于较大的 $n$  和 $p_{i}$ ，分解和求逆的总耗时为 $(N_{fact} + N_{inv})&#x2F;N_{fact} \approx 3$ 。</p>
-<h1 id="不满秩的-W-矩阵"><a href="#不满秩的-W-矩阵" class="headerlink" title="不满秩的 W 矩阵"></a>不满秩的 W 矩阵</h1><p>如果 $\mathbf{W}$ 矩阵不满秩，我们考虑其广义逆。</p>
+<h2 id="附录">附录</h2>
+<p>稀疏逆和数值分解的计算量。</p>
+<p>设 $p_{i}$ 是 $\mathbf{U}$ 矩阵第 $i$ 行的非零元素数目，将 $\mathbf{W}$ 矩阵分解为 $\mathbf{U}$ 和 $\mathbf{D}$ 的计算次数为 (Duff, 1989)<br>
+$$<br>
+N_{fact} = \sum_{i=1}^{n-1}(p_{i}^{2} + \frac{1}{2} p_{i}))<br>
+$$<br>
+一旦分解完成之后，根据 Dempster (1977)，计算稀疏逆的计算次数为<br>
+$$<br>
+N_{inv} = 2n + 2 \sum_{i=1}^{n-1} p_{i}^{2}<br>
+$$<br>
+因此对于较大的 $n$  和 $p_{i}$ ，分解和求逆的总耗时为 $(N_{fact} + N_{inv})/N_{fact} \approx 3$ 。</p>
+<h1>不满秩的 W 矩阵</h1>
+<p>如果 $\mathbf{W}$ 矩阵不满秩，我们考虑其广义逆。</p>
 <ol>
-<li><p>如果矩阵 $\mathbf{A}$ 分解为 $\mathbf{A&#x3D;LDU}$ ，则 $\mathbf{A^{-}&#x3D;U^{-1}D^{+}L^{-1}}$  是 $\mathbf{A}$ 矩阵的一个自反身广义逆。</p>
+<li>
+<p>如果矩阵 $\mathbf{A}$ 分解为 $\mathbf{A=LDU}$ ，则 $\mathbf{A^{-}=U^{-1}D^{+}L^{-1}}$  是 $\mathbf{A}$ 矩阵的一个自反身广义逆。</p>
 <p>这里容易证明满足 MP 逆的前两个方程。</p>
 </li>
-<li><p>如果 $\mathbf{A^{-}&#x3D;U^{-1}D^{+}L^{-1}}$ ，$\mathbf{P}$ 和  $\mathbf{Q}$ 为正交矩阵，则 $\mathbf{(PAQ)^{-} &#x3D; Q^{-1}A^{-}P^{-1} &#x3D; Q^{T}U^{-1}D^{+}L^{-1}P^{T}}$ 是 $\mathbf{PAQ}$ 的一个自反身广义逆。</p>
+<li>
+<p>如果 $\mathbf{A^{-}=U^{-1}D^{+}L^{-1}}$ ，$\mathbf{P}$ 和  $\mathbf{Q}$ 为正交矩阵，则 $\mathbf{(PAQ)^{-} = Q^{-1}A^{-}P^{-1} = Q^{T}U^{-1}D^{+}L^{-1}P^{T}}$ 是 $\mathbf{PAQ}$ 的一个自反身广义逆。</p>
 <p>同样，代入 MP 逆的前两个方程即可证明。</p>
 </li>
 </ol>
-<p>这里 $\mathbf{W}$ 矩阵不满秩的广义逆矩阵选择为 $\mathbf{Z&#x3D;U^{-1}D^{+}L^{-1}}$ ，则满足下面的两个公式，证明过程略。<br>$$<br>\begin{aligned}<br>\mathbf{Z} &amp;&#x3D; \mathbf{D^{+}L^{-1} + (I-U)Z} \<br>\mathbf{Z} &amp;&#x3D; \mathbf{U^{-1}D^{+} + Z(I-L)} \<br>\end{aligned}<br>$$<br>因此，根据这两个公式同样可以得到其广义逆的稀疏逆，只是对角元素计算公式改为<br>$$<br>c_{ii} &#x3D; d_{ii}^{+} - \sum_{k&#x3D;i+1}^{n} u_{ik} c_{ki}<br>$$</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p>Erisman A M, Tinney W F. On computing certain elements of the inverse of a sparse matrix[J]. Communications of the ACM, 1975, 18(3): 177-179.</p>
+<p>这里 $\mathbf{W}$ 矩阵不满秩的广义逆矩阵选择为 $\mathbf{Z=U^{-1}D^{+}L^{-1}}$ ，则满足下面的两个公式，证明过程略。<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{Z} &amp;= \mathbf{D^{+}L^{-1} + (I-U)Z} \<br>
+\mathbf{Z} &amp;= \mathbf{U^{-1}D^{+} + Z(I-L)} \<br>
+\end{aligned}<br>
+$$<br>
+因此，根据这两个公式同样可以得到其广义逆的稀疏逆，只是对角元素计算公式改为<br>
+$$<br>
+c_{ii} = d_{ii}^{+} - \sum_{k=i+1}^{n} u_{ik} c_{ki}<br>
+$$</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>Erisman A M, Tinney W F. On computing certain elements of the inverse of a sparse matrix[J]. Communications of the ACM, 1975, 18(3): 177-179.</p>
 </li>
-<li><p>Misztal I, Perez-Enciso M. Sparse matrix inversion for restricted maximum likelihood estimation of variance components by expectation-maximization[J]. Journal of dairy science, 1993, 76(5): 1479-1483.</p>
+<li>
+<p>Misztal I, Perez-Enciso M. Sparse matrix inversion for restricted maximum likelihood estimation of variance components by expectation-maximization[J]. Journal of dairy science, 1993, 76(5): 1479-1483.</p>
 </li>
 </ol>
  
@@ -195,55 +345,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -542,30 +644,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

@@ -84,26 +84,23 @@
     <div class="article-entry" itemprop="articleBody">
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">title: 软件学习-conda</span><br><span class="line">tags:</span><br><span class="line">  - 软件学习</span><br><span class="line">  - conda</span><br><span class="line">categories:</span><br><span class="line">  - 软件学习</span><br><span class="line">  - conda</span><br><span class="line">abbrlink: 5375f878</span><br><span class="line">date: 2023-04-14 08:52:52</span><br></pre></td></tr></table></figure>
-
 <p>介绍conda的使用教程</p>
 <span id="more"></span>
-
-<h1 id="conda-介绍"><a href="#conda-介绍" class="headerlink" title="conda 介绍"></a>conda 介绍</h1><p>conda 就是一个软件包安装管理系统，方便安装各种软件。</p>
+<h1>conda 介绍</h1>
+<p>conda 就是一个软件包安装管理系统，方便安装各种软件。</p>
 <p><strong>Anaconda 与 Miniconda</strong> 的差别。</p>
 <blockquote>
 <p>Anaconda则是一个打包的集合，里面预装好了conda、某个版本的python、众多packages、科学计算工具等等，就是把很多常用的不常用的库都给你装好了。</p>
 <p>Miniconda，顾名思义，它只包含最基本的内容——python与conda，以及相关的必须依赖项，对于空间要求严格的用户，Miniconda是一种选择。就只包含最基本的东西，其他的库得自己装。</p>
 </blockquote>
-<p>个人倾向于使用 Miniconda  </p>
-<h1 id="miniconda-安装"><a href="#miniconda-安装" class="headerlink" title="miniconda 安装"></a>miniconda 安装</h1><p>先下载一个 bash 脚本</p>
+<p>个人倾向于使用 Miniconda</p>
+<h1>miniconda 安装</h1>
+<p>先下载一个 bash 脚本</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
-
 <p>如果 <code>wget</code> 不行，可以尝试使用 <code>curl</code> 进行下载，或者手动下载然后上传到服务器</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -O https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
-
 <p>运行如下代码进行安装 miniconda</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash Miniconda3-latest-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
-
 <p>按照提示操作：</p>
 <ul>
 <li>阅读并同意许可协议 (输入 “yes”)。</li>
@@ -112,196 +109,171 @@
 </ul>
 <p>安装完成后刷新一下环境变了，通过查看 conda 版本确定是否安装成功。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">source ~/.bashrc</span><br><span class="line">conda --version</span><br></pre></td></tr></table></figure>
-
-<h1 id="添加-channel"><a href="#添加-channel" class="headerlink" title="添加 channel"></a>添加 channel</h1><p>清华大学的 Conda 镜像源包含了许多常用的包和工具，您可以通过以下命令将其添加为 Conda 的默认 Channel。</p>
+<h1>添加 channel</h1>
+<p>清华大学的 Conda 镜像源包含了许多常用的包和工具，您可以通过以下命令将其添加为 Conda 的默认 Channel。</p>
 <p>执行以下命令将清华镜像源添加到 Conda 配置中：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 1. 生成 .condarc 配置文件（若不存在）</span><br><span class="line">conda config --set show_channel_urls yes</span><br><span class="line"></span><br><span class="line"># 2. 添加清华镜像源</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/</span><br><span class="line"></span><br><span class="line"># 3. 设置优先级（可选）</span><br><span class="line">conda config --set channel_priority flexible</span><br></pre></td></tr></table></figure>
-
 <p>通过运行以下命令来查看当前 Conda 配置的 Channels：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda config --show channels</span><br></pre></td></tr></table></figure>
-
 <p>通过下面的命令可以一键删除所有已添加的频道（包括镜像源），恢复默认的 <code>defaults</code> 频道。</p>
-<p>这个是我发现有些时候用 清华源会导致包安装错误，出现 <code>File not valid: file size doesn&#39;t match expectation </code> 的问题，但是恢复为默认的 <code>defaults</code> 频道就没有问题。</p>
+<p>这个是我发现有些时候用 清华源会导致包安装错误，出现 <code>File not valid: file size doesn't match expectation </code> 的问题，但是恢复为默认的 <code>defaults</code> 频道就没有问题。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda config --remove-key channels</span><br></pre></td></tr></table></figure>
-
-<h1 id="设置环境变量-root"><a href="#设置环境变量-root" class="headerlink" title="设置环境变量-root"></a>设置环境变量-root</h1><p>root 安装 conda 后只是修改 root 账号本身的 <code>.bashrc</code> 文件，也就是只是修改了 root 账号的环境变量，如果要使得所有用户都能使用 Miniconda（而不只是某个特定用户），可以将 Miniconda 的路径添加到系统的全局配置文件中。</p>
-<p>编辑 <code>/etc/profile</code> 文件，添加 Miniconda 路径 </p>
+<h1>设置环境变量-root</h1>
+<p>root 安装 conda 后只是修改 root 账号本身的 <code>.bashrc</code> 文件，也就是只是修改了 root 账号的环境变量，如果要使得所有用户都能使用 Miniconda（而不只是某个特定用户），可以将 Miniconda 的路径添加到系统的全局配置文件中。</p>
+<p>编辑 <code>/etc/profile</code> 文件，添加 Miniconda 路径</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/profile</span><br></pre></td></tr></table></figure>
-
 <p>我的做法是直接将 root 的 <code>.bashrc</code> 文件中关于 conda 的内容复制黏贴过来，放到最后面，内容如下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># &gt;&gt;&gt; conda initialize &gt;&gt;&gt;</span><br><span class="line"># !! Contents within this block are managed by &#x27;conda init&#x27; !!</span><br><span class="line">__conda_setup=&quot;$(&#x27;/data/software/miniconda3/bin/conda&#x27; &#x27;shell.bash&#x27; &#x27;hook&#x27; 2&gt; /dev/null)&quot;</span><br><span class="line">if [ $? -eq 0 ]; then</span><br><span class="line">    eval &quot;$__conda_setup&quot;</span><br><span class="line">else</span><br><span class="line">    if [ -f &quot;/data/software/miniconda3/etc/profile.d/conda.sh&quot; ]; then</span><br><span class="line">        . &quot;/data/software/miniconda3/etc/profile.d/conda.sh&quot;</span><br><span class="line">    else</span><br><span class="line">        export PATH=&quot;/data/software/miniconda3/bin:$PATH&quot;</span><br><span class="line">    fi</span><br><span class="line">fi</span><br><span class="line">unset __conda_setup</span><br><span class="line"># &lt;&lt;&lt; conda initialize &lt;&lt;&lt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 <p>这样做不太好，这样做会使得所有账户都用 root 的 conda 环境，只要设置一下环境变量就行。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export PATH=&quot;/data/software/miniconda3/bin:$PATH&quot;</span><br></pre></td></tr></table></figure>
-
-<p> 然后 source 一下，使配置生效</p>
+<p>然后 source 一下，使配置生效</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
-
 <p>切换成别的普通用户账号，可以通过以下命令检查是否成功将 Miniconda 路径添加到 <code>$PATH</code>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $PATH</span><br></pre></td></tr></table></figure>
-
-<h1 id="更新环境中的所有的可更新包"><a href="#更新环境中的所有的可更新包" class="headerlink" title="更新环境中的所有的可更新包"></a>更新环境中的所有的可更新包</h1><p>用下面命令更新所有包</p>
+<h1>更新环境中的所有的可更新包</h1>
+<p>用下面命令更新所有包</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda update --all -y</span><br></pre></td></tr></table></figure>
-
-<h2 id="何时需要使用这个命令"><a href="#何时需要使用这个命令" class="headerlink" title="何时需要使用这个命令"></a>何时需要使用这个命令</h2><p>我是一开始就遇到依赖冲突了，conda 应该安装的不同的 sqlite 版本不一致导致了冲突，使用了这个命令就好了 。并且运行这个命令前，R 版本只能安装 4.4.2 ，运行后便升级为 4.4.3 。</p>
+<h2 id="何时需要使用这个命令">何时需要使用这个命令</h2>
+<p>我是一开始就遇到依赖冲突了，conda 应该安装的不同的 sqlite 版本不一致导致了冲突，使用了这个命令就好了 。并且运行这个命令前，R 版本只能安装 4.4.2 ，运行后便升级为 4.4.3 。</p>
 <table>
 <thead>
 <tr>
-<th align="left">场景</th>
-<th align="left">推荐频率</th>
-<th align="left">说明</th>
+<th style="text-align:left">场景</th>
+<th style="text-align:left">推荐频率</th>
+<th style="text-align:left">说明</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left">环境维护</td>
-<td align="left">每月1-2次</td>
-<td align="left">保持包的最新稳定状态</td>
+<tbody>
+<tr>
+<td style="text-align:left">环境维护</td>
+<td style="text-align:left">每月1-2次</td>
+<td style="text-align:left">保持包的最新稳定状态</td>
 </tr>
 <tr>
-<td align="left">解决依赖冲突</td>
-<td align="left">遇到问题时</td>
-<td align="left">修复因版本滞后导致的问题</td>
+<td style="text-align:left">解决依赖冲突</td>
+<td style="text-align:left">遇到问题时</td>
+<td style="text-align:left">修复因版本滞后导致的问题</td>
 </tr>
 <tr>
-<td align="left">安全更新</td>
-<td align="left">安全公告发布后</td>
-<td align="left">及时修补漏洞</td>
+<td style="text-align:left">安全更新</td>
+<td style="text-align:left">安全公告发布后</td>
+<td style="text-align:left">及时修补漏洞</td>
 </tr>
 <tr>
-<td align="left">准备共享环境</td>
-<td align="left">导出环境前</td>
-<td align="left">确保环境配置是最新状态</td>
+<td style="text-align:left">准备共享环境</td>
+<td style="text-align:left">导出环境前</td>
+<td style="text-align:left">确保环境配置是最新状态</td>
 </tr>
-</tbody></table>
-<h1 id="更新-python-（其它软件通用）"><a href="#更新-python-（其它软件通用）" class="headerlink" title="更新 python （其它软件通用）"></a>更新 python （其它软件通用）</h1><p>安装 conda 会自带 python ，应该是 conda 能支持的最新的 </p>
+</tbody>
+</table>
+<h1>更新 python （其它软件通用）</h1>
+<p>安装 conda 会自带 python ，应该是 conda 能支持的最新的</p>
 <ol>
 <li><strong>检查当前 Python 版本</strong></li>
 </ol>
 <p>首先，检查当前环境中 Python 的版本，以确认您需要更新：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda list python</span><br></pre></td></tr></table></figure>
-
 <p>或</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python --version</span><br></pre></td></tr></table></figure>
-
 <p>这会显示当前环境中安装的 Python 版本。</p>
 <ol start="2">
 <li><strong>更新 Conda</strong></li>
 </ol>
 <p>更新 Conda 本身，确保使用的是最新版本的 <code>conda</code>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda update conda</span><br></pre></td></tr></table></figure>
-
 <ol start="3">
 <li><strong>更新 Python</strong></li>
 </ol>
 <p>然后，您可以更新 Python 版本。您可以选择指定您需要的 Python 版本，或者让 Conda 更新到可用的最新版本（<strong>Conda 可用的最新版本可能会落后于实际最新版本</strong>，比如 python 现在的最新版本是 3.13 ，但是我an）。</p>
 <p>​		3.1 <strong>更新到最新版本的 Python</strong>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda update python</span><br></pre></td></tr></table></figure>
-
 <p>​		3.2 <strong>安装指定版本的 Python</strong>：</p>
 <p>如果您想更新到特定版本的 Python，例如 Python 3.9.5 (如果是降低版本，最好还是在一个虚拟环境中安装，避免弄乱主环境)：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install python=3.9.5</span><br></pre></td></tr></table></figure>
-
 <p>这将安装您指定版本的 Python，同时更新环境中的其他依赖包。</p>
 <ol start="4">
 <li><strong>验证更新</strong></li>
 </ol>
 <p>更新完成后，您可以通过以下命令验证 Python 的版本是否已更新：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python --version</span><br></pre></td></tr></table></figure>
-
 <p>或者：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda list python</span><br></pre></td></tr></table></figure>
-
 <ol start="5">
 <li><strong>如果遇到依赖问题</strong></li>
 </ol>
 <p>有时更新 Python 版本可能会导致依赖包的兼容性问题。您可以通过创建一个新的环境来避免这些问题：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">conda create --name new_env python=3.12.9</span><br><span class="line">conda activate new_env # 激活环境</span><br><span class="line">conda deactivate      # 退出环境</span><br></pre></td></tr></table></figure>
-
 <p>这样会创建一个新的环境，使用您指定的 Python 版本。</p>
-<h1 id="安装-python-包"><a href="#安装-python-包" class="headerlink" title="安装 python 包"></a>安装 python 包</h1><p>建议优先使用 conda 安装，只有在conda 中没有的情况下才用 pip 安装，因为二者之间可能产生冲突。</p>
-<h1 id="安装-R"><a href="#安装-R" class="headerlink" title="安装 R"></a>安装 R</h1><p>先查找一下 r</p>
+<h1>安装 python 包</h1>
+<p>建议优先使用 conda 安装，只有在conda 中没有的情况下才用 pip 安装，因为二者之间可能产生冲突。</p>
+<h1>安装 R</h1>
+<p>先查找一下 r</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda search r</span><br></pre></td></tr></table></figure>
-
 <p>安装 r</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c conda-forge r=4.1</span><br></pre></td></tr></table></figure>
-
 <p>看一下版本</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">which R</span><br><span class="line">R --version</span><br></pre></td></tr></table></figure>
-
-<h1 id="安装-R-包"><a href="#安装-R-包" class="headerlink" title="安装 R 包"></a>安装 R 包</h1><p>在 Conda 环境中安装 R 后，优先通过 <code>conda</code> 安装 R 的常用包，其次通过 <code>install.packages()</code> 安装。</p>
+<h1>安装 R 包</h1>
+<p>在 Conda 环境中安装 R 后，优先通过 <code>conda</code> 安装 R 的常用包，其次通过 <code>install.packages()</code> 安装。</p>
 <p>在 conda 中的 R 包命名规则为：Conda 中的 R 包名前缀为 <code>r-</code>（如 <code>r-dplyr</code>），Bioconductor 包前缀为<code>bioconductor-</code>。</p>
 <p>例如，安装常用的 R 包 <code>ggplot2</code>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install r-ggplot2</span><br></pre></td></tr></table></figure>
-
 <p>我之前一直使用 <code>install.packages()</code> 安装R包。</p>
-<h1 id="创建虚拟环境"><a href="#创建虚拟环境" class="headerlink" title="创建虚拟环境"></a>创建虚拟环境</h1><p>最标准的创建语法如下，推荐指定 Python 版本以确保环境一致性：</p>
+<h1>创建虚拟环境</h1>
+<p>最标准的创建语法如下，推荐指定 Python 版本以确保环境一致性：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create -n your_env_name python=3.12</span><br></pre></td></tr></table></figure>
-
 <p>也可以通过 -p 指定个人路径</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create -p /完整路径/环境名 python=3.10</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="查看所有虚拟环境"><a href="#查看所有虚拟环境" class="headerlink" title="查看所有虚拟环境"></a>查看所有虚拟环境</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda env list</span><br></pre></td></tr></table></figure>
-
-<h2 id="进入和退出环境（激活与停用）"><a href="#进入和退出环境（激活与停用）" class="headerlink" title="进入和退出环境（激活与停用）"></a>进入和退出环境（激活与停用）</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">1. 进入（激活）某个环境</span></span><br><span class="line">conda activate my_project</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">2. 退出当前环境（回到 base 环境）</span></span><br><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
-
-<h2 id="导出环境配置"><a href="#导出环境配置" class="headerlink" title="导出环境配置"></a>导出环境配置</h2><p>当你在一个环境里调试好了代码，想把它发给同事或者在另一台电脑（比如超算）上复现时，需要导出配置文件。</p>
+<h2 id="查看所有虚拟环境">查看所有虚拟环境</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda env list</span><br></pre></td></tr></table></figure>
+<h2 id="进入和退出环境（激活与停用）">进入和退出环境（激活与停用）</h2>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">1. 进入（激活）某个环境</span></span><br><span class="line">conda activate my_project</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">2. 退出当前环境（回到 base 环境）</span></span><br><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
+<h2 id="导出环境配置">导出环境配置</h2>
+<p>当你在一个环境里调试好了代码，想把它发给同事或者在另一台电脑（比如超算）上复现时，需要导出配置文件。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在当前环境下执行，生成一个 environment.yml 文件</span></span><br><span class="line">conda <span class="built_in">env</span> <span class="built_in">export</span> &gt; environment.yml</span><br></pre></td></tr></table></figure>
-
 <p>这个配置文件记录了当前环境里所有的包和精确版本号。</p>
 <p>别人可以通过 <code>environment.yml</code>文件复现环境：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda <span class="built_in">env</span> create -f environment.yml</span><br></pre></td></tr></table></figure>
-
-<h2 id="彻底移除环境"><a href="#彻底移除环境" class="headerlink" title="彻底移除环境"></a>彻底移除环境</h2><p>当你确定某个项目不再需要时，可以清理掉它以释放磁盘空间（尤其是深度学习环境很大）。</p>
+<h2 id="彻底移除环境">彻底移除环境</h2>
+<p>当你确定某个项目不再需要时，可以清理掉它以释放磁盘空间（尤其是深度学习环境很大）。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除名为 my_project 的环境</span></span><br><span class="line">conda remove -n my_project --all</span><br></pre></td></tr></table></figure>
-
 <p><strong>注意</strong>：</p>
 <ul>
 <li>删除前必须<strong>先退出</strong>该环境（<code>conda deactivate</code>），不能在环境内部删除自己。</li>
 <li><code>--all</code>参数表示删除这个环境里的所有包和缓存。</li>
 </ul>
-<h1 id="重装conda"><a href="#重装conda" class="headerlink" title="重装conda"></a>重装conda</h1><h2 id="重装系统"><a href="#重装系统" class="headerlink" title="重装系统"></a>重装系统</h2><p>如果是要重装系统了，那么有一个简单的方法可以保存原来的 conda 环境，首先我们将原来的 miniconda3 安装包 和 home 路径下的 <code>.bashrc</code> ，<code>.condarc</code> （如果是 root ，则可能还有 <code>/etc/profile</code> ）保存下来。</p>
+<h1>重装conda</h1>
+<h2 id="重装系统">重装系统</h2>
+<p>如果是要重装系统了，那么有一个简单的方法可以保存原来的 conda 环境，首先我们将原来的 miniconda3 安装包 和 home 路径下的 <code>.bashrc</code> ，<code>.condarc</code> （如果是 root ，则可能还有 <code>/etc/profile</code> ）保存下来。</p>
 <p>之后在原来的位置复制黏贴原来的 miniconda3 安装包  ，修改 home 路径下的 <code>.bashrc</code> ，<code>.condarc</code>文件即可。</p>
 <p>采用 <code>conda-pack</code> 打包，先安装（打包的环境只能在相同操作系统和CPU架构的机器上使用）</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c conda-forge conda-pack</span><br></pre></td></tr></table></figure>
-
 <p>备份命令如下（注意，不能打包 base 环境）</p>
 <p>不行，我用 R 安装的包导致Conda 元数据与实际文件不一致，导致打包报错，没法用这个打包了。以后 R 包也得优先使用 conda 安装。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进入环境</span></span><br><span class="line">conda activate zhouziwen</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查 pip 安装的包（容易冲突）</span></span><br><span class="line">conda list | grep &quot;&lt;pip&gt;&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">打包到当前文件夹，默认输出文件是env_name.tar.gz</span></span><br><span class="line">conda pack -n zhouziwen &amp;</span><br></pre></td></tr></table></figure>
-
 <p>还原命令如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">1. 建目录</span></span><br><span class="line">mkdir -p ~/miniconda3/envs/myenv</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">2. 解压</span></span><br><span class="line">tar -xzf ~/OneDrive/conda_backups/myenv_20260121.tar.gz -C ~/miniconda3/envs/myenv</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">3. 路径修复（关键！）</span></span><br><span class="line">~/miniconda3/envs/myenv/bin/conda-unpack</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">4. 验证</span></span><br><span class="line">conda activate myenv</span><br><span class="line">python --version</span><br></pre></td></tr></table></figure>
-
-<h2 id="逻辑备份"><a href="#逻辑备份" class="headerlink" title="逻辑备份"></a>逻辑备份</h2><p>感觉没啥用，只能保存 conda 安装的软件。</p>
+<h2 id="逻辑备份">逻辑备份</h2>
+<p>感觉没啥用，只能保存 conda 安装的软件。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda env export --no-builds &gt; zhouziwen_env.yml</span><br><span class="line">python -m pip freeze &gt; zhouziwen_pip.txt</span><br></pre></td></tr></table></figure>
-
-<h2 id="conda-崩溃"><a href="#conda-崩溃" class="headerlink" title="conda 崩溃"></a>conda 崩溃</h2><p>如果是 conda 崩溃了，那么只能保存 conda 中还有用的部分，比如R 包（<code>*/miniConda/miniconda3/lib/R/library</code>），虚拟环境（<code>*/miniConda/envs</code>）。 </p>
-<h1 id="安装其它软件"><a href="#安装其它软件" class="headerlink" title="安装其它软件"></a>安装其它软件</h1><p>bcftools</p>
+<h2 id="conda-崩溃">conda 崩溃</h2>
+<p>如果是 conda 崩溃了，那么只能保存 conda 中还有用的部分，比如R 包（<code>*/miniConda/miniconda3/lib/R/library</code>），虚拟环境（<code>*/miniConda/envs</code>）。</p>
+<h1>安装其它软件</h1>
+<p>bcftools</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">conda search -c bioconda -c conda-forge bcftools</span><br><span class="line"></span><br><span class="line">conda install -c bioconda -c conda-forge bcftools=1.21</span><br><span class="line"></span><br><span class="line">bcftools --version</span><br></pre></td></tr></table></figure>
-
 <p>shapeit4</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">conda create -n shapeit4</span><br><span class="line">conda activate shapeit4</span><br><span class="line"></span><br><span class="line">conda search shapeit4</span><br><span class="line">conda install shapeit4=4.2.2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置环境变量，尚未修改路径</span></span><br><span class="line">ln -s /opt/miniconda3/envs/shapeit4/bin/shapeit4 /usr/local/bin</span><br><span class="line"></span><br><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
-
 <p>个人账户安装 shapeit4 时遇到报错，如下，暂时无法解决。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">critical libconda filesystem error: cannot copy symlink: Invalid argument [/data/zhouziwen/software/miniconda3/pkgs/ncurses-6.5-h2d0b736_3/bin/captoinfo] [/data/zhouziwen/software/miniconda3/envs/shapeit4/bin/captoinfo]</span><br></pre></td></tr></table></figure>
-
 <p>安装一下 gcc , g++</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda install -c conda-forge gcc</span><br><span class="line">conda install -c conda-forge gxx</span><br></pre></td></tr></table></figure>
-
 <p>检查一下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc --version</span><br><span class="line">g++ --version</span><br></pre></td></tr></table></figure>
-
 <p>设置一下环境变量</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 永久设置（添加到 ~/.bashrc）</span></span><br><span class="line">echo <span class="string">&#x27;export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH&#x27;</span> &gt;&gt; ~/.bashrc</span><br><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="在-Bash-脚本中激活-Conda-环境"><a href="#在-Bash-脚本中激活-Conda-环境" class="headerlink" title="在 Bash 脚本中激活 Conda 环境"></a>在 Bash 脚本中激活 Conda 环境</h1><p>使用 <code>source</code>加载 Conda 初始化脚本（推荐）</p>
+<h1>在 Bash 脚本中激活 Conda 环境</h1>
+<p>使用 <code>source</code>加载 Conda 初始化脚本（推荐）</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">1. 加载 Conda 初始化脚本</span></span><br><span class="line">source &quot;/path/to/miniconda3/etc/profile.d/conda.sh&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">2. 激活环境</span></span><br><span class="line">conda activate snakemake</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">3. 执行命令</span></span><br><span class="line">snakemake --cores 4</span><br></pre></td></tr></table></figure>
-
-
-
  
       <!-- reward -->
       
@@ -347,55 +319,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -694,30 +618,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

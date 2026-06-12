@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">944</span>
+            <span class="post-count">942</span>
         </span>
     </span>
 
@@ -98,46 +98,55 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>我目前只掌握了这个包的一些用法，还有很多不清楚的地方。</p>
 <span id="more"></span>
-
 <p>据说python的多线程是假的，不能有效利用多核，一个时间只有一个线程在跑。因此平行计算只能使用多进程的技术。</p>
 <p>这里我一般就是使用 pool 创建进程池。</p>
-<h1 id="为什么要用进程池"><a href="#为什么要用进程池" class="headerlink" title="为什么要用进程池"></a>为什么要用进程池</h1><p>如果每个任务使用一个进程，每处理一个任务都会伴随着一个进程的创建、运行、销毁，如果进程的运行时间越短，创建和销毁的时间所占的比重就越大，显然，我们应该尽量避免创建和销毁进程本身的额外开销，提高进程的运行效率。我们可以用进程池来减少进程的创建和开销，提高进程对象的复用。</p>
-<h1 id="apply-和-apply-async"><a href="#apply-和-apply-async" class="headerlink" title="apply 和 apply_async"></a>apply 和 apply_async</h1><ul>
-<li><p><strong>apply</strong>（<strong>不推荐</strong>）: 阻塞，堵塞的意思是说等待当前子进程执行完毕之后再执行下一个进程。</p>
+<h1>为什么要用进程池</h1>
+<p>如果每个任务使用一个进程，每处理一个任务都会伴随着一个进程的创建、运行、销毁，如果进程的运行时间越短，创建和销毁的时间所占的比重就越大，显然，我们应该尽量避免创建和销毁进程本身的额外开销，提高进程的运行效率。我们可以用进程池来减少进程的创建和开销，提高进程对象的复用。</p>
+<h1>apply 和 apply_async</h1>
+<ul>
+<li>
+<p><strong>apply</strong>（<strong>不推荐</strong>）: 阻塞，堵塞的意思是说等待当前子进程执行完毕之后再执行下一个进程。</p>
 <p>首先主进程开始运行，碰到子进程，操作系统切换到子进程，等待子进程运行结束后，在切换到另外一个子进程，直到所有子进程运行完毕。然后在切换到主进程，运行剩余的部分。</p>
 <p><strong>相当于还是单进程，串行计算，没有使用余地</strong></p>
 </li>
-<li><p><strong>apply_async</strong> : 非阻塞</p>
+<li>
+<p><strong>apply_async</strong> : 非阻塞</p>
 <p>需要配合使用 <code>pool.close()</code> 和 <code>pool.join()</code> ，这两部分是及时我们要告诉主进程，你等着所有子进程运行完毕后再运行剩余部分。这两个命令的官方文档说明如下</p>
 <figure class="highlight f#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">close()</span><br><span class="line">阻止后续任务提交到进程池，当所有任务执行完成后，工作进程会退出。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">join()</span><br><span class="line">等待工作进程结束。调用 join() 前必须先调用 close() 或者 terminate() 。</span><br></pre></td></tr></table></figure>
 </li>
-<li><p><strong>map</strong> 和 <strong>map_async</strong> 大同小异，不过接的参数是列表。</p>
+<li>
+<p><strong>map</strong> 和 <strong>map_async</strong> 大同小异，不过接的参数是列表。</p>
 </li>
 </ul>
-<h1 id="获取结果"><a href="#获取结果" class="headerlink" title="获取结果"></a>获取结果</h1><p>首先，多进程函数要将结果写到 <code>return</code> 中（<code>return</code> 默认为 <code>None</code>，如果有多个值可以返回一个列表对象）。然后可以写到 一个列表中，提取列表元素时要用 <code>get()</code> ，才能得到值。</p>
+<h1>获取结果</h1>
+<p>首先，多进程函数要将结果写到 <code>return</code> 中（<code>return</code> 默认为 <code>None</code>，如果有多个值可以返回一个列表对象）。然后可以写到 一个列表中，提取列表元素时要用 <code>get()</code> ，才能得到值。</p>
 <p>注意：</p>
 <ol>
-<li><p>多进程中的子进程不会返回报错信息，只有在主进程用get方法来获取返回值时，子进程中的异常才会正常抛出。</p>
+<li>
+<p>多进程中的子进程不会返回报错信息，只有在主进程用get方法来获取返回值时，子进程中的异常才会正常抛出。</p>
 </li>
-<li><p>由于子进程会拷贝父进程的所有状态，因此对于大文件会占用很多内存。为了避免这一点，可以先把大文件拆分为很多小的子文件，然后用子进程读取每个子文件。</p>
+<li>
+<p>由于子进程会拷贝父进程的所有状态，因此对于大文件会占用很多内存。为了避免这一点，可以先把大文件拆分为很多小的子文件，然后用子进程读取每个子文件。</p>
 </li>
-<li><p>杀死父进程时，子进程会变成孤儿进程，这一点我暂时还有解决方法。</p>
+<li>
+<p>杀死父进程时，子进程会变成孤儿进程，这一点我暂时还有解决方法。</p>
 </li>
 </ol>
-<h1 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h1><p>下面是我常用的多进程的例子，这个例子是打印 1- 20 这 20 个数字，每打印一个数字睡眠 1 秒。</p>
+<h1>举例</h1>
+<p>下面是我常用的多进程的例子，这个例子是打印 1- 20 这 20 个数字，每打印一个数字睡眠 1 秒。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> multiprocessing</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test</span>(<span class="params">i</span>):</span><br><span class="line">    <span class="keyword">import</span> time <span class="comment"># 多进程中需要在函数中调用需要的模块</span></span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span>(i)</span><br><span class="line"></span><br><span class="line">result_list = [] <span class="comment"># 后面两步合并结果的临时列表</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置进程数</span></span><br><span class="line">process_nums =  <span class="number">5</span></span><br><span class="line">pool = multiprocessing.Pool(process_nums)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">11</span>):</span><br><span class="line">    result_list.append(pool.apply_async(func=test, args=(i,)))</span><br><span class="line">pool.close()</span><br><span class="line">pool.join()</span><br><span class="line"></span><br><span class="line"><span class="comment">#可以继续写入结果列表中</span></span><br><span class="line">process_nums =  <span class="number">5</span></span><br><span class="line">pool = multiprocessing.Pool(process_nums)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">11</span>,<span class="number">21</span>):</span><br><span class="line">    result_list.append(pool.apply_async(func=test, args=(i,)))</span><br><span class="line">pool.close()</span><br><span class="line">pool.join()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> result_list:</span><br><span class="line">    <span class="built_in">print</span>(i.get()) <span class="comment"># 获得多进程结果</span></span><br></pre></td></tr></table></figure>
-
-<p>如果不使用多进程，正常串行运算的话，运行时间肯定在 20 秒以上，但是这里使用 5 个进程，运行时间只有 4 秒左右（20&#x2F;5&#x3D;4）。</p>
+<p>如果不使用多进程，正常串行运算的话，运行时间肯定在 20 秒以上，但是这里使用 5 个进程，运行时间只有 4 秒左右（20/5=4）。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">18</span>]: %timeit %run test.py</span><br><span class="line">...</span><br><span class="line"><span class="number">4.06</span> s ± <span class="number">2.94</span> ms per loop (mean ± std. dev. of <span class="number">7</span> runs, <span class="number">1</span> loop each)</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hellenlee22/article/details/90643200">https://blog.csdn.net/hellenlee22/article/details/90643200</a></p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hellenlee22/article/details/90643200">https://blog.csdn.net/hellenlee22/article/details/90643200</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Bryan__/article/details/78786648">https://blog.csdn.net/Bryan__/article/details/78786648</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Bryan__/article/details/78786648">https://blog.csdn.net/Bryan__/article/details/78786648</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/340657122">https://zhuanlan.zhihu.com/p/340657122</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/340657122">https://zhuanlan.zhihu.com/p/340657122</a></p>
 </li>
 </ol>
  
@@ -187,55 +196,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -534,30 +495,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

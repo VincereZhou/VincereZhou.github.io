@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">278</span>
+            <span class="post-count">276</span>
         </span>
     </span>
 
@@ -98,23 +98,18 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 gmat 创建 G 阵。这个包没有维护了，已经过时了。</p>
 <span id="more"></span>
-
-<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>这个只能用 pip 安装，不能用 conda </p>
+<h1>安装</h1>
+<p>这个只能用 pip 安装，不能用 conda</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install gmat</span><br></pre></td></tr></table></figure>
-
 <p>我在 scnet 平台上安装不成功，尝试了一下下面的命令，先安装编译器才成功。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装 conda 版本的编译工具链</span></span><br><span class="line">conda install -c conda-forge compilers hdf5</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">再重新用 pip 安装</span></span><br><span class="line">pip install gmat</span><br></pre></td></tr></table></figure>
-
 <p>不行，看上去装上了，实际还是没装上，AI 说gmat 对 Python ≥3.10 的支持并不稳定，让我回退到 3.8或3.9 ，算了。</p>
 <p>改用新的<a target="_blank" rel="noopener" href="https://github.com/chaoning/GMAT/tree/main">gmatrix</a>生成 G 阵</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gmatrix --bfile ../gene --grm agrm --out gmatrix</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h1><p>示例代码如下</p>
+<h1>使用</h1>
+<p>示例代码如下</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">from</span> gmat.gmatrix <span class="keyword">import</span> agmat</span><br><span class="line"><span class="comment"># from gmat.uvlmm.gwas import fixed_repeat</span></span><br><span class="line"></span><br><span class="line">logging.basicConfig(level=logging.INFO)</span><br><span class="line"></span><br><span class="line">bed_file = <span class="string">&#x27;../gene&#x27;</span> <span class="comment">#plink文件</span></span><br><span class="line"><span class="comment"># pheno_file = &#x27;pheno.txt&#x27; # 表型文件， 第一列id，最后一列是表型，中间列放固定效应</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算基因组关系矩阵</span></span><br><span class="line">agmat_file = <span class="string">&#x27;gmatrix&#x27;</span></span><br><span class="line">agmat2 = agmat(bed_file, out_file=agmat_file, inv=<span class="literal">False</span>, small_val=<span class="number">0.001</span>, out_fmt=<span class="string">&#x27;id_id_val&#x27;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>输入文件是二进制文件，这里输出结果文件为三列:个体号、个体号、值。<code>agmat_file = &#39;gmatrix&#39;</code> 是输出结果的前缀。</p>
+<p>输入文件是二进制文件，这里输出结果文件为三列:个体号、个体号、值。<code>agmat_file = 'gmatrix'</code> 是输出结果的前缀。</p>
  
       <!-- reward -->
       
@@ -162,55 +157,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -509,30 +456,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

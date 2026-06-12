@@ -98,78 +98,84 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>个人使用 f2py 的流程整理。</p>
 <span id="more"></span>
-
-<h1 id="安装f2py"><a href="#安装f2py" class="headerlink" title="安装f2py"></a>安装f2py</h1><p>安装 <code>f2py</code>（Fortran 到 Python 的接口生成器）通常通过安装 <code>numpy</code> 实现，因为 <code>f2py</code> 是 <code>numpy</code> 的一部分。</p>
+<h1>安装f2py</h1>
+<p>安装 <code>f2py</code>（Fortran 到 Python 的接口生成器）通常通过安装 <code>numpy</code> 实现，因为 <code>f2py</code> 是 <code>numpy</code> 的一部分。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install numpy</span><br></pre></td></tr></table></figure>
-
-<h1 id="解决报错：找不到-distutils-msvccompiler"><a href="#解决报错：找不到-distutils-msvccompiler" class="headerlink" title="解决报错：找不到 distutils.msvccompiler"></a>解决报错：找不到 distutils.msvccompiler</h1><p>如果遇到报错（我是3.9.5版本的python和 1.21.5版本的numpy）</p>
+<h1>解决报错：找不到 distutils.msvccompiler</h1>
+<p>如果遇到报错（我是3.9.5版本的python和 1.21.5版本的numpy）</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ModuleNotFoundError: No module named <span class="string">&#x27;distutils.msvccompiler&#x27;</span></span><br></pre></td></tr></table></figure>
-
 <p>我搜了一下原因，好像是 python 本身的 bug ，这个模块是在 windows 下使用的，所以在 linux 环境下没有。</p>
 <blockquote>
 <p><code>distutils.msvccompiler</code>是Python的<code>distutils</code>模块的一部分，通常在Windows下用于调用Microsoft Visual C++编译器。然而，用户是在Linux环境下，为什么会引用到msvccompiler呢？可能是NumPy的某些部分在尝试调用这个模块，而它在Linux下并不存在。</p>
 </blockquote>
 <p>从网上找到的解决思路是将 setuptools 模块降低一下版本</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install setuptools==69.5.1 </span><br></pre></td></tr></table></figure>
-
-<h1 id="修改-fortran-脚本"><a href="#修改-fortran-脚本" class="headerlink" title="修改 fortran 脚本"></a>修改 fortran 脚本</h1><ol>
-<li><p>在<strong>需要直接调用的</strong>子例程中的参数中，如果存在数组，那么同时需要将<strong>数组的维度作为参数添加进来</strong>。</p>
+<h1>修改 fortran 脚本</h1>
+<ol>
+<li>
+<p>在<strong>需要直接调用的</strong>子例程中的参数中，如果存在数组，那么同时需要将<strong>数组的维度作为参数添加进来</strong>。</p>
 </li>
-<li><p>在<strong>需要直接调用的</strong>子例程中的参数中，如果存在数组，那么定义数组参数时，需要准确定义数组的维度（因为有些子例程中数组维度会定义为1）。</p>
+<li>
+<p>在<strong>需要直接调用的</strong>子例程中的参数中，如果存在数组，那么定义数组参数时，需要准确定义数组的维度（因为有些子例程中数组维度会定义为1）。</p>
 </li>
-<li><p>定义变量后，通过注释字符+<code>f2py</code> 定义参数的 <code>intent</code> 属性，总共有三种属性，解释如下：</p>
+<li>
+<p>定义变量后，通过注释字符+<code>f2py</code> 定义参数的 <code>intent</code> 属性，总共有三种属性，解释如下：</p>
 <ul>
-<li><p><code>in</code> ：输入变量，只读</p>
+<li>
+<p><code>in</code> ：输入变量，只读</p>
 </li>
-<li><p><code>out</code>:  输出变量，输出变量不会出现在模块的输入参数中，如果有多个输出变量，会以元组的形式同时输出。</p>
+<li>
+<p><code>out</code>:  输出变量，输出变量不会出现在模块的输入参数中，如果有多个输出变量，会以元组的形式同时输出。</p>
 </li>
-<li><p><code>in, out</code> : 输入输出变量，会对输入变量进行修改，再输出，如果有多个输出变量，会以元组的形式同时输出。</p>
+<li>
+<p><code>in, out</code> : 输入输出变量，会对输入变量进行修改，再输出，如果有多个输出变量，会以元组的形式同时输出。</p>
 </li>
 </ul>
 </li>
 </ol>
 <p>举个例子，根据下面的脚本，假设这个子例程原本就只有两个数组参数 <code>a</code>, <code>b</code> ，那么首先第一步我们要将 <code>nze</code> 和 <code>n</code> 加入到子例程的参数中，第二步因为定义 <code>a</code>, <code>b</code> 时其维度已经定义好了，不需要动，第三步就是像最后两句一样定义   <code>a</code>, <code>b</code> 的 <code>intent</code> ，这里就是需要同时输入  <code>a</code>, <code>b</code>  ，然后输出 <code>a</code></p>
 <figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">      <span class="keyword">real</span>*<span class="number">8</span> a(nze),b(n)</span><br><span class="line">cf2py <span class="keyword">intent</span>(<span class="keyword">in</span>,<span class="keyword">out</span>) a</span><br><span class="line">cf2py <span class="keyword">intent</span>(<span class="keyword">in</span>) b</span><br></pre></td></tr></table></figure>
-
-<h1 id="检查-fortran-脚本"><a href="#检查-fortran-脚本" class="headerlink" title="检查 fortran 脚本"></a>检查 fortran 脚本</h1><p>在 linux 中逐个编译需要用到的 fortran 脚本，看看是否有语法问题。</p>
+<h1>检查 fortran 脚本</h1>
+<p>在 linux 中逐个编译需要用到的 fortran 脚本，看看是否有语法问题。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gfortran -c *.f</span><br></pre></td></tr></table></figure>
-
-<h1 id="调用-F2PY"><a href="#调用-F2PY" class="headerlink" title="调用 F2PY"></a>调用 F2PY</h1><p>两种方式：既可以使用命令行工具<code>f2py</code> ，也可以使用 python 模块 <code>numpy.f2py</code> 。</p>
+<h1>调用 F2PY</h1>
+<p>两种方式：既可以使用命令行工具<code>f2py</code> ，也可以使用 python 模块 <code>numpy.f2py</code> 。</p>
 <p>如果使用第一种方式，则直接运行</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f2py</span><br></pre></td></tr></table></figure>
-
 <p>如果使用第二种方式，则运行命令为</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m numpy.f2py</span><br></pre></td></tr></table></figure>
-
 <p>按照下面的命令进行打包，<code>-c</code> 后面接 fortran 脚本名称，可以包含多个脚本；<code>-m</code> 后面接输出的模块名称。</p>
 <p>运行日志中如果最后有 <code>Removing build directory ***</code> 字样并且没有报错信息，则说明运行正常。并且在当前目录中会生成 <code>modulename.cpython-39-x86_64-linux-gnu.so</code>（在windows 中后缀为 <code>.pyd</code> ） 。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f2py -c *.f  -m modulename </span><br></pre></td></tr></table></figure>
-
 <p>然后在 ipython 页面中，导入生成的模块，查看其文档 (<code>__doc__</code>)。</p>
 <p>首先模块的文档包含了所有可用的函数。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">2</span>]: <span class="keyword">import</span> fib1</span><br><span class="line"></span><br><span class="line">In [<span class="number">3</span>]: <span class="built_in">print</span>(fib1.__doc__)</span><br><span class="line">This module <span class="string">&#x27;fib1&#x27;</span> <span class="keyword">is</span> auto-generated <span class="keyword">with</span> f2py (version:<span class="number">1.21</span><span class="number">.5</span>).</span><br><span class="line">Functions:</span><br><span class="line">  fib(a,n=<span class="built_in">len</span>(a))</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
-
 <p>然后查看需要调用的函数的文档，可以看到所有输入函数的类型。</p>
 <p>这里有两个作用，第一是检查一下是否和之前设置的参数的 <code>intent</code> 属性保持一致（如果不一致，重新调用一遍 F2PY 覆盖一下），第二就是看如何在 python 中运行这个模块 (看第一行)。这个模块在 python 中的调用方式就是 <code>ia,ja,a,b = test(option,ia,ja,a,b,[n,nze])</code> 。</p>
 <p>这里也可以看到，虽然我们需要在 fortran 脚本将数组参数的维度也作为参数加入进来（<code>n</code> 和 <code>nze</code>），但是经过 F2PY 打包之后，我们在 python 中运行其实是不需要输入数组维度的（可选参数），因为会自动从输入数组维度中得到 <code>n</code> 和 <code>nze</code> 。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">In [2]: print(test.test.__doc__)</span><br><span class="line">ia,ja,a,b = test(option,ia,ja,a,b,[n,nze])</span><br><span class="line"></span><br><span class="line">Wrapper for ``test``.</span><br><span class="line"></span><br><span class="line">Parameters</span><br><span class="line">----------</span><br><span class="line">option : input int</span><br><span class="line">ia : input rank-1 array(&#x27;i&#x27;) with bounds (n + 1)</span><br><span class="line">ja : input rank-1 array(&#x27;i&#x27;) with bounds (nze)</span><br><span class="line">a : input rank-1 array(&#x27;d&#x27;) with bounds (nze)</span><br><span class="line">b : input rank-1 array(&#x27;d&#x27;) with bounds (n)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Other Parameters</span><br><span class="line">----------------</span><br><span class="line">n : input int, optional</span><br><span class="line">    Default: (len(ia)-1)</span><br><span class="line">nze : input int, optional</span><br><span class="line">    Default: len(ja)</span><br><span class="line"></span><br><span class="line">Returns</span><br><span class="line">-------</span><br><span class="line">ia : rank-1 array(&#x27;i&#x27;) with bounds (n + 1)</span><br><span class="line">ja : rank-1 array(&#x27;i&#x27;) with bounds (nze)</span><br><span class="line">a : rank-1 array(&#x27;d&#x27;) with bounds (nze)</span><br><span class="line">b : rank-1 array(&#x27;d&#x27;) with bounds (n)</span><br></pre></td></tr></table></figure>
-
 <p>除了在 ipython 界面运行，你也可以按照下面的命令生成一个签名文件 (<code>*.pyf</code>) ，查看子例程参数的属性。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f2py *.f  -m * -h *.pyf</span><br></pre></td></tr></table></figure>
-
-<h1 id="在-python-中运行"><a href="#在-python-中运行" class="headerlink" title="在 python 中运行"></a>在 python 中运行</h1><p>唯一需要注意的地方就是<strong>输入数组的数据类型必须正确</strong>，不然不会对输入数组进行修改，也不会报错。</p>
+<h1>在 python 中运行</h1>
+<p>唯一需要注意的地方就是<strong>输入数组的数据类型必须正确</strong>，不然不会对输入数组进行修改，也不会报错。</p>
 <blockquote>
-<p> 否则 F2PY会生成输入数组的连续副本（具有正确的dtype），并将副本的C指针传递给Fortran子例程。因此，对输入数组（副本）的任何可能更改都不会影响原始参数。</p>
+<p>否则 F2PY会生成输入数组的连续副本（具有正确的dtype），并将副本的C指针传递给Fortran子例程。因此，对输入数组（副本）的任何可能更改都不会影响原始参数。</p>
 </blockquote>
-<p>比如说 fortran 中 <code>REAL*8</code> 对应的就是 python 中的 <code>float</code> 及数组中的 <code>np.float64</code> 。 </p>
-<h2 id="注意-array-的顺序"><a href="#注意-array-的顺序" class="headerlink" title="注意 array 的顺序"></a>注意 array 的顺序</h2><p>注意 numpy 数组在内存中数据顺序一直使用 C 的惯例（称为行优先顺序），而 Fortran 使用列优先顺序。举个例例子，矩阵[ [1, 2], [3, 4] ] 在内存中按行优先顺序排列成[1, 2, 3, 4]，按列优先顺序排列成<br>[1, 3, 2, 4]。</p>
+<p>比如说 fortran 中 <code>REAL*8</code> 对应的就是 python 中的 <code>float</code> 及数组中的 <code>np.float64</code> 。</p>
+<h2 id="注意-array-的顺序">注意 array 的顺序</h2>
+<p>注意 numpy 数组在内存中数据顺序一直使用 C 的惯例（称为行优先顺序），而 Fortran 使用列优先顺序。举个例例子，矩阵[ [1, 2], [3, 4] ] 在内存中按行优先顺序排列成[1, 2, 3, 4]，按列优先顺序排列成<br>
+[1, 3, 2, 4]。</p>
 <p>因此对于2维数组，在声明时需要指定其 <code>order=’F’</code> ，即按照列优先顺序排列，从而与 Fortran 保持一致。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p><a target="_blank" rel="noopener" href="https://numpy123.com/f2py/">https://numpy123.com/f2py/</a></p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p><a target="_blank" rel="noopener" href="https://numpy123.com/f2py/">https://numpy123.com/f2py/</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://blog.finaltheory.me/research/Introduction-to-F2PY.html">https://blog.finaltheory.me/research/Introduction-to-F2PY.html</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="https://blog.finaltheory.me/research/Introduction-to-F2PY.html">https://blog.finaltheory.me/research/Introduction-to-F2PY.html</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://sites.engineering.ucsb.edu/~shell/che210d/f2py.pdf">https://sites.engineering.ucsb.edu/~shell/che210d/f2py.pdf</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="https://sites.engineering.ucsb.edu/~shell/che210d/f2py.pdf">https://sites.engineering.ucsb.edu/~shell/che210d/f2py.pdf</a></p>
 </li>
 </ol>
  
@@ -219,55 +225,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -566,30 +524,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

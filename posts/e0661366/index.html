@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3.5k</span>
+            <span class="post-count">3.4k</span>
         </span>
     </span>
 
@@ -98,28 +98,271 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是方差组分估计方法的第三篇博客，介绍非求导算法 (deritative free REML, DF-REML) 算法。非求导算法顾名思义即不计算导数，对于不同的参数直接计算似然函数值，从中找到使得似然函数最大的一组参数。不过我这里主要是介绍如何进一步推导似然函数。</p>
 <span id="more"></span>
-
-<h1 id="推导-REML-似然函数"><a href="#推导-REML-似然函数" class="headerlink" title="推导 REML 似然函数"></a>推导 REML 似然函数</h1><p>这里只是进一步推导REML的似然函数。</p>
-<p>对于表型 $\mathbf{y}$ ，其对数似然函数如下（$n$ 为表型数目）<br>$$<br>l&#x3D;-\frac{1}{2}\left( n \times \ln (2 \pi) +\ln |\mathbf{V}|+(\mathbf{y}-\mathbf{X} \beta)^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \beta)\right)<br>$$<br>Verbyla (1990) 提出一个非奇异矩阵 $\mathbf{L} &#x3D; [\mathbf{L}<em>{1} \ \mathbf{L}</em>{2} ]$ ， 其中 $\mathbf{L}<em>{1}$ 和  $\mathbf{L}</em>{2}$ 分别为 $n \times p$ 和 $n \times (n-p)$ 的矩阵（$n$ 为表型数目，$p$ 为 $\mathbf{X}$ 的列数，<strong>假设 $\mathbf{X}$ 满秩</strong>，如果不满秩可以提取其中一个满秩的子矩阵 ），并且满足<br>$$<br>\begin{aligned}<br>\mathbf{L}<em>{1}^{\prime}\mathbf{X} &amp;&#x3D; \mathbf{I}</em>{p} \<br>\mathbf{L}<em>{2}^{\prime}\mathbf{X} &amp;&#x3D; \mathbf{0}<br>\end{aligned}<br>$$<br>我们对表型  $\mathbf{y}$  进行线性转换得到：<br>$$<br>\mathbf{L}^{\prime} \mathbf{y}&#x3D;\left[\begin{array}{l}<br>\mathbf{L}<em>1^{\prime} \mathbf{y} \<br>\mathbf{L}<em>2^{\prime} \mathbf{y}<br>\end{array}\right]&#x3D;\left[\begin{array}{l}<br>\mathbf{y}<em>1 \<br>\mathbf{y}<em>2<br>\end{array}\right]<br>$$<br>转换后的数据服从分布：<br>$$<br>\left[\begin{array}{l}<br>\mathbf{y}<em>1 \<br>\mathbf{y}<em>2<br>\end{array}\right] \sim \mathrm{N}\left(\left[\begin{array}{l}<br>\boldsymbol{\beta} \<br>\mathbf{0}<br>\end{array}\right], \left[\begin{array}{ll}<br>\mathbf{L}<em>1^{\prime} \mathbf{V} \mathbf{L}<em>1 &amp; \mathbf{L}<em>1^{\prime} \mathbf{V} \mathbf{L}<em>2 \<br>\mathbf{L}<em>2^{\prime} \mathbf{V} \mathbf{L}<em>1 &amp; \mathbf{L}<em>2^{\prime} \mathbf{V} \mathbf{L}<em>2<br>\end{array}\right]\right)<br>$$<br>根据概率统计公式，我们有 $f(\mathbf{L}^{\prime} \mathbf{y}) &#x3D; f(\mathbf{y}</em>{1},\mathbf{y}</em>{2}) &#x3D; f(\mathbf{y}</em>{1}|\mathbf{y}</em>{2})f(\mathbf{y}</em>{2})$  ，因此其对数似然函数满足<br>$$<br>l(\mathbf{L}^{\prime} \mathbf{y})  &#x3D; l(\mathbf{y}</em>{1}|\mathbf{y}</em>{2}) + l(\mathbf{y}</em>{2})<br>$$<br>首先对于 $\mathbf{L}^{\prime} \mathbf{y}$ ，我们有<br>$$<br>l(\mathbf{L}^{\prime} \mathbf{y})&#x3D;-\frac{1}{2}\left( n \times \ln (2 \pi) +\ln |\mathbf{\mathbf{L}^{\prime}V\mathbf{L}}|+\left[\begin{array}{c}<br>\left(\mathbf{y}<em>1-\boldsymbol{\beta}\right)^{\prime} &amp; \mathbf{y}<em>2^{\prime}<br>\end{array}\right]\left[\mathbf{L}^{\prime}\mathbf{V}\mathbf{L}\right]^{-1}\left[\begin{array}{c}<br>\mathbf{y}<em>1-\boldsymbol{\beta} \<br>\mathbf{y}<em>2<br>\end{array}\right]\right)<br>$$<br>对于 $\mathbf{y}</em>{2}$ ，我们有<br>$$<br>\begin{aligned}<br>l(\mathbf{y}</em>{2}) &amp;&#x3D; -\frac{1}{2}\left( (n-p) \times \ln (2 \pi) + \ln |\mathbf{L</em>{2}^{\prime}VL</em>{2}}|+\mathbf{y}^{\prime} \mathbf{L}</em>{2} \left(\mathbf{L</em>{2}^{\prime}VL</em>{2}}\right)^{-1}\mathbf{L}</em>{2}^{\prime}\mathbf{y} \right) \<br>&amp;&#x3D; -\frac{1}{2}\left( (n-p) \times \ln (2 \pi) + \ln |\mathbf{L</em>{2}^{\prime}VL</em>{2}}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right) \quad \because  \mathbf{P} &#x3D; \mathbf{L}</em>{2} \left(\mathbf{L_{2}^{\prime}VL_{2}}\right)^{-1}\mathbf{L}_{2}^{\prime} \</p>
-<p>\end{aligned}<br>$$<br>根据正态分布的条件分布公式<br>$$<br>\begin{aligned}<br>E(\mathbf{y} \mid \mathbf{x}) &amp; &#x3D;\boldsymbol{\mu}<em>y+\boldsymbol{\Sigma}</em>{y x} \boldsymbol{\Sigma}<em>{x x}^{-1}\left(\mathbf{x}-\boldsymbol{\mu}<em>x\right) \<br>\operatorname{cov}(\mathbf{y} \mid \mathbf{x}) &amp; &#x3D;\boldsymbol{\Sigma}</em>{y y}-\boldsymbol{\Sigma}</em>{y x} \boldsymbol{\Sigma}<em>{x x}^{-1} \boldsymbol{\Sigma}</em>{x y}<br>\end{aligned}<br>$$<br>我们得到<br>$$<br>\mathbf{y}_1 \mid \mathbf{y}_2 \sim \mathrm{N}\left(\boldsymbol{\beta}+\mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{y}_2, \mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_1-\mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_1\right)<br>$$<br>其协方差部分可以进一步推导：<br>$$<br>\begin{aligned}<br>&amp; \quad \mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_1-\mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_1 \<br>&amp;&#x3D; \mathbf{L}_1^{\prime} \left(\mathbf{V} - \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{L}_2^{\prime} \mathbf{V} \right)\mathbf{L}_1 \<br>&amp;&#x3D; \mathbf{L}_1^{\prime} \left(\mathbf{V} - \mathbf{V} \mathbf{P} \mathbf{V} \right)\mathbf{L}_1 \<br>&amp;&#x3D; \mathbf{L}_1^{\prime} \left(\mathbf{V} - \mathbf{V} \left(\mathbf{V}^{-1}-\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{V} \right)\mathbf{L}_1 \<br>&amp;&#x3D; \mathbf{L}<em>1^{\prime}  \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime}  \mathbf{L}<em>1 \<br>&amp;&#x3D;\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-1} \quad \because \mathbf{L}</em>{1}^{\prime}\mathbf{X} &#x3D; \mathbf{I}</em>{p} \<br>\end{aligned}<br>$$<br>因此，我们得到<br>$$<br>\mathbf{y}_1 \mid \mathbf{y}_2 \sim \mathrm{N}\left(\boldsymbol{\beta}+\mathbf{y}_2^{<em>}, \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-1}\right)<br>$$<br>其中 $\mathbf{y}_2^{</em>} &#x3D; \mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{y}_2$ 。</p>
-<p>因此 $\mathbf{y}<em>1 \mid \mathbf{y}<em>2$ 的对数似然值可以写成<br>$$<br>l(\mathbf{y}<em>1 \mid \mathbf{y}<em>2) &#x3D;  -\frac{1}{2}\left( p \times \ln (2 \pi) + \ln |\mathbf{(X^{\prime}V^{-1}X)}^{-1}|+\left(\mathbf{y}</em>{1}-\boldsymbol{\beta}-\mathbf{y}<em>2^{*}\right)^{\prime}\mathbf{(X^{\prime}V^{-1}X)} \left(\mathbf{y}</em>{1}-\boldsymbol{\beta}-\mathbf{y}<em>2^{*}\right) \right)<br>$$<br>因为 $l(\mathbf{L}^{\prime} \mathbf{y})  &#x3D; l(\mathbf{y}</em>{1}|\mathbf{y}</em>{2}) + l(\mathbf{y}</em>{2})$ ，因此<strong>左右两边的对数项也相等</strong>，得到：<br>$$<br>\ln |\mathbf{\mathbf{L}^{\prime}V\mathbf{L}}| &#x3D; \ln |\mathbf{L</em>{2}^{\prime}VL_{2}}| + \ln |\mathbf{(X^{\prime}V^{-1}X)}^{-1}|<br>$$<br>化简得到 (因为 $\ln |\mathbf{\mathbf{L}^{\prime}V\mathbf{L}}| &#x3D; \ln |\mathbf{L}^{\prime}| + \ln | \mathbf{V} | +\ln |\mathbf{L}| &#x3D; \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{V}|$ )<br>$$<br>\ln |\mathbf{L_{2}^{\prime}VL_{2}}| &#x3D; \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{V}| + \ln |\mathbf{X^{\prime}V^{-1}X}|<br>$$<br>因此 REML （ $\mathbf{y}<em>{2}$ ）的对数似然函数可以写为（前面两项是常数项，因为不包含参数）<br>$$<br>l(\mathbf{y}</em>{2})<br>&#x3D; -\frac{1}{2}\left( (n-p) \times \ln (2 \pi) + \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{V}| + \ln |\mathbf{X^{\prime}V^{-1}X}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right)<br>$$<br>根据舒尔补公式，系数矩阵的行列式可以写为<br>$$<br>\begin{aligned}<br>|\mathbf{C}| &amp; &#x3D;\left|\mathbf{C}<em>{Z Z}\right|\left|\mathbf{C}</em>{X X}-\mathbf{C}<em>{X Z} \mathbf{C}</em>{Z Z}^{-1} \mathbf{C}_{Z X}\right| \<br>&amp; &#x3D;\left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right|\left|\mathbf{X}^{\prime} \mathbf{R}^{-1}\mathbf{X}-\mathbf{X}^{\prime} \mathbf{R}^{-1}\mathbf{Z}(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1})^{-1}\mathbf{Z}^{\prime} \mathbf{R}^{-1}\mathbf{X}\right| \</p>
-<p>&amp; &#x3D;\left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right|\left|\mathbf{X}^{\prime} \left(\mathbf{R^{-1}-R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \right) \mathbf{X}\right| \<br>&amp; &#x3D;\left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right|\left|\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right|<br>\end{aligned}<br>$$<br>因此，我们得到 $\ln |\mathbf{X^{\prime}V^{-1}X}| &#x3D; \ln |\mathbf{C}| - \ln \left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right|$</p>
-<p>对于 $|\mathbf{V}|$ ，我们进行推导得到，其中 $q$ 为 $\mathbf{G}$ 的维度。<br>$$<br>\begin{aligned}<br>|\mathbf{V}| &amp;&#x3D; |\mathbf{R+ZGZ^{\prime}}| \<br>&amp;&#x3D; |\mathbf{R}||\mathbf{I_{q}+Z^{\prime}R^{-1}ZG}| \quad \because |\mathbf{A}+\mathbf{B} \mathbf{C}|&#x3D;|\mathbf{A}|\left|\mathbf{I}_n+\mathbf{C} \mathbf{A}^{-1} \mathbf{B}\right| \quad \text{见附录1}\<br>&amp;&#x3D; |\mathbf{R}||\mathbf{G^{-1}+Z^{\prime}R^{-1}Z}||\mathbf{G}|<br>\end{aligned}<br>$$<br>因此 $\ln |\mathbf{V}| &#x3D; \ln |\mathbf{R}| + \ln|\mathbf{G^{-1}+Z^{\prime}R^{-1}Z}|+\ln|\mathbf{G}|$ 。</p>
-<p>因此我们得到<br>$$<br>\begin{aligned}<br>&amp;\ln |\mathbf{X^{\prime}V^{-1}X}| + \ln |\mathbf{V}| \<br>&amp;&#x3D; \ln |\mathbf{C}| - \ln \left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right| + \ln |\mathbf{R}| + \ln|\mathbf{G^{-1}+Z^{\prime}R^{-1}Z}|+\ln|\mathbf{G}| \<br>&amp;&#x3D; \ln |\mathbf{C}|  + \ln |\mathbf{R}| +\ln|\mathbf{G}| \<br>&amp;&#x3D;  \ln |\mathbf{R}| +\ln|\mathbf{G}| + \ln |\mathbf{C}| \</p>
-<p>\end{aligned}<br>$$<br>代入 $l(\mathbf{y}<em>{2})$ 得到<br>$$<br>\begin{aligned}<br>l(\mathbf{y}</em>{2})<br>&amp;&#x3D; -\frac{1}{2}\left( (n-p) \times \ln (2 \pi) + \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| +\ln |\mathbf{V}| + \ln |\mathbf{X^{\prime}V^{-1}X}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right) \<br>&amp;&#x3D; -\frac{1}{2}\left((n-p) \times \ln (2 \pi) + \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{R}| +\ln|\mathbf{G}| +\ln |\mathbf{C}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right) \<br>\end{aligned}<br>$$<br>左右乘以 -2  ，得到<br>$$<br>-2l &#x3D; (n-p) \times \ln (2 \pi) + \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{R}| +\ln|\mathbf{G}| +\ln |\mathbf{C}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}<br>$$<br>忽略常数项，得到<br>$$<br>-2l \propto \ln |\mathbf{R}| +\ln|\mathbf{G}| +\ln |\mathbf{C}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}<br>$$</p>
-<h1 id="ln-C-和-y’Py-的计算"><a href="#ln-C-和-y’Py-的计算" class="headerlink" title="ln|C|和 y’Py 的计算"></a>ln|C|和 y’Py 的计算</h1><p>这里有两种方法可以计算 $\ln |\mathbf{C}|$ 和  $\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}$ ，第一种是是使用高斯消去法，我们建立混合线性模型方程组的增广矩阵如下：<br>$$<br>\mathbf{M} &#x3D; \left[\begin{array}{ll}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{Z} &amp; \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right] &#x3D; \left[\begin{array}{c}<br>\mathbf{C} &amp; \mathbf{r} \<br>\mathbf{r}^{\prime} &amp;  \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right]<br>$$<br>利用高斯消去法消除其对角线下方的元素，将其变成一个上三角矩阵，此时最后一行的对角线元素就等于  $\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}$ 。因为我们可以用等价的方式，将 $\mathbf{C}$ 吸收近  $\mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y}$ ，具体方式就是第二行子矩阵减去 $\mathbf{r}^{\prime}\mathbf{C}^{-1}$ 乘以第一行（类似于元素级别的高斯消元，根据矩阵乘法的定义，这个行为是增广矩阵行之间的线性组合，和高斯消去法原理一样），得到<br>$$<br>\begin{aligned}<br>\left[\begin{array}{c}<br>\mathbf{C} &amp; \mathbf{r} \<br>\mathbf{r}^{\prime} &amp;  \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right] &amp;\underrightarrow{线性变换}<br>\left[\begin{array}{c}<br>\mathbf{C} &amp; \mathbf{r} \<br>\mathbf{r}^{\prime}-\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{C}&amp;  \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{r}<br>\end{array}\right] \<br>&amp; \quad \quad  &#x3D;<br>\left[\begin{array}{c}<br>\mathbf{C} &amp; \mathbf{r} \<br>\mathbf{0}&amp;  \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{r}<br>\end{array}\right] \</p>
-<p>\end{aligned}<br>$$<br>其中右下角元素进一步推导得到（根据之前 REML 公式的推导，我们得到 $\mathbf{y}^{\prime}\mathbf{PVPy} &#x3D; \mathbf{y}^{\prime} \mathbf{R}^{-1} (\mathbf{y} - \mathbf{X} \boldsymbol{\beta} - \mathbf{Z}\mathbf{u})$ ）。<br>$$<br>\begin{aligned}<br>\mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{r} &amp;&#x3D; \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime} \mathbf{s} \quad \because \mathbf{Cs&#x3D;r} \<br>&amp;&#x3D; \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} - \left[\begin{array}{ll} \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \end{array}\right]  \left[\begin{array}{ll} \boldsymbol{\beta} \ \mathbf{u} \end{array}\right] \<br>&amp;&#x3D; \mathbf{y}^{\prime} \mathbf{R}^{-1} (\mathbf{y} - \mathbf{X} \boldsymbol{\beta} - \mathbf{Z}\mathbf{u}) \<br>&amp;&#x3D; \mathbf{y}^{\prime}\mathbf{PVPy} \<br>&amp;&#x3D; \mathbf{y}^{\prime}\mathbf{Py} \quad \because \mathbf{PVP&#x3D;P} \<br>\end{aligned}<br>$$<br>高斯消元后， $\ln |\mathbf{C}|$  就是其前 n 个对角线元素的对数值之和，即<br>$$<br>\ln |\mathbf{C}| &#x3D; \ln U_{11} + \ln U_{22} + \cdots + \ln U_{nn}<br>$$<br>第二种方法是使用 Cholesky 分解，我们对系数矩阵进行分解，得到<br>$$<br>\mathbf{C} &#x3D; \mathbf{L}\mathbf{L}^{\prime}<br>$$<br>通过三角方程组求解，我们可以很容易地求解，得到 $\mathbf{s}$ 。</p>
-<p>通过推导，我们得到<br>$$<br>\begin{aligned}<br>&amp;\mathbf{Py} \<br>&amp;&#x3D; \mathbf{V^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>&amp;&#x3D; \left( \mathbf{R^{-1}-R^{-1}Z\left(Z^{\prime}R^{-1}Z+G^{-1}\right)^{-1}Z^{\prime}R^{-1}} \right)(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>&amp;&#x3D; \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})- \mathbf{R^{-1}Z\left(Z^{\prime}R^{-1}Z+G^{-1}\right)^{-1}Z^{\prime}R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>&amp;&#x3D; \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})- \mathbf{R^{-1}Z}\mathbf{u} \quad \because \mathbf{u} &#x3D;\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta})  \<br>&amp;&#x3D; \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta} -\mathbf{Z}\mathbf{u}) \<br>&amp;&#x3D; \mathbf{R^{-1}}\mathbf{e} \<br>\end{aligned}<br>$$<br>此时我们可以通过 $\mathbf{y^{\prime}R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\hat{\beta}} -\mathbf{Z}\mathbf{\hat{u}})$ 计算   $\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}$  。对于  $\ln |\mathbf{C}|$   ，我们有<br>$$<br>\ln |\mathbf{C}| &#x3D; 2\ln |\mathbf{L}|<br>$$<br>如果我们对增广矩阵 $\mathbf{M}$ 进行 Cholesky 分解，则有<br>$$<br>\begin{aligned}<br>\ln |\mathbf{C}| &amp;&#x3D; 2 \sum_{i&#x3D;1}^{n} \ln l_{ii} \<br>\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} &amp;&#x3D; l_{(n+1),(n+1)}^{2}<br>\end{aligned}<br>$$<br>第一条证明略，第二条证明如下，根据舒尔补公式，我们有<br>$$<br>|\mathbf{M}| &#x3D; |\mathbf{C}||\mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{r}| &#x3D;|\mathbf{C}||\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}| &#x3D; |\mathbf{C}|\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}<br>$$<br>根据Cholesky 分解，我们有<br>$$<br>|\mathbf{M}| &#x3D; \prod_{i&#x3D;1}^{n+1}  l_{ii}^{2}<br>$$<br> 因此我们得到<br>$$<br>\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}  &#x3D; \frac{\prod_{i&#x3D;1}^{n+1}  l_{ii}^{2}}{\prod_{i&#x3D;1}^{n}  l_{ii}^{2}} &#x3D; l_{(n+1),(n+1)}^{2}<br>$$</p>
-<h1 id="DF-REML"><a href="#DF-REML" class="headerlink" title="DF-REML"></a>DF-REML</h1><p>非求导算法 (deritative-free, DF) 顾名思义即不计算导数对于不同的参数直接计算似然函数值，从中找到使得似然函数最大的一组参数。比如最简单的算法是将整个参数空间划分成 $n$ 个网格，每个网格中取一个点，然后计算一次似然函数值，找出最大值。</p>
+<h1>推导 REML 似然函数</h1>
+<p>这里只是进一步推导REML的似然函数。</p>
+<p>对于表型 $\mathbf{y}$ ，其对数似然函数如下（$n$ 为表型数目）<br>
+$$<br>
+l=-\frac{1}{2}\left( n \times \ln (2 \pi) +\ln |\mathbf{V}|+(\mathbf{y}-\mathbf{X} \beta)^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \beta)\right)<br>
+$$<br>
+Verbyla (1990) 提出一个非奇异矩阵 $\mathbf{L} = [\mathbf{L}<em>{1} \ \mathbf{L}</em>{2} ]$ ， 其中 $\mathbf{L}<em>{1}$ 和  $\mathbf{L}</em>{2}$ 分别为 $n \times p$ 和 $n \times (n-p)$ 的矩阵（$n$ 为表型数目，$p$ 为 $\mathbf{X}$ 的列数，<strong>假设 $\mathbf{X}$ 满秩</strong>，如果不满秩可以提取其中一个满秩的子矩阵 ），并且满足<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{L}<em>{1}^{\prime}\mathbf{X} &amp;= \mathbf{I}</em>{p} \<br>
+\mathbf{L}<em>{2}^{\prime}\mathbf{X} &amp;= \mathbf{0}<br>
+\end{aligned}<br>
+$$<br>
+我们对表型  $\mathbf{y}$  进行线性转换得到：<br>
+$$<br>
+\mathbf{L}^{\prime} \mathbf{y}=\left[\begin{array}{l}<br>
+\mathbf{L}<em>1^{\prime} \mathbf{y} \<br>
+\mathbf{L}<em>2^{\prime} \mathbf{y}<br>
+\end{array}\right]=\left[\begin{array}{l}<br>
+\mathbf{y}<em>1 \<br>
+\mathbf{y}<em>2<br>
+\end{array}\right]<br>
+$$<br>
+转换后的数据服从分布：<br>
+$$<br>
+\left[\begin{array}{l}<br>
+\mathbf{y}<em>1 \<br>
+\mathbf{y}<em>2<br>
+\end{array}\right] \sim \mathrm{N}\left(\left[\begin{array}{l}<br>
+\boldsymbol{\beta} \<br>
+\mathbf{0}<br>
+\end{array}\right], \left[\begin{array}{ll}<br>
+\mathbf{L}<em>1^{\prime} \mathbf{V} \mathbf{L}<em>1 &amp; \mathbf{L}<em>1^{\prime} \mathbf{V} \mathbf{L}<em>2 \<br>
+\mathbf{L}<em>2^{\prime} \mathbf{V} \mathbf{L}<em>1 &amp; \mathbf{L}<em>2^{\prime} \mathbf{V} \mathbf{L}<em>2<br>
+\end{array}\right]\right)<br>
+$$<br>
+根据概率统计公式，我们有 $f(\mathbf{L}^{\prime} \mathbf{y}) = f(\mathbf{y}</em>{1},\mathbf{y}</em>{2}) = f(\mathbf{y}</em>{1}|\mathbf{y}</em>{2})f(\mathbf{y}</em>{2})$  ，因此其对数似然函数满足<br>
+$$<br>
+l(\mathbf{L}^{\prime} \mathbf{y})  = l(\mathbf{y}</em>{1}|\mathbf{y}</em>{2}) + l(\mathbf{y}</em>{2})<br>
+$$<br>
+首先对于 $\mathbf{L}^{\prime} \mathbf{y}$ ，我们有<br>
+$$<br>
+l(\mathbf{L}^{\prime} \mathbf{y})=-\frac{1}{2}\left( n \times \ln (2 \pi) +\ln |\mathbf{\mathbf{L}^{\prime}V\mathbf{L}}|+\left[\begin{array}{c}<br>
+\left(\mathbf{y}<em>1-\boldsymbol{\beta}\right)^{\prime} &amp; \mathbf{y}<em>2^{\prime}<br>
+\end{array}\right]\left[\mathbf{L}^{\prime}\mathbf{V}\mathbf{L}\right]^{-1}\left[\begin{array}{c}<br>
+\mathbf{y}<em>1-\boldsymbol{\beta} \<br>
+\mathbf{y}<em>2<br>
+\end{array}\right]\right)<br>
+$$<br>
+对于 $\mathbf{y}</em>{2}$ ，我们有<br>
+$$<br>
+\begin{aligned}<br>
+l(\mathbf{y}</em>{2}) &amp;= -\frac{1}{2}\left( (n-p) \times \ln (2 \pi) + \ln |\mathbf{L</em>{2}^{\prime}VL</em>{2}}|+\mathbf{y}^{\prime} \mathbf{L}</em>{2} \left(\mathbf{L</em>{2}^{\prime}VL</em>{2}}\right)^{-1}\mathbf{L}</em>{2}^{\prime}\mathbf{y} \right) \<br>
+&amp;= -\frac{1}{2}\left( (n-p) \times \ln (2 \pi) + \ln |\mathbf{L</em>{2}^{\prime}VL</em>{2}}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right) \quad \because  \mathbf{P} = \mathbf{L}</em>{2} \left(\mathbf{L_{2}^{\prime}VL_{2}}\right)^{-1}\mathbf{L}_{2}^{\prime} \</p>
+<p>\end{aligned}<br>
+$$<br>
+根据正态分布的条件分布公式<br>
+$$<br>
+\begin{aligned}<br>
+E(\mathbf{y} \mid \mathbf{x}) &amp; =\boldsymbol{\mu}<em>y+\boldsymbol{\Sigma}</em>{y x} \boldsymbol{\Sigma}<em>{x x}^{-1}\left(\mathbf{x}-\boldsymbol{\mu}<em>x\right) \<br>
+\operatorname{cov}(\mathbf{y} \mid \mathbf{x}) &amp; =\boldsymbol{\Sigma}</em>{y y}-\boldsymbol{\Sigma}</em>{y x} \boldsymbol{\Sigma}<em>{x x}^{-1} \boldsymbol{\Sigma}</em>{x y}<br>
+\end{aligned}<br>
+$$<br>
+我们得到<br>
+$$<br>
+\mathbf{y}_1 \mid \mathbf{y}_2 \sim \mathrm{N}\left(\boldsymbol{\beta}+\mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{y}_2, \mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_1-\mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_1\right)<br>
+$$<br>
+其协方差部分可以进一步推导：<br>
+$$<br>
+\begin{aligned}<br>
+&amp; \quad \mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_1-\mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_1 \<br>
+&amp;= \mathbf{L}_1^{\prime} \left(\mathbf{V} - \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{L}_2^{\prime} \mathbf{V} \right)\mathbf{L}_1 \<br>
+&amp;= \mathbf{L}_1^{\prime} \left(\mathbf{V} - \mathbf{V} \mathbf{P} \mathbf{V} \right)\mathbf{L}_1 \<br>
+&amp;= \mathbf{L}_1^{\prime} \left(\mathbf{V} - \mathbf{V} \left(\mathbf{V}^{-1}-\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{V} \right)\mathbf{L}_1 \<br>
+&amp;= \mathbf{L}<em>1^{\prime}  \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime}  \mathbf{L}<em>1 \<br>
+&amp;=\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-1} \quad \because \mathbf{L}</em>{1}^{\prime}\mathbf{X} = \mathbf{I}</em>{p} \<br>
+\end{aligned}<br>
+$$<br>
+因此，我们得到<br>
+$$<br>
+\mathbf{y}_1 \mid \mathbf{y}_2 \sim \mathrm{N}\left(\boldsymbol{\beta}+\mathbf{y}_2^{<em>}, \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-1}\right)<br>
+$$<br>
+其中 $\mathbf{y}_2^{</em>} = \mathbf{L}_1^{\prime} \mathbf{V} \mathbf{L}_2\left(\mathbf{L}_2^{\prime} \mathbf{V} \mathbf{L}_2\right)^{-1} \mathbf{y}_2$ 。</p>
+<p>因此 $\mathbf{y}<em>1 \mid \mathbf{y}<em>2$ 的对数似然值可以写成<br>
+$$<br>
+l(\mathbf{y}<em>1 \mid \mathbf{y}<em>2) =  -\frac{1}{2}\left( p \times \ln (2 \pi) + \ln |\mathbf{(X^{\prime}V^{-1}X)}^{-1}|+\left(\mathbf{y}</em>{1}-\boldsymbol{\beta}-\mathbf{y}<em>2^{*}\right)^{\prime}\mathbf{(X^{\prime}V^{-1}X)} \left(\mathbf{y}</em>{1}-\boldsymbol{\beta}-\mathbf{y}<em>2^{*}\right) \right)<br>
+$$<br>
+因为 $l(\mathbf{L}^{\prime} \mathbf{y})  = l(\mathbf{y}</em>{1}|\mathbf{y}</em>{2}) + l(\mathbf{y}</em>{2})$ ，因此<strong>左右两边的对数项也相等</strong>，得到：<br>
+$$<br>
+\ln |\mathbf{\mathbf{L}^{\prime}V\mathbf{L}}| = \ln |\mathbf{L</em>{2}^{\prime}VL_{2}}| + \ln |\mathbf{(X^{\prime}V^{-1}X)}^{-1}|<br>
+$$<br>
+化简得到 (因为 $\ln |\mathbf{\mathbf{L}^{\prime}V\mathbf{L}}| = \ln |\mathbf{L}^{\prime}| + \ln | \mathbf{V} | +\ln |\mathbf{L}| = \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{V}|$ )<br>
+$$<br>
+\ln |\mathbf{L_{2}^{\prime}VL_{2}}| = \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{V}| + \ln |\mathbf{X^{\prime}V^{-1}X}|<br>
+$$<br>
+因此 REML （ $\mathbf{y}<em>{2}$ ）的对数似然函数可以写为（前面两项是常数项，因为不包含参数）<br>
+$$<br>
+l(\mathbf{y}</em>{2})<br>
+= -\frac{1}{2}\left( (n-p) \times \ln (2 \pi) + \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{V}| + \ln |\mathbf{X^{\prime}V^{-1}X}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right)<br>
+$$<br>
+根据舒尔补公式，系数矩阵的行列式可以写为<br>
+$$<br>
+\begin{aligned}<br>
+|\mathbf{C}| &amp; =\left|\mathbf{C}<em>{Z Z}\right|\left|\mathbf{C}</em>{X X}-\mathbf{C}<em>{X Z} \mathbf{C}</em>{Z Z}^{-1} \mathbf{C}_{Z X}\right| \<br>
+&amp; =\left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right|\left|\mathbf{X}^{\prime} \mathbf{R}^{-1}\mathbf{X}-\mathbf{X}^{\prime} \mathbf{R}^{-1}\mathbf{Z}(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1})^{-1}\mathbf{Z}^{\prime} \mathbf{R}^{-1}\mathbf{X}\right| \</p>
+<p>&amp; =\left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right|\left|\mathbf{X}^{\prime} \left(\mathbf{R^{-1}-R^{-1}Z(Z^{\prime}R^{-1}Z+G^{-1})^{-1}Z^{\prime}R^{-1}} \right) \mathbf{X}\right| \<br>
+&amp; =\left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right|\left|\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right|<br>
+\end{aligned}<br>
+$$<br>
+因此，我们得到 $\ln |\mathbf{X^{\prime}V^{-1}X}| = \ln |\mathbf{C}| - \ln \left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right|$</p>
+<p>对于 $|\mathbf{V}|$ ，我们进行推导得到，其中 $q$ 为 $\mathbf{G}$ 的维度。<br>
+$$<br>
+\begin{aligned}<br>
+|\mathbf{V}| &amp;= |\mathbf{R+ZGZ^{\prime}}| \<br>
+&amp;= |\mathbf{R}||\mathbf{I_{q}+Z^{\prime}R^{-1}ZG}| \quad \because |\mathbf{A}+\mathbf{B} \mathbf{C}|=|\mathbf{A}|\left|\mathbf{I}_n+\mathbf{C} \mathbf{A}^{-1} \mathbf{B}\right| \quad \text{见附录1}\<br>
+&amp;= |\mathbf{R}||\mathbf{G^{-1}+Z^{\prime}R^{-1}Z}||\mathbf{G}|<br>
+\end{aligned}<br>
+$$<br>
+因此 $\ln |\mathbf{V}| = \ln |\mathbf{R}| + \ln|\mathbf{G^{-1}+Z^{\prime}R^{-1}Z}|+\ln|\mathbf{G}|$ 。</p>
+<p>因此我们得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\ln |\mathbf{X^{\prime}V^{-1}X}| + \ln |\mathbf{V}| \<br>
+&amp;= \ln |\mathbf{C}| - \ln \left|\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right| + \ln |\mathbf{R}| + \ln|\mathbf{G^{-1}+Z^{\prime}R^{-1}Z}|+\ln|\mathbf{G}| \<br>
+&amp;= \ln |\mathbf{C}|  + \ln |\mathbf{R}| +\ln|\mathbf{G}| \<br>
+&amp;=  \ln |\mathbf{R}| +\ln|\mathbf{G}| + \ln |\mathbf{C}| \</p>
+<p>\end{aligned}<br>
+$$<br>
+代入 $l(\mathbf{y}<em>{2})$ 得到<br>
+$$<br>
+\begin{aligned}<br>
+l(\mathbf{y}</em>{2})<br>
+&amp;= -\frac{1}{2}\left( (n-p) \times \ln (2 \pi) + \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| +\ln |\mathbf{V}| + \ln |\mathbf{X^{\prime}V^{-1}X}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right) \<br>
+&amp;= -\frac{1}{2}\left((n-p) \times \ln (2 \pi) + \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{R}| +\ln|\mathbf{G}| +\ln |\mathbf{C}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} \right) \<br>
+\end{aligned}<br>
+$$<br>
+左右乘以 -2  ，得到<br>
+$$<br>
+-2l = (n-p) \times \ln (2 \pi) + \ln |\mathbf{\mathbf{L}^{\prime}\mathbf{L}}| + \ln |\mathbf{R}| +\ln|\mathbf{G}| +\ln |\mathbf{C}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}<br>
+$$<br>
+忽略常数项，得到<br>
+$$<br>
+-2l \propto \ln |\mathbf{R}| +\ln|\mathbf{G}| +\ln |\mathbf{C}|+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}<br>
+$$</p>
+<h1>ln|C|和 y’Py 的计算</h1>
+<p>这里有两种方法可以计算 $\ln |\mathbf{C}|$ 和  $\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}$ ，第一种是是使用高斯消去法，我们建立混合线性模型方程组的增广矩阵如下：<br>
+$$<br>
+\mathbf{M} = \left[\begin{array}{ll}<br>
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
+\mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{Z} &amp; \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
+\end{array}\right] = \left[\begin{array}{c}<br>
+\mathbf{C} &amp; \mathbf{r} \<br>
+\mathbf{r}^{\prime} &amp;  \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
+\end{array}\right]<br>
+$$<br>
+利用高斯消去法消除其对角线下方的元素，将其变成一个上三角矩阵，此时最后一行的对角线元素就等于  $\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}$ 。因为我们可以用等价的方式，将 $\mathbf{C}$ 吸收近  $\mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y}$ ，具体方式就是第二行子矩阵减去 $\mathbf{r}^{\prime}\mathbf{C}^{-1}$ 乘以第一行（类似于元素级别的高斯消元，根据矩阵乘法的定义，这个行为是增广矩阵行之间的线性组合，和高斯消去法原理一样），得到<br>
+$$<br>
+\begin{aligned}<br>
+\left[\begin{array}{c}<br>
+\mathbf{C} &amp; \mathbf{r} \<br>
+\mathbf{r}^{\prime} &amp;  \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
+\end{array}\right] &amp;\underrightarrow{线性变换}<br>
+\left[\begin{array}{c}<br>
+\mathbf{C} &amp; \mathbf{r} \<br>
+\mathbf{r}^{\prime}-\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{C}&amp;  \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{r}<br>
+\end{array}\right] \<br>
+&amp; \quad \quad  =<br>
+\left[\begin{array}{c}<br>
+\mathbf{C} &amp; \mathbf{r} \<br>
+\mathbf{0}&amp;  \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{r}<br>
+\end{array}\right] \</p>
+<p>\end{aligned}<br>
+$$<br>
+其中右下角元素进一步推导得到（根据之前 REML 公式的推导，我们得到 $\mathbf{y}^{\prime}\mathbf{PVPy} = \mathbf{y}^{\prime} \mathbf{R}^{-1} (\mathbf{y} - \mathbf{X} \boldsymbol{\beta} - \mathbf{Z}\mathbf{u})$ ）。<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{r} &amp;= \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime} \mathbf{s} \quad \because \mathbf{Cs=r} \<br>
+&amp;= \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} - \left[\begin{array}{ll} \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \end{array}\right]  \left[\begin{array}{ll} \boldsymbol{\beta} \ \mathbf{u} \end{array}\right] \<br>
+&amp;= \mathbf{y}^{\prime} \mathbf{R}^{-1} (\mathbf{y} - \mathbf{X} \boldsymbol{\beta} - \mathbf{Z}\mathbf{u}) \<br>
+&amp;= \mathbf{y}^{\prime}\mathbf{PVPy} \<br>
+&amp;= \mathbf{y}^{\prime}\mathbf{Py} \quad \because \mathbf{PVP=P} \<br>
+\end{aligned}<br>
+$$<br>
+高斯消元后， $\ln |\mathbf{C}|$  就是其前 n 个对角线元素的对数值之和，即<br>
+$$<br>
+\ln |\mathbf{C}| = \ln U_{11} + \ln U_{22} + \cdots + \ln U_{nn}<br>
+$$<br>
+第二种方法是使用 Cholesky 分解，我们对系数矩阵进行分解，得到<br>
+$$<br>
+\mathbf{C} = \mathbf{L}\mathbf{L}^{\prime}<br>
+$$<br>
+通过三角方程组求解，我们可以很容易地求解，得到 $\mathbf{s}$ 。</p>
+<p>通过推导，我们得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{Py} \<br>
+&amp;= \mathbf{V^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>
+&amp;= \left( \mathbf{R^{-1}-R^{-1}Z\left(Z^{\prime}R^{-1}Z+G^{-1}\right)^{-1}Z^{\prime}R^{-1}} \right)(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>
+&amp;= \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})- \mathbf{R^{-1}Z\left(Z^{\prime}R^{-1}Z+G^{-1}\right)^{-1}Z^{\prime}R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta}) \<br>
+&amp;= \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})- \mathbf{R^{-1}Z}\mathbf{u} \quad \because \mathbf{u} =\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta})  \<br>
+&amp;= \mathbf{R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta} -\mathbf{Z}\mathbf{u}) \<br>
+&amp;= \mathbf{R^{-1}}\mathbf{e} \<br>
+\end{aligned}<br>
+$$<br>
+此时我们可以通过 $\mathbf{y^{\prime}R^{-1}}(\mathbf{y}-\mathbf{X}\boldsymbol{\hat{\beta}} -\mathbf{Z}\mathbf{\hat{u}})$ 计算   $\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}$  。对于  $\ln |\mathbf{C}|$   ，我们有<br>
+$$<br>
+\ln |\mathbf{C}| = 2\ln |\mathbf{L}|<br>
+$$<br>
+如果我们对增广矩阵 $\mathbf{M}$ 进行 Cholesky 分解，则有<br>
+$$<br>
+\begin{aligned}<br>
+\ln |\mathbf{C}| &amp;= 2 \sum_{i=1}^{n} \ln l_{ii} \<br>
+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y} &amp;= l_{(n+1),(n+1)}^{2}<br>
+\end{aligned}<br>
+$$<br>
+第一条证明略，第二条证明如下，根据舒尔补公式，我们有<br>
+$$<br>
+|\mathbf{M}| = |\mathbf{C}||\mathbf{y}^{\prime} \mathbf{R}^{-1} \mathbf{y} -\mathbf{r}^{\prime}\mathbf{C}^{-1} \mathbf{r}| =|\mathbf{C}||\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}| = |\mathbf{C}|\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}<br>
+$$<br>
+根据Cholesky 分解，我们有<br>
+$$<br>
+|\mathbf{M}| = \prod_{i=1}^{n+1}  l_{ii}^{2}<br>
+$$<br>
+因此我们得到<br>
+$$<br>
+\mathbf{y}^{\prime} \mathbf{P} \mathbf{y}  = \frac{\prod_{i=1}^{n+1}  l_{ii}^{2}}{\prod_{i=1}^{n}  l_{ii}^{2}} = l_{(n+1),(n+1)}^{2}<br>
+$$</p>
+<h1>DF-REML</h1>
+<p>非求导算法 (deritative-free, DF) 顾名思义即不计算导数对于不同的参数直接计算似然函数值，从中找到使得似然函数最大的一组参数。比如最简单的算法是将整个参数空间划分成 $n$ 个网格，每个网格中取一个点，然后计算一次似然函数值，找出最大值。</p>
 <p>目前DFREML 中推荐的方法主要是 Simplex 法，其基本思想如下，假设需要估计的方差组分数目为 $p$ ，那么我们首先选择 $p+1$ 组方差组分初始值，每一组初始值就相当于 $p$ 维空间中的一个点，这里也称为一个 Simplex ，然后我们通过比较这  $p+1$ 组方差组分的似然函数值，淘汰其中最差的一个点，并通过某种方式产生一个新的点加入其中，如此不停迭代下去，不断向最大值运行，最终收敛于最大值。</p>
 <p>当需要估计的方差组分数目较少时，DF-REML 算法较为适用，反之其收敛较慢。</p>
-<h1 id="附录1：行列式性质"><a href="#附录1：行列式性质" class="headerlink" title="附录1：行列式性质"></a>附录1：行列式性质</h1><p>对于矩阵 $\mathbf{A}<em>{m \times m}, \mathbf{B}</em>{m \times n}, \mathbf{C}<em>{n \times m}$, 其中 $\mathbf{A}$ 可逆，则存在<br>$$<br>|\mathbf{A}+\mathbf{B} \mathbf{C}|&#x3D;|\mathbf{A}|\left|\mathbf{I}<em>m+\mathbf{A}^{-1} \mathbf{B} \mathbf{C}\right|&#x3D;|\mathbf{A}|\left|\mathbf{I}<em>n+\mathbf{C} \mathbf{A}^{-1} \mathbf{B}\right|<br>$$<br>第一个等式不用证明，我们证明第二个等式。<br>$$<br>\begin{aligned}<br>|\mathbf{A}+\mathbf{B} \mathbf{C}| &amp;&#x3D; \left| \left[\begin{array}{l}<br>\mathbf{I}</em>{n} &amp; \mathbf{0} \<br>\mathbf{B} &amp; \mathbf{I}</em>{m}<br>\end{array}\right] \left[\begin{array}{l}<br>\mathbf{I}</em>{n} &amp; -\mathbf{C} \<br>\mathbf{0} &amp; \mathbf{A+BC}<br>\end{array}\right]\right| \<br>&amp;&#x3D; \left|  \left[\begin{array}{l}<br>\mathbf{I}_{n} &amp; -\mathbf{C} \<br>\mathbf{B} &amp; \mathbf{A}<br>\end{array}\right]\right| \<br>&amp;&#x3D;|\mathbf{A}|\left|\mathbf{I}_n+\mathbf{C} \mathbf{A}^{-1} \mathbf{B}\right| \quad \because \text{舒尔补公式} \<br>\end{aligned}<br>$$<br>证明完毕。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p>Knight E. Improved iterative schemes for REML estimation of variance parameters in linear mixed models[D]. , 2008.</p>
+<h1>附录1：行列式性质</h1>
+<p>对于矩阵 $\mathbf{A}<em>{m \times m}, \mathbf{B}</em>{m \times n}, \mathbf{C}<em>{n \times m}$, 其中 $\mathbf{A}$ 可逆，则存在<br>
+$$<br>
+|\mathbf{A}+\mathbf{B} \mathbf{C}|=|\mathbf{A}|\left|\mathbf{I}<em>m+\mathbf{A}^{-1} \mathbf{B} \mathbf{C}\right|=|\mathbf{A}|\left|\mathbf{I}<em>n+\mathbf{C} \mathbf{A}^{-1} \mathbf{B}\right|<br>
+$$<br>
+第一个等式不用证明，我们证明第二个等式。<br>
+$$<br>
+\begin{aligned}<br>
+|\mathbf{A}+\mathbf{B} \mathbf{C}| &amp;= \left| \left[\begin{array}{l}<br>
+\mathbf{I}</em>{n} &amp; \mathbf{0} \<br>
+\mathbf{B} &amp; \mathbf{I}</em>{m}<br>
+\end{array}\right] \left[\begin{array}{l}<br>
+\mathbf{I}</em>{n} &amp; -\mathbf{C} \<br>
+\mathbf{0} &amp; \mathbf{A+BC}<br>
+\end{array}\right]\right| \<br>
+&amp;= \left|  \left[\begin{array}{l}<br>
+\mathbf{I}_{n} &amp; -\mathbf{C} \<br>
+\mathbf{B} &amp; \mathbf{A}<br>
+\end{array}\right]\right| \<br>
+&amp;=|\mathbf{A}|\left|\mathbf{I}_n+\mathbf{C} \mathbf{A}^{-1} \mathbf{B}\right| \quad \because \text{舒尔补公式} \<br>
+\end{aligned}<br>
+$$<br>
+证明完毕。</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>Knight E. Improved iterative schemes for REML estimation of variance parameters in linear mixed models[D]. , 2008.</p>
 </li>
-<li><p>Verbyla A P. A conditional derivation of residual maximum likelihood[J]. Australian Journal of Statistics, 1990, 32(2): 227-230.</p>
+<li>
+<p>Verbyla A P. A conditional derivation of residual maximum likelihood[J]. Australian Journal of Statistics, 1990, 32(2): 227-230.</p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://ccjou.wordpress.com/2013/06/07/%E5%88%86%E5%A1%8A%E7%9F%A9%E9%99%A3%E7%9A%84%E8%A1%8C%E5%88%97%E5%BC%8F/">分块矩阵的行列式</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="https://ccjou.wordpress.com/2013/06/07/%E5%88%86%E5%A1%8A%E7%9F%A9%E9%99%A3%E7%9A%84%E8%A1%8C%E5%88%97%E5%BC%8F/">分块矩阵的行列式</a></p>
 </li>
 </ol>
  
@@ -169,55 +412,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -516,30 +711,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

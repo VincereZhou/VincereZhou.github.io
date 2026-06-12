@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3.2k</span>
+            <span class="post-count">3.1k</span>
         </span>
     </span>
 
@@ -98,10 +98,26 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节介绍 <em>the minimum degree algorithm</em> ，我个人将其翻译为最小度数算法，我们这里看消元图的理论基础。</p>
 <span id="more"></span>
-
 <p>在这一章节中我们研究的排序算法称为 <em><strong>minimum degree algorithm</strong></em> (Rose) ，这是一个启发式算法，用于对 $\mathbf{A}$ 排序减少其分解时产生的 <code>fill-in</code>  数目。</p>
-<h1 id="Cholesky-分解"><a href="#Cholesky-分解" class="headerlink" title="Cholesky 分解"></a>Cholesky 分解</h1><p>设 $\mathbf{A}$ 是一个对称稀疏矩阵，其中的<strong>非零结构</strong> (<em>nonzero structure</em>) 定义为<br>$$<br>Nonz(\mathbf{A}) &#x3D; { { i,j } \mid a_{ij} \neq 0 \text{ and } i \neq j }<br>$$<br>假设  $\mathbf{A}$ 分解为 $\mathbf{LL^{T}}$ ，而 <em>filled matrix</em> $\mathbf{F(A)＝L+L^{T}}$，下文中我们用 $\mathbf{F}$ 替换 $\mathbf{F(A)}$ ，其相应的非零结构为<br>$$<br>Nonz(\mathbf{F}) &#x3D; { { i,j } \mid l_{ij} \neq 0 \text{ and } i \neq j }<br>$$<br>在本文中，<strong>我们假设精确的数值消除并不存在</strong>（就是说任意两个浮点数相减不能得到0），因此对于一个给定的非零结构 $Nonz(\mathbf{A})$，其相应的 $Nonz(\mathbf{F})$ 的结构就能完全确定。</p>
-<p>这个假设立刻推导出<br>$$<br>Nonz(\mathbf{A}) \subset Nonz(\mathbf{F})<br>$$<br>矩阵 $\mathbf{A}$ 的 <em>fill</em> 可以定义为<br>$$<br>Fill(\mathbf{A}) &#x3D; Nonz(\mathbf{F}) - Nonz(\mathbf{A})<br>$$<br>举个例子，假设存在下图中的矩阵，其中的 <em>fill-in</em> 用加号表示，其相应的集合为</p>
+<h1>Cholesky 分解</h1>
+<p>设 $\mathbf{A}$ 是一个对称稀疏矩阵，其中的<strong>非零结构</strong> (<em>nonzero structure</em>) 定义为<br>
+$$<br>
+Nonz(\mathbf{A}) = { { i,j } \mid a_{ij} \neq 0 \text{ and } i \neq j }<br>
+$$<br>
+假设  $\mathbf{A}$ 分解为 $\mathbf{LL^{T}}$ ，而 <em>filled matrix</em> $\mathbf{F(A)＝L+L^{T}}$，下文中我们用 $\mathbf{F}$ 替换 $\mathbf{F(A)}$ ，其相应的非零结构为<br>
+$$<br>
+Nonz(\mathbf{F}) = { { i,j } \mid l_{ij} \neq 0 \text{ and } i \neq j }<br>
+$$<br>
+在本文中，<strong>我们假设精确的数值消除并不存在</strong>（就是说任意两个浮点数相减不能得到0），因此对于一个给定的非零结构 $Nonz(\mathbf{A})$，其相应的 $Nonz(\mathbf{F})$ 的结构就能完全确定。</p>
+<p>这个假设立刻推导出<br>
+$$<br>
+Nonz(\mathbf{A}) \subset Nonz(\mathbf{F})<br>
+$$<br>
+矩阵 $\mathbf{A}$ 的 <em>fill</em> 可以定义为<br>
+$$<br>
+Fill(\mathbf{A}) = Nonz(\mathbf{F}) - Nonz(\mathbf{A})<br>
+$$<br>
+举个例子，假设存在下图中的矩阵，其中的 <em>fill-in</em> 用加号表示，其相应的集合为</p>
 
 $$
 \begin{aligned}
@@ -110,46 +126,123 @@ $$
 \end{aligned}
 $$
 
-<p><img src="/posts/9b2dddf7/56.png" alt="1"></p>
-<h2 id="Elimation-Graph-Model"><a href="#Elimation-Graph-Model" class="headerlink" title="Elimation Graph Model"></a>Elimation Graph Model</h2><p>我们现在联系 $\mathbf{A}$ 的高斯消元，与相应的图 $\mathcal{G}^{\mathbf{A}}$ 的变化。我们回顾一下分解的 <em>outer product form</em> ，第一步为<br>$$<br>\begin{aligned}<br>\boldsymbol{A} &amp;&#x3D;\boldsymbol{A}<em>{0}&#x3D;\boldsymbol{H}</em>{0}&#x3D;\left(\begin{array}{cc}<br>d_{1} &amp; \boldsymbol{v}<em>{1}^{T} \<br>\boldsymbol{v}</em>{1} &amp; \overline{\boldsymbol{H}}<em>{1}<br>\end{array}\right) \<br>&amp;&#x3D;\left(\begin{array}{cc}<br>\sqrt{d</em>{1}} &amp; \mathbf{0} \<br>\frac{\boldsymbol{v}<em>{1}}{\sqrt{d</em>{1}}} &amp; \boldsymbol{I}<em>{n-1}<br>\end{array}\right)\left(\begin{array}{cc}<br>1 &amp; \mathbf{0} \<br>\mathbf{0} &amp; \boldsymbol{H}</em>{1}<br>\end{array}\right)\left(\begin{array}{cc}<br>\sqrt{d_{1}} &amp; \frac{\boldsymbol{v}<em>{1}^{T}}{\sqrt{d</em>{1}}} \<br>\mathbf{0} &amp; \boldsymbol{I}<em>{n-1}<br>\end{array}\right) \<br>&amp;&#x3D;\boldsymbol{L}</em>{1} \boldsymbol{A}<em>{1} \boldsymbol{L}</em>{1}^{T},<br>\end{aligned}<br>$$<br>其中<br>$$<br>\boldsymbol{H}<em>{1}&#x3D;\overline{\boldsymbol{H}}</em>{1}-\frac{\boldsymbol{v}<em>{1} \boldsymbol{v}</em>{1}^{T}}{d_{1}}<br>$$<br>这一步会递归地应用于 $\mathbf{H}<em>{1}$， $\mathbf{H}</em>{2}$ 等。由于我们假设不存在精准的消除，因此根据上面的公式，如果 $\mathbf{\bar{H}<em>{1}}$ 中的   ${j,k}$  元素不为0，或者 $(v</em>{1})<em>{j} \neq 0 \text{ and } (v</em>{1})<em>{k} \neq 0$ ，$\mathbf{H}</em>{1}$ 矩阵的 ${j,k}$ 元素才不为0。当第一个条件不成立，而第二个条件成立时，便产生了 <em>fill-in</em> 。下图中展示了这个情况</p>
-<p>　<img src="/posts/9b2dddf7/57.png" alt="1"></p>
+<p><img src="56.png" alt="1"></p>
+<h2 id="Elimation-Graph-Model">Elimation Graph Model</h2>
+<p>我们现在联系 $\mathbf{A}$ 的高斯消元，与相应的图 $\mathcal{G}^{\mathbf{A}}$ 的变化。我们回顾一下分解的 <em>outer product form</em> ，第一步为<br>
+$$<br>
+\begin{aligned}<br>
+\boldsymbol{A} &amp;=\boldsymbol{A}<em>{0}=\boldsymbol{H}</em>{0}=\left(\begin{array}{cc}<br>
+d_{1} &amp; \boldsymbol{v}<em>{1}^{T} \<br>
+\boldsymbol{v}</em>{1} &amp; \overline{\boldsymbol{H}}<em>{1}<br>
+\end{array}\right) \<br>
+&amp;=\left(\begin{array}{cc}<br>
+\sqrt{d</em>{1}} &amp; \mathbf{0} \<br>
+\frac{\boldsymbol{v}<em>{1}}{\sqrt{d</em>{1}}} &amp; \boldsymbol{I}<em>{n-1}<br>
+\end{array}\right)\left(\begin{array}{cc}<br>
+1 &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \boldsymbol{H}</em>{1}<br>
+\end{array}\right)\left(\begin{array}{cc}<br>
+\sqrt{d_{1}} &amp; \frac{\boldsymbol{v}<em>{1}^{T}}{\sqrt{d</em>{1}}} \<br>
+\mathbf{0} &amp; \boldsymbol{I}<em>{n-1}<br>
+\end{array}\right) \<br>
+&amp;=\boldsymbol{L}</em>{1} \boldsymbol{A}<em>{1} \boldsymbol{L}</em>{1}^{T},<br>
+\end{aligned}<br>
+$$<br>
+其中<br>
+$$<br>
+\boldsymbol{H}<em>{1}=\overline{\boldsymbol{H}}</em>{1}-\frac{\boldsymbol{v}<em>{1} \boldsymbol{v}</em>{1}^{T}}{d_{1}}<br>
+$$<br>
+这一步会递归地应用于 $\mathbf{H}<em>{1}$， $\mathbf{H}</em>{2}$ 等。由于我们假设不存在精准的消除，因此根据上面的公式，如果 $\mathbf{\bar{H}<em>{1}}$ 中的   ${j,k}$  元素不为0，或者 $(v</em>{1})<em>{j} \neq 0 \text{ and } (v</em>{1})<em>{k} \neq 0$ ，$\mathbf{H}</em>{1}$ 矩阵的 ${j,k}$ 元素才不为0。当第一个条件不成立，而第二个条件成立时，便产生了 <em>fill-in</em> 。下图中展示了这个情况</p>
+<p><img src="57.png" alt="1"></p>
 <p>当第一步分解完成之后，我们对  $\mathbf{H}_{1}$ 矩阵继续进行分解。</p>
 <p>现在我们看从  $\mathbf{H}<em>{0}$ 到  $\mathbf{H}</em>{1}$ 的转变过程中，其相应的图从 $\mathcal{G}^{\mathbf{H}<em>{0}}$ 到 $\mathcal{G}^{\mathbf{H}</em>{1}}$的变化，下图是一个例子。生成图  $\mathcal{G}^{\mathbf{H}_{1}}$的过程如下</p>
 <ol>
-<li>删除节点 $x_{1}$ 及其相应的边 </li>
+<li>删除节点 $x_{1}$ 及其相应的边</li>
 <li>添加边，使得图  $\mathcal{G}^{\mathbf{H}<em>{1}}$中的 $Adj(x</em>{1})$ 彼此之间相邻</li>
 </ol>
-<p>　<img src="/posts/9b2dddf7/58.png" alt="1"></p>
-<p>因此，就像 Rose 观察到的，对称矩阵的高斯消元（上面的 $\mathbf{H}<em>{1}$， $\mathbf{H}</em>{2}$ 等其实也一样就是高斯消元的结果 ）可以理解为生成一系列 <em>elimination graphs</em><br>$$<br>\mathcal{G}<em>{i}^{\alpha}&#x3D;\mathcal{G}^{\boldsymbol{H}</em>{i}}&#x3D;\left(X_{i}^{\alpha}, E_{i}^{\alpha}\right), \quad i&#x3D;1,2, \cdots, n-1<br>$$<br>其中 $\mathcal{G}<em>{i}^{\alpha}$ 是从 $\mathcal{G}</em>{i-1}^{\alpha}$ 中得到的，过程就和上面描述的一样。这里 $\alpha$ 是所有节点的标签，当我们已知所有节点的标签时，我们用标记 $\mathcal{G}<em>{i}$ 替换 $\mathcal{G}</em>{i}^{\alpha}$ 。在上图的消元过程，比如从  $\mathcal{G}<em>{1}$ 消除 $x</em>{2}$ 的过程中，产生了三个 <em>fill-in</em> 的边 ${x_{3}, x_{4}}, {x_{3}, x_{6}}, {x_{4}, x_{6}}$ 。</p>
-<p>设 $\mathbf{L}$ 是 $\mathbf{A}$ 的分解因子，定义 $\mathcal{G}^{\mathbf{A}}$的 <em>filled graph</em> 为  $\mathcal{G}^{\mathbf{F}} &#x3D; (X^{\mathbf{F}},E^{\mathbf{F}})$ ，其中 $\mathbf{F &#x3D; L + L^{T}}$ 。这里所有边的集合 $E^{\mathbf{F}}$包含了 $E^{\mathbf{A}}$ 中的所有边，加上分解过程中新增的边。</p>
+<p><img src="58.png" alt="1"></p>
+<p>因此，就像 Rose 观察到的，对称矩阵的高斯消元（上面的 $\mathbf{H}<em>{1}$， $\mathbf{H}</em>{2}$ 等其实也一样就是高斯消元的结果 ）可以理解为生成一系列 <em>elimination graphs</em><br>
+$$<br>
+\mathcal{G}<em>{i}^{\alpha}=\mathcal{G}^{\boldsymbol{H}</em>{i}}=\left(X_{i}^{\alpha}, E_{i}^{\alpha}\right), \quad i=1,2, \cdots, n-1<br>
+$$<br>
+其中 $\mathcal{G}<em>{i}^{\alpha}$ 是从 $\mathcal{G}</em>{i-1}^{\alpha}$ 中得到的，过程就和上面描述的一样。这里 $\alpha$ 是所有节点的标签，当我们已知所有节点的标签时，我们用标记 $\mathcal{G}<em>{i}$ 替换 $\mathcal{G}</em>{i}^{\alpha}$ 。在上图的消元过程，比如从  $\mathcal{G}<em>{1}$ 消除 $x</em>{2}$ 的过程中，产生了三个 <em>fill-in</em> 的边 ${x_{3}, x_{4}}, {x_{3}, x_{6}}, {x_{4}, x_{6}}$ 。</p>
+<p>设 $\mathbf{L}$ 是 $\mathbf{A}$ 的分解因子，定义 $\mathcal{G}^{\mathbf{A}}$的 <em>filled graph</em> 为  $\mathcal{G}^{\mathbf{F}} = (X^{\mathbf{F}},E^{\mathbf{F}})$ ，其中 $\mathbf{F = L + L^{T}}$ 。这里所有边的集合 $E^{\mathbf{F}}$包含了 $E^{\mathbf{A}}$ 中的所有边，加上分解过程中新增的边。</p>
 <p>$E^{\mathbf{F}}$ 和 $E^{\mathbf{A}}$ 的关系存在以下引理 (Parter)</p>
-<p><strong>引理</strong>：当且仅当 ${ x_{i}, x_{j}} \in E^{\mathbf{A}}$，或者  ${ x_{i}, x_{k}} \in E^{\mathbf{F}}$ and  ${ x_{k}, x_{j}} \in E^{\mathbf{F}}$ for some $k &lt; \min{i,j}$ ，才满足 ${ x_{i}, x_{j}} \in E^{\mathbf{F}}$ </p>
+<p><strong>引理</strong>：当且仅当 ${ x_{i}, x_{j}} \in E^{\mathbf{A}}$，或者  ${ x_{i}, x_{k}} \in E^{\mathbf{F}}$ and  ${ x_{k}, x_{j}} \in E^{\mathbf{F}}$ for some $k &lt; \min{i,j}$ ，才满足 ${ x_{i}, x_{j}} \in E^{\mathbf{F}}$</p>
 <p>根据这个引理，上图中得到的 $\mathcal{G}^{\mathbf{F}}$ 如下。发现了  $\mathcal{G}^{\mathbf{F}}$ ，我们就可以得到 $\mathbf{L}$ 矩阵的结构。</p>
-<p>　<img src="/posts/9b2dddf7/59.png" alt="1"></p>
-<h2 id="Modelling-Elimination-By-Reachable-Sets"><a href="#Modelling-Elimination-By-Reachable-Sets" class="headerlink" title="Modelling Elimination By Reachable Sets"></a>Modelling Elimination By Reachable Sets</h2><p>上面的章节中定义了 <em>elimination graphs</em> 的序列<br>$$<br>\mathcal{G}<em>{0} \rightarrow \mathcal{G}</em>{1} \rightarrow \cdots \rightarrow \mathcal{G}_{n-1}<br>$$<br>然后提供了一种递归的方式来确认 $E^{\mathbf{F}}$ ，我们这一章节的目标是采用 <em><strong>reachable sets</strong></em> 的概念来确认这些步骤。</p>
-<p>让我们首先研究在上图中 <em>fill edge</em> ${ x_{4}, x_{6} }$ 的形成过程。在 $\mathcal{G}<em>{1}$ ，存在路径：<br>$$<br>(x</em>{4}, x_{2}, x_{6})<br>$$<br>因此当 $x_{2}$ 被消除，被创建了 ${ x_{4}, x_{6} }$ 这条边。然而，${ x_{2}, x_{6} }$ 并不在原始的图中，这条边是由于路径 $(x_{2}, x_{1}, x_{6})$ 中的 $x_{1}$ 从  $\mathcal{G}_{0}$ 中消除而创建得到的。</p>
-<p> 联合这两个，我们得到  $\mathcal{G}<em>{0}$ 中的路径 $(x</em>{4}, x_{2}, x_{1}, x_{6})$ 才是生成  <em>fill edge</em> ${ x_{4}, x_{6} }$ 的真正原因，因此我们引入  <em><strong>reachable sets</strong></em> 的概念。</p>
-<p>设 $S$ 是节点集合的一个真子集，$x \notin S$ 。如果存在一个从 y 到 x 的路径 $(y, v_{1}, \cdots, v_{k},x)$ ，其中 $v_{i} \in S, 1 \leq i \leq k, k \geq 0$，则我们称节点 $x$ 是 <em>be reachable from a node $y$ through $S$</em> ，注意由于 $k$ 可以为 0，因此 $y$ 的任何不在 $S$ 中的相邻节点均 <em>be reachable from $y$ through $S$</em> </p>
-<p>这些节点的集合就是 <em>reachable set of y through S</em> ，标记为 $Reach(y, S)$ ，定义为<br>$$<br>\operatorname{Reach}(y, S)&#x3D;{x \notin S \mid x \text { is reachable from } y \text { through } S} .<br>$$<br>为了说明 <em>reachable set</em> 的概念，以下图为例，如果 $S &#x3D; {s_{1}, s_{2},s_{3},s_{4}}$ ，我们有<br>$$<br>\operatorname{Reach}(y, S)&#x3D;{ a,b,c}<br>$$<br>　因为存在以下路径 ${y,s_{2},s_{4},a}$，${y,b}$，${y,s_{1},c}$</p>
-<p><img src="/posts/9b2dddf7/60.png" alt="1"></p>
-<p>下面的定理说明通过 <em>reachable set</em> 来创建的 <em>filled graph</em> </p>
-<p><strong>定理</strong>：<br>$$<br>E^{\boldsymbol{F}}&#x3D;\left{\left{x_{i}, x_{j}\right} \mid x_{j} \in \operatorname{Reach}\left(x_{i},\left{x_{1}, x_{2}, \cdots, x_{i-1}\right}\right)\right} .<br>$$<br>证明：假设 $x_{j} \in \operatorname{Reach}\left(x_{i},\left{x_{1}, x_{2}, \cdots, x_{i-1}\right}\right)$ ，根据定义，在 $\mathcal{G}<em>{0}$ 中存在一条路径 $(x</em>{i},y_{1},\cdots, y_{t},x_{j})$ ，其中 $y_{k} \in \left{x_{1}, x_{2}, \cdots, x_{i-1}\right}$ 。如果 $t &#x3D; 0$ 或者 $t &#x3D; 1$ ，根据上面的引理就可以直接得到 $\left{x_{i}, x_{j}\right} \in E^{\mathbf{F}}$。如果 $t &gt; 1$ ，我们可以从 $y_{1},\cdots, y_{t}$ 中逐渐消除节点，使得 $t &#x3D; 0$ ，从而得到 $\left{x_{i}, x_{j}\right} \in E^{\mathbf{F}}$。</p>
+<p><img src="59.png" alt="1"></p>
+<h2 id="Modelling-Elimination-By-Reachable-Sets">Modelling Elimination By Reachable Sets</h2>
+<p>上面的章节中定义了 <em>elimination graphs</em> 的序列<br>
+$$<br>
+\mathcal{G}<em>{0} \rightarrow \mathcal{G}</em>{1} \rightarrow \cdots \rightarrow \mathcal{G}_{n-1}<br>
+$$<br>
+然后提供了一种递归的方式来确认 $E^{\mathbf{F}}$ ，我们这一章节的目标是采用 <em><strong>reachable sets</strong></em> 的概念来确认这些步骤。</p>
+<p>让我们首先研究在上图中 <em>fill edge</em> ${ x_{4}, x_{6} }$ 的形成过程。在 $\mathcal{G}<em>{1}$ ，存在路径：<br>
+$$<br>
+(x</em>{4}, x_{2}, x_{6})<br>
+$$<br>
+因此当 $x_{2}$ 被消除，被创建了 ${ x_{4}, x_{6} }$ 这条边。然而，${ x_{2}, x_{6} }$ 并不在原始的图中，这条边是由于路径 $(x_{2}, x_{1}, x_{6})$ 中的 $x_{1}$ 从  $\mathcal{G}_{0}$ 中消除而创建得到的。</p>
+<p>联合这两个，我们得到  $\mathcal{G}<em>{0}$ 中的路径 $(x</em>{4}, x_{2}, x_{1}, x_{6})$ 才是生成  <em>fill edge</em> ${ x_{4}, x_{6} }$ 的真正原因，因此我们引入  <em><strong>reachable sets</strong></em> 的概念。</p>
+<p>设 $S$ 是节点集合的一个真子集，$x \notin S$ 。如果存在一个从 y 到 x 的路径 $(y, v_{1}, \cdots, v_{k},x)$ ，其中 $v_{i} \in S, 1 \leq i \leq k, k \geq 0$，则我们称节点 $x$ 是 <em>be reachable from a node $y$ through $S$</em> ，注意由于 $k$ 可以为 0，因此 $y$ 的任何不在 $S$ 中的相邻节点均 <em>be reachable from $y$ through $S$</em></p>
+<p>这些节点的集合就是 <em>reachable set of y through S</em> ，标记为 $Reach(y, S)$ ，定义为<br>
+$$<br>
+\operatorname{Reach}(y, S)={x \notin S \mid x \text { is reachable from } y \text { through } S} .<br>
+$$<br>
+为了说明 <em>reachable set</em> 的概念，以下图为例，如果 $S = {s_{1}, s_{2},s_{3},s_{4}}$ ，我们有<br>
+$$<br>
+\operatorname{Reach}(y, S)={ a,b,c}<br>
+$$<br>
+　因为存在以下路径 ${y,s_{2},s_{4},a}$，${y,b}$，${y,s_{1},c}$</p>
+<p><img src="60.png" alt="1"></p>
+<p>下面的定理说明通过 <em>reachable set</em> 来创建的 <em>filled graph</em></p>
+<p><strong>定理</strong>：<br>
+$$<br>
+E^{\boldsymbol{F}}=\left{\left{x_{i}, x_{j}\right} \mid x_{j} \in \operatorname{Reach}\left(x_{i},\left{x_{1}, x_{2}, \cdots, x_{i-1}\right}\right)\right} .<br>
+$$<br>
+证明：假设 $x_{j} \in \operatorname{Reach}\left(x_{i},\left{x_{1}, x_{2}, \cdots, x_{i-1}\right}\right)$ ，根据定义，在 $\mathcal{G}<em>{0}$ 中存在一条路径 $(x</em>{i},y_{1},\cdots, y_{t},x_{j})$ ，其中 $y_{k} \in \left{x_{1}, x_{2}, \cdots, x_{i-1}\right}$ 。如果 $t = 0$ 或者 $t = 1$ ，根据上面的引理就可以直接得到 $\left{x_{i}, x_{j}\right} \in E^{\mathbf{F}}$。如果 $t &gt; 1$ ，我们可以从 $y_{1},\cdots, y_{t}$ 中逐渐消除节点，使得 $t = 0$ ，从而得到 $\left{x_{i}, x_{j}\right} \in E^{\mathbf{F}}$。</p>
 <p>反过来，假设  $\left{x_{i}, x_{j}\right} \in E^{\mathbf{F}}$ ，并且 $i \leq j$ 。根据前面的推理，则 ${ x_{i}, x_{j}} \in E^{\mathbf{A}}$，或者  ${ x_{i}, x_{k}} \in E^{\mathbf{F}}$ and  ${ x_{k}, x_{j}} \in E^{\mathbf{F}}$ for some $k &lt; \min{i,j}$ 。如果是满足第一个条件  ${ x_{i}, x_{j}} \in E^{\mathbf{A}}$，则  $x_{j} \in \operatorname{Reach}\left(x_{i},\left{x_{1}, x_{2}, \cdots, x_{i-1}\right}\right)$  成立；如果是满足第二个条件，即   ${ x_{i}, x_{k}} \in E^{\mathbf{F}}$ and  ${ x_{k}, x_{j}} \in E^{\mathbf{F}}$ for some $k &lt; \min{i,j}$ ，这说明在 $\mathcal{G}<em>{0}$ 中 $x</em>{i}$ 和  $x_{k}$， $x_{k}$ 和  $x_{j}$ 均存在一条路径连接，二者可以连通起来，说明   存在某条通过 $x_{k}$ 连接 $x_{i}$ 和 $x_{j}$ 的路径  $(x_{i},x_{k},x_{j})$ ，因此 $x_{j} \in \operatorname{Reach}\left(x_{i},\left{x_{1}, x_{2}, \cdots, x_{i-1}\right}\right)$  成立。</p>
 <p>证明完毕。</p>
 <p>采用矩阵的术语，$\operatorname{Reach}\left(x_{i},\left{x_{1}, x_{2}, \cdots, x_{i-1}\right}\right)$ 就是在列向量 $\mathbf{L}_{*i}$ 中的非零元素的行号。举个例子，假设上图 5.2.5 中的图排序如下</p>
-<p><img src="/posts/9b2dddf7/61.png" alt="1"></p>
-<p>如果 $S_{i} &#x3D; \left{x_{1}, x_{2}, \cdots, x_{i-1}\right}$ ，根据上面的定理，我们可以轻松得到下面的 <em>reachable set</em><br>$$<br>\begin{aligned}<br>\operatorname{Reach}\left(x_{1}, S_{0}\right) &amp;&#x3D;\left{x_{5}, x_{8}\right} \<br>\operatorname{Reach}\left(x_{2}, S_{1}\right) &amp;&#x3D;\left{x_{4}, x_{5}\right} \<br>\operatorname{Reach}\left(x_{3}, S_{2}\right) &amp;&#x3D;\left{x_{8}\right} \<br>\operatorname{Reach}\left(x_{4}, S_{3}\right) &amp;&#x3D;\left{x_{5}, x_{7}\right} \<br>\operatorname{Reach}\left(x_{5}, S_{4}\right) &amp;&#x3D;\left{x_{6}, x_{7}, x_{8}\right} \<br>\operatorname{Reach}\left(x_{6}, S_{5}\right) &amp;&#x3D;\left{x_{7}, x_{8}\right} \<br>\operatorname{Reach}\left(x_{7}, S_{6}\right) &amp;&#x3D;\left{x_{8}\right} \<br>\operatorname{Reach}\left(x_{8}, S_{7}\right) &amp;&#x3D;\left{x_{9}\right} \<br>\operatorname{Reach}\left(x_{9}, S_{8}\right) &amp;&#x3D;\phi .<br>\end{aligned}<br>$$<br>因此我们可以得到下面的 $\mathbf{L}$ 矩阵</p>
-<p><img src="/posts/9b2dddf7/62.png" alt="1"></p>
+<p><img src="61.png" alt="1"></p>
+<p>如果 $S_{i} = \left{x_{1}, x_{2}, \cdots, x_{i-1}\right}$ ，根据上面的定理，我们可以轻松得到下面的 <em>reachable set</em><br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{Reach}\left(x_{1}, S_{0}\right) &amp;=\left{x_{5}, x_{8}\right} \<br>
+\operatorname{Reach}\left(x_{2}, S_{1}\right) &amp;=\left{x_{4}, x_{5}\right} \<br>
+\operatorname{Reach}\left(x_{3}, S_{2}\right) &amp;=\left{x_{8}\right} \<br>
+\operatorname{Reach}\left(x_{4}, S_{3}\right) &amp;=\left{x_{5}, x_{7}\right} \<br>
+\operatorname{Reach}\left(x_{5}, S_{4}\right) &amp;=\left{x_{6}, x_{7}, x_{8}\right} \<br>
+\operatorname{Reach}\left(x_{6}, S_{5}\right) &amp;=\left{x_{7}, x_{8}\right} \<br>
+\operatorname{Reach}\left(x_{7}, S_{6}\right) &amp;=\left{x_{8}\right} \<br>
+\operatorname{Reach}\left(x_{8}, S_{7}\right) &amp;=\left{x_{9}\right} \<br>
+\operatorname{Reach}\left(x_{9}, S_{8}\right) &amp;=\phi .<br>
+\end{aligned}<br>
+$$<br>
+因此我们可以得到下面的 $\mathbf{L}$ 矩阵</p>
+<p><img src="62.png" alt="1"></p>
 <p>因此我们可以通过 $\mathbf{A}$ 的结构而直接得到 $\mathbf{L}$ 矩阵的结构（这种方式比 <em>envelope region</em> 的方式更加精确，<em>fill-in</em> 更少）。更重要的是，我们可以更方便的得到 <em>elimination graphs</em> 。设 $\mathcal{G}<em>{0} \rightarrow \mathcal{G}</em>{1} \rightarrow \cdots \rightarrow \mathcal{G}_{n-1}$ 为一组 <em>elimination graphs</em> ，我们有：</p>
-<p><strong>定理</strong>：设 $y$ 是一个  <em>elimination graph</em>   $\mathcal{G}<em>{i} &#x3D; (X</em>{i},E_{i})$ 中的一个节点，邻近于 $\mathcal{G}<em>{i}$ 中的节点 $y$ 的节点集合为：<br>$$<br>\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{i}\right}\right)<br>$$<br>其中，这里的 $\operatorname{Reach}$ 操作符是用于原始的图 $\mathcal{G}_{0}$ 。</p>
-<p>证明：证明可以通过对 $i$ 采用归纳法证明得到，设 $i &#x3D; 1$ ，易证明成立；假设 $i &#x3D;k$ 时成立，即邻近于 $\mathcal{G}<em>{k}$ 中的节点 $y$ 的节点集合为 $\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{k}\right}\right)$ ；当 $i &#x3D; k+1$ 时， $\mathcal{G}<em>{k+1}$ 进一步剔除了 $x</em>{k+1}$ ，我们需要证明邻近于  $\mathcal{G}<em>{k+1}$ 中的节点 $y$ 的节点集合为  $\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{k+1}\right}\right)$  。此时如果 $y \notin \operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right)$ , 也就是说在  $\mathcal{G}<em>{k}$ 中 $y$ 和 $x</em>{k+1}$ 不相邻，此时  $\mathcal{G}<em>{k+1}$ 中的节点 $y$ 的相邻列表不变，仍为 $\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{k}\right}\right)$ ，也等于  $\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k+1}\right}\right)$   。如果 $y \in \operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right)$ ，此时 $y$ 的相邻节点会减去 $x_{k+1}$ , 新增 $x_{k+1}$ 在  $\mathcal{G}<em>{k}$ 中 除 $y$ 之外的相邻节点，即此时 $\mathcal{G}</em>{k+1}$ 中的节点 $y$ 的相邻列表为 $(\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right) - {x_{k+1}}) \cup (\operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right) - {y})$ ，易得其中第一部分为  $\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}, x_{k+1}\right}\right)$ 中路径中不包含 $x_{k+1}$ 的部分 ，对于第二部分，设 $t \in  (\operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right) - {y})$ ,  由于  $y \in \operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right)$ ，易得 $t \in \operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}, x_{k+1}\right}\right)$ ，因此第二部分为 $\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}, x_{k+1}\right}\right)$ 路径中包含 $x_{k+1}$ 的部分 ，因此第一部分和第二部分的并集就正好为  $\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}, x_{k+1}\right}\right)$ ，因此得证 邻近于  $\mathcal{G}<em>{k+1}$ 中的节点 $y$ 的节点集合为  $\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{k+1}\right}\right)$  。</p>
+<p><strong>定理</strong>：设 $y$ 是一个  <em>elimination graph</em>   $\mathcal{G}<em>{i} = (X</em>{i},E_{i})$ 中的一个节点，邻近于 $\mathcal{G}<em>{i}$ 中的节点 $y$ 的节点集合为：<br>
+$$<br>
+\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{i}\right}\right)<br>
+$$<br>
+其中，这里的 $\operatorname{Reach}$ 操作符是用于原始的图 $\mathcal{G}_{0}$ 。</p>
+<p>证明：证明可以通过对 $i$ 采用归纳法证明得到，设 $i = 1$ ，易证明成立；假设 $i =k$ 时成立，即邻近于 $\mathcal{G}<em>{k}$ 中的节点 $y$ 的节点集合为 $\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{k}\right}\right)$ ；当 $i = k+1$ 时， $\mathcal{G}<em>{k+1}$ 进一步剔除了 $x</em>{k+1}$ ，我们需要证明邻近于  $\mathcal{G}<em>{k+1}$ 中的节点 $y$ 的节点集合为  $\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{k+1}\right}\right)$  。此时如果 $y \notin \operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right)$ , 也就是说在  $\mathcal{G}<em>{k}$ 中 $y$ 和 $x</em>{k+1}$ 不相邻，此时  $\mathcal{G}<em>{k+1}$ 中的节点 $y$ 的相邻列表不变，仍为 $\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{k}\right}\right)$ ，也等于  $\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k+1}\right}\right)$   。如果 $y \in \operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right)$ ，此时 $y$ 的相邻节点会减去 $x_{k+1}$ , 新增 $x_{k+1}$ 在  $\mathcal{G}<em>{k}$ 中 除 $y$ 之外的相邻节点，即此时 $\mathcal{G}</em>{k+1}$ 中的节点 $y$ 的相邻列表为 $(\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right) - {x_{k+1}}) \cup (\operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right) - {y})$ ，易得其中第一部分为  $\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}, x_{k+1}\right}\right)$ 中路径中不包含 $x_{k+1}$ 的部分 ，对于第二部分，设 $t \in  (\operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right) - {y})$ ,  由于  $y \in \operatorname{Reach}\left(x_{k+1},\left{x_{1}, x_{2}, \cdots, x_{k}\right}\right)$ ，易得 $t \in \operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}, x_{k+1}\right}\right)$ ，因此第二部分为 $\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}, x_{k+1}\right}\right)$ 路径中包含 $x_{k+1}$ 的部分 ，因此第一部分和第二部分的并集就正好为  $\operatorname{Reach}\left(y,\left{x_{1}, x_{2}, \cdots, x_{k}, x_{k+1}\right}\right)$ ，因此得证 邻近于  $\mathcal{G}<em>{k+1}$ 中的节点 $y$ 的节点集合为  $\operatorname{Reach}\left(y,\left{x</em>{1}, x_{2}, \cdots, x_{k+1}\right}\right)$  。</p>
 <p>证明完毕。</p>
 <p>我们用图 5.2.3 来重新举一个例子，我们考虑 图 $\mathcal{G}<em>{0}$ 和 图 $\mathcal{G}</em>{2}$ 如下：</p>
-<p><img src="/posts/9b2dddf7/63.png" alt="1"></p>
-<p>设 $S_{2} &#x3D; {x_{1}, x_{2}}$ ，我们易得：<br>$$<br>\begin{aligned}<br>\operatorname{Reach}\left(x_{3}, S_{2}\right) &amp;&#x3D;\left{x_{4}, x_{5}, x_{6}\right} \<br>\operatorname{Reach}\left(x_{4}, S_{2}\right) &amp;&#x3D;\left{x_{3}, x_{6}\right} \<br>\operatorname{Reach}\left(x_{5}, S_{2}\right) &amp;&#x3D;\left{x_{3}, x_{6}\right} \<br>\operatorname{Reach}\left(x_{6}, S_{2}\right) &amp;&#x3D;\left{x_{3}, x_{4},  x_{5}\right} \</p>
-<p>\end{aligned}<br>$$<br>因此我们就得到  图 $\mathcal{G}_{2}$ 的结构。</p>
+<p><img src="63.png" alt="1"></p>
+<p>设 $S_{2} = {x_{1}, x_{2}}$ ，我们易得：<br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{Reach}\left(x_{3}, S_{2}\right) &amp;=\left{x_{4}, x_{5}, x_{6}\right} \<br>
+\operatorname{Reach}\left(x_{4}, S_{2}\right) &amp;=\left{x_{3}, x_{6}\right} \<br>
+\operatorname{Reach}\left(x_{5}, S_{2}\right) &amp;=\left{x_{3}, x_{6}\right} \<br>
+\operatorname{Reach}\left(x_{6}, S_{2}\right) &amp;=\left{x_{3}, x_{4},  x_{5}\right} \</p>
+<p>\end{aligned}<br>
+$$<br>
+因此我们就得到  图 $\mathcal{G}_{2}$ 的结构。</p>
 <p>我们采用 <em>reachable sets</em> 得到的 图 $\mathcal{G}<em>{i}$ 称为 <em>implicit model</em> for elimation；而上一节中消除节点 $x</em>{1}$ 及其相应的边 添加边，使得图  $\mathcal{G}^{\mathbf{H}<em>{1}}$中的 $Adj(x</em>{1})$ 彼此之间相邻，这种方式称为 <em>explicit model</em> for elimation。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>参考文献</h1>
+<ol>
 <li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
 </ol>
  
@@ -199,55 +292,7 @@ $$
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -546,30 +591,6 @@ $$
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

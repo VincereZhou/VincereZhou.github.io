@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.2k</span>
+            <span class="post-count">1.1k</span>
         </span>
     </span>
 
@@ -98,38 +98,99 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在 ssGBLUP 中需要构建 A22 矩阵，通过 Colleau 算法可以避免直接构建 A 矩阵，节约内存和时间。</p>
 <span id="more"></span>
-
-<h1 id="A-阵分解"><a href="#A-阵分解" class="headerlink" title="A 阵分解"></a>A 阵分解</h1><p>我们可以将 $\mathbf{A}$ 分解为 $\mathbf{A} &#x3D; \mathbf{(I-P)^{-1}D(I-P)^{-1\prime}}$ （要求系谱按照出生日期顺序排序）。</p>
-<p>其中 $\mathbf{D}$ 是一个对角矩阵，其元素计算公式如下，其中 $F_{i}$ 是近交系数。<br>$$<br>\begin{aligned}<br>D_{ii} &amp;  &#x3D; 0.5 - 0.25(F_{s_{i}} + F_{d_{i}}) \quad \text{当 i 的父母均已知}\<br>&amp;  &#x3D; 0.75 - 0.25 F_{p_{i}}  \quad \text{当 i 的单个亲本已知}\<br>&amp; &#x3D; 1 \quad \text{当 i 的两个亲本均未知}\<br>\end{aligned}<br>$$<br>这里 $\mathbf{P}$ 是一个下三角矩阵，对角线元素为 0，非对角线只有亲子间为 0.5，其余元素也为 0 。</p>
-<p>$\mathbf{I-P}$ 矩阵举例如下：<br>$$<br>\left[\begin{array}{cccccc}<br>1 &amp; &amp; &amp; &amp; &amp; \<br>0 &amp; 1 &amp; &amp; &amp; \<br>-0.5 &amp; 0 &amp; 1 &amp; &amp; \<br>-0.5 &amp; -0.5 &amp; 0 &amp; 1 &amp; \<br>0 &amp; 0 &amp; -0.5 &amp; -0.5 &amp; 1 &amp; \<br>-0.5 &amp; 0 &amp; 0 &amp; -0.5 &amp; 0 &amp; 1 \<br>0 &amp; 0 &amp; 0 &amp; 0 &amp; -0.5 &amp; -0.5 &amp; 1<br>\end{array}\right]<br>$$</p>
-<h1 id="Colleau-算法"><a href="#Colleau-算法" class="headerlink" title="Colleau 算法"></a>Colleau 算法</h1><p>Colleau (2002) 年证明 $\mathbf{A}$ 阵与一个向量 $\mathbf{t}$ 的乘积可以在一个线性的时间内计算完成，如下<br>$$<br>\mathbf{v} &#x3D; \mathbf{At} &#x3D; \mathbf{(I-P)^{-1}D[(I-P)^{-1\prime}t]}<br>$$<br>这里我们可以分步骤进行计算：</p>
+<h1>A 阵分解</h1>
+<p>我们可以将 $\mathbf{A}$ 分解为 $\mathbf{A} = \mathbf{(I-P)^{-1}D(I-P)^{-1\prime}}$ （要求系谱按照出生日期顺序排序）。</p>
+<p>其中 $\mathbf{D}$ 是一个对角矩阵，其元素计算公式如下，其中 $F_{i}$ 是近交系数。<br>
+$$<br>
+\begin{aligned}<br>
+D_{ii} &amp;  = 0.5 - 0.25(F_{s_{i}} + F_{d_{i}}) \quad \text{当 i 的父母均已知}\<br>
+&amp;  = 0.75 - 0.25 F_{p_{i}}  \quad \text{当 i 的单个亲本已知}\<br>
+&amp; = 1 \quad \text{当 i 的两个亲本均未知}\<br>
+\end{aligned}<br>
+$$<br>
+这里 $\mathbf{P}$ 是一个下三角矩阵，对角线元素为 0，非对角线只有亲子间为 0.5，其余元素也为 0 。</p>
+<p>$\mathbf{I-P}$ 矩阵举例如下：<br>
+$$<br>
+\left[\begin{array}{cccccc}<br>
+1 &amp; &amp; &amp; &amp; &amp; \<br>
+0 &amp; 1 &amp; &amp; &amp; \<br>
+-0.5 &amp; 0 &amp; 1 &amp; &amp; \<br>
+-0.5 &amp; -0.5 &amp; 0 &amp; 1 &amp; \<br>
+0 &amp; 0 &amp; -0.5 &amp; -0.5 &amp; 1 &amp; \<br>
+-0.5 &amp; 0 &amp; 0 &amp; -0.5 &amp; 0 &amp; 1 \<br>
+0 &amp; 0 &amp; 0 &amp; 0 &amp; -0.5 &amp; -0.5 &amp; 1<br>
+\end{array}\right]<br>
+$$</p>
+<h1>Colleau 算法</h1>
+<p>Colleau (2002) 年证明 $\mathbf{A}$ 阵与一个向量 $\mathbf{t}$ 的乘积可以在一个线性的时间内计算完成，如下<br>
+$$<br>
+\mathbf{v} = \mathbf{At} = \mathbf{(I-P)^{-1}D[(I-P)^{-1\prime}t]}<br>
+$$<br>
+这里我们可以分步骤进行计算：</p>
 <ul>
-<li><p>首先我们定义 $\mathbf{r} &#x3D; \mathbf{(I-P)^{-1\prime}t}$ ，转换一下我们可以通过求解三角方程组 $\mathbf{(I-P)^{\prime}r&#x3D;t}$ 得到 $\mathbf{r}$ 。</p>
+<li>
+<p>首先我们定义 $\mathbf{r} = \mathbf{(I-P)^{-1\prime}t}$ ，转换一下我们可以通过求解三角方程组 $\mathbf{(I-P)^{\prime}r=t}$ 得到 $\mathbf{r}$ 。</p>
 </li>
-<li><p>然后我们得到 $\mathbf{v} &#x3D;  \mathbf{(I-P)^{-1}Dr}$ ，转换一下我们可以通过求解三角方程组 $\mathbf{(I-P)v&#x3D;Dr}$ 得到 $\mathbf{v}$ 。</p>
+<li>
+<p>然后我们得到 $\mathbf{v} =  \mathbf{(I-P)^{-1}Dr}$ ，转换一下我们可以通过求解三角方程组 $\mathbf{(I-P)v=Dr}$ 得到 $\mathbf{v}$ 。</p>
 </li>
 </ul>
-<p>标量公式如下（第一行是采用 <strong>outer-product</strong> 的原理；第二行是采用向量内积的原理）<br>$$<br>r_{i} &#x3D; r_{i}+t_{i}; \quad r_{si} &#x3D; r_{si} + r_{i}&#x2F;2; \quad r_{di} &#x3D; r_{di} + r_{i}&#x2F;2; \quad i&#x3D;n,\cdots,1<br>$$</p>
-<p>$$<br>v_{i} &#x3D; d_{i}r_{i}+ (v_{si}+v_{di})&#x2F;2, \quad i &#x3D; 1,\cdots,n<br>$$</p>
+<p>标量公式如下（第一行是采用 <strong>outer-product</strong> 的原理；第二行是采用向量内积的原理）<br>
+$$<br>
+r_{i} = r_{i}+t_{i}; \quad r_{si} = r_{si} + r_{i}/2; \quad r_{di} = r_{di} + r_{i}/2; \quad i=n,\cdots,1<br>
+$$</p>
+<p>$$<br>
+v_{i} = d_{i}r_{i}+ (v_{si}+v_{di})/2, \quad i = 1,\cdots,n<br>
+$$</p>
 <p>这里的 $si$ 和 $di$ 表示个体 $i$ 的父母本。</p>
-<p>通过 Colleau 算法可以用于计算子矩阵，举个例子，下面展示了如何计算 $\mathbf{A}<em>{11}\mathbf{q}$，$\mathbf{A}</em>{21}\mathbf{q}$ 。<br>$$<br>\left[\begin{array}{c}<br>\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22} \<br>\end{array}\right]<br>\left[\begin{array}{c}<br>\mathbf{q} \<br>\mathbf{0} \<br>\end{array}\right]<br>&#x3D; \left[\begin{array}{c}<br>\mathbf{A}<em>{11} \mathbf{q} \<br>\mathbf{A}</em>{21} \mathbf{q} \<br>\end{array}\right]<br>$$</p>
-<h1 id="构建-A22-矩阵"><a href="#构建-A22-矩阵" class="headerlink" title="构建 A22 矩阵"></a>构建 A22 矩阵</h1><p>这里需要注意的是，构建 $\mathbf{A}$ 阵时是按照出生日期顺序排序，但是我们提取A22 矩阵要求按照无基因型个体在前，有基因型个体在后的顺序排列，因此我们还要对原始的 $\mathbf{A}$ 阵的行和列进行重新重排。我们设相应的置换矩阵为 $\mathbf{Q}$ ，重排后按照无基因型个体在前，有基因型个体在后的顺序的矩阵称为 $\mathbf{A}^{<em>}$ 矩阵，则有<br>$$<br>\mathbf{A}^{</em>} &#x3D; \mathbf{QAQ^{\prime}} &#x3D; \mathbf{Q(I-P)^{-1}D(I-P)^{-1\prime}Q^{\prime}}<br>$$<br> 此时我们逐列提取 A22 矩阵的每一列，举个例子，假如基因型个体在 $\mathbf{A}^{*}$ 矩阵中的位置是 80 到 100，那么我们构建第一个 $\mathbf{t}$ 向量就是在 80位置为1，其它位置为0；构建第二个 $\mathbf{t}$ 向量就是在 81位置为1，其它位置为0 …以此类推。</p>
-<p>通过  $\mathbf{A}^{<em>}\mathbf{t}$ 便可以得到 A22 矩阵个体的一列，其计算公式为<br>$$<br>\mathbf{v}^{</em>} &#x3D; \mathbf{A}^{*}\mathbf{t} &#x3D; \mathbf{Q(I-P)^{-1}D(I-P)^{-1\prime}Q^{\prime}t}<br>$$<br>这里我们可以同样分步骤进行计算：</p>
+<p>通过 Colleau 算法可以用于计算子矩阵，举个例子，下面展示了如何计算 $\mathbf{A}<em>{11}\mathbf{q}$，$\mathbf{A}</em>{21}\mathbf{q}$ 。<br>
+$$<br>
+\left[\begin{array}{c}<br>
+\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>
+\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22} \<br>
+\end{array}\right]<br>
+\left[\begin{array}{c}<br>
+\mathbf{q} \<br>
+\mathbf{0} \<br>
+\end{array}\right]<br>
+= \left[\begin{array}{c}<br>
+\mathbf{A}<em>{11} \mathbf{q} \<br>
+\mathbf{A}</em>{21} \mathbf{q} \<br>
+\end{array}\right]<br>
+$$</p>
+<h1>构建 A22 矩阵</h1>
+<p>这里需要注意的是，构建 $\mathbf{A}$ 阵时是按照出生日期顺序排序，但是我们提取A22 矩阵要求按照无基因型个体在前，有基因型个体在后的顺序排列，因此我们还要对原始的 $\mathbf{A}$ 阵的行和列进行重新重排。我们设相应的置换矩阵为 $\mathbf{Q}$ ，重排后按照无基因型个体在前，有基因型个体在后的顺序的矩阵称为 $\mathbf{A}^{<em>}$ 矩阵，则有<br>
+$$<br>
+\mathbf{A}^{</em>} = \mathbf{QAQ^{\prime}} = \mathbf{Q(I-P)^{-1}D(I-P)^{-1\prime}Q^{\prime}}<br>
+$$<br>
+此时我们逐列提取 A22 矩阵的每一列，举个例子，假如基因型个体在 $\mathbf{A}^{*}$ 矩阵中的位置是 80 到 100，那么我们构建第一个 $\mathbf{t}$ 向量就是在 80位置为1，其它位置为0；构建第二个 $\mathbf{t}$ 向量就是在 81位置为1，其它位置为0 …以此类推。</p>
+<p>通过  $\mathbf{A}^{<em>}\mathbf{t}$ 便可以得到 A22 矩阵个体的一列，其计算公式为<br>
+$$<br>
+\mathbf{v}^{</em>} = \mathbf{A}^{*}\mathbf{t} = \mathbf{Q(I-P)^{-1}D(I-P)^{-1\prime}Q^{\prime}t}<br>
+$$<br>
+这里我们可以同样分步骤进行计算：</p>
 <ul>
-<li><p>首先计算 $\mathbf{t}^{*} &#x3D; \mathbf{Q^{\prime}t}$ </p>
+<li>
+<p>首先计算 $\mathbf{t}^{*} = \mathbf{Q^{\prime}t}$</p>
 </li>
-<li><p>我们定义 $\mathbf{r} &#x3D; \mathbf{(I-P)^{-1\prime}t^{<em>}}$ ，转换一下我们可以通过求解三角方程组 $\mathbf{(I-P)^{\prime}r&#x3D;t^{</em>}}$ 得到 $\mathbf{r}$ 。</p>
+<li>
+<p>我们定义 $\mathbf{r} = \mathbf{(I-P)^{-1\prime}t^{<em>}}$ ，转换一下我们可以通过求解三角方程组 $\mathbf{(I-P)^{\prime}r=t^{</em>}}$ 得到 $\mathbf{r}$ 。</p>
 </li>
-<li><p>然后我们得到 $\mathbf{v} &#x3D;  \mathbf{(I-P)^{-1}Dr}$ ，转换一下我们可以通过求解三角方程组 $\mathbf{(I-P)v&#x3D;Dr}$ 得到 $\mathbf{v}$ 。 </p>
+<li>
+<p>然后我们得到 $\mathbf{v} =  \mathbf{(I-P)^{-1}Dr}$ ，转换一下我们可以通过求解三角方程组 $\mathbf{(I-P)v=Dr}$ 得到 $\mathbf{v}$ 。</p>
 </li>
-<li><p>然后我们通过 $\mathbf{v}^{<em>} &#x3D; \mathbf{Qv}$ 得到 $\mathbf{v}^{</em>}$ 。</p>
+<li>
+<p>然后我们通过 $\mathbf{v}^{<em>} = \mathbf{Qv}$ 得到 $\mathbf{v}^{</em>}$ 。</p>
 </li>
 </ul>
-<p>最后这里得到的 $\mathbf{v}^{<em>}$ 还包含一些无关元素，按照上例，还需要从  $\mathbf{v}^{</em>}$ 提取从 80 到 100 的位置的元素，这才是真正的 A22 矩阵的一列元素。 </p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
-<li><p>Colleau J J. An indirect approach to the extensive calculation of relationship coefficients[J]. Genetics Selection Evolution, 2002, 34(4): 409.</p>
+<p>最后这里得到的 $\mathbf{v}^{<em>}$ 还包含一些无关元素，按照上例，还需要从  $\mathbf{v}^{</em>}$ 提取从 80 到 100 的位置的元素，这才是真正的 A22 矩阵的一列元素。</p>
+<h1>参考文献</h1>
+<ol>
+<li>
+<p>Colleau J J. An indirect approach to the extensive calculation of relationship coefficients[J]. Genetics Selection Evolution, 2002, 34(4): 409.</p>
 </li>
-<li><p>Misztal I, Aguilar I, Legarra A, et al. A unified approach to utilize phenotypic, full pedigree, andgenomic information for genetic evaluation[C]&#x2F;&#x2F;9. World Congress on Genetics Applied to Livestock Production. 2010.</p>
+<li>
+<p>Misztal I, Aguilar I, Legarra A, et al. A unified approach to utilize phenotypic, full pedigree, andgenomic information for genetic evaluation[C]//9. World Congress on Genetics Applied to Livestock Production. 2010.</p>
 </li>
 </ol>
  
@@ -179,55 +240,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -526,30 +539,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

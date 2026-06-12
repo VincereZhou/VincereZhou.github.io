@@ -94,16 +94,16 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>代码用 <strong>UTF-8-BOM</strong>（<code>utf-8-sig</code>）生成 CSV 文件，就是为了 <strong>Windows 下双击 CSV 用 Excel 打开时中文不乱码</strong>，就是一种妥协性的操作。</p>
 <span id="more"></span>
-
 <p>这背后的故事值得讲清楚，因为 <strong>UTF-8 理论上不需要 BOM，但 Excel 偏偏靠 BOM 认编码</strong>——这就是矛盾的根源。</p>
-<h2 id="1）BOM-是什么？为什么叫-“UTF-8-with-BOM”"><a href="#1）BOM-是什么？为什么叫-“UTF-8-with-BOM”" class="headerlink" title="1）BOM 是什么？为什么叫 “UTF-8 with BOM”"></a>1）BOM 是什么？为什么叫 “UTF-8 with BOM”</h2><p>BOM &#x3D; <strong>Byte Order Mark</strong>，<code>U+FEFF</code>，在 UTF-8 编码下就是文件最开头的 <strong>3 个字节</strong>：</p>
+<h2 id="1）BOM-是什么？为什么叫-“UTF-8-with-BOM”">1）BOM 是什么？为什么叫 “UTF-8 with BOM”</h2>
+<p>BOM = <strong>Byte Order Mark</strong>，<code>U+FEFF</code>，在 UTF-8 编码下就是文件最开头的 <strong>3 个字节</strong>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EF BB BF</span><br></pre></td></tr></table></figure>
-
-<p>它对 UTF-8 来说是<strong>多余的</strong>（UTF-8 字节序固定，不需要 FEFF 来判定）。BOM 存活到现在，纯粹是靠<strong>Windows 历史包袱</strong>在养着。而对于Linux&#x2F;macOS 这边：BOM 是”不受欢迎的客人”。</p>
+<p>它对 UTF-8 来说是<strong>多余的</strong>（UTF-8 字节序固定，不需要 FEFF 来判定）。BOM 存活到现在，纯粹是靠<strong>Windows 历史包袱</strong>在养着。而对于Linux/macOS 这边：BOM 是&quot;不受欢迎的客人&quot;。</p>
 <p>Excel 在 Windows 下默认使用系统 ANSI 编码（中文即为 GBK）去解析无 BOM 的 UTF-8 文件。你编写的“无 BOM” CSV 文件，很可能会被 Excel 误读，从而显示为乱码。而 UTF-8 BOM（也就是那三个看不见的字符 <code>\uFEFF</code>），就像贴在文件开头的“我用了 UTF-8 哦”的小贴士，让 Excel 能正确“认识”它，避免“鸡同鸭讲”的乱码局面。</p>
-<h2 id="2）Excel-到底怎么对待-CSV-编码（重点）"><a href="#2）Excel-到底怎么对待-CSV-编码（重点）" class="headerlink" title="2）Excel 到底怎么对待 CSV 编码（重点）"></a>2）Excel 到底怎么对待 CSV 编码（重点）</h2><p>微软自己的支持文档说得很直白：</p>
+<h2 id="2）Excel-到底怎么对待-CSV-编码（重点）">2）Excel 到底怎么对待 CSV 编码（重点）</h2>
+<p>微软自己的支持文档说得很直白：</p>
 <blockquote>
-<p>如果 CSV 文件是以 <strong>BOM</strong> 储存的，则可以正常开启 UTF-8 编码的 CSV 文件；否则需要通过 <strong>数据 → 从文字&#x2F;CSV（Power Query）</strong> 手动指定编码。</p>
+<p>如果 CSV 文件是以 <strong>BOM</strong> 储存的，则可以正常开启 UTF-8 编码的 CSV 文件；否则需要通过 <strong>数据 → 从文字/CSV（Power Query）</strong> 手动指定编码。</p>
 </blockquote>
 <p>翻译成人话就是——Windows 版 Excel 的两条打开路径：</p>
 <table>
@@ -114,72 +114,84 @@
 <th>有 BOM（UTF-8-BOM）</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><strong>双击 .csv（默认关联）</strong></td>
-<td>❌ 回退到系统 ANSI（简中 &#x3D; <strong>GBK</strong>）→ <strong>中文乱码</strong></td>
+<td>❌ 回退到系统 ANSI（简中 = <strong>GBK</strong>）→ <strong>中文乱码</strong></td>
 <td>✅ 识别为 UTF-8，正常显示</td>
 </tr>
 <tr>
-<td><strong>Excel → 数据 → 从文字&#x2F;CSV → 手动选 UTF-8</strong></td>
+<td><strong>Excel → 数据 → 从文字/CSV → 手动选 UTF-8</strong></td>
 <td>✅ 能显示（但要人手动操作）</td>
 <td>✅ 自动识别</td>
 </tr>
-</tbody></table>
-<p>所以 <strong>BOM 解决的不是”编码对错”，而是”Excel 偷懒不猜对”的问题</strong>。</p>
+</tbody>
+</table>
+<p>所以 <strong>BOM 解决的不是&quot;编码对错&quot;，而是&quot;Excel 偷懒不猜对&quot;的问题</strong>。</p>
 <blockquote>
 <p>微软甚至把 BOM 称为 “signature”，明确建议用于 CSV 的 UTF-8 场景。</p>
 </blockquote>
-<h2 id="3）我的建议：有条件推荐-BOM，但要意识到代价"><a href="#3）我的建议：有条件推荐-BOM，但要意识到代价" class="headerlink" title="3）我的建议：有条件推荐 BOM，但要意识到代价"></a>3）我的建议：<strong>有条件推荐 BOM，但要意识到代价</strong></h2><h3 id="✅-什么时候建议用-utf-8-sig（即带-BOM）"><a href="#✅-什么时候建议用-utf-8-sig（即带-BOM）" class="headerlink" title="✅ 什么时候建议用 utf-8-sig（即带 BOM）"></a>✅ 什么时候建议用 <code>utf-8-sig</code>（即带 BOM）</h3><p>满足以下条件就 <strong>放心用</strong>：</p>
+<h2 id="3）我的建议：有条件推荐-BOM，但要意识到代价">3）我的建议：<strong>有条件推荐 BOM，但要意识到代价</strong></h2>
+<h3 id="✅-什么时候建议用-utf-8-sig（即带-BOM）">✅ 什么时候建议用 <code>utf-8-sig</code>（即带 BOM）</h3>
+<p>满足以下条件就 <strong>放心用</strong>：</p>
 <ul>
 <li>你的 CSV <strong>交付给别人用</strong>，对方大概率 <strong>双击 → Excel 打开</strong></li>
-<li>对方环境是 <strong>Windows + 传统 Excel（2016&#x2F;2019&#x2F;2021&#x2F;MS 365 但用双击路径）</strong></li>
-<li>文件里有 <strong>中文&#x2F;日文&#x2F;韩文等非 ASCII</strong></li>
+<li>对方环境是 <strong>Windows + 传统 Excel（2016/2019/2021/MS 365 但用双击路径）</strong></li>
+<li>文件里有 <strong>中文/日文/韩文等非 ASCII</strong></li>
 </ul>
 <p>这时候 <strong>BOM 是性价比最高的防乱码手段</strong>，3 个字节换来不吵架。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pandas</span></span><br><span class="line">df.to_csv(<span class="string">&quot;output.csv&quot;</span>, encoding=<span class="string">&quot;utf-8-sig&quot;</span>, index=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 原生 open</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;output.csv&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;utf-8-sig&quot;</span>, newline=<span class="string">&quot;&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    writer = csv.writer(f)</span><br><span class="line">    writer.writerow(...)</span><br></pre></td></tr></table></figure>
-
 <p><code>utf-8-sig</code> 的意思就是：<strong>写 UTF-8，但文件开头自动塞 EF BB BF</strong>。</p>
 <hr>
-<h3 id="⚠️-什么时候-BOM-会带来麻烦（所以不是”永远无脑好”）"><a href="#⚠️-什么时候-BOM-会带来麻烦（所以不是”永远无脑好”）" class="headerlink" title="⚠️ 什么时候 BOM 会带来麻烦（所以不是”永远无脑好”）"></a>⚠️ 什么时候 BOM 会带来麻烦（所以不是”永远无脑好”）</h3><table>
+<h3 id="⚠️-什么时候-BOM-会带来麻烦（所以不是-永远无脑好-）">⚠️ 什么时候 BOM 会带来麻烦（所以不是&quot;永远无脑好&quot;）</h3>
+<table>
 <thead>
 <tr>
 <th>场景</th>
 <th>问题</th>
 </tr>
 </thead>
-<tbody><tr>
-<td>这个 CSV 要 <strong>被程序再次读取</strong>（Python &#x2F; R &#x2F; awk &#x2F; sed &#x2F; shell pipe）</td>
+<tbody>
+<tr>
+<td>这个 CSV 要 <strong>被程序再次读取</strong>（Python / R / awk / sed / shell pipe）</td>
 <td>大多没事，但<strong>极少数旧工具</strong>会把 BOM 当首行的第一个字符吃掉，导致首列名变成 <code>�姓名</code> 或解析首行出错</td>
 </tr>
 <tr>
 <td>进 <strong>Git</strong></td>
-<td>Git 有时会把它当”差异”；但一般无害（可配置 <code>.gitattributes</code>）</td>
+<td>Git 有时会把它当&quot;差异&quot;；但一般无害（可配置 <code>.gitattributes</code>）</td>
 </tr>
 <tr>
-<td>给 <strong>Mac &#x2F; Linux 用户</strong></td>
+<td>给 <strong>Mac / Linux 用户</strong></td>
 <td>Mac 版 Excel 对无 BOM 的 UTF-8 更宽容，但 BOM 也不伤（就是多 3 字节）</td>
 </tr>
 <tr>
-<td>你追求”语义纯洁”</td>
+<td>你追求&quot;语义纯洁&quot;</td>
 <td>UTF-8 不需要 BOM，BOM 违背 Unicode 标准精神 → 所以有人反感</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <hr>
-<h2 id="4）所以给我一句最终立场"><a href="#4）所以给我一句最终立场" class="headerlink" title="4）所以给我一句最终立场"></a>4）所以给我一句最终立场</h2><blockquote>
-<p><strong>如果你的目标受众是”人（尤其 Windows 用户）用 Excel 双击看”→ 用 <code>utf-8-sig</code>（带 BOM），这是对的、务实的、行业标准妥协。</strong><br><strong>如果这个 CSV 是”数据管道的中间产物 &#x2F; 给下游脚本读”→ 用纯 <code>utf-8</code>（无 BOM），更干净。</strong></p>
+<h2 id="4）所以给我一句最终立场">4）所以给我一句最终立场</h2>
+<blockquote>
+<p><strong>如果你的目标受众是&quot;人（尤其 Windows 用户）用 Excel 双击看&quot;→ 用 <code>utf-8-sig</code>（带 BOM），这是对的、务实的、行业标准妥协。</strong><br>
+<strong>如果这个 CSV 是&quot;数据管道的中间产物 / 给下游脚本读&quot;→ 用纯 <code>utf-8</code>（无 BOM），更干净。</strong></p>
 </blockquote>
 <p>换句话说：<strong>BOM 不是为编码正确性而存在，是为 Excel 兼容性而存在。</strong></p>
-<h2 id="我的看法"><a href="#我的看法" class="headerlink" title="我的看法"></a>我的看法</h2><p>我是 linux 派，我不喜欢BOM ，还是不要更改字符编码，统一使用 <code>UTF-8</code> 格式最好。</p>
+<h2 id="我的看法">我的看法</h2>
+<p>我是 linux 派，我不喜欢BOM ，还是不要更改字符编码，统一使用 <code>UTF-8</code> 格式最好。</p>
 <ol>
-<li><p>分析：绝对不采用 BOM 格式</p>
+<li>
+<p>分析：绝对不采用 BOM 格式</p>
 </li>
-<li><p>交付客户：</p>
+<li>
+<p>交付客户：</p>
 <ul>
-<li><p>数据量小，用 EXCEL 表更好</p>
+<li>
+<p>数据量小，用 EXCEL 表更好</p>
 </li>
-<li><p>数据量大，用 UTF-8 格式的 txt 格式（因为生成 csv 或 excel ，客户用excel也打不开）。如果生成 csv （UTF-8 格式）就要确保<strong>无中文</strong>。</p>
+<li>
+<p>数据量大，用 UTF-8 格式的 txt 格式（因为生成 csv 或 excel ，客户用excel也打不开）。如果生成 csv （UTF-8 格式）就要确保<strong>无中文</strong>。</p>
 </li>
 </ul>
 </li>
@@ -229,55 +241,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -576,30 +540,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

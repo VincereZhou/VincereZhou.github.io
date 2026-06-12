@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.1k</span>
+            <span class="post-count">2k</span>
         </span>
     </span>
 
@@ -98,25 +98,162 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在学习吴恩达老师的机器学习课上，碰到了一个旧知识点：在统计上，样本方差的分母应该是 n-1 ，这样才是对总体方差的无偏估计。在网上查了很多资料，根据自己的理解总结了一下，水平有限，如有不当之处敬请指正。</p>
 <span id="more"></span>
-
-<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>首先我们要理清楚问题是什么，假设我们拿到了一组数据，样本数为 n，我们认为这些数据服从<strong>独立同分布</strong>的正态分布，我们想知道它们服从的正态分布的均值和方差是多少，或者说想估计它们服从的正态分布的均值和方差。</p>
-<h1 id="最大似然估计"><a href="#最大似然估计" class="headerlink" title="最大似然估计"></a>最大似然估计</h1><p>这种从已有数据推断参数的事情，第一时间我想的就是最大似然估计。首先，一维正态分布的概率密度函数长这样：<br>$$<br>f(x)&#x3D;\frac{1}{\sqrt{2 \pi} \sigma} \exp \left(-\frac{(x-\mu)^{2}}{2 \sigma^{2}}\right)<br>$$<br>由于不同的样本服从独立同分布，因此所有样本的联合概率密度函数如下：<br>$$<br>\begin{aligned}<br>f(\textbf{x}|μ,\sigma^{2}) &amp;&#x3D;\prod_{i&#x3D;1}^{n} \frac{1}{\sqrt{2 \pi} \sigma} \exp \left(-\frac{(x-\mu)^{2}}{2 \sigma^{2}}\right) \<br>&amp;&#x3D;\left(\frac{1}{\sqrt{2 \pi}\sigma}\right)^{n} \exp \left(-\sum_{i&#x3D;1}^{n}\frac{(x-\mu)^{2}}{2 \sigma^{2}}\right)<br>\end{aligned}<br>$$<br>因此，我们要求出现这组数据或更极端数据出现的似然值<strong>最大</strong>，也就是求使上式的联合概率密度函数最大的一组参数。我们对联合概率密度函数采用对数函数，可以简化运算：<br>$$<br>\ln f\left(\mathbf{x} \mid \mu, \sigma^{2}\right)&#x3D;-\frac{1}{2 \sigma^{2}} \sum_{i&#x3D;1}^{n}\left(x_{i}-\mu\right)^{2}-\frac{n}{2} \ln \sigma^{2}-\frac{n}{2} \ln (2 \pi)<br>$$<br>为了方便查看，这里我们将 σ<sup>2</sup> 替换为 v 。<br>$$<br>\ln f\left(\mathbf{x} \mid \mu, v\right)&#x3D;-\frac{1}{2 v} \sum_{i&#x3D;1}^{n}\left(x_{i}-\mu\right)^{2}-\frac{n}{2} \ln v-\frac{n}{2} \ln (2 \pi)<br>$$</p>
-<p>这里要求该式的极值，想到了对该式求偏导，计算两个偏导等于 0 时的参数值。首先对参数 μ 求偏导。<br>$$<br>\begin{aligned}<br>\frac{\partial f}{\partial \mu} &amp;&#x3D;-\frac{1}{2 v} \cdot 2 \sum_{i&#x3D;1}^{n}\left(x_{i}-\mu\right)(-1) \<br>&amp;&#x3D;\frac{1}{v}\left(\sum_{i&#x3D;1}^{n} X_{i}-n \mu\right)<br>\end{aligned}<br>$$<br>求该式为 0 ，得到参数 μ 的最大似然值如下，就是样本均值（下标 ML 表示最大似然估计值，下图）<br>$$<br>\mu_{ML}&#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n} X_{i}<br>$$<br>再对参数 v (即σ<sup>2</sup>) 求偏导<br>$$<br>\frac{\partial f}{\partial v}&#x3D;\frac{1}{2} \sum_{i&#x3D;1}^{n}\left(x_{i}-\mu\right)^{2} v^{-2}-\frac{n}{2} v^{-1}<br>$$<br>求该式为 0 ，得到参数 v  (即σ<sup>2</sup>)  的最大似然值如下。<br>$$<br>\sigma^{2}<em>{ML} &#x3D;\frac{1}{n} \sum</em>{i&#x3D;1}^{n}\left(x_{i}-\mu\right)^{2}<br>$$<br>易证，最大似然估计的两个参数值均为无偏估计，证明如下：<br>$$<br>\begin{aligned}<br>E(\mu_{ML}) &amp;&#x3D;E\left(\frac{1}{n} \sum_{i&#x3D;1}^{n} x_{i}\right) \<br>&amp;&#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n} E\left(x_{i}\right) \<br>&amp;&#x3D;\frac{1}{n} n \mu \<br>&amp;&#x3D;\mu \<br>E\left(\sigma^{2}<em>{ML}\right) &amp;&#x3D;E\left(\frac{1}{n} \sum</em>{i&#x3D;1}^{n}\left(x_{i}-u\right)^{2}\right) \<br>&amp;&#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n} E\left(x_{i}-u\right)^{2} \<br>&amp;&#x3D;\frac{1}{n} n \sigma^{2} \<br>&amp;&#x3D;\sigma^{2}<br>\end{aligned}<br>$$<br>因此，最大似然估计的方差是无偏的，没有问题。但是注意，<strong>这里得到的方差估计值的公式中含有总体均值 μ</strong>。看我们的问题，我们并不知道总体均值，我们上面得到了总体均值的最大似然估计值就是样本均值，我们能不能直接将总体均值替换为样本均值呢？就是下式：<br>$$<br>\hat{\sigma^{2}} &#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{X}\right)^{2}<br>$$</p>
+<h1>问题</h1>
+<p>首先我们要理清楚问题是什么，假设我们拿到了一组数据，样本数为 n，我们认为这些数据服从<strong>独立同分布</strong>的正态分布，我们想知道它们服从的正态分布的均值和方差是多少，或者说想估计它们服从的正态分布的均值和方差。</p>
+<h1>最大似然估计</h1>
+<p>这种从已有数据推断参数的事情，第一时间我想的就是最大似然估计。首先，一维正态分布的概率密度函数长这样：<br>
+$$<br>
+f(x)=\frac{1}{\sqrt{2 \pi} \sigma} \exp \left(-\frac{(x-\mu)^{2}}{2 \sigma^{2}}\right)<br>
+$$<br>
+由于不同的样本服从独立同分布，因此所有样本的联合概率密度函数如下：<br>
+$$<br>
+\begin{aligned}<br>
+f(\textbf{x}|μ,\sigma^{2}) &amp;=\prod_{i=1}^{n} \frac{1}{\sqrt{2 \pi} \sigma} \exp \left(-\frac{(x-\mu)^{2}}{2 \sigma^{2}}\right) \<br>
+&amp;=\left(\frac{1}{\sqrt{2 \pi}\sigma}\right)^{n} \exp \left(-\sum_{i=1}^{n}\frac{(x-\mu)^{2}}{2 \sigma^{2}}\right)<br>
+\end{aligned}<br>
+$$<br>
+因此，我们要求出现这组数据或更极端数据出现的似然值<strong>最大</strong>，也就是求使上式的联合概率密度函数最大的一组参数。我们对联合概率密度函数采用对数函数，可以简化运算：<br>
+$$<br>
+\ln f\left(\mathbf{x} \mid \mu, \sigma^{2}\right)=-\frac{1}{2 \sigma^{2}} \sum_{i=1}^{n}\left(x_{i}-\mu\right)^{2}-\frac{n}{2} \ln \sigma^{2}-\frac{n}{2} \ln (2 \pi)<br>
+$$<br>
+为了方便查看，这里我们将 σ<sup>2</sup> 替换为 v 。<br>
+$$<br>
+\ln f\left(\mathbf{x} \mid \mu, v\right)=-\frac{1}{2 v} \sum_{i=1}^{n}\left(x_{i}-\mu\right)^{2}-\frac{n}{2} \ln v-\frac{n}{2} \ln (2 \pi)<br>
+$$</p>
+<p>这里要求该式的极值，想到了对该式求偏导，计算两个偏导等于 0 时的参数值。首先对参数 μ 求偏导。<br>
+$$<br>
+\begin{aligned}<br>
+\frac{\partial f}{\partial \mu} &amp;=-\frac{1}{2 v} \cdot 2 \sum_{i=1}^{n}\left(x_{i}-\mu\right)(-1) \<br>
+&amp;=\frac{1}{v}\left(\sum_{i=1}^{n} X_{i}-n \mu\right)<br>
+\end{aligned}<br>
+$$<br>
+求该式为 0 ，得到参数 μ 的最大似然值如下，就是样本均值（下标 ML 表示最大似然估计值，下图）<br>
+$$<br>
+\mu_{ML}=\frac{1}{n} \sum_{i=1}^{n} X_{i}<br>
+$$<br>
+再对参数 v (即σ<sup>2</sup>) 求偏导<br>
+$$<br>
+\frac{\partial f}{\partial v}=\frac{1}{2} \sum_{i=1}^{n}\left(x_{i}-\mu\right)^{2} v^{-2}-\frac{n}{2} v^{-1}<br>
+$$<br>
+求该式为 0 ，得到参数 v  (即σ<sup>2</sup>)  的最大似然值如下。<br>
+$$<br>
+\sigma^{2}<em>{ML} =\frac{1}{n} \sum</em>{i=1}^{n}\left(x_{i}-\mu\right)^{2}<br>
+$$<br>
+易证，最大似然估计的两个参数值均为无偏估计，证明如下：<br>
+$$<br>
+\begin{aligned}<br>
+E(\mu_{ML}) &amp;=E\left(\frac{1}{n} \sum_{i=1}^{n} x_{i}\right) \<br>
+&amp;=\frac{1}{n} \sum_{i=1}^{n} E\left(x_{i}\right) \<br>
+&amp;=\frac{1}{n} n \mu \<br>
+&amp;=\mu \<br>
+E\left(\sigma^{2}<em>{ML}\right) &amp;=E\left(\frac{1}{n} \sum</em>{i=1}^{n}\left(x_{i}-u\right)^{2}\right) \<br>
+&amp;=\frac{1}{n} \sum_{i=1}^{n} E\left(x_{i}-u\right)^{2} \<br>
+&amp;=\frac{1}{n} n \sigma^{2} \<br>
+&amp;=\sigma^{2}<br>
+\end{aligned}<br>
+$$<br>
+因此，最大似然估计的方差是无偏的，没有问题。但是注意，<strong>这里得到的方差估计值的公式中含有总体均值 μ</strong>。看我们的问题，我们并不知道总体均值，我们上面得到了总体均值的最大似然估计值就是样本均值，我们能不能直接将总体均值替换为样本均值呢？就是下式：<br>
+$$<br>
+\hat{\sigma^{2}} =\frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{X}\right)^{2}<br>
+$$</p>
 <p>这里我们可以证明这样做得到的估计量会<strong>低于</strong>极大似然估计值，是一个有偏估计量。</p>
-<h1 id="证明分母为n的样本方差会低于极大似然估计值"><a href="#证明分母为n的样本方差会低于极大似然估计值" class="headerlink" title="证明分母为n的样本方差会低于极大似然估计值"></a>证明分母为n的样本方差会低于极大似然估计值</h1><p>我们这里构建一个函数 f(a)<br>$$<br>f(a) &#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-a\right)^{2}<br>$$</p>
-<p>求导得到<br>$$<br>\begin{aligned}<br>f’(a) &amp;&#x3D;\frac{2}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-a\right)(-1) \<br>&amp;&#x3D;\frac{2}{n}\left(n a-\sum_{i&#x3D;1}^{n} x_{i}\right)<br>\end{aligned}<br>$$<br>当导数为 0 时，a 等于<br>$$<br>a&#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n} x_{i}&#x3D;\bar{X}<br>$$<br>易知，当 a 等于样本均值时，该式最小。因此，下式成立<br>$$<br>\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(X_{i}-\bar{X}\right)^{2} \leq \frac{1}{n} \sum_{i&#x3D;1}^{n}\left(X_{i}-\mu\right)^{2}<br>$$<br>证明分母为n的样本方差会低估总体方差估计值。</p>
-<h2 id="第二种证明方法"><a href="#第二种证明方法" class="headerlink" title="第二种证明方法"></a>第二种证明方法</h2><p>$$<br>\begin{aligned}<br>\sigma^{2}<em>{ML} &amp;&#x3D;\frac{1}{n} \sum</em>{i&#x3D;1}^{n}\left(x_{i}-u\right)^{2} \<br>&amp;&#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(\left(x_{i}-\bar{x}\right)+(\bar{x}-u)\right)^{2} \<br>&amp;&#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}+\frac{2}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)(\bar{x}-u)+(\bar{x}-u)^{2} \<br>&amp;&#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}+\frac{2}{n}(\bar{x}-u)\left(\sum_{i&#x3D;1}^{n} x_{i}-n \bar{x}\right)+(\bar{x}-u)^{2} \<br>&amp;&#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}+(\bar{x}-u)^{2} \<br>&amp; \geqslant \frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}<br>\end{aligned}<br>$$</p>
-<h1 id="样本方差推导"><a href="#样本方差推导" class="headerlink" title="样本方差推导"></a>样本方差推导</h1><p>具体小多少，可以通过求期望计算一下<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="https://www.zhihu.com/question/20099757">[1]</span></a></sup><br>$$<br>\begin{aligned}<br>E\left(\frac{1}{n} \sum_{i&#x3D;1}^{n} \left(X_{i}-\bar{X}\right)^{2} \right) &amp;&#x3D;\frac{1}{n} \sum_{i&#x3D;1}^{n} E\left(\left(X_{i}-\bar{X}\right)^{2}\right)&#x3D;\frac{1}{n} E\left(\sum_{i&#x3D;1}^{n}\left(X_{i}-\mu+\mu-\bar{X}\right)^{2}\right) \<br>&amp;&#x3D;\frac{1}{n} E\left(\sum_{i&#x3D;1}^{n}\left(\left(X_{i}-\mu\right)^{2}-2\left(X_{i}-\mu\right)(\bar{X}-\mu)+(\bar{X}-\mu)^{2}\right)\right) \<br>&amp;&#x3D;\frac{1}{n} E\left(\sum_{i&#x3D;1}^{n}\left(X_{i}-\mu\right)^{2}-2 \sum_{i&#x3D;1}^{n}\left(X_{i}-\mu\right)(\bar{X}-\mu)+n(\bar{X}-\mu)^{2}\right) \<br>&amp;&#x3D;\frac{1}{n} E\left(\sum_{i&#x3D;1}^{n}\left(X_{i}-\mu\right)^{2}-2 n(\bar{X}-\mu)(\bar{X}-\mu)+n(\bar{X}-\mu)^{2}\right) \<br>&amp;&#x3D;\frac{1}{n} E\left(\sum_{i&#x3D;1}^{n}\left(X_{i}-\mu\right)^{2}-n(\bar{X}-\mu)^{2}\right) \<br>&amp;&#x3D;\frac{1}{n}\left(\sum_{i&#x3D;1}^{n} E\left(\left(X_{i}-\mu\right)^{2}\right)-n E\left((\bar{X}-\mu)^{2}\right)\right) \<br>&amp;&#x3D;\frac{1}{n}(n \operatorname{Var}(X)-n \operatorname{Var}(\bar{X})) \<br>&amp;&#x3D;\operatorname{Var}(X)-\operatorname{Var}(\bar{X})<br>\end{aligned}<br>$$<br>其中, $\operatorname{Var}(\bar{X})$ 证明如下。首先方差存在下面的性质</p>
+<h1>证明分母为n的样本方差会低于极大似然估计值</h1>
+<p>我们这里构建一个函数 f(a)<br>
+$$<br>
+f(a) =\frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-a\right)^{2}<br>
+$$</p>
+<p>求导得到<br>
+$$<br>
+\begin{aligned}<br>
+f’(a) &amp;=\frac{2}{n} \sum_{i=1}^{n}\left(x_{i}-a\right)(-1) \<br>
+&amp;=\frac{2}{n}\left(n a-\sum_{i=1}^{n} x_{i}\right)<br>
+\end{aligned}<br>
+$$<br>
+当导数为 0 时，a 等于<br>
+$$<br>
+a=\frac{1}{n} \sum_{i=1}^{n} x_{i}=\bar{X}<br>
+$$<br>
+易知，当 a 等于样本均值时，该式最小。因此，下式成立<br>
+$$<br>
+\frac{1}{n} \sum_{i=1}^{n}\left(X_{i}-\bar{X}\right)^{2} \leq \frac{1}{n} \sum_{i=1}^{n}\left(X_{i}-\mu\right)^{2}<br>
+$$<br>
+证明分母为n的样本方差会低估总体方差估计值。</p>
+<h2 id="第二种证明方法">第二种证明方法</h2>
+<p>$$<br>
+\begin{aligned}<br>
+\sigma^{2}<em>{ML} &amp;=\frac{1}{n} \sum</em>{i=1}^{n}\left(x_{i}-u\right)^{2} \<br>
+&amp;=\frac{1}{n} \sum_{i=1}^{n}\left(\left(x_{i}-\bar{x}\right)+(\bar{x}-u)\right)^{2} \<br>
+&amp;=\frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}+\frac{2}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)(\bar{x}-u)+(\bar{x}-u)^{2} \<br>
+&amp;=\frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}+\frac{2}{n}(\bar{x}-u)\left(\sum_{i=1}^{n} x_{i}-n \bar{x}\right)+(\bar{x}-u)^{2} \<br>
+&amp;=\frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}+(\bar{x}-u)^{2} \<br>
+&amp; \geqslant \frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}<br>
+\end{aligned}<br>
+$$</p>
+<h1>样本方差推导</h1>
+<p>具体小多少，可以通过求期望计算一下<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="https://www.zhihu.com/question/20099757">[1]</span></a></sup><br>
+$$<br>
+\begin{aligned}<br>
+E\left(\frac{1}{n} \sum_{i=1}^{n} \left(X_{i}-\bar{X}\right)^{2} \right) &amp;=\frac{1}{n} \sum_{i=1}^{n} E\left(\left(X_{i}-\bar{X}\right)^{2}\right)=\frac{1}{n} E\left(\sum_{i=1}^{n}\left(X_{i}-\mu+\mu-\bar{X}\right)^{2}\right) \<br>
+&amp;=\frac{1}{n} E\left(\sum_{i=1}^{n}\left(\left(X_{i}-\mu\right)^{2}-2\left(X_{i}-\mu\right)(\bar{X}-\mu)+(\bar{X}-\mu)^{2}\right)\right) \<br>
+&amp;=\frac{1}{n} E\left(\sum_{i=1}^{n}\left(X_{i}-\mu\right)^{2}-2 \sum_{i=1}^{n}\left(X_{i}-\mu\right)(\bar{X}-\mu)+n(\bar{X}-\mu)^{2}\right) \<br>
+&amp;=\frac{1}{n} E\left(\sum_{i=1}^{n}\left(X_{i}-\mu\right)^{2}-2 n(\bar{X}-\mu)(\bar{X}-\mu)+n(\bar{X}-\mu)^{2}\right) \<br>
+&amp;=\frac{1}{n} E\left(\sum_{i=1}^{n}\left(X_{i}-\mu\right)^{2}-n(\bar{X}-\mu)^{2}\right) \<br>
+&amp;=\frac{1}{n}\left(\sum_{i=1}^{n} E\left(\left(X_{i}-\mu\right)^{2}\right)-n E\left((\bar{X}-\mu)^{2}\right)\right) \<br>
+&amp;=\frac{1}{n}(n \operatorname{Var}(X)-n \operatorname{Var}(\bar{X})) \<br>
+&amp;=\operatorname{Var}(X)-\operatorname{Var}(\bar{X})<br>
+\end{aligned}<br>
+$$<br>
+其中, $\operatorname{Var}(\bar{X})$ 证明如下。首先方差存在下面的性质</p>
 <blockquote>
-<p> If $X_{1}, \ldots, X_{n}$ are independent and $a_{1}, \ldots, a_{n}$ are constants, then</p>
+<p>If $X_{1}, \ldots, X_{n}$ are independent and $a_{1}, \ldots, a_{n}$ are constants, then</p>
 </blockquote>
-<p>$$<br>\mathbb{V}\left(\sum_{i&#x3D;1}^{n} a_{i} X_{i}\right)&#x3D;\sum_{i&#x3D;1}^{n} a_{i}^{2} \mathbb{V}\left(X_{i}\right)<br>$$</p>
-<p>所以，我们得到<br>$$<br>\begin{aligned}<br>&amp; \operatorname{Var}(\bar{X}) \<br>&#x3D;&amp; \operatorname{var}\left(\frac{1}{n} \sum_{i&#x3D;1}^{n} x_{i}\right) \<br>&#x3D;&amp; \frac{1}{n^{2}} \sum_{i&#x3D;1}^{n} \operatorname{var}\left(x_{i}\right) \<br>&#x3D;&amp; \frac{1}{n^{2}} n \operatorname{var}(x) \<br>&#x3D;&amp; \frac{\sigma^{2}}{n}<br>\end{aligned}<br>$$<br>所以，</p>
-<p>$$<br>\begin{aligned}<br>E\left(\frac{1}{n} \sum_{i&#x3D;1}^{n} \left(X_{i}-\bar{X}\right)^{2} \right)&amp;&#x3D;\operatorname{Var}(X)-\operatorname{Var}(\bar{X})&#x3D;\sigma^{2}-\frac{\sigma^{2}}{n}&#x3D;\frac{n-1}{n} \sigma^{2}<br>\end{aligned}<br>$$</p>
-<p>因此，为了避免使用有偏差的估计值，略加转换，我们得到下式：<br>$$<br>S^{2}&#x3D;\frac{1}{n-1} \sum_{i&#x3D;1}^{n}\left(X_{i}-\bar{X}\right)^{2}<br>$$</p>
-<h2 id="第二种证明方法-1"><a href="#第二种证明方法-1" class="headerlink" title="第二种证明方法"></a>第二种证明方法</h2><p>我感觉像上面一样，直接从 $\mathrm{E}(\sigma^{2}<em>{ML})$ 去推公式，结果更直观一点。首先我们需要拆分一下 $\sigma^{2}</em>{ML}$ 。</p>
-<p>$$<br>\sigma^{2}<em>{ML} &#x3D;\frac{1}{n} \sum</em>{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}+(\bar{x}-u)^{2} \<br>$$</p>
-<p>同时对左右两侧求期望，得到：<br>$$<br>\begin{aligned}<br>\mathrm{E}(\sigma^{2}<em>{ML})&amp;&#x3D;\mathrm{E}\left(\frac{1}{n} \sum</em>{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}+(\bar{x}-u)^{2}\right) \<br>&amp;&#x3D;\mathrm{E}\left(\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}\right) + \mathrm{E}\left((\bar{x}-u)^{2}\right) \<br>&amp;&#x3D;\mathrm{E}\left(\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}\right) + \operatorname{Var}(\bar{X}) \<br>&amp;&#x3D;\mathrm{E}\left(\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}\right) + \frac{\sigma^{2}}{n} \<br>\end{aligned}<br>$$<br>左侧 $\sigma^{2}<em>{ML}$ 期望为总体方差 $\sigma^2$ （  $\because \mathrm{E}(\sigma^{2}</em>{ML}) &#x3D; \sigma^{2}$ ） ，因此<br>$$<br>\begin{aligned}<br>\sigma^{2} &amp;&#x3D;\mathrm{E}\left(\frac{1}{n} \sum_{i&#x3D;1}^{n}\left(x_{i}-\bar{x}\right)^{2}\right) + \frac{\sigma^{2}}{n} \<br>\end{aligned}<br>$$<br> 所以<br>$$<br>E\left(\frac{1}{n} \sum_{i&#x3D;1}^{n} \left(X_{i}-\bar{X}\right)^{2} \right)&#x3D;\sigma^{2}-\frac{\sigma^{2}}{n}&#x3D;\frac{n-1}{n} \sigma^{2}<br>$$</p>
+<p>$$<br>
+\mathbb{V}\left(\sum_{i=1}^{n} a_{i} X_{i}\right)=\sum_{i=1}^{n} a_{i}^{2} \mathbb{V}\left(X_{i}\right)<br>
+$$</p>
+<p>所以，我们得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp; \operatorname{Var}(\bar{X}) \<br>
+=&amp; \operatorname{var}\left(\frac{1}{n} \sum_{i=1}^{n} x_{i}\right) \<br>
+=&amp; \frac{1}{n^{2}} \sum_{i=1}^{n} \operatorname{var}\left(x_{i}\right) \<br>
+=&amp; \frac{1}{n^{2}} n \operatorname{var}(x) \<br>
+=&amp; \frac{\sigma^{2}}{n}<br>
+\end{aligned}<br>
+$$<br>
+所以，</p>
+<p>$$<br>
+\begin{aligned}<br>
+E\left(\frac{1}{n} \sum_{i=1}^{n} \left(X_{i}-\bar{X}\right)^{2} \right)&amp;=\operatorname{Var}(X)-\operatorname{Var}(\bar{X})=\sigma^{2}-\frac{\sigma^{2}}{n}=\frac{n-1}{n} \sigma^{2}<br>
+\end{aligned}<br>
+$$</p>
+<p>因此，为了避免使用有偏差的估计值，略加转换，我们得到下式：<br>
+$$<br>
+S^{2}=\frac{1}{n-1} \sum_{i=1}^{n}\left(X_{i}-\bar{X}\right)^{2}<br>
+$$</p>
+<h2 id="第二种证明方法-2">第二种证明方法</h2>
+<p>我感觉像上面一样，直接从 $\mathrm{E}(\sigma^{2}<em>{ML})$ 去推公式，结果更直观一点。首先我们需要拆分一下 $\sigma^{2}</em>{ML}$ 。</p>
+<p>$$<br>
+\sigma^{2}<em>{ML} =\frac{1}{n} \sum</em>{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}+(\bar{x}-u)^{2} \<br>
+$$</p>
+<p>同时对左右两侧求期望，得到：<br>
+$$<br>
+\begin{aligned}<br>
+\mathrm{E}(\sigma^{2}<em>{ML})&amp;=\mathrm{E}\left(\frac{1}{n} \sum</em>{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}+(\bar{x}-u)^{2}\right) \<br>
+&amp;=\mathrm{E}\left(\frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}\right) + \mathrm{E}\left((\bar{x}-u)^{2}\right) \<br>
+&amp;=\mathrm{E}\left(\frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}\right) + \operatorname{Var}(\bar{X}) \<br>
+&amp;=\mathrm{E}\left(\frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}\right) + \frac{\sigma^{2}}{n} \<br>
+\end{aligned}<br>
+$$<br>
+左侧 $\sigma^{2}<em>{ML}$ 期望为总体方差 $\sigma^2$ （  $\because \mathrm{E}(\sigma^{2}</em>{ML}) = \sigma^{2}$ ） ，因此<br>
+$$<br>
+\begin{aligned}<br>
+\sigma^{2} &amp;=\mathrm{E}\left(\frac{1}{n} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}\right) + \frac{\sigma^{2}}{n} \<br>
+\end{aligned}<br>
+$$<br>
+所以<br>
+$$<br>
+E\left(\frac{1}{n} \sum_{i=1}^{n} \left(X_{i}-\bar{X}\right)^{2} \right)=\sigma^{2}-\frac{\sigma^{2}}{n}=\frac{n-1}{n} \sigma^{2}<br>
+$$</p>
 <div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">https://www.zhihu.com/question/20099757<a href="#fnref:1" rev="footnote"> ↩</a></span></li></ol></div></div> 
       <!-- reward -->
       
@@ -164,55 +301,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -511,30 +600,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

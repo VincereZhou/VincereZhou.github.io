@@ -98,27 +98,69 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>APY 方法的相应文献。</p>
 <span id="more"></span>
-
-<h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>一步法要对 G  阵求逆，其计算和存储花销是 $n^3$ 和 $n^2$ ，因此当基因型数据量很大时计算量很大。</p>
+<h1>引言</h1>
+<p>一步法要对 G  阵求逆，其计算和存储花销是 $n^3$ 和 $n^2$ ，因此当基因型数据量很大时计算量很大。</p>
 <p>Misztal (2014) 提出了 APY 算法（an algorithm for proven and young animals）来计算 $\mathbf{G}^{-1}$ ，这里称为  $\mathbf{G}^{-1}_{APY}$ ，一开始这里的 proven 指的是初始的个体，young 指的是更年轻的个体。</p>
 <p>之后的研究发现（Fragomeni, 2015）发现没有必要通过年纪对个体进行排序，因此此时这个算法将基因型个体划分为核心个体 (core) 和 非核心个体 (noncore) 。 当基因型个体总数为 50万，核心群体数目为 2万是，APY 方法的计算和存储花销分别是常规求逆的 0.3% 和 8% 。</p>
 <p>当核心群体数目超过 1万时，APY 方法计算的 GEBV 结果与常规结果非常类似。</p>
 <p>之前的重心都关注APY算法的可行性，效率并不是最主要的考虑。这篇文章关注<strong>如何研究出一个高效的 APY 算法</strong>，并用实际的奶牛数据进行计算。</p>
-<h1 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h1><p>常规的 G 阵构建方法如下（VanRaden, 2008）<br>$$<br>\mathbf{G}&#x3D;\frac{\mathbf{Z Z}^{\prime}}{2 \sum p_j\left(1-p_j\right)} \text { and } \mathbf{Z}&#x3D;(\mathbf{M}-\mathbf{P})<br>$$<br>这里 $p_{j}$ 是第二个碱基的基因频率（当前的基因型个体），M 矩阵包含所有位点的基因型，P 矩阵包含 $2p_{j}$ 。 </p>
-<p>我们将 $\mathbf{G}$ 矩阵分成 4 块：<br>$$<br>\mathbf{G}&#x3D;\left[\begin{array}{ll}<br>\mathbf{G}<em>{c c} &amp; \mathbf{G}</em>{c n} \<br>\mathbf{G}<em>{n c} &amp; \mathbf{G}</em>{n n}<br>\end{array}\right],<br>$$<br>这里下标 c 为核心群体，n 为非核心群体。这里的 $\mathbf{G}$  经过了 blending 从而确保其为非奇异矩阵，  即 $0.95\mathbf{G}+0.05\mathbf{A}<em>{22}$。<strong>这里的 $\mathbf{A}_{22}$ 矩阵使用 (Aguilar, 2011) 中的算法得到</strong>，但是只使用其中相对于 $\mathbf{G}</em>{cc}$ , $\mathbf{G}<em>{cn}$ 和 $\mathbf{G}</em>{nn}$ 对角线位置的元素加入到 $\mathbf{G}$ 阵中。然后对 blending 之后的 $\mathbf{G}$ 阵进行 scale ，使得其对角线元素矩阵和非对角线元素均值与 $\mathbf{A}_{22}$ 矩阵相同。</p>
-<p>然后我们计算 APY 逆，公式如下<br>$$<br>\begin{aligned}<br>&amp; \mathbf{G}<em>{\mathrm{APY}}^{-1}&#x3D; {\left[\begin{array}{cc}<br>\mathbf{G}</em>{c c}^{-1}+\mathbf{G}<em>{c c}^{-1} \mathbf{G}</em>{c n} \mathbf{M}<em>{n n}^{-1} \mathbf{G}</em>{c n}^{\prime} \mathbf{G}<em>{c c}^{-1} &amp; -\mathbf{G}</em>{c c}^{-1} \mathbf{G}<em>{c n} \mathbf{M}</em>{n n}^{-1} \<br>-\mathbf{M}<em>{n n}^{-1} \mathbf{G}</em>{c n}^{\prime} \mathbf{G}<em>{c c}^{-1} &amp; \mathbf{M}</em>{n n}^{-1}<br>\end{array}\right] } \<br>&amp;&#x3D; {\left[\begin{array}{cc}<br>\mathbf{G}<em>{\mathrm{APY}}^{c c} &amp; \mathbf{G}</em>{\mathrm{APY}}^{c n} \<br>\mathbf{G}<em>{\mathrm{APY}}^{c n} &amp; \mathbf{M}</em>{n n}^{-1}<br>\end{array}\right] \text { and } } \<br>&amp; \mathbf{M}<em>{n n}&#x3D;\operatorname{diag}\left{g</em>{i i}-\mathbf{g}<em>{c i}^{\prime} \mathbf{G}</em>{c c}^{-1} \mathbf{g}<em>{c i}\right},<br>\end{aligned}<br>$$<br>这里$g</em>{ii}$ 是 $\mathbf{G}<em>{nn}$ 的第 $i$ 个对角线元素， $\mathbf{g}</em>{ci}$ 是 $\mathbf{G}<em>{cn}$ 的第 $i$ 列，$\mathbf{M}</em>{nn}$ 是一个对角线矩阵。</p>
+<h1>方法</h1>
+<p>常规的 G 阵构建方法如下（VanRaden, 2008）<br>
+$$<br>
+\mathbf{G}=\frac{\mathbf{Z Z}^{\prime}}{2 \sum p_j\left(1-p_j\right)} \text { and } \mathbf{Z}=(\mathbf{M}-\mathbf{P})<br>
+$$<br>
+这里 $p_{j}$ 是第二个碱基的基因频率（当前的基因型个体），M 矩阵包含所有位点的基因型，P 矩阵包含 $2p_{j}$ 。</p>
+<p>我们将 $\mathbf{G}$ 矩阵分成 4 块：<br>
+$$<br>
+\mathbf{G}=\left[\begin{array}{ll}<br>
+\mathbf{G}<em>{c c} &amp; \mathbf{G}</em>{c n} \<br>
+\mathbf{G}<em>{n c} &amp; \mathbf{G}</em>{n n}<br>
+\end{array}\right],<br>
+$$<br>
+这里下标 c 为核心群体，n 为非核心群体。这里的 $\mathbf{G}$  经过了 blending 从而确保其为非奇异矩阵，  即 $0.95\mathbf{G}+0.05\mathbf{A}<em>{22}$。**这里的 $\mathbf{A}</em>{22}$ 矩阵使用 (Aguilar, 2011) 中的算法得到**，但是只使用其中相对于 $\mathbf{G}<em>{cc}$ , $\mathbf{G}</em>{cn}$ 和 $\mathbf{G}<em>{nn}$ 对角线位置的元素加入到 $\mathbf{G}$ 阵中。然后对 blending 之后的 $\mathbf{G}$ 阵进行 scale ，使得其对角线元素矩阵和非对角线元素均值与 $\mathbf{A}</em>{22}$ 矩阵相同。</p>
+<p>然后我们计算 APY 逆，公式如下<br>
+$$<br>
+\begin{aligned}<br>
+&amp; \mathbf{G}<em>{\mathrm{APY}}^{-1}= {\left[\begin{array}{cc}<br>
+\mathbf{G}</em>{c c}^{-1}+\mathbf{G}<em>{c c}^{-1} \mathbf{G}</em>{c n} \mathbf{M}<em>{n n}^{-1} \mathbf{G}</em>{c n}^{\prime} \mathbf{G}<em>{c c}^{-1} &amp; -\mathbf{G}</em>{c c}^{-1} \mathbf{G}<em>{c n} \mathbf{M}</em>{n n}^{-1} \<br>
+-\mathbf{M}<em>{n n}^{-1} \mathbf{G}</em>{c n}^{\prime} \mathbf{G}<em>{c c}^{-1} &amp; \mathbf{M}</em>{n n}^{-1}<br>
+\end{array}\right] } \<br>
+&amp;= {\left[\begin{array}{cc}<br>
+\mathbf{G}<em>{\mathrm{APY}}^{c c} &amp; \mathbf{G}</em>{\mathrm{APY}}^{c n} \<br>
+\mathbf{G}<em>{\mathrm{APY}}^{c n} &amp; \mathbf{M}</em>{n n}^{-1}<br>
+\end{array}\right] \text { and } } \<br>
+&amp; \mathbf{M}<em>{n n}=\operatorname{diag}\left{g</em>{i i}-\mathbf{g}<em>{c i}^{\prime} \mathbf{G}</em>{c c}^{-1} \mathbf{g}<em>{c i}\right},<br>
+\end{aligned}<br>
+$$<br>
+这里$g</em>{ii}$ 是 $\mathbf{G}<em>{nn}$ 的第 $i$ 个对角线元素， $\mathbf{g}</em>{ci}$ 是 $\mathbf{G}<em>{cn}$ 的第 $i$ 列，$\mathbf{M}</em>{nn}$ 是一个对角线矩阵。</p>
 <p>下面是为了实现高效计算需要注意的地方：</p>
 <ol>
 <li>基因型需要压缩为二进制格式（如plink的 bed 文件），以节约内存。</li>
 <li>我们需要完整计算 $\mathbf{G}<em>{cc}$  和  $\mathbf{G}</em>{cn}$， 但是 $\mathbf{G}_{nn}$ 矩阵只需要计算对角线元素，保存为一个向量。</li>
 <li>我们通过 <strong>LAPACK</strong> (the Linear Algebra Package) 包 (Aguilar, 2011) 对 $\mathbf{G}<em>{cc}$ 矩阵进行更新覆盖得到  $\mathbf{G}</em>{cc}^{-1}$ ，那么  $- \mathbf{G}<em>{cc}^{-1}\mathbf{G}</em>{cn}$ 会临时存储在内存中，而 $\mathbf{M}<em>{nn}^{-1}$ 中的对角线元素会替换 $\mathbf{G}</em>{nn}$ 矩阵中的元素。最终  $\mathbf{G}<em>{cc}$  和  $\mathbf{G}</em>{cn}$ 会覆盖为   $\mathbf{G}^{cc}<em>{APY}$  和  $\mathbf{G}^{cn}</em>{APY}$ 。<strong>BLAS</strong> (the Basic Linear Algebra Subprograms) 用于密集矩阵操作(Aguilar, 2011) 。</li>
 </ol>
-<p>ssGBLUP 同样需要 $\mathbf{A}<em>{22}^{-1}$ ， 这个矩阵是一个密集矩阵，并且不能保存在内存中。当我们使用 PCG 方法来求解 MME 时，每一轮迭代我们只需要计算  $\mathbf{A}</em>{22}^{-1}$ 和一个向量 (称为 $\mathbf{q}$ ) 的乘积，这个乘积可以通过下面的公式得到（Strandén and Mäntysaari (2014)）：<br>$$<br>A_{22}^{-1}&#x3D;A^{22}-\left(A^{12}\right)^{\prime}\left(A^{11}\right)^{-1}\left(A^{12}\right)<br>$$</p>
-<p>$$<br>A_{22}^{-1} q&#x3D;A^{22} q-\left(A^{12}\right)^{\prime}\left[\left(A^{11}\right)^{-1}\left[A^{12} q\right]\right]<br>$$</p>
-<p>其中右手项的所有元素均是 $\mathbf{A}^{-1}$ 矩阵的子矩阵，即<br>$$<br>\mathbf{A}&#x3D;\left[\begin{array}{ll}<br>\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22}<br>\end{array}\right] \text { and } \mathbf{A}^{-1}&#x3D;\left[\begin{array}{cc}<br>\mathbf{A}^{11} &amp; \mathbf{A}^{12} \<br>\mathbf{A}^{21} &amp; \mathbf{A}^{22}<br>\end{array}\right]<br>$$<br>每一次计算 $\mathbf{A}<em>{22}^{-1} \mathbf{q}$ 均通过一系列系数矩阵操作得到：$\mathbf{t &#x3D; A^{22}q}$, $\mathbf{x &#x3D; A^{12}q}$, $\mathbf{y &#x3D; (A^{11})^{−1} x}$ , $\mathbf{z &#x3D; (A^{12})^{\prime}y}$,  $\mathbf{A</em>{22}^{−1}q &#x3D; t − z}$  。 其中 $\mathbf{t,x,y,z}$ 均为临时向量。 </p>
-<p>其中 $\mathbf{y &#x3D; (A^{11})^{−1} x}$ 可以改为方程组 $\mathbf{A^{11}y &#x3D;  x}$ ，因此我们需要对 $\mathbf{A}^{11}$ 矩阵进行 Cholesky 分解，我们可以使用 FSPAK 或 YAMS 来实现这一点。在实际中，因为结果相同，上面的表达式只考虑基因型个体（在矩阵 $\mathbf{A}<em>{22}$ 中）和<strong>基因型个体的未检测基因型的祖先</strong> （在矩阵 $\mathbf{A}</em>{11}$ 中）（很好理解，就相当于对基因型个体追系谱了）。</p>
+<p>ssGBLUP 同样需要 $\mathbf{A}<em>{22}^{-1}$ ， 这个矩阵是一个密集矩阵，并且不能保存在内存中。当我们使用 PCG 方法来求解 MME 时，每一轮迭代我们只需要计算  $\mathbf{A}</em>{22}^{-1}$ 和一个向量 (称为 $\mathbf{q}$ ) 的乘积，这个乘积可以通过下面的公式得到（Strandén and Mäntysaari (2014)）：<br>
+$$<br>
+A_{22}^{-1}=A^{22}-\left(A^{12}\right)^{\prime}\left(A^{11}\right)^{-1}\left(A^{12}\right)<br>
+$$</p>
+<p>$$<br>
+A_{22}^{-1} q=A^{22} q-\left(A^{12}\right)^{\prime}\left[\left(A^{11}\right)^{-1}\left[A^{12} q\right]\right]<br>
+$$</p>
+<p>其中右手项的所有元素均是 $\mathbf{A}^{-1}$ 矩阵的子矩阵，即<br>
+$$<br>
+\mathbf{A}=\left[\begin{array}{ll}<br>
+\mathbf{A}<em>{11} &amp; \mathbf{A}</em>{12} \<br>
+\mathbf{A}<em>{21} &amp; \mathbf{A}</em>{22}<br>
+\end{array}\right] \text { and } \mathbf{A}^{-1}=\left[\begin{array}{cc}<br>
+\mathbf{A}^{11} &amp; \mathbf{A}^{12} \<br>
+\mathbf{A}^{21} &amp; \mathbf{A}^{22}<br>
+\end{array}\right]<br>
+$$<br>
+每一次计算 $\mathbf{A}<em>{22}^{-1} \mathbf{q}$ 均通过一系列系数矩阵操作得到：$\mathbf{t = A^{22}q}$, $\mathbf{x = A^{12}q}$, $\mathbf{y = (A^{11})^{−1} x}$ , $\mathbf{z = (A^{12})^{\prime}y}$,  $\mathbf{A</em>{22}^{−1}q = t − z}$  。 其中 $\mathbf{t,x,y,z}$ 均为临时向量。</p>
+<p>其中 $\mathbf{y = (A^{11})^{−1} x}$ 可以改为方程组 $\mathbf{A^{11}y =  x}$ ，因此我们需要对 $\mathbf{A}^{11}$ 矩阵进行 Cholesky 分解，我们可以使用 FSPAK 或 YAMS 来实现这一点。在实际中，因为结果相同，上面的表达式只考虑基因型个体（在矩阵 $\mathbf{A}<em>{22}$ 中）和<strong>基因型个体的未检测基因型的祖先</strong> （在矩阵 $\mathbf{A}</em>{11}$ 中）（很好理解，就相当于对基因型个体追系谱了）。</p>
 <p>我们将上面提到的算法应用到 <strong>BLUP90IOD2</strong> 程序中，其中通过 PCG 方法求解 MME 。这个脚本通过 Intel Fortran Compiler 14.0  进行编译。我们使用 the Intel Math Kernel Library 11.0 中的 BLAS 和 LAPACK 包。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<h1>参考文献</h1>
+<ol>
 <li>Masuda Y, Misztal I, Tsuruta S, et al. Implementation of genomic recursions in single-step genomic best linear unbiased predictor for US Holsteins with a large number of genotyped animals[J]. Journal of Dairy Science, 2016, 99(3): 1968-1974.</li>
 <li>Aguilar, I., I. Misztal, A. Legarra, and S. Tsuruta. 2011. Efficient computation of the genomic relationship matrix and other matrices  used in single-step evaluation. J. Anim. Breed. Genet. 128:422–428.</li>
 </ol>
@@ -169,55 +211,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -516,30 +510,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

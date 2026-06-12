@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">631</span>
+            <span class="post-count">628</span>
         </span>
     </span>
 
@@ -98,17 +98,41 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>如何使用 blupf90 软件构建母体效应模型。</p>
 <span id="more"></span>
-
-<h1 id="母体效应模型理论"><a href="#母体效应模型理论" class="headerlink" title="母体效应模型理论"></a>母体效应模型理论</h1><p>有一些性状可以收到母体的影响很大，比如断奶重，那么我们就可以将母体的效应加入到模型中。母体效应又可以分为两类，母体遗传效应和母体环境效应。</p>
-<p>一般的模型模型如下<br>$$<br>\mathbf{y} &#x3D; \mathbf{Xb+Zu+Wm+Sp+e}<br>$$<br>这里 $\mathbf{b}$ 是固定效应，$\mathbf{u}$ 是个体直接加性效应，$\mathbf{m}$ 是母体遗传效应，$\mathbf{p}$ 是母体永久环境效应，$\mathbf{e}$ 是残差。</p>
-<p>相应的协方差矩阵如下<br>$$<br>\mathrm{var} \left[\begin{array}{c}<br>\mathbf{u} \<br>\mathbf{m} \<br>\mathbf{p} \<br>\mathbf{e}<br>\end{array}\right] &#x3D; \left[\begin{array}{c}<br>\mathbf{A}\sigma_{d}^{2} &amp;  \mathbf{A}\sigma_{dm}^{2} &amp; \mathbf{0} &amp; \mathbf{0} \<br>\mathbf{A}\sigma_{dm}^{2} &amp;  \mathbf{A}\sigma_{m}^{2} &amp; \mathbf{0} &amp; \mathbf{0} \<br>\mathbf{0} &amp;  \mathbf{0} &amp; \mathbf{I}\sigma_{p}^{2} &amp; \mathbf{0} \<br>\mathbf{0} &amp;  \mathbf{0} &amp; \mathbf{0} &amp; \mathbf{I}\sigma_{e}^{2} \<br>\end{array}\right]<br>$$<br>其中个体直接加性效应和母体效应的加性协方差矩阵为<br>$$<br>\mathbf{G}<em>{0} &#x3D; \left[\begin{array}{c}<br>\sigma</em>{d}^{2} &amp; \sigma_{dm}^{2} \<br>\sigma_{dm}^{2} &amp; \sigma_{m}^{2} \</p>
-<p>\end{array}\right]<br>$$</p>
-<h1 id="准备文件"><a href="#准备文件" class="headerlink" title="准备文件"></a>准备文件</h1><p>其它准备文件和正常的个体动物模型一样，只需要修改 renumf90 的参数卡。</p>
+<h1>母体效应模型理论</h1>
+<p>有一些性状可以收到母体的影响很大，比如断奶重，那么我们就可以将母体的效应加入到模型中。母体效应又可以分为两类，母体遗传效应和母体环境效应。</p>
+<p>一般的模型模型如下<br>
+$$<br>
+\mathbf{y} = \mathbf{Xb+Zu+Wm+Sp+e}<br>
+$$<br>
+这里 $\mathbf{b}$ 是固定效应，$\mathbf{u}$ 是个体直接加性效应，$\mathbf{m}$ 是母体遗传效应，$\mathbf{p}$ 是母体永久环境效应，$\mathbf{e}$ 是残差。</p>
+<p>相应的协方差矩阵如下<br>
+$$<br>
+\mathrm{var} \left[\begin{array}{c}<br>
+\mathbf{u} \<br>
+\mathbf{m} \<br>
+\mathbf{p} \<br>
+\mathbf{e}<br>
+\end{array}\right] = \left[\begin{array}{c}<br>
+\mathbf{A}\sigma_{d}^{2} &amp;  \mathbf{A}\sigma_{dm}^{2} &amp; \mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{A}\sigma_{dm}^{2} &amp;  \mathbf{A}\sigma_{m}^{2} &amp; \mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp;  \mathbf{0} &amp; \mathbf{I}\sigma_{p}^{2} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp;  \mathbf{0} &amp; \mathbf{0} &amp; \mathbf{I}\sigma_{e}^{2} \<br>
+\end{array}\right]<br>
+$$<br>
+其中个体直接加性效应和母体效应的加性协方差矩阵为<br>
+$$<br>
+\mathbf{G}<em>{0} = \left[\begin{array}{c}<br>
+\sigma</em>{d}^{2} &amp; \sigma_{dm}^{2} \<br>
+\sigma_{dm}^{2} &amp; \sigma_{m}^{2} \</p>
+<p>\end{array}\right]<br>
+$$</p>
+<h1>准备文件</h1>
+<p>其它准备文件和正常的个体动物模型一样，只需要修改 renumf90 的参数卡。</p>
 <p>参数卡只需新增一个关键词 OPTIONAL，这个关键词必须放在加性效应EFFECT的后面，如下图所示。这里最多可以加入三个效应，<code>pe</code> (永久环境效应)，<code>mat</code> (母体遗传效应)， <code>mpe</code> （母体环境效应）。</p>
 <p><strong>如果表型个体缺少系谱（母本为 0），需要手动剔除这些个体的表型</strong>（相当于存在因子缺失）。我测试了一下，BLUPF90 会将缺失的母本也分配一个虚拟的重编码个体号，就是说也当成一个已知的个体，这应该不符合我们的预期。</p>
 <p>如果你选了<code>mat</code>（母系效应），那么 (CO)VARIANCES 地方必须放一个 $2 \times 2$ 的矩阵（单性状模型），包括个体直接加性效应和母体加性效应 (<strong>注意顺序，第一个是个体加性效应，第二个是母体加性效应</strong>)；如果你选了 <code>mpe</code>，那么你应该把永久环境效应方差放在 (C0)VARIANCES_MPE中；如果你选了 <code>pe</code>，那么你应该把永久环境效应方差放在 (C0)VARIANCES_PE中。</p>
 <p>按照上面的母体效应模型，我们应该往模型中加入 <code>mat</code> 和 <code>mpe</code> 。</p>
-<p><img src="/posts/11a64ff8/1.png"></p>
+<p><img src="1.png" alt=""></p>
  
       <!-- reward -->
       
@@ -156,55 +180,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -503,30 +479,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

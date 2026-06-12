@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">618</span>
+            <span class="post-count">617</span>
         </span>
     </span>
 
@@ -98,33 +98,36 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 rrBLUP 包计算 SNP 效用的方法。</p>
 <span id="more"></span>
-
-<h1 id="表型和基因型处理"><a href="#表型和基因型处理" class="headerlink" title="表型和基因型处理"></a>表型和基因型处理</h1><ol>
-<li><p>表型文件中必须剔除存在缺失的行。</p>
+<h1>表型和基因型处理</h1>
+<ol>
+<li>
+<p>表型文件中必须剔除存在缺失的行。</p>
 </li>
-<li><p>基因型质控填充，将位点编码必须为 {-1,0,1} 。</p>
+<li>
+<p>基因型质控填充，将位点编码必须为 {-1,0,1} 。</p>
 </li>
-<li><p>表型文件和基因型文件中的个体顺序必须保持一致（只能使用既有表型又有基因型的个体数据）。</p>
+<li>
+<p>表型文件和基因型文件中的个体顺序必须保持一致（只能使用既有表型又有基因型的个体数据）。</p>
 </li>
 </ol>
-<h1 id="求解"><a href="#求解" class="headerlink" title="求解"></a>求解</h1><p>这里我们主要用到的就是 <code>rrBLUP</code> 包中的 <code>mixed.solve</code> 函数，这里还可以手动填充固定效应（必须列满秩），用法如下</p>
+<h1>求解</h1>
+<p>这里我们主要用到的就是 <code>rrBLUP</code> 包中的 <code>mixed.solve</code> 函数，这里还可以手动填充固定效应（必须列满秩），用法如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mixed.solve<span class="punctuation">(</span>y<span class="punctuation">,</span> Z<span class="operator">=</span><span class="literal">NULL</span><span class="punctuation">,</span> K<span class="operator">=</span><span class="literal">NULL</span><span class="punctuation">,</span> X<span class="operator">=</span><span class="literal">NULL</span><span class="punctuation">,</span> method<span class="operator">=</span><span class="string">&quot;REML&quot;</span><span class="punctuation">,</span></span><br><span class="line">			bounds<span class="operator">=</span><span class="built_in">c</span><span class="punctuation">(</span><span class="number">1e-09</span><span class="punctuation">,</span> <span class="number">1e+09</span><span class="punctuation">)</span><span class="punctuation">,</span> SE<span class="operator">=</span><span class="literal">FALSE</span><span class="punctuation">,</span> return.Hinv<span class="operator">=</span><span class="literal">FALSE</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-
 <p>参数：</p>
 <p>y:  $n \times 1$ 的表型向量，不能有缺失 （NA），必须与 X 和 Z 的行顺序保持一致。</p>
-<p>Z: $n \times m$ 的随机效应矩阵，如果不设置，默认为单位矩阵。 </p>
-<p>K: $m \times m$ 的随机效应协方差矩阵，必须为半正定矩阵。如果不设置，默认为单位矩阵。 </p>
+<p>Z: $n \times m$ 的随机效应矩阵，如果不设置，默认为单位矩阵。</p>
+<p>K: $m \times m$ 的随机效应协方差矩阵，必须为半正定矩阵。如果不设置，默认为单位矩阵。</p>
 <p>X: $n \times p$ 的固定效应设计矩阵，如果不设置，则为 1 向量。<strong>X 必须为列满秩序矩阵</strong>。</p>
 <p>method: “ML”, “REML”</p>
 <p>bounds: 两个元素的数组，表明 ridge 参数的下限和上限。</p>
 <p>SE ：如果 TRUE , 则计算标准误</p>
-<p>return.Hinv: 如果 TRUE,  返回 reverse of  $H &#x3D; ZKZ’ + \lambda I$ ，这对 GWAS 有用。</p>
+<p>return.Hinv: 如果 TRUE,  返回 reverse of  $H = ZKZ’ + \lambda I$ ，这对 GWAS 有用。</p>
 <p>正常来说，如果固定效应为均值，那么就只需要设置 y 和 Z (填充后的基因型矩阵，由**{-1,0,1}**构成)即可。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">out &lt;- mixed.solve(y, Z=marker)</span><br></pre></td></tr></table></figure>
-
-<p>返回值如下， 其中我们需要的 <strong>snp 效应就是$u</strong>。 </p>
-<p><img src="/posts/8e8c3017/1.png" alt="1"></p>
-<h1 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h1><p>下面是一个实际应用的脚本例子。</p>
+<p>返回值如下， 其中我们需要的 <strong>snp 效应就是$u</strong>。</p>
+<p><img src="1.png" alt="1"></p>
+<h1>举例</h1>
+<p>下面是一个实际应用的脚本例子。</p>
 <p>这里的两个输入文件 <code>rrblup.phe</code> 与 <code>rrblup.raw</code> 是事先处理好的，二者中的个体顺序保持一致。 而 <code>rrblup.raw</code> 中的内容是通过 plink 软件的 <code>--recodeA</code> 选项生成的。</p>
 <p>输出文件夹 <code>rrblup_results</code> 中的每一个文件表示一个结果，其中 <code>u.csv</code> 就是我们需要的 SNP 效应值。</p>
 <p>经过手动比较，<code>rrBLUP</code> 和 <code>GBLUP</code> 计算得到的个体 GEBV 相关系数为 1， 没有问题。</p>
@@ -175,55 +178,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -522,30 +477,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

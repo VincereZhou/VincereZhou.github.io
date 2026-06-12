@@ -98,48 +98,62 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>有的时候，你可能需要比较两个文件的<strong>实质内容</strong>是否一样，或者某一个文件的内容是否均包含在另一个文件，你可以看看本代码。</p>
 <span id="more"></span>
-
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这两天老得比对各种文件，比对我手上的数据和你手上的数据是否一致，比对上传的数据和计算用的数据是否一致等。但是之前用的一些比对文件的方法又不能很好地满足我的需求，总得手动各种弄，就写了这个小脚本。</p>
+<h1>前言</h1>
+<p>这两天老得比对各种文件，比对我手上的数据和你手上的数据是否一致，比对上传的数据和计算用的数据是否一致等。但是之前用的一些比对文件的方法又不能很好地满足我的需求，总得手动各种弄，就写了这个小脚本。</p>
 <p>我一般用的比对方式有三种，notpad++ 的 Compare 插件，Excel 的  Vlookup 函数 + 排序 + IF， linux 的 diff 命令。但是问题在于第一种和第三种主要用在两个文件行的排序一致的情况，而且也得肉眼去看比对结果。第二种用 Excel 倒是灵活，就是得手动各种弄，偶尔一次可以，经常这样做就废时间了。</p>
-<h1 id="脚本逻辑"><a href="#脚本逻辑" class="headerlink" title="脚本逻辑"></a>脚本逻辑</h1><p>这个脚本要求两个文件的<strong>列数相同</strong>，并且<strong>列的顺序也一样</strong>。两个文件指定以某一列作为主键（数据库的概念，主键不可以出现重复）。</p>
+<h1>脚本逻辑</h1>
+<p>这个脚本要求两个文件的<strong>列数相同</strong>，并且<strong>列的顺序也一样</strong>。两个文件指定以某一列作为主键（数据库的概念，主键不可以出现重复）。</p>
 <p>首先比较两个文件的主键，画个韦恩图如下，最左边的部分表示只在第一个文件的主键，也就是只在第一个文件中的行（如果存在，则写入文件 only_in_file1.txt ），最右边同理 。中间重叠的部分就是两个文件共同的主键。</p>
-<p><img src="/posts/705b018f/1.png" alt="1"></p>
+<p><img src="1.png" alt="1"></p>
 <p>然后查看两个文件共同的主键部分，比对同一个主键在两个文件的行的内容是否一致，如果不一致，则将这两行内容写入到 diff_rows.txt 。</p>
 <p>如果<strong>只在文件1中的行</strong>，<strong>只在文件2中的行</strong>，<strong>共同主键但是行内容不同的行</strong>，这三个<strong>均不存在</strong>，那就说明这<strong>两个文件在内容上完全一致</strong>。</p>
-<h1 id="使用软件"><a href="#使用软件" class="headerlink" title="使用软件"></a>使用软件</h1><ul>
+<h1>使用软件</h1>
+<ul>
 <li>python 3.8 及以上版本</li>
 </ul>
-<h1 id="输入文件格式"><a href="#输入文件格式" class="headerlink" title="输入文件格式"></a>输入文件格式</h1><p>文本格式</p>
-<h1 id="输出文件格式"><a href="#输出文件格式" class="headerlink" title="输出文件格式"></a>输出文件格式</h1><p>如果两个文件存在不一致，那么可能出现这三个文件。</p>
+<h1>输入文件格式</h1>
+<p>文本格式</p>
+<h1>输出文件格式</h1>
+<p>如果两个文件存在不一致，那么可能出现这三个文件。</p>
 <p><code>only_in_file1.txt</code> :  只在第一个文件出现的行</p>
 <p><code>only_in_file2.txt</code> :  只在第二个文件出现的行</p>
 <p><code>diff_rows.txt</code> : 两个文件主键相同但是行内容不一致的内容。</p>
 <p>前两个文件就不用说了，唯一注意的地方是这三个文件文件分隔符用的都是tab，可能和输入文件的分隔符不一样。</p>
 <p>第三个文件举个例子，见下方，前两行为一个不一致的地方，第一行为主键<code>YYLNWJ119077114</code>在第一个文件中的内容，第二行则为主键<code>YYLNWJ119077114</code>在第二个文件中的内容，可以看到这两行在最后一列内容不一致，第一个文件为 9，第二个文件为 -999 。第三行为空行，作为分隔。第四行和第五行是第二个不一致的地方。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">YYLNWJ119077114	F	7	YYCFJYA1872471220191013	243.76	9</span><br><span class="line">YYLNWJ119077114	F	7	YYCFJYA1872471220191013	243.76	-999</span><br><span class="line"></span><br><span class="line">YYLNWJ119083106	F	8	YYCFJYA1874850920191031	193.26	9</span><br><span class="line">YYLNWJ119083106	F	8	YYCFJYA1874850920191031	193.26	-999</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="运行代码"><a href="#运行代码" class="headerlink" title="运行代码"></a>运行代码</h1><p>代码文件见: <a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/compair_two_files.py">compair_two_files.py</a></p>
+<h1>运行代码</h1>
+<p>代码文件见: <a target="_blank" rel="noopener" href="https://github.com/VincereZhou/code_backup/blob/master/compair_two_files.py">compair_two_files.py</a></p>
 <p>将两个需要比较的文件和本程序放在一个文件夹内，运行命令示范如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python compair_two_files.py --file1 in_sz_phe --file2 out_sz_phe</span><br></pre></td></tr></table></figure>
-
 <p><strong>参数说明</strong>：</p>
 <p><code>--file1</code>: 第一个输入文件名称，必选</p>
-<p> <code>--file2</code>: 第二个输入文件名称，必选</p>
+<p><code>--file2</code>: 第二个输入文件名称，必选</p>
 <p><code>--key-column</code>:  主键所在的列，可选，默认为 1，即默认第一列为主键。如果数据中无法指定一列作为主键，现在可以指定多列内容作为主键，以逗号分隔。举个例子，假如比对文件为母猪的繁殖数据，此时由于一头母猪有多条数据，你不能将母猪ID作为主键，因为会重复；但是你可以通过母猪ID+胎次来保证一行数据的唯一性，如果母猪ID为第一列，胎次为第4列，则此时这个参数的值为 1,4 。</p>
 <p><code>--file-separator</code>:  文件中的分隔符，可选，默认为空白字符。</p>
-<h1 id="代码说明"><a href="#代码说明" class="headerlink" title="代码说明"></a>代码说明</h1><h2 id="输入参数，打印参数"><a href="#输入参数，打印参数" class="headerlink" title="输入参数，打印参数"></a>输入参数，打印参数</h2><p>略</p>
-<h2 id="检验参数"><a href="#检验参数" class="headerlink" title="检验参数"></a>检验参数</h2><p>检验两个文件是否存在且非空，两个文件的列数是否相同，主键是否为数字且在列数的范围内。如果存在问题，报错退出</p>
-<h2 id="检查文件"><a href="#检查文件" class="headerlink" title="检查文件"></a>检查文件</h2><h3 id="第一个文件"><a href="#第一个文件" class="headerlink" title="第一个文件"></a>第一个文件</h3><p>对于每一行判断列数，判断整行内容是否重复，判断主键是否重复，将内容写入到 dict1 中。</p>
-<h3 id="第二个文件"><a href="#第二个文件" class="headerlink" title="第二个文件"></a>第二个文件</h3><p>正常检查同第一个文件，判断第二个文件的主键是否在第一个文件中，将共同主键的行内容写入到 dict2 ，将只在第二个文件的行内容写入到 only_in_file2_list 。</p>
-<h3 id="提取只在第一个文件中的主键的行"><a href="#提取只在第一个文件中的主键的行" class="headerlink" title="提取只在第一个文件中的主键的行"></a>提取只在第一个文件中的主键的行</h3><p>上面已经提取了只在第二个文件中的行的内容，这里就提取只在第一个文件的内容，写入 only_in_file1_list</p>
-<h3 id="比较共同主键的行"><a href="#比较共同主键的行" class="headerlink" title="比较共同主键的行"></a>比较共同主键的行</h3><p>比较两个文件共同主键的行的内容是否一致</p>
-<h2 id="综合判断"><a href="#综合判断" class="headerlink" title="综合判断"></a>综合判断</h2><p>结合上述内容，综合判断，如果完全一致则打印退出。如果存在不一致，将不一致的地方写入文件。</p>
-<h1 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h1><h2 id="2021年12月4号"><a href="#2021年12月4号" class="headerlink" title="2021年12月4号"></a>2021年12月4号</h2><ol>
-<li><p>之前数据每行内容拆分时，漏了使用指定的分隔符，改回来了</p>
+<h1>代码说明</h1>
+<h2 id="输入参数，打印参数">输入参数，打印参数</h2>
+<p>略</p>
+<h2 id="检验参数">检验参数</h2>
+<p>检验两个文件是否存在且非空，两个文件的列数是否相同，主键是否为数字且在列数的范围内。如果存在问题，报错退出</p>
+<h2 id="检查文件">检查文件</h2>
+<h3 id="第一个文件">第一个文件</h3>
+<p>对于每一行判断列数，判断整行内容是否重复，判断主键是否重复，将内容写入到 dict1 中。</p>
+<h3 id="第二个文件">第二个文件</h3>
+<p>正常检查同第一个文件，判断第二个文件的主键是否在第一个文件中，将共同主键的行内容写入到 dict2 ，将只在第二个文件的行内容写入到 only_in_file2_list 。</p>
+<h3 id="提取只在第一个文件中的主键的行">提取只在第一个文件中的主键的行</h3>
+<p>上面已经提取了只在第二个文件中的行的内容，这里就提取只在第一个文件的内容，写入 only_in_file1_list</p>
+<h3 id="比较共同主键的行">比较共同主键的行</h3>
+<p>比较两个文件共同主键的行的内容是否一致</p>
+<h2 id="综合判断">综合判断</h2>
+<p>结合上述内容，综合判断，如果完全一致则打印退出。如果存在不一致，将不一致的地方写入文件。</p>
+<h1>更新</h1>
+<h2 id="2021年12月4号">2021年12月4号</h2>
+<ol>
+<li>
+<p>之前数据每行内容拆分时，漏了使用指定的分隔符，改回来了</p>
 </li>
-<li><p><code>--key-column</code> 参数现在可以指定多列。</p>
+<li>
+<p><code>--key-column</code> 参数现在可以指定多列。</p>
 </li>
 </ol>
  
@@ -189,55 +203,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -536,30 +502,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

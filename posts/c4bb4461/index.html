@@ -98,42 +98,39 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在一个新服务器上重新安装一堆R包，估计是最让人头疼的事情之一了。</p>
 <span id="more"></span>
-
-<h1 id="第一种方式，复制黏贴-library-文件夹"><a href="#第一种方式，复制黏贴-library-文件夹" class="headerlink" title="第一种方式，复制黏贴 library 文件夹"></a>第一种方式，复制黏贴 <code>library</code> 文件夹</h1><p>如果你在两个服务器中安装的 R 的版本相同，那么最简单的方式就是从旧服务器中R的目录中找到 <code>library</code> 文件夹（比如我的在 <code>*/miniConda/miniconda3/lib/R/library</code> ），然后黏贴到新服务器的相同目录下（记得备份一下新服务器的 <code>library</code> 文件夹 ），如果你够幸运的话就没啥问题了。</p>
+<h1>第一种方式，复制黏贴 <code>library</code> 文件夹</h1>
+<p>如果你在两个服务器中安装的 R 的版本相同，那么最简单的方式就是从旧服务器中R的目录中找到 <code>library</code> 文件夹（比如我的在 <code>*/miniConda/miniconda3/lib/R/library</code> ），然后黏贴到新服务器的相同目录下（记得备份一下新服务器的 <code>library</code> 文件夹 ），如果你够幸运的话就没啥问题了。</p>
 <p>但是我旧的R版本是 3.6 ，新的 R 版本是 4.0 ，复制黏贴过去运行R直接报错，这条路就不通了。</p>
-<h1 id="第二种方式，批量安装"><a href="#第二种方式，批量安装" class="headerlink" title="第二种方式，批量安装"></a>第二种方式，批量安装</h1><h2 id="1-查找所有需要安装的-R-包"><a href="#1-查找所有需要安装的-R-包" class="headerlink" title="1. 查找所有需要安装的 R 包"></a>1. 查找所有需要安装的 R 包</h2><p>我采用下面的命令行，在脚本文件夹中便利所有内容，找到所有加载R包的语句</p>
+<h1>第二种方式，批量安装</h1>
+<h2 id="1-查找所有需要安装的-R-包">1. 查找所有需要安装的 R 包</h2>
+<p>我采用下面的命令行，在脚本文件夹中便利所有内容，找到所有加载R包的语句</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat * | grep &quot;library(&quot; | sort | uniq</span><br></pre></td></tr></table></figure>
-
 <p>找到一堆 <code>library(*)</code> 的语句后，我是直接复制到 Excel 里，用 excel 的智能填充提取 R 包名称（快捷键为 ctrl+e）, 然后用 f9 提取数组信息提取所有包名，简单处理后得到所有 R 包名称序列，如下。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">all_packages <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;*&quot;</span><span class="punctuation">,</span><span class="string">&quot;*&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="2-简单区分R包来源并安装"><a href="#2-简单区分R包来源并安装" class="headerlink" title="2. 简单区分R包来源并安装"></a>2. 简单区分R包来源并安装</h2><p>我们通过 <code>available.packages()</code> 函数提取 CRAN 中所有可用的R包</p>
+<h2 id="2-简单区分R包来源并安装">2. 简单区分R包来源并安装</h2>
+<p>我们通过 <code>available.packages()</code> 函数提取 CRAN 中所有可用的R包</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ap <span class="operator">&lt;-</span> available.packages<span class="punctuation">(</span><span class="punctuation">)</span> <span class="comment"># cran 中所有可用的包</span></span><br></pre></td></tr></table></figure>
-
 <p>我们先简单地将需要安装的 R 包分为两类，如果在 <code>ap</code> 中则视为 CRAN 中的 R 包，采用 <code>install.packages()</code> 来安装；如果不在 <code>ap</code> 中则视为 Bioconductor 中的 R 包，采用 <code>BiocManager::install()</code> 命令来安装。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">cran_packages <span class="operator">&lt;-</span> all_packages<span class="punctuation">[</span>all_packages <span class="operator">%in%</span> rownames<span class="punctuation">(</span>ap<span class="punctuation">)</span><span class="punctuation">]</span></span><br><span class="line"><span class="comment"># length(cran_packages)</span></span><br><span class="line"></span><br><span class="line">bio_packages <span class="operator">&lt;-</span> all_packages<span class="punctuation">[</span><span class="operator">!</span><span class="punctuation">(</span>all_packages <span class="operator">%in%</span> rownames<span class="punctuation">(</span>ap<span class="punctuation">)</span><span class="punctuation">)</span><span class="punctuation">]</span></span><br><span class="line"><span class="comment"># length(bio_packages)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">install.packages<span class="punctuation">(</span>cran_packages<span class="punctuation">)</span> <span class="comment"># 一次性安装所有的 cran 包</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="punctuation">(</span><span class="operator">!</span>requireNamespace<span class="punctuation">(</span><span class="string">&quot;BiocManager&quot;</span><span class="punctuation">,</span> quietly <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line">    install.packages<span class="punctuation">(</span><span class="string">&quot;BiocManager&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">BiocManager<span class="operator">::</span>install<span class="punctuation">(</span>bio_packages<span class="punctuation">)</span> <span class="comment"># 一次性安装所有的 bioconductor 包</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="3-确定哪些R包没有安装成功"><a href="#3-确定哪些R包没有安装成功" class="headerlink" title="3. 确定哪些R包没有安装成功"></a>3. 确定哪些R包没有安装成功</h2><p>将所有需要安装的R包，与所有已经安装的R包进行配对，确定哪些R包没有安装成功</p>
+<h2 id="3-确定哪些R包没有安装成功">3. 确定哪些R包没有安装成功</h2>
+<p>将所有需要安装的R包，与所有已经安装的R包进行配对，确定哪些R包没有安装成功</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 所有已经安装的 R 包</span></span><br><span class="line"></span><br><span class="line">installed_packages <span class="operator">=</span> row.names<span class="punctuation">(</span>installed.packages<span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看哪些 R 包还没有安装</span></span><br><span class="line"></span><br><span class="line">no_cran_packages <span class="operator">=</span> cran_packages<span class="punctuation">[</span><span class="operator">!</span><span class="punctuation">(</span>cran_packages <span class="operator">%in%</span> installed_packages<span class="punctuation">)</span><span class="punctuation">]</span></span><br><span class="line">no_cran_packages <span class="comment"># 2 个 [1] &quot;ggpubr&quot; &quot;car&quot;</span></span><br><span class="line"></span><br><span class="line">no_bio_packages <span class="operator">=</span> bio_packages<span class="punctuation">[</span><span class="operator">!</span><span class="punctuation">(</span>bio_packages <span class="operator">%in%</span> installed_packages<span class="punctuation">)</span><span class="punctuation">]</span></span><br><span class="line">no_bio_packages <span class="comment"># 0 个</span></span><br><span class="line"></span><br><span class="line">install.packages<span class="punctuation">(</span>no_cran_packages<span class="punctuation">)</span> <span class="comment"># 再来一次</span></span><br><span class="line"></span><br><span class="line">BiocManager<span class="operator">::</span>install<span class="punctuation">(</span>no_bio_packages<span class="punctuation">)</span> <span class="comment"># 再来一次</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="4-需要特殊安装的-R-包"><a href="#4-需要特殊安装的-R-包" class="headerlink" title="4. 需要特殊安装的 R 包"></a>4. 需要特殊安装的 R 包</h2><p>有些 R 包其实是从 GitHub 安装的，或者从别的地方安装，因此需要特殊安装一下。</p>
+<h2 id="4-需要特殊安装的-R-包">4. 需要特殊安装的 R 包</h2>
+<p>有些 R 包其实是从 GitHub 安装的，或者从别的地方安装，因此需要特殊安装一下。</p>
 <p>如果你足够幸运的话，你到这一步应该就把所有的 R 包都安装好了，还有没装好的，估计就是遇到问题了。</p>
-<h2 id="5-始终安装失败的包，手动下载安装"><a href="#5-始终安装失败的包，手动下载安装" class="headerlink" title="5.  始终安装失败的包，手动下载安装"></a>5.  始终安装失败的包，手动下载安装</h2><p>我有两个  CRAN 中的 R 包一直安装不下来，<code>ggpubr</code> 和 <code>car</code> ， 本来打算手动安装。因为存在附属包的情况，所以手动安装往往需要 “套娃式” 安装。</p>
+<h2 id="5-始终安装失败的包，手动下载安装">5.  始终安装失败的包，手动下载安装</h2>
+<p>我有两个  CRAN 中的 R 包一直安装不下来，<code>ggpubr</code> 和 <code>car</code> ， 本来打算手动安装。因为存在附属包的情况，所以手动安装往往需要 “套娃式” 安装。</p>
 <figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 手动安装 ggpubr， 事先安装 rstatix</span></span><br><span class="line"><span class="built_in">R</span> CMD INSTALL /mnt/<span class="keyword">data</span>/zhouziwen/lib/R_packages/ggpubr_0.<span class="number">4.0</span>.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 手动安装  car, 事先安装 pbkrtest lme4</span></span><br><span class="line"><span class="built_in">R</span> CMD INSTALL /mnt/<span class="keyword">data</span>/zhouziwen/lib/R_packages/nloptr_2.<span class="number">0.0</span>.tar.gz</span><br><span class="line"><span class="built_in">R</span> CMD INSTALL /mnt/<span class="keyword">data</span>/zhouziwen/lib/R_packages/lme4_1.<span class="number">1</span><span class="literal">-13</span>.tar.gz</span><br><span class="line"><span class="built_in">R</span> CMD INSTALL /mnt/<span class="keyword">data</span>/zhouziwen/lib/R_packages/pbkrtest_0.<span class="number">5.1</span>.tar.gz</span><br><span class="line"><span class="built_in">R</span> CMD INSTALL /mnt/<span class="keyword">data</span>/zhouziwen/lib/R_packages/car_3.<span class="number">0</span><span class="literal">-12</span>.tar.gz</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 <p>并且，手动安装还是遇到了相同的报错。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CMake Error: The source directory &quot;/tmp/RtmpGALOB5/R.INSTALL62081f90ce01/nloptr/src/nlopt-build&quot; does not exist.</span><br><span class="line">Specify --help for usage, or press the help button on the CMake GUI</span><br></pre></td></tr></table></figure>
-
 <p>此时，真正消耗时间和心情的步骤才来了，然后我就在网上搜索这个报错，没有找到清晰的答案（R 包安装不上的情况貌似一向如此，基本上找不到明白的答案，或者说别人的答案你试了可能还是没用）。</p>
-<h2 id="5-1-重装-cmake"><a href="#5-1-重装-cmake" class="headerlink" title="5.1 重装 cmake"></a>5.1 重装 cmake</h2><p>然后一番东搞西搞以后，我发现有一个 <code>cmake</code> 软件，从 <a target="_blank" rel="noopener" href="https://cmake.org/download/">https://cmake.org/download/</a> 下载 <code>cmake-3.22.2-linux-x86_64.tar.gz </code> ，然后先解压</p>
+<h2 id="5-1-重装-cmake">5.1 重装 cmake</h2>
+<p>然后一番东搞西搞以后，我发现有一个 <code>cmake</code> 软件，从 <a target="_blank" rel="noopener" href="https://cmake.org/download/">https://cmake.org/download/</a> 下载 <code>cmake-3.22.2-linux-x86_64.tar.gz </code> ，然后先解压</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zvxf cmake-3.22.2-linux-x86_64.tar.gz</span><br></pre></td></tr></table></figure>
-
 <p>解压以后，<code>bin</code> 文件夹中就有新的 <code>cmake</code> 软件，将这个 <code>bin</code> 文件夹加入到环境变量</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export PATH=&quot;*/cmake-3.22.2-linux-x86_64/bin:$PATH&quot;</span><br></pre></td></tr></table></figure>
-
 <p>之前的版本是 2.8 ，现在的版本如下，估计可能就是版本太低了。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">cmake --version</span></span><br><span class="line">cmake version 3.22.2</span><br><span class="line"></span><br><span class="line">CMake suite maintained and supported by Kitware (kitware.com/cmake).</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 <p>然后正常用 <code>install.packages()</code> 命令来安装 <code>ggpubr</code> 和 <code>car</code> 就正常了。</p>
  
       <!-- reward -->
@@ -182,55 +179,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -529,30 +478,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

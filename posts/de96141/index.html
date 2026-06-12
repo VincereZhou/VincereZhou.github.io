@@ -98,26 +98,29 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>材料来自于<a target="_blank" rel="noopener" href="https://www.illumina.com/documents/products/technotes/technote_topbot.pdf">technote_topbot</a> 。</p>
 <span id="more"></span>
-
 <p>这种划分DNA链的方式是 Illumina 提出的，其说法是可以使得在不同的基因组版本中的同一位点的链划分方式相同。</p>
-<h1 id="无歧义情况"><a href="#无歧义情况" class="headerlink" title="无歧义情况"></a>无歧义情况</h1><p>当 SNP 的某一个碱基为 A ，另一个碱基是 G &#x2F; C 时，此时我们称这个 SNP 所处的链为 TOP 链，碱基 A 称为  <code>Allele A</code>，碱基 C&#x2F;G 称为 <code>Allele B</code> 。</p>
-<p> 相似地，当 SNP 的某一个碱基为 T ，另一个碱基是 G &#x2F; C 时，此时我们称这个 SNP 所处的链为 BOT 链，碱基 T 称为  <code>Allele A</code>，碱基 C&#x2F;G 称为 <code>Allele B</code> 。</p>
-<p>总之，这里就是 A 和 T 分别是 TOP 链和  BOT 链的    <code>Allele A</code> ，而 碱基 C&#x2F;G 是   <code>Allele B</code>  。</p>
-<h1 id="有歧义情况"><a href="#有歧义情况" class="headerlink" title="有歧义情况"></a>有歧义情况</h1><p>如果 SNP 的两个碱基是 [A&#x2F;T] 或者 [C&#x2F;G] ，此时我们要看 SNP 附近的位点。我们 SNP 所处的位置是 n ，其前一个和后一个位置则是 n-1 和 n+1 ，我们将这两个位置的碱基组成一个配对；类似地，n-2 和 n+2 位置的两个碱基组成一个配对，以此类推，如下图所示</p>
-<p><img src="/posts/de96141/1.png" alt="1"></p>
-<p>采用这种方式，我们从SNP所在位置先两边依次延续，直到出现第一个无歧义的配对（某个碱基是 A&#x2F;T ，另一个碱基是 G&#x2F;C）。比如在上图中， n-1 和 n+1 所在位置的配对就是无歧义的配对。</p>
+<h1>无歧义情况</h1>
+<p>当 SNP 的某一个碱基为 A ，另一个碱基是 G / C 时，此时我们称这个 SNP 所处的链为 TOP 链，碱基 A 称为  <code>Allele A</code>，碱基 C/G 称为 <code>Allele B</code> 。</p>
+<p>相似地，当 SNP 的某一个碱基为 T ，另一个碱基是 G / C 时，此时我们称这个 SNP 所处的链为 BOT 链，碱基 T 称为  <code>Allele A</code>，碱基 C/G 称为 <code>Allele B</code> 。</p>
+<p>总之，这里就是 A 和 T 分别是 TOP 链和  BOT 链的    <code>Allele A</code> ，而 碱基 C/G 是   <code>Allele B</code>  。</p>
+<h1>有歧义情况</h1>
+<p>如果 SNP 的两个碱基是 [A/T] 或者 [C/G] ，此时我们要看 SNP 附近的位点。我们 SNP 所处的位置是 n ，其前一个和后一个位置则是 n-1 和 n+1 ，我们将这两个位置的碱基组成一个配对；类似地，n-2 和 n+2 位置的两个碱基组成一个配对，以此类推，如下图所示</p>
+<p><img src="1.png" alt="1"></p>
+<p>采用这种方式，我们从SNP所在位置先两边依次延续，直到出现第一个无歧义的配对（某个碱基是 A/T ，另一个碱基是 G/C）。比如在上图中， n-1 和 n+1 所在位置的配对就是无歧义的配对。</p>
 <p>我们进一步看第一个无歧义的配对，如果 A 或者 T 碱基出现在 5’ 端，那么此时我们称该 SNP 所处的链为 TOP 链；如果 A 或者 T 碱基出现在 3’ 端，那么此时我们称该 SNP 所处的链为 BOT 链。</p>
-<p>然后确认SNP 的两个碱基哪一个是   <code>Allele A</code> ，哪一个是   <code>Allele B</code> 。当 SNP 是 [A&#x2F;T] 突变，如果我们确实 SNP 所在链为 TOP 链，那么此时 A 是   <code>Allele A</code>  ，T 是    <code>Allele B</code> ；  如果我们确实 SNP 所在链为 BOT 链，那么此时 T 是   <code>Allele A</code>  ，A 是    <code>Allele B</code> 。</p>
-<p>当 SNP 是 [C&#x2F;G] 突变，如果我们确实 SNP 所在链为 TOP 链，那么此时 C 是   <code>Allele A</code>  ，G 是    <code>Allele B</code> ；  如果我们确实 SNP 所在链为 BOT 链，那么此时 G 是   <code>Allele A</code>  ，C 是    <code>Allele B</code> 。</p>
+<p>然后确认SNP 的两个碱基哪一个是   <code>Allele A</code> ，哪一个是   <code>Allele B</code> 。当 SNP 是 [A/T] 突变，如果我们确实 SNP 所在链为 TOP 链，那么此时 A 是   <code>Allele A</code>  ，T 是    <code>Allele B</code> ；  如果我们确实 SNP 所在链为 BOT 链，那么此时 T 是   <code>Allele A</code>  ，A 是    <code>Allele B</code> 。</p>
+<p>当 SNP 是 [C/G] 突变，如果我们确实 SNP 所在链为 TOP 链，那么此时 C 是   <code>Allele A</code>  ，G 是    <code>Allele B</code> ；  如果我们确实 SNP 所在链为 BOT 链，那么此时 G 是   <code>Allele A</code>  ，C 是    <code>Allele B</code> 。</p>
 <p>举例见下表</p>
-<p><img src="/posts/de96141/2.png" alt="1"></p>
-<h1 id="实际例子"><a href="#实际例子" class="headerlink" title="实际例子"></a>实际例子</h1><p>下表中， SNP1 有两次基因组的组装版本，然而这两个版本提供的序列正好是互补的，这种情况并不罕见（注意互补应该是一条链是 5’ 到 3‘ ，一条链是 3’ 到 5’ 方向，然后才有相同位置的碱基互补。下表中的序列应该都是 5’ 到 3’ 方向，所以是 Assembly1 的最后一个碱基和  Assembly2 的第一个碱基互补，其余同理）。</p>
-<p>我们看到此时两个组装版本中的 SNP1 正好一个是 TOP 链，一个是 BOT 链，即满足互补关系；同时    <code>Allele A</code>  和    <code>Allele B</code> 的划分保持一致。SNP2 同理。 </p>
-<p><img src="/posts/de96141/3.png" alt="1"></p>
-<h1 id="个人理解"><a href="#个人理解" class="headerlink" title="个人理解"></a>个人理解</h1><p>这种划分链的方式纯粹是按照 SNP 及其临近位置的分型来划分的，唯一的好处就是理论上不随参考基因组的变化而变化。也就是说，如果对多个基因组版本的共同位点的 TOP 链的基因型数据理论上可以进行直接合并，而不会因为互补链的问题而报错。</p>
-<p>问题在于，第一是和参考基因组的 FORWARD&#x2F;REVERSE 链划分方式不同，那么就和对应的参考基因组不同 (如互补)；第二是这种 TOP&#x2F;BOT 链的划分方式实际上是每个 SNP 特异的，即在同一条染色体均认为处在 TOP 链上的两个 SNP 根本不一定在一条 DNA 链上。</p>
-<p>其实第二点还是在说 TOP&#x2F;BOT 和  FORWARD&#x2F;REVERSE 划分方式不同，因为 FORWARD&#x2F;REVERSE 从理论上是真的把 DNA 双链一条命名为  FORWARD 链，一条命名为  REVERSE  链。</p>
-<p>从个人角度出发，我还是比较认可 FORWARD&#x2F;REVERSE 的划分方式，首先就是和对应的参考基因组保持一致，方便一些需要用到参考基因组的操作；第二就是规则简单，具有明确的含义（即我们认为在同一条 DNA 链上）。最后就是不同参考基因组版本的互补链问题，这一点还是比较容易发现，手动转换一下也不困难，比如采用 PLINK 的 <code>--flip</code> 选项。</p>
+<p><img src="2.png" alt="1"></p>
+<h1>实际例子</h1>
+<p>下表中， SNP1 有两次基因组的组装版本，然而这两个版本提供的序列正好是互补的，这种情况并不罕见（注意互补应该是一条链是 5’ 到 3‘ ，一条链是 3’ 到 5’ 方向，然后才有相同位置的碱基互补。下表中的序列应该都是 5’ 到 3’ 方向，所以是 Assembly1 的最后一个碱基和  Assembly2 的第一个碱基互补，其余同理）。</p>
+<p>我们看到此时两个组装版本中的 SNP1 正好一个是 TOP 链，一个是 BOT 链，即满足互补关系；同时    <code>Allele A</code>  和    <code>Allele B</code> 的划分保持一致。SNP2 同理。</p>
+<p><img src="3.png" alt="1"></p>
+<h1>个人理解</h1>
+<p>这种划分链的方式纯粹是按照 SNP 及其临近位置的分型来划分的，唯一的好处就是理论上不随参考基因组的变化而变化。也就是说，如果对多个基因组版本的共同位点的 TOP 链的基因型数据理论上可以进行直接合并，而不会因为互补链的问题而报错。</p>
+<p>问题在于，第一是和参考基因组的 FORWARD/REVERSE 链划分方式不同，那么就和对应的参考基因组不同 (如互补)；第二是这种 TOP/BOT 链的划分方式实际上是每个 SNP 特异的，即在同一条染色体均认为处在 TOP 链上的两个 SNP 根本不一定在一条 DNA 链上。</p>
+<p>其实第二点还是在说 TOP/BOT 和  FORWARD/REVERSE 划分方式不同，因为 FORWARD/REVERSE 从理论上是真的把 DNA 双链一条命名为  FORWARD 链，一条命名为  REVERSE  链。</p>
+<p>从个人角度出发，我还是比较认可 FORWARD/REVERSE 的划分方式，首先就是和对应的参考基因组保持一致，方便一些需要用到参考基因组的操作；第二就是规则简单，具有明确的含义（即我们认为在同一条 DNA 链上）。最后就是不同参考基因组版本的互补链问题，这一点还是比较容易发现，手动转换一下也不困难，比如采用 PLINK 的 <code>--flip</code> 选项。</p>
  
       <!-- reward -->
       
@@ -165,55 +168,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -512,30 +467,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

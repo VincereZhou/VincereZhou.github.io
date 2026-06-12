@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">715</span>
+            <span class="post-count">703</span>
         </span>
     </span>
 
@@ -98,14 +98,95 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>有关舒尔补的一些公式，主要是涉及 $2 \times 2$ 的分块矩阵的求逆和行列式。</p>
 <span id="more"></span>
-
-<h1 id="舒尔补"><a href="#舒尔补" class="headerlink" title="舒尔补"></a>舒尔补</h1><p>对于一个非奇异的分块矩阵，其逆矩阵可以写为（假设 $\mathbf{A}$ 可逆）<br>$$<br>\left[\begin{array}{c}<br>\mathbf{A} &amp; \mathbf{B} \<br>\mathbf{C} &amp; \mathbf{D} \<br>\end{array}\right]^{-1} &#x3D;  \left[\begin{array}{c}<br>\mathbf{A}^{-1} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{0} \<br>\end{array}\right] + \left<a href="%5Cmathbf%7BD-CA%5E%7B-1%7DB%7D">\begin{array}{c}<br>-\mathbf{A}^{-1}\mathbf{B} \<br>\mathbf{I} \<br>\end{array}\right</a>^{-1}\left[\begin{array}{c}<br>\mathbf{-CA^{-1}} &amp; \mathbf{I} \<br>\end{array}\right]<br>$$<br>其中矩阵 $\mathbf{D-CA^{-1}B}$ 称为 $\mathbf{A}$ 的舒尔补 (Schur complement) 。</p>
-<p>类似地，我们有<br>$$<br>\left[\begin{array}{c}<br>\mathbf{A} &amp; \mathbf{B} \<br>\mathbf{C} &amp; \mathbf{D} \<br>\end{array}\right]^{-1} &#x3D;  \left[\begin{array}{c}<br>\mathbf{0} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{D}^{-1} \<br>\end{array}\right] + \left[\begin{array}{c}<br>\mathbf{I} \<br>-\mathbf{D}^{-1}\mathbf{C} \<br>\end{array}\right](\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C})^{-1}\left[\begin{array}{c}<br>\mathbf{I} &amp; \mathbf{-BD^{-1}}\<br>\end{array}\right]<br>$$<br>其中矩阵 $\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}$ 称为矩阵 $\mathbf{D}$ 的舒尔补。</p>
-<p>Marsaglia 和 Styan (1974a,b) 给出了两个重要公式，分别为（第二个式子可以理解为将 $\mathbf{A}$ 替换成了  $\mathbf{-A}$ ）。<br>$$<br>\left(\mathbf{D}-\mathbf{C A}^{-1} \mathbf{B}\right)^{-1}&#x3D;\mathbf{D}^{-1}+\mathbf{D}^{-1} \mathbf{C}\left(\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}\right)^{-1} \mathbf{B D}^{-1},<br>$$</p>
-<p>$$<br>\left(\mathbf{D}+\mathbf{C A}^{-1} \mathbf{B}\right)^{-1}&#x3D;\mathbf{D}^{-1}-\mathbf{D}^{-1} \mathbf{C}\left(\mathbf{A}+\mathbf{B D}^{-1} \mathbf{C}\right)^{-1} \mathbf{B D}^{-1} \text {, }<br>$$</p>
+<h1>舒尔补</h1>
+<p>对于一个非奇异的分块矩阵，其逆矩阵可以写为（假设 $\mathbf{A}$ 可逆）<br>
+$$<br>
+\left[\begin{array}{c}<br>
+\mathbf{A} &amp; \mathbf{B} \<br>
+\mathbf{C} &amp; \mathbf{D} \<br>
+\end{array}\right]^{-1} =  \left[\begin{array}{c}<br>
+\mathbf{A}^{-1} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{0} \<br>
+\end{array}\right] + \left<a href="%5Cmathbf%7BD-CA%5E%7B-1%7DB%7D">\begin{array}{c}<br>
+-\mathbf{A}^{-1}\mathbf{B} \<br>
+\mathbf{I} \<br>
+\end{array}\right</a>^{-1}\left[\begin{array}{c}<br>
+\mathbf{-CA^{-1}} &amp; \mathbf{I} \<br>
+\end{array}\right]<br>
+$$<br>
+其中矩阵 $\mathbf{D-CA^{-1}B}$ 称为 $\mathbf{A}$ 的舒尔补 (Schur complement) 。</p>
+<p>类似地，我们有<br>
+$$<br>
+\left[\begin{array}{c}<br>
+\mathbf{A} &amp; \mathbf{B} \<br>
+\mathbf{C} &amp; \mathbf{D} \<br>
+\end{array}\right]^{-1} =  \left[\begin{array}{c}<br>
+\mathbf{0} &amp; \mathbf{0} \<br>
+\mathbf{0} &amp; \mathbf{D}^{-1} \<br>
+\end{array}\right] + \left[\begin{array}{c}<br>
+\mathbf{I} \<br>
+-\mathbf{D}^{-1}\mathbf{C} \<br>
+\end{array}\right](\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C})^{-1}\left[\begin{array}{c}<br>
+\mathbf{I} &amp; \mathbf{-BD^{-1}}\<br>
+\end{array}\right]<br>
+$$<br>
+其中矩阵 $\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}$ 称为矩阵 $\mathbf{D}$ 的舒尔补。</p>
+<p>Marsaglia 和 Styan (1974a,b) 给出了两个重要公式，分别为（第二个式子可以理解为将 $\mathbf{A}$ 替换成了  $\mathbf{-A}$ ）。<br>
+$$<br>
+\left(\mathbf{D}-\mathbf{C A}^{-1} \mathbf{B}\right)^{-1}=\mathbf{D}^{-1}+\mathbf{D}^{-1} \mathbf{C}\left(\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}\right)^{-1} \mathbf{B D}^{-1},<br>
+$$</p>
+<p>$$<br>
+\left(\mathbf{D}+\mathbf{C A}^{-1} \mathbf{B}\right)^{-1}=\mathbf{D}^{-1}-\mathbf{D}^{-1} \mathbf{C}\left(\mathbf{A}+\mathbf{B D}^{-1} \mathbf{C}\right)^{-1} \mathbf{B D}^{-1} \text {, }<br>
+$$</p>
 <p>证明就是用右手项乘以  $\mathbf{D-CA^{-1}B}$ ，证明过程略。</p>
-<p>  $\mathbf{D-CA^{-1}B}$ 的行列式推导如下，首先根据行列式性质，我们有<br>$$<br>\left[\begin{array}{c}<br>\mathbf{R} &amp; \mathbf{0} \<br>\mathbf{X} &amp; \mathbf{T} \<br>\end{array}\right] &#x3D; |\mathbf{R}||\mathbf{T}| &#x3D; \left[\begin{array}{c}<br>\mathbf{R}^{\prime} &amp; \mathbf{X}^{\prime} \<br>\mathbf{0} &amp; \mathbf{T}^{\prime} \<br>\end{array}\right]<br>$$<br>因此我们有<br>$$<br>\begin{aligned}<br>\operatorname{det}\left[\begin{array}{ll}<br>\mathbf{A} &amp; \mathbf{B} \<br>\mathbf{C} &amp; \mathbf{D}<br>\end{array}\right] &amp;&#x3D;\operatorname{det}\left(\left[\begin{array}{cc}<br>\mathbf{A} &amp; \mathbf{O} \<br>\mathbf{C} &amp; \mathbf{D}-\mathbf{C A}^{-1} \mathbf{B}<br>\end{array}\right]\left[\begin{array}{cc}<br>\mathbf{I} &amp; \mathbf{A}^{-1} \mathbf{B} \<br>\mathbf{O} &amp; \mathbf{I}<br>\end{array}\right]\right) \<br>&amp;&#x3D;|\mathbf{A}| |\mathbf{D}-\mathbf{C A}^{-1} \mathbf{B}|<br>\end{aligned}<br>$$<br>类似的，我们有<br>$$<br>\begin{aligned}<br>\operatorname{det}\left[\begin{array}{ll}<br>\mathbf{A} &amp; \mathbf{B} \<br>\mathbf{C} &amp; \mathbf{D}<br>\end{array}\right] &amp;&#x3D;\operatorname{det}\left(\left[\begin{array}{cc}<br>\mathbf{\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}} &amp; \mathbf{B} \<br>\mathbf{0} &amp; \mathbf{D}<br>\end{array}\right]\left[\begin{array}{cc}<br>\mathbf{I} &amp; \mathbf{0} \<br>\mathbf{D}^{-1} \mathbf{C} &amp; \mathbf{I}<br>\end{array}\right]\right) \<br>&amp;&#x3D;|\mathbf{D}| |\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}|<br>\end{aligned}<br>$$<br>因此，我们得到<br>$$<br>|\mathbf{D}-\mathbf{C A}^{-1} \mathbf{B}| &#x3D; (|\mathbf{D}|&#x2F;|\mathbf{A}|) |\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}|<br>$$</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<p>$\mathbf{D-CA^{-1}B}$ 的行列式推导如下，首先根据行列式性质，我们有<br>
+$$<br>
+\left[\begin{array}{c}<br>
+\mathbf{R} &amp; \mathbf{0} \<br>
+\mathbf{X} &amp; \mathbf{T} \<br>
+\end{array}\right] = |\mathbf{R}||\mathbf{T}| = \left[\begin{array}{c}<br>
+\mathbf{R}^{\prime} &amp; \mathbf{X}^{\prime} \<br>
+\mathbf{0} &amp; \mathbf{T}^{\prime} \<br>
+\end{array}\right]<br>
+$$<br>
+因此我们有<br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{det}\left[\begin{array}{ll}<br>
+\mathbf{A} &amp; \mathbf{B} \<br>
+\mathbf{C} &amp; \mathbf{D}<br>
+\end{array}\right] &amp;=\operatorname{det}\left(\left[\begin{array}{cc}<br>
+\mathbf{A} &amp; \mathbf{O} \<br>
+\mathbf{C} &amp; \mathbf{D}-\mathbf{C A}^{-1} \mathbf{B}<br>
+\end{array}\right]\left[\begin{array}{cc}<br>
+\mathbf{I} &amp; \mathbf{A}^{-1} \mathbf{B} \<br>
+\mathbf{O} &amp; \mathbf{I}<br>
+\end{array}\right]\right) \<br>
+&amp;=|\mathbf{A}| |\mathbf{D}-\mathbf{C A}^{-1} \mathbf{B}|<br>
+\end{aligned}<br>
+$$<br>
+类似的，我们有<br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{det}\left[\begin{array}{ll}<br>
+\mathbf{A} &amp; \mathbf{B} \<br>
+\mathbf{C} &amp; \mathbf{D}<br>
+\end{array}\right] &amp;=\operatorname{det}\left(\left[\begin{array}{cc}<br>
+\mathbf{\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}} &amp; \mathbf{B} \<br>
+\mathbf{0} &amp; \mathbf{D}<br>
+\end{array}\right]\left[\begin{array}{cc}<br>
+\mathbf{I} &amp; \mathbf{0} \<br>
+\mathbf{D}^{-1} \mathbf{C} &amp; \mathbf{I}<br>
+\end{array}\right]\right) \<br>
+&amp;=|\mathbf{D}| |\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}|<br>
+\end{aligned}<br>
+$$<br>
+因此，我们得到<br>
+$$<br>
+|\mathbf{D}-\mathbf{C A}^{-1} \mathbf{B}| = (|\mathbf{D}|/|\mathbf{A}|) |\mathbf{A}-\mathbf{B D}^{-1} \mathbf{C}|<br>
+$$</p>
+<h1>参考文献</h1>
+<ol>
 <li>Searle S R, Casella G, McCulloch C E. Variance components[M]. John Wiley &amp; Sons, 2009.</li>
 <li>Matsaglia G, PH Styan G. Equalities and inequalities for ranks of matrices[J]. Linear and multilinear Algebra, 1974, 2(3): 269-292.</li>
 <li>Marsaglia G, Styan G P H. Rank conditions for generalized inverses of partitioned matrices[J]. Sankhyā: The Indian Journal of Statistics, Series A, 1974: 437-442.</li>
@@ -157,55 +238,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -504,30 +537,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 

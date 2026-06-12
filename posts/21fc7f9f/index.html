@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">741</span>
+            <span class="post-count">740</span>
         </span>
     </span>
 
@@ -94,70 +94,100 @@
        
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>手动写PCA代码的过程，使用参考群和候选群分开的形式，这样新样本无需进行特征分解。</p>
 <span id="more"></span>
-
-<h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>一般软件（如 plink, gcta等）计算 PCA 的过程的如下：</p>
+<h1>目的</h1>
+<p>一般软件（如 plink, gcta等）计算 PCA 的过程的如下：</p>
 <ol>
-<li>构建 G 阵 </li>
+<li>构建 G 阵</li>
 <li>对 G 阵进行特征值分解</li>
 </ol>
 <p>得到的特征向量就是需要的主成分。</p>
 <p>当样本数较多时，PCA计算速度慢；而且当仅仅是新增部分样本时，均要使用全部样本重新计算一遍主成分，计算效率低。本脚本将做 PCA 的数据分为两个群体，参考群（旧数据）和候选群（新增数据）；对于参考群构建 <strong>SNP 的协方差矩阵</strong>并进行特征值分解；对于候选群，可以直接使用参考群的特征值分解结果，无需再次进行特征值分解，因此计算效率大大提高。因此本脚本适用于同一个群体不断新增样本的情况，如不更新参考群，则全部 PCA 分析只需要进行一次特征值分解。</p>
-<h1 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h1><h2 id="参考群"><a href="#参考群" class="headerlink" title="参考群"></a>参考群</h2><ol>
-<li><p>plink 转化为 012 格式（保存计数的碱基，后面还要用）</p>
+<h1>过程</h1>
+<h2 id="参考群">参考群</h2>
+<ol>
+<li>
+<p>plink 转化为 012 格式（保存计数的碱基，后面还要用）</p>
 </li>
-<li><p>遍历 raw 文件，缺失 (NA) 改为 5 。 </p>
+<li>
+<p>遍历 raw 文件，缺失 (NA) 改为 5 。</p>
 <p>缺失改为5的好处在于，2p_j 的范围在 [0,2], 因此 M_ij - 2p_j 的范围在 [-2,2]，当缺失为 5时，其范围为 [3,5]，这样可以和正常值分开。</p>
 </li>
-<li><p>构建 SNP 的协方差矩阵并分解，过程如下：</p>
+<li>
+<p>构建 SNP 的协方差矩阵并分解，过程如下：</p>
 <ul>
-<li><p>生成基因型矩阵（一行一个样本，一列一个位点）</p>
+<li>
+<p>生成基因型矩阵（一行一个样本，一列一个位点）</p>
 </li>
-<li><p>计算 maf (去除缺失位点)</p>
+<li>
+<p>计算 maf (去除缺失位点)</p>
 </li>
-<li><p>每一列减去 2 * maf （中心化）</p>
+<li>
+<p>每一列减去 2 * maf （中心化）</p>
 </li>
-<li><p>将此时矩阵中大于 2 的元素设为 0 （缺失位点）</p>
+<li>
+<p>将此时矩阵中大于 2 的元素设为 0 （缺失位点）</p>
 </li>
-<li><p>计算每一列 SNP 的标准差（2 * maf * (1-maf)）</p>
+<li>
+<p>计算每一列 SNP 的标准差（2 * maf * (1-maf)）</p>
 </li>
-<li><p>每一列除以相应标准差，得到 X 矩阵（标准化）</p>
+<li>
+<p>每一列除以相应标准差，得到 X 矩阵（标准化）</p>
 </li>
-<li><p>SNP 的协方差矩阵计算公式如下<br>$$<br>G &#x3D; \frac{1}{m} X^{T}X<br>$$</p>
+<li>
+<p>SNP 的协方差矩阵计算公式如下<br>
+$$<br>
+G = \frac{1}{m} X^{T}X<br>
+$$</p>
 </li>
-<li><p>对 G 阵进行特征值分解，得到特征向量 u （可以提取前 n 个）和特征值 sigma</p>
+<li>
+<p>对 G 阵进行特征值分解，得到特征向量 u （可以提取前 n 个）和特征值 sigma</p>
 </li>
-<li><p>通过计算 $Xu$  得到我们需要的主成分。</p>
+<li>
+<p>通过计算 $Xu$  得到我们需要的主成分。</p>
 </li>
 </ul>
 </li>
 </ol>
-<h2 id="候选群"><a href="#候选群" class="headerlink" title="候选群"></a>候选群</h2><p>候选群必须包含参考群中的全部位点。</p>
+<h2 id="候选群">候选群</h2>
+<p>候选群必须包含参考群中的全部位点。</p>
 <ol>
-<li><p>plink 转化为 012 格式（注意计数的碱基必须和参考群一致，使用 <code>--recode-allele &#123;ref_prefix&#125;.recode_allele</code> 参数设置这一点 ）</p>
+<li>
+<p>plink 转化为 012 格式（注意计数的碱基必须和参考群一致，使用 <code>--recode-allele &#123;ref_prefix&#125;.recode_allele</code> 参数设置这一点 ）</p>
 </li>
-<li><p>遍历 raw 文件，缺失 (NA) 改为 5 。 </p>
+<li>
+<p>遍历 raw 文件，缺失 (NA) 改为 5 。</p>
 </li>
-<li><p>计算特征向量，过程如下：</p>
+<li>
+<p>计算特征向量，过程如下：</p>
 <ul>
-<li><p>生成候选群的基因型矩阵（一行一个样本，一列一个位点）</p>
+<li>
+<p>生成候选群的基因型矩阵（一行一个样本，一列一个位点）</p>
 </li>
-<li><p>使用 参考群的 maf </p>
+<li>
+<p>使用 参考群的 maf</p>
 </li>
-<li><p>每一列减去 2 * maf （中心化）</p>
+<li>
+<p>每一列减去 2 * maf （中心化）</p>
 </li>
-<li><p>将此时矩阵中大于 2 的元素设为 0 （缺失位点）</p>
+<li>
+<p>将此时矩阵中大于 2 的元素设为 0 （缺失位点）</p>
 </li>
-<li><p>计算每一列 SNP 的标准差（2 * maf * (1-maf)）</p>
+<li>
+<p>计算每一列 SNP 的标准差（2 * maf * (1-maf)）</p>
 </li>
-<li><p>每一列除以相应标准差，得到 X 矩阵（标准化）</p>
+<li>
+<p>每一列除以相应标准差，得到 X 矩阵（标准化）</p>
 </li>
-<li><p>通过计算 $Xu$  （$u$ 为参考群得到的特征向量）得到我们需要的主成分。</p>
+<li>
+<p>通过计算 $Xu$  （$u$ 为参考群得到的特征向量）得到我们需要的主成分。</p>
 </li>
 </ul>
 </li>
 </ol>
-<h2 id="pca画图"><a href="#pca画图" class="headerlink" title="pca画图"></a>pca画图</h2><p>可选</p>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ol>
+<h2 id="pca画图">pca画图</h2>
+<p>可选</p>
+<h1>参考资料</h1>
+<ol>
 <li><a href="https://vincere.fun/posts/fc532062/">https://vincere.fun/posts/fc532062/</a></li>
 <li><a href="https://vincere.fun/posts/1e12f93e/">https://vincere.fun/posts/1e12f93e/</a></li>
 </ol>
@@ -206,55 +236,7 @@
     
   </nav>
 
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
-    app_key: "RPIwmdftljIzOtAULwc7JCAp",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
+  
    
      
 </article>
@@ -553,30 +535,6 @@
 </script>
 
 <!-- MathJax -->
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-      tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-  });
-
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for(i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script>
-  var ayerConfig = {
-    mathjax: true
-  }
-</script>
 
 <!-- Katex -->
 
