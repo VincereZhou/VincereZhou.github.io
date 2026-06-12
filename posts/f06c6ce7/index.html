@@ -106,10 +106,10 @@
 <p>变量 <strong>LAST</strong> 记录上一次计算的<strong>非零</strong>解的索引，这样如果本方程计算时左手项第一个非零元素大于 <strong>LAST</strong> ，那么就可以直接采用 $RHS(I) &#x3D; S&#x2F;DIAG(I)$ 计算解。</p>
 <p>最终输出 <strong>RHS</strong> 和 <strong>OPS</strong>，这里 RHS 就是最终的解，OPS 是执行的算术操作的次数（乘法和除法）。我感觉OPS 应该采用长整型，而不是用双精度浮点数。</p>
 <p>注意，下面脚本中的 $OPS &#x3D; OPS + 1.0D0$ ，其中的 <code>1.0D0</code> 就是 $1.0 \times 10^{0}$ ，$D$ 是双精度的意思。</p>
-<p><img src="/44.png" alt="1"></p>
-<p><img src="/45.png" alt="1"></p>
-<p><img src="/46.png" alt="1"></p>
-<p><img src="/47.png" alt="1"></p>
+<p><img src="/posts/f06c6ce7/44.png" alt="1"></p>
+<p><img src="/posts/f06c6ce7/45.png" alt="1"></p>
+<p><img src="/posts/f06c6ce7/46.png" alt="1"></p>
+<p><img src="/posts/f06c6ce7/47.png" alt="1"></p>
 <p>下面我们开始逐行解析脚本，定义变量时将 OPS 定义成了  SPKOPS 组的第一个<strong>全局变量</strong>，用于记录乘除法的操作次数。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMMON /SPKOPS/ OPS</span><br></pre></td></tr></table></figure>
 
@@ -131,17 +131,17 @@
 
 <p>下图描述了本子程序的计算逻辑，其中圆圈圈起来的元素是ELSLV 实际使用的元素，可以按照上面的子程序手动模拟一下计算流程，看看是不是只用了圆圈圈起来的元素。</p>
 <p>注意，在这个子流程中，我们在 <code>DO 300</code> 循环中可能执行了 一些乘以 0 的乘法，但是在大部分机器中通过做一个检查来避免这种乘法可能比不管它更加耗时。</p>
-<p><img src="/48.png" alt="1"></p>
+<p><img src="/posts/f06c6ce7/48.png" alt="1"></p>
 <p>子程序中 54 行对 <strong>IBAND</strong> 的处理（<code> IF ( IBAND .GE. I) IBAND = I - 1</code> ）解释如下，在某些环境中，<strong>ELSLV</strong> 子程序只用于求解导入的系数矩阵**(XADJ, ADJNCY)<strong>的</strong>子矩阵**的解，如下图所示，$\mathbf{L}$ 实际是一个 $16 \times 16$ 的矩阵，而我们想要求解的方程组是框起来的 $11 \times 11$ 的子矩阵，伴随着其相应的右手项 RHS ，我们求解的脚本为<br>$$<br>\text{CALL  ELSLV( 11, XENV(5), ENV, DIAG(5), RHS)}<br>$$<br>在这个子程序中，XENV(5) 被解释为 XENV(1)， XENV(6) 被解释为 XENV(2)，依此类推。</p>
-<p><img src="/49.png" alt="1"></p>
+<p><img src="/posts/f06c6ce7/49.png" alt="1"></p>
 <h1 id="EUSLV"><a href="#EUSLV" class="headerlink" title="EUSLV"></a>EUSLV</h1><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>我们现在查看子程序 <strong>EUSLV</strong> ，其求解 $\mathbf{L^{T}x &#x3D; y}$ ，其中 $\mathbf{L}$ 就是 <strong>ELSLV</strong> 中的系数矩阵，这就意味着我们可以获取 $\mathbf{L^{T}}$ 的<strong>列</strong>，此时我们采用 <em>outer product form</em>，该方法描述如下</p>
 <p>假设 $n \times n$ 的方程组 $\mathbf{Tx &#x3D; b}$ ，其中 $\mathbf{T}$ 是一个<strong>非奇异的</strong>下三角矩阵，并且按列存储，其计算公式如下</p>
-<p><img src="/3.png" alt="1"></p>
+<p><img src="/posts/f06c6ce7/3.png" alt="1"></p>
 <p>这种算法适用于 $\mathbf{x}$ 向量很稀疏的情况，如果在第 $i$ 步一开始 $b_{i}$ 就等于 0 ，那么 $x_{i}$ 等于 0，我们可以整个跳过这一步。　</p>
 <p>同样类似于 <strong>ELSLV</strong> ，我们可以对提供的系数矩阵的子矩阵进行计算求解。</p>
 <p>其求解顺序是反的，从 $x_{n}$ 到 $x_{1}$ 。</p>
-<h2 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h2><p><img src="/50.png" alt="1"></p>
-<p>　<img src="/51.png" alt="1"></p>
+<h2 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h2><p><img src="/posts/f06c6ce7/50.png" alt="1"></p>
+<p>　<img src="/posts/f06c6ce7/51.png" alt="1"></p>
 <p>现在对该脚本逐行解析如下，首先这个是按照从ｎ到１的顺序，设 I 的初值设为 NEQNS + 1，进入循环。</p>
 <p>如果 RHS(I) 等于0，直接跳过，进入下一个循环</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">	  I = NEQNS + 1</span><br><span class="line">100   I = I - 1</span><br><span class="line">	  IF (I .EQ. 0) RETURN</span><br><span class="line">	    IF (RHS(I) .EQ. 0.0E0) GO TO 100</span><br></pre></td></tr></table></figure>

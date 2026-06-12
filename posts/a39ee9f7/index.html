@@ -166,7 +166,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error: matrix is not invertible,…</span><br></pre></td></tr></table></figure>
 
 <h3 id="Ga-和-Gd矩阵"><a href="#Ga-和-Gd矩阵" class="headerlink" title="Ga 和 Gd矩阵"></a>Ga 和 Gd矩阵</h3><h4 id="构建G阵的算法"><a href="#构建G阵的算法" class="headerlink" title="构建G阵的算法"></a>构建G阵的算法</h4><p>HIBLUP 计算G阵的公式如下，其中 $\text{tr}$ 是矩阵的迹。<br>$$<br>\mathbf{G} &#x3D; \frac{\mathbf{ZZ^{^\prime}}}{\text{tr}(\mathbf{ZZ^{^\prime}})&#x2F;n}<br>$$<br>$\mathbf{Z}$ 矩阵每一行是一个样本，每一列是一个位点的基因型编码。在 HIBLUP 中，我们有4种方式来构建加性效应和显性效应的$\mathbf{Z}$ 矩阵 ，如下表</p>
-<p><img src="/1.png"></p>
+<p><img src="/posts/a39ee9f7/1.png"></p>
 <p>其中 $p_A$ 等是基因频率，而 $p_{AA}$ 等是基因型频率。</p>
 <p>使用 <code>--code-method n</code> 来选择使用那种基因型编码方式，4中基因型编码方式的参考文献见下</p>
 <ul>
@@ -180,7 +180,7 @@
 <p>这个命令会生成 <code>demo.GA.bin</code>, <code>demo.GA.id</code>, <code>demo.GD.bin</code>, <code>demo.GD.id</code> 。</p>
 <p>如果需要生成逆矩阵，可以添加选项 <code>--add-inv</code> 和 <code>--dom-inv</code> 。</p>
 <h4 id="多个群体的G阵"><a href="#多个群体的G阵" class="headerlink" title="多个群体的G阵"></a>多个群体的G阵</h4><p>对于多个群体（如多个品种）的基因型数据，HIBLUP 可以构建一个混合的G阵，公式如下</p>
-<p><img src="/2.png"></p>
+<p><img src="/posts/a39ee9f7/2.png"></p>
 <p>其中 $\mathbf{Z}<em>{i}$ 和  $\mathbf{Z}</em>{j}$ 是每个群体用它自身的等位基因频率计算得到的矩阵（因为每个群体的基因频率不同），$n_{i}$ 和  $n_{j}$ 是每个群体的样本数目。</p>
 <p>运行命令如下，单纯就是增加了一个 <code>--pop-class</code> 选项，即群体分类文件。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">construct mixed GRM</span></span><br><span class="line">./hiblup --make-xrm --code-method 1</span><br><span class="line">         --bfile demo </span><br><span class="line">         --pop-class demo.popclass.txt</span><br><span class="line">         --step 10000 </span><br><span class="line">         --thread 32 </span><br><span class="line">         --out demo</span><br></pre></td></tr></table></figure>
@@ -308,7 +308,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">t1_v1: the variance of the environmental random effect located </span><br><span class="line">       at the 6th column in phenotype file for the first trait.</span><br><span class="line">t1_v2: the variance of the environmental random effect located </span><br><span class="line">       at the 7th column in phenotype file for the first trait.</span><br><span class="line">t1_v3: the variance of additive genetic effect for the first trait.</span><br><span class="line">t1_v4: the variance of dominant genetic effect for the first trait.</span><br><span class="line">t1_v5: the variance of residuals for the first trait.</span><br><span class="line">t2_v1: the variance of the environmental random effect located </span><br><span class="line">       at the 7th column in phenotype file for the second trait.</span><br><span class="line">t2_v2: the variance of additive genetic effect for the second trait.</span><br><span class="line">t2_v3: the variance of dominant genetic effect for the second trait.</span><br><span class="line">t2_v4: the variance of residuals for the second trait.</span><br><span class="line">t3_v1: the variance of additive genetic effect for the third trait.</span><br><span class="line">t3_v2: the variance of dominant genetic effect for the third trait.</span><br><span class="line">t3_v3: the variance of residuals for the third trait.</span><br></pre></td></tr></table></figure>
 
 <h3 id="协方差"><a href="#协方差" class="headerlink" title="协方差"></a>协方差</h3><p>协方差组分包括<strong>遗传效应</strong>和<strong>残差</strong> ，这里是按照性状的顺序进行排列，单个因子内使用逗号分隔，不同因子之间使用空格分隔，顺序如下图</p>
-<p><img src="/3.png"></p>
+<p><img src="/posts/a39ee9f7/3.png"></p>
 <h2 id="因子间的互作"><a href="#因子间的互作" class="headerlink" title="因子间的互作"></a>因子间的互作</h2><h3 id="E-by-E"><a href="#E-by-E" class="headerlink" title="E by E"></a>E by E</h3><p>2个环境因子之间的互作效应使用 ”:“ 号表示，可以作为固定因子，也可以作为随机因子</p>
 <p>作为固定因子示例如下，表示固定因子为 2 和 2:3:6 （3个因子之间的互作，这里互作效应应该就是将多列合并为一列）</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./hiblup ... --dcovar 2,2:3:6</span><br></pre></td></tr></table></figure>
@@ -347,7 +347,7 @@
 
 <p>输出 <em>demo.snpeff</em> ，即 SNP 效应值。</p>
 <p>注意：如果 GEBV 值是通过加权G阵计算得到的，此时必须添加SNP权重文件 <code>--snp-weight</code> 。</p>
-<h2 id="预测GEBV-PRS"><a href="#预测GEBV-PRS" class="headerlink" title="预测GEBV&#x2F;PRS"></a>预测GEBV&#x2F;PRS</h2><p>HIBLUP 可以用之前计算好的SNP效应值和基因型数据来预测GEBV&#x2F;PRS ，这和 PLINK 软件的 <code>--score</code> 一样，但是速度更快。</p>
+<h2 id="预测GEBV-x2F-PRS"><a href="#预测GEBV-x2F-PRS" class="headerlink" title="预测GEBV&#x2F;PRS"></a>预测GEBV&#x2F;PRS</h2><p>HIBLUP 可以用之前计算好的SNP效应值和基因型数据来预测GEBV&#x2F;PRS ，这和 PLINK 软件的 <code>--score</code> 一样，但是速度更快。</p>
 <p>命令如下，通过  <code>--score</code> 命令输入SNP效应值文件</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">./hiblup --pred</span><br><span class="line">         --bfile demo        #the binary genotype data</span><br><span class="line">         --score demo.snpeff #the pre-computed SNP effects</span><br><span class="line">         --threads 10</span><br><span class="line">         --out demo</span><br></pre></td></tr></table></figure>
 

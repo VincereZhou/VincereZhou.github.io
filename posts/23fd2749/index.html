@@ -100,7 +100,7 @@
 <span id="more"></span>
 
 <h1 id="程序结构"><a href="#程序结构" class="headerlink" title="程序结构"></a>程序结构</h1><p>在这一章节中，我们会介绍三个子程序 <strong>DEGREE, RCM, GENRCM</strong> ，再加上之前提到的子程序，就构成了 RCM 算法的所有脚本。其输入为 ROOT, MASK, XADJ, ADJNCY 和 PERM 。不同子程序之间的关系见下图：</p>
-<p><img src="/32.png" alt="1"></p>
+<p><img src="/posts/23fd2749/32.png" alt="1"></p>
 <h1 id="DEGREE"><a href="#DEGREE" class="headerlink" title="DEGREE"></a>DEGREE</h1><p>这个子程序会计算一个连通组分中所有节点的度数。其输入为 ROOT, MASK, XADJ, ADJNCY 。</p>
 <p>这个子程序会从第一层 (只包含 ROOT ) 开始，同时计算每一层的所有节点的度数，然后产生下一层的所有节点，加入到 LS 数组中。当一个节点加入到 LS 数组中，其在 XADJ 数组中的符号会改变，从而确保这个节点只会被记录一次（这个功能之前在 ROOTLS 中是通过修改 MASK 数组实现的，但是这里 MASK 必须保持不变，以保证所有节点的度数可以正确计算）。</p>
 <p>变量 CCSIZE 包含了当前在 LS 中的节点数目。当所有的节点均被发现之后，所有节点的度数也计算完毕，此时 LS 数组中的节点在 XADJ 中的元素会改回原来的符号。</p>
@@ -163,7 +163,7 @@
 
 
 
-<h1 id="GENRCM"><a href="#GENRCM" class="headerlink" title="GENRCM"></a>GENRCM</h1><p><strong>(GENeral RCM)</strong> ，这个子程序用于找到一个<strong>不连通的图</strong>的 RCM 顺序，这个子程序会对每一个连通组分运行子程序 RCM 。这个子程序的输入为 <strong>NEQNS</strong> (the number of nodes or equations)，<strong>(XADJ, ADJNCY)</strong>。中间数据为 <strong>MASK</strong> 和 <strong>XLS</strong> ，作为中间子程序 FNROOT 和 RCM 的输入。</p>
+<h1 id="GENRCM"><a href="#GENRCM" class="headerlink" title="GENRCM"></a>GENRCM</h1><p><strong>(GENeral RCM)</strong> ，这个子程序用于找到一个<strong>不连通的图</strong>的 RCM 顺序，这个子程序会对每一个连通组分运行子程序 RCM 。这个子程序的输入为 <strong>NEQNS</strong> (the number of nodes or equations)，**(XADJ, ADJNCY)**。中间数据为 <strong>MASK</strong> 和 <strong>XLS</strong> ，作为中间子程序 FNROOT 和 RCM 的输入。</p>
 <p>这个子程序一开始将 <strong>MASK</strong> 中的所有值均设为 1，之后对 MASK 进行循环知道其发现一个节点 $i$ ，其 MASK(i) &#x3D; 1;  节点 $i$ 和 <strong>MASK</strong>, <strong>(XADJ, ADJNCY)</strong> 便可以指定一个连通子图，之后调用子程序 <strong>FNROOT</strong> 和 <strong>RCM</strong> 来确定这个子图中所有节点的顺序（注意运行完 RCM 之后，所有排序号的节点其 MASK 值会设为 0）。</p>
 <p>注意 <strong>NUM</strong> 指向数组 <strong>PERM</strong> 中的第一个自由的位置 (<em>first free position</em>) ，每次运行完 RCM 子程序后就会更新。<strong>GENRCM</strong> 程序中运行 RCM 中关于 <strong>PERM</strong> 的实际参数为 <strong>PERM(NUM)</strong> ，也就是说在 RCM 中的 PERM(NUM) 参数是 GENRCM 中 PERM 数据的最后 <strong>NEQNS - NUM + 1</strong> 个元素。 </p>
 <p>最后当一个连通组分排好序后，<strong>GENRCM</strong> 程序会查找下一个 $MASK(i) &#x3D; 1$ 的节点，对下一个连通组分进行排序，直到终止。 </p>

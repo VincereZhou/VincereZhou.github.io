@@ -152,7 +152,7 @@
 <li>❌ Slurm 看不见</li>
 </ul>
 <h2 id="创建作业脚本"><a href="#创建作业脚本" class="headerlink" title="创建作业脚本"></a>创建作业脚本</h2><p>使用 <strong>SLURM</strong> 调度系统 ，你需要创建一个作业脚本，标准的叫法是 <strong>Batch Job Script（批处理作业脚本）</strong>，通常直接简称为 <strong>Job Script</strong>。</p>
-<p>这个脚本在超算中扮演着**“中介”**的角色，它负责把你（用户）的需求翻译成 SLURM（调度器）能听懂的语言。它的作用可以拆解为两部分：</p>
+<p>这个脚本在超算中扮演着<strong>“中介”</strong>的角色，它负责把你（用户）的需求翻译成 SLURM（调度器）能听懂的语言。它的作用可以拆解为两部分：</p>
 <ol>
 <li><p>上半部分 (<code>#SBATCH ...</code>)：<strong>“资源订单” (Order)</strong> ，这部分以 <code>#SBATCH</code>开头，<strong>不是给 Linux 执行的命令，而是给 SLURM 调度器看的“采购单”</strong>。</p>
 <p><strong>作用</strong>：SLURM 读取这些指令后，会去资源池里帮你<strong>锁定</strong>对应的计算节点、CPU 和内存。如果资源不够，你的作业就会在队列（Queue）里等待。</p>
@@ -236,7 +236,7 @@
 <tr>
 <td align="left"><code>--ntasks</code></td>
 <td align="center"><code>-n</code></td>
-<td align="left"><strong>总任务数 (MPI进程数)</strong>。通常单节点单进程设为 1。</td>
+<td align="left">**总任务数 (MPI进程数)**。通常单节点单进程设为 1。</td>
 <td align="left"><code>#SBATCH -n 1</code></td>
 </tr>
 <tr>
@@ -265,7 +265,7 @@
 </tr>
 </tbody></table>
 <blockquote>
-<p>💡 <strong>避坑指南：CPU 和内存的分配逻辑</strong><br>实际总 CPU 核心数 &#x3D; <code>节点数(-N)</code> × <code>每节点任务数(--ntasks-per-node)</code> × <code>每任务核心数(-c)</code><br>申请内存时，<strong><code>--mem</code> 是直接划定节点总内存，而 <code>--mem-per-cpu</code> 是弹性计算。</strong> 一般建议直接用 <code>--mem</code> 更直观不易错。</p>
+<p>💡 <strong>避坑指南：CPU 和内存的分配逻辑</strong><br>实际总 CPU 核心数 &#x3D; <code>节点数(-N)</code> × <code>每节点任务数(--ntasks-per-node)</code> × <code>每任务核心数(-c)</code><br>申请内存时，**<code>--mem</code> 是直接划定节点总内存，而 <code>--mem-per-cpu</code> 是弹性计算。** 一般建议直接用 <code>--mem</code> 更直观不易错。</p>
 </blockquote>
 <hr>
 <p>📂 三、 输入输出与日志管理</p>
@@ -437,7 +437,7 @@
 <li><strong>效果</strong>：用 100 台机器跑 MPI，可能把 100 年的任务缩短到 1 年。<strong>这是 MPI 的绝对主场。</strong></li>
 </ul>
 <h3 id="每个节点的任务数（非必须）"><a href="#每个节点的任务数（非必须）" class="headerlink" title="每个节点的任务数（非必须）"></a>每个节点的任务数（非必须）</h3><p><code>#SBATCH --ntasks-per-node=1</code></p>
-<p>这里的“任务”（<strong>tasks</strong>）指的是<strong>独立的程序进程</strong>，不是 CPU 核心。一般就是说你准备<strong>同时跑几个程序</strong>，最常见的用途是**“并行跑多个互不干扰的独立任务”**（通常称为“任务阵列”或“多实例运行”）。举个例子，假如你要同时跑4条命令（没看懂，好像是多进程需要用 srun 启动，这是 slurm 的一个命令，就是在作业中启动 task ）。</p>
+<p>这里的“任务”（<strong>tasks</strong>）指的是<strong>独立的程序进程</strong>，不是 CPU 核心。一般就是说你准备<strong>同时跑几个程序</strong>，最常见的用途是<strong>“并行跑多个互不干扰的独立任务”</strong>（通常称为“任务阵列”或“多实例运行”）。举个例子，假如你要同时跑4条命令（没看懂，好像是多进程需要用 srun 启动，这是 slurm 的一个命令，就是在作业中启动 task ）。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">SBATCH -p xhacnormalb01</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">SBATCH -N 1</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">SBATCH --ntasks-per-node=4</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">SBATCH -c 2</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">SBATCH -J multi_input</span></span><br><span class="line"></span><br><span class="line">module load anaconda3/2023.03</span><br><span class="line">conda activate shapeit4_env</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">同一个脚本，4 个不同输入文件</span></span><br><span class="line">srun -n 1 -c 2 python my_script.py input1.txt &amp;</span><br><span class="line">srun -n 1 -c 2 python my_script.py input2.txt &amp;</span><br><span class="line">srun -n 1 -c 2 python my_script.py input3.txt &amp;</span><br><span class="line">srun -n 1 -c 2 python my_script.py input4.txt &amp;</span><br><span class="line">wait</span><br></pre></td></tr></table></figure>
 
 <p>如果你只有一个独立任务，可以不设置这个参数，默认就是1个任务。</p>
@@ -1124,7 +1124,7 @@
 <td align="left">✅ <strong><code>srun</code> 并行（唯一特例）</strong></td>
 </tr>
 </tbody></table>
-<h2 id="单脚本内部多线程-多进程"><a href="#单脚本内部多线程-多进程" class="headerlink" title="单脚本内部多线程 &#x2F; 多进程"></a>单脚本内部多线程 &#x2F; 多进程</h2><p>比如 python 脚本采用 multiprocessing包同时处理8个输入文件，那么 slurm 脚本只需要设置 <code>-c</code> 参数即可</p>
+<h2 id="单脚本内部多线程-x2F-多进程"><a href="#单脚本内部多线程-x2F-多进程" class="headerlink" title="单脚本内部多线程 &#x2F; 多进程"></a>单脚本内部多线程 &#x2F; 多进程</h2><p>比如 python 脚本采用 multiprocessing包同时处理8个输入文件，那么 slurm 脚本只需要设置 <code>-c</code> 参数即可</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">SBATCH --ntasks=1</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">SBATCH --cpus-per-task=8</span></span><br><span class="line"></span><br><span class="line">···</span><br><span class="line">python test.py 8 # 告诉python是8个进程</span><br></pre></td></tr></table></figure>
 
 <h1 id="交互式提交作业-salloc命令"><a href="#交互式提交作业-salloc命令" class="headerlink" title="交互式提交作业-salloc命令"></a>交互式提交作业-<strong>salloc命令</strong></h1><p>该命令支持用户在提交作业前，先获取所需计算资源，用户可以ssh进入计算节点运行相关计算程序，当命令结束后释放分配的资源，常用作调试，常用命令选项同sbatch基本一致。</p>
@@ -1560,7 +1560,7 @@
 <h3 id="为什么不用找-GUI-设置？"><a href="#为什么不用找-GUI-设置？" class="headerlink" title="为什么不用找 GUI 设置？"></a>为什么不用找 GUI 设置？</h3><p>MobaXterm 的 <strong>Settings -&gt; Configuration -&gt; Terminal</strong> 里确实有粘贴相关的选项（如 <code>Paste using right-click</code>），但那是控制<strong>本地行为</strong>的（如是否允许右键粘贴），<strong>无法解决远程 Shell 发来的控制序列乱码问题</strong> 。</p>
 <p><strong>总结</strong>：直接在 ScNet 的终端里执行一次 <code>printf &quot;\e[?2004l&quot;</code>即可立即解决，或者修改 <code>~/.bashrc</code>一劳永逸。</p>
 <h2 id="报错提示Network-error-Software-caused-connection-abort"><a href="#报错提示Network-error-Software-caused-connection-abort" class="headerlink" title="报错提示Network error: Software caused connection abort"></a>报错提示Network error: Software caused connection abort</h2><p>mobaxterm 偶尔出现下面的报错，自动退出，但是</p>
-<p><img src="/2.png"></p>
+<p><img src="/posts/35c635e1/2.png"></p>
 <p>你遇到的这个错误：</p>
 <blockquote>
 <p><strong>Network error: Software caused connection abort</strong></p>
@@ -1593,13 +1593,13 @@
 <li>MobaXterm vs WinSCP 的行为差异（关键点）</li>
 </ol>
 <ul>
-<li><strong>MobaXterm (终端模式)</strong>：<ul>
+<li>**MobaXterm (终端模式)**：<ul>
 <li>它的主要功能是提供一个交互式 Shell。</li>
 <li><strong>如果终端处于“空闲”状态（比如你没敲键盘，或者命令运行完了在等待），MobaXterm 默认不会发送任何数据。</strong></li>
-<li>结果：服务器等了 5 分钟没动静，就把它踢了 -&gt; <strong>出现 “Software caused connection abort”</strong>。</li>
+<li>结果：服务器等了 5 分钟没动静，就把它踢了 -&gt; **出现 “Software caused connection abort”**。</li>
 </ul>
 </li>
-<li><strong>WinSCP (文件传输模式)</strong>：<ul>
+<li>**WinSCP (文件传输模式)**：<ul>
 <li>它的主要功能是传输文件。</li>
 <li><strong>如果你打开 WinSCP 但没有在传文件，它其实也在“空闲”。</strong></li>
 <li><strong>但是</strong>，WinSCP 有一个隐藏的机制：它通常会<strong>每隔几分钟自动刷新一下目录列表</strong>，或者在后台保持微弱的心跳。</li>
@@ -1694,18 +1694,18 @@
 <li>如果是域名，添加：<code>- DOMAIN,SUFFIX,scnet.cn,DIRECT</code></li>
 <li>如果是 IP，添加：<code>- IP-CIDR,114.212.100.50/32,DIRECT</code>（请确保将 IP 替换为你实际的 SCNet IP）</li>
 </ul>
-<p><img src="/5.png"></p>
-<p><img src="/6.png"></p>
+<p><img src="/posts/35c635e1/5.png"></p>
+<p><img src="/posts/35c635e1/6.png"></p>
 <p>第三步：验证是否生效 </p>
 <ol>
-<li>回到 FIClash 主界面，确保你的代理模式处于 <strong>“规则 (Rule)</strong>” 模式（非常重要，如果是“全局”模式分流规则是不生效的）。</li>
+<li>回到 FIClash 主界面，确保你的代理模式处于 **“规则 (Rule)**” 模式（非常重要，如果是“全局”模式分流规则是不生效的）。</li>
 <li>打开 WinSCP 尝试连接 SCNet。</li>
 <li>如果之前因为 VPN 导致的卡顿、超时或拒绝连接消失了，顺利弹出了输入密码的窗口（或者直接连上了），就说明绕过成功！</li>
 </ol>
 <h1 id="winscp-登录"><a href="#winscp-登录" class="headerlink" title="winscp 登录"></a>winscp 登录</h1><p>新建标签页，输入主机-端口-用户名-密码，点击高级设置，在 SSH - 验证 - 密钥文件，选择刚刚下载的文件（这里默认是.ppk，下载的.txt，所以一开始选不上，需要在弹出窗口文件类型那里选择所有文件），然后 winscp 会自动转化生成并选择 .ppk 格式的密钥格式。</p>
 <p>然后登录即可。</p>
 <h2 id="连接超时"><a href="#连接超时" class="headerlink" title="连接超时"></a>连接超时</h2><p>每次登录均弹出下面的提示：</p>
-<p><img src="/1.png"></p>
+<p><img src="/posts/35c635e1/1.png"></p>
 <p>AI 的解释和解决思路：</p>
 <p>你遇到的这个弹窗是因为 <strong>WinSCP 默认在 15 秒内如果没有收到服务器响应，就会判定超时并弹出警告</strong>。</p>
 <p>在科研计算平台（如 scnet）上，由于服务器负载较高、网络延迟不稳定，或者正在进行排队&#x2F;认证，往往无法在 15 秒内完成响应，从而导致这个烦人的提示反复出现。</p>
@@ -1733,7 +1733,7 @@
 </ol>
 <p><strong>总结：</strong> 这相当于为了避开某个特定服务器的“握手小毛病”，放弃使用一个不太起眼的“网络加速猜测”，换取连接的稳定性。放心关掉即可。</p>
 <h2 id="网络错误"><a href="#网络错误" class="headerlink" title="网络错误"></a>网络错误</h2><p>报错信息如下，这个和 mobaxterm 的 <code>Network error</code>应该是同一个报错，只是中英文的区别，解决办法就是<strong>保活</strong>。</p>
-<p><img src="/3.jpeg"></p>
+<p><img src="/posts/35c635e1/3.jpeg"></p>
 <p>要解决 WinSCP 一段时间无操作后卡住&#x2F;断连的问题，需在<strong>高级站点设置</strong>中配置 <strong>Keepalive（保活机制）</strong>，让 WinSCP 定期向服务器发送“心跳包”，维持连接活性。以下是详细设置步骤：</p>
 <p><strong>步骤 1：进入高级站点设置</strong> </p>
 <p>打开 WinSCP，点击左上角 <strong>“会话(S)”</strong> → 选择 <strong>“站点管理”</strong>（或直接按 <code>F4</code>）。</p>
@@ -1741,7 +1741,7 @@
 <p><strong>步骤 2：打开“连接”选项卡的高级设置</strong> </p>
 <p>在“编辑站点”窗口中，点击左下角的 <strong>“高级(A)…”</strong> 按钮。</p>
 <p>设置如下，服务器响应超时改为 30秒；保活设置发送空SSH包，间隔秒数为 30秒。</p>
-<p><img src="/4.png"></p>
+<p><img src="/posts/35c635e1/4.png"></p>
 <h1 id="报错解决思路"><a href="#报错解决思路" class="headerlink" title="报错解决思路"></a>报错解决思路</h1><p>进不去就是退出刷新一下。</p>
  
       <!-- reward -->

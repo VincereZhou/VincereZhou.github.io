@@ -101,7 +101,7 @@
 
 <h1 id="阈值模型理论"><a href="#阈值模型理论" class="headerlink" title="阈值模型理论"></a>阈值模型理论</h1><p>有些性状属于<strong>有序多分类</strong>的性状，例如产犊难易程度性状，产仔数等。这些性状本身不服从正态分布，但是育种家们通常会将这类性状的表型值归因于某个潜在的无法观测到的服从正态分布的连续性状，称为<strong>liability</strong> （有的人称为易感性，我下面还是称呼为潜在变量）。因此观测到的分类表型可以解释为其潜在变量超过了某个特定阈值后的表型。因此，对于有 $m$ 个分类的分类变量，这里总共有 $m-1$ 个阈值 ($t_{1} &lt; t_{2}&lt;t_{3},…,t_{m-1}$) 。</p>
 <p>阈值模型需要用到正态分布的一些函数，假设我们的性状是产羔数，其有4个分类，此时潜在变量具有3个阈值的分布如下图所示，其中 $N_{j}$ 表示当潜在变量超过 $t_{j-1}$ 之后的表示产羔数为 $j$ 的表型。</p>
-<p><img src="/1.png"></p>
+<p><img src="/posts/33cf95d2/1.png"></p>
 <p> 假设潜在变量 $l$ 服从 $N(0,1)$ 的分布，其正态分布曲线在点 $t_{j}$ 的高度为 $\phi(t_{j})$ 为<br>$$<br>\phi(t_{j}) &#x3D; \exp(-0.5t_{j}^2)&#x2F;\sqrt{2\pi}<br>$$<br>这里我们用 $\Phi()$ 表示正态分布的累积分布函数，因此 $\Phi(k)$ 或  $\Phi_{k}$ 会计算出正态分布曲线左侧截止到第 $k$ 个分类的面积。假设我们有 $m$ 个分类，因此当 $k&#x3D;m$ 时， $\Phi_{k}&#x3D;1$ 。</p>
 <p>我们定义 $P(k)$ 为表型观测值为第 $k$ 个分类的概率，因此$P(k)$ 或 $P_{k}$ 可以计算为 $P(k) &#x3D; \Phi(k) -\Phi(k-1)$ ，其中 $\Phi(0)&#x3D;0$  。或者我们用阈值模型的表示方式，每个阈值用 $t_{j}$ 表示，此时$P(t_{j}) &#x3D; \Phi(t_{j}) -\Phi(t_{j-1})$ 。</p>
 <p>我们对潜在变量的分析模型如下<br>$$<br>\mathbf{y&#x3D;Xb+Zu+e}<br>$$<br>其中 $\mathbf{y}$ 是潜在变量的向量，其它和正常的模型一样。</p>
@@ -129,7 +129,7 @@
 <h2 id="对方差组分的限制"><a href="#对方差组分的限制" class="headerlink" title="对方差组分的限制"></a>对方差组分的限制</h2><p>当某些方差组分不存在时，这里如同 AIREML ，也支持将相应的方差组分设为 0 。但是与 AIREMLF90 不同的是，AIREMLF90 不会再估计不存在的方差组分，但是 THRGIBBSF90 仍然会估计所有的方差组分，然后将相应的不存在的方差组分设为 0 。</p>
 <p>有一点与 AIREMLF90 相同，当估计的方差组分超过参数空间时，THRGIBBSF90 会尝试固定相应的需要估计的方差组分（我的理解，是不是说某个遗传参数的估计值超出了参数空间，就仍然使用之前的值）。在这个过程中，可能会出现某个方差组分为 0 的情况，此时这个方差组分之后的估计值会一直为 0 （因为没有信息）。因此如果出现这种某个方差组分碰巧为 0 的情况，你就要考虑可能模型欠佳，或者数据量不足以估计出这些方差组分。</p>
 <h2 id="THRGIBBSF90-结果文件"><a href="#THRGIBBSF90-结果文件" class="headerlink" title="THRGIBBSF90 结果文件"></a>THRGIBBSF90 结果文件</h2><h3 id="日志信息"><a href="#日志信息" class="headerlink" title="日志信息"></a>日志信息</h3><p>打印在屏幕上的日志信息如下图，首先是每一轮抽样的方差组分结果（基于每多少次迭代保存1次结果这个参数抽取结果），这个程序本身也会计算每一次抽样的育种值结果，在抽样结束后也会打印出一些统计指标如下</p>
-<p><img src="/2.png"></p>
+<p><img src="/posts/33cf95d2/2.png"></p>
 <p>其中两个值说明如下，同理另外两个就是残差。</p>
 <ul>
 <li><code>ave G</code> ： 方差组分的后验均值</li>
@@ -138,7 +138,7 @@
 <li><code>SD R</code> :   残差的后验标准差</li>
 </ul>
 <p>接下来的内容如下，这里是一些不重要的信息，<code>Last seeds</code> 是随机数生成器的 Seeds 信息（不重要），<code> Number of samples kept</code> 是剔除 burn-in 之后的抽样次数，<code>solutions stored in a binary file: &quot;last_solutions&quot;</code> 表示最后一次抽样结果保存为 “last_solutions” （这个文件不重要）</p>
-<p><img src="/3.png"></p>
+<p><img src="/posts/33cf95d2/3.png"></p>
 <p>接下来是 DIC 和相应的信息， DIC 是 AIC 一样用于比较2个模型的优劣的指标（越小越好）（下面的公式推导没有看懂）。</p>
 <p>其中信息如下</p>
 <ul>
@@ -150,7 +150,7 @@
 <li><code> Effective number of parameters</code> :  $\bar{D} - D(\bar{\theta})$</li>
 <li><code>solutions stored in file: &quot;binary_final_solutions&quot;</code>  :  抽样的后验均值结果存储在 binary_final_solutions 文件中</li>
 </ul>
-<p><img src="/4.png"></p>
+<p><img src="/posts/33cf95d2/4.png"></p>
 <p>这里我们以 $\log\mathbf{L(\boldsymbol{\theta})}$ 作为参数 $\boldsymbol{\theta}$ 的似然换数，$N$ 是表型数目，$\hat{\sigma}_{e[k]}^{2}$ 表示第 $k$ 次抽样（在 burn-in 之后）的残差方差。</p>
 <p>我定义第 $k$ 次的偏差 $D_{k}$ 为<br>$$<br>D_k&#x3D;-2 \log L\left(\hat{\theta}<em>k\right)&#x3D;-2 \sum</em>{i&#x3D;1}^N\left[C+\frac{\hat{e}<em>i^2}{\hat{\sigma}</em>{e[k]}^2}\right]<br>$$<br>这里 $C$ 为 $\log(2\pi\hat{\sigma}<em>{e[k]}^{2})$ ，$\hat{e}</em>{i}$ 为某个观测值 $i$ 的残差（$y-\hat{y}$ ）。</p>
 <p>通过  burn-in 之后的 $m$ 次抽样后，$\bar{D}$ （$D$ 的期望值的估计值）定义为<br>$$<br>\bar{D} &#x3D; \frac{\sum_{k&#x3D;1}^{m}D_{k}}{m}<br>$$<br>我们以同样的方式计算 $\sigma_{e}^{2}$ 后验均值的估计值。我们使用上面计算  $D_{k}$ 的公式来计算后验偏差 $D(\bar{\theta})$ ，只是 $\hat{\sigma}<em>{e[k]}^{2}$ 替换为了其后验均值   $\hat{\sigma}</em>{e}^{2}$<br>$$<br>D(\bar{\theta})&#x3D;-2 \log L(\hat{\boldsymbol{\theta}})&#x3D;-2 \sum_{i&#x3D;1}^N\left[C+\frac{\hat{e}_i^2}{\hat{\sigma}<em>e^2}\right]<br>$$<br>这些统计量都是使用 burn-in 之后的抽样结果，之后按照下面的公式计算统计量 DIC<br>$$<br>\text{DIC} &#x3D; 2 \bar{D} - D(\bar{\theta})<br>$$<br>THRGIBBSF90 会将每一个 $D</em>{k}$ 值存储在文件 <code>fort.99</code> 中。</p>
@@ -165,17 +165,17 @@
 <p>这里 <strong>gibbs_samples</strong> 文件和 <strong>fort.99</strong> 文件 会被 <strong>POSTGIBBSF90</strong> 软件用于后续分析。</p>
 <h2 id="Post-Gibbs-分析"><a href="#Post-Gibbs-分析" class="headerlink" title="Post Gibbs 分析"></a>Post Gibbs 分析</h2><p><strong>POSTGIBBSF90</strong> 模块会执行 post-Gibbs 分析，其输入文件为参数卡名称，gibbs_samples 文件和 fort.99 文件 。</p>
 <p>运行时第一个参数是参数卡名称，之后脚本会问你 Burn-in 的数目 （这里实际是问你需要<strong>额外</strong>丢弃的抽样数目）</p>
-<p><img src="/5.png"></p>
+<p><img src="/posts/33cf95d2/5.png"></p>
 <p>这是一个需要谨慎的问题，你不能直接使用 <strong>THRGIBBSF90</strong> 使用的 burn-in 数目，因为这些抽样结果早已经被丢弃了（没有保存在文件中）。这里问的是你需要额外丢弃的抽样结果数目，因此你的回答应该是</p>
 <ul>
 <li>0 ： 如果你不需要丢弃额外的抽样结果</li>
 <li>一个整数，表示你想要丢弃额外的抽样结果</li>
 </ul>
 <p>之后，脚本会问你下面的问题</p>
-<p><img src="/6.png"></p>
+<p><img src="/posts/33cf95d2/6.png"></p>
 <p>这里你不能直接输入1 ，这里问的是你之前分析的 interval 参数，因此如果你要保留全部抽样结果，你就要输入 THRGIBBSF90 分析时使用的参数（或者之前interval 参数的整数倍）。</p>
 <p>之后会输出下面的2个表格，每一个表格对应方差组分的统计值。</p>
-<p><img src="/7.png"></p>
+<p><img src="/posts/33cf95d2/7.png"></p>
 <p>方差组分可以通过 <code>Pos. eff1 eff2 trt1 trt2</code> 这些列来确认：</p>
 <ul>
 <li><code>Pos.</code> ： 一个参数的位置索引（应该就和行号一样，没用）</li>
@@ -184,10 +184,10 @@
 </ul>
 <p>在这个例子中，我们有2个方差组分，第一个加性方差是第4个因子，第二个就是残差。因此这里 position 1 就是加性方差，position 2 就是残差。</p>
 <p>这里我们提取一些重要信息说明如下（我测试了一下，后验均值和标准差和日志信息一致）</p>
-<p><img src="/8.png"></p>
+<p><img src="/posts/33cf95d2/8.png"></p>
 <p>表格里面有好几个方差组分的点估计值，包括<code>mean</code>， <code>median</code> ， <code>mode</code> （众数）。具体用哪个值更合理取决于后验分布的偏态情况。如果后验分布高度偏态，并且 <code>mean</code> 和 <code>mode</code> 结果相差很大，此时使用  <code>mode</code> 或 <code>median</code>  结果可能更好。注意这里</p>
-<p><strong>高后验密度区间（HPD95）<strong>是评估参数精度的常用统计量，属于区间估计范畴。其计算方式为：将排序后的样本按</strong>截断前2.5%最大值和后2.5%最小值</strong>，得到区间的上下界。</p>
-<p>你可以通过**独立链大小（Independent chain size）<strong>和</strong>自相关系数（Autocorrelations）**可判断保存的样本是否足够：</p>
+<p><strong>高后验密度区间（HPD95）</strong>是评估参数精度的常用统计量，属于区间估计范畴。其计算方式为：将排序后的样本按<strong>截断前2.5%最大值和后2.5%最小值</strong>，得到区间的上下界。</p>
+<p>你可以通过<strong>独立链大小（Independent chain size）</strong>和<strong>自相关系数（Autocorrelations）</strong>可判断保存的样本是否足够：</p>
 <ol>
 <li><strong>自相关性（Autocorrelations）</strong><ul>
 <li>相邻样本通常高度相关（因下一个样本基于当前样本生成）；</li>
@@ -202,7 +202,7 @@
 </li>
 </ol>
 <p>展示完上面的表格后，软件会提示下面的信息</p>
-<p><img src="/9.png"></p>
+<p><img src="/posts/33cf95d2/9.png"></p>
 <p><strong>POSTGIBBSF90</strong> 支持通过外部软件 <strong>Gnuplot</strong> 绘制样本的<strong>时间序列图</strong>或<strong>直方图</strong>。操作说明如下：</p>
 <ol>
 <li><strong>输入1</strong>：生成时间序列图（需系统已安装 Gnuplot；安装命令为 <code>sudo yum install gnuplot</code> ）；</li>
@@ -236,8 +236,8 @@
 <li><strong>postmean</strong><br>以用户友好格式（如表格）展示的<strong>后验均值</strong>结果文件。</li>
 <li><strong>postmeanCorr</strong><br>以用户友好格式展示的相关性后验均值文件。<br><em>（示例：遗传相关性的点估计值）</em></li>
 <li><strong>postsd</strong><br>后验标准差（Posterior Standard Deviation）的数值记录文件。<br><em>（用途：评估参数估计的精确性，值越小表示置信度越高）</em></li>
-<li><strong>fort.998</strong><br>基于 <code>fort.99</code> 文件计算的**对数似然值（logL）**记录文件。</li>
-<li><strong>postgibbs_samples</strong><br>经过<strong>预烧期（burn-in）剔除</strong>和**间隔抽样（thinning）**处理后的最终抽样结果集合。</li>
+<li><strong>fort.998</strong><br>基于 <code>fort.99</code> 文件计算的<strong>对数似然值（logL）</strong>记录文件。</li>
+<li><strong>postgibbs_samples</strong><br>经过<strong>预烧期（burn-in）剔除</strong>和<strong>间隔抽样（thinning）</strong>处理后的最终抽样结果集合。</li>
 </ul>
 <p>这里 <strong>postgibbs_samples</strong> 文件是文本文件，可以用于计算一些你自己感兴趣的别的统计指标。其内容如下表，说明如下</p>
 <ul>

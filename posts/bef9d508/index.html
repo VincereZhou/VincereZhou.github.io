@@ -106,13 +106,13 @@
 </ul>
 <p><strong>突出性能与优势</strong></p>
 <ul>
-<li><strong>准确率大幅提升：</strong> 在 14 个大豆性状的预测训练中表现优异，最高预测准确率（相关系数）达 <strong>0.92</strong>，比传统 GBLUP 方法最高提升了 <strong>35.85%</strong>。</li>
+<li><strong>准确率大幅提升：</strong> 在 14 个大豆性状的预测训练中表现优异，最高预测准确率（相关系数）达 <strong>0.92</strong>，比传统 GBLUP 方法最高提升了 **35.85%**。</li>
 <li><strong>高鲁棒性（稳定性）：</strong> 模拟研究证实，在中小样本量（300–5000）、中低遗传力（0.4–0.6）以及复杂遗传结构（100 个因果位点）下，该框架依然表现稳健。</li>
 <li><strong>多物种验证：</strong> 在水稻、玉米、棉花、高粱和柳枝稷的真实数据验证中，其表现持续优于 GBLUP 和深度学习方法。</li>
 </ul>
 <p><strong>育种潜力与结论</strong></p>
 <ul>
-<li><strong>超亲分离潜力：</strong> 在分析的 14 个大豆性状中，有 13 个在后代中表现出超亲分离潜力。其中，华北地区大豆种子的<strong>亚麻酸含量</strong>重组潜力最高，超过亲本最大值 <strong>16.89%</strong>。</li>
+<li><strong>超亲分离潜力：</strong> 在分析的 14 个大豆性状中，有 13 个在后代中表现出超亲分离潜力。其中，华北地区大豆种子的<strong>亚麻酸含量</strong>重组潜力最高，超过亲本最大值 **16.89%**。</li>
 <li><strong>总结：</strong> EMLGP 优化了亲本选择和表型预测，为高效、智能驱动的作物育种提供了一个强有力的框架。</li>
 </ul>
 <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><h3 id="GBLUP-和-Bayes-算法"><a href="#GBLUP-和-Bayes-算法" class="headerlink" title="GBLUP 和 Bayes 算法"></a>GBLUP 和 Bayes 算法</h3><p>略</p>
@@ -216,7 +216,7 @@
 </li>
 <li><strong>第二步：定位置——交叉互换发生的位置</strong><ul>
 <li><strong>模拟方法</strong>：一旦用泊松分布确定了某条染色体的具体交叉次数（比如 <code>k</code> 次），这 <code>k</code> 个交叉点的位置就会<strong>独立且均匀地</strong>分布在整个染色体上。</li>
-<li><strong>关键词</strong>：整个过程是随机的，并且假设 <strong>无交叉干涉 (No Crossover Interference)</strong>，意味着一个交叉的发生不会影响另一个交叉。</li>
+<li><strong>关键词</strong>：整个过程是随机的，并且假设 **无交叉干涉 (No Crossover Interference)**，意味着一个交叉的发生不会影响另一个交叉。</li>
 </ul>
 </li>
 <li><strong>第三步：定基因——生成后代的配子和基因型</strong><ul>
@@ -233,6 +233,7 @@
 </ol>
 <p>python 示例代码如下</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置模拟参数</span></span><br><span class="line">chr_length_morgan = <span class="number">1.0</span>      <span class="comment"># 染色体遗传长度: 1 Morgan</span></span><br><span class="line">chr_physical_length = <span class="number">100.0</span>  <span class="comment"># 染色体物理长度（可设为任意单位）</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 使用泊松分布随机确定交叉互换次数</span></span><br><span class="line">n_crossovers = np.random.poisson(chr_length_morgan)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 若发生交叉，确定具体位置</span></span><br><span class="line"><span class="keyword">if</span> n_crossovers &gt; <span class="number">0</span>:</span><br><span class="line"> <span class="comment"># 在染色体物理长度范围内随机均匀分布生成交叉点</span></span><br><span class="line"> positions = np.random.uniform(<span class="number">0</span>, chr_physical_length, n_crossovers)</span><br><span class="line"> positions.sort()  <span class="comment"># 按顺序排列</span></span><br><span class="line"></span><br><span class="line"> <span class="built_in">print</span>(<span class="string">f&quot;发生了 <span class="subst">&#123;n_crossovers&#125;</span> 次交叉&quot;</span>)</span><br><span class="line"> <span class="built_in">print</span>(<span class="string">f&quot;交叉点位: <span class="subst">&#123;positions&#125;</span>&quot;</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line"> <span class="built_in">print</span>(<span class="string">&quot;未发生任何交叉&quot;</span>)</span><br></pre></td></tr></table></figure>
+
 
 </blockquote>
 <blockquote>
@@ -252,7 +253,7 @@
 </blockquote>
 </li>
 </ol>
-<h4 id="EMLGP-框架-1"><a href="#EMLGP-框架-1" class="headerlink" title="EMLGP 框架"></a>EMLGP 框架</h4><p><img src="/1.png"></p>
+<h4 id="EMLGP-框架-1"><a href="#EMLGP-框架-1" class="headerlink" title="EMLGP 框架"></a>EMLGP 框架</h4><p><img src="/posts/bef9d508/1.png"></p>
 <h4 id="EMLGP-软件-gitee-网址"><a href="#EMLGP-软件-gitee-网址" class="headerlink" title="EMLGP 软件 gitee 网址"></a>EMLGP 软件 gitee 网址</h4><p><a target="_blank" rel="noopener" href="https://gitee.com/njau-sri/EMLGP">https://gitee.com/njau-sri/EMLGP</a></p>
 <h4 id="模型比较"><a href="#模型比较" class="headerlink" title="模型比较"></a>模型比较</h4><p>和下面的模型进行比较预测准确性。采用5折交叉验证获取准确性。</p>
 <ul>
@@ -269,13 +270,13 @@
 <ul>
 <li>在 <strong>CSGP1</strong>（821份栽培大豆，9个性状）和 <strong>CSGP2</strong>（750份野生+栽培大豆，5个性状）两个群体中，EMLGP 的预测精度（Pearson相关系数 PCC）在多数性状上达到 <strong>0.75–0.92</strong>。</li>
 <li><strong>开花期（DTF）</strong> 和 <strong>成熟期（DTM）</strong> 的 PCC 最高，分别达到 <strong>0.92</strong> 和 <strong>0.90</strong>。</li>
-<li>相比经典方法 <strong>GBLUP</strong>，EMLGP 的预测精度最大提升 <strong>35.85%</strong>（例如大豆亚油酸含量 LA：PCC 从 0.53 提升至 0.72）。</li>
+<li>相比经典方法 <strong>GBLUP</strong>，EMLGP 的预测精度最大提升 **35.85%**（例如大豆亚油酸含量 LA：PCC 从 0.53 提升至 0.72）。</li>
 <li>同时，EMLGP 在所有测试的机器学习方法（Lasso、Ridge、SVR、RF、XGBoost）及深度学习方法（DNNGP）中均表现最佳。</li>
 </ul>
 <p><strong>二、在不同作物（水稻、玉米、棉花、高粱、柳枝稷）中稳健领先</strong></p>
 <ul>
 <li><strong>棉花纤维长度&#x2F;强度</strong>：EMLGP（PCC&#x3D;0.83）优于 GBLUP（0.78–0.79）和 DNNGP（0.69–0.70）。</li>
-<li><strong>玉米株高（HT）</strong>：EMLGP 预测精度（0.85）相比 GBLUP（0.45）提升 <strong>88.9%</strong>。</li>
+<li><strong>玉米株高（HT）</strong>：EMLGP 预测精度（0.85）相比 GBLUP（0.45）提升 **88.9%**。</li>
 <li><strong>柳枝稷</strong>：株高稳定性（ST）PCC&#x3D;0.88，开花期（FT）PCC&#x3D;0.92。</li>
 <li><strong>高粱</strong>：籽粒水分（GM）和株高（HT）的 PCC 分别为 0.78 和 0.81，显著高于 GBLUP&#x2F;DNNGP（0.55–0.57）。</li>
 <li>结论：EMLGP 具有<strong>跨物种的泛化能力和稳定性</strong>。</li>
@@ -289,7 +290,7 @@
 <p><strong>四、成功预测大豆 13 个性状的超越潜力，筛选出优良亲本</strong></p>
 <ul>
 <li>在 14 个大豆性状中，有 <strong>13 个性状</strong> 的后代表现出超越双亲的潜力（即存在超亲个体）。</li>
-<li><strong>华北地区（NC）</strong> 的 <strong>亚麻酸含量（LNA）</strong> 重组潜力最大，比双亲最大值高出 <strong>16.89%</strong>。</li>
+<li><strong>华北地区（NC）</strong> 的 <strong>亚麻酸含量（LNA）</strong> 重组潜力最大，比双亲最大值高出 **16.89%**。</li>
 <li>基于三个生态区（华北 NC、华中 CC、华南 SC），给出了高蛋白、高油及双高（蛋白+油）的推荐亲本材料：<ul>
 <li><strong>高蛋白潜力</strong>：N25486（NC）、N23633（CC）、N23630（SC）</li>
 <li><strong>高油潜力</strong>：N25318（NC）、N24192（CC）、N25151（SC）</li>

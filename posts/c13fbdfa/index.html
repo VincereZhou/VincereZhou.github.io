@@ -99,16 +99,16 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>cervus 是经典的亲子鉴定软件。</p>
 <span id="more"></span>
 
-<h1 id="cervus-原理"><a href="#cervus-原理" class="headerlink" title="cervus 原理"></a>cervus 原理</h1><p><img src="/10.png"></p>
-<p><img src="/11.png"></p>
-<p><img src="/12.png"></p>
-<p><img src="/13.png"></p>
+<h1 id="cervus-原理"><a href="#cervus-原理" class="headerlink" title="cervus 原理"></a>cervus 原理</h1><p><img src="/posts/c13fbdfa/10.png"></p>
+<p><img src="/posts/c13fbdfa/11.png"></p>
+<p><img src="/posts/c13fbdfa/12.png"></p>
+<p><img src="/posts/c13fbdfa/13.png"></p>
 <h1 id="下载-cervus"><a href="#下载-cervus" class="headerlink" title="下载 cervus"></a>下载 cervus</h1><p>去官网下载软件（见参考文献的第一条链接），我下载的是 3.0.7 版本</p>
 <h1 id="准备基因型文件"><a href="#准备基因型文件" class="headerlink" title="准备基因型文件"></a>准备基因型文件</h1><p>基因型文件可以由 plink 文件生成，第一列是个体号，从第二列起为每个位点的基因型，一个基因型占2列（SSR 使用片段大小，SNP 可以使用碱基，缺失标记为 0），含有标题（两列基因型分别添加后缀 “a”, “b”）。</p>
 <p>举例如下</p>
-<p><img src="/1.png"></p>
+<p><img src="/posts/c13fbdfa/1.png"></p>
 <h1 id="计算等位基因频率"><a href="#计算等位基因频率" class="headerlink" title="计算等位基因频率"></a>计算等位基因频率</h1><p>点击 <code>Analysis</code> ，然后点击 <code>Allele Frequency Analysis</code> </p>
-<p><img src="/3.png"></p>
+<p><img src="/posts/c13fbdfa/3.png"></p>
 <p>在弹出的窗口设置如下，其中左下部分含义为</p>
 <ul>
 <li><code>Header row</code> ： 是否有标题</li>
@@ -118,10 +118,10 @@
 <li><code>Number of loci</code> : 位点总数</li>
 </ul>
 <p>右下部分默认不动（含义为做哈温伯格平衡测试，最小期望频率为5，使用叶氏连续性修正，使用Bonferroni校正，估计无效等位基因频率）。</p>
-<p><img src="/4.png"></p>
+<p><img src="/posts/c13fbdfa/4.png"></p>
 <p>运行结束了我们得到了两个结果文件 </p>
 <p><code>frequence.alf</code> 就是等位基因型频率结果文件</p>
-<p><img src="/7.png"></p>
+<p><img src="/posts/c13fbdfa/7.png"></p>
 <p><code>frequence.txt</code> 文件各列内容如下</p>
 <ul>
 <li><code>Locus</code> ： 位点名称</li>
@@ -143,7 +143,7 @@
 <p>HW: 哈温伯格平衡NS &#x3D; not significant无显著性, * &#x3D; significant at the 5% level显著性水平5%, ** &#x3D; significant at the 1% level显著性水平1%, *** &#x3D; significant at the 0.1% level显著性水平0.1%, ND &#x3D; not done没有做</p>
 <p>F(Null): Estimated null allele frequency估计无效等位基因频率</p>
 </blockquote>
-<p><img src="/5.png"></p>
+<p><img src="/posts/c13fbdfa/5.png"></p>
 <p>因此，需要手动计算的排除概率如下：</p>
 <ul>
 <li><code>PE-1P</code> &#x3D; 1 -  <code>NE-1P</code></li>
@@ -161,22 +161,22 @@
 <li><code>Mean polymorphic information content (PIC)</code>: 所有位点的平均多态信息含量</li>
 </ul>
 <p>之后是累积<strong>非排除概率</strong>的统计。</p>
-<p><img src="/6.png"></p>
+<p><img src="/posts/c13fbdfa/6.png"></p>
 <h1 id="检测重复样本"><a href="#检测重复样本" class="headerlink" title="检测重复样本"></a>检测重复样本</h1><p>亲子鉴定前最好做一下个体识别，或者说重复样本检测，看看有没有基因型一样的个体。</p>
 <p>点击 <code>Analysis</code> ，然后点击 <code>Identity Analysis</code> 。</p>
-<p><img src="/2.png"></p>
+<p><img src="/posts/c13fbdfa/2.png"></p>
 <p>设置如下，其它设置上面均提过，新增加的选项就是输出选项</p>
 <ul>
 <li><code>Minimum number of matching loci</code> ：这应该是说输出的重复样本之间最少应该匹配上多少个体位点</li>
 <li><code>Allow fuzzy matching</code> : 允许模糊匹配，就是说允许两个重复存在不一致位点</li>
 <li><code>Allow 3 mismatches</code> ：允许重复样本之间最多存在几个不一致位点</li>
 </ul>
-<p><img src="/8.png"></p>
+<p><img src="/posts/c13fbdfa/8.png"></p>
 <p>输出文件 <code>identity.csv</code> 中含有所有重复样本的信息，其中 pID 这一列就是累积匹配概率 CPM 。</p>
-<p><img src="/9.png"></p>
+<p><img src="/posts/c13fbdfa/9.png"></p>
 <h1 id="模拟亲缘关系推断"><a href="#模拟亲缘关系推断" class="headerlink" title="模拟亲缘关系推断"></a>模拟亲缘关系推断</h1><p>通过模拟训练可以获得亲子关系统计指标 $\Delta$ 置信区间为80%和95%的临界值。</p>
 <p>点击 <code>Analysis</code> ，然后点击 <code>Simulation of Parentage Analysis</code> 。</p>
-<p><img src="/14.png"></p>
+<p><img src="/posts/c13fbdfa/14.png"></p>
 <p>这里有四种亲子鉴定分析类型类型：maternity analysis, paternity analysis, parent pair analysis where the sexes of candidate parents are known and parent pair analysis where the sexes of candidate parents are unknown 。</p>
 <p>可以简单地理解为单亲鉴定和双亲鉴定，下面以 <code>parent pair (Sexes Known)</code> 为例</p>
 <p>其中：</p>
@@ -187,19 +187,19 @@
 <li><code>Prop. loci typed</code> ：位点的分型率</li>
 <li><code>Prop. loci mistyped</code> ：位点的错误分型率</li>
 </ul>
-<p><img src="/15.png"></p>
+<p><img src="/posts/c13fbdfa/15.png"></p>
 <p>这里有两个输出文件: <code>sim_mother.sim</code> 中包含了所有的参数，<code>sim_mother.txt</code> 是模拟结果。</p>
 <h1 id="亲子鉴定"><a href="#亲子鉴定" class="headerlink" title="亲子鉴定"></a>亲子鉴定</h1><p>首先将后代的个体号放在一个文件中(offspring.txt) ，如果已知亲本性别则创建一个候选父本的个体号文件(father.txt) 和 候选母本的个体号文件（mother.txt），如果亲本性别未知则将所有候选亲本放在一个文件夹中。</p>
 <p>下面以亲本性别已知为例，点击 <code>Analysis</code>  再点击 <code>Parentage Analysis</code> , <code>Parent Pair (Sexes Known)</code></p>
 <p>填写参数如下，每一步之后都点击 <code>next</code> 进入下一步，注意选择模拟结果文件时要选择相同的分析结果（比如这里是双亲有性别信息，这里的模拟结果也要用双亲有性别信息）</p>
-<p><img src="/16.png"></p>
-<p><img src="/17.png"></p>
-<p><img src="/18.png"></p>
-<p><img src="/19.png"></p>
-<p><img src="/20.png"></p>
+<p><img src="/posts/c13fbdfa/16.png"></p>
+<p><img src="/posts/c13fbdfa/17.png"></p>
+<p><img src="/posts/c13fbdfa/18.png"></p>
+<p><img src="/posts/c13fbdfa/19.png"></p>
+<p><img src="/posts/c13fbdfa/20.png"></p>
 <p>输出结果中 <code>assign_out.txt</code> 是汇总文件， <code>assign_out.csv</code> 是具体结果，其结构如下，首先是最可能的母本（主要关注其似然比，$\Delta$ 还有显著性水平 ），然后是最可能的父本，然后是这个 trios 的似然比结果。</p>
 <p>显著性水平有三种符号，<code>*</code> 表示亲子关系极显著，置信度超过 95%；<code>+</code> 表示亲子关系较显著，置信度超过 80%； <code>-</code> 表示亲子关系没有达到显著要求，置信度低于 80% 。</p>
-<p><img src="/21.png"></p>
+<p><img src="/posts/c13fbdfa/21.png"></p>
 <h1 id="讨论"><a href="#讨论" class="headerlink" title="讨论"></a>讨论</h1><p>cervus 是一款经典的亲子鉴定软件，使用起来还算是比较方便简单，但是我认为它有几点缺点：</p>
 <ol>
 <li>图形化界面，只能在 windows 环境中运行</li>

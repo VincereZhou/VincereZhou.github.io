@@ -112,7 +112,7 @@
 </ol>
 <h1 id="连接-scnet"><a href="#连接-scnet" class="headerlink" title="连接 scnet"></a>连接 scnet</h1><p>参考官网说明：<a target="_blank" rel="noopener" href="https://www.scnet.cn/help/docs/mainsite/hpc/cmd/connect-to-hpc/#_4%E3%80%81vscode%E4%B8%8B%E8%BD%BD%E7%A7%98%E9%92%A5%E8%BF%9E%E6%8E%A5%E9%9B%86%E7%BE%A4">https://www.scnet.cn/help/docs/mainsite/hpc/cmd/connect-to-hpc/#_4%E3%80%81vscode%E4%B8%8B%E8%BD%BD%E7%A7%98%E9%92%A5%E8%BF%9E%E6%8E%A5%E9%9B%86%E7%BE%A4</a></p>
 <p>一直卡在”正在下载 VS Code服务器“ 这。</p>
-<h2 id="连接失败"><a href="#连接失败" class="headerlink" title="连接失败"></a>连接失败</h2><p>你这两条日志拼起来，就是典型的**“解压安置在 NFS 家目录上反复崩 → 残骸留下 → 下次重下 → 又崩”的死循环**：</p>
+<h2 id="连接失败"><a href="#连接失败" class="headerlink" title="连接失败"></a>连接失败</h2><p>你这两条日志拼起来，就是典型的<strong>“解压安置在 NFS 家目录上反复崩 → 残骸留下 → 下次重下 → 又崩”的死循环</strong>：</p>
 <ul>
 <li><strong><code>could not canonicalize extraction path ... dist: No such file or directory</code></strong> → 在 <code>/work/home</code>（NFS）里解包&#x2F;搬目录时，深层路径 <code>node_modules/@microsoft/.../dist</code> 对应目录<strong>不存在或 NFS 来不及同步</strong>，于是安置失败</li>
 <li><strong><code>error decoding response body</code></strong> → 下载过程中网络被掐了一下（HPC 出网经常这样），下载没完整就断了</li>

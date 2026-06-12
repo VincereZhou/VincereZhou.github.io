@@ -124,36 +124,36 @@
 
 <h2 id="2-4-感知机的局限性"><a href="#2-4-感知机的局限性" class="headerlink" title="2.4 感知机的局限性"></a>2.4 感知机的局限性</h2><p>这里我们考虑一下异或门（XOR gate），仅当 x1 或 x2 中的一方为1时，才会输出 1 。</p>
 <p>事实上这里我们用感知机是无法构建异或门，因为感知机的局限性就在于它只能表示由一条<strong>直线</strong>分割的空间，以 $(b, w_1, w_2) &#x3D; (-0.5, 1, 1)$ 为例，其感知机会生成由下图直线分隔开的两个空间，直线下面输出0，直线上面输出1</p>
-<p><img src="/1.png"></p>
+<p><img src="/posts/d2e41a48/1.png"></p>
 <p>而异或门没法用一条直线来划分开，需要用曲线分隔开，如下图所示。我们称由曲线分隔开的空间称为<strong>非线性空间</strong>，由直线分隔而成的空间称为<strong>线性空间</strong>。</p>
-<p><img src="/2.png"></p>
+<p><img src="/posts/d2e41a48/2.png"></p>
 <p>但是我们可以用多层感知机来解决这个问题。</p>
 <h2 id="2-5-多层感知机"><a href="#2-5-多层感知机" class="headerlink" title="2.5 多层感知机"></a>2.5 多层感知机</h2><h3 id="已有门电路的组合"><a href="#已有门电路的组合" class="headerlink" title="已有门电路的组合"></a>已有门电路的组合</h3><p>异或门的制作方法有很多，其中之一就是组成我们之前做好的与门，与非门、或门进行配置，其符号表示如下图，这里与非门中的圆圈表示反转输出的意思。</p>
-<p><img src="/3.png"></p>
+<p><img src="/posts/d2e41a48/3.png"></p>
 <p>这里我们可以通过下面的结果来构建异或门，可以自己确认一下。</p>
-<p><img src="/4.png"></p>
+<p><img src="/posts/d2e41a48/4.png"></p>
 <h3 id="异或门的实现"><a href="#异或门的实现" class="headerlink" title="异或门的实现"></a>异或门的实现</h3><p>下面用 Python 代码来实现</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">XOR</span>(<span class="params">x1, x2</span>):</span><br><span class="line">    s1 = NAND(x1, x2)</span><br><span class="line">    s2 = OR(x1, x2)</span><br><span class="line">    y = AND(s1, s2)</span><br><span class="line">    <span class="keyword">return</span> y</span><br><span class="line">    </span><br><span class="line"><span class="built_in">print</span>(XOR(<span class="number">0</span>, <span class="number">0</span>)) <span class="comment"># 输出0</span></span><br><span class="line"><span class="built_in">print</span>(XOR(<span class="number">1</span>, <span class="number">0</span>)) <span class="comment"># 输出1</span></span><br><span class="line"><span class="built_in">print</span>(XOR(<span class="number">0</span>, <span class="number">1</span>)) <span class="comment"># 输出1</span></span><br><span class="line"><span class="built_in">print</span>(XOR(<span class="number">1</span>, <span class="number">1</span>)) <span class="comment"># 输出0</span></span><br></pre></td></tr></table></figure>
 
 <p>下面我们用感知机的表示方式（明确地显示神经元）来表示这个异或门，如下图所示。这里异或门是一种多层结构的神经网络，我们将最左面的一列称为第 0 层，随后称为第1层和第2层。我们将这种叠加了多层的感知机称为<strong>多层感知机</strong>。这里的感知机总共是3层，但是因为拥有权重的层实质上只有2层（第0层和第1层之间，第1层和第2层之间），因此称为<strong>2层感知机</strong>，不过也有文献称为<strong>3层感知机</strong>。图中的圆圈称为<strong>神经元</strong>或<strong>节点</strong>。</p>
-<p><img src="/5.png"></p>
+<p><img src="/posts/d2e41a48/5.png"></p>
 <p>这种2层感知机的运行过程如同流水线的组装作业，第1层的工人对传过来的零件进行加工，完成后再传递给第2层的工人，之后出货。</p>
 <p>因此我们看到单层感知机无法表示的东西，通过增加一层就可以解决。也就是说，通过叠加层，感知机能进行更加灵活的表示。</p>
 <h1 id="第3章-神经网络"><a href="#第3章-神经网络" class="headerlink" title="第3章 神经网络"></a>第3章 神经网络</h1><h2 id="3-1-从感知机到神经网络"><a href="#3-1-从感知机到神经网络" class="headerlink" title="3.1 从感知机到神经网络"></a>3.1 从感知机到神经网络</h2><p>神经网络和感知机有很多共同点，这里主要介绍二者的差异。</p>
 <h3 id="神经网络的例子"><a href="#神经网络的例子" class="headerlink" title="神经网络的例子"></a>神经网络的例子</h3><p>用图来表示神经网络的话，如下图所示，我们把最左边的一列称为<strong>输入层</strong>， 最右边的一列称为<strong>输出层</strong>，中间的一列称为<strong>中间层</strong>，有时也称为<strong>隐藏层</strong>。本书中将输入层称为第 0 层，方便后面的 Python 实现。</p>
-<p><img src="/6.png"></p>
+<p><img src="/posts/d2e41a48/6.png"></p>
 <p>这里神经网络的连接方式与感知机相同。</p>
 <h3 id="复习感知机"><a href="#复习感知机" class="headerlink" title="复习感知机"></a>复习感知机</h3><p>我们先复习一下感知机，先看下面的网络结构</p>
-<p><img src="/7.png"></p>
+<p><img src="/posts/d2e41a48/7.png"></p>
 <p>图中的感知机接收 x1 和 x2 两个输入信号，输出 y 。这里没有表示偏置 b ，如果要明确表示出来，可以如下图那样做。这里权重为 b 的输入信号为 1，这个感知机接收 x1 ，x2 和 1 三个输入信号。</p>
-<p><img src="/8.png"></p>
+<p><img src="/posts/d2e41a48/8.png"></p>
 <p>原本感知机的计算公式如下<br>$$<br>y &#x3D; \left{<br>\begin{array}{ll}<br>0 &amp; (b + w_1 x_1 + w_2 x_2 \leqslant 0) \<br>1 &amp; (b + w_1 x_1 + w_2 x_2 &gt; 0)<br>\end{array}<br>\right.<br>$$<br>我们将其改成更简洁的形式，我们用一个函数来表示这种分情况的动作（超过0则输出1，否则输出0），引入新函数 $h(x)$ ，将上式改成下面这2个式子<br>$$<br>y &#x3D; h(b + w_1 x_1 + w_2 x_2)<br>$$</p>
 <p>$$<br>h(x) &#x3D; \left{<br>\begin{array}{ll}<br>0 &amp; (x\leqslant 0) \<br>1 &amp; (x &gt; 0)<br>\end{array}<br>\right.<br>$$</p>
 <h3 id="激活函数登场"><a href="#激活函数登场" class="headerlink" title="激活函数登场"></a>激活函数登场</h3><p>刚才登场的 $h(x)$ 函数会将输入信号的总和转换为输出信号，这种函数一般称为<strong>激活函数</strong>（activation funciton）。</p>
 <p>我们把这一步写得更细一点，分为2步，第一步计算输入信号的加权总和，第二步用激活函数转换这一总和，写成下面这两个式子。<br>$$<br>a&#x3D;b + w_1 x_1 + w_2 x_2<br>$$</p>
 <p>$$<br>y&#x3D;h(a)<br>$$</p>
 <p>之前的神经元都式用一个圆圈表示的，如果要在图中明确表示出上面那2个式子，则可以像下图这样做。</p>
-<p><img src="/9.png"></p>
+<p><img src="/posts/d2e41a48/9.png"></p>
 <p>激活函数是连接感知机和神经网络的桥梁。</p>
 <h2 id="3-2-激活函数"><a href="#3-2-激活函数" class="headerlink" title="3.2 激活函数"></a>3.2 激活函数</h2><p>上面表示的激活函数以阈值为界，一旦输入超过阈值，就切换输出。这样的函数称为<strong>阶跃函数</strong>。因此，感知机可以说就是使用了阶跃函数作为激活函数。如果将激活函数转换成其它函数，就可以进入到神经网络的世界了。下面我们介绍一下神经网络使用的激活函数。</p>
 <h3 id="sigmoid函数"><a href="#sigmoid函数" class="headerlink" title="sigmoid函数"></a>sigmoid函数</h3><p>神经网络中经常使用的一个函数就是 sigmoid 函数<br>$$<br>h(x) &#x3D; \frac{1}{1+\exp(-x)}<br>$$</p>
@@ -166,14 +166,14 @@
 <h3 id="阶跃函数的图像"><a href="#阶跃函数的图像" class="headerlink" title="阶跃函数的图像"></a>阶跃函数的图像</h3><p>下面就用图来表示上面定义的阶跃函数，为此需要使用 matplotlib 库。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pylab <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">step_function</span>(<span class="params">x</span>):</span><br><span class="line">    y = x &gt; <span class="number">0</span></span><br><span class="line">    <span class="keyword">return</span> y.astype(<span class="built_in">int</span>)</span><br><span class="line"></span><br><span class="line">x = np.arange(-<span class="number">5.0</span>, <span class="number">5.0</span>, <span class="number">0.1</span>)</span><br><span class="line">y = step_function(x)</span><br><span class="line">plt.plot(x,y)</span><br><span class="line">plt.ylim(-<span class="number">0.1</span>, <span class="number">1.1</span>) <span class="comment"># 指定y轴范围</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
 
-<p><img src="/10.png"></p>
+<p><img src="/posts/d2e41a48/10.png"></p>
 <h3 id="sigmoid函数的实现"><a href="#sigmoid函数的实现" class="headerlink" title="sigmoid函数的实现"></a>sigmoid函数的实现</h3><p>下面我们来实现 sigmoid 函数</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">sigmoid</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + np.exp(-x))</span><br></pre></td></tr></table></figure>
 
 <p>画图如下</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(-<span class="number">5.0</span>, <span class="number">5.0</span>, <span class="number">0.1</span>)</span><br><span class="line">y = sigmoid(x)</span><br><span class="line">plt.plot(x,y)</span><br><span class="line">plt.ylim(-<span class="number">0.1</span>, <span class="number">1.1</span>) <span class="comment"># 指定y轴范围</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
 
-<p><img src="/11.png"></p>
+<p><img src="/posts/d2e41a48/11.png"></p>
 <h3 id="sigmoid函数和阶跃函数的比较"><a href="#sigmoid函数和阶跃函数的比较" class="headerlink" title="sigmoid函数和阶跃函数的比较"></a>sigmoid函数和阶跃函数的比较</h3><p>现在我们来比较这两个函数的不同点：</p>
 <ol>
 <li>平滑性不同：sigmoid 函数就是一条平滑曲线，输出随着输入发生连续性的变化。而阶跃函数以0为界，输出发生急剧性的变化。</li>
@@ -194,7 +194,7 @@
 <h3 id="多维数组"><a href="#多维数组" class="headerlink" title="多维数组"></a>多维数组</h3><p>简单地说，多维数组就是“数字的集合”，数字排成一列的集合，排成长方形的集合（二维数组也称为<strong>矩阵</strong>）、排成三维状或N维的集合都称为数组。下面我们用 numpy来生成多维数组。在 Python 中，第一个维度对应<strong>第0维</strong>，之后称为第1维，第2维等（Python的索引从0开始）。</p>
 <h3 id="矩阵乘法"><a href="#矩阵乘法" class="headerlink" title="矩阵乘法"></a>矩阵乘法</h3><p>对于2个矩阵的矩阵乘法而言，需要第一个矩阵的第1维（列数）与第二个矩阵的第0维（行数）的元素个数相同。</p>
 <p>对于二维矩阵和一维数组的乘积，对应维度的个数仍要保持一致，如下图</p>
-<p><img src="/12.png"></p>
+<p><img src="/posts/d2e41a48/12.png"></p>
 <p>更具体地规则如下</p>
 <ol>
 <li><strong>二维数组在左，一维数组在右（<code>np.dot(A, B)</code>）</strong>：<ul>
@@ -211,21 +211,21 @@
 </li>
 </ol>
 <h3 id="神经网络的内积"><a href="#神经网络的内积" class="headerlink" title="神经网络的内积"></a>神经网络的内积</h3><p>下面我们使用 Numpy 矩阵来实现神经网络，以下图为例，这里忽略了偏置和激活函数，只有权重。</p>
-<p><img src="/13.png"></p>
+<p><img src="/posts/d2e41a48/13.png"></p>
 <h2 id="3-4-3层神经网络的实现"><a href="#3-4-3层神经网络的实现" class="headerlink" title="3.4 3层神经网络的实现"></a>3.4 3层神经网络的实现</h2><p>现在我们来进行神经网络的实现。这里我们以下图的3层神经网络为对象，实现从输入到输出的（前向）处理。</p>
-<p><img src="/14.png"></p>
+<p><img src="/posts/d2e41a48/14.png"></p>
 <h3 id="符号确认"><a href="#符号确认" class="headerlink" title="符号确认"></a>符号确认</h3><p>在介绍神经网络中的处理之前，我们先导入 $w_{12}^{(1)}$ ，$a_{1}^{(1)}$ 等符号。</p>
 <p>我们先从定义符号开始。如下图，图中只突出显示了从输入层神经元 $x_{2}$ 到后一层的神经元 $a_{1}^{(1)}$ 的权重。如下图所示，权重和隐藏层的神经元的右上角的 “(1)” ，表示权重和神经元的层号。此外，权重的右下角有2个数字，它们是后一层的神经元和前一层的神经元的索引号。比如   $w_{12}^{(1)}$  表示前一层 $x_{2}$ 到后一层的第一个神经元 $a_{1}^{(1)}$ 的权重。权重右下角按照“后一层的索引号，前一层的索引号”的顺序排列。</p>
-<p><img src="/15.png"></p>
+<p><img src="/posts/d2e41a48/15.png"></p>
 <h3 id="各层信号传递的实现"><a href="#各层信号传递的实现" class="headerlink" title="各层信号传递的实现"></a>各层信号传递的实现</h3><p>现在看一下从输入层到第1层的第1个神经元的信号传递过程，如下图所示，这里增加了表示偏置的神经元 “1”，而偏置的右下角的索引号只有一个，因为不需要表示前一层的偏置神经元，因此其索引号只包含后一层神经元索引号。</p>
-<p><img src="/16.png"></p>
+<p><img src="/posts/d2e41a48/16.png"></p>
 <p>为了确认前面的内容，现在用数学式表示 $a_{1}^{(1)}$<br>$$<br>a_{1}^{(1)} &#x3D;  w_{11}^{(1)} x_1 + w_{12}^{(1)} x_2 + b_{1}^{(1)}<br>$$<br>此外，如果使用矩阵的乘法运算，则可以将第1层的加权和表示成下式<br>$$<br>\mathbf{A}^{(1)} &#x3D; \mathbf{X}\mathbf{W}^{(1)} + \mathbf{B}^{(1)}<br>$$<br>其中各式内容如下</p>
-<p><img src="/17.png"></p>
+<p><img src="/posts/d2e41a48/17.png"></p>
 <p>下面我们用 Numpy 数组来实现</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">X = np.array([<span class="number">1.0</span>, <span class="number">0.5</span>])</span><br><span class="line">W1 = np.array([[<span class="number">0.1</span>, <span class="number">0.3</span>, <span class="number">0.5</span>], [<span class="number">0.2</span>, <span class="number">0.4</span>, <span class="number">0.6</span>]])</span><br><span class="line">B1 = np.array([<span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.3</span>])</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(W1.shape) <span class="comment"># (2, 3)</span></span><br><span class="line"><span class="built_in">print</span>(X.shape)  <span class="comment"># (2,)</span></span><br><span class="line"><span class="built_in">print</span>(B1.shape) <span class="comment"># (3,)</span></span><br><span class="line"></span><br><span class="line">A1 = np.dot(X, W1) + B1</span><br></pre></td></tr></table></figure>
 
 <p>接下来我们观察第1层中激活函数的计算过程。如果把这个计算过程用图来表示的话，如下图所示</p>
-<p><img src="/18.png"></p>
+<p><img src="/posts/d2e41a48/18.png"></p>
 <p>这里加权和用 a 表示，被激活函数转换后的信号用 z 表示。这里我们使用的激活函数式sigmoid函数，用 Python实现，代码如下</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Z1 = sigmoid(A1)</span><br></pre></td></tr></table></figure>
 
@@ -243,12 +243,12 @@
 <h3 id="恒等函数和-softmax函数"><a href="#恒等函数和-softmax函数" class="headerlink" title="恒等函数和 softmax函数"></a>恒等函数和 softmax函数</h3><p>恒等函数会将输入按原样输出。</p>
 <p>分类问题使用的 softmax 函数可以用下面的式子表示。<br>$$<br>y_{k} &#x3D; \frac{\exp(a_{k})}{\sum_{i&#x3D;1}^{n}\exp(a_{i})}<br>$$<br>这里 $n$ 是输出神经元的数目， $a_{k}$ 是输入信号。所有输入信号的输出值之和为1（输出信号的大小应该是理解为概率）。</p>
 <p>用图来表示 software 的话，如下图所示，softmax 函数的输出通过箭头与所有的输入信号相连。</p>
-<p><img src="/19.png"></p>
+<p><img src="/posts/d2e41a48/19.png"></p>
 <p>现在我们来实现 softmax 函数。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">softmax</span>(<span class="params">a</span>):</span><br><span class="line">    exp_a = np.exp(a)</span><br><span class="line">    sum_exp_a = np.<span class="built_in">sum</span>(exp_a)</span><br><span class="line">    y = exp_a / sum_exp_a</span><br><span class="line">    <span class="keyword">return</span> y</span><br></pre></td></tr></table></figure>
 
 <h3 id="实现-softmax-函数时的注意事项"><a href="#实现-softmax-函数时的注意事项" class="headerlink" title="实现 softmax 函数时的注意事项"></a>实现 softmax 函数时的注意事项</h3><p>上面的 softmax 函数虽然正确，但是在计算机的运算上有一定缺陷，就是<strong>溢出</strong>问题。因为 softmax 函数设计指数函数的运算，指数函数的值可能会非常大，超出数值范围，会返回一个表示无穷大的 inf 。</p>
-<p>softmax 函数可以按照下式进行改进，下面 C 是一个常数，$C’ &#x3D; \log(C)$ 。<br>$$<br>\begin{aligned}<br>y_{k} &amp;&#x3D; \frac{\exp(a_{k})}{\sum_{i&#x3D;1}^{n}\exp(a_{i})} \<br>	&amp;&#x3D; \frac{C \times \exp(a_{k})}{C \times \sum_{i&#x3D;1}^{n}\exp(a_{i})} \<br>    &amp;&#x3D; \frac{\exp(a_{k}+ \log C)}{\sum_{i&#x3D;1}^{n}\exp(a_{i}+ \log C)} \<br>    &amp;&#x3D; \frac{\exp(a_{k}+ C’)}{\sum_{i&#x3D;1}^{n}\exp(a_{i}+  C’)} \</p>
+<p>softmax 函数可以按照下式进行改进，下面 C 是一个常数，$C’ &#x3D; \log(C)$ 。<br>$$<br>\begin{aligned}<br>y_{k} &amp;&#x3D; \frac{\exp(a_{k})}{\sum_{i&#x3D;1}^{n}\exp(a_{i})} \<br>    &amp;&#x3D; \frac{C \times \exp(a_{k})}{C \times \sum_{i&#x3D;1}^{n}\exp(a_{i})} \<br>    &amp;&#x3D; \frac{\exp(a_{k}+ \log C)}{\sum_{i&#x3D;1}^{n}\exp(a_{i}+ \log C)} \<br>    &amp;&#x3D; \frac{\exp(a_{k}+ C’)}{\sum_{i&#x3D;1}^{n}\exp(a_{i}+  C’)} \</p>
 <p>\end{aligned}<br>$$<br>这说明在进行指数计算时，加上或减去某个常数不会改变运算结果。这里的常数可以用任何值，但是一般会减去输入信号中的最大值。因此上面的 softmax 函数可以进行如下修改</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">softmax</span>(<span class="params">a</span>):</span><br><span class="line">    c = np.<span class="built_in">max</span>(a)</span><br><span class="line">    exp_a = np.exp(a - c)</span><br><span class="line">    sum_exp_a = np.<span class="built_in">sum</span>(exp_a)</span><br><span class="line">    y = exp_a / sum_exp_a</span><br><span class="line">    <span class="keyword">return</span> y</span><br></pre></td></tr></table></figure>
 
@@ -273,7 +273,7 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">x,t = get_data()</span><br><span class="line">network = init_network()</span><br><span class="line"></span><br><span class="line">accuracy_cnt = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(x)):</span><br><span class="line">    y = predict(network, x[i])</span><br><span class="line">    p = np.argmax(y) <span class="comment"># 获取概率最高的元素的索引</span></span><br><span class="line">    <span class="keyword">if</span> p == t[i]:</span><br><span class="line">        accuracy_cnt += <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Accuracy:&quot;</span> + <span class="built_in">str</span>(<span class="built_in">float</span>(accuracy_cnt)/<span class="built_in">len</span>(x)))</span><br></pre></td></tr></table></figure>
 
 <p>这里我们先获得数据集，生成网络，然后用 <code>predict()</code> 函数进行分类，这里我们取出输出值最大的索引（第几个元素的概率最高，这里使用 <code>np.argmax()</code>函数），作为预测结果。最后比较预测结果和正确解标签，将回答正确的概率作为识别精度。这里输出识别精度为 0.9352 。</p>
-<p>另外，在这个例子中，我们把 <code>load_mnist</code> 函数的参数 normalize 设置成了 true ，将 normalize 设置为 True 后，函数内部会进行转换，<strong>将图像的各个像素值除以255，使得数据的值在0.0-1.0的范围内</strong>。像这样把数据限定到某个范围内的处理称为<strong>正规化(normalization)</strong>（现在好像都叫做<strong>归一化</strong>）。此外，对神经网络的输入数据进行某种既定的转换称为<strong>预处理</strong>（pre-processing）。这里，作为对输入图像的一种预处理，我们进行了正规化。</p>
+<p>另外，在这个例子中，我们把 <code>load_mnist</code> 函数的参数 normalize 设置成了 true ，将 normalize 设置为 True 后，函数内部会进行转换，<strong>将图像的各个像素值除以255，使得数据的值在0.0-1.0的范围内</strong>。像这样把数据限定到某个范围内的处理称为<strong>正规化(normalization)<strong>（现在好像都叫做</strong>归一化</strong>）。此外，对神经网络的输入数据进行某种既定的转换称为<strong>预处理</strong>（pre-processing）。这里，作为对输入图像的一种预处理，我们进行了正规化。</p>
 <h3 id="批处理"><a href="#批处理" class="headerlink" title="批处理"></a>批处理</h3><p>以上就是处理 MNIST 数据集的神经网络的实现，现在我们来关注输入数据和权重参数的”形状“。再看一下刚才的代码实现。</p>
 <p>下面我们使用输出一下刚才的各层的权重的形状。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">x, _ = get_data()</span><br><span class="line">network = init_network()</span><br><span class="line">W1, W2, W3 = network[<span class="string">&#x27;W1&#x27;</span>], network[<span class="string">&#x27;W2&#x27;</span>], network[<span class="string">&#x27;W3&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(x.shape)</span><br><span class="line"><span class="built_in">print</span>(x[<span class="number">0</span>].shape)</span><br><span class="line"><span class="built_in">print</span>(W1.shape)</span><br><span class="line"><span class="built_in">print</span>(W2.shape)</span><br><span class="line"><span class="built_in">print</span>(W3.shape)</span><br></pre></td></tr></table></figure>
@@ -282,9 +282,9 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">10000</span>, <span class="number">784</span>)</span><br><span class="line">(<span class="number">784</span>,)</span><br><span class="line">(<span class="number">784</span>, <span class="number">50</span>)</span><br><span class="line">(<span class="number">50</span>, <span class="number">100</span>)</span><br><span class="line">(<span class="number">100</span>, <span class="number">10</span>)</span><br></pre></td></tr></table></figure>
 
 <p>我们通过上述结果来确认一下多维数组的对应维度的元素个数是否一致（省略了偏置）。用图表示的话，如下图所示</p>
-<p><img src="/20.png"></p>
+<p><img src="/posts/d2e41a48/20.png"></p>
 <p>不过这里只是输入一张图片的情形，如果我们要用 <code>predict</code> 函数一次性打包处理100张图像。为此，我们可以将 $\mathbf{X}$ 的形状改为 100×784，将100张图像打包作为输入数据。用图表示的话，如下图所示</p>
-<p><img src="/21.png"></p>
+<p><img src="/posts/d2e41a48/21.png"></p>
 <p>此时输入数据的形状是 100×784 ，输出数据额形状是 100×10。则表示输入的 100 张图像的结果被一次性输出了。比如 x[0] 和 y[0] 中保存了第0张图像及其推理结果， x[1] 和 y[1] 中保存了第1张图像及其推理结果等等。</p>
 <p>这种打包式的输入数据称为<strong>批</strong>（batch）。批有”捆“的意思，图像就如同纸币一样扎成一捆。批处理可以答复缩短处理时间，因为批处理可以减轻数据总线的负荷（较少数据传送的时间）。</p>
 <p>下面我们进行基于批处理的代码实现。</p>
@@ -296,7 +296,7 @@
 <p>因此，与其绞尽脑汁，从零开始想出一个可以识别5的算法，不如考虑通过有效利用数据来解决这个问题。一种方案是，先从图像中提取<strong>特征量</strong>，再用机器学习技术学习这些特征量的模式。这里所说的”特征量“是指可以从输入数据（输入图像）中准确地提取本质数据（重要的数据）的转换器。图像的特征量通常表示为向量的形式。在计算机视觉领域，常用的特征量包括SIFT，SURF和 HOG等。使用这些特征量将图像数据转换为向量，然后对转换后的向量使用机器学习中的 SVM ，KNN 等分类器进行学习。</p>
 <p>机器学习的方法中，由机器从收集到的数据中找出规律性。与从零开始想出算法相比，这种方法可以更加高效地解决问题，也能减轻人的负担。但是需要注意的是，将图像转换为向量时使用的特征量仍是由人设计的。对于不同的问题，必须使用合适的特征量（必须设计专门的特征量），才能得到好的结果。比如，为了区分狗的脸部，人们需要考虑与用于识别5的特征量不同的其它特征量。也就是说，即使使用特征量和机器学习的方法，也需要针对不同的问题人工考虑合适的特征量。</p>
 <p>到这里，我们介绍了2种针对机器学习任务的方法。将这两种方法用下图来表示，这里神经网络的方法不存在人为介入，神经网络直接学习图像本身。</p>
-<p><img src="/22.png"></p>
+<p><img src="/posts/d2e41a48/22.png"></p>
 <p>神经网络&#x2F;深度学习有时也称为端对端机器学习（end-to-end machine learning），这里说的端对端是指从一端到另一端的意思，也就是说从原始数据（输入）中获得目标结果（输出）的意思。</p>
 <h3 id="训练数据和测试数据"><a href="#训练数据和测试数据" class="headerlink" title="训练数据和测试数据"></a>训练数据和测试数据</h3><p>机器学习一般将数据分为<strong>训练数据</strong>和<strong>测试数据</strong>两部分来进行学习和实验等。首先，使用训练数据进行学习，寻找最优的参数；然后，使用测试数据评价训练得到的模型的实际能力。为什么需要将数据分为训练数据和测试数据呢？因为我们追求的是模型的泛化能力。为了正确评价模型的<strong>泛化能力</strong>，就必须划分训练数据和测试数据。另外，训练数据也可以称为<strong>监督数据</strong>。</p>
 <p>泛化能力是指处理未被观察过的数据的能力。获得泛化能力是机器学习的最终目标。</p>
@@ -345,7 +345,7 @@
 <p>为什么使用识别精度作为指标，参数的导数在绝大多数地方都会变成0呢？为了回答这个问题，我们来思考一个具体例子。假设某个神经网络正确识别出了100笔训练数据中的32笔，此时识别精度为 32% 。如果以识别精度为指标，即使稍微改变权重参数的值，识别精度也仍将保持在 32%，不会出现变化。也就是说，仅仅微调参数，是无法改善识别精度的。即使识别精度有所改善，它的值也不会像 32.0123…% 这样连续变化，而是变成 33%、34% 这样的不连续的、离散的值。而如果把损失函数作为指标，稍微改变一下参数的值，会发生连续性的变化。</p>
 <p>识别精度对微小的参数变化基本没有什么反应，即便有反应，它的值也是不连续地、突然地变化。作为激活函数的阶跃函数也有同样的情况。出于相同的原因，如果使用阶跃函数作为激活函数，神经网络的学习将无法进行。</p>
 <p>阶跃函数就像”竹筒敲石“一样，只在某个瞬间发生改变。而 sigmoid 函数不仅输出值是连续变化的，曲线的斜率（导数）也是连续变化的。也就是说，sigmoid 函数的导数在任何地方都不为 0。这对神经网络的学习非常重要。得益于这个斜率不会为 0 的性质，神经网络的学习得以正确进行。</p>
-<p><img src="/23.png"></p>
+<p><img src="/posts/d2e41a48/23.png"></p>
 <h2 id="4-3-数值微分"><a href="#4-3-数值微分" class="headerlink" title="4.3 数值微分"></a>4.3 数值微分</h2><p>梯度法使用梯度的信息决定前进的方向。这里介绍梯度是什么，有什么性质。</p>
 <h3 id="导数"><a href="#导数" class="headerlink" title="导数"></a>导数</h3><p>导数就是表示某个瞬间的变化量。它可以定义成下面的式子。<br>$$<br>\frac{\operatorname{d}f(x)}{\operatorname{d}x} &#x3D; \lim_{h \rightarrow0} \frac{f(x+h) - f(x)}{h}<br>$$<br>下面我们根据这个式子来实现求函数的导数的程序。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不好的导数实现示例</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">numerical_diff</span>(<span class="params">f, x</span>):</span><br><span class="line">    h = <span class="number">1e-50</span></span><br><span class="line">    <span class="keyword">return</span> (f(x+h) - f(x)) / h</span><br></pre></td></tr></table></figure>
@@ -354,7 +354,7 @@
 <p>在上面的函数中，h 采用了一个尽可能小的值，但是这样会产生<strong>舍入误差（rounding error）</strong>。所谓摄入误差，指因省略小数的精细部分的数值而造成的计算结果上的误差。这是第一个需要改变的地方，这里可以将 h 改为 $10^{-4}$ 。</p>
 <p>第二个需要改进的地方于函数f的差分有关。虽然上述实现中计算了函数 f 在 x+h 和 x 之间的差分。但是必须注意到，这个计算从一开始就有误差。”真的导数“对应函数在 x 处的斜率（称为切线），但上述实现中计算的导数对应的是 (x+h) 和 x 之间的斜率。因此，真的导数于上述实现中得到的导数的值在严格意义上并不一致。这个差异的出现是因为 h 不可能无限接近 0 。</p>
 <p>如下图所示，数值微分含有误差。为了减小这个误差，我们可以计算函数 f 在 (x+h) 和 (x-h) 之间的差分。因为这种计算方法以 x 为中心，计算它左右两边的差分，所以也称为<strong>中心差分</strong>（而 (x+h) 和 x 之间的差分称为<strong>前向差分</strong>）。</p>
-<p><img src="/24.png"></p>
+<p><img src="/posts/d2e41a48/24.png"></p>
 <p>下面，我们基于上述2个要改进的点来实现数值微分。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">numerical_diff</span>(<span class="params">f, x</span>):</span><br><span class="line">    h = <span class="number">1e-4</span></span><br><span class="line">    <span class="keyword">return</span> (f(x+h) - f(x-h)) / (<span class="number">2</span>*h)</span><br></pre></td></tr></table></figure>
 
@@ -395,7 +395,7 @@
 
 <p>为了更好的理解，我们把 $f(x_0,x_1) &#x3D; x_{0}^{2} +  x_{1}^{2}$ 的梯度画在图上。不过，这里我们画的<strong>负梯度</strong>的向量（因为负梯度方向才是梯度下降法中变量的更新方向）。</p>
 <p>我们看所有梯度均指向函数的最小值，并且离“最低处”越远，箭头越大。</p>
-<p><img src="/25.png"></p>
+<p><img src="/posts/d2e41a48/25.png"></p>
 <p>虽然图中的梯度指向了最低处，但并非任何时候都这样。实际上，梯度会指向各点处的函数值下降的方向。更严格地说，<strong>梯度指示的方向是各点处的函数值减少最多的方向</strong>，这是一个非常重要的性质。</p>
 <h3 id="梯度法"><a href="#梯度法" class="headerlink" title="梯度法"></a>梯度法</h3><p>神经网络中的最佳参数就是指<strong>损失函数取最小值的参数</strong>。但是，一般而言，损失函数很复杂，参数空间庞大，我们不知道它在何处能取得最小值。我们可以用梯度法来寻找函数最小值。</p>
 <p>梯度表示的是各点处的函数值减少最多的方向。因此，无法保证梯度所指的方向就是函数的最小值或者真正应该前进的方向。实际上，在复杂的函数中，梯度指示的方向基本上都不是函数最小值。</p>
@@ -463,7 +463,7 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"><span class="keyword">import</span> sys, os</span><br><span class="line">sys.path.append(os.pardir)  <span class="comment"># 为了导入父目录的文件而进行的设定</span></span><br><span class="line"><span class="keyword">from</span> common.functions <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> common.gradient <span class="keyword">import</span> numerical_gradient</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TwoLayerNet</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, input_size, hidden_size, output_size, weight_init_std=<span class="number">0.01</span></span>):</span><br><span class="line">        <span class="comment"># 初始化权重</span></span><br><span class="line">        self.params = &#123;&#125;</span><br><span class="line">        self.params[<span class="string">&#x27;W1&#x27;</span>] = weight_init_std * np.random.randn(input_size, hidden_size)</span><br><span class="line">        self.params[<span class="string">&#x27;b1&#x27;</span>] = np.zeros(hidden_size)</span><br><span class="line">        self.params[<span class="string">&#x27;W2&#x27;</span>] = weight_init_std * np.random.randn(hidden_size, output_size)</span><br><span class="line">        self.params[<span class="string">&#x27;b2&#x27;</span>] = np.zeros(output_size)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">self, x</span>):</span><br><span class="line">        W1, W2 = self.params[<span class="string">&#x27;W1&#x27;</span>], self.params[<span class="string">&#x27;W2&#x27;</span>]</span><br><span class="line">        b1, b2 = self.params[<span class="string">&#x27;b1&#x27;</span>], self.params[<span class="string">&#x27;b2&#x27;</span>]</span><br><span class="line">    </span><br><span class="line">        a1 = np.dot(x, W1) + b1</span><br><span class="line">        z1 = sigmoid(a1)</span><br><span class="line">        a2 = np.dot(z1, W2) + b2</span><br><span class="line">        y = softmax(a2)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> y</span><br><span class="line">        </span><br><span class="line">    <span class="comment"># x:输入数据, t:监督数据</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">self, x, t</span>):</span><br><span class="line">        y = self.predict(x)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> cross_entropy_error(y, t)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">accuracy</span>(<span class="params">self, x, t</span>):</span><br><span class="line">        y = self.predict(x)</span><br><span class="line">        y = np.argmax(y, axis=<span class="number">1</span>)</span><br><span class="line">        t = np.argmax(t, axis=<span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">        accuracy = np.<span class="built_in">sum</span>(y == t) / <span class="built_in">float</span>(x.shape[<span class="number">0</span>])</span><br><span class="line">        <span class="keyword">return</span> accuracy</span><br><span class="line">        </span><br><span class="line">    <span class="comment"># x:输入数据, t:监督数据</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">numerical_gradient</span>(<span class="params">self, x, t</span>):</span><br><span class="line">        loss_W = <span class="keyword">lambda</span> W: self.loss(x, t)</span><br><span class="line">        </span><br><span class="line">        grads = &#123;&#125;</span><br><span class="line">        grads[<span class="string">&#x27;W1&#x27;</span>] = numerical_gradient(loss_W, self.params[<span class="string">&#x27;W1&#x27;</span>])</span><br><span class="line">        grads[<span class="string">&#x27;b1&#x27;</span>] = numerical_gradient(loss_W, self.params[<span class="string">&#x27;b1&#x27;</span>])</span><br><span class="line">        grads[<span class="string">&#x27;W2&#x27;</span>] = numerical_gradient(loss_W, self.params[<span class="string">&#x27;W2&#x27;</span>])</span><br><span class="line">        grads[<span class="string">&#x27;b2&#x27;</span>] = numerical_gradient(loss_W, self.params[<span class="string">&#x27;b2&#x27;</span>])</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> grads</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">gradient</span>(<span class="params">self, x, t</span>):</span><br><span class="line">        W1, W2 = self.params[<span class="string">&#x27;W1&#x27;</span>], self.params[<span class="string">&#x27;W2&#x27;</span>]</span><br><span class="line">        b1, b2 = self.params[<span class="string">&#x27;b1&#x27;</span>], self.params[<span class="string">&#x27;b2&#x27;</span>]</span><br><span class="line">        grads = &#123;&#125;</span><br><span class="line">        </span><br><span class="line">        batch_num = x.shape[<span class="number">0</span>]</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># forward</span></span><br><span class="line">        a1 = np.dot(x, W1) + b1</span><br><span class="line">        z1 = sigmoid(a1)</span><br><span class="line">        a2 = np.dot(z1, W2) + b2</span><br><span class="line">        y = softmax(a2)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># backward</span></span><br><span class="line">        dy = (y - t) / batch_num</span><br><span class="line">        grads[<span class="string">&#x27;W2&#x27;</span>] = np.dot(z1.T, dy)</span><br><span class="line">        grads[<span class="string">&#x27;b2&#x27;</span>] = np.<span class="built_in">sum</span>(dy, axis=<span class="number">0</span>)</span><br><span class="line">        </span><br><span class="line">        da1 = np.dot(dy, W2.T)</span><br><span class="line">        dz1 = sigmoid_grad(a1) * da1</span><br><span class="line">        grads[<span class="string">&#x27;W1&#x27;</span>] = np.dot(x.T, dz1)</span><br><span class="line">        grads[<span class="string">&#x27;b1&#x27;</span>] = np.<span class="built_in">sum</span>(dz1, axis=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> grads</span><br></pre></td></tr></table></figure>
 
 <p>虽然这个类的实现稍微有点长，但是因为和上一章的神经网络的前向处理的实现有很多共通之处，所以没有太多新东西。我们把这个类中用到的变量和方法整理一下。这里只罗列了重要的变量。</p>
-<p><img src="/26.png"></p>
+<p><img src="/posts/d2e41a48/26.png"></p>
 <p>这里有 params 和 grads 两个字典型实例变量。params 变量中保存了权重参数。</p>
 <p>这里来看一个例子</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">net = TwoLayerNet(input_size=<span class="number">784</span>, hidden_size=<span class="number">100</span>, output_size=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">net.params[<span class="string">&#x27;W1&#x27;</span>].shape <span class="comment"># (784, 100)</span></span><br><span class="line">net.params[<span class="string">&#x27;b1&#x27;</span>].shape <span class="comment"># (100,)</span></span><br><span class="line">net.params[<span class="string">&#x27;W2&#x27;</span>].shape <span class="comment"># (100, 10)</span></span><br><span class="line">net.params[<span class="string">&#x27;b2&#x27;</span>].shape <span class="comment"># (10,)</span></span><br></pre></td></tr></table></figure>
@@ -481,7 +481,7 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"><span class="keyword">import</span> sys, os</span><br><span class="line">sys.path.append(os.pardir)  <span class="comment"># 为了导入父目录的文件而进行的设定</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> dataset.mnist <span class="keyword">import</span> load_mnist</span><br><span class="line"><span class="keyword">from</span> two_layer_net <span class="keyword">import</span> TwoLayerNet</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读入数据</span></span><br><span class="line">(x_train, t_train), (x_test, t_test) = load_mnist(normalize=<span class="literal">True</span>, one_hot_label=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">network = TwoLayerNet(input_size=<span class="number">784</span>, hidden_size=<span class="number">50</span>, output_size=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">iters_num = <span class="number">10000</span>  <span class="comment"># 适当设定循环的次数</span></span><br><span class="line">train_size = x_train.shape[<span class="number">0</span>]</span><br><span class="line">batch_size = <span class="number">100</span></span><br><span class="line">learning_rate = <span class="number">0.1</span></span><br><span class="line"></span><br><span class="line">train_loss_list = []</span><br><span class="line">train_acc_list = []</span><br><span class="line">test_acc_list = []</span><br><span class="line"></span><br><span class="line">iter_per_epoch = <span class="built_in">max</span>(train_size / batch_size, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(iters_num):</span><br><span class="line">    batch_mask = np.random.choice(train_size, batch_size)</span><br><span class="line">    x_batch = x_train[batch_mask]</span><br><span class="line">    t_batch = t_train[batch_mask]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 计算梯度</span></span><br><span class="line">    <span class="comment">#grad = network.numerical_gradient(x_batch, t_batch)</span></span><br><span class="line">    grad = network.gradient(x_batch, t_batch)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 更新参数</span></span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> (<span class="string">&#x27;W1&#x27;</span>, <span class="string">&#x27;b1&#x27;</span>, <span class="string">&#x27;W2&#x27;</span>, <span class="string">&#x27;b2&#x27;</span>):</span><br><span class="line">        network.params[key] -= learning_rate * grad[key]</span><br><span class="line">    </span><br><span class="line">    loss = network.loss(x_batch, t_batch)</span><br><span class="line">    train_loss_list.append(loss)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> i % iter_per_epoch == <span class="number">0</span>:</span><br><span class="line">        train_acc = network.accuracy(x_train, t_train)</span><br><span class="line">        test_acc = network.accuracy(x_test, t_test)</span><br><span class="line">        train_acc_list.append(train_acc)</span><br><span class="line">        test_acc_list.append(test_acc)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;train acc, test acc | &quot;</span> + <span class="built_in">str</span>(train_acc) + <span class="string">&quot;, &quot;</span> + <span class="built_in">str</span>(test_acc))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绘制图形</span></span><br><span class="line">markers = &#123;<span class="string">&#x27;train&#x27;</span>: <span class="string">&#x27;o&#x27;</span>, <span class="string">&#x27;test&#x27;</span>: <span class="string">&#x27;s&#x27;</span>&#125;</span><br><span class="line">x = np.arange(<span class="built_in">len</span>(train_acc_list))</span><br><span class="line">plt.plot(x, train_acc_list, label=<span class="string">&#x27;train acc&#x27;</span>)</span><br><span class="line">plt.plot(x, test_acc_list, label=<span class="string">&#x27;test acc&#x27;</span>, linestyle=<span class="string">&#x27;--&#x27;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&quot;epochs&quot;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;accuracy&quot;</span>)</span><br><span class="line">plt.ylim(<span class="number">0</span>, <span class="number">1.0</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&#x27;lower right&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
 
 <p>这里 mini-batch 的大小为 100， 需要每次从 60000 个训练数据中随机取出 100 个数据（图像数据和正确解标签数据）。然后，对这个包含100笔数据的 mini-batch 求梯度，使用随机梯度下降法（SGD）更新参数。这里，梯度法的更新次数（循环的次数）为10000。每更新一次，都对训练数据计算损失函数的值（这里是先更新参数，再用更新后的参数计算损失函数），并把该值添加到数组中，用图像来表示这个损失函数的值的推移，如下图所示（代码没有这个画图的过程）</p>
-<p><img src="/27.png"></p>
+<p><img src="/posts/d2e41a48/27.png"></p>
 <p>从这个图可以发现，随着学习的进行，损失函数的值在不断减小。这表示神经网络通过反复学习，正在逐渐向最优参数靠近。</p>
 <h3 id="基于测试数据的评价"><a href="#基于测试数据的评价" class="headerlink" title="基于测试数据的评价"></a>基于测试数据的评价</h3><p>基于图 4-11 呈现的结果，我们确认了通过反复学习可以使损失函数的值逐渐减小这一事实。不过这个损失函数的值，严格地说是“对训练数据的某个 mini-batch 的损失函数”的值。训练数据的损失函数值减小，虽说是神经网络的学习正常进行的一个信号，但光看这个结果还不能说明该神经网络在其它数据集上也一定能有同等程度的表型。</p>
 <p>神经网络的学习中，必须确认是否能够正确识别训练数据以外的其他数据，即确认是否会发生<strong>过拟合</strong>。</p>
@@ -489,7 +489,7 @@
 <p><strong>epoch</strong> 举例：对于1万笔训练数据，用大小为 100笔数据的 mini-batch 进行学习时，重复随机梯度下降法 100 次，所有训练数据就都被“看过”。此时 100 次就是一个 epoch 。实际上，一般做法时先将训练数据随机打乱，然后按指定的批次大小，按序生成 mini-batch 。这样每个 mini-batch 均有一个索引号，比如 0,1,2,…,99 ，然后用索引号可以遍历所有的 mini-batch ，这里遍历一次所有数据，就称为一个 epoch 。请注意，本书中的 mini-batch 每次都是随机选择的，所以不一定每个数据都会被“看到”。</p>
 <p>因此，这里我们每经过一个 epoch ，就对所有的训练数据和测试数据计算识别精度，并记录结果。之所以要计算每一个 epoch 的识别精度，是因为如果在每一次重复随机梯度下降法中均计算识别精度，会花费太多时间，而且也没有必要那么频繁地记录识别精度（只要从大方向上大致把握识别精度的变化就可以了）。因此，我们才会每经过一个 epoch 就记录一次训练数据的识别精度。</p>
 <p>把上面的代码中得到的结果用图表示，如下图所示，这说明，随着 epoch 的前进，我们发现使用训练数据和测试数据评价的识别精度都提高了，并且<strong>二者基本没有差异，这说明这次的学习中没有发生过拟合的现象</strong>（反过来说，如果训练数据和测试数据的识别精度差别很大，那就是存在过拟合了）。</p>
-<p><img src="/28.png"></p>
+<p><img src="/posts/d2e41a48/28.png"></p>
 <h1 id="第5章-误差反向传播法"><a href="#第5章-误差反向传播法" class="headerlink" title="第5章 误差反向传播法"></a>第5章 误差反向传播法</h1><p>上一章中介绍了通过数值微分计算神经网络的权重参数的梯度（严格来说，是损失函数关于权重参数的梯度）。数值微分虽然简单，也容易实现，但缺点是计算上比较费时间。本章我们将学习一个能够高效计算权重参数的梯度的方法 —— 误差反向传播法。</p>
 <p>要正确理解误差反向传播法，有两种方法：一种是基于数学式；另一种是基于<strong>计算图</strong>（computational graph）。前者是比较常用的方法，因为数学式严密且简洁，但是一上来就围绕数学式进行探讨，会忽略一些根本的东西，止步于式子的罗列。因此，本章希望通过计算图，可以直观地理解误差反向传播法。</p>
 <h2 id="5-1-计算图"><a href="#5-1-计算图" class="headerlink" title="5.1 计算图"></a>5.1 计算图</h2><p>计算图将计算过程用图形表示出来。这里说的图形是数据结构图，通过多个节点和边表示（连接节点的直线称为“边”）。为了让大家熟悉计算图，本节先用计算图解决一些简单的问题，然后逐步深入。</p>
@@ -498,16 +498,16 @@
 <p> 问题1：太郎在超市买了2个100日元一个的苹果，消费税是10%，请计算支付金额。</p>
 </blockquote>
 <p>计算图通过节点和箭头表示计算过程，节点用⚪表示，⚪中式计算的内容。将计算的中间结果写在箭头的上方，表示各个节点的计算结果从左向右传递。用计算图解问题1，求解过程如下图所示</p>
-<p><img src="/29.png"></p>
+<p><img src="/posts/d2e41a48/29.png"></p>
 <p>如图所示，开始时，苹果的100日元流到 “×2” 节点，变成 200 日元，然后传递给下一个节点。接着，这个200日元流向“×1.1”节点，变成220日元。因此，最终答案是220日元。</p>
 <p>虽然图中的  “×2”  “×1.1” 等作为一个运算整体用⚪括起来了，不过只用⚪表示乘法运算“×”也是可行的。此时，如图所示，可以将“2”和“1.1”分别作为变量“苹果的个数”和“消费税”标记在⚪外面。</p>
-<p><img src="/30.png"></p>
+<p><img src="/posts/d2e41a48/30.png"></p>
 <p>再看下一题</p>
 <blockquote>
 <p>问题2： 太郎在超市买了2个苹果、3个橘子。其中，苹果每个100日元，<br>橘子每个150日元。消费税是10%，请计算支付金额。</p>
 </blockquote>
 <p>同问题1，我们用计算图来求解，如下图所示</p>
-<p><img src="/31.png"></p>
+<p><img src="/posts/d2e41a48/31.png"></p>
 <p>这个问题中新增了加法节点 “+” ，用于合计苹果和橘子的金额。构建了计算图后，从左向右进行计算。就像电路中的电流流动一样，计算结果从左向右传递。到达最右边的计算结果后，计算过程就结束了。</p>
 <p>综上，用计算图解题的情况下，需要按如下流程进行</p>
 <ol>
@@ -517,19 +517,19 @@
 <p>这里的第2步“从左向右进行计算”是一种正方向上的传播，简称为<strong>正向传播</strong> (forward propagation)。正向传播是从计算图出发点到结束点的传播。既然有正向传播这个名称， 当然也可以考虑反向的传播，即<strong>反向传播</strong>（backward propagation）。</p>
 <h3 id="局部计算"><a href="#局部计算" class="headerlink" title="局部计算"></a>局部计算</h3><p>计算图的特征是可以通过传递“局部计算”获得最终结果。“局部”这个词的意思是“与自己相关的某个小范围”。局部计算是指，无论全局发生了什么，都能只根据自己相关的信息输出接下来的结果。</p>
 <p>我们用一个具体的例子来说明局部计算。比如，在超市买了2个苹果和其他很多东西。此时，可以画出下图所示的计算图。</p>
-<p><img src="/32.png"></p>
+<p><img src="/posts/d2e41a48/32.png"></p>
 <p>如图所示，假设（经过复杂的计算）购买的其他很多东西总共花费 4000 日元。这里的重点是，各个节点处的计算都是局部计算。这意味着，例如苹果和其他很多东西的求和运算，并不关心 4000 这个数字是如何计算而来的，只要把两个数字相加就可以了。换言之，各个节点只需进行与自己有关的计算（这里是对两个数字进行加法运算），不用考虑全局。</p>
 <p>综上，计算图可以集中精力于局部计算。无论全局计算有多么复杂，各个步骤要做的就是对象节点的局部计算。虽然局部计算非常简单，但是通过传递它的计算结果，可以获得全局的复杂计算的结果。</p>
 <p>比如，组装汽车是一个复杂的工作，通过需要进行“流水线”作业。每个工人（机器）所承担的都是被简化了的工作，这个工作的成果会传递给下一个工人，直至汽车组装完成。计算图将复杂的计算分隔成简单的局部计算，和流水线作业一样，将局部计算的结果传递给下一个节点。在复杂的计算分解成简单的计算这一点上与汽车的组装有相似之处。</p>
 <h3 id="为何用计算图解题"><a href="#为何用计算图解题" class="headerlink" title="为何用计算图解题"></a>为何用计算图解题</h3><p>前面我们用计算图解答了两个问题，那么计算图到底有什么优点呢？一个优点就在于前面所说的局部计算。无论全局是多么复杂的计算，都可以通过局部计算使各个节点致力于简单的计算，从而简化问题。另一个优点是，利用计算图可以将中间的计算结果全部保存起来。但是只有这些理由可能还无法令人信服。实际上，使用计算图最大的原因是，可以通过反向传播高效计算导数。</p>
 <p>在介绍计算图的反向传播时，我们再来思考一下问题1。问题1中，我们计算了购买2个苹果时加上消费税最终需要支付的金额。这里，假设我们想知道苹果价格的上涨会在多大程度上影响最终的支付金额，即求“支付金额关于苹果的价格的导数”。设苹果的价格为 $x$ ，支付金额为 $L$ ，求相当于求 $\frac{\partial L}{\partial x}$ 。这个导数的值表示当苹果的价格稍微上涨时，支付金额会增加多少。</p>
 <p>如前所述，“支付金额关于苹果的价格的导数”的值可以通过计算图的反向传播求出来。先来看一下结果，如下图所示，可以通过计算图的反向传播求导数。</p>
-<p><img src="/33.png"></p>
+<p><img src="/posts/d2e41a48/33.png"></p>
 <p>如图所示，反向传播使用与正方向相反的箭头（粗线）表示。反向传播传递“局部导数”，将导数的值写在箭头的下方。在本例中，反向传播从右到左传递导数的值（1 → 1.1 → 2.2）。从这个结果中，“支付金额关于苹果的价格的导数”的值是 2.2 。这意味着，如果苹果的价格上涨1日元，最终的支付金额会增加 2.2 日元（严格地说，如果苹果的价格增加某个微小值，则最终的支付金额将增加那个微小值的2.2倍）。</p>
 <p>这里只求了关于苹果的价格的导数，不过“支付金额关于消费税的导数”，“支付金额关于苹果的个数的导数”等也都可以用同样的方式算出来。并且，计算中途求得的导数的结果（中间传递的导数）可以被共享，从而可以高效地计算多个导数。综上，计算图的优点是，可以通过正向传播和反向传播高效地计算各个变量的导数值。</p>
 <h2 id="5-2-链式法则"><a href="#5-2-链式法则" class="headerlink" title="5.2 链式法则"></a>5.2 链式法则</h2><p>前面介绍的计算图的正向传播将计算结果正向传递，其计算过程是我们日常接触的计算过程，所以感觉上可能比较自然。而反向传播将局部导数向正方向的反方向（从右向左）传递，一开始可能会让人感到困惑。传递这个局部导数的原理，是基于<strong>链式法则</strong> (chain rule) 的。下面将介绍链式法则，以及它是如何对应计算图上的反向传播的。</p>
 <h3 id="计算图的方向传播"><a href="#计算图的方向传播" class="headerlink" title="计算图的方向传播"></a>计算图的方向传播</h3><p>话不多说，让我们先来看一个使用计算图的反向传播的例子。假设存在 $y&#x3D;f(x)$ 的计算，这个计算的反向传播如下图所示。</p>
-<p><img src="/34.png"></p>
+<p><img src="/posts/d2e41a48/34.png"></p>
 <p>如图所示，反向传播的计算顺序是，将信号E乘以节点的局部导数 ( $\frac{\partial y}{\partial x}$ ) ，然后将结果传递给下一个节点。这里所说的局部导数是指正向传播中 $y&#x3D;f(x)$ 的导数，也就是 y 关于 x 的导数，例如  $y&#x3D;f(x)&#x3D;x^2$ ，则局部导数为  $\frac{\partial y}{\partial x} &#x3D; 2x$ 。把这个局部导数乘以上游传递过来的值（本例中为 E ）。然后传递给前面的节点。</p>
 <p>这就是反向传播的计算顺序。通过这样的计算，可以高效地求出导数的值，这是反向传播的要点。那么这是如何实现的呢？我们可以从链式法则的原理进行解释。下面我们就来介绍链式法则。</p>
 <h3 id="什么是链式法则"><a href="#什么是链式法则" class="headerlink" title="什么是链式法则"></a>什么是链式法则</h3><p>介绍链式法则时，我们需要先从<strong>复合函数</strong>说起。复合函数是由多个函数构成的函数。比如 $z&#x3D;(x+y)^2$ 是由下面的两个式子构成的<br>$$<br>z&#x3D;t^2 \<br>t&#x3D;x+y<br>$$<br>链式法则是关于复合函数的导数的性质，定义如下。</p>
@@ -537,27 +537,27 @@
 <p>如果某个函数由复合函数表示，则该复合函数的导数可以用构成复合函数的各个函数的导数的乘积表示。</p>
 </blockquote>
 <p>这就是链式法则的原理，乍一看可能比较难理解，但实际上它是一个非常简单的性质。数学式如下<br>$$<br>\frac{\partial z}{\partial x}&#x3D;\frac{\partial z}{\partial t} \frac{\partial t}{\partial x}<br>$$<br>式子中的 $\partial t$ 正好可以像下面这样“互相抵消”，所以记起来很简单。</p>
-<p><img src="/35.png"></p>
+<p><img src="/posts/d2e41a48/35.png"></p>
 <p>现在我们使用链式法则，试着求 $\frac{\partial z}{\partial x}$ , 为此，我们要先求局部导数。<br>$$<br>\frac{\partial z}{\partial t} &#x3D; 2t \<br>\frac{\partial t}{\partial x} &#x3D; 1<br>$$<br>然后我们由导数的乘积计算出来 $\frac{\partial z}{\partial x}$<br>$$<br>\frac{\partial z}{\partial x}&#x3D;\frac{\partial z}{\partial t} \frac{\partial t}{\partial x} &#x3D; 2t \times 1 &#x3D; 2(x+y)<br>$$</p>
 <h3 id="链式法则和计算图"><a href="#链式法则和计算图" class="headerlink" title="链式法则和计算图"></a>链式法则和计算图</h3><p>现在我们尝试用链式法则的计算用计算图表示出来。如果用 “**2” 表示平方运行的话，则计算图如下所示</p>
-<p><img src="/36.png"></p>
+<p><img src="/posts/d2e41a48/36.png"></p>
 <p>如图所示，计算图的反向传播从右到左传播信号。反向传播的计算顺序是，先将节点的输入信号乘以节点的局部导数（偏导数），然后再传递给下一个节点。比如，反向传播是，“**2” 节点的输入是  $\frac{\partial z}{\partial z}$ ，将其乘以局部导数  $\frac{\partial z}{\partial t}$ (因为正向传播时输入是 t ，输出是 z ，所以这个节点的局部导数是   $\frac{\partial z}{\partial t}$ ) ，然后传递给下一个节点。另外，图中最开始的信号   $\frac{\partial z}{\partial z}$  在前面的数学式中没有出现，这是因为  $\frac{\partial z}{\partial z} &#x3D;1$ ，所以在刚才的式子中被省略了。</p>
 <p>图中需要注意的是最左边的反向传播的结果。根据链式法则， $\frac{\partial z}{\partial z} \frac{\partial z}{\partial t} \frac{\partial t}{\partial x} &#x3D; \frac{\partial z}{\partial x}$ ，对应 “z 关于 x 的导数”。也就是说，反向传播是基于链式法则的。</p>
 <p>将上面式子的结果带入到图中，结果如下图所示，得到  $\frac{\partial z}{\partial x}$ 的结果为 $2(x+y)$ 。</p>
-<p><img src="/37.png"></p>
+<p><img src="/posts/d2e41a48/37.png"></p>
 <h2 id="5-3-反向传播"><a href="#5-3-反向传播" class="headerlink" title="5.3 反向传播"></a>5.3 反向传播</h2><p>上一节介绍了计算图的反向传播是基于链式法则成立的。本节将以 “+” 和 “×” 等运算为例，介绍反向传播的结构。</p>
 <h3 id="加法节点的反向传播"><a href="#加法节点的反向传播" class="headerlink" title="加法节点的反向传播"></a>加法节点的反向传播</h3><p>首先来考虑加法节点的反向传播。这里以 $z&#x3D;x+y$ 为对象，观察它的反向传播。 $z&#x3D;x+y$ 的导数可由下式（解析性地）计算出来<br>$$<br>\begin{aligned}<br>&amp; \frac{\partial z}{\partial x}&#x3D;1 \<br>&amp; \frac{\partial z}{\partial y}&#x3D;1<br>\end{aligned}<br>$$<br>可以看到，两个变量的偏导数均为1。因此，用计算图表示的话，如下图所示。加法节点的反向传播只乘以1，所以输入的值会原封不动地流向下一个节点。</p>
-<p><img src="/38.png"></p>
+<p><img src="/posts/d2e41a48/38.png"></p>
 <p>另外，本例中把上游传过来的导数的值设为 $\frac{\partial L}{\partial z}$ 。这是因为，如图所示，我们假定了一个一个最终输出值为 $L$ 的大型计算图。$z&#x3D;x+y$ 的计算位于这个大型计算图的某个地方，从上游会传来  $\frac{\partial L}{\partial z}$ 的值，并向下游传递  $\frac{\partial L}{\partial x}$ 和  $\frac{\partial L}{\partial y}$ 。</p>
-<p><img src="/39.png"></p>
+<p><img src="/posts/d2e41a48/39.png"></p>
 <p>现在来看一个加法的反向传播的具体例子。假设有 “10+5&#x3D;15”这一计算，反向传播时，从上游会传来值 1.3 。用计算图来表示的话，如下图所示</p>
-<p><img src="/40.png"></p>
+<p><img src="/posts/d2e41a48/40.png"></p>
 <p>因为加法节点的反向传播只是将输入信号输出到下一个节点，所以如图所示，反向传播将 1.3 向下一个节点传递。</p>
 <h3 id="乘法节点的反向传播"><a href="#乘法节点的反向传播" class="headerlink" title="乘法节点的反向传播"></a>乘法节点的反向传播</h3><p>接下来，我们看一下乘法节点的反向传播。这里我们考虑 $z&#x3D;xy$ 。这个式子的导数用下式表示<br>$$<br>\begin{aligned}<br>&amp; \frac{\partial z}{\partial x}&#x3D;y \<br>&amp; \frac{\partial z}{\partial y}&#x3D;x<br>\end{aligned}<br>$$<br>因此我们可以得到下面的计算图和例子。乘法的反向传播会将上游的值乘以正向传播时的输入信号的“翻转值”后传递给下游。翻转值表示一种翻转关系，输入是 $x$ ，反向传播则是 $y$ 。</p>
 <p>在具体例子中，假设有 “10 × 5 &#x3D; 50” 这一计算，反向传播时，从上游会传来值 1.3 ，此时按照反向传播，所以各自得到 “1.3×5&#x3D;6.5，1.3×10&#x3D;13” 计算。由于实现乘法节点的反向传播需要正向传播时的输入信号值，因此需要保存正向传播时的输入信号。</p>
-<p><img src="/41.png"></p>
+<p><img src="/posts/d2e41a48/41.png"></p>
 <h3 id="苹果的例子"><a href="#苹果的例子" class="headerlink" title="苹果的例子"></a>苹果的例子</h3><p>再来思考一下一开始买苹果的例子，这里要解的问题是苹果的价格、苹果的个数、消费税这3个变量各自如何影响最终支付的金额。这个问题相当于求“支付金额关于苹果的价格的导数”，“支付金额关于苹果的个数的导数” “支付金额关于消费税的导数”。用计算图的反向传播来解的话，求解过程如下所示</p>
-<p><img src="/42.png"></p>
+<p><img src="/posts/d2e41a48/42.png"></p>
 <p>如前所述，乘法节点的反向传播会见输入信号翻转后传给下游。因此从上图的结果可知，苹果的价格的导数是 2.2 ，苹果的个数的导数是 110，消费税的导数是 200 。这可以解释为，如果消费税和苹果的价格增加相同的值，则消费税将对最终价格产生 200 倍的影响，苹果的价格将产生 2.2 倍大小的影响。不过，因为这个例子中消费税和苹果的价格的量纲不同，所以才形成了这样的结果（消费税的 1 是100% ，苹果的价格的1是1日元）。</p>
 <h2 id="5-4-简单层的实现"><a href="#5-4-简单层的实现" class="headerlink" title="5.4 简单层的实现"></a>5.4 简单层的实现</h2><p>本节将用 Python 实现前面的购买苹果的例子。这里，我们将要实现的计算图的乘法节点成为“乘法层”（MulLayer），加法节点称为“加法层”（AddLayer）。这里的“层”在神经网络中是功能的单位，如 sigmoid 函数，负责矩阵乘积的 Affine 等，都以层为单位进行实现。</p>
 <h3 id="乘法层的实现"><a href="#乘法层的实现" class="headerlink" title="乘法层的实现"></a>乘法层的实现</h3><p>层的实现中有两个共通的方法（接口）<code>forward()</code> 和 <code>backward()</code> 。<code>forward()</code> 对应正向传播，<code>backward()</code> 对应反向传播。</p>
@@ -566,7 +566,7 @@
 
 <p><code>__init__()</code> 会初始化实例变量 x 和 y ，它们用于保存正向传播时的输入值。<code>froward()</code> 接收 x 和 y 两个参数，将它们相乘后输出。<code>backward()</code> 将上游传来的导数（<code>dout</code>）乘以正向传播的翻转值，然后传给下游。</p>
 <p>上面就是 MulLayer 的实现。现在我们使用 MulLayer  实现前面的购买评估的例子（2个苹果和消费税）。上一节中我们使用计算图的正向传播和反向传播，如下图。</p>
-<p><img src="/42.png"></p>
+<p><img src="/posts/d2e41a48/42.png"></p>
 <p>使用这个乘法层的话，那个例子的正向传播可以像下面这样实现。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">apple = <span class="number">100</span></span><br><span class="line">apple_num = <span class="number">2</span></span><br><span class="line">tax = <span class="number">1.1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># layer</span></span><br><span class="line">mul_apple_layer = MulLayer()</span><br><span class="line">mul_tax_layer = MulLayer()</span><br><span class="line"></span><br><span class="line"><span class="comment"># forward</span></span><br><span class="line">apple_price = mul_apple_layer.forward(apple, apple_num)</span><br><span class="line">price = mul_tax_layer.forward(apple_price, tax)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(price)</span><br></pre></td></tr></table></figure>
 
@@ -581,7 +581,7 @@
 
 <p>加法层不需要特意进行初始化，所以 <code>__init__()</code> 中什么也不运行（因为不需要保留 x 和 y，反向传播用不上）。</p>
 <p>现在我们用加法层和乘法层，实现上面购买2个苹果和3个橘子的例子。</p>
-<p><img src="/43.png"></p>
+<p><img src="/posts/d2e41a48/43.png"></p>
 <p>实现代码如下</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"><span class="keyword">from</span> layer_naive <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">apple = <span class="number">100</span></span><br><span class="line">apple_num = <span class="number">2</span></span><br><span class="line">orange = <span class="number">150</span></span><br><span class="line">orange_num = <span class="number">3</span></span><br><span class="line">tax = <span class="number">1.1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># layer</span></span><br><span class="line">mul_apple_layer = MulLayer()</span><br><span class="line">mul_orange_layer = MulLayer()</span><br><span class="line">add_apple_orange_layer = AddLayer()</span><br><span class="line">mul_tax_layer = MulLayer()</span><br><span class="line"></span><br><span class="line"><span class="comment"># forward</span></span><br><span class="line">apple_price = mul_apple_layer.forward(apple, apple_num)  <span class="comment"># (1)</span></span><br><span class="line">orange_price = mul_orange_layer.forward(orange, orange_num)  <span class="comment"># (2)</span></span><br><span class="line">all_price = add_apple_orange_layer.forward(apple_price, orange_price)  <span class="comment"># (3)</span></span><br><span class="line">price = mul_tax_layer.forward(all_price, tax)  <span class="comment"># (4)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># backward</span></span><br><span class="line">dprice = <span class="number">1</span></span><br><span class="line">dall_price, dtax = mul_tax_layer.backward(dprice)  <span class="comment"># (4)</span></span><br><span class="line">dapple_price, dorange_price = add_apple_orange_layer.backward(dall_price)  <span class="comment"># (3)</span></span><br><span class="line">dorange, dorange_num = mul_orange_layer.backward(dorange_price)  <span class="comment"># (2)</span></span><br><span class="line">dapple, dapple_num = mul_apple_layer.backward(dapple_price)  <span class="comment"># (1)</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;price:&quot;</span>, <span class="built_in">int</span>(price))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;dApple:&quot;</span>, dapple)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;dApple_num:&quot;</span>, <span class="built_in">int</span>(dapple_num))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;dOrange:&quot;</span>, dorange)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;dOrange_num:&quot;</span>, <span class="built_in">int</span>(dorange_num))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;dTax:&quot;</span>, dtax)</span><br></pre></td></tr></table></figure>
 
@@ -589,32 +589,32 @@
 <p>综上，计算图中层的实现（这里是加法层和乘法层）非常简单，使用这些层可以进行复杂的导数计算。下面，我们来实现神经网络中使用的层。</p>
 <h2 id="5-5-激活函数层的实现"><a href="#5-5-激活函数层的实现" class="headerlink" title="5.5 激活函数层的实现"></a>5.5 激活函数层的实现</h2><p>现在，我们将计算图的思路应用到神经网络中。这里，我们把构成神经网络的层实现一个类。先来实现激活函数的 ReLU 层和 Sigmoid 层。</p>
 <h3 id="ReLU-层"><a href="#ReLU-层" class="headerlink" title="ReLU 层"></a>ReLU 层</h3><p>激活函数 ReLU 函数，其式子如下<br>$$<br>y &#x3D; \left{<br>\begin{array}{ll}<br>x &amp; (x &gt; 0) \<br>0 &amp; (x \leq 0)<br>\end{array}<br>\right.<br>$$<br>其导数如下<br>$$<br>\frac{\partial y}{\partial x} &#x3D; \left{<br>\begin{array}{ll}<br>1 &amp; (x &gt; 0) \<br>0 &amp; (x \leq 0)<br>\end{array}<br>\right.<br>$$<br>在这个式子中，如果正向传播的输入 $x$ 大于0，则反向传播会将上游的值原封不动地传给下游。反过来，如果正向传播时的 $x$ 小于等于0，则反向传播中传给下游的信号将停在此处。用计算图表示的话，如下图所示。</p>
-<p><img src="/44.png"></p>
+<p><img src="/posts/d2e41a48/44.png"></p>
 <p>现在我们来实现 ReLU 层，在神经网络的层的实现中，一般假定 forward() 和 backward() 的参数是 NumPy 数组。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Relu</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.mask = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        self.mask = (x &lt;= <span class="number">0</span>)</span><br><span class="line">        out = x.copy()</span><br><span class="line">        out[self.mask] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> out</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, dout</span>):</span><br><span class="line">        dout[self.mask] = <span class="number">0</span></span><br><span class="line">        dx = dout</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> dx</span><br></pre></td></tr></table></figure>
 
 <p>Relu 类有实例变量 mask 。这个变量 mask 是由 True&#x2F;False 构成的 NumPy 数组，它把正向传播时的输入 x 的变量中小于等于0的地方保存为 True ，其他地方保存为 False 。如下例所示，mask 变量保存了由 True&#x2F;False 构成的 NumPy 数组。</p>
 <p>Relu 层的作用就像电路中的开关一样。正向传播时，有电流通过的话，就将开关设为 ON ；没有电流通过的话，就将开关设为 OFF。反向传播时，开关为 ON 的时候，电流会直接通过；开关为 OFF 的话，则不会有电流通过。</p>
 <h3 id="Sigmoid-层"><a href="#Sigmoid-层" class="headerlink" title="Sigmoid 层"></a>Sigmoid 层</h3><p>接下来，我们来实现 sigmoid 函数。sigmoid 函数由下式表示：<br>$$<br>y &#x3D; \frac{1}{1+\exp(-x)}<br>$$<br>用计算图来表示的话，如下图所示</p>
-<p><img src="/45.png"></p>
+<p><img src="/posts/d2e41a48/45.png"></p>
 <p>这里除了 “×” 和 “+” 节点外，还出现了新的 “exp” 和 “&#x2F;“ 节点。“exp” 节点会进行 $y&#x3D;\exp(x)$ 的计算，“&#x2F;” 节点会进行 $y&#x3D;1&#x2F;x$ 的计算。</p>
 <p>这里我们进行计算图的反向传播，如下图所示（具体步骤我省略了）</p>
-<p><img src="/46.png"></p>
+<p><img src="/posts/d2e41a48/46.png"></p>
 <p>简化一下，就可以得到简洁版的 “sigmoid” 节点。</p>
-<p><img src="/47.png"></p>
+<p><img src="/posts/d2e41a48/47.png"></p>
 <p>并且其反向传播公式可以进一步整理如下<br>$$<br>\begin{aligned}<br>\frac{\partial L}{\partial y} y^2 \exp (-x) &amp; &#x3D;\frac{\partial L}{\partial y} \frac{1}{(1+\exp (-x))^2} \exp (-x) \<br>&amp; &#x3D;\frac{\partial L}{\partial y} \frac{1}{1+\exp (-x)} \frac{\exp (-x)}{1+\exp (-x)} \<br>&amp; &#x3D;\frac{\partial L}{\partial y} y(1-y)<br>\end{aligned}<br>$$<br>因此，其实 Sigmoid 的反向传播，只根据正向传播的输出就能计算出来。</p>
-<p><img src="/48.png"></p>
+<p><img src="/posts/d2e41a48/48.png"></p>
 <p>现在，我们用 Python 实现 Sigmoid 层，如下，这里将正向传播时的输出值保存为实例变量 out 。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Sigmoid</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.out = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        out = sigmoid(x)</span><br><span class="line">        self.out = out</span><br><span class="line">        <span class="keyword">return</span> out</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, dout</span>):</span><br><span class="line">        dx = dout * (<span class="number">1.0</span> - self.out) * self.out</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> dx</span><br></pre></td></tr></table></figure>
 
-<h2 id="5-6-Affine-Softmax-层的实现"><a href="#5-6-Affine-Softmax-层的实现" class="headerlink" title="5.6 Affine&#x2F;Softmax 层的实现"></a>5.6 Affine&#x2F;Softmax 层的实现</h2><h3 id="Affine-层"><a href="#Affine-层" class="headerlink" title="Affine 层"></a>Affine 层</h3><p>神经网络的正向传播中，为了计算矩阵的乘积运算。而这种 $\mathbf{XW+B}$ 的计算在几何学领域被称为“仿射变换”（仿射变换包括一次线性变换和一次平移，分别对应着神经网络中的加权和加偏置运算），因此这里将进行仿射变换的处理实现为 “Affine层”。</p>
+<h2 id="5-6-Affine-x2F-Softmax-层的实现"><a href="#5-6-Affine-x2F-Softmax-层的实现" class="headerlink" title="5.6 Affine&#x2F;Softmax 层的实现"></a>5.6 Affine&#x2F;Softmax 层的实现</h2><h3 id="Affine-层"><a href="#Affine-层" class="headerlink" title="Affine 层"></a>Affine 层</h3><p>神经网络的正向传播中，为了计算矩阵的乘积运算。而这种 $\mathbf{XW+B}$ 的计算在几何学领域被称为“仿射变换”（仿射变换包括一次线性变换和一次平移，分别对应着神经网络中的加权和加偏置运算），因此这里将进行仿射变换的处理实现为 “Affine层”。</p>
 <p>采用计算图的方式描述如下图，不过这里各个节点传播的是矩阵。</p>
-<p><img src="/49.png"></p>
+<p><img src="/posts/d2e41a48/49.png"></p>
 <p>现在我们来考虑其反向传播。以矩阵为对象的反向传播，按矩阵的各个元素进行计算时，步骤和以标量为对象的计算图相同。实际写一下的话，可以得到下式（缺证明过程）<br>$$<br>\begin{aligned}<br>\frac{\partial L}{\partial \boldsymbol{X}} &amp; &#x3D;\frac{\partial L}{\partial \boldsymbol{Y}} \cdot \boldsymbol{W}^{\mathrm{T}} \<br>\frac{\partial L}{\partial \boldsymbol{W}} &amp; &#x3D;\boldsymbol{X}^{\mathrm{T}} \cdot \frac{\partial L}{\partial \boldsymbol{Y}}<br>\end{aligned}<br>$$<br>这里式子中的 T 表示转置，举例如下<br>$$<br>\begin{gathered}<br>\boldsymbol{W}&#x3D;\left(\begin{array}{lll}<br>w_{11} &amp; w_{12} &amp; w_{13} \<br>w_{21} &amp; w_{22} &amp; w_{23}<br>\end{array}\right) \<br>\boldsymbol{W}^{\mathrm{T}}&#x3D;\left(\begin{array}{ll}<br>w_{11} &amp; w_{21} \<br>w_{12} &amp; w_{22} \<br>w_{13} &amp; w_{23}<br>\end{array}\right)<br>\end{gathered}<br>$$<br>现在，我们根据上面的式子，尝试写出计算图的反向传播，如下所示</p>
-<p><img src="/50.png"></p>
+<p><img src="/posts/d2e41a48/50.png"></p>
 <p>我们来看各个变量的形状。要注意，$\mathbf{X}$ 和 $\frac{\partial L}{\partial \mathbf{X}}$ 形状相同，$\mathbf{W}$ 和 $\frac{\partial L}{\partial \mathbf{W}}$ 形状相同。从下面的数学式可以明确地看出 $\mathbf{X}$ 和 $\frac{\partial L}{\partial \mathbf{X}}$ 形状相同。<br>$$<br>\begin{aligned}<br>\boldsymbol{X} &amp; &#x3D;\left(x_0, x_1, \cdots, x_n\right) \<br>\frac{\partial L}{\partial \boldsymbol{X}} &amp; &#x3D;\left(\frac{\partial L}{\partial x_0}, \frac{\partial L}{\partial x_1}, \cdots, \frac{\partial L}{\partial x_n}\right)<br>\end{aligned}<br>$$<br>为什么要注意矩阵的形状呢？因为矩阵的乘积运算要求对应维度的元素个数保持一致。</p>
 <h3 id="批版本的-Affine-层"><a href="#批版本的-Affine-层" class="headerlink" title="批版本的 Affine 层"></a>批版本的 Affine 层</h3><p>前面介绍的 Affine 层的输入 $\mathbf{X}$ 是以单个数据为对象的。现在我们考虑 $N$ 个数据一起进行正向传播的情况，也就是批版本的 Affine 层，如下图所示</p>
-<p><img src="/51.png"></p>
+<p><img src="/posts/d2e41a48/51.png"></p>
 <p>与刚刚不同的是，现在输入 $\mathbf{X}$ 的形状是 $(N,2)$ 。之后就和前面一样，在计算图上进行单纯的矩阵计算。</p>
 <p>加上偏置时，需要特别注意。正向传播时，偏置被加到 $\mathbf{XW}$ 的各个数据上。比如，$N&#x3D;2$ (数据为 2个)时，偏置会被分别加到这 2 个数据（各自的计算结果）上，具体的例子如下所示</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">X_dot_W = np.array([[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>]])</span><br><span class="line">B = np.array([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line"></span><br><span class="line">X_dot_W</span><br><span class="line">X_dot_W + B</span><br></pre></td></tr></table></figure>
@@ -631,13 +631,13 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Affine</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, W, b</span>):</span><br><span class="line">        self.W = W</span><br><span class="line">        self.b = b</span><br><span class="line">        self.x = <span class="literal">None</span></span><br><span class="line">        self.dW = <span class="literal">None</span></span><br><span class="line">        self.db = <span class="literal">None</span></span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        self.x = x</span><br><span class="line">        out = np.dot(x, self.W) + self.b</span><br><span class="line">        <span class="keyword">return</span> out</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, dout</span>):</span><br><span class="line">        dx = np.dot(dout, self.W.T)</span><br><span class="line">        self.dW = np.dot(self.x.T, dout)</span><br><span class="line">        self.db = np.<span class="built_in">sum</span>(dout, axis=<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> dx</span><br></pre></td></tr></table></figure>
 
 <h3 id="Softmax-with-Loss-层"><a href="#Softmax-with-Loss-层" class="headerlink" title="Softmax-with-Loss 层"></a>Softmax-with-Loss 层</h3><p>最后介绍一下输出层的 softmax 函数。softmax 函数会将输入值正规化之后再输出。比如手写数字识别时，softmax 层的输出如下所示</p>
-<p><img src="/52.png"></p>
+<p><img src="/posts/d2e41a48/52.png"></p>
 <p>图中，softmax 层将输入值正规化（将输出值的和调整为1）之后再输出。另外，因为手写数字识别要进行10类分类，所以向 softmax 层的输入也有 10 个。</p>
 <p>下面来实现 softmax 层，考虑到这里也包含作为损失函数的交叉熵误差，所以称为 “softmax-with-loss层”。softmax-with-loss 层的计算图如下所示</p>
-<p><img src="/53.png"></p>
+<p><img src="/posts/d2e41a48/53.png"></p>
 <p>可以看到，softmax-with-loss 层有些复杂。这里只给出了最终结果，对 Softmax-with-Loss 层的导出过程感兴趣的读者，请参照附录A。</p>
 <p>其计算图可以简化成下图</p>
-<p><img src="/54.png"></p>
+<p><img src="/posts/d2e41a48/54.png"></p>
 <p>这里要注意的是反向传播的结果。softmax 层得到了 $(y_1 - t_1, y_2 - t_2, y_3 - t_3 )$ 这样“漂亮”的结果，这是神经网络学习中的重要性质（实际上，这样“漂亮”的结果并不是偶然的，而是为了得到这样的结果，特意设计了交叉熵误差函数。回归问题中输出层中使用“恒等函数”，损失函数使用“平方和误差”，也是出于同样的理由）。</p>
 <p>神经网路学习的目的就是通过调整权重参数，使神经网络的输出（softmax的输出）接近标签。因此，必须将神经网络的输出与训练标签的误差高效地传递给前面的层。刚刚的  $(y_1 - t_1, y_2 - t_2, y_3 - t_3 )$  正是 softmax 层的输出与教师标签的差，直截了当地表示了当前神经网路的输出与训练标签的误差。</p>
 <p>如果神经网路的输出结果与训练标签相差很大，那么反向传播会传递一个很大的误差，因此下次学习会从这个误差中学习到较“大”的内容。反过来如果神经网路的输出结果与训练标签相差很小，那么反向传播会传递一个很小的误差，因此下次学习会从这个误差中学习到较“小”的内容。</p>
@@ -669,7 +669,7 @@
 </ol>
 <p>之前介绍的误差方向传播法会在步骤2中出现。上一章中，我们利用数值微分求得了这个梯度。数值微分虽然实现简单，但是计算要耗费较多的时间，与之相比，误差反向传播法可以快速高效地计算梯度。</p>
 <h3 id="对应误差反向传播法地神经网络的实现"><a href="#对应误差反向传播法地神经网络的实现" class="headerlink" title="对应误差反向传播法地神经网络的实现"></a>对应误差反向传播法地神经网络的实现</h3><p>现在来进行神经网络的实现。这里我们把 2 层神经网络实现为 TwoLayerNet 。首先，把这个类的实例变量和方法整理成下面2个表。</p>
-<p><img src="/55.png"></p>
+<p><img src="/posts/d2e41a48/55.png"></p>
 <p>具体代码如下，这里和 4.5 节的学习算法的实现有很多共通的部分，不同点主要在于这里使用了层。通过使用层，获得识别结果的处理 （predict()） 和计算梯度的处理（gradient()）只需通过层之间的传递就能完成（？）。 </p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"><span class="keyword">import</span> sys, os</span><br><span class="line">sys.path.append(os.pardir)  <span class="comment"># 为了导入父目录的文件而进行的设定</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> common.layers <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> common.gradient <span class="keyword">import</span> numerical_gradient</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> OrderedDict</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TwoLayerNet</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, input_size, hidden_size, output_size, weight_init_std = <span class="number">0.01</span></span>):</span><br><span class="line">        <span class="comment"># 初始化权重</span></span><br><span class="line">        self.params = &#123;&#125;</span><br><span class="line">        self.params[<span class="string">&#x27;W1&#x27;</span>] = weight_init_std * np.random.randn(input_size, hidden_size)</span><br><span class="line">        self.params[<span class="string">&#x27;b1&#x27;</span>] = np.zeros(hidden_size)</span><br><span class="line">        self.params[<span class="string">&#x27;W2&#x27;</span>] = weight_init_std * np.random.randn(hidden_size, output_size) </span><br><span class="line">        self.params[<span class="string">&#x27;b2&#x27;</span>] = np.zeros(output_size)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 生成层</span></span><br><span class="line">        self.layers = OrderedDict()</span><br><span class="line">        self.layers[<span class="string">&#x27;Affine1&#x27;</span>] = Affine(self.params[<span class="string">&#x27;W1&#x27;</span>], self.params[<span class="string">&#x27;b1&#x27;</span>])</span><br><span class="line">        self.layers[<span class="string">&#x27;Relu1&#x27;</span>] = Relu()</span><br><span class="line">        self.layers[<span class="string">&#x27;Affine2&#x27;</span>] = Affine(self.params[<span class="string">&#x27;W2&#x27;</span>], self.params[<span class="string">&#x27;b2&#x27;</span>])</span><br><span class="line"></span><br><span class="line">        self.lastLayer = SoftmaxWithLoss()</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers.values():</span><br><span class="line">            x = layer.forward(x)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line">        </span><br><span class="line">    <span class="comment"># x:输入数据, t:监督数据</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">self, x, t</span>):</span><br><span class="line">        y = self.predict(x)</span><br><span class="line">        <span class="keyword">return</span> self.lastLayer.forward(y, t)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">accuracy</span>(<span class="params">self, x, t</span>):</span><br><span class="line">        y = self.predict(x)</span><br><span class="line">        y = np.argmax(y, axis=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> t.ndim != <span class="number">1</span> : t = np.argmax(t, axis=<span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">        accuracy = np.<span class="built_in">sum</span>(y == t) / <span class="built_in">float</span>(x.shape[<span class="number">0</span>])</span><br><span class="line">        <span class="keyword">return</span> accuracy</span><br><span class="line">        </span><br><span class="line">    <span class="comment"># x:输入数据, t:监督数据</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">numerical_gradient</span>(<span class="params">self, x, t</span>):</span><br><span class="line">        loss_W = <span class="keyword">lambda</span> W: self.loss(x, t)</span><br><span class="line">        </span><br><span class="line">        grads = &#123;&#125;</span><br><span class="line">        grads[<span class="string">&#x27;W1&#x27;</span>] = numerical_gradient(loss_W, self.params[<span class="string">&#x27;W1&#x27;</span>])</span><br><span class="line">        grads[<span class="string">&#x27;b1&#x27;</span>] = numerical_gradient(loss_W, self.params[<span class="string">&#x27;b1&#x27;</span>])</span><br><span class="line">        grads[<span class="string">&#x27;W2&#x27;</span>] = numerical_gradient(loss_W, self.params[<span class="string">&#x27;W2&#x27;</span>])</span><br><span class="line">        grads[<span class="string">&#x27;b2&#x27;</span>] = numerical_gradient(loss_W, self.params[<span class="string">&#x27;b2&#x27;</span>])</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> grads</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">gradient</span>(<span class="params">self, x, t</span>):</span><br><span class="line">        <span class="comment"># forward</span></span><br><span class="line">        self.loss(x, t)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># backward</span></span><br><span class="line">        dout = <span class="number">1</span></span><br><span class="line">        dout = self.lastLayer.backward(dout)</span><br><span class="line">        </span><br><span class="line">        layers = <span class="built_in">list</span>(self.layers.values())</span><br><span class="line">        layers.reverse()</span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> layers:</span><br><span class="line">            dout = layer.backward(dout)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 设定</span></span><br><span class="line">        grads = &#123;&#125;</span><br><span class="line">        grads[<span class="string">&#x27;W1&#x27;</span>], grads[<span class="string">&#x27;b1&#x27;</span>] = self.layers[<span class="string">&#x27;Affine1&#x27;</span>].dW, self.layers[<span class="string">&#x27;Affine1&#x27;</span>].db</span><br><span class="line">        grads[<span class="string">&#x27;W2&#x27;</span>], grads[<span class="string">&#x27;b2&#x27;</span>] = self.layers[<span class="string">&#x27;Affine2&#x27;</span>].dW, self.layers[<span class="string">&#x27;Affine2&#x27;</span>].db</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> grads</span><br></pre></td></tr></table></figure>
 
@@ -814,20 +814,20 @@
 <p> 这里首次出现的变量名 optimizer 表示“进行最优化的人” 的意思，这里由 SGD 承担这个角色。参数的更新由 optimizer 负责完成。我们在这里需要做的只是将参数和梯度的信息传给 optimizer 。</p>
 <p>像这样，通过单独实现进行最优化的类，功能的模块化变得更简单。比如，后面我们马上会实现另一个最优化方法 Momentum ，它同样会实现成拥有 <code>update(params, grads)</code> 这个共同方法的形式。这样一来，只需要将 <code>optimizer = SGD()</code> 这一语句改成 <code>optimizer = Momentum()</code> ，就可以从 SGD 切换成 Momentum 。</p>
 <h3 id="SGD-的缺点"><a href="#SGD-的缺点" class="headerlink" title="SGD 的缺点"></a>SGD 的缺点</h3><p>虽然 SGD 简单，并且容易实现，但是在解决某些问题时可能没有效率。这里，在指出SGD的缺点之际，我们来思考一下求下面这个函数的最小值的问题。<br>$$<br>f(x, y)&#x3D;\frac{1}{20} x^2+y^2<br>$$<br>如图所示，这个函数是向 $x$ 轴方向延伸的“碗”状函数。实际上，这个函数的登高线呈向 $x$ 轴方向延伸的椭圆状。</p>
-<p><img src="/56.png"></p>
+<p><img src="/posts/d2e41a48/56.png"></p>
 <p>现在看一下这个函数的梯度。如果用图表示梯度的话，则如下图所示。这个梯度的特征是 $y$ 轴方向上大，$x$ 轴方向上小。换句话说，就是 $y$ 轴方向的梯度大，而 $x$ 轴方向的梯度小。这里需要注意的是，虽然这个式子的最小值在 $(0,0)$ ，但是很多地方的梯度并没有指向  $(0,0)$ 。</p>
-<p><img src="/57.png"></p>
+<p><img src="/posts/d2e41a48/57.png"></p>
 <p>我们来尝试对这个函数应用SGD ，从 $(x,y) &#x3D; (-7.0, 2.0)$ 处（初始值）开始搜索，结果如下图所示。在图中，SGD 呈“之”字形移动。这是一个相当低效的路径。也就是说，SGD 的缺点是，如果函数的形状非均向（anisotropic），比如呈延伸状，搜索的路径就会非常低效。因此，我们需要比单纯朝梯度方向前进的SGD更聪明的方法。SGD低效的根本原因是，梯度的方向并没有指向最小值的方向。</p>
-<p><img src="/58.png"></p>
+<p><img src="/posts/d2e41a48/58.png"></p>
 <p>为了改正 SGD 的缺点。下面我们将介绍 Momentum、AdaGrad、Adam这3种方法来取代 SGD 。我们会简单介绍各个方法，并用数学式和 Python 进行实现。</p>
 <h3 id="Momentum"><a href="#Momentum" class="headerlink" title="Momentum"></a>Momentum</h3><p>Momentum 是“动量”的意思，和物理有关。用数学式表示 Momentum 方法，如下所示<br>$$<br>\begin{aligned}<br>&amp;\boldsymbol{v} \leftarrow \alpha \boldsymbol{v}-\eta \frac{\partial L}{\partial \boldsymbol{W}}\<br>&amp;\boldsymbol{W} \leftarrow \boldsymbol{W}+\boldsymbol{v}<br>\end{aligned}<br>$$<br>和前面的 SGD 一样，$\boldsymbol{W}$ 表示要更新的权重参数，$\eta$ 表示学习率。这里新出现了一个变量 $\boldsymbol{v}$ ，对应物理上的速度。第一个式子表示了物体在梯度方向上受力，在这个力的作用下，物体的速度增加这一物理法则。如下图所示，Momentum 方法给人的感觉就像是小球在地面上滚动。</p>
-<p><img src="/59.png"></p>
+<p><img src="/posts/d2e41a48/59.png"></p>
 <p>式中有 $\alpha \boldsymbol{v}$ 这一项。在物体不受任何力时，该项承担使物体逐渐减速的任务（$\alpha$ 设定为 0.9之类的值），对应物理上的地面摩擦或空气阻力。下面是 Momentum 的代码实现</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Momentum</span>:</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;&quot;&quot;Momentum SGD&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, lr=<span class="number">0.01</span>, momentum=<span class="number">0.9</span></span>):</span><br><span class="line">        self.lr = lr</span><br><span class="line">        self.momentum = momentum</span><br><span class="line">        self.v = <span class="literal">None</span></span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, params, grads</span>):</span><br><span class="line">        <span class="keyword">if</span> self.v <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            self.v = &#123;&#125;</span><br><span class="line">            <span class="keyword">for</span> key, val <span class="keyword">in</span> params.items():                                </span><br><span class="line">                self.v[key] = np.zeros_like(val)</span><br><span class="line">                </span><br><span class="line">        <span class="keyword">for</span> key <span class="keyword">in</span> params.keys():</span><br><span class="line">            self.v[key] = self.momentum*self.v[key] - self.lr*grads[key] </span><br><span class="line">            params[key] += self.v[key]</span><br></pre></td></tr></table></figure>
 
 <p>这里实例变量 $v$ 会保存物体的速度。初始化时，$v$ 中什么都不保存，但当第一次调用 update() 时，$v$ 会以字典型变量的形式保存与参数结构相同的数据。</p>
 <p>现在尝试用 Momentum 解决示例函数的最优化问题，如下图所示。其中更新路径就像小球在碗中滚动一样。和 SGD 相比，我们发现“之”字形的“程度”减轻了。这是因为虽然 $x$ 轴方向上受到的力非常小，但是一直在同一方向上受力，但是一直在同一方向上受力，所以朝同一个方向会有一定的加速。反过来，虽然 $y$ 轴方向上受到的力很大，但是因为交互地受到正方向和反方向地力，它们会互相抵消，所以 $y$ 轴方向上的速度不稳定。因此，和 SGD 时的情形相比，可以更快地朝 $x$ 轴方向靠近，减弱“之”字形的变动程度。</p>
-<p><img src="/60.png"></p>
+<p><img src="/posts/d2e41a48/60.png"></p>
 <h3 id="AdaGrad"><a href="#AdaGrad" class="headerlink" title="AdaGrad"></a>AdaGrad</h3><p>在神经网络的学习中，学习率（$\eta$ ）的值很重要。学习率过小，会导致学习花费过多时间；反过来，学习率过大，则会导致学习发散而不能正确进行。</p>
 <p>在关于学习率的有效技巧中，有一种被称为<strong>学习率衰减</strong> (learning rate decay) 的方法，即随着学习的进行，使学习率逐渐减小。实际上，一开始“多“学，然后逐渐”少“学的方法，在神经网络的学习中经常被使用。</p>
 <p>逐渐减小学习率的想法，相当于”全体“参数的学习率一起降低。而 AdaGrad 进一步发展了这个想法，针对”一个一个“的参数，赋予其”定制“的值。</p>
@@ -839,21 +839,21 @@
 
 <p>这里需要注意的是，最后一行加上了微小值 1e-7 。这是为了防止当0存在时，将0作为除数的情况。在很多深度学习的框架中，这个微小值也可以设定为参数，但这里我们用的是 1e-7 这个固定值。</p>
 <p>现在，让我们试着使用 AdaGrad  来解决示例函数的最优化问题，结果如下图所示，这里可以看到，函数的取值高效地向着最小值移动。由于 $y$ 轴方向上的梯度较大，因此刚开始变动较大，但是后面会根据这个较大的变动按比例调整，减小更新的步伐。因此，$y$ 轴方向上的更新程度被减弱，”之“字形的变动程度有所衰减。 </p>
-<p><img src="/61.png"></p>
+<p><img src="/posts/d2e41a48/61.png"></p>
 <h3 id="Adam"><a href="#Adam" class="headerlink" title="Adam"></a>Adam</h3><p>Momentum参照小球在碗中滚动的物理规则进行移动，AdaGrad为参数的每个元素适当地调整更新步伐。如果将这两个方法融合在一起会怎么样呢？这就是 Adam 方法的基本思路。</p>
 <p>其理论优点复杂，直观说就是通过组合前面两个方法的优点，有望实现高效搜索参数空间。此外，进行超参数的”偏置校正“也是 Adam 的特征。这里不再进行过多的说明，详细内容请参考原作者的论文。关于 Python 的实现，common&#x2F;optimizer.y 中将其实现为了 Adam 类，可以参考。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Adam</span>:</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;&quot;&quot;Adam (http://arxiv.org/abs/1412.6980v8)&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, lr=<span class="number">0.001</span>, beta1=<span class="number">0.9</span>, beta2=<span class="number">0.999</span></span>):</span><br><span class="line">        self.lr = lr</span><br><span class="line">        self.beta1 = beta1</span><br><span class="line">        self.beta2 = beta2</span><br><span class="line">        self.<span class="built_in">iter</span> = <span class="number">0</span></span><br><span class="line">        self.m = <span class="literal">None</span></span><br><span class="line">        self.v = <span class="literal">None</span></span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, params, grads</span>):</span><br><span class="line">        <span class="keyword">if</span> self.m <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            self.m, self.v = &#123;&#125;, &#123;&#125;</span><br><span class="line">            <span class="keyword">for</span> key, val <span class="keyword">in</span> params.items():</span><br><span class="line">                self.m[key] = np.zeros_like(val)</span><br><span class="line">                self.v[key] = np.zeros_like(val)</span><br><span class="line">        </span><br><span class="line">        self.<span class="built_in">iter</span> += <span class="number">1</span></span><br><span class="line">        lr_t  = self.lr * np.sqrt(<span class="number">1.0</span> - self.beta2**self.<span class="built_in">iter</span>) / (<span class="number">1.0</span> - self.beta1**self.<span class="built_in">iter</span>)         </span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> key <span class="keyword">in</span> params.keys():</span><br><span class="line">            <span class="comment">#self.m[key] = self.beta1*self.m[key] + (1-self.beta1)*grads[key]</span></span><br><span class="line">            <span class="comment">#self.v[key] = self.beta2*self.v[key] + (1-self.beta2)*(grads[key]**2)</span></span><br><span class="line">            self.m[key] += (<span class="number">1</span> - self.beta1) * (grads[key] - self.m[key])</span><br><span class="line">            self.v[key] += (<span class="number">1</span> - self.beta2) * (grads[key]**<span class="number">2</span> - self.v[key])</span><br><span class="line">            </span><br><span class="line">            params[key] -= lr_t * self.m[key] / (np.sqrt(self.v[key]) + <span class="number">1e-7</span>)</span><br><span class="line">            </span><br><span class="line">            <span class="comment">#unbias_m += (1 - self.beta1) * (grads[key] - self.m[key]) # correct bias</span></span><br><span class="line">            <span class="comment">#unbisa_b += (1 - self.beta2) * (grads[key]*grads[key] - self.v[key]) # correct bias</span></span><br><span class="line">            <span class="comment">#params[key] += self.lr * unbias_m / (np.sqrt(unbisa_b) + 1e-7)</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>使用 Adam 方法解决示例函数的最优化问题，如下所示。可以看到基于 Adam 的更新过程就像小球在碗里滚动一样。相比于 Momentun ，Adam 的小球左右摇晃的程度有所减轻，这得益于学习的更新程度被适当地调整了。</p>
-<p><img src="/62.png"></p>
+<p><img src="/posts/d2e41a48/62.png"></p>
 <p>Adam 会设置3个超参数，第一个是学习率 (论文中以 $\alpha$ 出现)，另外两个是一次momentum系数β1和二次momentum系数β2。根据论文，标准的设定值是β1为0.9，β2为0.999。设置了这些值后，大多数情<br>况下都能顺利运行。</p>
 <h3 id="使用哪种更新方法呢"><a href="#使用哪种更新方法呢" class="headerlink" title="使用哪种更新方法呢"></a>使用哪种更新方法呢</h3><p>到目前为止，我们已经学习了4中更新参数的反复。这里我们来比较一下这 4 种反复。</p>
 <p>如图所示，根据使用的方法不同，参数更新的路径也不同。只看这个图的话，AdaGard 似乎是最好的，不过也要注意，结果会根据要解决的问题而变。并且，很显然，超参数的设定值不同，结果也会发生变化。</p>
-<p><img src="/63.png"></p>
+<p><img src="/posts/d2e41a48/63.png"></p>
 <p>目前并不存在能在所有问题中都表型良好的方法。这4中方法各有各的特点，都有各自擅长解决的问题和不擅长解决的问题。</p>
 <p>很多研究中至今仍在使用SGD。Momentum 和 AdaGrad 也是值得一试的方法。最近，很多研究人员和技术人员都喜欢用Adam。本书将主要使用 SGD 或者 Adam，读者可以根据自己的喜好多多尝试。</p>
 <h3 id="基于MNIST数据集的更新方法的比较"><a href="#基于MNIST数据集的更新方法的比较" class="headerlink" title="基于MNIST数据集的更新方法的比较"></a>基于MNIST数据集的更新方法的比较</h3><p>我们以手写数字识别为例，比较前面的4种方法，并确认不同的方法在学习进展上有多大程度上的差异。先来看一下结果，如下图所示</p>
-<p><img src="/64.png"></p>
+<p><img src="/posts/d2e41a48/64.png"></p>
 <p>这个实验以一个5层神经网络为对象，其中每层有 100 个神经元。激活函数使用的是 ReLU 。</p>
 <p>从图中的结果可知，与SGD相比，其他3种方法学习得更快，而且速度基本相同，仔细看的话，AdaGrad 的学习进行得稍微快一点。这个实验需要注意的地方是，实验结果会随学习率等超参数、神经网络的结构（几层深等）的不同而发生变化。不过，一般而言，与SGD相比，其他3种方法可以学习得更快，有时最终的识别精度也更高。</p>
 <h2 id="6-2-权重的初始值"><a href="#6-2-权重的初始值" class="headerlink" title="6.2 权重的初始值"></a>6.2 权重的初始值</h2><p>在神经网络的学习中，权重的初始值特别重要。实际上，设定什么样的权重初始值，经常关系到神经网络的学习能否成功。本节将介绍权重初始值的推荐值，并通过实验确认神经网络的学习是否会快速进行。</p>
@@ -869,13 +869,13 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i, a <span class="keyword">in</span> activations.items():</span><br><span class="line">    plt.subplot(<span class="number">1</span>, <span class="built_in">len</span>(activations), i+<span class="number">1</span>)</span><br><span class="line">    plt.title(<span class="built_in">str</span>(i+<span class="number">1</span>) + <span class="string">&quot;-layer&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> i != <span class="number">0</span>: plt.yticks([], [])</span><br><span class="line">    <span class="comment"># plt.xlim(0.1, 1)</span></span><br><span class="line">    <span class="comment"># plt.ylim(0, 7000)</span></span><br><span class="line">    plt.hist(a.flatten(), <span class="number">30</span>, <span class="built_in">range</span>=(<span class="number">0</span>,<span class="number">1</span>))</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
 
 <p>运行这段代码后，可以得到下面的直方图</p>
-<p><img src="/65.png"></p>
+<p><img src="/posts/d2e41a48/65.png"></p>
 <p>从图可知，各层的激活值呈偏向 0 和 1 的分布。这里使用的 sigmoid 函数是 S 型函数，随着输出不断地偏向0（或者靠近1），它的导数的值逐渐接近0。因此，偏向0和1的数据分布会造成反向传播中的梯度的值不断变小，最后完全消失。这个问题称为<strong>梯度消失</strong> (gradient vanishing) 。层次加深的深度学习中，梯度消失的问题可能会更加严重。</p>
 <p>下面，将权重的标准差设为 0.01，进行相同的实验。实验的代码只需要把设定权重初始值的地方换成下面的代码即可。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># w = np.random.randn(node_num, node_num) * 1</span></span><br><span class="line">w = np.random.randn(node_num, node_num) * <span class="number">0.01</span></span><br></pre></td></tr></table></figure>
 
 <p>来看一下结果。使用标准差为 0.01的高斯分布时，各层的激活值的分布如下所示</p>
-<p><img src="/66.png"></p>
+<p><img src="/posts/d2e41a48/66.png"></p>
 <p>这次呈集中在 0.5 附近的分布。因为不像刚才的例子那样偏向0和1，所以不会发生梯度消失的问题。但是，激活值的分布有所偏向，说明在表现力上有很大的问题。为什么这么说呢个？因为如果有多个神经元都输出几乎相同的值，那它们就没有存在的意义了。比如，如果100个神经元都输出几乎相同的值，那么也可以由1个神经元来表达基本相同的事情。因此，激活值在分布上有所偏向会出现”表现力受限“的问题。</p>
 <blockquote>
 <p>各层的激活值的分布都要求有适当的广度。为什么呢？因为通过在各层间传递多样性的数据，神经网络可以进行高效的学习。反过来，如果传递的是有所偏向的数据，就会出现梯度消失或者“表现力受限”的问题，导致学习可能无法顺利进行。</p>
@@ -883,21 +883,21 @@
 <p>接着，我们尝试使用Xavier Glorot等人的论文中推荐的权重初始值（俗称“Xavier初始值”）。现在，在一般的深度学习框架中，Xavier 初始值已被作为标准使用。比如，Caffe框架中，通过在设定权重初始值时赋予xavier参数，就可以使用Xavier初始值。</p>
 <p>（ Xavier的论文中提出的设定值，不仅考虑了前一层的输入节点数量，还考虑了下一层的输出节点数量。但是，Caffe等框架的实现中进行了简化，只使用了这里所说的前一层的输入节点进行计算。）</p>
 <p>Xavier 的论文中，为了使各层的激活值呈现处具有相同广度的分布，推荐了合适的权重尺度。推导出的结论是，如果前一层的节点数为n ，这初始值使用标准差为 $\frac{1}{\sqrt{n}}$ 的分布。</p>
-<p><img src="/67.png"></p>
+<p><img src="/posts/d2e41a48/67.png"></p>
 <p>使用 Xavier 初始值后，前一层的节点数越多，要设定为目标节点的初始值的权重尺度就越小。现在，我们使用Xavier 初始值进行实验。进行实验的代码只需要设定权重初始值的地方换成下面内容即可 (因此此处所有层的节点数都是 100， 所以简化了实现)。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">node_num = <span class="number">100</span> <span class="comment"># 前一层的节点数</span></span><br><span class="line">w = np.random.randn(node_num, node_num) / np.sqrt(node_num)</span><br></pre></td></tr></table></figure>
 
 <p>使用 Xavier 初始值后的结果见下图。从这个结果可知，越是后面的层，图像变得越歪斜，但是呈现了比之前更有广度的分布。因为各层间传递的数据有适当的广度，所以sigmoid函数的表现力不受限制，有望进行高效的学习。</p>
-<p><img src="/68.png"></p>
+<p><img src="/posts/d2e41a48/68.png"></p>
 <p>注：图6-13的分布中，后面的层的分布呈稍微歪斜的形状。如果用tanh函数（双曲线函数）代替sigmoid函数，这个稍微歪斜的问题就能得到改善。实际上，使用tanh函数后，会呈漂亮的吊钟型分布。tanh函数和sigmoid函数同是S型曲线函数，但tanh函数是关于原点(0,0) 对称的S型曲线，而sigmoid函数是关于(x,y)&#x3D;(0,0.5)对称的S型曲线。众所周知，用作激活函数的函数最好具有关于原点对称的性质。</p>
 <h3 id="ReLU的权重初始值"><a href="#ReLU的权重初始值" class="headerlink" title="ReLU的权重初始值"></a>ReLU的权重初始值</h3><p>Xavier初始值是以激活函数是线性函数为前提而推导出来的。因为sigmoid函数和tanh函数左右对称，且中央附近可以视为线性函数，所以适当使用 Xavier 初始值。但当激活函数使用 ReLU 时，一般推荐使用 ReLU 专用的初始值 ，也就是 Kaiming He等人推荐的初始值，也称为 ”He 初始值“。当前一层的节点数为 $n$ 时，He初始值使用标准差为 $\sqrt{\frac{2}{n}}$ 的高斯分布。当 Xavier 初始值是  $\sqrt{\frac{1}{n}}$ 时，（直观上）可以解释为，因为 ReLU 的负值区域的值为 0 ，为了使它更有广度，所以需要2倍的系数。</p>
 <p>现在来看一下激活函数使用 ReLU 时激活值的分布。我们给出了3个实验的结果</p>
-<p><img src="/69.png"></p>
+<p><img src="/posts/d2e41a48/69.png"></p>
 <p>观察结果可知，当”std &#x3D; 0.01“ 时，各层的激活值非常小。神经网络传递的是非常小的值，说明逆向传播时权重的梯度也同样很小。这是非常严重的问题，实际上学习基本上没有进展。</p>
 <p>接下来是初始值为 Xavier 初始值时的结果。在这种情况下，随着层的加深，偏向一点点变大。实际上，层加深后，激活值的偏向变大，学习时会出现梯度消失的问题。而当初始值为 He 初始值时，各层中分布的广度相同。由于即便层加深，数据的广度也能保持不变，因此逆向传播时，也会传递合适的值。</p>
 <p>总结一下，当激活函数使用 ReLU 时，权重初始值使用 He 初始值，当激活函数为 sigmoid 或 tanh 等S型曲线函数时，初始值使用 Xavier 初始值。这是目前的最佳实践。</p>
 <h3 id="基于-MNIST-数据集的权重初始值的比较"><a href="#基于-MNIST-数据集的权重初始值的比较" class="headerlink" title="基于 MNIST 数据集的权重初始值的比较"></a>基于 MNIST 数据集的权重初始值的比较</h3><p>下面通过实际的数据，观察不同的权重初始值的赋值方法会在多大程度上影响神经网络的学习。这里，我们基于std&#x3D;0.01, Xavier初始值、He初始值进行实验（源代码在ch06&#x2F;weight_init_compare.py中）。先来看一下结果，如下图所示</p>
-<p><img src="/70.png"></p>
+<p><img src="/posts/d2e41a48/70.png"></p>
 <p>这个实验中，神经网络有5层，每层有100个神经元，激活函数使用的是ReLU。从图6-15的结果可知，std&#x3D;0.01时完全无法进行学习。这和刚才观察到的激活值的分布一样，是因为正向传播中传递的值很小（集中在0附近的数据）。因此，逆向传播时求得的梯度也很小，权重几乎不进行更新。相反，当权重初始值为 Xavier 初始值和 He 初始值时，学习进行得很顺利。并且，我们发现 He 初始值时得学习进度更快一些。</p>
 <p>综上，在神经网络的学习中，权重初始值非常重要，关系到神经网络的学习能否成功。</p>
 <h2 id="6-3-Batch-Normalization"><a href="#6-3-Batch-Normalization" class="headerlink" title="6.3 Batch Normalization"></a>6.3 Batch Normalization</h2><p>在上一节，我们观察了各层的激活值分布，并从中了解到如何设定了合适的权重初始值，则各层的激活值分布会有适当的广度，从而可以顺利地进行学习。那么，为了使各层拥有适当地广度，”强制性“地调整激活值地分布会怎样呢？实际上，Batch Normalization 方法就是基于这个想法而产生地。</p>
@@ -910,7 +910,7 @@
 </ul>
 <p>考虑到深度学习要花费很多时间，第一个优点令人非常开心。另外，后两点也可以帮我们消除深度学习中的很多烦恼。</p>
 <p>如前所述，Batch Norm 的思路是调整各层的激活值分布使其拥有适当的广度。为此，要向神经网络中插入对数据分布进行正规化的层，即 Batch Normalization 层（下面简称 Batch Norm 层），如下图所示</p>
-<p><img src="/71.png"></p>
+<p><img src="/posts/d2e41a48/71.png"></p>
 <p>Batch Norm ，顾名思义，以进行学习时的 mini-batch 为单位，按 mini-batch 进行正规化。具体而言，就是进行数据分布的值为0、方差为1的正规化。用数学式表示的话，如下所示<br>$$<br>\mu_{B} \leftarrow \frac{1}{m} \sum_{i&#x3D;1}^{m} x_{i}<br>$$</p>
 <p>$$<br>\sigma_{B}^{2} \leftarrow \frac{1}{m} \sum_{i&#x3D;1}^{m}\left(x_{i}-\mu_{B}\right)^{2}<br>$$</p>
 <p>$$<br>\hat{x}<em>{i} \leftarrow \frac{x</em>{i}-\mu_{B}}{\sqrt{\sigma_{B}^{2}+\varepsilon}}<br>$$</p>
@@ -918,12 +918,12 @@
 <p>通过将这个正规化的处理插入到激活函数的前面（或者后面），可以减小数据分布的偏向。</p>
 <p>接着，Batch Norm 层会对正规化的数据进行缩放和平移的变换，用数学式可以如下表示<br>$$<br>y_{i} \leftarrow \gamma \hat{x}_{i} + \beta<br>$$<br>这里 $\gamma$ 和 $\beta$ 是参数，一开始 $\gamma&#x3D;1,\beta&#x3D;0$ ，然后再通过学习调整到合适的值。</p>
 <p>上面就是 Batch Norm 的算法。这个算法是神经网络上的正向传播。如果使用计算图，可以表示为下图。</p>
-<p><img src="/72.png"></p>
+<p><img src="/posts/d2e41a48/72.png"></p>
 <p>Batch Norm 的反向传播的推导有些复杂，这里我们不进行介绍。不过如果使用上图的计算图来思考的话，Batch Norm 的反向传播或许可以轻松地推导出来。Frederik Kratzert的博客“Understanding the backward<br>pass through Batch Normalization Layer” 里有详细说明，可以参考一下</p>
 <h3 id="Batch-Normalization-的评估"><a href="#Batch-Normalization-的评估" class="headerlink" title="Batch Normalization 的评估"></a>Batch Normalization 的评估</h3><p>现在我们使用 Batch Norm 层进行实验。首先，使用 MNIST 数据集，观察使用 Batch Norm 层和不适用 Batch Norm 层时学习的过程会如何变化，结果如下所示</p>
-<p><img src="/73.png"></p>
+<p><img src="/posts/d2e41a48/73.png"></p>
 <p>从图中的结果可知，使用 Batch Norm 后，学习进行得更快了。接着，给予不同的初始值尺度，观察学习的过程如何变化。下图是权重初始值的标准差为各种不同的值时的学习过程图。我们发现，几乎所有的情况下都是使用 Batch Norm时学习进行得更快。同时也可以发现，实际上，在不使用 Batch Norm 的情况下，如果不赋予一个尺度好的初始值，学习将完全无法进行。</p>
-<p><img src="/74.png"></p>
+<p><img src="/posts/d2e41a48/74.png"></p>
 <p>综上，通过使用 Batch Norm ，可以推动学习的进行。并且，对权重初始值变得健壮（不那么依赖初始值）。Batch Norm 具备了如此优良的性质，一定能应用在更多场合中。</p>
 <h2 id="6-4-正则化"><a href="#6-4-正则化" class="headerlink" title="6.4 正则化"></a>6.4 正则化</h2><p>机器学习的过程中，<strong>过拟合</strong>是一个很常见的问题。过拟合指的是只能拟合训练数据，但不能很好地拟合不包含在训练数据中的其他数据的状态。机器学习的目标是提高泛化能力，因此抑制过拟合的技巧也很重要。</p>
 <h3 id="过拟合"><a href="#过拟合" class="headerlink" title="过拟合"></a>过拟合</h3><p>发生过拟合的原因，主要有以下两个</p>
@@ -936,29 +936,29 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(x_train, t_train), (x_test, t_test) = load_mnist(normalize=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># 为了再现过拟合，减少学习数据</span></span><br><span class="line">x_train = x_train[:<span class="number">300</span>]</span><br><span class="line">t_train = t_train[:<span class="number">300</span>]</span><br></pre></td></tr></table></figure>
 
 <p>接着是进行训练的代码。和之前的代码一样，按 epoch 分别算出所有训练数据和所有测试数据的识别精度，如下所示</p>
-<p><img src="/75.png"></p>
+<p><img src="/posts/d2e41a48/75.png"></p>
 <p>过了 100 个 epoch 左右后，用训练数据测量到的识别精度几乎都为 100% 。但是，对于测试数据，离100%的识别精度还有较大的差距。如此大的识别精度差距，是只拟合了训练数据的结果，而对没有使用的一般数据（测试数据）拟合得不是很好。</p>
 <h3 id="权值衰减"><a href="#权值衰减" class="headerlink" title="权值衰减"></a>权值衰减</h3><p><strong>权值衰减</strong>是一直以来经常使用的一种抑制过拟合的方法。该方法通过在学习的过程中对大的权重进行惩罚，来抑制过拟合。很多过拟合原本就是因为权重参数取值过大才发生的。</p>
 <p>复习一下，神经网络的学习目的是减小损失函数的值。这时，例如为损失函数加上权重的平方范数（L2范数）。这样一来，就可以抑制权重变大。用符号来表示的话，如果将权重记为 $\mathbf{W}$ ，L2范数的权值衰减就是 $\frac{1}{2}\lambda \mathbf{W}^{2}$ ，然后将这个 $\frac{1}{2}\lambda \mathbf{W}^{2}$ 加到损失函数上。这里，$\lambda$ 是控制正则化程度的超参数，$\frac{1}{2}$ 是用于将求导结果变成 $\lambda \mathbf{W}$ 的调整用常量。</p>
-<p><img src="/76.png"></p>
+<p><img src="/posts/d2e41a48/76.png"></p>
 <p>对于所有权重，权值衰减方法都会为损失函数加上 $\frac{1}{2}\lambda \mathbf{W}^{2}$ 。因此，在求权重梯度的计算中，要为之前的误差反向传播法的结果加上正则化项的导数  $\lambda \mathbf{W}$ 。</p>
 <blockquote>
 <p>我的理解是这样的，把原来的损失函数定义为 $l_1$ ，现在的L2范数部分定义为 $l_{2}$，$l&#x3D; l_{1} + l_{2}$ ，因此，对于某个权重参数 $w_{<em>}$ ，其偏导数为 $\frac{\partial l}{\partial w_{</em>}} &#x3D;  \frac{\partial l_{1}}{\partial w_{<em>}} + \frac{\partial l_{2}}{\partial w_{</em>}}$ ，第一部分就还是按照的方式计算，第二部分就是 $\lambda w_{<em>}$ ，也就是说，此时偏导数的变化就是增加了   $\lambda w_{</em>}$ 。</p>
 <p>偏导数增加了  $\lambda w_{<em>}$ ，按照梯度下降法更新参数时，参数的绝对值会变小。证明如下，如果   $w_{</em>}$  是正数，那么减去   $\lambda w_{*}$ 会降低其值（当 $\lambda$ 在0-1之间 ），反过来也一样。因此实现了减小权重参数绝对值的目的。</p>
 </blockquote>
 <p>现在我们来进行实验，对于刚刚进行的实验，应用 $\lambda &#x3D; 0.1$ 的权值衰减，结果如下图所示</p>
-<p><img src="/77.png"></p>
+<p><img src="/posts/d2e41a48/77.png"></p>
 <p>如图所示，虽然训练数据和测试数据的识别精度之间还有差距，但与之前结果相比差距变小了。这说明过拟合受到了抑制。此外，还要注意，训练数据的识别精度没有达到100% 。</p>
 <h3 id="Dropout"><a href="#Dropout" class="headerlink" title="Dropout"></a>Dropout</h3><p>作为抑制过拟合的方法，前面我们介绍了为损失函数加上权重的 L2 范数的权值衰减方法。该方法可以简单地实现，在某种程度上能够抑制过拟合。但是，如果网络的模型变得很复杂，只用权值衰减就难以应付了。在这种情况下，我们经常会使用 Dropout 方法。</p>
 <p>Dropout 是一种在学习的过程中随机删除神经元的方法。训练时，随机选出隐藏层的神经元，然后将其删除。被删除的神经元不在进行信号的传递，如图所示。训练时，每传递一次数据，都会随机选择要删除的神经元。然后，测试时，虽然会传递所有的神经元信号，但是对于各个神经元的输出，要乘以训练时的删除比例后再输出。</p>
-<p><img src="/78.png"></p>
+<p><img src="/posts/d2e41a48/78.png"></p>
 <p>下面我们来实现 Dropout 。这里的实现重视易理解性。不过，因为训练时如果进行恰当的计算的话，正向传播时单纯地传递数据就可以了（不用乘以删除比例），所以深度学习的框架中进行了这样的实现。关于高效的实现，可以参考 Chainer 中实现的 Dropout 。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Dropout</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, dropout_ratio=<span class="number">0.5</span></span>):</span><br><span class="line">        self.dropout_ratio = dropout_ratio</span><br><span class="line">        self.mask = <span class="literal">None</span></span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x, train_flg=<span class="literal">True</span></span>):</span><br><span class="line">        <span class="keyword">if</span> train_flg:</span><br><span class="line">            self.mask = np.random.rand(*x.shape) &gt; self.dropout_ratio</span><br><span class="line">            <span class="keyword">return</span> x * self.mask</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> x * (<span class="number">1.0</span> - self.dropout_ratio)</span><br><span class="line">            </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, dout</span>):</span><br><span class="line">        <span class="keyword">return</span> dout * self.mask</span><br></pre></td></tr></table></figure>
 
 <p>这里的要点是，每次正向传播时，<code>self.mask</code> 中都会以 False 的形式保存要删除的神经元。<code>self.mask</code> 会随机生成和 <code>x</code> 形状相同的数组，并将值比 <code>dropout_ratio</code> 大的元素设为 True 。反向传播时的行为和 ReLU 相同。也就是说，正向传播时传递了信号的神经元，反向传播时按原样传递信号；正向传播时没有传递信号的神经元，反向传播时信号将停在那里。</p>
 <p>现在，我们使用 MNIST 数据集进行验证，以确认 Dropout 的效果。源代码在ch06&#x2F;overfit_dropout.py中。另外，源代码中使用了Trainer类来简化实现（这个类可以负责前面所进行的网络的学习）。</p>
 <p>Dropout 的实验和前面的实验一样，使用 7 层网络（每层有100个神经元，激活函数为 ReLU），一个使用Dropout，另一个不使用 Dropout ，实验结果如下图所示</p>
-<p><img src="/79.png"></p>
+<p><img src="/posts/d2e41a48/79.png"></p>
 <p>我们可以看到，通过使用 Dropout ，训练数据和测试数据的识别精度的差距变小了。并且，训练数据也没有到达100%的识别精度。像这样，通过使用 Dropout ，即便是表现力强的网络，也可以抑制过拟合。</p>
 <blockquote>
 <p>机器学习中经常使用集成学习。所谓集成学习，就是让多个模型单独进行学习，推理时再取多个模型的输出的平均值。用神经网络的语境来说，比如，准备5个结构相同（或者类似）的网络，分别进行学习，测试时，以这5个网络的输出的平均值作为答案。实验告诉我们，通过进行集成学习，神经网络的识别精度可以提高好几个百分点。这个集成学习与 Dropout 有密切的关系。这是因为可以将 Dropout 理解为，通过在学习过程中随机删除神经元，从而让每一次都让不同的模型进行学习。并且，推理时，通过对神经元的输出乘以删除比例，可以取得模型的平均值。也就是说，可以理解成，Dropout 将集成学习的效果（模拟地）通过一个网络实现了。</p>
@@ -982,7 +982,7 @@
 <p>超参数的范围只要“大致地指定”就可以了。所谓“大致地指定”，是指像 $10^{-3}$ 到 $10^{3}$ 这样，以10的阶乘的尺度指定范围（也表述为“用对数尺度指定”）。</p>
 <p>在超参数的最优化中，要注意的是深度学习需要很长时间（比如，几天或几周）。因此，在超参数的搜索中，需要尽早放弃那些不符合逻辑的超参数。于是，在超参数的最优化中，减少学习的 epoch ，缩短一次评估所需的时间是一个不错的办法。</p>
 <p>以上就是超参数的最优化的内容，简单归纳一下，如下所示。</p>
-<p><img src="/80.png"></p>
+<p><img src="/posts/d2e41a48/80.png"></p>
 <p>反复进行上述操作，不断缩小超参数的范围，在缩小到一定程度时，从该范围中选出一个超参数的值。这就是进行超参数的最优化的一种方法。</p>
 <blockquote>
 <p>这里介绍的超参数的最优化方法是实践性的方法。不过，这个方法与其说是科学方法，倒不如说有些实践者的经验的感觉。在超参数的最优化中，如果需要更精炼的方法，可以使用贝叶斯最优化（Bayesian optimization）。贝叶斯最优化运用以贝叶斯定理为中心的数学理论，能够更加严密、高效地进行最优化。详细内容请参 考 论 文“Practical Bayesian Optimization of Machine Learning  Algorithms”等。</p>
@@ -1018,7 +1018,7 @@
 </blockquote>
 <p>像这样进行随机采样后，再使用这些值进行学习，重复这一过程，观察合乎逻辑的超参数在哪里。</p>
 <p>结果如下图所示，这里按照识别精度从高到低的顺序排列了验证数据的学习的变化。</p>
-<p><img src="/81.png"></p>
+<p><img src="/posts/d2e41a48/81.png"></p>
 <p>从图中可知，直到 “Best-5” 左右，学习进行得都很顺利。因此，我们来观察一下 “Best-5” 之前的超参数的值，结果如下</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Best-<span class="number">1</span> (val acc:<span class="number">0.83</span>) | lr:<span class="number">0.0092</span>, weight decay:<span class="number">3.86e-07</span></span><br><span class="line">Best-<span class="number">2</span> (val acc:<span class="number">0.78</span>) | lr:<span class="number">0.00956</span>, weight decay:<span class="number">6.04e-07</span></span><br><span class="line">Best-<span class="number">3</span> (val acc:<span class="number">0.77</span>) | lr:<span class="number">0.00571</span>, weight decay:<span class="number">1.27e-06</span></span><br><span class="line">Best-<span class="number">4</span> (val acc:<span class="number">0.74</span>) | lr:<span class="number">0.00626</span>, weight decay:<span class="number">1.43e-05</span></span><br><span class="line">Best-<span class="number">5</span> (val acc:<span class="number">0.73</span>) | lr:<span class="number">0.0052</span>, weight decay:<span class="number">8.97e-06</span></span><br></pre></td></tr></table></figure>
 
@@ -1027,9 +1027,9 @@
 <h1 id="第7章-卷积神经网络"><a href="#第7章-卷积神经网络" class="headerlink" title="第7章 卷积神经网络"></a>第7章 卷积神经网络</h1><p>本章的主题是卷积神经网络（Convolutional Neural Network, CNN）。CNN被用于图像识别、语音识别等各种场合中。</p>
 <h2 id="7-1-整体结构"><a href="#7-1-整体结构" class="headerlink" title="7.1 整体结构"></a>7.1 整体结构</h2><p>首先，来看一下CNN的网络结构，了解CNN的大致框架。CNN和之前介绍的神经网络一样，可以像乐高积木一样通过组装层来构建。不过，CNN新出现了卷积层（Convolution 层）和池化层（Pooling 层）。</p>
 <p>之前介绍的神经网络中，相邻层的所有神经元之间都有连接，这称为<strong>全连接</strong> (fully-connected)。另外，我们用 Affine层实现了全连接层。如果使用这个 Affine 层，一个5层的全连接的神经网络就可以通过下图所示的网络结构来实现。其中 Affine 层后面跟着激活函数 ReLU 层，但是第5层的 Affine 层后面是由 Softmax 层输出最终结果。</p>
-<p><img src="/82.png"></p>
+<p><img src="/posts/d2e41a48/82.png"></p>
 <p>那么，CNN 会是什么样的结构呢？如下图所示，这里 CNN 新增了卷积层和池化层，其顺序是 Conv-ReLU-(Pooling)（Pooling 层有时会被省略）。这里还需要注意的是，这里靠近输出的层中使用了之前的 “Affine - ReLU” 组合。此外，最后的输出层中使用了之前的 “Affine - softmax” 组合。这些都是一般的 CNN 中比较常见的结构</p>
-<p><img src="/83.png"></p>
+<p><img src="/posts/d2e41a48/83.png"></p>
 <h2 id="7-2-卷积层"><a href="#7-2-卷积层" class="headerlink" title="7.2 卷积层"></a>7.2 卷积层</h2><p>CNN中出现了一些特有的术语，比如填充、步幅等。此外，各层中传递的数据是有形状的数据（比如，3维数据），这与之前的全连接网络不同，因此刚开始学习 CNN 时可能会感到难以理解。本节我们将花点时间，认真学习一些CNN中使用的卷积层的结构。</p>
 <h3 id="全连接层存在的问题"><a href="#全连接层存在的问题" class="headerlink" title="全连接层存在的问题"></a>全连接层存在的问题</h3><p>之前介绍的全连接的神经网络中使用了全连接层（Affine 层）。在全连接层中，相邻层的神经元全部连接在一起，输出的数量可以任意决定。</p>
 <p>全连接层存在什么问题呢？那就是数据的形状被“忽视”了。比如，输入数据是图像时，图像通常时高、长、通道方向上的3维形状。但是，向全连接层输入时，需要将3维数据拉平维1维数据。实际上，前面提到的使用了 MNIST 数据集的例子中，输入数据就是1通道，高28像素，长28像素的（1，28，28）形状，但却被排成1列，以784个数据的形式输入到最开始的 Affine 层。</p>
@@ -1037,40 +1037,40 @@
 <p>而卷积层可以保持形状不变。当输入数据是图像时，卷积层会以3维数据的形式接收输入数据，并同样以3维数据的形状输出至下一层。因此，在CNN中，可以（有可能）正确理解图像等具有形状的数据。</p>
 <p>另外，CNN中，有时将卷积层的输入输出数据称为<strong>特征图</strong> (feature map)。其中，卷积层的输入数据称为<strong>输入特征图</strong> (input feature map)，输出数据称为<strong>输出特征图</strong> (output feature map)。本书中将“输入输出数据”和“特征图”作为含义相同的词使用。</p>
 <h3 id="卷积运算"><a href="#卷积运算" class="headerlink" title="卷积运算"></a>卷积运算</h3><p>卷积层进行的处理就是卷积运算。卷积运算相当于图像处理中的“滤波器运算”。在介绍卷积运算时，我们来看一个具体的例子。</p>
-<p><img src="/84.png"></p>
+<p><img src="/posts/d2e41a48/84.png"></p>
 <p>如图所示，卷积运算对输入数据应用滤波器。在这个例子中，输入数据是有高长方向的数据，滤波器也一样，有高长方向上的维度。假设用 (height, width) 表示数据和滤波器的形状，则在本例中，输入大小是 (4,4) ，滤波器大小是 (3,3) ，输出大小是 (2,2) 。另外，有的文献中也会用 “核” 这个词来表示这里所说的“滤波器”。</p>
 <p>现在来解释一些图中的卷积运算的例子中都进行了什么样的运算。下图展示了卷积运算的计算顺序。卷积运算是以一定间隔滑动滤波器的窗口并应用。如图所示，这里是将各个位置上滤波器的元素与输入的对应元素相乘，然后再求和（有时将这个计算称为<strong>乘积累加运算</strong>），然后输出到相应位置。将这个过程在所有位置都进行一遍，就可以得到卷积运算的输出。</p>
-<p><img src="/85.png"></p>
+<p><img src="/posts/d2e41a48/85.png"></p>
 <p>在全连接中的神经网络中，除了权重参数，还存在偏置。CNN中，滤波器的参数就对应之前的权重。并且，CNN中也存在偏置，包含偏置的卷积运算的处理流如下图所示。其中向应用了滤波器的数据加上了偏置。偏置通常只有一个 (1 × 1)，这个值会被加到应用了滤波器的所有元素上。</p>
-<p><img src="/86.png"></p>
+<p><img src="/posts/d2e41a48/86.png"></p>
 <h3 id="填充"><a href="#填充" class="headerlink" title="填充"></a>填充</h3><p>在进行卷积层的处理之前，有时要向输入数据的周围填入固定的数据（比如0等），这称为<strong>填充</strong> (padding) ，是卷积运算中经常会用到的处理。比如，在下图的例子中，对大小为 (4,4) 的输入数据应用了幅度为1的填充。“幅度为1的填充”是指用幅度为1像素的0填充周围。</p>
-<p><img src="/87.png"></p>
+<p><img src="/posts/d2e41a48/87.png"></p>
 <p>如图所示，通过填充，大小为 (4,4) 的输入数据变成了 (6,6) 的形状。然后，应用大小为 (3,3) 的滤波器，生成了大小为 (4,4) 的输出数据。这个例子中将填充设为了1，不过填充的值也可以设置为2，3等任意的整数。</p>
 <blockquote>
 <p>使用填充主要是为了调整输出的大小。如果输出一直比输入的规模小，这在反复进行多次卷积运算的深度网络中会成为问题。如果每次进行卷积运算都会缩写空间，那么在某个时刻输出大小就有可能变成1，导致无法再应用卷积运算。</p>
 </blockquote>
 <h3 id="步幅"><a href="#步幅" class="headerlink" title="步幅"></a>步幅</h3><p>应用滤波器的位置间隔称为<strong>步幅</strong> (stride) 。之前例子中步幅都是 1，如果将步幅设为2，如下所示，此时应用滤波器的窗口的间隔变成2个元素。</p>
-<p><img src="/88.png"></p>
+<p><img src="/posts/d2e41a48/88.png"></p>
 <p>我们看一下对于填充和步幅，如何计算输出大小。</p>
 <p>这里，假设输入大小为 $(H,W)$ ，滤波器大小为 $(FH,FW)$ ，输出大小为 $(OH,OW)$ ，填充为 $P$ ，步幅为 $S$ 。此时，输出大小可以按照下式计算。<br>$$<br>\begin{align*}<br>OH &amp;&#x3D; \frac{H + 2P - FH}{S} + 1 \<br>OW &amp;&#x3D; \frac{W + 2P - FW}{S} + 1<br>\end{align*}<br>$$<br>当上面式子中的除法式子不能除尽时（结果是小数时），需要采取报错等对策（顺便说一下，根据深度学习的框架的不同，有时会向最接近的整数四舍五入，不进行报错而继续运行）。</p>
 <h3 id="3维数据的卷积运算"><a href="#3维数据的卷积运算" class="headerlink" title="3维数据的卷积运算"></a>3维数据的卷积运算</h3><p>之前的卷积运算的例子都是以有高、长方向的2维形状为对象的。但是，图像是3维数据，除了高、长方向之外，还需要处理通道方向。这里，我们按照与之前相同的顺序，看一下对加上了通道方向的3维数据进行卷积运算的例子。</p>
 <p>下图是卷积运算的例子，和2维数据时相比，可以发现纵深方向（通道方向）上特征图增加了。通道方向上有多个特征图时，会按通道进行输入数据和滤波器的卷积运算，并将结果相加，从而得到输出。</p>
-<p><img src="/89.png"></p>
-<p><img src="/90.png"></p>
+<p><img src="/posts/d2e41a48/89.png"></p>
+<p><img src="/posts/d2e41a48/90.png"></p>
 <p>需要注意的是，在3维数据的卷积运算中，输入数据和滤波器的通道数要设为相同的值。在这个例子中，输入数据和滤波器的通道数一致，均为3。滤波器大小可以设定为任意值（不过，每个通道的滤波器大小要全部相同）。这个例子中滤波器大小为 (3,3) ，但也可以设定为 (2,2) ，(1,1) ，(5,5) 等任意值。再强调一下，通道数只能设定为和输入数据的通道数相同的值。</p>
 <h3 id="结合方块思考"><a href="#结合方块思考" class="headerlink" title="结合方块思考"></a>结合方块思考</h3><p>将数据和滤波器结合长方体的方块来考虑，3维数据的卷积运算会很容易理解。方块是如下图所示的3维长方体。把3维数据表示维多维数组时，书写顺序为 (channel, weight, width) 。比如，通道数为 C，高度为 H，长度为 W 的数据的形状可以写成 $(C,H,W)$ 。滤波器也一样，要按照 (channel, weight, width) 的顺序书写，如 $(C,FH,FW)$ 。</p>
-<p><img src="/91.png"></p>
+<p><img src="/posts/d2e41a48/91.png"></p>
 <p>在这个例子中，数据输出是 1 张特征图。所谓1张特征图，换句话说，就是通道数为1的特征图。那么，如果要在通道方向上也拥有多个卷积运算的输出，该怎么做呢？为此，就需要用到多个滤波器（权重）。用图表示的话，如下图所示</p>
-<p><img src="/92.png"></p>
+<p><img src="/posts/d2e41a48/92.png"></p>
 <p>图中，通过应用 $FN$ 个滤波器，输出特征图也生成了 $FN$ 个。如果将这 $FN$ 个特征图汇集在一起，就得到了形状为 $(FN, OH,OW)$ 的方块。将这个方块传给下一层，就是 CNN 的处理流。</p>
 <p>因此，关于卷积运算的滤波器，也必须考虑滤波器的数量。因此，作为4维数据，滤波器的权重数据要按 (output_channel, input_channel, height, width) 的顺序书写。比如，通道数为3， 大小为 5 × 5 的滤波器有20个时，可以写成 (20, 3, 5, 5) 。</p>
 <p>卷积运算中存在偏置，在上图的例子中，如果进一步追加偏置的加法运算处理，则结果如下图所示。其中每个通道只有一个偏置，偏置的形状是 $(FN,1,1)$ ，滤波器的输出结果的形状是 $(FN, OH,OW)$  。这里不同形状的方块相加时，可以基于 NumPy 的广播功能轻松实现。</p>
-<p><img src="/93.png"></p>
+<p><img src="/posts/d2e41a48/93.png"></p>
 <h3 id="批处理-1"><a href="#批处理-1" class="headerlink" title="批处理"></a>批处理</h3><p>神经网络的处理中进行了将输入数据打包的批处理。为此，需要将在各层间传递的数据保存为4维数据。具体地将，就是按 (batch_num, channel, height, width) 的顺序保存数据。比如，将之前的处理改成为 $N$ 个数据进行批处理时，数据的形状如下图所示。</p>
 <p>下图的批处理版的数据流中，在各个数据的开头添加了批用的维度。像这样，数据作为4维的形状在各层的形状在各层间传递。这里需要注意的是，网络间传递的是4维数据，对这 $N$ 个数据进行了卷积运算。也就是说，批处理将 $N$ 次的处理汇总成了1次进行。</p>
-<p><img src="/94.png"></p>
+<p><img src="/posts/d2e41a48/94.png"></p>
 <h2 id="7-3-池化层"><a href="#7-3-池化层" class="headerlink" title="7.3 池化层"></a>7.3 池化层</h2><p>池化是缩小高、长方向上的空间的运算。比如，如下图所示，进行将 2×2 的区域集约成1个元素的处理，缩小空间大小。</p>
-<p><img src="/95.png"></p>
+<p><img src="/posts/d2e41a48/95.png"></p>
 <p>这里的例子是按步幅2进行 2×2 的 Max 池化时的处理顺序。“Max池化”是获取最大值的运算，”2×2”表示目标区域的大小。如图所示，从2×2的区域中取出最大的元素。此外，这个例子中将步幅设为了2，所以2×2的窗口的移动间隔为2个元素。另外，一般来说，池化的窗口大小会和步幅设定成相同的值。比如，3×3 的窗口的步幅都会设为3，4×4 的窗口的步幅会设为4等。</p>
 <blockquote>
 <p>除了 Max 池化之外，还有 Average 池化等。Average 池化是计算目标区域的平均值。在图像识别领域，主要使用 Max 池化。因此，本书中说明“池化层”时，指的是 Max 池化。</p>
@@ -1080,11 +1080,11 @@
 <li>没有要学习的参数</li>
 <li>输入数据和输出数据的通道数不会发生变化，二者通道数相同，如下图所示，计算是按照通道独立进行的。如下图所示</li>
 </ol>
-<p><img src="/96.png"></p>
+<p><img src="/posts/d2e41a48/96.png"></p>
 <ol start="3">
 <li>对微小的位置变化具有鲁棒性（健壮）：当输入数据发生微小偏差时，池化仍会返回相同的结果，如下图所示</li>
 </ol>
-<p><img src="/97.png"></p>
+<p><img src="/posts/d2e41a48/97.png"></p>
 <h2 id="7-4-卷积层和池化层的实现"><a href="#7-4-卷积层和池化层的实现" class="headerlink" title="7.4 卷积层和池化层的实现"></a>7.4 卷积层和池化层的实现</h2><p>前面我们详细介绍了卷积层和池化层，本节我们就用 Python 来实现这两个层。和第5章一样，也给进行实现的类赋予 forward 和 backward 方法，并使其可以作为模块使用。</p>
 <p>大家可能会感觉卷积层和池化层的实现很复杂，但实际上，通过使用某种技巧，就可以轻松地实现。本节将介绍这种技巧，将问题简化，然后再进行卷积层的实现。</p>
 <h3 id="4维数组"><a href="#4维数组" class="headerlink" title="4维数组"></a>4维数组</h3><p>如前所述，CNN中各层间传递的数据是4维数据。所谓4维数据，比如数据的形状是 (10,1,28,28) ，这它对应10个高为28，长为28，通道为1的数据。用Python来实现的话，如下所示。</p>
@@ -1101,19 +1101,19 @@
 <p>像这样，CNN中处理 的是4维数据，因此卷积运算的实现看上去会很复杂，但是通过使用下面要介绍的 im2col 这个技巧，问题就会变得很简单。</p>
 <h3 id="基于-im2col-的展开"><a href="#基于-im2col-的展开" class="headerlink" title="基于 im2col 的展开"></a>基于 im2col 的展开</h3><p>如果老老实实地实现卷积运算，估计要重复好几层的 for 语句。这样的实现有点麻烦，而且，NumPy 中存在使用 for 语句后处理变慢的特点（NumPy中，访问元素时最好不要用 for 语句）。这里，我们不适用 for 语句，而是使用 im2col 这个便利的函数进行简单的实现。</p>
 <p>im2col 是一个函数，将输入数据展开以合适滤波器（权重）。如图所示，对3维的输入数据应用 im2col 后，数据转为 2 维矩阵（正确地讲，是把包含批数量的4维数据转换成了2维数据）。</p>
-<p><img src="/98.png"></p>
+<p><img src="/posts/d2e41a48/98.png"></p>
 <p>im2col 会把输入数据展开以适合滤波器。具体的说，如下图所示，对输入数据，将应用滤波器的区域（3维方块）横向展开为1列。im2col 会在所有应用滤波器的地方进行这个展开处理。</p>
-<p><img src="/99.png"></p>
+<p><img src="/posts/d2e41a48/99.png"></p>
 <p>在这个图中，为了便于观察，将步幅设置得很大，以使滤波器的应用区域不重叠。而在实际的卷积运算中，滤波器的应用区域几乎都是重叠的。在滤波器的应用区域重叠的情况下，使用 im2col 展开后，展开的元素个数会多余原方块的元素个数。因此，使用 im2col 的实现存在比普通的实现消耗更多内存的缺点。但是，汇总成一个大的矩阵进行计算，对计算机的计算颇有益处。比如，在矩阵计算的库等中，矩阵计算的实现已被高度最优化，可以高速的进行大矩阵的乘法运算。因此，通过归结到矩阵计算上，可以有效地利用线性代数库。</p>
 <blockquote>
 <p>im2col 这个名称是 “image to column” 的缩写，翻译过滤就是“从图像到矩阵”的意思。Caffe, Chainer 等深度学习框架中有名为 im2col 的函数，并且在卷积层的实现中，都使用了 im2col 。</p>
 </blockquote>
 <p>使用 im2col 展开输入数据后，之后就只需将卷积层的滤波器纵向展开为 1列，并计算2个矩阵的乘积即可。这和全连接层的 Affine 层进行的处理基本相同。</p>
 <p>如下图所示，基于 im2col 方式的输出结果是2维矩阵。因为CNN中数据会保存为4维数组，所以要将2维输出数据转换为合适的形状。以上就是卷积层的实现流程。</p>
-<p><img src="/100.png"></p>
+<p><img src="/posts/d2e41a48/100.png"></p>
 <h3 id="卷积层的实现"><a href="#卷积层的实现" class="headerlink" title="卷积层的实现"></a>卷积层的实现</h3><p>本书提供了 im2col 函数，并将这个 im2col 函数作为黑盒（不关心内部实现）使用。im2col的实现内容在common&#x2F;util.py中，它的实现（实质上）是一个10行左右的简单函数。有兴趣的读者可以参考。</p>
 <p>im2col 这一便捷函数具有以下接口。</p>
-<p><img src="/101.png"></p>
+<p><img src="/posts/d2e41a48/101.png"></p>
 <p>im2col 会考虑滤波器大小、步幅、填充，将输入数据慷慨成2维数组。现在我们实际使用一下这个im2col 。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys, os</span><br><span class="line">sys.path.append(os.pardir)</span><br><span class="line"><span class="keyword">from</span> common.util <span class="keyword">import</span> im2col</span><br><span class="line"></span><br><span class="line">x1 = np.random.rand(<span class="number">1</span>, <span class="number">3</span>, <span class="number">7</span>, <span class="number">7</span>)</span><br><span class="line">col1 = im2col(x1, <span class="number">5</span>, <span class="number">5</span>, stride=<span class="number">1</span>, pad=<span class="number">0</span>)</span><br><span class="line"><span class="built_in">print</span>(col1.shape) <span class="comment"># (9, 75)</span></span><br><span class="line"></span><br><span class="line">x2 = np.random.rand(<span class="number">10</span>, <span class="number">3</span>, <span class="number">7</span>, <span class="number">7</span>) <span class="comment"># 10个数据</span></span><br><span class="line">col2 = im2col(x2, <span class="number">5</span>, <span class="number">5</span>, stride=<span class="number">1</span>, pad=<span class="number">0</span>)</span><br><span class="line"><span class="built_in">print</span>(col2.shape) <span class="comment"># (90, 75)</span></span><br></pre></td></tr></table></figure>
 
@@ -1124,12 +1124,12 @@
 <p>卷积层的初始化方法将滤波器、偏置、步幅、填充作为参数接收。滤波器是 (FN, C, FH, FW) 的4维形状。另外，FN, C, FH, FW 分别时 Filter Number（滤波器数量）、Channel、Filter Height、Filter width 的缩写。</p>
 <p>这里用 im2col 展开输入数据，并用 reshape 将滤波器展开为 2 维数组。然后，计算展开后的矩阵的乘积。展开滤波器的部分如下图所示，将各个滤波器的方块纵向展开为1列。这里通过 <code>reshape(FN, -1)</code> 将参数指定为-1，会自动计算 -1 维度上的元素个数，以使多维数组的元素个数前后一致。比如，(10,3,5,5) 形状的数组的元素个数共有 750 个，指定 reshape(10, -1) 后，就会转换成 (10, 75) 形状的数组。最后通过 NumPy 的 transpose 函数，更改多维数组的轴的顺序。</p>
 <p>forward的实现中，最后会将输出大小转换为合适的形状。转换时使用了 NumPy 的 transpose 函数。transpose 会更改多维数组的轴的顺序（没太看懂）。</p>
-<p><img src="/102.png"></p>
+<p><img src="/posts/d2e41a48/102.png"></p>
 <p>以上就是卷积层的 forward 处理的实现。通过使用 im2col 进行展开，基本上可以像实现全连接层的 Affine 层一样来实现。接下来是卷积层的方向传播的实现，因为和 Affine 层的实现有很多共通的地方，所以就不再介绍了。但有一点需要注意，在进行卷积层的反向传播时，必须进行 im2col 的逆处理。这可以使用本书提供的 col2im 函数（在common&#x2F;util.py 中）来进行。除了使用 col2im 这一点，卷积层的反向传播和 Affine 层的实现方式都一样。卷积层的反向传播的实现在 common&#x2F;layer.py 中。</p>
 <h3 id="池化层的实现"><a href="#池化层的实现" class="headerlink" title="池化层的实现"></a>池化层的实现</h3><p>池化层的实现和卷积层相同，都使用 im2col 展开输入数据。不过，池化的情况下，在通道方向上是独立的，这一点和卷积层不同。具体地讲，如下图所示，池化的应用区域按通道单独展开。</p>
-<p><img src="/103.png"></p>
+<p><img src="/posts/d2e41a48/103.png"></p>
 <p>像这样展开后，只需要对展开的矩阵求各行的最大值，并转换为合适的形状即可。</p>
-<p><img src="/104.png"></p>
+<p><img src="/posts/d2e41a48/104.png"></p>
 <p>上面就是池化层的 forward 处理的实现流程。下面来看一下 Python 的实现示例。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Pooling</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, pool_h, pool_w, stride=<span class="number">1</span>, pad=<span class="number">0</span></span>):</span><br><span class="line">        self.pool_h = pool_h</span><br><span class="line">        self.pool_w = pool_w</span><br><span class="line">        self.stride = stride</span><br><span class="line">        self.pad = pad</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        N, C, H, W = x.shape</span><br><span class="line">        out_h = <span class="built_in">int</span>(<span class="number">1</span> + (H - self.pool_h) / self.stride)</span><br><span class="line">        out_w = <span class="built_in">int</span>(<span class="number">1</span> + (W - self.pool_w) / self.stride)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 展开(1)</span></span><br><span class="line">        col = im2col(x, self.pool_h, self.pool_w, self.stride, self.pad)</span><br><span class="line">        col = col.reshape(-<span class="number">1</span>, self.pool_h*self.pool_w)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 最大值(2)</span></span><br><span class="line">        out = np.<span class="built_in">max</span>(col, axis=<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># 转换(3)</span></span><br><span class="line">        out = out.reshape(N, out_h, out_w, C).transpose(<span class="number">0</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
 
@@ -1143,10 +1143,10 @@
 <p>以上就是池化层的 forward 层处理的介绍。如上所述，通过将输入数据展开为容易进行池化的形状，后面的实现就会变得非常简单。</p>
 <p>关于池化层的 backward 处理，之前已经介绍过相关内容，这里就不再介绍了（没介绍啊）。另外，池化层的 backward 处理可以参考 ReLU 层的实现中使用的 max 的反向传播。池化层的实现在 common&#x2F;layers.py 中。</p>
 <h2 id="7-5-CNN的实现"><a href="#7-5-CNN的实现" class="headerlink" title="7.5 CNN的实现"></a>7.5 CNN的实现</h2><p>我们已经实现了卷积层和池化层，现在来组合这些层，搭建进行手写数字识别的CNN。这里要实现如下图所示的CNN。</p>
-<p><img src="/105.png"></p>
+<p><img src="/posts/d2e41a48/105.png"></p>
 <p>如图所示，网络的构成是 “Convolution - ReLU - Pooling - Affine - ReLU - Affine - Softmax” 。我们将它实现为名为 SimpleConvNet 的类。</p>
 <p>首先来看一下 SimpleConvNet 的初始化（<code>__init__</code> ），取下面这些参数。</p>
-<p><img src="/106.png"></p>
+<p><img src="/posts/d2e41a48/106.png"></p>
 <p>这里，卷积层的超参数通过名为 conv_param 的字典传入。我们设想它会像 {‘filter_num’:30,’filter_size’:5,’pad’:0, ‘stride’:1} 这样，保存必要的超参数值。</p>
 <p>SimpleConvNet 的初始化的实现稍长，我们分为3部分来说明，首先是初始化的最开始部分。这里由初始化参数传入的卷积层的超参数从字典中取了出来（以方便后面使用），然后，计算卷积层的输出大小。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, input_dim=(<span class="params"><span class="number">1</span>, <span class="number">28</span>, <span class="number">28</span></span>), </span></span><br><span class="line"><span class="params">             conv_param=&#123;<span class="string">&#x27;filter_num&#x27;</span>:<span class="number">30</span>, <span class="string">&#x27;filter_size&#x27;</span>:<span class="number">5</span>, <span class="string">&#x27;pad&#x27;</span>:<span class="number">0</span>, <span class="string">&#x27;stride&#x27;</span>:<span class="number">1</span>&#125;,</span></span><br><span class="line"><span class="params">             hidden_size=<span class="number">100</span>, output_size=<span class="number">10</span>, weight_init_std=<span class="number">0.01</span></span>):</span><br><span class="line">    filter_num = conv_param[<span class="string">&#x27;filter_num&#x27;</span>]</span><br><span class="line">    filter_size = conv_param[<span class="string">&#x27;filter_size&#x27;</span>]</span><br><span class="line">    filter_pad = conv_param[<span class="string">&#x27;pad&#x27;</span>]</span><br><span class="line">    filter_stride = conv_param[<span class="string">&#x27;stride&#x27;</span>]</span><br><span class="line">    input_size = input_dim[<span class="number">1</span>]</span><br><span class="line">    conv_output_size = (input_size - filter_size + <span class="number">2</span>*filter_pad) / filter_stride + <span class="number">1</span></span><br><span class="line">    pool_output_size = <span class="built_in">int</span>(filter_num * (conv_output_size/<span class="number">2</span>) * (conv_output_size/<span class="number">2</span>))</span><br></pre></td></tr></table></figure>
@@ -1171,22 +1171,22 @@
 <h2 id="7-6-CNN的可视化"><a href="#7-6-CNN的可视化" class="headerlink" title="7.6 CNN的可视化"></a>7.6 CNN的可视化</h2><p>CNN用到的卷积层在“观察”什么呢？本节将通过卷积层的可视化，探索CNN中到底进行了什么处理。</p>
 <h3 id="第1层权重的可视化"><a href="#第1层权重的可视化" class="headerlink" title="第1层权重的可视化"></a>第1层权重的可视化</h3><p>刚才我们对 MNIST 数据集进行了简单的 CNN 学习。当时，第1层的卷积层的权重的性状是（30,1,5,5），即30个大小为 5×5，通道为1的滤波器。滤波器大小是5×5，通道数是1，意味着滤波器可以可视化为1通道的灰度图像。现在，我们将卷积层（第1层）的滤波器显示为图像。这里，我们来比较一下学习前和学习后的权重，结果如下图所示（源代码在ch07&#x2F;visualize_filter.py中）。</p>
 <p>图中，学习前的滤波器是随机进行初始化的，所以在黑白的浓淡上没有规律可循，但学习后的滤波器变成了有规律的图像。我们发现，通过学习，滤波器被更新成了有规律的滤波器，比如从白到黑渐变的滤波器，含有块状区域（称为blob）的滤波器等。</p>
-<p><img src="/107.png"></p>
+<p><img src="/posts/d2e41a48/107.png"></p>
 <p>如果要问图7-24中右边的有规律的滤波器在“观察”什么，答案就是它在观察边缘（颜色变化的分界线）和斑块（局部的块状区域）等。比如左半部分为白色，右半部分为黑色的滤波器的情况下，如下图所示，会对垂直方向上的边缘有响应。</p>
 <p>图中显示了选择两个学习完的滤波器对输入图像进行卷积处理时的结果。我们发现“滤波器1”对垂直方向上的边缘有响应，“滤波器2”对水平方向上的边缘有响应。</p>
 <p>由次可知，卷积层的滤波器会提取边缘或斑块等原始信息。而刚才实现的 CNN 会将这些原始信息传递给后面的层。</p>
-<p><img src="/108.png"></p>
+<p><img src="/posts/d2e41a48/108.png"></p>
 <h3 id="基于分层结构的信息提取"><a href="#基于分层结构的信息提取" class="headerlink" title="基于分层结构的信息提取"></a>基于分层结构的信息提取</h3><p>上面的结果是针对第1层的卷积层得到的。第1层的卷积层中提取了边缘或斑块等“低级”信息，那么在堆叠了多层的CNN中，各层中又会提取什么样的信息呢？根据深度学习的可视化相关的研究，随着层次加深，提取的信息（正确地讲，是反映强烈的神经元）也越来越抽象。</p>
 <p>下图中展示了进行一般物体识别（车或狗等）的8层CNN。这个网络结构的名称是下一节要介绍的 AlexNet 。 AlexNet 网络中堆叠了多层卷积层和池化层，最后经过全连接层输出结果。下图中的方块表示的是中间数据，对于这些中间数据，会连续应用卷积运算。</p>
-<p><img src="/109.png"></p>
+<p><img src="/posts/d2e41a48/109.png"></p>
 <p>如图所示，如果堆叠了多层卷积层，则随着层次加深，提取的信息也愈加复杂、抽象，这是深度学习中很有意思的一个地方。最开始的层对简单的边缘有响应，再后面的层对更加复杂的物体部件有响应。也就是说，随着层次加深，神经元从简单的形状向“高级”信息变化。换句话说，就像我们理解东西的“含义”一样，响应的对象在逐渐变化。</p>
 <h2 id="7-7-具有代表性的CNN"><a href="#7-7-具有代表性的CNN" class="headerlink" title="7.7 具有代表性的CNN"></a>7.7 具有代表性的CNN</h2><p>关于CNN，迄今为止已经提出了各种网络结构。这里，我们介绍其中特别重要的两个网络，一个是在 1998年首次被提出的CNN元组 LeNet ，另一个是在深度学习受到关注的 2012 年被提出的 AlexNet 。</p>
 <h3 id="LeNet"><a href="#LeNet" class="headerlink" title="LeNet"></a>LeNet</h3><p>LeNet 在1998年被提出，是进行手写数字识别的网络。如下图所示，它有连续的卷积层和池化层（正确地讲，是只“抽取元素”的子采样层），最后经过全连接层输出结果。</p>
-<p><img src="/110.png"></p>
+<p><img src="/posts/d2e41a48/110.png"></p>
 <p>和“现在的CNN”相比，LeNet 有几个不同点。第一个不同点在于激活函数。LeNet 中使用 sigmoid 函数，而现在的 CNN 中主要使用 ReLU 函数。此外，原始的 LeNet 中采用子采样（subsampling）缩小中间数据的大小，而现在的 CNN 中 Max 池化是主流。</p>
 <p>综上，LeNet 与现在的 CNN 虽然有些许不同，但差别并不是那么大。想到 LeNet 是20多年前提出的最早的 CNN，还是令人称奇的。</p>
 <h3 id="AlexNet"><a href="#AlexNet" class="headerlink" title="AlexNet"></a>AlexNet</h3><p>在 LeNet 问世 20 多年后，AlexNet 被发布出来。AlexNet 是引发深度学习热潮的导火线，不过它的网络结构和 LeNet 基本上没有什么不同，如下图所示</p>
-<p><img src="/111.png"></p>
+<p><img src="/posts/d2e41a48/111.png"></p>
 <p>AlexNet 叠有多个卷积层和池化层，最后经由全连接层输出结果。虽然结构上 AlexNet 和 LeNet 没有大的不同，但有以下几点差异。</p>
 <ul>
 <li>激活函数使用 ReLU</li>
@@ -1198,7 +1198,7 @@
 <h2 id="8-1-加深网络"><a href="#8-1-加深网络" class="headerlink" title="8.1 加深网络"></a>8.1 加深网络</h2><p>关于神经网路，我们已经学了很多东西，比如构建神经网络的各种层，学习时的有效技巧、对图像特别有效的 CNN 、参数的最优化方法等，这些都是深度学习中的重要技术。本节我们将这些已经学过的技术汇总起来，创建一个深度网络，调整MNIST数据集的手写数字识别。</p>
 <h3 id="向更深的网络出发"><a href="#向更深的网络出发" class="headerlink" title="向更深的网络出发"></a>向更深的网络出发</h3><p>这里我们创建一个如下图所示的 CNN ，这个网络参考了下一节要介绍的 VGG 。</p>
 <p>如图所示，这个网络的层比之前实现的网络都要深。这里使用的卷积层全都是 3×3 的小型滤波器，特点是随着层的加深，通道数变大（卷积层的通道数从前面的层开始按顺序以16、16、32、32、64、64的方式增加）。此外，如图所示，插入了池化层，以逐渐减小中间数据的空间大小；并且，后面的全连接层中使用了 Dropout 层。</p>
-<p><img src="/112.png"></p>
+<p><img src="/posts/d2e41a48/112.png"></p>
 <p>这个网络使用 He 初始值作为权重的初始值，使用 Adam 更新权重参数。把上述内容总结起来，这个网络有如下特点。</p>
 <ul>
 <li>基于 3×3 的小型滤波器的卷积层</li>
@@ -1209,20 +1209,20 @@
 </ul>
 <p>从这些特征中可以看出，这个网络使用了多个之前介绍的神经网络技术。现在，我们使用这个网络进行学习。先说一下结果，这个网络的识别精度为 99.38% ，可以说是非常优秀的性能了。</p>
 <p>这个网络的错误识别率只有 0.62% 。这里我们实际看一下在什么样的图像上发生了识别错误。下图中显示了识别错误的例子。</p>
-<p><img src="/113.png"></p>
+<p><img src="/posts/d2e41a48/113.png"></p>
 <p>可以看到，这些图像对于人类而言也很难判断。实际上，这里有几个图像很难判断是哪个数字，即使是我们人类，也同样会犯“识别错误”。</p>
 <p>这次的深度CNN尽管识别精度很高，但是对于某些图像，也犯了和人类同样的“识别错误”。从这一点上，我们也可以感受到深度 CNN 中蕴藏着巨大的可能性。</p>
 <h3 id="进一步提高识别精度"><a href="#进一步提高识别精度" class="headerlink" title="进一步提高识别精度"></a>进一步提高识别精度</h3><p>在一个标题为“What is the class of this image ?”的网站上，以排行榜的形式刊登了目前为止通过论文等渠道发表的针对各种数据集的方法的识别精度。榜单上的前几名大都是基于 CNN 的方法。顺便说一下，截止到2016年6月，对MNIST数据集的最高识别精度是99.79%（错误识别率为0.21%），该方法也是以CNN为基础的。不过，它用的CNN并不是特别深层的网络（卷积层为2层、全连接层为2层的网络）。</p>
 <p>参考刚才排行榜中前几名的方法，可以发现进一步提高识别精度的技术和线索。比如，集成学习，学习率衰减，Data Augmentation (数据扩充)等都有助于提高识别精度。尤其是数据扩充，虽然方法简单，但在提高识别精度上效果显著。</p>
 <p>数据扩充基于算法“人为地”扩充输入图像（训练图像）。具体地说，如下图所示，对于输入图像，通过施加旋转、垂直或水平方向上的移动等微小变化，增加图像的数量。这在数据集的图像数量有限时尤其有效。</p>
-<p><img src="/114.png"></p>
+<p><img src="/posts/d2e41a48/114.png"></p>
 <p>除了上面的变形话，数据扩充还可以通过其他方法扩充图像，比如裁剪图像的 “crop处理”、将图像左右翻转的 “flip处理”等。对于一般的图像，施加亮度等外观上的变化、放大缩小等尺度上的变化也是有效的。不管怎样，通过数据扩充巧妙地增加训练图像，就可以提高深度学习的识别精度。虽然这个看上去只是一个简单的技巧，不过经常会有很好的效果。</p>
 <h3 id="加深层的动机"><a href="#加深层的动机" class="headerlink" title="加深层的动机"></a>加深层的动机</h3><p>关于加深层的重要性，现状是理论研究还不够透彻。尽管目前相关理论还比较贫乏，但是有几点可以从过往的研究和实验中得以解释（虽然有一些直观）。本节就加深层的重要性，给出一些增补性的数据和说明。</p>
 <p>首先，加深层可以减少网络的参数数量。说得详细一点，就是与没有加深层的网络相比，加深了层的网络可以用更少的参数达到同等水平的表现力。这一点结合卷积运算中的滤波器大小来思考就好理解了。比如，下图展示了由 5 × 5 的滤波器构成的卷积层。</p>
-<p><img src="/115.png"></p>
+<p><img src="/posts/d2e41a48/115.png"></p>
 <p>这里每个输出节点都是从输入数的某个 5 × 5 的区域算出来的。接下来我们思考一下下图中重复两次 3 × 3 的卷积运算的情形。此时，每个输出数据均是由中间数据的某个  3 × 3 的区域算出来的，而中间数据的 3 × 3 的区域又是由前一个输入数据的 5 × 5的区域算出来的。也就是说，下图中的输出数据是“观察”了输入数据的某个5×5的区域后计算出来的。</p>
 <p>相比于前面的参数数量 25 ，后者一共是 18 ，通过叠加卷积层，参数数量减少了。并且，这个参数数量之差会随着层的加深而变大。比如，重复三次 3×3 的卷积运算时，参数的数量总共是 27 。而为了用依次卷积运算“观察”与之相同的区域，需要一个7×7的滤波器，此时的参数数量是 49。</p>
-<p><img src="/116.png"></p>
+<p><img src="/posts/d2e41a48/116.png"></p>
 <p>加深层的另一个好处是使学习更加高效。与没有加深层的网络相比，通过加深层，可以减少学习数据，从而高效地进行学习。例如 CNN 的卷积层会分层次地提取信息，会从对边缘等简单的形状有响应，到对纹理、物体部件等更加复杂的东西有响应。</p>
 <p>比如我们考虑一下“狗”的识别问题，如果要用浅层神经网络解决这个问题的话，卷积层需要一下子理解很多“狗”的特征，因此需要大量富有差异性的学习数据，这会导致学习需要花费很多时间。</p>
 <p>不过，通过加深网络，就可以分层次地分解学习的问题。因此，各层需要学习的问题就变成了更简单的问题。比如，最开始的层只要专注于学习边缘就好，这样一来，只需用较少的学习数据就可以高效地进行学习。</p>
@@ -1231,28 +1231,28 @@
 <h3 id="ImageNet"><a href="#ImageNet" class="headerlink" title="ImageNet"></a>ImageNet</h3><p>ImageNet 是拥有超过100万张图像的数据集。它包含了各种各样的图像，并且每张图像都被关联了标签。每年都会举办使用这个巨大数据集的 ILSVRC 图像识别大赛。</p>
 <p>ILSVRC大赛有多个测试项目，其中之一是“类别分类”（classification），在该项目中，会进行1000个类别的分类，比试识别精度。我们来看一下最近几年的ILSVRC大赛的类别分类项目的结果。图8-8中展示了从2010年到<br>2015年的优胜队伍的成绩。这里，将前5类中出现正确解的情况视为“正确”，此时的错误识别率用柱形图来表示。 </p>
 <p>图8-8中需要注意的是，以2012年为界，之后基于深度学习的方法一直居于首位。实际上，我们发现2012年的AlexNet大幅降低了错误识别率。并且，此后基于深度学习的方法不断在提升识别精度。特别是2015年的ResNet（一个超过150层的深度网络）将错误识别率降低到了3.5%。据说这个结果甚至超过了普通人的识别能力。</p>
-<p><img src="/117.png"></p>
+<p><img src="/posts/d2e41a48/117.png"></p>
 <p>这些年深度学习取得了不斐的成绩，其中VGG、GoogLeNet、ResNet 已广为人知，在与深度学习有关的各种场合都会遇到这些网络。下面我们就来简单地介绍一下这3个有名的网络。</p>
 <h3 id="VGG"><a href="#VGG" class="headerlink" title="VGG"></a>VGG</h3><p>VGG是由卷积层和池化层构成的基础的CNN。不过，如图8-9所示，它的特点在于将有权重的层（卷积层或者全连接层）叠加至16层（或者 19层），具备了深度（根据层的深度，有时也称为“VGG16”或“VGG19”）。<br>VGG中需要注意的地方是，基于3×3的小型滤波器的卷积层的运算是连续进行的。如图8-9所示，重复进行“卷积层重叠2次到4次，再通过池化层将大小减半”的处理，最后经由全连接层输出结果。</p>
 <blockquote>
 <p>VGG在2014年的比赛中最终获得了第2名的成绩（下一节介绍的GoogleNet是2014年的第1名）。虽然在性能上不及GoogleNet，但因为VGG结构简单，应用性强，所以很多技术人员都喜欢使用基于 VGG 的网络。</p>
 </blockquote>
-<p><img src="/118.png"></p>
+<p><img src="/posts/d2e41a48/118.png"></p>
 <h3 id="GoogLeNet"><a href="#GoogLeNet" class="headerlink" title="GoogLeNet"></a>GoogLeNet</h3><p>GoogLeNetde 网络结构如下图所示。图中的矩形表示卷积层、池化层等。</p>
-<p><img src="/119.png"></p>
+<p><img src="/posts/d2e41a48/119.png"></p>
 <p>只看图的话，这似乎是一个看上去非常复杂的网络结构，但实际上它基本上和之前介绍的CNN结构相同。不过，GoogLeNet的特征是，网络不仅在纵向上有深度，在横向上也有深度（广度）。</p>
 <p>GoogLeNet在横向上有“宽度”，这称为“Inception结构”，以图8-11所示的结构为基础。如图8-11所示Inception结构使用了多个大小不同的滤波器（和池化），最后再合并它们的结果。GoogLeNet的特征就是将这个Inception结构用作一个构件（构成元素）。此外，在GoogLeNet中，很多地方都使用了大小为 1× 1 的滤波器的卷积层。这个 1×1的卷积运算通过在通道方向上减小大小，有助于减少参数和实现高速化处理（具体请参数原始论文）。</p>
-<p><img src="/120.png"></p>
+<p><img src="/posts/d2e41a48/120.png"></p>
 <h3 id="ResNet"><a href="#ResNet" class="headerlink" title="ResNet"></a>ResNet</h3><p>ResNet 是微软团队开发的网络。它的特征在于具有比以前的网络更深的结构。</p>
 <p>们已经知道加深层对于提升性能很重要。但是，在深度学习中，过度加深层的话，很多情况下学习将不能顺利进行，导致最终性能不佳。ResNet中，为了解决这类问题，导入了“快捷结构”（也称为“捷径”或“小路”）。导入这个快捷结构后，就可以随着层的加深而不断提高性能了（当然，层的加深也是有限度的）。</p>
 <p>如图8-12所示，快捷结构横跨（跳过）了输入数据的卷积层，将输入x合计到输出。</p>
 <p>图8-12中，在连续2层的卷积层中，将输入x跳着连接至2层后的输出。这里的重点是，通过快捷结构，原来的2层卷积层的输出F(x)变成了F(x)+x。通过引入这种快捷结构，即使加深层，也能高效地学习。这是因为，通过快捷结构，反向传播时信号可以无衰减地传递（？）。</p>
-<p><img src="/121.png"></p>
+<p><img src="/posts/d2e41a48/121.png"></p>
 <blockquote>
 <p>因为快捷结构只是原封不动地传递输入数据，所以反向传播时会将来自上游的梯度原封不动地传向下游。这里的重点是不对来自上游的梯度进行任何处理，将其原封不动地传向下游。因此，基于快捷结构，不用担心梯度会变小（或变大），能够向前一层传递“有意义的梯度”。通过这个快捷结构，之前因为加深层而导致的梯度变小的梯度消失问题就有望得到缓解。</p>
 </blockquote>
 <p>ResNet 以前面介绍过的 VGG 网络为基础，引入快捷结构以加深层，其结果如下图所示</p>
-<p><img src="/122.png"></p>
+<p><img src="/posts/d2e41a48/122.png"></p>
 <p>如图8-13所示，ResNet通过以2个卷积层为间隔跳跃式地连接来加深层。另外，根据实验的结果，即便加深到150层以上，识别精度也会持续提高。并且，在ILSVRC大赛中，ResNet的错误识别率为3.5%（前5类中包含正确解这一精度下的错误识别率），令人称奇。</p>
 <blockquote>
 <p>实践中经常会灵活应用使用ImageNet这个巨大的数据集学习到的权重数据，这称为迁移学习，将学习完的权重（的一部分）复制到其他神经网络，进行再学习（fine tuning）。比如，准备一个和VGG相同<br>结构的网络，把学习完的权重作为初始值，以新数据集为对象，进行再学习。迁移学习在手头数据集较少时非常有效。</p>
@@ -1263,19 +1263,19 @@
 <blockquote>
 <p>正如7.2节介绍的那样，卷积层中进行的运算可以追溯至乘积累加运算。因此，深度学习的高速化的主要课题就变成了如何高速、高效地进行大量的乘积累加运算。</p>
 </blockquote>
-<p><img src="/123.png"></p>
+<p><img src="/posts/d2e41a48/123.png"></p>
 <h3 id="基于GPU的高速化"><a href="#基于GPU的高速化" class="headerlink" title="基于GPU的高速化"></a>基于GPU的高速化</h3><p>GPU原本是作为图像专用的显卡使用的，但最近不仅用于图像处理，也用于通用的数值计算。由于GPU可以高速地进行并行数值计算，因此GPU计算的目标就是将这种压倒性的计算能力用于各种用途。所谓GPU计算，<br>是指基于GPU进行通用的数值计算的操作。</p>
 <p>深度学习中需要进行大量的乘积累加运算（或者大型矩阵的乘积运算）。这种大量的并行运算正是GPU所擅长的（反过来说，CPU比较擅长连续的、复杂的计算）。因此，与使用单个CPU相比，使用GPU进行深度学习的运算可以达到惊人的高速化。下面我们就来看一下基于GPU可以实现多大程度的高速化。图8-15是基于CPU和GPU进行AlexNet的学习时分别所需的时间。从图中可知，使用CPU要花40天以上的时间，而使用GPU则可以将时间缩短至6天。此外，还可以看出，通过使用cuDNN这个最优化的库，可以进一步实现高速化。</p>
 <p>GPU主要由NVIDIA和AMD两家公司提供。虽然两家的GPU都可以用于通用的数值计算，但与深度学习比较“亲近”的是NVIDIA的GPU。实际上，大多数深度学习框架只受益于NVIDIA的GPU。这是因为深度学习的框架中使用了NVIDIA提供的CUDA这个面向GPU计算的综合开发环境。</p>
 <p>图8-15中出现的cuDNN是在CUDA上运行的库，它里面实现了为深度学习最优化过的函数等。</p>
-<p><img src="/124.png"></p>
+<p><img src="/posts/d2e41a48/124.png"></p>
 <blockquote>
 <p>通过im2col可以将卷积层进行的运算转换为大型矩阵的乘积。这个im2col方式的实现对GPU来说是非常方便的实现方式。这是因为，相比按小规模的单位进行计算，GPU更擅长计算大规模的汇总好的数据。也就是说，通过基于im2col以大型矩阵的乘积的方式汇总计算，更容易发挥出GPU的能力。</p>
 </blockquote>
 <h3 id="分布式学习"><a href="#分布式学习" class="headerlink" title="分布式学习"></a>分布式学习</h3><p>虽然通过GPU可以实现深度学习运算的高速化，但即便如此，当网络较深时，学习还是需要几天到几周的时间。并且，前面也说过，深度学习伴随着很多试错。为了创建良好的网络，需要反复进行各种尝试，这样一来就必然会产生尽可能地缩短一次学习所需的时间的要求。于是，将深度学习的学习过程扩展开来的想法（也就是分布式学习）就变得重要起来。</p>
 <p>为了进一步提高深度学习所需的计算的速度，可以考虑在多个GPU或者多台机器上进行分布式计算。现在的深度学习框架中，出现了好几个支持多GPU或者多机器的分布式学习的框架。其中，Google的TensorFlow、微<br>软的CNTK（Computational Network Toolki）在开发过程中高度重视分布式学习。以大型数据中心的低延迟·高吞吐网络作为支撑，基于这些框架的分布式学习呈现出惊人的效果。</p>
 <p>基于分布式学习，可以达到何种程度的高速化呢？图8-16中显示了基于<br>TensorFlow的分布式学习的效果。</p>
-<p><img src="/125.png"></p>
+<p><img src="/posts/d2e41a48/125.png"></p>
 <p>如图8-16所示，随着GPU个数的增加，学习速度也在提高。实际上，与使用1个GPU时相比，使用100个GPU（设置在多台机器上，共100个）似乎可以实现56倍的高速化！这意味着之前花费7天的学习只要3个小时就能完成，充分说明了分布式学习惊人的效果。</p>
 <p>关于分布式学习，“如何进行分布式计算”是一个非常难的课题。它包含了机器间的通信、数据的同步等多个无法轻易解决的问题。可以将这些难题都交给TensorFlow等优秀的框架。这里，我们不讨论分布式学习的细节。关于分布式学习的技术性内容，请参考TensorFlow的技术论文（白皮书）等。</p>
 <h3 id="运算精度的位数缩减"><a href="#运算精度的位数缩减" class="headerlink" title="运算精度的位数缩减"></a>运算精度的位数缩减</h3><p>在深度学习的高速化中，除了计算量之外，内存容量、总线带宽等也有可能成为瓶颈。关于内存容量，需要考虑将大量的权重参数或中间数据放在内存中。关于总线带宽，当流经GPU（或者CPU）总线的数据超过某个限制时，就会成为瓶颈。考虑到这些情况，我们希望尽可能减少流经网络的数据的位数。</p>
@@ -1288,17 +1288,17 @@
 <p>以往的深度学习的实现中并没有注意数值的精度，不过Python中一般使用64位的浮点数。NumPy中提供了16位的半精度浮点数类型（不过，只有16位类型的存储，运算本身不用16位进行），即便使用NumPy的半精度<br>浮点数，识别精度也不会下降。相关的论证也很简单，有兴趣的读者请参考 ch08&#x2F;half_float_network.py。</p>
 <p>关于深度学习的位数缩减，到目前为止已有若干研究。最近有人提出了用1位来表示权重和中间数据的Binarized Neural Networks方法。为了实现深度学习的高速化，位数缩减是今后必须关注的一个课题，特别是在面向嵌入式应用程序中使用深度学习时，位数缩减非常重要。</p>
 <h2 id="8-4-深度学习的应用案例"><a href="#8-4-深度学习的应用案例" class="headerlink" title="8.4 深度学习的应用案例"></a>8.4 深度学习的应用案例</h2><h3 id="物体检测"><a href="#物体检测" class="headerlink" title="物体检测"></a>物体检测</h3><p>物体检测是从图像中确定物体的位置，并进行分类的问题。如图8-17所示，要从图像中确定物体的种类和物体的位置。</p>
-<p><img src="/126.png"></p>
+<p><img src="/posts/d2e41a48/126.png"></p>
 <p>观察图8-17可知，物体检测是比物体识别更难的问题。之前介绍的物体识别是以整个图像为对象的，但是物体检测需要从图像中确定类别的位置，而且还有可能存在多个物体。</p>
 <p>对于这样的物体检测问题，人们提出了多个基于CNN的方法。这些方法展示了非常优异的性能，并且证明了在物体检测的问题上，深度学习是非常有效的。</p>
 <h3 id="图像分隔"><a href="#图像分隔" class="headerlink" title="图像分隔"></a>图像分隔</h3><p>图像分割是指在像素水平上对图像进行分类。如图8-19所示，使用以像素为单位对各个对象分别着色的监督数据进行学习。然后，在推理时，对输入图像的所有像素进行分类。</p>
-<p><img src="/127.png"></p>
+<p><img src="/posts/d2e41a48/127.png"></p>
 <h3 id="图像标题的生成"><a href="#图像标题的生成" class="headerlink" title="图像标题的生成"></a>图像标题的生成</h3><p>有一项融合了计算机视觉和自然语言的有趣的研究，该研究如图8-21所示，给出一个图像后，会自动生成介绍这个图像的文字（图像的标题）。</p>
-<p><img src="/128.png"></p>
+<p><img src="/posts/d2e41a48/128.png"></p>
 <p>一个基于深度学习生成图像标题的代表性方法是被称为NIC（Neural Image Caption）的模型。如图8-22所示，NIC由深层的CNN和处理自然语言的RNN（Recurrent  Neural Network）构成。RNN是呈递归式连接的网络，经常被用于自然语言、时间序列数据等连续性的数据上。</p>
 <p>NIC基于CNN从图像中提取特征，并将这个特征传给RNN。RNN以CNN提取出的特征为初始值，递归地生成文本。这里，我们不深入讨论技术上的细节，不过基本上NIC是组合了两个神经网络（CNN和RNN）的简单结构。基于NIC，可以生成惊人的高精度的图像标题。我们将组合图像和自然语言等多种信息进行的处理称为多模态处理。多模态处理是近年来备受关注的一个领域。</p>
 <h2 id="8-5-深度学习的未来"><a href="#8-5-深度学习的未来" class="headerlink" title="8.5 深度学习的未来"></a>8.5 深度学习的未来</h2><h3 id="图像风格变换"><a href="#图像风格变换" class="headerlink" title="图像风格变换"></a>图像风格变换</h3><p>有一项研究是使用深度学习来 “绘制”带有艺术气息的画。如图8-23所示，输入两个图像后，会生成一个新的图像。两个输入图像中，一个称为“内容图像”，另一个称为“风格图像”。如图8-23所示，如果指定将梵高的绘画风格应用于内容图像，深度学习就会按照指示绘制出新的画作。</p>
-<p><img src="/129.png"></p>
+<p><img src="/posts/d2e41a48/129.png"></p>
 <h3 id="图像的生成"><a href="#图像的生成" class="headerlink" title="图像的生成"></a>图像的生成</h3><p>生成新的图像时不需要使用任何图像，从零生成新的图像（虽然需要先用大量的图像进行学习，但在“画”新图像时不需要任何图像）。</p>
 <blockquote>
 <p>之前我们见到的机器学习问题都是被称为监督学习（supervised learning）的问题。这类问题就像手写数字识别一样，使用的是图像数据和标签成对给出的数据集。不过这里讨论的问题，并没有给出监督数据，只给了大量的图像（图像的集合），这样的问题称为无监督学习（unsupervised learning）。无监督学习虽然是很早之前就开始研究的领域（Deep Belief Network、Deep Boltzmann Machine<br>等很有名），但最近似乎并不是很活跃。今后，随着使用深度学习的DCGAN等方法受到关注，无监督学习有望得到进一步发展。</p>

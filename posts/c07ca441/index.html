@@ -124,7 +124,7 @@
 <p><strong>结论</strong>：XGBoost 是<strong>因</strong>，SHAP 是<strong>果</strong>。没有 XGBoost 的强力预测，SHAP 无据可依；没有 SHAP 的归因解释，XGBoost 只是个黑箱。</p>
 <p><strong>1. XGBoost 内置重要性 <code>feature_importances_</code>：负责“粗筛”</strong></p>
 <ul>
-<li><strong>角色</strong>：<strong>特征过滤器 (Filter)</strong>。</li>
+<li><strong>角色</strong>：**特征过滤器 (Filter)**。</li>
 <li><strong>原理</strong>：基于树模型训练过程中的统计（分裂次数、增益）。</li>
 <li><strong>优点</strong>：<strong>极快</strong>。对于几万个 SNP，几秒钟就能排出名次。</li>
 <li><strong>缺点</strong>：<ul>
@@ -137,7 +137,7 @@
 </ul>
 <p><strong>2. SHAP 值：负责“精修”与“解释”</strong></p>
 <ul>
-<li><strong>角色</strong>：<strong>归因解释器 (Explainer)</strong>。</li>
+<li><strong>角色</strong>：**归因解释器 (Explainer)**。</li>
 <li><strong>原理</strong>：基于博弈论，计算特征在<strong>各种组合</strong>下的边际贡献。</li>
 <li><strong>优点</strong>：<ul>
 <li><strong>更公平</strong>：能正确处理 LD 区域，不会因为两个 SNP 高度相关就胡乱分配权重。</li>
@@ -183,21 +183,21 @@
 </tr>
 </tbody></table>
 <p>但是我看别人论文和网页，并没有使用 XGBoost <code>feature_importances_</code> 进行初筛位点的操作。</p>
-<h3 id="第一部分：XGBoost-的数学本质"><a href="#第一部分：XGBoost-的数学本质" class="headerlink" title="第一部分：XGBoost 的数学本质"></a>第一部分：XGBoost 的数学本质</h3><p>XGBoost (eXtreme Gradient Boosting) 的核心思想是<strong>加法模型（Additive Model）<strong>与</strong>前向分步算法</strong>。它不是一次性训练一个复杂的模型，而是一步步地添加新的弱分类器（决策树）来修正之前的残差。</p>
+<h3 id="第一部分：XGBoost-的数学本质"><a href="#第一部分：XGBoost-的数学本质" class="headerlink" title="第一部分：XGBoost 的数学本质"></a>第一部分：XGBoost 的数学本质</h3><p>XGBoost (eXtreme Gradient Boosting) 的核心思想是<strong>加法模型（Additive Model）</strong>与<strong>前向分步算法</strong>。它不是一次性训练一个复杂的模型，而是一步步地添加新的弱分类器（决策树）来修正之前的残差。</p>
 <h4 id="1-目标函数（Objective-Function）"><a href="#1-目标函数（Objective-Function）" class="headerlink" title="1. 目标函数（Objective Function）"></a>1. 目标函数（Objective Function）</h4><p>XGBoost 的目标函数由两部分组成：<strong>损失函数</strong>（衡量预测准不准）和 <strong>正则化项</strong>（控制模型复杂度，防止过拟合）。</p>
 <p>给定 $n$ 个样本，训练 $K$ 棵树，预测结果为 $\hat{y}_i$：</p>
 <p>$$\text{Obj} &#x3D; \sum_{i&#x3D;1}^n l(y_i, \hat{y}<em>i) + \sum</em>{k&#x3D;1}^K \Omega(f_k)$$</p>
 <ul>
-<li><strong>$l(y_i, \hat{y}_i)$</strong>：损失函数（如均方误差、Logistic Loss）。</li>
-<li><strong>$\Omega(f_k)$</strong>：第 $k$ 棵树的正则化项。</li>
+<li>**$l(y_i, \hat{y}_i)$**：损失函数（如均方误差、Logistic Loss）。</li>
+<li>**$\Omega(f_k)$**：第 $k$ 棵树的正则化项。</li>
 </ul>
 <h4 id="2-加法模型与泰勒展开"><a href="#2-加法模型与泰勒展开" class="headerlink" title="2. 加法模型与泰勒展开"></a>2. 加法模型与泰勒展开</h4><p>在第 $t$ 轮迭代中，模型预测为前 $t-1$ 轮的模型加上一棵新树 $f_t$：<br>$$\hat{y}_i^{(t)} &#x3D; \hat{y}_i^{(t-1)} + f_t(x_i)$$</p>
 <p>代入目标函数：<br>$$\text{Obj}^{(t)} &#x3D; \sum_{i&#x3D;1}^n l(y_i, \hat{y}_i^{(t-1)} + f_t(x_i)) + \Omega(f_t)$$</p>
 <p>由于 $l(y_i, \hat{y}<em>i^{(t-1)})$ 是常数，为了优化 $f_t$，XGBoost 使用了<strong>二阶泰勒展开</strong>来近似损失函数：<br>$$\text{Obj}^{(t)} \approx \sum</em>{i&#x3D;1}^n \left[ l(y_i, \hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \frac{1}{2} h_i f_t^2(x_i) \right] + \Omega(f_t)$$</p>
 <p>其中：</p>
 <ul>
-<li><strong>$g_i &#x3D; \partial_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$</strong>：损失函数的一阶导数（梯度）。</li>
-<li><strong>$h_i &#x3D; \partial^2_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$</strong>：损失函数的二阶导数（海森矩阵）。</li>
+<li>**$g_i &#x3D; \partial_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$**：损失函数的一阶导数（梯度）。</li>
+<li>**$h_i &#x3D; \partial^2_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$**：损失函数的二阶导数（海森矩阵）。</li>
 </ul>
 <h4 id="3-树的参数化与最优权重"><a href="#3-树的参数化与最优权重" class="headerlink" title="3. 树的参数化与最优权重"></a>3. 树的参数化与最优权重</h4><p>定义树 $f_t(x) &#x3D; w_{q(x)}$，其中 $q(x)$ 将样本映射到叶子节点，$w_j$ 是第 $j$ 个叶子节点的分数（权重）。<br>正则化项定义为：<br>$$\Omega(f_t) &#x3D; \gamma T + \frac{1}{2} \lambda \sum_{j&#x3D;1}^T w_j^2$$</p>
 <ul>
@@ -213,16 +213,16 @@
 <h3 id="第二部分：SHAP-的公理化推导"><a href="#第二部分：SHAP-的公理化推导" class="headerlink" title="第二部分：SHAP 的公理化推导"></a>第二部分：SHAP 的公理化推导</h3><p>SHAP (SHapley Additive exPlanations) 将博弈论中的 <strong>Shapley 值</strong> 引入机器学习。其核心在于将模型的预测值 $f(x)$ 解释为基值 $E[f(X)]$ 加上各特征贡献 $\phi_i$ 的和。</p>
 <h4 id="1-SHAP-值的定义"><a href="#1-SHAP-值的定义" class="headerlink" title="1. SHAP 值的定义"></a>1. SHAP 值的定义</h4><p>对于任意样本 $x$，其 SHAP 值 $\phi_i$ 满足：<br>$$f(x) &#x3D; \phi_0 + \sum_{i&#x3D;1}^M \phi_i$$</p>
 <ul>
-<li><strong>$\phi_0$</strong>：模型在训练集上的平均预测值（Base Value）。</li>
-<li><strong>$\phi_i$</strong>：特征 $i$ 对当前样本预测值的贡献。</li>
+<li>**$\phi_0$**：模型在训练集上的平均预测值（Base Value）。</li>
+<li>**$\phi_i$**：特征 $i$ 对当前样本预测值的贡献。</li>
 </ul>
 <h4 id="2-基于博弈论的-Shapley-公式"><a href="#2-基于博弈论的-Shapley-公式" class="headerlink" title="2. 基于博弈论的 Shapley 公式"></a>2. 基于博弈论的 Shapley 公式</h4><p>对于特征 $i$，其 Shapley 值是通过计算它在所有可能特征组合（联盟 $S$）中的边际贡献加权平均得到的：</p>
 <p>$$\phi_i &#x3D; \sum_{S \subseteq N \setminus {i}} \frac{|S|! (M - |S| - 1)!}{M!} \left[ f_{S \cup {i}}(x_{S \cup {i}}) - f_S(x_S) \right]$$</p>
 <ul>
-<li><strong>$N$</strong>：所有特征的集合。</li>
-<li><strong>$S$</strong>：不包含特征 $i$ 的特征子集。</li>
-<li><strong>$|S|$</strong>：子集 $S$ 的大小。</li>
-<li><strong>$f_{S \cup {i}}$</strong>：仅使用子集 $S$ 加上特征 $i$ 时的模型预测值。</li>
+<li>**$N$**：所有特征的集合。</li>
+<li>**$S$**：不包含特征 $i$ 的特征子集。</li>
+<li>**$|S|$**：子集 $S$ 的大小。</li>
+<li>**$f_{S \cup {i}}$**：仅使用子集 $S$ 加上特征 $i$ 时的模型预测值。</li>
 </ul>
 <p><strong>问题</strong>：这个公式的计算复杂度是 $O(2^M)$，对于特征多的模型是不可行的。</p>
 <h4 id="3-TreeSHAP：针对树模型的高效算法"><a href="#3-TreeSHAP：针对树模型的高效算法" class="headerlink" title="3. TreeSHAP：针对树模型的高效算法"></a>3. TreeSHAP：针对树模型的高效算法</h4><p>Lundberg 等人提出的 TreeSHAP 算法，利用树的结构特性，将复杂度降至多项式时间 $O(TLD^2)$ （其中 T 是树的数量，L 是叶节点数，D 是树的最大深度）。</p>
@@ -230,7 +230,7 @@
 <p>对于单棵树，特征 $i$ 的贡献 $\phi_{i,j}$ 计算为：<br>$$\phi_{i,j} &#x3D; \sum_{k&#x3D;1}^{T_j} \frac{\text{PathCoverage}(i, k)}{T_j} \cdot \Delta \text{Value}$$</p>
 <ul>
 <li><strong>PathCoverage</strong>：特征 $i$ 在节点 $k$ 处对样本路径的覆盖率（权重）。</li>
-<li><strong>$\Delta \text{Value}$</strong>：由于分裂带来的预测值变化。</li>
+<li>**$\Delta \text{Value}$**：由于分裂带来的预测值变化。</li>
 </ul>
 <p><strong>最终 SHAP 值</strong>是所有树的贡献之和：<br>$$\phi_i &#x3D; \sum_{j&#x3D;1}^K \phi_{i,j}$$</p>
 <p><em>(这也是为什么 SHAP 对树模型（XGBoost, LightGBM, CatBoost）的支持如此无脑且快速的原因)</em></p>
@@ -270,17 +270,17 @@
 <ul>
 <li><strong>多源数据整合</strong>：收集自变量（如遥感影像的波段反射率、建筑形态指标、SNP位点基因型）与因变量（如LST、表型性状）。</li>
 <li><strong>数据清洗与标准化</strong>：处理缺失值与异常值；对不同量纲的特征（如温度与面积）进行标准化或归一化处理。</li>
-<li><strong>数据集划分</strong>：按比例（如 8:2 或 7:3）切分为<strong>训练集 (Training Set)</strong> 与 <strong>测试集 (Test Set)</strong>，确保模型评估的无偏性。</li>
+<li><strong>数据集划分</strong>：按比例（如 8:2 或 7:3）切分为<strong>训练集 (Training Set)</strong> 与 **测试集 (Test Set)**，确保模型评估的无偏性。</li>
 </ul>
 <h3 id="🟡-阶段二：XGBoost-模型构建与优化-Black-box-Prediction"><a href="#🟡-阶段二：XGBoost-模型构建与优化-Black-box-Prediction" class="headerlink" title="🟡 阶段二：XGBoost 模型构建与优化 (Black-box Prediction)"></a>🟡 阶段二：XGBoost 模型构建与优化 (Black-box Prediction)</h3><p>此阶段致力于打磨一个高精度、强泛化能力的“黑箱”预测模型。</p>
 <ul>
 <li><strong>模型初始化与训练</strong>：调用 <code>XGBRegressor</code>或 <code>XGBClassifier</code>（要求因变量是0 1 2 形式的整数，又可分为二分类和多分类），通过加法模型与前向分步算法，迭代训练出由多棵决策树组成的集成模型。</li>
-<li><strong>超参数调优 (Hyperparameter Tuning)</strong>：<ul>
+<li>**超参数调优 (Hyperparameter Tuning)**：<ul>
 <li>利用网格搜索 (Grid Search) 或贝叶斯优化，确定最佳参数组合（如 <code>max_depth</code>, <code>learning_rate</code>, <code>n_estimators</code>, <code>reg_alpha</code>等）。</li>
-<li><strong>早停法 (Early Stopping)</strong>：监控验证集误差，防止模型过拟合。</li>
+<li>**早停法 (Early Stopping)**：监控验证集误差，防止模型过拟合。</li>
 </ul>
 </li>
-<li><strong>性能评估</strong>：在测试集上使用 R2、RMSE（回归）或 Accuracy、AUC（分类）等指标评估模型预测精度。<em>(此时模型已具备高预测能力，但缺乏可解释性)</em>。</li>
+<li><strong>性能评估</strong>：在测试集上使用 R2、RMSE（回归）或 Accuracy、AUC（分类）等指标评估模型预测精度。*(此时模型已具备高预测能力，但缺乏可解释性)*。</li>
 </ul>
 <h3 id="🔵-阶段三：SHAP-机制解析与归因计算-Interpretability"><a href="#🔵-阶段三：SHAP-机制解析与归因计算-Interpretability" class="headerlink" title="🔵 阶段三：SHAP 机制解析与归因计算 (Interpretability)"></a>🔵 阶段三：SHAP 机制解析与归因计算 (Interpretability)</h3><p>这是连接“黑箱”与“科学机理”的桥梁，利用博弈论拆解模型的内在逻辑。</p>
 <ul>
@@ -288,11 +288,11 @@
 <li><strong>全局特征重要性量化</strong>：聚合所有样本的 SHAP 值绝对值，得出各变量对模型预测的总体贡献度排名，筛选出关键驱动因子。</li>
 <li><strong>局部预测逻辑拆解</strong>：针对极端样本或特定个案，提取其特征的 SHAP 值，还原模型对该样本的具体决策路径。</li>
 </ul>
-<h4 id="具体解释"><a href="#具体解释" class="headerlink" title="具体解释"></a>具体解释</h4><p>阶段三是整个框架的**“灵魂”<strong>。它将第一阶段（数据）和第二阶段（模型）的成果，转化为人类可理解的</strong>因果逻辑**。这一阶段不再关注“预测得准不准”，而是关注“为什么准”以及“是怎么决策的”。</p>
+<h4 id="具体解释"><a href="#具体解释" class="headerlink" title="具体解释"></a>具体解释</h4><p>阶段三是整个框架的<strong>“灵魂”</strong>。它将第一阶段（数据）和第二阶段（模型）的成果，转化为人类可理解的<strong>因果逻辑</strong>。这一阶段不再关注“预测得准不准”，而是关注“为什么准”以及“是怎么决策的”。</p>
 <h4 id="1-核心操作流程"><a href="#1-核心操作流程" class="headerlink" title="1. 核心操作流程"></a>1. 核心操作流程</h4><p>在代码中，这个阶段通常对应以下几步：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 初始化解释器（绑定训练好的黑盒模型）</span></span><br><span class="line">explainer = shap.TreeExplainer(model)  <span class="comment"># model 是第二阶段训练好的 XGBoost</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 计算 SHAP 值（这是最关键的一步）</span></span><br><span class="line">shap_values = explainer(X_test)  <span class="comment"># 传入数据</span></span><br></pre></td></tr></table></figure>
 
-<p>这里的 <code>shap_values</code>是一个数组，形状为 <code>(样本数, 特征数)</code>。例如，如果你有 1000 个测试样本，20 个特征，那么 <code>shap_values</code>就有 1000 行、20 列，每一个数字代表**“某个特征对某个样本的预测贡献了多少”** 。</p>
+<p>这里的 <code>shap_values</code>是一个数组，形状为 <code>(样本数, 特征数)</code>。例如，如果你有 1000 个测试样本，20 个特征，那么 <code>shap_values</code>就有 1000 行、20 列，每一个数字代表<strong>“某个特征对某个样本的预测贡献了多少”</strong> 。</p>
 <p>采用 “平均绝对 SHAP 值” 对特征进行排序（这里实际算的是<strong>该特征在所有测试样本中的贡献值绝对值的均值</strong>，而不是该特征每增加1个单位的增加的效应值），这是 SHAP 的标准做法。</p>
 <p>这种做法其实衡量的是“这个特征在群体中平均有多大的话语权”，而不是“这个特征每变动一个单位会带来多少线性变化”。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计算每个 SNP 的平均贡献度（跨所有样本）</span></span><br><span class="line">importance = np.<span class="built_in">abs</span>(shap_values).mean(axis=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
@@ -349,12 +349,12 @@
 <li>如果你用 <strong>测试集 SNP</strong> 计算 SHAP，发现这些 SNP 依然有高贡献，这就能强有力地证明：<strong>这些基因位点确实通过生物学机制影响了表型</strong>，而不是统计噪音。</li>
 </ul>
 <p><strong>总结：</strong></p>
-<p>计算测试集的 SHAP 值，是为了确保我们解释的是模型的**“智慧”<strong>（泛化规律），而不是模型的</strong>“记忆”**（过拟合噪声）。这是从“机器学习跑通了”迈向“科学研究完成了”的关键一步。</p>
-<h3 id="🔴-阶段四：科学机理可视化与洞察-Visualization-Insights"><a href="#🔴-阶段四：科学机理可视化与洞察-Visualization-Insights" class="headerlink" title="🔴 阶段四：科学机理可视化与洞察 (Visualization &amp; Insights)"></a>🔴 阶段四：科学机理可视化与洞察 (Visualization &amp; Insights)</h3><p>将高维的 SHAP 数值转化为直观的图表，从而推导出符合领域知识的科学结论。</p>
+<p>计算测试集的 SHAP 值，是为了确保我们解释的是模型的<strong>“智慧”</strong>（泛化规律），而不是模型的<strong>“记忆”</strong>（过拟合噪声）。这是从“机器学习跑通了”迈向“科学研究完成了”的关键一步。</p>
+<h3 id="🔴-阶段四：科学机理可视化与洞察-Visualization-amp-Insights"><a href="#🔴-阶段四：科学机理可视化与洞察-Visualization-amp-Insights" class="headerlink" title="🔴 阶段四：科学机理可视化与洞察 (Visualization &amp; Insights)"></a>🔴 阶段四：科学机理可视化与洞察 (Visualization &amp; Insights)</h3><p>将高维的 SHAP 数值转化为直观的图表，从而推导出符合领域知识的科学结论。</p>
 <ul>
-<li><strong>特征重要性摘要图 (Summary Plot)</strong>：宏观展示哪些因素主导了目标变量的变化。</li>
-<li><strong>依赖图与交互效应 (Dependence Plot)</strong>：揭示单一特征的<strong>边际效应</strong>（如：随着建筑容积率增加，LST如何非线性变化），并挖掘<strong>特征间的协同或拮抗作用</strong>（如：风速与湿度对降温的联合影响）。</li>
-<li><strong>个体瀑布图 (Waterfall Plot) &#x2F; 力图 (Force Plot)</strong>：微观解释单个预测值是如何由基线值（E[f(X)]）加上各特征的贡献值（ϕi）累加而成的。</li>
+<li>**特征重要性摘要图 (Summary Plot)**：宏观展示哪些因素主导了目标变量的变化。</li>
+<li><strong>依赖图与交互效应 (Dependence Plot)<strong>：揭示单一特征的</strong>边际效应</strong>（如：随着建筑容积率增加，LST如何非线性变化），并挖掘<strong>特征间的协同或拮抗作用</strong>（如：风速与湿度对降温的联合影响）。</li>
+<li>**个体瀑布图 (Waterfall Plot) &#x2F; 力图 (Force Plot)**：微观解释单个预测值是如何由基线值（E[f(X)]）加上各特征的贡献值（ϕi）累加而成的。</li>
 </ul>
 <h2 id="升级技术路线-双层交叉验证"><a href="#升级技术路线-双层交叉验证" class="headerlink" title="升级技术路线-双层交叉验证"></a>升级技术路线-双层交叉验证</h2><p><strong>当样本量较小时，单次划分训练集&#x2F;测试集确实存在较大的随机性风险</strong>。在 GWAS 这种高维小样本场景中，5×交叉验证（5-fold CV）不仅是“锦上添花”，更是<strong>确保科学结论稳健性的必要条件</strong>。</p>
 <p>以下是针对小样本优化的 <strong>XGBoost-SHAP 技术路线升级版</strong>，将交叉验证逻辑深度融入各个阶段：</p>
@@ -384,7 +384,7 @@
 <li><strong>结果聚合（Aggregation）</strong>：<ul>
 <li><strong>均值法（最常用）</strong>：在<strong>每一次</strong>交叉验证折（Fold）中，计算该折测试集上所有样本的 <strong>SHAP 值绝对值的平均值</strong>（即该折的特征重要性排名）。计算这 5 个数字的 <strong>均值（Mean）</strong> 和 <strong>标准差（Std）</strong>。</li>
 <li><strong>中位数法</strong>：如果数据中有极端异常值，使用中位数更稳健。</li>
-<li><strong>一致性检验</strong>：统计某个 SNP 在 5 次实验中是否都排在 Top 10。只有那些**“次次都稳居前列”**的 SNP 才被认为是真正的强关联位点。</li>
+<li><strong>一致性检验</strong>：统计某个 SNP 在 5 次实验中是否都排在 Top 10。只有那些<strong>“次次都稳居前列”</strong>的 SNP 才被认为是真正的强关联位点。</li>
 </ul>
 </li>
 </ol>

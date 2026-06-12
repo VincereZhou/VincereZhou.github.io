@@ -221,9 +221,9 @@
 <h2 id="输入文件"><a href="#输入文件" class="headerlink" title="输入文件"></a>输入文件</h2><p>这里主要介绍 ANNOVAR 可接受的文件输入格式，以及如何利用 <code>convert2annovar.pl</code>工具将其他格式的变异文件转换为 ANNOVAR 可识别的格式。</p>
 <h3 id="输入文件格式概述"><a href="#输入文件格式概述" class="headerlink" title="输入文件格式概述"></a>输入文件格式概述</h3><ul>
 <li><strong>VCF 文件</strong>：<code>table_annovar.pl</code>程序可以直接接受 VCF 文件作为输入（需加 <code>-vcfinput</code>参数）。目前 VCF 已成为大多数研究者使用的黄金标准格式。</li>
-<li><strong>ANNOVAR 输入格式 (.avinput)</strong>：<code>annotate_variation.pl</code>等程序需要一个简单的基于文本的格式（称为 ANNOVAR input format）。<ul>
+<li>**ANNOVAR 输入格式 (.avinput)**：<code>annotate_variation.pl</code>等程序需要一个简单的基于文本的格式（称为 ANNOVAR input format）。<ul>
 <li>文件中每一行对应一个变异位点。</li>
-<li>每一行的前 <strong>5 列</strong>（空格或 Tab 分隔）分别代表：<strong>染色体 (Chromosome)</strong>、<strong>起始位置 (Start)</strong>、<strong>终止位置 (End)</strong>、<strong>参考碱基 (Reference Allele)</strong>、<strong>变异碱基 (Alternative Allele)</strong>。</li>
+<li>每一行的前 <strong>5 列</strong>（空格或 Tab 分隔）分别代表：**染色体 (Chromosome)<strong>、</strong>起始位置 (Start)<strong>、</strong>终止位置 (End)<strong>、</strong>参考碱基 (Reference Allele)<strong>、</strong>变异碱基 (Alternative Allele)**。</li>
 <li>第 5 列之后可以添加任意额外的列，这些列会在输出中被原样打印。</li>
 <li>如果参考碱基信息未知，可用 <code>0</code>填充。</li>
 <li>插入或缺失可用 <code>-</code>表示空碱基（例如 <code>TC</code>到 <code>-</code>代表缺失，<code>-</code>到 <code>AT</code>代表插入）。</li>
@@ -245,7 +245,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># 基本转换（默认只处理第一个样本）</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf &gt; ex2.avinput</span><br><span class="line"></span><br><span class="line"># 指定输出文件</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2.avinput</span><br><span class="line"></span><br><span class="line"># 转换所有样本（生成多个文件，如 ex2.NA00001.avinput, ex2.NA00002.avinput）</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -allsample</span><br><span class="line"></span><br><span class="line"># 包含 VCF 的 INFO 信息</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -includeinfo</span><br><span class="line"></span><br><span class="line"># 包含杂合性、质量、深度信息</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -withzyg</span><br><span class="line"></span><br><span class="line"># 打印基于文件内所有样本的等位基因频率（-withfreq）</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -withfreq -includeinfo</span><br><span class="line"></span><br><span class="line"># 保留 VCF 头信息</span><br><span class="line">perl convert2annovar.pl -format vcf4 example/ex2.vcf -outfile ex2 -comment</span><br></pre></td></tr></table></figure>
 
 <p><em>注意：如果某个位点有多个可变等位基因（Multiple Alleles），输出会产生多行，每行对应一个变异。</em></p>
-<h4 id="vcf4-vcf4old"><a href="#vcf4-vcf4old" class="headerlink" title="vcf4 &amp; vcf4old"></a>vcf4 &amp; vcf4old</h4><p>我看之前的脚本有的使用 <code>-format vcf4old</code> ，这里和 <code>-format vcf4</code> 的区别就是输入文件 VCF 版本问题。</p>
+<h4 id="vcf4-amp-vcf4old"><a href="#vcf4-amp-vcf4old" class="headerlink" title="vcf4 &amp; vcf4old"></a>vcf4 &amp; vcf4old</h4><p>我看之前的脚本有的使用 <code>-format vcf4old</code> ，这里和 <code>-format vcf4</code> 的区别就是输入文件 VCF 版本问题。</p>
 <blockquote>
 <p>✅ <strong>-format vcf4用于“新版 VCF（4.x）”，支持多样本、多 ALT、基因型字段</strong></p>
 <p>✅ <strong>-format vcf4old用于“老版 VCF（4.0 之前 &#x2F; 简化版）”，只处理单样本、单列 ALT</strong></p>
@@ -254,7 +254,7 @@
 <ol>
 <li><code>vcf4old</code>：过时的全量转换模式</li>
 </ol>
-<p>该模式保留了 2013 年之前的旧逻辑。它的核心特点是**“见行就转”**：无论 VCF 中的特定样本在该位点是否有突变（即使是 <code>0/0</code>纯合参考），只要 VCF 文件中有这一行记录，它就会被转换为输出文件的一行。这种模式在现代多样本联合 Calling（Joint Calling）场景下会产生大量无意义的冗余数据，因此已被视为 <strong>Obsolete（过时）</strong>，不建议新用户使用。</p>
+<p>该模式保留了 2013 年之前的旧逻辑。它的核心特点是<strong>“见行就转”</strong>：无论 VCF 中的特定样本在该位点是否有突变（即使是 <code>0/0</code>纯合参考），只要 VCF 文件中有这一行记录，它就会被转换为输出文件的一行。这种模式在现代多样本联合 Calling（Joint Calling）场景下会产生大量无意义的冗余数据，因此已被视为 <strong>Obsolete（过时）</strong>，不建议新用户使用。</p>
 <ol start="2">
 <li><code>vcf4</code>：智能的现代转换模式*</li>
 </ol>
@@ -434,7 +434,7 @@
 <li><p><strong>修改优先级</strong>：可用 <code>-precedence intronic,utr5,utr3</code>等参数自定义优先级顺序。</p>
 </li>
 </ul>
-<h4 id="intergenic（基因间区）的解释"><a href="#intergenic（基因间区）的解释" class="headerlink" title="intergenic（基因间区）的解释"></a>intergenic（基因间区）的解释</h4><p>按照我的理解，<strong>intergenic（基因间区）<strong>的判断标准为：这是相对“默认”或“最后”的选项。如果一个变异位点</strong>既不</strong>在任何基因的编码&#x2F;非编码区内，<strong>也不</strong>在任何基因的 <code>upstream</code>（上游1kb）或 <code>downstream</code>（下游1kb）区域内（即距离最近的基因边界超过 1kb），那么它就会被归类为 <code>intergenic</code>。（就是如果是在某个基因上下游1kb范围那么就会归到这个基因的 upstream 或 downstream，否则就是基因间区）。</p>
+<h4 id="intergenic（基因间区）的解释"><a href="#intergenic（基因间区）的解释" class="headerlink" title="intergenic（基因间区）的解释"></a>intergenic（基因间区）的解释</h4><p>按照我的理解，<strong>intergenic（基因间区）</strong>的判断标准为：这是相对“默认”或“最后”的选项。如果一个变异位点<strong>既不</strong>在任何基因的编码&#x2F;非编码区内，<strong>也不</strong>在任何基因的 <code>upstream</code>（上游1kb）或 <code>downstream</code>（下游1kb）区域内（即距离最近的基因边界超过 1kb），那么它就会被归类为 <code>intergenic</code>。（就是如果是在某个基因上下游1kb范围那么就会归到这个基因的 upstream 或 downstream，否则就是基因间区）。</p>
 <p>在实际分析中，这个范围是可以根据研究需求进行调整的。如果在运行注释命令时加入了 <code>-neargene</code>参数，就可以自定义这个近端距离（例如改为 2kb、5kb 甚至 10kb）。如果扩大这个距离，原本被判定为 <code>intergenic</code>的一些位点就可能会被重新归类为 <code>upstream</code>或 <code>downstream</code>。</p>
 <p>另外如果位点在染色体的两端，那么就可能存在注释为 intergenic 的位点的某一段没有基因（<strong>此时会用 <code>NONE</code>来表示基因缺失</strong>），示例如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">intergenic      NONE(dist=NONE),Mberchr1G0001(dist=28042)       1       40992   40992   C       T</span><br></pre></td></tr></table></figure>

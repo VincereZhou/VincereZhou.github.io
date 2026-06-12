@@ -111,11 +111,11 @@
 <h1 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h1><p>母体遗传效应模型如下<br>$$<br>\mathbf{y&#x3D;Xb+Zu+Wm+Spe+e}<br>$$<br>这里 $\mathbf{m}$ 是母体遗传效应，$\mathbf{pe}$ 是母体永久环境效应。</p>
 <p>随机效应协方差矩阵假设如下，即我们假设个体加性效应和母体加性效应存在加性协方差。<br>$$<br>\operatorname{var}\left[\begin{array}{r}<br>\mathbf{u} \<br>\mathbf{m} \<br>\mathbf{p e} \<br>\mathbf{e}<br>\end{array}\right]&#x3D;\left[\begin{array}{cccc}<br>g_{11} \mathbf{A} &amp; g_{12} \mathbf{A} &amp; 0 &amp; 0 \<br>g_{21} \mathbf{A} &amp; g_{22} \mathbf{A} &amp; 0 &amp; 0 \<br>0 &amp; 0 &amp; \mathbf{I} \sigma_{p e}^2 &amp; 0 \<br>0 &amp; 0 &amp; 0 &amp; \mathbf{I} \sigma_e^2<br>\end{array}\right]<br>$$</p>
 <h1 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h1><p>假设我们有下面的数据，其中 herds 和 pen 是固定因子，采用母体效应模型。</p>
-<p><img src="/1.png"></p>
+<p><img src="/posts/dac1bfe0/1.png"></p>
 <p>首先构建设计矩阵，我们看固定因子的设计矩阵 $\mathbf{X}$ ，其前 3 列是 herds 的因子，后 2 列是 pen 的因子，转置后如下，这里一列表示一行表型。<br>$$<br>\mathbf{X}^{\prime}&#x3D;\left[\begin{array}{llllllllll}<br>1 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \<br>0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \<br>0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \<br>1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 \<br>0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 1<br>\end{array}\right]<br>$$</p>
 <p>个体加性效应 $\mathbf{Z}$ 其维度是 $14 \times 14$ ，前4行是全0行（没有表型的祖先个体），剔除前4行后是一个单位矩阵。</p>
 <p><strong>重点来了</strong>，$\mathbf{W}$ 和 $\mathbf{S}$ 矩阵都是关于母体效应的，但是母体遗传效应是可遗传的（从亲本到子代），因此所有个体都需要估计其母体遗传效应；而估计母体永久环境效应只需要针对表型中个体的母本。<strong>因此这里 $\mathbf{W}$ 中的因子数目是全部个体数 14 ，而 $\mathbf{S}$ 矩阵的因子数目仅为 4 （个母本）。</strong></p>
-<p><img src="/2.png"></p>
+<p><img src="/posts/dac1bfe0/2.png"></p>
 <h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
 <li>Mrode R A. Linear models for the prediction of animal breeding values[M]. 2005.</li>
 </ol>

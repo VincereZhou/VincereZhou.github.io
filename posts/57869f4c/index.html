@@ -101,11 +101,11 @@
 
 <h1 id="ESFCT"><a href="#ESFCT" class="headerlink" title="ESFCT"></a>ESFCT</h1><h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>ESFCT，用于计算 Cholesky 分解 $\mathbf{LL^{T}}$ ，将 $\mathbf{L}$ 矩阵按照 <em>envelope storage scheme</em> 格式存储。</p>
 <p>Cholesky 分解的方法是 bordering method ，假设矩阵 $\mathbf{A}$ 可以分块为<br>$$<br>\boldsymbol{A}&#x3D;\left(\begin{array}{ll}<br>\boldsymbol{M} &amp; \boldsymbol{u} \<br>\boldsymbol{u}^{T} &amp; s<br>\end{array}\right)<br>$$<br>其中 $\mathbf{M}$ 可以分解为 $\mathbf{L_{M}L_{M}^{T}}$ ，因此 $\mathbf{A}$ 的分解因子为<br>$$<br>\boldsymbol{L}&#x3D;\left(\begin{array}{ll}<br>\boldsymbol{L_{M}} &amp; \boldsymbol{0} \<br>\boldsymbol{w}^{T} &amp; t<br>\end{array}\right)<br>$$<br>其中 $\mathbf{L_{M}w &#x3D; u}$ ，$\mathbf{t &#x3D; (s - w^{T}w)^{1&#x2F;2}}$ ，因此 $\mathbf{A}$ 的分解因子 $\mathbf{L}$ 可以<strong>逐行</strong>计算。以下图为例，假设我们已经完成了前 $i-1$ 步的分解，因此 $\mathbf{A}$ 的左上角的 $(i-1) \times (i-1)$ 的子矩阵已经完成了分解。为了计算 $\mathbf{L}$ 矩阵的第 $i$ 行，我们需要计算  $\mathbf{L_{M}w &#x3D; u}$ 。但是，实际上 $\mathbf{u}$ 只有一部分 envelope 区域需要计算，因此实际使用和计算的 $\mathbf{\bar{L}}$ 和 $\mathbf{\bar{u}^{T}}$ 如右图，因此此时 <strong>ELSLV</strong> 可以对这个 <strong>IBAND</strong> 大小的三角方程组进行求解</p>
-<p><img src="/52.png" alt="1"></p>
+<p><img src="/posts/57869f4c/52.png" alt="1"></p>
 <h1 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h1><p>具体脚本如下：</p>
-<p><img src="/53.png" alt="1"></p>
-<p><img src="/54.png" alt="1"></p>
-<p><img src="/55.png" alt="1"></p>
+<p><img src="/posts/57869f4c/53.png" alt="1"></p>
+<p><img src="/posts/57869f4c/54.png" alt="1"></p>
+<p><img src="/posts/57869f4c/55.png" alt="1"></p>
 <p>现在开始逐行解析。</p>
 <p>首先对第一行进行分解，如果对角线元素小于等于0则程序中止</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">IF ( DIAG(1) .LE. 0.0E0) GO TO 400</span><br><span class="line">DIAG(1) = SQRT(DIAG(1))</span><br><span class="line">IF( NEQNS .EQ. 1) RETURN</span><br></pre></td></tr></table></figure>

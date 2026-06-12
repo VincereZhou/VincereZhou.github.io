@@ -103,7 +103,7 @@
 <p>我一般用的比对方式有三种，notpad++ 的 Compare 插件，Excel 的  Vlookup 函数 + 排序 + IF， linux 的 diff 命令。但是问题在于第一种和第三种主要用在两个文件行的排序一致的情况，而且也得肉眼去看比对结果。第二种用 Excel 倒是灵活，就是得手动各种弄，偶尔一次可以，经常这样做就废时间了。</p>
 <h1 id="脚本逻辑"><a href="#脚本逻辑" class="headerlink" title="脚本逻辑"></a>脚本逻辑</h1><p>这个脚本要求两个文件的<strong>列数相同</strong>，并且<strong>列的顺序也一样</strong>。两个文件指定以某一列作为主键（数据库的概念，主键不可以出现重复）。</p>
 <p>首先比较两个文件的主键，画个韦恩图如下，最左边的部分表示只在第一个文件的主键，也就是只在第一个文件中的行（如果存在，则写入文件 only_in_file1.txt ），最右边同理 。中间重叠的部分就是两个文件共同的主键。</p>
-<p><img src="/1.png" alt="1"></p>
+<p><img src="/posts/705b018f/1.png" alt="1"></p>
 <p>然后查看两个文件共同的主键部分，比对同一个主键在两个文件的行的内容是否一致，如果不一致，则将这两行内容写入到 diff_rows.txt 。</p>
 <p>如果<strong>只在文件1中的行</strong>，<strong>只在文件2中的行</strong>，<strong>共同主键但是行内容不同的行</strong>，这三个<strong>均不存在</strong>，那就说明这<strong>两个文件在内容上完全一致</strong>。</p>
 <h1 id="使用软件"><a href="#使用软件" class="headerlink" title="使用软件"></a>使用软件</h1><ul>

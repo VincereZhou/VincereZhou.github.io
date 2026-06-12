@@ -100,7 +100,7 @@
 <span id="more"></span>
 
 <h1 id="ROOTLS"><a href="#ROOTLS" class="headerlink" title="ROOTLS"></a>ROOTLS</h1><p> (<strong>ROOTed Level Structure</strong>) 这个子程序的目的是产生一个<strong>连通组分</strong>的 <em>level structure</em> 。</p>
-<p>其输入参数为 <strong>ROOT</strong>, <strong>MASK</strong>, <strong>XADJ</strong>, <strong>ADJNCY</strong>。<strong>(XADJ, ADJNCY)</strong> 为整个图的相邻结构，  <strong>MASK</strong> 和  <strong>ROOT</strong> 指定了连通子图，MASK(i)&#x3D;0 的节点会直接忽略，ROOT 为起始节点。</p>
+<p>其输入参数为 <strong>ROOT</strong>, <strong>MASK</strong>, <strong>XADJ</strong>, <strong>ADJNCY</strong>。**(XADJ, ADJNCY)** 为整个图的相邻结构，  <strong>MASK</strong> 和  <strong>ROOT</strong> 指定了连通子图，MASK(i)&#x3D;0 的节点会直接忽略，ROOT 为起始节点。</p>
 <p>其输出的以<strong>ROOT</strong>为根的  <em>level structure</em> ，保存在数组对 <strong>(XLS, LS)</strong> 中，其第 $k$ 层的节点为 $LS(j), XLS(k) \leq j &lt; XLS(k+1)$ 。总层数存储在 <strong>NLVL</strong> 。</p>
 <p>注意由于 Fortran 是 1-index ，因此算法中 0 水平在代码中是 1，因此这里的 $k$ 其实是上面算法里的 $k-1$ 层 $L_{k-1}$ ，而 $NLVL &#x3D; \ell(x) + 1$ 。</p>
 <p> 这个子程序会逐层查找节点，所有找到的节点会存储在数组 <strong>LS</strong> 中，然后其相应的 <strong>MASK</strong> 的值设置为 0 ，因此这些节点不会再出现在 <strong>LS</strong> 中。当所有的水平都找完，MASK 中所有 level structure 中的节点的值会重新设置为 1 。</p>

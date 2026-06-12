@@ -101,15 +101,15 @@
 
 <h1 id="最小度数算法的实施"><a href="#最小度数算法的实施" class="headerlink" title="最小度数算法的实施"></a>最小度数算法的实施</h1><p>在最小度数算法的实施过程中，不可区分的节点会视为一个 <em>supernode</em> 。注意此时我们有两种不同情况下的 <em>supernode</em>，一个是消元过程中已经消元的连接起来的节点组成的 <em>supernode</em> ，一个是上面提到的不可区分的节点组成的 <em>supernode</em> 。</p>
 <p>下图就是对于这两种 <em>supernode</em> 的说明，它是对图 5.4.5 中的图是如何通过两种商图存储的，其中的阴影的双层圆圈表示已经消元的节点组成的<em>supernodes</em> ，而空白的双层圆圈表示不可区分的节点组成的 <em>supernodes</em> 。</p>
-<p><img src="/84.png" alt="1"></p>
+<p><img src="/posts/e0c9e6c/84.png" alt="1"></p>
 <p>我们现在会讨论如何实施这个算法的脚本，其输入为图的结构 <strong>(XADJ, ADJNCY)</strong> 和方程数目 <strong>NEQNS</strong> ，输出为 <strong>PERM</strong> 和 <strong>INVP</strong> 。</p>
 <p>这个子程序要求一些临时向量来实施商图模型和不可区分的节点。当前消元图中所有节点的度数存储在数组 <strong>DEG</strong> 中，其中已经被消除的节点的 DEG 值会设为 -1 。</p>
 <p>在商图模型中，连通的已经消除的节点会合并为一个 <em>supernode</em> ，此时我们需要挑出一个节点作为 <em>supernode</em> 的代表。如果 $\mathcal{G}(C)$ 就是这样一个连通组分，我们通常会选择 $C$ 中最后消除的节点作为 $C$ 的代表，其它节点不再使用。</p>
 <p>同样地，对于未消除的不可区分的节点，也会挑出一个节点作为代表，其它节点不再使用。</p>
 <p>中间向量 <strong>MARKER</strong> 用于标记在相邻结构中可以忽略的节点，这样的节点的 MARKER 值会设为 -1 ，这个向量也会临时用于生成 <em>reachable sets</em> 。<strong>QSIZE</strong> 和 <strong>QLINK</strong> 数组用于指定不可区分的节点，如果节点 $i$ 作为代表，那么在这个 <em>supernode</em> 中的节点数目为 <strong>QSIZE(i)</strong> ，这些节点为<br>$$<br>i, QLINK(i), QLINK(Qlink(i)),\cdots<br>$$<br>下图说明了 <strong>QSIZE</strong>, <strong>QLINK</strong> 和 <strong>MARKER</strong> 的使用，节点 ${2,5,8}$ 形成了一个由不可区分的节点组成的 <em>supernode</em> ，其代表为节点 2 。因此节点 5 和 8 的 MARKER 值设置为 -1；节点 ${3,6,9}$ 形成了一个已经消元的 <em>supernode</em> ，其代表为节点 9 ，因此节点 3 和 6 的 MARKER 值设置为 -1</p>
-<p><img src="/85.png" alt="1"></p>
+<p><img src="/posts/e0c9e6c/85.png" alt="1"></p>
 <p> 这里总共有 5 个子程序，分别为 <strong>GENQMD, QMDRCH, QMDQT, QMDUPD, QMDMRG</strong> ，它们的控制关系见下图。</p>
-<p><img src="/86.png" alt="1"></p>
+<p><img src="/posts/e0c9e6c/86.png" alt="1"></p>
 <h1 id="GENQMD"><a href="#GENQMD" class="headerlink" title="GENQMD"></a>GENQMD</h1><p>(General Quotient Minimum Degree algorithm)，这个子程序的目的是对一个<strong>不连通</strong>的图找到其最小度数排序。其输入为图的结构 <strong>(XADJ, ADJNCY)</strong> 和方程数目 <strong>NEQNS</strong> ，输出为 <strong>PERM</strong> 和 <strong>INVP</strong> 。运算过程中， <strong>(XADJ, ADJNCY)</strong> 会被修改，用于存储商图的结构。</p>
 <p>这个子程序一开始会初始化中间数组  <strong>QSIZE</strong>, <strong>QLINK</strong>, <strong>MARKER</strong> 和 <strong>DEG</strong> 向量，之后进行到主循环中。在主循环中，子程序首先会通过 <em>threshold searching</em> 找到一个度数最小的节点，其中有两个变量 <strong>THRESH</strong> 和 <strong>MINDEG</strong>，任何当前的度数等于 <strong>THRESH</strong> 的节点均是度数最小的节点。变量 <strong>MINDEG</strong> 保存大于 <strong>THRESH</strong> 的值的最小的度数，并用于更新 <strong>THRESH</strong> 的值。</p>
 <p> 当找到了一个最小度数的节点 <strong>NODE</strong> ，之后通过调用子程序 <strong>QMDRCH</strong> 来通过已经消除的节点获得 NODE 的 <em>reachable set</em> 。这个集合会存储在向量 <strong>RCHSET</strong> 中，其大小为 RCHSZE。通过 <strong>QLINK</strong> 获得 NODE 的不可区分的节点，并且进行编号和消除。</p>

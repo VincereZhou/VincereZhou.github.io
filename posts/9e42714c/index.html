@@ -125,8 +125,8 @@
 <p>$x_{i}$ 表示第 $i$ 列SNP的列向量，$\bar{x_{i}}$ 表示第 $i$ 列SNP的群体均值，$v_{x_{i}}$ 表示第 $i$ 列SNP的群体均值，$1_{n}$ 表示一个 $n \times 1$ 的全为1的列向量。</p>
 <p>因此两种矩阵的计算方式为 (文章中给的公式)：<br>$$<br>\begin{aligned}<br>G_{c} &amp;&#x3D;\frac{1}{p} \sum_{i&#x3D;1}^{p}\left(\mathrm{x}<em>{i}-1</em>{n} \bar{x}<em>{i}\right)\left(\mathrm{x}</em>{i}-1_{n} \bar{x}<em>{i}\right)^{T}, \<br>G</em>{s} &amp;&#x3D;\frac{1}{p} \sum_{i&#x3D;1}^{p} \frac{1}{v_{x_{i}}}\left(\mathrm{x}<em>{i}-1</em>{n} \overline{x_{i}}\right)\left(\mathrm{x}<em>{i}-1</em>{n} \overline{x_{i}}\right)^{T} .<br>\end{aligned}<br>$$<br>如果换成我们常见的G阵构建方式，如果 $Z_{1}$ 表示对 $X$ 每列进行<strong>中心化</strong>之后的矩阵，$Z_{2}$ 表示对 $X$ 每列进行<strong>标准化</strong>之后的矩阵。上面的式子可以写为下式：<br>$$<br>\mathbf{G_{c}}&#x3D;\frac{1}{p} \mathbf{Z_{1}} \mathbf{Z}_{1}^{\top}<br>$$</p>
 <p>$$<br>\mathbf{G_{s}}&#x3D;\frac{1}{p} \mathbf{Z_{2}} \mathbf{Z}_{2}^{\top}<br>$$</p>
-<p>我们发现标准化的G阵就是GCTA计算用的G阵，而中心化的G阵相比于 VanRaden 构建的G阵（见下式）常数项不同，<br>$$<br>\mathbf{G}&#x3D;\mathbf{Z Z}^{\prime} &#x2F; \sum 2 p_{i}\left(1-p_{i}\right)<br>$$<br>作者解释了一下何时使用这两种矩阵：<strong>如果MAF比较低的SNP容易有更大的效应，那么我们倾向于使用标准化的G阵</strong>，反之则倾向于中心化的G阵（理由呢？）。但是根据作者的经验，**中心化的G阵对于校正群体结构效果更好。**原文如下：</p>
-<p><img src="/23.png"></p>
+<p>我们发现标准化的G阵就是GCTA计算用的G阵，而中心化的G阵相比于 VanRaden 构建的G阵（见下式）常数项不同，<br>$$<br>\mathbf{G}&#x3D;\mathbf{Z Z}^{\prime} &#x2F; \sum 2 p_{i}\left(1-p_{i}\right)<br>$$<br>作者解释了一下何时使用这两种矩阵：<strong>如果MAF比较低的SNP容易有更大的效应，那么我们倾向于使用标准化的G阵</strong>，反之则倾向于中心化的G阵（理由呢？）。但是根据作者的经验，<strong>中心化的G阵对于校正群体结构效果更好。</strong>原文如下：</p>
+<p><img src="/posts/9e42714c/23.png"></p>
 <h4 id="结果文件"><a href="#结果文件" class="headerlink" title="结果文件"></a>结果文件</h4><ul>
 <li>prefix.log.txt 日志文件</li>
 <li>prefix.cXX.txt 或者 prefix.sXX.txt 是n*n 的矩阵文件。</li>
@@ -146,7 +146,7 @@
 <h4 id="结果文件-1"><a href="#结果文件-1" class="headerlink" title="结果文件"></a>结果文件</h4><p>结果文件会在当前目录的 <code>output</code> 文件夹中。</p>
 <h5 id="prefix-log-txt"><a href="#prefix-log-txt" class="headerlink" title="prefix.log.txt"></a>prefix.log.txt</h5><p>日志文件</p>
 <h5 id="prefix-assoc-txt"><a href="#prefix-assoc-txt" class="headerlink" title="prefix.assoc.txt"></a>prefix.assoc.txt</h5><p>关联结果，这里的 beta 估计值就是这个位点的斜率，最后一列 p_wald 表示 Wald test 计算得到的 P 值。</p>
-<p><img src="/22.png"></p>
+<p><img src="/posts/9e42714c/22.png"></p>
 <h3 id="单性状混合模型GWAS"><a href="#单性状混合模型GWAS" class="headerlink" title="单性状混合模型GWAS"></a>单性状混合模型GWAS</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -k [filename] -lmm [num] -o [prefix]</span><br></pre></td></tr></table></figure>
 
 <p>-bfile 二进制plink文件前缀</p>
@@ -165,7 +165,7 @@
 <li>prefix.log.txt ：日志文件，其中还包含了 PVE (遗传力) 估计值及其标准误</li>
 <li>prefix.assoc.txt ： GWAS 结果文件，示例如下图。这里新增了倒数第二列，<code>l_remle</code> 为 $\lambda$  的限制极大似然估计值（REML）。</li>
 </ul>
-<p><img src="/25.png"></p>
+<p><img src="/posts/9e42714c/25.png"></p>
 <h3 id="多性状混合模型GWAS"><a href="#多性状混合模型GWAS" class="headerlink" title="多性状混合模型GWAS"></a>多性状混合模型GWAS</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gemma -bfile [prefix] -k [filename] -lmm [num] -n [num1] [num2] [num3] -o [prefix]</span><br></pre></td></tr></table></figure>
 
 <p>这和单性状完全相同，除了 -n 选项，用于指定表型，以空格分隔。（例如 -n 1 2 就是第六列和第七列）。</p>
