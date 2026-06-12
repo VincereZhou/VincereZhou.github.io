@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    从GBLUP或ssGBLUP的育种值推导snp效应值 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-从GBLUP或ssGBLUP的育种值推导snp效应值"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  从GBLUP或ssGBLUP的育种值推导snp效应值
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/6b882d9f/" class="article-date">
+  <time datetime="2023-04-14T00:59:59.000Z" itemprop="datePublished">2023-04-14</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">875</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">4 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>基于GBLUP/ssGBLUP的育种值计算 SNP 效应。</p>
+<span id="more"></span>
+<h1>估计SNP效应</h1>
+<p>一步法中的 $\mathbf{H}^{-1}$ 公式为<br>
+$$<br>
+\mathbf{H}^{-1}=\mathbf{A}^{-1}+\left[\begin{array}{lc}<br>
+0 &amp; 0 \<br>
+0 &amp; \mathbf{G}^{-1}-\mathbf{A}<em>{22}^{-1}<br>
+\end{array}\right]<br>
+$$<br>
+其中 $\mathbf{G}$ 是校正到与 $\mathbf{A}</em>{22}$ 矩阵规模相同后的矩阵。</p>
+<p>我们将个体育种值分为基因型个体 ($\mathbf{a_{g}}$) 和 非基因型个体 ($\mathbf{a_{n}}$) ， 基因型个体的育种值可以视为所有 snp 效应之和，即：<br>
+$$<br>
+\mathbf{a_{g}} = \mathbf{Z}\mathbf{u}<br>
+$$<br>
+这里 $\mathbf{Z}$ 是 SNP 效应的系数矩阵（<strong>中心化</strong>的系数矩阵），$\mathbf{u}$ 是 SNP 效应向量。</p>
+<p>因此，个体加性效应的方差为<br>
+$$<br>
+\operatorname{var}(\mathbf{a_{g}}) = \operatorname{var}(\mathbf{Z}\mathbf{u}) = \mathbf{Z} \mathbf{D} \mathbf{Z}^{\prime} \sigma_{u}^{2} = \mathbf{G}^{<em>}\sigma_{a}^{2}<br>
+$$<br>
+这里 $\mathbf{D}$ 是位点的权重的对角矩阵（GBLUP 中为 $\mathbf{I}$ ），$\sigma_{u}^{2}$ 是位点的加性方差，$\mathbf{G}^{</em>}$ 是有权重的基因组亲缘关系矩阵。</p>
+<p>基因型个体的育种值 $\mathbf{a_{g}}$ 和 SNP 效应 $\mathbf{u}$ 的联合协方差矩阵为<br>
+$$<br>
+\operatorname{var}\left[\begin{array}{lc}<br>
+\mathbf{a_{g}} \<br>
+\mathbf{u}<br>
+\end{array}\right] = \left[\begin{array}{lc}<br>
+\mathbf{ZDZ^{\prime}} &amp; \mathbf{ZD^{\prime}} \<br>
+\mathbf{DZ^{\prime}} &amp; \mathbf{D}<br>
+\end{array}\right] \sigma_{u}^{2}<br>
+$$<br>
+因此<br>
+$$<br>
+\mathbf{G}^{*} = \frac{\operatorname{var}(\mathbf{a_{g}})} {\sigma_{a}^{2}} = \frac{\operatorname{var}(\mathbf{Zu})} {\sigma_{a}^{2}} = \mathbf{ZDZ^{\prime}} \frac{\sigma_{u}^{2}}{\sigma_{a}^{2}} = \mathbf{ZDZ^{\prime}}\lambda<br>
+$$<br>
+其中 $\lambda$ 是一个方差比值，基于 VanRaden 2009 ，存在公式<br>
+$$<br>
+\lambda = \frac{\sigma_{u}^{2}}{\sigma_{a}^{2}} = \frac{1}{\sum_{i=1}^{M}2p_{i}(1-p_{i})}<br>
+$$<br>
+这里 $M$ 是位点数目，$p_{i}$ 是等位基因频率。</p>
+<p>基于 Stranden &amp; Garrick (2009) ，可以推导出公式<br>
+$$<br>
+\hat{\mathbf{u}}  = \lambda \mathbf{DZ^{\prime}G^{*-1}\mathbf{\hat{a}<em>{g}}} = \mathbf{DZ^{\prime}(ZDZ^{\prime})^{-1}\mathbf{\hat{a}</em>{g}}}<br>
+$$<br>
+我们可以检查一下， 没有问题<br>
+$$<br>
+\mathbf{\hat{a}<em>{g}} = \mathbf{Zu} =\mathbf{ZDZ^{\prime}(ZDZ^{\prime})^{-1}\mathbf{\hat{a}</em>{g}}} = \mathbf{\hat{a}_{g}}<br>
+$$</p>
+<h1>估计SNP效应的方差</h1>
+<p>每一个 SNP 效应的方差估计值为 （Zhang, 2010）<br>
+$$<br>
+\hat{\sigma}<em>{u,i}^{2} = \hat{u}</em>{i}^{2}2p_{i}(1-p_{i})<br>
+$$<br>
+根据上面的公式可以构建一个估计一步法的 $\mathbf{D}$ 矩阵的算法，定义 $t$ 是迭代次数，$i$ 第 $i$ 个 SNP ，算法流程如下（这也是 blupf90 进行 ssGWAS 的流程）：</p>
+<ol>
+<li>$t=0$ ，$\mathbf{D}<em>{(t)} = \mathbf{I}$ ， $\mathbf{G}^{*}</em>{(t)} = \mathbf{Z} \mathbf{D}_{(t)} \mathbf{Z}^{\prime} \lambda$</li>
+<li>使用 ssGBLUP 计算 $\mathbf{\hat{a}_{g}}$</li>
+<li>计算 $\hat{\mathbf{u}<em>{(t)}}  = \lambda \mathbf{D</em>{(t)}Z^{\prime}G^{*-1}<em>{(t)}\mathbf{\hat{a}</em>{g}}}$</li>
+<li>对每一个位点，计算 $d^{<em>}<em>{i(t+1)} = \hat{u}</em>{i(t)}^{2}2p_{i}(1-p_{i})$ ，得到 $\mathbf{D}^{</em>}_{(t+1)}$ 矩阵</li>
+<li>标准化 $\mathbf{D}<em>{(t+1)} = \frac{\operatorname{tr} (\mathbf{D}</em>{(0)})}{\operatorname{tr} (\mathbf{D}^{<em>}_{(t+1)})} \mathbf{D}^{</em>}_{(t+1)}$</li>
+<li>计算 $\mathbf{G}^{*}<em>{(t+1)} = \mathbf{ZD</em>{(t+1)}Z^{\prime}} \lambda$</li>
+<li>$t = t+1$</li>
+<li>退出程序，或循环跳到第二步或第三步。</li>
+</ol>
+<p>如果循环跳到第三步，则每一次计算均使用相同的  $\mathbf{\hat{a}_{g}}$ 。</p>
+<p>具体是跳到第二步或第三步 ，还有循环次数均需要根据具体情况确定。</p>
+<h1>参考文献</h1>
+<ol>
+<li>Wang H, Misztal I, Aguilar I, et al. Genome-wide association mapping including phenotypes from relatives without genotypes[J]. Genetics research, 2012, 94(2): 73-83.</li>
+<li>VanRaden P M, Van Tassell C P, Wiggans G R, et al. Invited review: Reliability of genomic predictions for North American Holstein bulls[J]. Journal of dairy science, 2009, 92(1): 16-24.</li>
+<li>Strandén I, Garrick D J. Derivation of equivalent computing algorithms for genomic predictions and reliabilities of animal merit[J]. Journal of dairy science, 2009, 92(6): 2971-2975.</li>
+<li>Zhang Z, Liu J, Ding X, et al. Best linear unbiased prediction of genomic breeding values using a trait-specific marker-derived relationship matrix[J]. PloS one, 2010, 5(9): e12648.</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/bdd0ca05/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            混合模型方程组的迭代求解
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/cecfc845/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">R包-GCA</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

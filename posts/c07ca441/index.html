@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    XGBoost-SHAP框架用于筛位点 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-XGBoost-SHAP框架用于筛位点"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  XGBoost-SHAP框架用于筛位点
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/c07ca441/" class="article-date">
+  <time datetime="2026-06-12T05:46:04.000Z" itemprop="datePublished">2026-06-12</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">6.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">23 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>用XGBoost-SHAP框架可以得到每个特征的贡献值，因此可以用来筛选位点。</p>
+<p>本文内容主要来自于AI。</p>
+<span id="more"></span>
+<h2 id="XGBoost-SHAP-框架理论">XGBoost-SHAP 框架理论</h2>
+<p>在现代数据科学与传统科研的交叉领域，存在一个核心痛点：<strong>“高精度模型往往不可解释，而可解释的模型往往精度不足”</strong>。XGBoost-SHAP 框架正是打破这一僵局的“黄金搭档”。如果说 XGBoost 是榨干数据最后一点预测潜力的“性能猛兽”，那么 SHAP 就是照亮其内部逻辑的“高亮探照灯”。</p>
+<p>下面的理论部分都是 AI 写的，我也不知道对不对。我的理解就是通过新提出的 TreeSHAP 算法可以高校对这些决策树算法计算得到特征的贡献值，不然正常是没法计算特征的贡献值的。</p>
+<h3 id="前提：二者作用与分工">前提：二者作用与分工</h3>
+<p>可以把整个分析流程看作一场<strong>考古发掘</strong>：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">角色</th>
+<th style="text-align:left">工具</th>
+<th style="text-align:left">比喻</th>
+<th style="text-align:left">核心使命</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>挖掘机</strong></td>
+<td style="text-align:left"><strong>XGBoost</strong></td>
+<td style="text-align:left"><strong>“大力士”</strong></td>
+<td style="text-align:left"><strong>干活（预测）</strong>。负责在杂乱的数据中挖掘规律，把 0/1/2 变成表型预测值。它不在乎为什么，只在乎准不准。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>考古学家</strong></td>
+<td style="text-align:left"><strong>SHAP</strong></td>
+<td style="text-align:left"><strong>“翻译官”</strong></td>
+<td style="text-align:left"><strong>解释（归因）</strong>。负责把大力士挖出来的东西整理归类，告诉你：“这块石头（SNP）之所以重要，是因为它支撑了整个结构（表型）。”</td>
+</tr>
+</tbody>
+</table>
+<p><strong>结论</strong>：XGBoost 是<strong>因</strong>，SHAP 是<strong>果</strong>。没有 XGBoost 的强力预测，SHAP 无据可依；没有 SHAP 的归因解释，XGBoost 只是个黑箱。</p>
+<p><strong>1. XGBoost 内置重要性 <code>feature_importances_</code>：负责“粗筛”</strong></p>
+<ul>
+<li><strong>角色</strong>：<strong>特征过滤器 (Filter)</strong>。</li>
+<li><strong>原理</strong>：基于树模型训练过程中的统计（分裂次数、增益）。</li>
+<li><strong>优点</strong>：<strong>极快</strong>。对于几万个 SNP，几秒钟就能排出名次。</li>
+<li><strong>缺点</strong>：
+<ul>
+<li>不稳定（尤其是小样本）。</li>
+<li>无法处理特征共线性（LD）导致的贡献分散。</li>
+<li>只有分数，没有方向（不知道是增效还是减效）。</li>
+</ul>
+</li>
+<li><strong>你的用法</strong>：用来把 <strong>2 千万 $\rightarrow$ 5 万 $\rightarrow$ 5 千</strong>。这是它最擅长的工作。</li>
+</ul>
+<p><strong>2. SHAP 值：负责“精修”与“解释”</strong></p>
+<ul>
+<li><strong>角色</strong>：<strong>归因解释器 (Explainer)</strong>。</li>
+<li><strong>原理</strong>：基于博弈论，计算特征在<strong>各种组合</strong>下的边际贡献。</li>
+<li><strong>优点</strong>：
+<ul>
+<li><strong>更公平</strong>：能正确处理 LD 区域，不会因为两个 SNP 高度相关就胡乱分配权重。</li>
+<li><strong>有方向</strong>：告诉你 0$\rightarrow$2 是增加还是减少表型。</li>
+<li><strong>抗噪</strong>：结合交叉验证后，能筛掉“偶尔重要”的噪声位点。</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<strong>极慢</strong>。计算 5 千个 SNP 的 SHAP 值，可能需要几分钟到几小时。</li>
+</ul>
+<p><strong>3. 核心区别对照表</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">维度</th>
+<th style="text-align:left">XGBoost <code>feature_importances_</code></th>
+<th style="text-align:left">SHAP Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>主要功能</strong></td>
+<td style="text-align:left"><strong>挑选特征</strong> (Feature Selection)</td>
+<td style="text-align:left"><strong>解释模型</strong> (Model Interpretation)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>能否用于挑选</strong></td>
+<td style="text-align:left">✅ <strong>非常适合</strong>（速度快）</td>
+<td style="text-align:left">✅ <strong>非常适合</strong>（精度高）</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>针对你的数据</strong></td>
+<td style="text-align:left">用来<strong>砍掉杂草</strong>（降维）</td>
+<td style="text-align:left">用来<strong>鉴定庄稼</strong>（定论）</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>输出结果</strong></td>
+<td style="text-align:left">一个分数（越大越好）</td>
+<td style="text-align:left">一个矩阵（正/负贡献）</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>应对 LD</strong></td>
+<td style="text-align:left">差（容易把贡献分散给连锁位点）</td>
+<td style="text-align:left">好（能合理分配贡献）</td>
+</tr>
+</tbody>
+</table>
+<p>但是我看别人论文和网页，并没有使用 XGBoost <code>feature_importances_</code> 进行初筛位点的操作。</p>
+<h3 id="第一部分：XGBoost-的数学本质">第一部分：XGBoost 的数学本质</h3>
+<p>XGBoost (eXtreme Gradient Boosting) 的核心思想是<strong>加法模型（Additive Model）<strong>与</strong>前向分步算法</strong>。它不是一次性训练一个复杂的模型，而是一步步地添加新的弱分类器（决策树）来修正之前的残差。</p>
+<h4 id="1-目标函数（Objective-Function）">1. 目标函数（Objective Function）</h4>
+<p>XGBoost 的目标函数由两部分组成：<strong>损失函数</strong>（衡量预测准不准）和 <strong>正则化项</strong>（控制模型复杂度，防止过拟合）。</p>
+<p>给定 $n$ 个样本，训练 $K$ 棵树，预测结果为 $\hat{y}_i$：</p>
+<p>$$\text{Obj} = \sum_{i=1}^n l(y_i, \hat{y}<em>i) + \sum</em>{k=1}^K \Omega(f_k)$$</p>
+<ul>
+<li><strong>$l(y_i, \hat{y}_i)$</strong>：损失函数（如均方误差、Logistic Loss）。</li>
+<li><strong>$\Omega(f_k)$</strong>：第 $k$ 棵树的正则化项。</li>
+</ul>
+<h4 id="2-加法模型与泰勒展开">2. 加法模型与泰勒展开</h4>
+<p>在第 $t$ 轮迭代中，模型预测为前 $t-1$ 轮的模型加上一棵新树 $f_t$：<br>
+$$\hat{y}_i^{(t)} = \hat{y}_i^{(t-1)} + f_t(x_i)$$</p>
+<p>代入目标函数：<br>
+$$\text{Obj}^{(t)} = \sum_{i=1}^n l(y_i, \hat{y}_i^{(t-1)} + f_t(x_i)) + \Omega(f_t)$$</p>
+<p>由于 $l(y_i, \hat{y}<em>i^{(t-1)})$ 是常数，为了优化 $f_t$，XGBoost 使用了<strong>二阶泰勒展开</strong>来近似损失函数：<br>
+$$\text{Obj}^{(t)} \approx \sum</em>{i=1}^n \left[ l(y_i, \hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \frac{1}{2} h_i f_t^2(x_i) \right] + \Omega(f_t)$$</p>
+<p>其中：</p>
+<ul>
+<li><strong>$g_i = \partial_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$</strong>：损失函数的一阶导数（梯度）。</li>
+<li><strong>$h_i = \partial^2_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$</strong>：损失函数的二阶导数（海森矩阵）。</li>
+</ul>
+<h4 id="3-树的参数化与最优权重">3. 树的参数化与最优权重</h4>
+<p>定义树 $f_t(x) = w_{q(x)}$，其中 $q(x)$ 将样本映射到叶子节点，$w_j$ 是第 $j$ 个叶子节点的分数（权重）。<br>
+正则化项定义为：<br>
+$$\Omega(f_t) = \gamma T + \frac{1}{2} \lambda \sum_{j=1}^T w_j^2$$</p>
+<ul>
+<li>$T$：叶子节点数。</li>
+<li>$\gamma$：惩罚分裂的复杂度（Gamma）。</li>
+<li>$\lambda$：L2 正则化系数。</li>
+</ul>
+<p>将样本按叶子节点分组（$I_j = {i | q(x_i)=j}$），目标函数简化为：<br>
+$$\text{Obj}^{(t)} = \sum_{j=1}^T \left[ (\sum_{i \in I_j} g_i) w_j + \frac{1}{2} (\sum_{i \in I_j} h_i + \lambda) w_j^2 \right] + \gamma T$$</p>
+<p>对 $w_j$ 求导并令其为 0，得到最优叶子权重：<br>
+$$w_j^* = -\frac{\sum_{i \in I_j} g_i}{\sum_{i \in I_j} h_i + \lambda}$$</p>
+<p>代入后得到衡量树结构好坏的评分函数（Gain）：<br>
+$$\text{Gain} = \frac{1}{2} \left[ \frac{(\sum_{i \in I_L} g_i)^2}{\sum_{i \in I_L} h_i + \lambda} + \frac{(\sum_{i \in I_R} g_i)^2}{\sum_{i \in I_R} h_i + \lambda} - \frac{(\sum_{i \in I} g_i)^2}{\sum_{i \in I} h_i + \lambda} \right] - \gamma$$</p>
+<p><strong>这就是 XGBoost 选择分裂节点的数学依据：最大化这个 Gain 值。</strong></p>
+<hr>
+<h3 id="第二部分：SHAP-的公理化推导">第二部分：SHAP 的公理化推导</h3>
+<p>SHAP (SHapley Additive exPlanations) 将博弈论中的 <strong>Shapley 值</strong> 引入机器学习。其核心在于将模型的预测值 $f(x)$ 解释为基值 $E[f(X)]$ 加上各特征贡献 $\phi_i$ 的和。</p>
+<h4 id="1-SHAP-值的定义">1. SHAP 值的定义</h4>
+<p>对于任意样本 $x$，其 SHAP 值 $\phi_i$ 满足：<br>
+$$f(x) = \phi_0 + \sum_{i=1}^M \phi_i$$</p>
+<ul>
+<li><strong>$\phi_0$</strong>：模型在训练集上的平均预测值（Base Value）。</li>
+<li><strong>$\phi_i$</strong>：特征 $i$ 对当前样本预测值的贡献。</li>
+</ul>
+<h4 id="2-基于博弈论的-Shapley-公式">2. 基于博弈论的 Shapley 公式</h4>
+<p>对于特征 $i$，其 Shapley 值是通过计算它在所有可能特征组合（联盟 $S$）中的边际贡献加权平均得到的：</p>
+<p>$$\phi_i = \sum_{S \subseteq N \setminus {i}} \frac{|S|! (M - |S| - 1)!}{M!} \left[ f_{S \cup {i}}(x_{S \cup {i}}) - f_S(x_S) \right]$$</p>
+<ul>
+<li><strong>$N$</strong>：所有特征的集合。</li>
+<li><strong>$S$</strong>：不包含特征 $i$ 的特征子集。</li>
+<li><strong>$|S|$</strong>：子集 $S$ 的大小。</li>
+<li><strong>$f_{S \cup {i}}$</strong>：仅使用子集 $S$ 加上特征 $i$ 时的模型预测值。</li>
+</ul>
+<p><strong>问题</strong>：这个公式的计算复杂度是 $O(2^M)$，对于特征多的模型是不可行的。</p>
+<h4 id="3-TreeSHAP：针对树模型的高效算法">3. TreeSHAP：针对树模型的高效算法</h4>
+<p>Lundberg 等人提出的 TreeSHAP 算法，利用树的结构特性，将复杂度降至多项式时间 $O(TLD^2)$ （其中 T 是树的数量，L 是叶节点数，D 是树的最大深度）。</p>
+<p><strong>核心思想</strong>：<br>
+对于树模型，预测值是样本落入叶子节点的权重之和。TreeSHAP 通过<strong>追踪样本路径</strong>，计算“包含特征 $i$ 的路径”在整棵树中的概率分布。</p>
+<p>对于单棵树，特征 $i$ 的贡献 $\phi_{i,j}$ 计算为：<br>
+$$\phi_{i,j} = \sum_{k=1}^{T_j} \frac{\text{PathCoverage}(i, k)}{T_j} \cdot \Delta \text{Value}$$</p>
+<ul>
+<li><strong>PathCoverage</strong>：特征 $i$ 在节点 $k$ 处对样本路径的覆盖率（权重）。</li>
+<li><strong>$\Delta \text{Value}$</strong>：由于分裂带来的预测值变化。</li>
+</ul>
+<p><strong>最终 SHAP 值</strong>是所有树的贡献之和：<br>
+$$\phi_i = \sum_{j=1}^K \phi_{i,j}$$</p>
+<p><em>(这也是为什么 SHAP 对树模型（XGBoost, LightGBM, CatBoost）的支持如此无脑且快速的原因)</em></p>
+<h3 id="第三部分：XGBoost-SHAP-的结合">第三部分：XGBoost + SHAP 的结合</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">维度</th>
+<th style="text-align:left">XGBoost (预测者)</th>
+<th style="text-align:left">SHAP (解释者)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>核心目标</strong></td>
+<td style="text-align:left">最小化 $\text{Obj} = L + \Omega$</td>
+<td style="text-align:left">满足 $\phi_0 + \sum \phi_i = f(x)$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>数学工具</strong></td>
+<td style="text-align:left">二阶泰勒展开、贪心算法</td>
+<td style="text-align:left">博弈论、递归路径追踪</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>输出</strong></td>
+<td style="text-align:left">预测值 $\hat{y}$</td>
+<td style="text-align:left">每个特征的归因值 $\phi_i$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>交互效应</strong></td>
+<td style="text-align:left">隐含在树结构的分裂中</td>
+<td style="text-align:left">通过 <strong>Interaction Values</strong> 显式量化</td>
+</tr>
+</tbody>
+</table>
+<p><strong>交互效应的数学表达</strong>：<br>
+SHAP 还可以计算特征 $i$ 和 $j$ 的交互值 $\phi_{i,j}$：<br>
+$$\phi_{i,j} = \sum_{S \subseteq N \setminus {i,j}} \frac{|S|! (M - |S| - 2)!}{M!} \left[ f_{S \cup {i,j}} - f_{S \cup {i}} - f_{S \cup {j}} + f_S \right]$$</p>
+<p>这解释了为什么在你的 GWAS 分析中，使用 SHAP 依赖图（Dependence Plot）能看到两个基因位点如何共同作用影响表型（例如：当基因 A 突变时，基因 B 的影响才会显现）。</p>
+<h3 id="总结">总结</h3>
+<p>XGBoost 通过<strong>二阶优化</strong>保证了预测的高精度，而 SHAP 通过<strong>公理化归因</strong>保证了逻辑的可解释性。二者结合，实现了从“知其然”（预测准确）到“知其所以然”（机制解析）的跨越。</p>
+<h2 id="XGBoost-SHAP-框架技术路线">XGBoost-SHAP 框架技术路线</h2>
+<h3 id="🟢-阶段一：数据工程与预处理-Data-Engineering">🟢 阶段一：数据工程与预处理 (Data Engineering)</h3>
+<p>这是决定模型上限的基础环节，主要完成从原始数据到机器学习可用特征的转化。</p>
+<ul>
+<li><strong>多源数据整合</strong>：收集自变量（如遥感影像的波段反射率、建筑形态指标、SNP位点基因型）与因变量（如LST、表型性状）。</li>
+<li><strong>数据清洗与标准化</strong>：处理缺失值与异常值；对不同量纲的特征（如温度与面积）进行标准化或归一化处理。</li>
+<li><strong>数据集划分</strong>：按比例（如 8:2 或 7:3）切分为<strong>训练集 (Training Set)</strong> 与 <strong>测试集 (Test Set)</strong>，确保模型评估的无偏性。</li>
+</ul>
+<h3 id="🟡-阶段二：XGBoost-模型构建与优化-Black-box-Prediction">🟡 阶段二：XGBoost 模型构建与优化 (Black-box Prediction)</h3>
+<p>此阶段致力于打磨一个高精度、强泛化能力的“黑箱”预测模型。</p>
+<ul>
+<li><strong>模型初始化与训练</strong>：调用 <code>XGBRegressor</code>或 <code>XGBClassifier</code>（要求因变量是0 1 2 形式的整数，又可分为二分类和多分类），通过加法模型与前向分步算法，迭代训练出由多棵决策树组成的集成模型。</li>
+<li><strong>超参数调优 (Hyperparameter Tuning)</strong>：
+<ul>
+<li>利用网格搜索 (Grid Search) 或贝叶斯优化，确定最佳参数组合（如 <code>max_depth</code>, <code>learning_rate</code>, <code>n_estimators</code>, <code>reg_alpha</code>等）。</li>
+<li><strong>早停法 (Early Stopping)</strong>：监控验证集误差，防止模型过拟合。</li>
+</ul>
+</li>
+<li><strong>性能评估</strong>：在测试集上使用 R2、RMSE（回归）或 Accuracy、AUC（分类）等指标评估模型预测精度。<em>(此时模型已具备高预测能力，但缺乏可解释性)</em>。</li>
+</ul>
+<h3 id="🔵-阶段三：SHAP-机制解析与归因计算-Interpretability">🔵 阶段三：SHAP 机制解析与归因计算 (Interpretability)</h3>
+<p>这是连接“黑箱”与“科学机理”的桥梁，利用博弈论拆解模型的内在逻辑。</p>
+<ul>
+<li><strong>构建 SHAP 解释器</strong>：调用 <code>shap.TreeExplainer(model)</code>，基于 TreeSHAP 算法 O(TLD2)的高效复杂度，计算测试集中每个样本、每个特征的 Shapley 值。</li>
+<li><strong>全局特征重要性量化</strong>：聚合所有样本的 SHAP 值绝对值，得出各变量对模型预测的总体贡献度排名，筛选出关键驱动因子。</li>
+<li><strong>局部预测逻辑拆解</strong>：针对极端样本或特定个案，提取其特征的 SHAP 值，还原模型对该样本的具体决策路径。</li>
+</ul>
+<h4 id="具体解释">具体解释</h4>
+<p>阶段三是整个框架的**“灵魂”<strong>。它将第一阶段（数据）和第二阶段（模型）的成果，转化为人类可理解的</strong>因果逻辑**。这一阶段不再关注“预测得准不准”，而是关注“为什么准”以及“是怎么决策的”。</p>
+<h4 id="1-核心操作流程">1. 核心操作流程</h4>
+<p>在代码中，这个阶段通常对应以下几步：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 初始化解释器（绑定训练好的黑盒模型）</span></span><br><span class="line">explainer = shap.TreeExplainer(model)  <span class="comment"># model 是第二阶段训练好的 XGBoost</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 计算 SHAP 值（这是最关键的一步）</span></span><br><span class="line">shap_values = explainer(X_test)  <span class="comment"># 传入数据</span></span><br></pre></td></tr></table></figure>
+<p>这里的 <code>shap_values</code>是一个数组，形状为 <code>(样本数, 特征数)</code>。例如，如果你有 1000 个测试样本，20 个特征，那么 <code>shap_values</code>就有 1000 行、20 列，每一个数字代表**“某个特征对某个样本的预测贡献了多少”** 。</p>
+<p>采用 “平均绝对 SHAP 值” 对特征进行排序（这里实际算的是<strong>该特征在所有测试样本中的贡献值绝对值的均值</strong>，而不是该特征每增加1个单位的增加的效应值），这是 SHAP 的标准做法。</p>
+<p>这种做法其实衡量的是“这个特征在群体中平均有多大的话语权”，而不是“这个特征每变动一个单位会带来多少线性变化”。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计算每个 SNP 的平均贡献度（跨所有样本）</span></span><br><span class="line">importance = np.<span class="built_in">abs</span>(shap_values).mean(axis=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>我问了 AI ，这种对于我这种非0/1类的特征（如 SNP 和 连续变量），这种做法也适用吗？AI 说是，而且有文章里面就有连续变量的特征。AI 的解释我看了都不太通，只有一个点比较通，那就是<strong>效应的非线性</strong>，强行算单位变化会丢失信息。</p>
+<h4 id="2-灵魂拷问：为什么要算“测试集”？训练集不能算吗？">2. 灵魂拷问：为什么要算“测试集”？训练集不能算吗？</h4>
+<p><strong>答案是：技术上完全可以算训练集，但在科学分析和论文发表中，强烈建议使用测试集。</strong></p>
+<p>以下是为什么我们要坚持用<strong>测试集（Test Set）</strong> 来计算 SHAP 值的深层原因：</p>
+<p><strong>原因一：模拟“真实世界”的决策逻辑（泛化性）</strong></p>
+<ul>
+<li><strong>训练集</strong>：模型见过无数次，甚至已经把噪声都记下来了（过拟合）。在训练集上解释模型，可能解释的是“模型如何记住了数据”，而不是“模型学到了规律”。</li>
+<li><strong>测试集</strong>：模型从未见过这些数据。在这里计算 SHAP 值，反映的是模型面对<strong>未知新样本</strong>时的真实决策逻辑。这才是科研关心的：“如果我用这个模型预测新的病例/新的城市/新的基因数据，它会依据什么下判断？”</li>
+</ul>
+<p><strong>原因二：避免“数据泄露”导致的逻辑谬误</strong></p>
+<p>如果你用训练集计算 SHAP 值，可能会出现一种假象：某个特征看起来很重要，但实际上只是因为它在训练集中恰好和标签高度相关（甚至是巧合）。</p>
+<ul>
+<li><strong>举例</strong>：在训练集中，可能因为采样偏差，“穿红色衣服”的人患病的多。模型在训练集上会给“红色衣服”很高的 SHAP 值。但在测试集（真实世界）中，这两者无关。用测试集计算就能揭露这种虚假关联。</li>
+</ul>
+<p><strong>原因三：符合“训练-验证-测试”的科研范式</strong></p>
+<p>在《Building and Environment》那篇论文中，逻辑链条必须是闭环的：</p>
+<ol>
+<li><strong>训练集</strong>：用来拟合参数（让模型聪明）。</li>
+<li><strong>测试集</strong>：用来评估性能（证明模型聪明），同时也用来解释模型（证明模型聪明的理由是合理的）。</li>
+</ol>
+<p>如果解释用的是训练集，审稿人会质疑：“你只是解释了它怎么背答案，没解释它怎么解题。”</p>
+<hr>
+<h4 id="3-什么时候可以用训练集算-SHAP？">3. 什么时候可以用训练集算 SHAP？</h4>
+<p>虽然推荐用测试集，但在以下特定场景下，训练集也是有价值的：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>使用数据集</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>模型调试 (Debugging)</strong></td>
+<td><strong>训练集</strong></td>
+<td>检查模型是否过拟合。如果训练集的 SHAP 值和测试集差异巨大，说明模型没学好。</td>
+</tr>
+<tr>
+<td><strong>特征筛选 (Feature Selection)</strong></td>
+<td><strong>训练集</strong></td>
+<td>快速看哪些特征在训练过程中被赋予了高权重。</td>
+</tr>
+<tr>
+<td><strong>科学机理挖掘 (Paper)</strong></td>
+<td><strong>测试集</strong></td>
+<td><strong>必须</strong>。证明发现的规律（如：建筑密度导致升温）具有普适性，而非数据巧合。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="4-结合GWAS分析">4. 结合GWAS分析</h4>
+<p>在 GWAS（全基因组关联分析）中，这一点尤为重要：</p>
+<ul>
+<li>如果你用 <strong>训练集 SNP</strong> 计算 SHAP，可能会发现一些 SNP 很重要，但它们可能只是恰好在你采集的样本群体中出现频率高（假阳性）。</li>
+<li>如果你用 <strong>测试集 SNP</strong> 计算 SHAP，发现这些 SNP 依然有高贡献，这就能强有力地证明：<strong>这些基因位点确实通过生物学机制影响了表型</strong>，而不是统计噪音。</li>
+</ul>
+<p><strong>总结：</strong></p>
+<p>计算测试集的 SHAP 值，是为了确保我们解释的是模型的**“智慧”<strong>（泛化规律），而不是模型的</strong>“记忆”**（过拟合噪声）。这是从“机器学习跑通了”迈向“科学研究完成了”的关键一步。</p>
+<h3 id="🔴-阶段四：科学机理可视化与洞察-Visualization-Insights">🔴 阶段四：科学机理可视化与洞察 (Visualization &amp; Insights)</h3>
+<p>将高维的 SHAP 数值转化为直观的图表，从而推导出符合领域知识的科学结论。</p>
+<ul>
+<li><strong>特征重要性摘要图 (Summary Plot)</strong>：宏观展示哪些因素主导了目标变量的变化。</li>
+<li><strong>依赖图与交互效应 (Dependence Plot)</strong>：揭示单一特征的<strong>边际效应</strong>（如：随着建筑容积率增加，LST如何非线性变化），并挖掘<strong>特征间的协同或拮抗作用</strong>（如：风速与湿度对降温的联合影响）。</li>
+<li><strong>个体瀑布图 (Waterfall Plot) / 力图 (Force Plot)</strong>：微观解释单个预测值是如何由基线值（E[f(X)]）加上各特征的贡献值（ϕi）累加而成的。</li>
+</ul>
+<h2 id="升级技术路线-双层交叉验证">升级技术路线-双层交叉验证</h2>
+<p><strong>当样本量较小时，单次划分训练集/测试集确实存在较大的随机性风险</strong>。在 GWAS 这种高维小样本场景中，5×交叉验证（5-fold CV）不仅是“锦上添花”，更是<strong>确保科学结论稳健性的必要条件</strong>。</p>
+<p>以下是针对小样本优化的 <strong>XGBoost-SHAP 技术路线升级版</strong>，将交叉验证逻辑深度融入各个阶段：</p>
+<h4 id="🟢-阶段一：数据工程与预处理（不变）">🟢 阶段一：数据工程与预处理（不变）</h4>
+<ul>
+<li>标准化特征，确保数据质量。</li>
+</ul>
+<h4 id="🟡-阶段二：XGBoost-模型构建与优化（核心改动点）">🟡 阶段二：XGBoost 模型构建与优化（核心改动点）</h4>
+<p>不再使用单次划分，而是引入 <strong>嵌套交叉验证（Nested CV）</strong>：</p>
+<ol>
+<li><strong>外层循环（模型评估）</strong>：
+<ul>
+<li>将数据分为 5 折（5 folds）。</li>
+<li>每次取 4 折训练，1 折测试。重复 5 次，确保<strong>每一个样本都被预测过一次</strong>。</li>
+</ul>
+</li>
+<li><strong>内层循环（超参数调优）</strong>：
+<ul>
+<li>在每一折的训练集内部，再次使用 5 折交叉验证（或贝叶斯优化）来搜索最佳的 <code>max_depth</code>、<code>learning_rate</code>等参数。</li>
+<li><strong>目的</strong>：防止在小样本上，因为超参数刚好适配了某一次特定的训练/测试划分而产生“伪最优”。</li>
+</ul>
+</li>
+</ol>
+<h4 id="🔵-阶段三：SHAP-机制解析与归因计算（关键升级）">🔵 阶段三：SHAP 机制解析与归因计算（关键升级）</h4>
+<p>这是解决你痛点的核心。<strong>不再只计算一个测试集的 SHAP 值，而是计算 5 个。</strong></p>
+<ol>
+<li><strong>循环计算</strong>：
+<ul>
+<li>在 5 折交叉验证的每一轮中，使用训练好的模型计算<strong>当前测试折</strong>的 SHAP 值。</li>
+<li>你会得到 5 份 <code>shap_values</code>数据（对应 5 个不同的测试子集）。</li>
+</ul>
+</li>
+<li><strong>结果聚合（Aggregation）</strong>：
+<ul>
+<li><strong>均值法（最常用）</strong>：在<strong>每一次</strong>交叉验证折（Fold）中，计算该折测试集上所有样本的 <strong>SHAP 值绝对值的平均值</strong>（即该折的特征重要性排名）。计算这 5 个数字的 <strong>均值（Mean）</strong> 和 <strong>标准差（Std）</strong>。</li>
+<li><strong>中位数法</strong>：如果数据中有极端异常值，使用中位数更稳健。</li>
+<li><strong>一致性检验</strong>：统计某个 SNP 在 5 次实验中是否都排在 Top 10。只有那些**“次次都稳居前列”**的 SNP 才被认为是真正的强关联位点。</li>
+</ul>
+</li>
+</ol>
+<h4 id="🔴-阶段四：科学机理可视化与洞察（基于聚合结果）">🔴 阶段四：科学机理可视化与洞察（基于聚合结果）</h4>
+<ul>
+<li>使用<strong>聚合后的 SHAP 值</strong>（而不是单次的结果）来绘制 Summary Plot 或 Dependence Plot。</li>
+<li>在论文中，你可以自信地陈述：“经过 5 次交叉验证，特征 X1 的平均 SHAP 值为 0.85 ± 0.12，表明其对表型具有稳定且显著的正向影响。”</li>
+</ul>
+<h2 id="挖掘表型关联SNP位点技术路线">挖掘表型关联SNP位点技术路线</h2>
+<p>针对挖掘表型关联SNP位点，由于一般是样本少，位点多的情况。AI 的建议是使用机器学习进行验证位点，而不是发现位点。</p>
+<ol>
+<li>先用 <strong>GEMMA</strong>、<strong>GCTA</strong> 或 <strong>Plink</strong> 做传统的 GWAS 关联分析，算出 P 值。</li>
+<li>进行 clumping ，基于 P 值结果过滤 LD ，剔除连锁位点</li>
+<li>过滤后，选取 <strong>Top 1000 个 P 值最小的 SNP</strong> 。</li>
+<li>将剩下的位点丢给上面的 XGBoost-SHAP 框架，基于 SHAP 值对SNP位点进行排序，<strong>进行最终的位点筛选</strong></li>
+</ol>
+<p>最终位点的筛选最简单的思路就是人为设定一个数目，选取top n 的位点，但是会引发一个问题，比如选前 50，别人会问你为什么是 50 ？</p>
+<p>别人的网页没有这方面内容，他们都没有筛选特征，只是用 shap 画图。结合与 AI 的问答，我自己想了一个比较自动的标准。首先必须要做  5× 交叉验证，得到 SHAP_Mean 和 SHAP_Std ，并计算变异系数 （std/mean, CV）。但是由于不同 fold 之间可能 SNP 的基因型分布差异比较大（随机划分的），因此 CV 更多反映 <strong>fold 间样本结构差异</strong> ，而不是 SNP 本身是否稳定（小样本量会加剧这一问题），因此看 CV 没有用（当样本量很大时，fold间样本结构就趋于一致，此时的 CV 就反映的snp本身的稳定性）。</p>
+<p>筛选位点的唯一金标准就是 SHAP_Mean  大于给定阈值（可以看看每个 fold 中的 shap_mean ，看看是不是只在1折里不是0，其他折都是0，这种可能就是噪音，进行剔除）。大样本量时可以关注变异系数 CV 。</p>
+<h3 id="为什么选Top-1000">为什么选Top 1000</h3>
+<p>针对你的 <strong>109 个样本</strong> 和 <strong>重测序数据</strong>，结合传统 GWAS 先验知识，以下是具体的参数建议和原理解析。</p>
+<p><strong>结论：选 1000 比选 5000 更安全、更科学。</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">维度</th>
+<th style="text-align:left">Top 1000</th>
+<th style="text-align:left">Top 5000</th>
+<th style="text-align:left">针对你的 109 样本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>自由度</strong></td>
+<td style="text-align:left">109 vs 1000</td>
+<td style="text-align:left">109 vs 5000</td>
+<td style="text-align:left">109 个样本撑不起 5000 个参数，过拟合风险极高。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>SHAP 计算</strong></td>
+<td style="text-align:left">✅ 可行</td>
+<td style="text-align:left">⚠️ 吃力</td>
+<td style="text-align:left">5000 个特征在交叉验证中计算 SHAP 可能会爆内存或耗时极长。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>生物学</strong></td>
+<td style="text-align:left">信号集中</td>
+<td style="text-align:left">噪声增多</td>
+<td style="text-align:left">第 1001 到第 5000 的位点往往 P 值差异不大，混入假阳性概率大。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>建议</strong>：优先选择 <strong>Top 1000</strong>。如果担心漏掉信号，可以在做完 SHAP 后，观察第 1000 名的 P 值和 SHAP 值是否断崖式下跌，如果没有，再放宽到 2000。</p>
+<h3 id="为什么要过滤-LD-吗？">为什么要过滤 LD 吗？</h3>
+<p><strong>结论：必须过滤，且这是最关键的步骤之一。</strong></p>
+<p>即便你已经用 GEMMA/GCTA 选出了 Top 1000 个 P 值最小的 SNP，<strong>LD 过滤依然不可或缺</strong>。原因如下：</p>
+<ol>
+<li>
+<p><strong>消除冗余信号（去重）</strong></p>
+<ul>
+<li>传统 GWAS 的 P 值往往成簇出现。比如 1 号染色体上 100 个 SNP 都显著（因为 LD 高），但它们代表的是同一个因果变异。</li>
+<li>如果不去 LD，你的 Top 1000 列表里可能有 300 个都来自同一个基因区域。<strong>这浪费了你本就稀缺的“1000 个名额”</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>保障 XGBoost 稳定性</strong></p>
+<ul>
+<li>XGBoost 在高度相关的特征面前会“选择困难”，导致每次训练选中的特征不同，使得 <code>feature_importances_</code> 和 SHAP 值波动极大。</li>
+</ul>
+</li>
+<li>
+<p><strong>提升 SHAP 归因准确性</strong></p>
+<ul>
+<li>SHAP 虽然能处理共线性，但在小样本下，去除 LD 能让贡献度更清晰地分配给“代表位点”，而不是分散在连锁位点中。</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-针对你的数据的“黄金标准”流程">3. 针对你的数据的“黄金标准”流程</h3>
+<p>请严格按照以下顺序操作，以确保结果能被审稿人接受：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">步骤</th>
+<th style="text-align:left">操作</th>
+<th style="text-align:left">目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Step 1</strong></td>
+<td style="text-align:left"><strong>传统 GWAS</strong></td>
+<td style="text-align:left">用 GEMMA/GCTA 算出所有 SNP 的 P 值。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Step 2</strong></td>
+<td style="text-align:left"><strong>提取 Top 1000</strong></td>
+<td style="text-align:left">按 P 值排序，保留最显著的 1000 个。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Step 3</strong></td>
+<td style="text-align:left"><strong>LD 修剪 (Pruning)</strong></td>
+<td style="text-align:left"><strong>关键！</strong> 对这 1000 个 SNP 再次进行 LD 修剪（例如 <code>plink --indep-pairwise 50 5 0.2</code>）。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Step 4</strong></td>
+<td style="text-align:left"><strong>XGBoost 训练</strong></td>
+<td style="text-align:left">使用修剪后的 SNP（可能只剩 400-600 个）训练模型。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Step 5</strong></td>
+<td style="text-align:left"><strong>SHAP 归因</strong></td>
+<td style="text-align:left">计算 SHAP 值，排序，并汇报 <code>Mean ± Std</code>。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-为什么这样做最稳妥？">4. 为什么这样做最稳妥？</h3>
+<ul>
+<li><strong>生物学上</strong>：你利用了传统遗传学的先验知识（P 值），保证了候选位点有遗传基础。</li>
+<li><strong>统计学上</strong>：你剔除了由于连锁造成的冗余，保证了特征独立性。</li>
+<li><strong>机器学习上</strong>：109 个样本对应几百个特征，模型自由度充足，不会过拟合。</li>
+</ul>
+<p><strong>总结：</strong><br>
+不要直接把 Top 1000 丢给 XGBoost。<strong>一定要对这 1000 个再做一次 LD 修剪。</strong> 这一步能防止你的“关键基因列表”里塞满同一个基因的重复拷贝，是产出干净、可信结果的决定性环节。</p>
+<h2 id="回归问题实操">回归问题实操</h2>
+<p>输入文件：</p>
+<ol>
+<li>基因型为 012格式的 qc_prune.raw</li>
+<li>表型文件 blue_pick.txt （个体号和 blue 值，无标题）</li>
+</ol>
+<h2 id="参考文献">参考文献</h2>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Gv5GTBX5lKXEd_4u_U7NPA">https://mp.weixin.qq.com/s/Gv5GTBX5lKXEd_4u_U7NPA</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/read/cv39836525/?opus_fallback=1">https://www.bilibili.com/read/cv39836525/?opus_fallback=1</a></li>
+<li></li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/fa7f1b9d/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            校正表型思考
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/1fd0f94e/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">gcta进行GWAS分析</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

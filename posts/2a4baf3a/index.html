@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    从markdown生成ppt-软件Marp |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-从markdown生成ppt-软件Marp"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  从markdown生成ppt-软件Marp
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/2a4baf3a/" class="article-date">
+  <time datetime="2026-06-12T06:14:59.000Z" itemprop="datePublished">2026-06-12</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">11 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>用直接写markdown的形式生成 ppt 文件，至此完成了对 office 软件的扬弃。</p>
+<span id="more"></span>
+<p>Marp 的本质是一个 <strong>Markdown → HTML/CSS 幻灯片</strong> 的转换器（底层是 <strong>Marpit 框架</strong>）。每一页 <code>---</code>分隔的内容会被渲染成一个 <strong><code>&lt;section&gt;</code>元素</strong>，最终拼成一页页幻灯片。</p>
+<h1>vscode插件方式</h1>
+<h2 id="安装-vscode-和-marp-插件">安装 vscode 和 marp 插件</h2>
+<p>marp 可以单独安装，然后用命令行的方式运行。但是用 <strong>VS Code + Marp 插件</strong> 来替代命令行方案，会让你体验更好、效率倍增。它就像一个对开发者友好的“PPT 制作工具”，让你直接在 Markdown 里写幻灯片，并能实时看到专业、美观的视觉风格。</p>
+<ol>
+<li>安装 vscode</li>
+<li>安装 markdown 插件：安装 <strong>Markdown All in One</strong> ，这个插件能提供更强大的 Markdown 编辑辅助功能。</li>
+<li>安装 Marp 插件：在插件市场的搜索框中输入 “<strong>Marp for VS Code</strong>”，然后点击搜索结果中的 “<strong>安装</strong> (Install)” 按钮即可（注意：安装插件要关闭网络VPN代理）。</li>
+<li>安装  “<strong>Marp to Editable PPTX</strong>” 插件：在 VS Code 的扩展商店中搜索并安装 “<strong>Marp to Editable PPTX</strong>”</li>
+</ol>
+<h3 id="设置内容溢出诊断"><s>设置内容溢出诊断</s></h3>
+<p>如果一页内容太多，多出的内容 marp 会自动裁掉。Vs code 有一个选项可以提醒你这一点。</p>
+<ol>
+<li>在 VS Code 里按 <strong>Ctrl + ,</strong>（或右上角 ⚙️ <strong>管理 → 设置</strong>）</li>
+<li>顶部搜索框输入： <code>marp overflow</code>或完整键名： <code>markdown.marp.diagnostics.slideContentOverflow</code></li>
+<li>看到 <strong>Markdown › Marp: Diagnostics: Slide Content Overflow</strong> 这一项 → 勾选（或把下拉改成 <code>enabled</code>）</li>
+</ol>
+<p>开了之后你会看到什么</p>
+<ul>
+<li>**必须打开 Marp Preview（预览窗口）**才会出现波浪线/警告</li>
+<li>当某一页内容跑到 <code>&lt;section&gt;</code>的 safe-area（padding 定义的可视区）外面时，Marp 扩展会在预览里标诊断（黄色波浪/Problem 面板提示），意思是：<strong>这页可能导出时被裁</strong>。</li>
+</ul>
+<p>试了一下没用</p>
+<h3 id="怎么打开-Marp-Preview（预览窗口）"><s>怎么打开 Marp Preview（预览窗口）</s></h3>
+<p><strong>① 先确保你打开了那个 <code>.md</code>文件</strong></p>
+<p>在 VS Code 里把你的 <code>xxx.md</code>打开（左侧文件树单击就行）。</p>
+<p><strong>② 打开命令面板（搜索工具）</strong></p>
+<p>按快捷键：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ctrl + Shift + P</span><br></pre></td></tr></table></figure>
+<p>顶部会出现一个<strong>搜索输入框</strong>。</p>
+<p><strong>③ 在搜索框里输入这几个字之一（挑最容易拼的）：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Marp: Open Preview</span><br></pre></td></tr></table></figure>
+<p>或更长全称：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Marp: Open Preview Window</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>输到 <code>Marp: O</code>一般就会自动补全出来了，用 <strong>↓/↑</strong> 选中：</p>
+<p><strong>Marp: Open Preview Window</strong></p>
+<p>然后按 <strong>Enter</strong>。</p>
+</blockquote>
+<p><strong>④ 右侧/旁边会弹出一个新窗口，里面就是幻灯片预览</strong></p>
+<h2 id="Marp官方导出的pptx的问题">Marp官方导出的pptx的问题</h2>
+<p>Marp 官方导出的 PPTX 确实不能直接编辑，因为它的原理是把整张幻灯片“拍”成一张背景图。</p>
+<p>因为 Marp 官方导出 PPTX 主要依赖 PptxGenJS 库。该库的设计初衷是快速将网页内容“快照”为幻灯片，因此它生成的文件中，文字都是作为静态背景图片的一部分，而不是可独立编辑的文本框。</p>
+<p><strong>“Marp to Editable PPTX”</strong> 插件可以解决这一问题，它在后台调用 Chrome 浏览器渲染 HTML，再精确提取每个元素的位置、字体、颜色，然后重新构建一个原生 PPTX 文件。</p>
+<h2 id="快速上手流程">快速上手流程</h2>
+<ol>
+<li>
+<p><strong>新建文件并开启 Marp 功能</strong></p>
+<ul>
+<li>
+<p>在 VS Code 里新建一个文件，保存时文件名以 <code>.md</code> 结尾，例如 <code>my_slides.md</code>。</p>
+</li>
+<li>
+<p>在文件<strong>最顶部</strong>输入 <code>---</code>，然后换行再输入 <code>marp: true</code>，最后输入 <code>---</code> 并换行。这段<code>frontmatter</code>元数据就告诉 VS Code：“请用 Marp 来处理这个 Markdown 文件”。示例如下</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">marp: true</span><br><span class="line">theme: default</span><br><span class="line">size: 16:9</span><br><span class="line">math: mathjax</span><br><span class="line">paginate: true</span><br><span class="line"><span class="section">backgroundColor: #ffffff</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>说明如下</p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>含义</th>
+<th>可选值/说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>marp: true</code></td>
+<td><strong>启用 Marp 解析</strong></td>
+<td>必须写在文件最开头，告诉 VS Code 这个 Markdown 文件要用 Marp 引擎渲染为幻灯片</td>
+</tr>
+<tr>
+<td><code>theme: default</code></td>
+<td><strong>幻灯片主题</strong></td>
+<td>Marp 内置三个主题：<code>default</code>（简洁白底）、<code>gaia</code>（更现代的扁平风格）、<code>uncover</code>（全屏沉浸感）。你也可以自定义 CSS 主题</td>
+</tr>
+<tr>
+<td><code>size: 16:9</code></td>
+<td><strong>幻灯片宽高比</strong></td>
+<td>可选 <code>16:9</code>（宽屏，推荐）或 <code>4:3</code>（传统标屏）</td>
+</tr>
+<tr>
+<td><code>math: mathjax</code></td>
+<td><strong>公式渲染</strong></td>
+<td>声明有 mathjax 渲染公式</td>
+</tr>
+<tr>
+<td><code>paginate: true</code></td>
+<td><strong>显示页码</strong></td>
+<td>在每页幻灯片的右下角自动生成当前页/总页数（如 1/5）</td>
+</tr>
+<tr>
+<td><code>backgroundColor: #ffffff</code></td>
+<td><strong>背景色</strong></td>
+<td>十六进制颜色代码，<code>#ffffff</code> 表示白色。可以改为 <code>#f0f0f0</code>（浅灰）等其他颜色</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>输入完成后，你可能会在编辑器<strong>右上角</strong>看到一个 Marp 的小图标（或一个“预览”图标），点击它就能打开实时预览窗口。</p>
+<p><img src="1.png" alt=""></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>编写幻灯片内容</strong><br>
+现在，你就可以像写 Markdown 文档一样，去写你的幻灯片了。</p>
+<ul>
+<li><strong>分页</strong>：使用 <code>---</code> (三个连续的短横线) 来分隔每一页（最后不要写换行符，会多出空白页）。</li>
+<li><strong>标题</strong>：每页顶部的 <code># 一级标题</code> 通常会被视为该页幻灯片的大标题。</li>
+<li><strong>内容</strong>：正常使用 Markdown 语法，像 <code>- 无序列表</code>、<code>1. 有序列表</code>、<code>**加粗**</code>、<code>_斜体_</code> 等都可以。</li>
+</ul>
+</li>
+<li>
+<p><strong>导出为 PPT 文件</strong></p>
+<ul>
+<li><strong>marp</strong> 自带不可编辑格式：打开命令面板 (<code>Ctrl+Shift+P</code>)，输入并执行 <code>Marp: Export Slide Deck...</code> 命，选择路径和文件格式。</li>
+<li>“<strong>Marp to Editable PPTX</strong>” 插件可编辑样式：打开命令面板 (<code>Ctrl+Shift+P</code>)，输入并执行 <code>Marp: Export to Editable PPTX</code>命，选择路径和文件格式。</li>
+</ul>
+</li>
+</ol>
+<h2 id="“Marp-to-Editable-PPTX”-插件的问题"><strong>“Marp to Editable PPTX”</strong> 插件的问题</h2>
+<p>我测试了一下，<strong>“Marp to Editable PPTX”</strong> 插件导出的 PPT 默认是 Yu Gothic UI 字体，这是个日文字体，显示的中文排版很难看。</p>
+<h3 id="解决思路：显式定义中文字体">解决思路：显式定义中文字体</h3>
+<p>这是最优雅的方法，能让所有输出方式（PDF, HTML, PPTX）都受益。在你的 Marp 文件<strong>最顶部 frontmatter 之后</strong>，加一段内联 <code>&lt;style&gt;</code>，或者写进外部 CSS 都行。</p>
+<p>这里写的 CSS 代码会被 Marp <strong>原样注入到输出 HTML 的样式表里</strong>，变成全局生效的 CSS 规则——相当于你手动给&quot;每一页幻灯片&quot;设置了字体。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">marp: true</span><br><span class="line">theme: default</span><br><span class="line">size: 16:9</span><br><span class="line">math: mathjax</span><br><span class="line">paginate: true</span><br><span class="line"><span class="section">backgroundColor: #ffffff</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">style</span>&gt;</span></span></span><br><span class="line">/* ===== 全局字体：把中文字体放最前 ===== <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">section &#123;</span></span><br><span class="line"><span class="emphasis">  font-family: &#x27;Microsoft YaHei&#x27;, &#x27;PingFang SC&#x27;, &#x27;Noto Sans CJK SC&#x27;, &#x27;SimHei&#x27;, sans-serif !important;</span></span><br><span class="line"><span class="emphasis">&#125;</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">/*</span> 代码块也一起锁（否则代码注释里的中文也可能方块） <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">pre,</span></span><br><span class="line"><span class="emphasis">code,</span></span><br><span class="line"><span class="emphasis">pre &gt; code &#123;</span></span><br><span class="line"><span class="emphasis">  font-family:</span></span><br><span class="line"><span class="emphasis">    /*</span> 第1层：等宽拉丁（Consolas 有英文字形，没中文→自动跳下一层） <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">    &#x27;Consolas&#x27;,</span></span><br><span class="line"><span class="emphasis">    /*</span> 第2层：CJK 字形层（接住中文/全角，但它是比例宽度） <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">    &#x27;Microsoft YaHei&#x27;,</span></span><br><span class="line"><span class="emphasis">    /*</span> 第3层：跨平台 CJK 兜底 <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">    &#x27;Noto Sans CJK SC&#x27;, &#x27;SimHei&#x27;,</span></span><br><span class="line"><span class="emphasis">    /*</span> 最终等宽兜底 <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">    &#x27;Courier New&#x27;, monospace !important;</span></span><br><span class="line"><span class="emphasis">&#125;</span></span><br><span class="line"><span class="emphasis"><span class="language-xml"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span></span></span><br></pre></td></tr></table></figure>
+<p>解释一下这里的 <code>!important</code> :  !important = 贴在整条声明末尾的标记，作用是<strong>把整条 font-family声明标为 important</strong>。</p>
+<p>正常情况下 CSS 优先级按这条链决胜负：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">内联 style=&quot;&quot;  &gt;  ID选择器  &gt;  类/属性选择器  &gt;  元素选择器</span><br><span class="line">                                     ↑</span><br><span class="line">                             (特异性越高越赢)</span><br></pre></td></tr></table></figure>
+<p>当一个属性值后面加上 <code>!important</code>，它就会<strong>无视正常的层叠优先级</strong>（如选择器权重、代码顺序），成为该元素该属性的“最终胜者”。<code>!important</code> 会覆盖任何没有 <code>!important</code> 的声明。</p>
+<p>这里使用  <code>!important</code> 的原因是：Marp 的 <code>gaia</code>/ <code>uncover</code>主题自身带了：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">section</span> &#123;</span><br><span class="line">  <span class="attribute">font-family</span>: <span class="string">&#x27;Roboto&#x27;</span>, <span class="string">&#x27;Helvetica&#x27;</span>, sans-serif;  <span class="comment">/* ← 主题自带的，选择器也是 section */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果没有 <code>!important</code>，两个 <code>section &#123; font-family &#125;</code>同特异性 → <strong>源顺序靠后的赢</strong>。如果 Marp 主题样式在你 <code>&lt;style&gt;</code>之后注入（它经常这样干），你的设置就会被无声覆盖，中文变回 Roboto → 方块。</p>
+<p>所以 <code>!important</code>在这的本质是：<strong>“别管你怎么算优先级，听我的。”</strong></p>
+<p>另外，marp 会将下面的代码渲染成下面的 HTML 格式。因此这里也设置了一下字体格式，避免代码出现字体问题。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a = a + <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">pre</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">code</span> <span class="attr">class</span>=<span class="string">&quot;language-python&quot;</span>&gt;</span>a = a + 1</span><br><span class="line"><span class="tag">&lt;/<span class="name">code</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">pre</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="图片">图片</h2>
+<h3 id="普通内联图片">普通内联图片</h3>
+<p>在 Marp 里，当你设置了 <code>size: 16:9</code> 或 <code>size: 4:3</code> 时，整个幻灯片（也就是 <code>section</code> 元素）的实际像素尺寸分别是 <strong>1280 x 720</strong> 和 <strong>960 x 720</strong> 。</p>
+<p>正常内联图片设置大小的核心参数是 <code>w</code>（宽），<code>h</code>（高）。我试了一下，只能设置长度单位，不接受百分比，如（设置一个，另一个默认就是 <code>auto</code>）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![w:200px](1.png)</span><br></pre></td></tr></table></figure>
+<h3 id="背景图片-占据整个幻灯片">背景图片 - 占据整个幻灯片</h3>
+<p>那就将这个图片作为背景即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![bg contain](1.png)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>
+<p>contain : <strong>等比缩放图片到&quot;尽可能大&quot;，但保证整张图都装进容器 。</strong></p>
+<p><strong>所以有一边会</strong>刚好贴到<code>section</code>的对应边，另一边按比例缩小后 <code>&lt;section</code>对应边，会有留空</p>
+</li>
+</ul>
+<p><code>contain</code>到底做了什么几何运算？（可视化理解）</p>
+<p>假设你 16:9 画布 = <strong>宽 W × 高 H</strong>，图片原始 = <strong>宽 w × 高 h</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scale = min(W/w, H/h)</span><br><span class="line">       ↑</span><br><span class="line">  选&quot;宽度方向能容纳的比例&quot;和&quot;高度方向能容纳的比例&quot;中更小的那个</span><br><span class="line">  保证  scaled_w ≤ W 且 scaled_h ≤ H  同时成立</span><br></pre></td></tr></table></figure>
+<p>画完之后：</p>
+<ul>
+<li>图<strong>完整可见</strong> ✅</li>
+<li>多余空间留作<strong>上下或左右的留白</strong>（letterbox/pillarbox）</li>
+<li><strong>绝不会裁掉任何像素</strong></li>
+</ul>
+<h3 id="背景图片-图文分栏">背景图片-图文分栏</h3>
+<p>上面正常的内联图片和文字是上下顺序。</p>
+<p>Marp 的 <code>bg</code> 语法（设置为背景图片）也支持一些高级布局，比如让图片和文字分居两侧（<strong>这相当于一个捷径</strong>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![bg left:50%](image.jpg)    # 将这张背景图片固定在幻灯片的左侧 50% 位置，右侧留给文字</span><br></pre></td></tr></table></figure>
+<p>还需要设置图片大小（不然可能显示不正常），如下例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![bg left:50% contain](1.png)</span><br></pre></td></tr></table></figure>
+<h2 id="公式的问题">公式的问题</h2>
+<p>其他 markdown 格式都是 marp 原生支持的。只有 marp 公式是通过 mathjax 渲染的，我看在 PPT 里变成了图片。</p>
+<p>因此在 <strong>“Marp to Editable PPTX”</strong> 插件导出的 PPT 里公式容易乱，特别是<strong>行内公式</strong>。</p>
+<p>因此要做到：</p>
+<ol>
+<li>能不用公式，尽量不用公式，例如 <code>$x$</code> 改成 <code>x</code> 。</li>
+</ol>
+<h2 id="导出为可编辑的pptx">导出为可编辑的pptx</h2>
+<ol>
+<li><strong>“Marp to Editable PPTX”</strong> 插件 : 缺点就是<strong>公式</strong>容易乱，有的版型也会乱，还得手动调整（就是不想手动调整）。</li>
+<li>邪修做法：marp 导出 pdf, pdf 再转 ppt 。（pdf 转 ppt 目前用的网站 <a target="_blank" rel="noopener" href="https://smallpdf.com/cn/pdf-to-ppt#r=convert-to-powerpoint">smallpdf</a> ，好像目前可以免费使用2次）</li>
+</ol>
+<h2 id="示例">示例</h2>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">marp: true</span><br><span class="line">theme: default</span><br><span class="line">size: 16:9</span><br><span class="line">math: mathjax</span><br><span class="line">paginate: true</span><br><span class="line"><span class="section">backgroundColor: #ffffff</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">style</span>&gt;</span></span></span><br><span class="line">/* ===== 全局字体：把中文字体放最前 ===== <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">section &#123;</span></span><br><span class="line"><span class="emphasis">  font-family: &#x27;Microsoft YaHei&#x27;, &#x27;PingFang SC&#x27;, &#x27;Noto Sans CJK SC&#x27;, &#x27;SimHei&#x27;, sans-serif !important;</span></span><br><span class="line"><span class="emphasis">&#125;</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">/*</span> 代码块也一起锁（否则代码注释里的中文也可能方块） <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">pre,</span></span><br><span class="line"><span class="emphasis">code,</span></span><br><span class="line"><span class="emphasis">pre &gt; code &#123;</span></span><br><span class="line"><span class="emphasis">  font-family:</span></span><br><span class="line"><span class="emphasis">    /*</span> 第1层：等宽拉丁（Consolas 有英文字形，没中文→自动跳下一层） <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">    &#x27;Consolas&#x27;,</span></span><br><span class="line"><span class="emphasis">    /*</span> 第2层：CJK 字形层（接住中文/全角，但它是比例宽度） <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">    &#x27;Microsoft YaHei&#x27;,</span></span><br><span class="line"><span class="emphasis">    /*</span> 第3层：跨平台 CJK 兜底 <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">    &#x27;Noto Sans CJK SC&#x27;, &#x27;SimHei&#x27;,</span></span><br><span class="line"><span class="emphasis">    /*</span> 最终等宽兜底 <span class="emphasis">*/</span></span><br><span class="line"><span class="emphasis">    &#x27;Courier New&#x27;, monospace !important;</span></span><br><span class="line"><span class="emphasis">&#125;</span></span><br><span class="line"><span class="emphasis"><span class="language-xml"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span></span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis"># ← 这行是一页的标题（一级标题 = 整页大字居中）</span></span><br><span class="line"><span class="emphasis">- 列表项</span></span><br><span class="line"><span class="emphasis">- 列表项</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">---</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">## ← 这是第二页</span></span><br><span class="line"><span class="emphasis">普通段落文字。</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis"><span class="strong">**加粗**</span> / *</span>斜体* / <span class="code">`代码`</span></span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"></span><br><span class="line"><span class="section">### 分栏示例（Gaia主题下好用）</span></span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;columns&quot;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="strong">**左栏**</span></span><br><span class="line"><span class="bullet">-</span> A</span><br><span class="line"><span class="bullet">-</span> B</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="strong">**右栏**</span></span><br><span class="line"><span class="bullet">-</span> X</span><br><span class="line"><span class="bullet">-</span> Y</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"></span><br></pre></td></tr></table></figure> 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/33b4171/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            网络版报告一之web基础
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/bef9d508/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">机器学习做基因组选配文献笔记</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

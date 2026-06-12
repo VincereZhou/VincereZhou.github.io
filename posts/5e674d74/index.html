@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    混合线性模型一之广义最小二乘 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-混合线性模型一之广义最小二乘"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  混合线性模型一之广义最小二乘
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/5e674d74/" class="article-date">
+  <time datetime="2022-02-17T05:51:50.000Z" itemprop="datePublished">2022-02-17</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">16 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是混合线性模型理论系列的第一篇，内容为概述及广义最小二乘（固定效应的估计）。</p>
+<span id="more"></span>
+<h1>混合线性模型概述</h1>
+<h2 id="前言">前言</h2>
+<p>统计分析的目的是推断 (<em>inference</em>) 和预测 (<em>prediction</em>)，推断指估计参数的大小（比如确定哪些自变量有作用，哪些自变量没有作用），预测是对未来的观测值进行预测。</p>
+<p>假设我们定义我们的观测值向量是一个 $n$ 维的向量 $\mathbf{y}$ ，一般来说我们将观测值向量视为对真实的或概念上的<strong>总体</strong>的一次<strong>随机抽样</strong>，即向量 $\mathbf{y}$ 是一个随机向量，向量 $\mathbf{y}$ 的每一个元素是随机变量 。但是我们很少知道总体的分布，一般我们可能会假设总体服从多元正态分布。</p>
+<h2 id="模型">模型</h2>
+<p>混合线性模型表示如下<br>
+$$<br>
+\mathbf{y}=\mathbf{X} \boldsymbol{\beta}+\mathbf{Zu}+\mathbf{e}<br>
+$$<br>
+其中，</p>
+<blockquote>
+<p>$\mathbf{X}$ 是一个已知的固定的 $n \times p \quad  (n &gt; p)$ 的矩阵， 其秩为 $r \leq p$ 。<br>
+$\boldsymbol{\beta}$ 是一个<strong>固定</strong>的由未知参数组成的 $p \times 1$ 向量 。<br>
+$\mathbf{Z}$ 是一个已知的固定的 $n \times q$ 矩阵。<br>
+$\mathbf{u}$ 是一个 $q \times 1$ 的<strong>随机</strong>向量。<br>
+$\mathbf{e}$ 是由随机误差组成的 $n \times 1$ 的随机向量</p>
+</blockquote>
+<p>注意：这里的 $\mathbf{y, u ,e}$ 均视为从某个真实的或者概念上的总体的一个<strong>随机抽样</strong>，即均为随机向量。这三者的均值和方差，协方差假设如下。<br>
+$$<br>
+\begin{gathered}<br>
+E(\mathbf{u})=\mathbf{0}, E(\mathbf{e})=\mathbf{0}, E(\mathbf{y})=\mathbf{X} \beta \<br>
+\operatorname{Var}(\mathbf{u})=\mathbf{G}, \operatorname{Var}(\mathbf{e})=\mathbf{R}, \operatorname{Cov}\left(\mathbf{u}, \mathbf{e}^{\prime}\right)=\mathbf{0}, \operatorname{Var}(\mathbf{y})=\mathbf{Z G Z}^{\prime}+\mathbf{R}<br>
+\end{gathered}<br>
+$$<br>
+这里的协方差矩阵 $\mathbf{G, R}$ 可能是已知的，也可能是未知的。由于 $\mathbf{u}$ 和 $\mathbf{e}$ 均无法观测，因此我们一般不知道 $\mathbf{G}$ 和 $\mathbf{R}$ ，但是我们可以对这两个协方差矩阵做一些假设，从而减少估计的参数数目。我们一般假设 $\mathbf{R}$ 的非对角线元素均为 0，对角线元素均相同，也就是不同样本具有相同的残差并且彼此的残差之间不相干，即假设 $\mathbf{R} = \sigma_{e}^{2} \mathbf{I}$ 。</p>
+<p>其中 $\boldsymbol{\beta}$ 称为<strong>固定效应</strong>，因为其元素均为<strong>固定的不变的常数</strong>，只是我们不知道具体的值；$\boldsymbol{\mu}$ 称为<strong>随机效应</strong>，因为它是从总体得到的一次随机抽样，其元素均为随机变量，我们无法完全控制其大小。</p>
+<p>除了随机误差外，完全由固定效应组成的模型称为<strong>固定效应模型</strong>，或<strong>固定模型</strong>；除群体平均数 $\mu$ 之外，完全由随机效应组成的模型称为<strong>随机效应模型</strong>，简称为<strong>随机模型</strong>。</p>
+<p>其实所有的线性模型都可以表示为<strong>混合线性模型</strong>，固定模型和随机模型均可以视为混合线性模型的一个特例。这样一来我们可以通过这一个模型的通式来解决所有问题（线性问题）。</p>
+<p>在混合线性模型中，我们需要估计固定效应 $\boldsymbol{\beta}$ 和随机效应 $\boldsymbol{\mu}$ ，我们将固定效应的估计称为<strong>估计</strong>，将随机效应的估计称为<strong>预测</strong>。</p>
+<p>下面我们看如何通过广义最小二乘法来估计固定效应 $\boldsymbol{\beta}$ 。</p>
+<h1>广义最小二乘</h1>
+<p>在普通最小二乘中，我们假设 $\operatorname{Var}(\mathbf{y}) = \operatorname{Var}(\mathbf{e}) = \sigma_{e}^{2} \mathbf{I}$ ，此时得到的正规方程组 $\mathbf{X^{T}X } \boldsymbol{\hat{\beta}} = \mathbf{X^{T}y}$ 及满秩情况下的唯一解 $\boldsymbol{\beta}_{\mathrm{LS}}=\left(\boldsymbol{X}^{\mathrm{T}} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\mathrm{T}} \boldsymbol{y}$ 即为<strong>最佳线性无偏估计值</strong>  (<em>best linear unbiased estimators</em>, BLUE) 。这一部分内容可见 <a href="https://vincere.fun/posts/55264e6f/#">矩阵微分与正规方程组推导</a> 。</p>
+<p>但是如果 $\mathbf{y}$ 的协方差矩阵并不满足普通最小二乘的假设，此时如果我们仍采用普通最小二乘方法，此时得到的参数估计值就不再是 BLUE ，此时我们需要对 $\mathbf{y}$ 作相应的线性变换。</p>
+<p>我们考虑一般的情况，假设固定模型如下<br>
+$$<br>
+\mathbf{y} = \boldsymbol{X \beta} + \mathbf{e}<br>
+$$<br>
+假设$E(\mathbf{e}) = \mathbf{0}$，  $\operatorname{Var}(\mathbf{y}) = \operatorname{Var}(\mathbf{e}) = \mathbf{V}=\sigma^{2} \mathbf{R}$ ，其中 $\mathbf{R}$ 为一个 $n \times n$ 的相关系数矩阵，这里  $\mathbf{R}$ 是一个正定矩阵（ 因此 $\mathbf{R}^{-1}$ 同样是正定矩阵）。根据正定矩阵的性质，一定存在一个非奇异矩阵 $\mathbf{Q}$ 使得<br>
+$$<br>
+\mathbf{QQ^{\prime}= R^{-1}}<br>
+$$<br>
+用  $\mathbf{Q}$  对 $\mathbf{y}$ 作线性变换，有<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{y}^{<em>} &amp;=\mathbf{Q y} \<br>
+&amp;=\mathbf{Q} \mathbf{X} \boldsymbol{\beta}+\mathbf{Q} \mathbf{e} \<br>
+&amp;=\mathbf{X}^{</em>} \boldsymbol{\beta}+\mathbf{e}^{<em>}<br>
+\end{aligned}<br>
+$$<br>
+其中 $\mathbf{X}^{</em>}=\mathbf{Q} \mathbf{X}, \quad \mathbf{e}^{<em>}=\mathbf{Q} \mathbf{e}$  ，则<br>
+$$<br>
+\operatorname{Var}\left(\mathbf{y}^{</em>}\right)=\operatorname{Var}(\mathbf{Q y})=\mathbf{Q} \operatorname{Var}(\mathbf{y}) \mathbf{Q}^{\prime}=\sigma^{2} \mathbf{Q} \mathbf{R} \mathbf{Q}^{\prime}<br>
+$$<br>
+因为 $\mathbf{QQ^{\prime}= R^{-1}}$ ，对该式左乘 $\mathbf{Q}^{-1}$ ，右乘  $\mathbf{Q}^{‘-1}$ ，得到 $\mathbf{Q}^{-1} \mathbf{R}^{-1} \mathbf{Q}^{\prime-1}=\mathbf{I}$ ，即 $\mathbf{Q R Q}^{\prime}=\mathbf{I}$ ，于是<br>
+$$<br>
+\operatorname{Var}\left(\mathbf{y}^{<em>}\right)=\sigma^{2} \mathbf{I}<br>
+$$<br>
+因此，我们知道线性转换后的模型 $\mathbf{y}^{</em>}=\mathbf{X}^{<em>} \boldsymbol{\beta}+\mathrm{e}^{</em>}$ 符合普通最小二乘的假设，此时我们得到最小二乘方程组如下<br>
+$$<br>
+\mathbf{X}^{<em>'} \mathbf{X}^{</em>}\boldsymbol{\hat{\beta}}=\mathbf{X}^{<em>'} \mathbf{y}^{</em>}<br>
+$$<br>
+将 $\mathbf{X}^{<em>}=\mathbf{Q} \mathbf{X}$ ， $\mathbf{y}^{</em>} =\mathbf{Q y} $ 带入，得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{X}^{<em>'} \mathbf{X}^{</em>}\boldsymbol{\hat{\beta}}=\mathbf{X}^{<em>'} \mathbf{y}^{</em>} \<br>
+&amp;\mathbf{X’Q’} \mathbf{QX} \boldsymbol{\hat{\beta}}=\mathbf{X’Q’} \mathbf{Qy} \</p>
+<p>&amp;\mathbf{X’R^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X’R^{-1}} \mathbf{y} \</p>
+<p>\end{aligned}<br>
+$$<br>
+$\mathbf{X’R^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X’R^{-1}} \mathbf{y}$ 称为 <strong>广义最小二乘方程组</strong>。 当 $\mathbf{X}$ 满秩时，我们得到唯一的广义最小二乘估计值 $\boldsymbol{\hat{\beta}}= (\mathbf{X’R^{-1}} \mathbf{X})^{-1} \mathbf{X’R^{-1}} \mathbf{y}$ ，也就是最佳线性无偏估计值；当  $\mathbf{X}$ 不满秩时，我们有无穷个解，某个解可以表示为 $\boldsymbol{\hat{\beta}}= (\mathbf{X’R^{-1}} \mathbf{X})^{-} \mathbf{X’R^{-1}} \mathbf{y}$ ，其中 $(\mathbf{X’R^{-}} \mathbf{X})^{-}$ 为任意一个广义逆，此时若  $\boldsymbol{q’ \beta}$ 为可估计函数，则   $\boldsymbol{q’ \hat{\beta}}$  是对   $\boldsymbol{q’ \beta}$  的最佳线性无偏估计。</p>
+<p>对上面的<strong>广义最小二乘方程组</strong>的左右两侧均乘以 $1/\sigma^{2}$ ，我们得到该方程组的另一种形式。<br>
+$$<br>
+\mathbf{X’V^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X’V^{-1}} \mathbf{y}<br>
+$$<br>
+上面我们推导了固定模型的情况，我们可以轻松推广至一般的混合线性模型，设混合线性模型表达式同上，我们可以将随机效应和随机误差效应视为一体，即令 $\mathbf{Zu + e = e^{<em>}}$ ，此时模型写为<br>
+$$<br>
+\mathbf{y} = \boldsymbol{X \beta} + \mathbf{e}^{</em>}<br>
+$$<br>
+此时，$\operatorname{Var}(\mathbf{y}) = \operatorname{Var}(\mathbf{e^{*}}) =\mathbf{Z G Z}^{\prime}+\mathbf{R}$ ，即此时 $\mathbf{V} =\mathbf{Z G Z}^{\prime}+\mathbf{R}$ ，同样有 $\mathbf{X’V^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X’V^{-1}} \mathbf{y}$ 方程组成立。</p>
+<h2 id="另一种证明">另一种证明</h2>
+<p>我们接着延续高斯-马尔可夫定理的思想，从所有的线性无偏估计值中找到一个“最佳的”估计值，这里“最佳”的意思是指估计值具有<strong>最小的</strong>方差。</p>
+<p>假设 $\mathbf{k}^{\prime} \boldsymbol{\beta}$ 是一个可估计函数，即我们可以找到一个向量  $\mathbf{a}$  使得  $\mathrm{E}\left(\mathbf{a}^{\prime} \mathbf{y}\right)=\mathbf{k}^{\prime} \boldsymbol{\beta}$ 。我们知道  $E\left(\mathbf{a}^{\prime} \mathbf{y}\right)=\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta}$ ，因此 $\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta} = \mathbf{k}^{\prime} \boldsymbol{\beta}$ 需要对所有可能的  $\boldsymbol{\beta}$ 均成立，那么当且仅当下式成立时 $\mathbf{k}^{\prime} \boldsymbol{\beta}$ 是一个可估计函数<br>
+$$<br>
+\mathbf{a}^{\prime} \mathbf{X}=\mathbf{k}^{\prime}<br>
+$$<br>
+同时，我们有<br>
+$$<br>
+\operatorname{Var}\left(\mathbf{a}^{\prime} \mathbf{y}\right)=\mathbf{a}^{\prime}(\operatorname{Var}(\mathbf{y})) \mathbf{a}=\mathbf{a}^{\prime} \mathbf{V a}<br>
+$$<br>
+这里我们假设 $\mathbf{V}$ 矩阵已知。</p>
+<p>因此我们是在满足约束条件  $\mathbf{a}^{\prime} \mathbf{X}=\mathbf{k}^{\prime}$ 的前提下使得 $\mathbf{a’Va}$ 的对角线元素最小，构建拉格朗日函数如下<br>
+$$<br>
+\mathbf{L}=\frac{1}{2}\mathbf{tr(a’Va) + (a’X-k’)\boldsymbol{\theta}}<br>
+$$<br>
+求偏导数，使之为 $\mathbf{0}$ 得到<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\partial \mathbf{L} / \partial \mathbf{a}= \mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta}= \mathbf{0} \<br>
+&amp;\partial \mathbf{L} / \partial \boldsymbol{\theta}=\mathbf{X’a-k} = \mathbf{0}<br>
+\end{aligned}<br>
+$$<br>
+将两个式子整理成一个方程组，得到<br>
+$$<br>
+\left(\begin{array}{cc}<br>
+\mathbf{V} &amp; \mathbf{X} \<br>
+\mathbf{X}^{\prime} &amp; \mathbf{0}<br>
+\end{array}\right)\left(\begin{array}{l}<br>
+\mathbf{a} \<br>
+\boldsymbol{\theta}<br>
+\end{array}\right)=\left(\begin{array}{l}<br>
+\mathbf{0} \<br>
+\mathbf{k}<br>
+\end{array}\right)<br>
+$$<br>
+对第一个方程进行变换可得<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta} &amp;= \mathbf{0} \<br>
+\mathbf{a}  &amp;= \mathbf{-V^{-1}X \boldsymbol{\theta}} \<br>
+\mathbf{X’a}  &amp;= \mathbf{-X’V^{-1}X \boldsymbol{\theta}} \<br>
+\mathbf{k}  &amp;= \mathbf{-X’V^{-1}X \boldsymbol{\theta}} \</p>
+<p>\end{aligned}<br>
+$$<br>
+因此我们得到了一个只关于 $\boldsymbol{\theta}$ 的方程组<br>
+$$<br>
+\mathbf{X’V^{-1}X \boldsymbol{\theta}} = \mathbf{-k}<br>
+$$<br>
+我们只需要证明对于任何一个广义逆 $\mathbf{ (X’V^{-1}X)^{-} }$ ，$\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}k=k}$ 均成立，则该方程组相容。因为  $\mathbf{k}^{\prime} \boldsymbol{\beta}$ 可估计，因此必然存在某个  $\mathbf{a_{0}}$ 向量使得  $\mathbf{k = X’a_{0}}$ ，因此上式可以写成  $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}X’a_{0}=X’a_{0}}$ 。我们设这里的 $\mathbf{A=V^{-1/2}X}$ ，这里的 $\mathbf{V^{-1/2}}$ 是 $\mathbf{V^{1/2}}$ 的逆矩阵，易得 $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}X’} = \mathbf{A’A(A’A)^{-}A’V^{1/2}} = \mathbf{A’V^{1/2}} =  \mathbf{X’V^{-1/2} V^{1/2}} = \mathbf{X’}$ ，因此得证   $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}X’a_{0}=X’a_{0}}$  。</p>
+<p>因此  $\boldsymbol{\theta}$  的一个解为<br>
+$$<br>
+\mathbf{-(X’V^{-1}X)^{-}k}<br>
+$$<br>
+带入到第一个方程 $\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta}= \mathbf{0}$ ，得到<br>
+$$<br>
+\mathbf{a}  = \mathbf{V^{-1}X (X’V^{-1}X)^{-}k}<br>
+$$<br>
+我们可以进一步证明无论 $\mathbf{ (X’V^{-1}X)^{-} }$ 如何取值，$\mathbf{a}$ 均不变。同样设  $\mathbf{A=V^{-1/2}X}$ ，$\mathbf{a}  = \mathbf{V^{-1}X (X’V^{-1}X)^{-}k} = \mathbf{V^{-1}X (X’V^{-1}X)^{-}X’a_{0}}$  ，则 $\mathbf{a = V^{-1/2} A(A’A)^{-}A’V^{1/2}a_{0}}$ 。根据广义逆的性质，无论 $(\mathbf{A}^{\prime} \mathbf{A})^{-}$ 取何值， $\mathbf{A}\left(\mathbf{A}^{\prime} \mathbf{A}\right)^{-} \mathbf{A}^{\prime}$  均保持不变，因此 $\mathbf{a}$ 保持不变。</p>
+<p>此时  $\mathbf{k}^{\prime} \boldsymbol{\beta}$  的 BLUE 为<br>
+$$<br>
+\mathbf{a’y} = \mathbf{k’(X’V^{-1}X)^{-}X’V^{-1}y}<br>
+$$<br>
+如果我们设<br>
+$$<br>
+\boldsymbol{\beta^{0}} = \mathbf{(X’V^{-1}X)^{-}X’V^{-1}y}<br>
+$$<br>
+即 $\boldsymbol{\beta^{0}}$ 是下式的任意一个解，即  $\boldsymbol{\beta^{0}}$ 是<strong>广义最小二乘方程组</strong>的一个解，其上标的 0 表示其是某一个解，而不是唯一解。<br>
+$$<br>
+\mathbf{(X’V^{-1}X)}\boldsymbol{\beta^{0}} = \mathbf{X’V^{-1}y}<br>
+$$<br>
+因此，我们得到   $\mathbf{k}^{\prime} \boldsymbol{\beta}$  的 BLUE 值就是  $\mathbf{k}^{\prime} \boldsymbol{\beta^{0}}$  。</p>
+<h2 id="V-1-的计算简化">$V^{-1}$ 的计算简化</h2>
+<p>在广义最小二乘估计时需要计算 $\mathbf{V^{-1}}$ ，当表型值数据量很大时， $\mathbf{V^{-1}}$ 计算困难甚至无法计算。Henderson 在 1959 年给出了  $\mathbf{V^{-1}}$ 的一个计算公式，如下：<br>
+$$<br>
+\mathbf{V}^{-1}=\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}<br>
+$$<br>
+一般 $\mathbf{R}^{-1}$ 很好计算，如果我们可以轻松计算 $\mathbf{G^{-1}}$ 和 $\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1}$ 的话 ，那么采用这个公式计算  $\mathbf{V^{-1}}$ 就很有优势。在个体动物模型中貌似没法简单计算  $\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1}$ ，所以这个计算公式现在好像没啥用了。</p>
+<p><strong>证明</strong>：我们只需要证明 $\mathbf{(R+ZGZ’)} \left(\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\right)  = \mathbf{I}$ 即可，我们有<br>
+$$<br>
+\begin{aligned}<br>
+&amp;\mathbf{\left(R+Z G Z^{\prime}\right)\left[R^{-1}-R^{-1} Z\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}\right]} \<br>
+&amp;=\mathbf{I+Z G Z^{\prime} R^{-1}-Z\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \<br>
+&amp; \quad-\mathbf{Z G Z^{\prime} R^{-1} Z\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \<br>
+&amp;=\mathbf{I+Z G Z^{\prime} R^{-1}-Z\left(I+G Z^{\prime} R^{-1} Z\right)\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \<br>
+&amp;=\mathbf{I+Z G Z^{\prime} R^{-1}-Z G\left(G^{-1}+Z^{\prime} R^{-1} Z\right)\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \<br>
+&amp;=\mathbf{ I+Z G Z^{\prime} R^{-1}-Z G Z^{\prime} R^{-1}} \<br>
+&amp;=\mathbf{I}<br>
+\end{aligned}<br>
+$$<br>
+得证。</p>
+<p>其实这里可以推导出一个一般定理，如下：</p>
+<p>对于矩阵 $\mathbf{A}<em>{m \times m}, \mathbf{B}</em>{m \times n}, \mathbf{C}<em>{n \times n}, \mathbf{D}</em>{n \times m}$, 其中 $\mathbf{A}, \mathbf{C}, \mathbf{C}^{-1}+\mathbf{D}\mathbf{A}^{-1}\mathbf{B}$ 可逆，则存在以下结果，证明过程同上。<br>
+$$<br>
+(\boldsymbol{A}+\boldsymbol{B C D})^{-1}=\boldsymbol{A}^{-1}-\boldsymbol{A}^{-1} \boldsymbol{B}\left(\boldsymbol{C}^{-1}+\boldsymbol{D} \boldsymbol{A}^{-1} \boldsymbol{B}\right)^{-1} \boldsymbol{D} \boldsymbol{A}^{-1}<br>
+$$</p>
+<h2 id="BLUE的方差">BLUE的方差</h2>
+<p>假设我们有一个可估计的函数  $\mathbf{K}^{\prime} \boldsymbol{\beta^{0}}$  ，那么其方差为<br>
+$$<br>
+\begin{aligned}<br>
+\operatorname{Var}\left(\mathbf{K}^{\prime} \boldsymbol{\beta}^{o}\right) &amp;=\operatorname{Var}\left[\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}\right] \<br>
+&amp;=\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{V} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K} \<br>
+&amp;=\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K} \quad\text { 注：这里应该需要假设  } \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \text{是一个自反广义逆矩阵}<br>
+\end{aligned}<br>
+$$<br>
+由于   $\mathbf{K}^{\prime} \boldsymbol{\beta^{0}}$   可估计，因此一定可以找到一个矩阵 $\mathbf{A}<em>{0}$ 使得 $\mathbf{K = X’A</em>{0}}$ ，同上易证 $\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K} $ 具有不变性。</p>
+<h1>参考文献</h1>
+<ol>
+<li>Henderson，The Estimation of Environmental and Genetic Trends from Records Subject to Culling, 1959</li>
+<li>Henderson，《Applications_of_Linear_Models_in_Animal_Breeding》, 1984</li>
+<li>张沅，张勤，《畜禽育种中的线性模型》</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/c9ff3048/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            混合线性模型二之选择指数法
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/c4bb4461/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">批量下载R包</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

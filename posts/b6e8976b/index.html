@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    LU分解及单位下三角矩阵性质 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-LU分解及单位下三角矩阵性质"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  LU分解及单位下三角矩阵性质
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/b6e8976b/" class="article-date">
+  <time datetime="2022-12-09T09:20:57.000Z" itemprop="datePublished">2022-12-09</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/">线性代数</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.6k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">7 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>证明LU分解及单位下三角矩阵的性质。</p>
+<span id="more"></span>
+<p>单位下三角矩阵指对角线元素均为 1 的下三角矩阵，一个很好的例子就是 LU 分解得到的 L 矩阵。</p>
+<h1>证明LU分解</h1>
+<p>我们考虑对一个矩阵进行高斯消元（假设这里不考虑换行），消元的过程就是对原始矩阵左乘很多个初等矩阵。</p>
+<h1>举个例子，考虑下面的矩阵 $\mathbf{A}$<br>
+$$<br>
+\left[<br>
+\begin{array}{c}<br>
+2 &amp; 1 \<br>
+8 &amp; 7 \<br>
+\end{array}<br>
+\right]<br>
+$$<br>
+消元的过程等于左乘一个初等矩阵 $\mathbf{E_{21}}$<br>
+$$<br>
+\left[<br>
+\begin{array}{c}<br>
+1 &amp; 0 \<br>
+-4 &amp; 1 \<br>
+\end{array}<br>
+\right]<br>
+\left[<br>
+\begin{array}{c}<br>
+2 &amp; 1 \<br>
+8 &amp; 7 \<br>
+\end{array}<br>
+\right]</h1>
+<p>\left[<br>
+\begin{array}{c}<br>
+2 &amp; 1 \<br>
+0 &amp; 3 \<br>
+\end{array}<br>
+\right]<br>
+$$<br>
+这样就能一次性得到 $\mathbf{U}$ 矩阵了。</p>
+<p>但是如果我们要得到 $\mathbf{A = LU}$ , 那么我们就需要  $\mathbf{E_{21}}$ 求逆放在右手项中，在这个例子中， $\mathbf{E_{21}}$ 的逆矩阵只需要将 -4 改为 4，即<br>
+$$<br>
+\left[<br>
+\begin{array}{c}<br>
+2 &amp; 1 \<br>
+8 &amp; 7 \<br>
+\end{array}<br>
+\right] = \left[<br>
+\begin{array}{c}<br>
+1 &amp; 0 \<br>
+4 &amp; 1 \<br>
+\end{array}<br>
+\right]<br>
+\left[<br>
+\begin{array}{c}<br>
+2 &amp; 1 \<br>
+0 &amp; 3 \<br>
+\end{array}<br>
+\right]<br>
+$$<br>
+这是最简单的 $2 \times 2$ 的情况。</p>
+<p>这里我们可以换一个格式来证明，使用高斯变换矩阵，高斯变换矩阵是只有某一列存在非零元素的单位下三角矩阵，即<br>
+$$<br>
+\mathbf{L}<em>i=\left[\begin{array}{cccccccc}<br>
+1 &amp; &amp; &amp; \ldots &amp; &amp; &amp; &amp; 0 \<br>
+0 &amp; \ddots &amp; &amp; &amp; &amp; &amp; &amp; \<br>
+0 &amp; \ddots &amp; 1 &amp; &amp; &amp; &amp; &amp; \vdots \<br>
+0 &amp; \ddots &amp; 0 &amp; 1 &amp; &amp; &amp; &amp; \vdots \<br>
+&amp; &amp; 0 &amp; l</em>{i+1, i} &amp; 1 &amp; &amp; &amp; \vdots \<br>
+\vdots &amp; &amp; 0 &amp; l_{i+2, i} &amp; 0 &amp; \ddots &amp; &amp; \<br>
+&amp; &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; 1 &amp; \<br>
+0 &amp; \ldots &amp; 0 &amp; l_{n, i} &amp; 0 &amp; \ldots &amp; 0 &amp; 1<br>
+\end{array}\right]<br>
+$$<br>
+其可以写为<br>
+$$<br>
+\mathbf{L}<em>{i} = \mathbf{I} + \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T}<br>
+$$<br>
+其中<br>
+$$<br>
+\mathbf{l}</em>{k} = (0\cdots0,l_{i+1,i},\cdots,l_{n,i})^{T}<br>
+$$<br>
+其逆矩阵为 $\mathbf{L}<em>{i}^{-1} = \mathbf{I} - \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T}$， 因为 $(\mathbf{I} - \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T})(\mathbf{I} + \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T}) = \mathbf{I} - \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T}\mathbf{l}</em>{i} \mathbf{e}_{i}^{T} = \mathbf{I}$ 。</p>
+<p>所以其逆矩阵仍为高斯变换矩阵，如下<br>
+$$<br>
+\mathbf{L}<em>i^{-1} =\left[\begin{array}{cccccccc}<br>
+1 &amp; &amp; &amp; \ldots &amp; &amp; &amp; &amp; 0 \<br>
+0 &amp; \ddots &amp; &amp; &amp; &amp; &amp; &amp; \<br>
+0 &amp; \ddots &amp; 1 &amp; &amp; &amp; &amp; &amp; \vdots \<br>
+0 &amp; \ddots &amp; 0 &amp; 1 &amp; &amp; &amp; &amp; \vdots \<br>
+&amp; &amp; 0 &amp; -l</em>{i+1, i} &amp; 1 &amp; &amp; &amp; \vdots \<br>
+\vdots &amp; &amp; 0 &amp; -l_{i+2, i} &amp; 0 &amp; \ddots &amp; &amp; \<br>
+&amp; &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; 1 &amp; \<br>
+0 &amp; \ldots &amp; 0 &amp; -l_{n, i} &amp; 0 &amp; \ldots &amp; 0 &amp; 1<br>
+\end{array}\right]<br>
+$$<br>
+这一点很好理解，左乘 $\mathbf{L}<em>{i}$ 的作用是对 $i+1$ 到 $n$ 行均加上了第 $i$ 行的倍数，而左乘 $\mathbf{L}</em>{i}^{-1}$ 的作用是对 $i+1$ 到 $n$ 行均减去了第 $i$ 行的相应倍数，因此就还原了原来的矩阵，因此 $\mathbf{L}<em>{i} \mathbf{L}</em>{i}^{-1} = \mathbf{I}$ 。</p>
+<p>对于一个 $n \times n$ 的矩阵 $\mathbf{A}$ ，经过了消元之后（假设没有换行），则有<br>
+$$<br>
+\mathbf{L}<em>{n-1}^{-1} \cdots\mathbf{L}</em>{1}^{-1} \mathbf{A} = \mathbf{U}<br>
+$$<br>
+因此我们有<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{L} &amp;= \mathbf{L}<em>{1}\mathbf{L}</em>{2} \cdots \mathbf{L}<em>{n-1} \<br>
+&amp;= (\mathbf{I} + \mathbf{l}</em>{1} \mathbf{e}<em>{1}^{T}) (\mathbf{I} + \mathbf{l}</em>{2} \mathbf{e}<em>{2}^{T}) \cdots (\mathbf{I} + \mathbf{l}</em>{n-1} \mathbf{e}<em>{n-1}^{T}) \<br>
+\end{aligned}<br>
+$$<br>
+这里我们可以证明，对于 $i &lt; j$ ，存在<br>
+$$<br>
+\mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T} \mathbf{l}</em>{j} \mathbf{e}<em>{j}^{T} = \mathbf{l}</em>{i} (\mathbf{e}<em>{i}^{T} \mathbf{l}</em>{j}) \mathbf{e}<em>{j}^{T} = 0 \times \mathbf{l}</em>{i} \mathbf{e}<em>{j}^{T} = \mathbf{0}<br>
+$$<br>
+因此对于上面的式子，我们有<br>
+$$<br>
+\begin{aligned}<br>
+\mathbf{L} &amp;= \mathbf{L}</em>{1}\mathbf{L}<em>{2} \cdots \mathbf{L}</em>{n-1} \<br>
+&amp;= (\mathbf{I} + \mathbf{l}<em>{1} \mathbf{e}</em>{1}^{T}) (\mathbf{I} + \mathbf{l}<em>{2} \mathbf{e}</em>{2}^{T}) \cdots (\mathbf{I} + \mathbf{l}<em>{n-1} \mathbf{e}</em>{n-1}^{T}) \<br>
+&amp;= (\mathbf{I} + \mathbf{l}<em>{1} \mathbf{e}</em>{1}^{T} + \mathbf{l}<em>{2} \mathbf{e}</em>{2}^{T}) \cdots (\mathbf{I} + \mathbf{l}<em>{n-1} \mathbf{e}</em>{n-1}^{T}) \<br>
+&amp;= (\mathbf{I} + \mathbf{l}<em>{1} \mathbf{e}</em>{1}^{T} + \mathbf{l}<em>{2} \mathbf{e}</em>{2}^{T}+ \mathbf{l}<em>{3} \mathbf{e}</em>{3}^{T}) \cdots (\mathbf{I} + \mathbf{l}<em>{n-1} \mathbf{e}</em>{n-1}^{T}) \<br>
+&amp;\cdots \<br>
+&amp;= \mathbf{I} + \mathbf{l}<em>{1} \mathbf{e}</em>{1}^{T} + \cdots + \mathbf{l}<em>{n-1} \mathbf{e}</em>{n-1}^{T}</p>
+<p>\end{aligned}<br>
+$$<br>
+即<br>
+$$<br>
+\mathbf{L}=\mathbf{L}<em>1 \mathbf{L}<em>2 \ldots \mathbf{L}</em>{n-1}=\left[\begin{array}{ccccc}<br>
+1 &amp; &amp; &amp; &amp; \<br>
+l</em>{21} &amp; 1 &amp; &amp; &amp; \<br>
+1_{31} &amp; 1_{32} &amp; \ddots &amp; &amp; \<br>
+\vdots &amp; \vdots &amp; \ddots &amp; 1 &amp; \<br>
+l_{\mathrm{n} 1} &amp; 1_{\mathrm{n} 2} &amp; \cdots &amp; l_{\mathrm{n}, \mathrm{n}-1} &amp; 1<br>
+\end{array}\right]<br>
+$$<br>
+得证。</p>
+<h1>单位下三角矩阵的性质</h1>
+<ol>
+<li>
+<p>多个单位下三角矩阵的乘积仍为单位下三角矩阵</p>
+<p>证明：先以两个单位下三角矩阵的乘积为例，假设 $\mathbf{A}$ 和 $\mathbf{B}$ 是两个 n 维的单位下三角矩阵，根据矩阵乘积性质，$\mathbf{AB}$ 的每一行均是 $\mathbf{B}$ 的行的线性组合，$\mathbf{AB}$ 的第 $i$ 行等于 $a_{i1} \mathbf{b}<em>{1}^{T} + a</em>{i2} \mathbf{b}<em>{2}^{T} + \cdots +  \mathbf{b}</em>{i}^{T}$ ，易得 $\mathbf{AB}$ 的对角线元素均为 1，因此  $\mathbf{AB}$ 为单位下三角矩阵，这可以推广至多个下三角矩阵的乘积。</p>
+</li>
+<li>
+<p>单位下三角矩阵的逆矩阵仍为单位下三角矩阵</p>
+<p>证明：根据上面的推导，对于任意一个单位下三角矩阵 $\mathbf{L}$ ，其可以分解为 $\mathbf{L}=\mathbf{L}<em>1 \mathbf{L}<em>2 \ldots \mathbf{L}</em>{n-1}$ ，因此 $\mathbf{L}^{-1} = \mathbf{L}</em>{n-1}^{-1} \cdots\mathbf{L}_{1}^{-1}$ ，由于多个单位下三角矩阵的乘积仍为单位下三角矩阵，因此 $\mathbf{L}^{-1}$ 也是单位下三角矩阵。</p>
+</li>
+</ol>
+<h1>高斯消元的时间复杂度</h1>
+<p>假设存在一个 $100 \times 100$ 的矩阵，由于一般的数学计算都是乘法和减法合并在一块，因此这里我们只考虑乘法的次数。</p>
+<p>对于第一步，消除第一列的计算次数差不多是 $100^{2}$ (准确次数是 $99 \times 100$ ，因为不考虑第一行)，消除第二列的计算次数差不多是 $99^{2}$ (准确次数是 $98 \times 99$ ），以此类推。</p>
+<p>一般化得到，对于一个维度为 n 的矩阵，高斯消元的计算次数大约为<br>
+$$<br>
+n^{2} + \cdots + 1^{2} = \frac{n^{3}}{3} +   \frac{n^{2}}{2} +   \frac{n}{6} \approx \frac{n^{3}}{3}<br>
+$$</p>
+<h1>参考文献</h1>
+<ol>
+<li>MIT-线性代数课程</li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/363948873">矩阵的LU分解</a></li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/a49531b5/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            python包-multiprocessing
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/784a5321/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">如何使用blupf90进行GBLUP分析</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
