@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">13.6k</span>
+            <span class="post-count">13.9k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">53 分钟</span>
+            <span class="post-count">54 分钟</span>
         </span>
     </span>
 </div>
@@ -106,7 +106,7 @@
 </ul>
 <p>现在我一进入服务器，第一步就是设置环境，如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">module purge</span><br><span class="line">conda activate zhouziwen</span><br><span class="line">bin=~/zhouziwen/bin</span><br></pre></td></tr></table></figure>
-<h1>提交作业</h1>
+<h1>批量提交作业</h1>
 <p>分析需要使用 <strong>SLURM</strong> 调度系统，作业（<strong>job</strong>）就是是你在超算上<strong>从“申请资源”到“跑完程序”的整个任务过程</strong>。</p>
 <p>SLURM 是<strong>全球超算界的“普通话”</strong>，就像 Linux 系统里的 <code>ls</code>、<code>cd</code>命令一样，它是一个<strong>通用的、开源的作业调度系统</strong>。你学到的 SLURM 知识（<code>sbatch</code>, <code>squeue</code>等），换到国内外绝大多数超算中心（如清华、科大、天河二号、阿里云等）都能直接通用。</p>
 <p>scnet 官网命令行专区：<a target="_blank" rel="noopener" href="https://www.scnet.cn/help/docs/mainsite/hpc/cmd/">https://www.scnet.cn/help/docs/mainsite/hpc/cmd/</a></p>
@@ -175,7 +175,7 @@
 <p>取消作业：先通过<strong>squeue</strong>查看<strong>JOBID</strong>，假如<strong>JOBID为27532270</strong>，使用命令<strong>scancel JOBID</strong>取消作业。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scancel 27532270</span><br></pre></td></tr></table></figure>
 <p>目前常用的查询命令</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">job_id=21695205</span><br><span class="line"></span><br><span class="line">squeue -j $job_id</span><br><span class="line">seff $job_id</span><br><span class="line">tail slurm-$&#123;job_id&#125;.out</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">job=21695205</span><br><span class="line"></span><br><span class="line">seff $job</span><br><span class="line">tail slurm-$&#123;job&#125;.out</span><br></pre></td></tr></table></figure>
 <h2 id="作业脚本内容解释">作业脚本内容解释</h2>
 <h3 id="常用-SBATCH-参数">常用<code>#SBATCH</code> 参数</h3>
 <p>完整的参数说明见官网：<a target="_blank" rel="noopener" href="https://slurm.schedmd.com/sbatch.html">https://slurm.schedmd.com/sbatch.html</a></p>
@@ -1154,6 +1154,24 @@
 <h2 id="单脚本内部多线程-多进程">单脚本内部多线程 / 多进程</h2>
 <p>比如 python 脚本采用 multiprocessing包同时处理8个输入文件，那么 slurm 脚本只需要设置 <code>-c</code> 参数即可</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">SBATCH --ntasks=1</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">SBATCH --cpus-per-task=8</span></span><br><span class="line"></span><br><span class="line">···</span><br><span class="line">python test.py 8 # 告诉python是8个进程</span><br></pre></td></tr></table></figure>
+<h1>交互式提交作业-<strong>salloc命令</strong></h1>
+<p>该命令支持用户在提交作业前，先获取所需计算资源，用户可以ssh进入计算节点运行相关计算程序，当命令结束后释放分配的资源，常用作调试，常用命令选项同sbatch基本一致。</p>
+<p>目的：用来调试代码。</p>
+<ol>
+<li>
+<p>申请资源（调节 <code>-c</code> ( <code>--cpus-per-task</code>) 来指定 CPU 数目）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[yuki@login02 ~]$ salloc -p kshcnormal -N 1 -c 4</span><br><span class="line">salloc: Pending job allocation 47416155          # 你的作业已进入队列，正在等待资源分配</span><br><span class="line">salloc: job 47416155 queued and waiting for resources  # 同上，排队中</span><br><span class="line">salloc: job 47416155 has been allocated resources       # 资源分配成功（给你预留了资源）</span><br><span class="line">salloc: Granted job allocation 47416155                 # 正式授予作业ID 47416155</span><br><span class="line">salloc: Waiting for resource configuration              # 系统正在为你的作业配置资源（如挂载文件系统、网络设置）</span><br><span class="line">salloc: Nodes a02r1n14 are ready for job                # 计算节点 a02r1n14 已就绪，你可以 ssh 登录了</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>ssh 到计算节点执行命令（需要重新激活环境和切换目录）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[yuki@login02 ~]$ ssh a02r1n14</span><br><span class="line">[yuki@a02r1n14 ~]$ hostname </span><br><span class="line">a02r1n14</span><br><span class="line">[yuki@a02r1n14 ~]$ exit</span><br><span class="line">logout</span><br><span class="line">Connection to a02r1n14 closed.</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>执行<strong>2次exit退出</strong>（计算节点和登录节点各一次），作业释放资源。执行<code>seff</code> 确认退出停止计费（官网说的是 <code>squeue</code>）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[yuki@login02 ~]$ exit</span><br><span class="line">exit</span><br><span class="line">salloc: Relinquishing job allocation 47416155</span><br><span class="line">salloc: Job allocation 47416155 has been revoked.</span><br><span class="line">[yuki@login02 ~]$ squeue </span><br><span class="line">        JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">seff 47416155</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
 <h1>Slurm 排障最常用的命令</h1>
 <p>Slurm 命令的统一命名规则为</p>
 <blockquote>
@@ -1197,6 +1215,11 @@
 <td style="text-align:left">sacct</td>
 <td style="text-align:left">记账</td>
 <td style="text-align:left">Slurm <strong>accounting</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">seff</td>
+<td style="text-align:left">效率</td>
+<td style="text-align:left">Slurm efficiency</td>
 </tr>
 <tr>
 <td style="text-align:left">scancel</td>

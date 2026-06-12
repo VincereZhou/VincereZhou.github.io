@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">5k</span>
+            <span class="post-count">5.3k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">19 分钟</span>
+            <span class="post-count">20 分钟</span>
         </span>
     </span>
 </div>
@@ -455,13 +455,18 @@
 <p><strong>第 2 列（基因信息）</strong>：</p>
 <ul>
 <li>若落在基因区域：给出基因名（多个基因用逗号分隔，如 <code>exonic ATG16L1,BRAF</code>）。</li>
-<li>若落在基因间区：给出两侧最近的基因名和距离（如 <code>intergenic UBIAD1(dist=43968),DISP3(dist=135699)</code>）。</li>
+<li>若落在基因间区：给出两侧最近的基因名和距离，单位是<strong>bp</strong> （如 <code>intergenic UBIAD1(dist=43968),DISP3(dist=135699)</code>）。</li>
 </ul>
 </li>
 <li>
 <p><strong>修改优先级</strong>：可用 <code>-precedence intronic,utr5,utr3</code>等参数自定义优先级顺序。</p>
 </li>
 </ul>
+<h4 id="intergenic（基因间区）的解释">intergenic（基因间区）的解释</h4>
+<p>按照我的理解，<strong>intergenic（基因间区）<strong>的判断标准为：这是相对“默认”或“最后”的选项。如果一个变异位点</strong>既不</strong>在任何基因的编码/非编码区内，<strong>也不</strong>在任何基因的 <code>upstream</code>（上游1kb）或 <code>downstream</code>（下游1kb）区域内（即距离最近的基因边界超过 1kb），那么它就会被归类为 <code>intergenic</code>。（就是如果是在某个基因上下游1kb范围那么就会归到这个基因的 upstream 或 downstream，否则就是基因间区）。</p>
+<p>在实际分析中，这个范围是可以根据研究需求进行调整的。如果在运行注释命令时加入了 <code>-neargene</code>参数，就可以自定义这个近端距离（例如改为 2kb、5kb 甚至 10kb）。如果扩大这个距离，原本被判定为 <code>intergenic</code>的一些位点就可能会被重新归类为 <code>upstream</code>或 <code>downstream</code>。</p>
+<p>另外如果位点在染色体的两端，那么就可能存在注释为 intergenic 的位点的某一段没有基因（<strong>此时会用 <code>NONE</code>来表示基因缺失</strong>），示例如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">intergenic      NONE(dist=NONE),Mberchr1G0001(dist=28042)       1       40992   40992   C       T</span><br></pre></td></tr></table></figure>
 <h3 id="exonic-variant-function（仅外显子变异的详细注释）"><code>*exonic_variant_function</code>（仅外显子变异的详细注释）</h3>
 <ul>
 <li>

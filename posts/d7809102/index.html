@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    中文空格是半角而标点是全角的原因 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-中文空格是半角而标点是全角的原因"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  中文空格是半角而标点是全角的原因
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/d7809102/" class="article-date">
+  <time datetime="2026-06-12T05:54:23.000Z" itemprop="datePublished">2026-06-12</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">4 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>答案来自AI，我觉得这个问题有点意思，记录一下。</p>
+<span id="more"></span>
+<p>这个问题问得<strong>太好了</strong>，而且你抓住了很多人（包括很多前端）都没想透的本质矛盾。答案不在&quot;输入法随便设计的&quot;，而在<strong>空格和标点在中文书写系统里扮演的角色完全不同</strong>。</p>
+<hr>
+<h2 id="一句话结论">一句话结论</h2>
+<blockquote>
+<p><strong>逗号、句号是&quot;可见的标点字符&quot;，中文排版规范要求它们跟汉字同宽 → 所以输入法给了全角版本。<br>
+空格是&quot;不可见的空白分隔符&quot;，中文书写体系中文字之间本来就不该有空隙 → 所以它不能变成全角宽度的空白，否则每按一次空格就多出半個汉字的洞。</strong></p>
+</blockquote>
+<p>这就是为什么它们被区别对待。</p>
+<hr>
+<h2 id="一、先理清：逗号-句号为什么被做成-全角-？">一、先理清：逗号/句号为什么被做成&quot;全角&quot;？</h2>
+<h3 id="历史原因（最核心）">历史原因（最核心）</h3>
+<p>早期计算机（80年代）字符显示是基于<strong>等宽栅格</strong>的：</p>
+<ul>
+<li>西文：1个字符 = 1格（窄）</li>
+<li>汉字：1个字符 = 2格（宽）</li>
+</ul>
+<p>为了让中文排版看着整齐，设计者（GB2312时代）<strong>专门造了一套&quot;全角标点&quot;</strong>，放进 Unicode 的 <strong>全角兼容区（U+FF00–U+FFEF）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>你看到的</th>
+<th>中文模式输出</th>
+<th>Unicode</th>
+<th>本质上是</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>，</strong>(宽逗号)</td>
+<td>全角逗号</td>
+<td><strong>U+FF0C</strong></td>
+<td>故意做成=汉字宽度</td>
+</tr>
+<tr>
+<td><strong>。</strong>(空心句号)</td>
+<td>句点</td>
+<td><strong>U+3002</strong></td>
+<td>中日韩标点</td>
+</tr>
+<tr>
+<td><strong>、</strong>(顿号)</td>
+<td>顿号</td>
+<td><strong>U+3001</strong></td>
+<td>中日韩标点</td>
+</tr>
+</tbody>
+</table>
+<p>这些<strong>不是</strong>英文逗号 <code>,</code>(U+002C) 穿件衣服变胖了——它们在 Unicode 里是<strong>完全不同的码位、完全不同的字符</strong>。</p>
+<p>输入法在中文模式下做的事很简单：</p>
+<blockquote>
+<p>你按了 <code>,</code> 键（键盘上的同一个物理键）<br>
+→ 输入法拦截了，不给你 U+002C（半角逗号）<br>
+→ 改成输出 U+FF0C（全角逗号）<br>
+因为<strong>中文排版规范（GB/T 15834）要求中文标点占一个汉字位置</strong></p>
+</blockquote>
+<hr>
+<h2 id="二、那空格为什么例外？">二、那空格为什么例外？</h2>
+<h3 id="这就是关键——空格不是标点">这就是关键——空格<strong>不是标点</strong></h3>
+<p>中文书写体系的两个铁律：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">汉 字 之 间 没 有 空 格（纯方块字密排）</span><br><span class="line">英文  words  have  spaces（靠空格分词）</span><br></pre></td></tr></table></figure>
+<p>如果中文输入法在中文模式下把你的 Space 键变成 <strong>U+3000（全角空格，= 一个汉字宽度）</strong>，结果会怎样？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">第一次[　]育种[　]分析报告</span><br><span class="line">       ↑U+3000    ↑U+3000</span><br></pre></td></tr></table></figure>
+<p>每打一个空格，就多出一个<strong>半个到整整一个汉字宽的透明窟窿</strong>。</p>
+<p>这完全没有意义，因为：</p>
+<ul>
+<li>中文正文不需要单词分隔空格</li>
+<li>需要空格的地方（首行缩进、段间距、图文间距）由 <strong>CSS / 排版引擎</strong> 控制，不是靠往文本里塞 U+3000</li>
+</ul>
+<p>所以输入法的逻辑是：</p>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>中文模式</th>
+<th>英文模式</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>,</code> <code>.</code> <code>、</code> <code>！</code></td>
+<td>→ 全角标点（U+FF0C等）</td>
+<td>→ 半角标点（U+002C等）</td>
+<td>标点是可见字符，必须服从中文排版规范</td>
+</tr>
+<tr>
+<td><code>Space</code></td>
+<td>→ <strong>U+0020</strong>（半角空格）</td>
+<td>→ <strong>U+0020</strong>（半角空格）</td>
+<td>空格是分隔符/控制空白，扩成全角会把正文撑破</td>
+</tr>
+</tbody>
+</table>
+<p><strong>空格的&quot;宽度&quot;不该由输入法决定，而该由排版层决定</strong>——这是从铅字时代就有的原则。</p>
+<hr>
+<h2 id="三、微软拼音的两套开关（你会看得更清楚了）">三、微软拼音的两套开关（你会看得更清楚了）</h2>
+<p>微软官方文档确认了快捷键分工：</p>
+<table>
+<thead>
+<tr>
+<th>快捷键</th>
+<th>控制什么</th>
+<th>空格受影响？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Shift</strong></td>
+<td>中/英模式切换（拼字 vs 直出字母）</td>
+<td>不直接影响空格的 U+0020</td>
+</tr>
+<tr>
+<td><strong>Shift + Space</strong></td>
+<td><strong>全角/半角字符宽度模式</strong></td>
+<td>切到全角模式时，空格才变成 U+3000</td>
+</tr>
+</tbody>
+</table>
+<p>也就是说：</p>
+<ul>
+<li><strong>默认（半角模式）</strong>：Space → U+0020，<strong>不管中/英模式</strong></li>
+<li><strong>你手动 Shift+Space 切到全角模式</strong>：Space → U+3000（但没人这么做，因为会把中文文本撑出窟窿）</li>
+</ul>
+<p>逗号句号则不受这个&quot;默认&quot;保护——它们<strong>在中文模式下永远走全角码位</strong>，这是输入法引擎的硬规则，不是靠全角/半角开关控制的。</p>
+<hr>
+<h2 id="四、用一个比喻">四、用一个比喻</h2>
+<ul>
+<li><strong>逗号、句号</strong> = 砖块上的花纹 → 必须跟砖（汉字）同款同宽 → 输入法给全角版本</li>
+<li><strong>空格</strong> = 砖缝里的水泥厚度 → 不应随便变厚，否则墙就歪了 → 输入法不给全角版本，保持 U+0020 让排版引擎后续接管</li>
+</ul>
+<hr>
+<h2 id="五、总结你的问题">五、总结你的问题</h2>
+<blockquote>
+<p><strong>“中文按空格是半角的，逗号句号却是全角的”</strong></p>
+</blockquote>
+<p>这不是矛盾，恰恰是<strong>正确的设计</strong>：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>逗号/句号</th>
+<th>空格</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>是什么</td>
+<td>可见标点字符</td>
+<td>不可见空白分隔符</td>
+</tr>
+<tr>
+<td>中文排版要求</td>
+<td>必须与汉字等宽（全角）</td>
+<td>必须保持最小/可控（半角），正文间距由排版层管</td>
+</tr>
+<tr>
+<td>输入法给的码位</td>
+<td>U+FF0C / U+3002（全角区）</td>
+<td>U+0020（ASCII 空白）</td>
+</tr>
+<tr>
+<td>如果强变成全角会怎样</td>
+<td>✅ 正确（，。看起来对）</td>
+<td>❌ 灾难（文字间多出大窟窿）</td>
+</tr>
+</tbody>
+</table>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/c46c599a/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            浏览器开发者工具笔记
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/3dfeb753/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">python包-snpflip</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
