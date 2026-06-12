@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    混合线性模型二之选择指数法 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-混合线性模型二之选择指数法"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  混合线性模型二之选择指数法
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/c9ff3048/" class="article-date">
+  <time datetime="2022-02-21T05:44:32.000Z" itemprop="datePublished">2022-02-21</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">16 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>混合线性模型理论的第二篇，如何估计随机效应的值（假设不存在固定效应或者已知固定效应）。上一篇见<a href="https://vincere.fun/posts/5e674d74/">混合线性模型一之广义最小二乘</a> 。</p>
+<span id="more"></span>
+
+<h1 id="代价函数"><a href="#代价函数" class="headerlink" title="代价函数"></a>代价函数</h1><p>这里运行机器学习的思想，不同的预测函数的好坏需要通过代价函数来计算比较，或者说我们需要通过最小化代价函数来确定一个合适的预测函数，因此首要的问题是确定一个合适的代价函数，也就是说我们如何定义“最佳”。</p>
+<p>本节内容主要参考 Henderson 1973年的论文。 </p>
+<h2 id="最佳预测"><a href="#最佳预测" class="headerlink" title="最佳预测"></a>最佳预测</h2><p>假设 $\mathbf{y}$ 是观测值向量，我们想要预测 $\mathbf{w}$ 向量， $\mathbf{w}$ 向量的第 $i$ 个元素的预测值为<br>$$<br>\hat{w}_{i} &#x3D; f(\mathbf{y})<br>$$<br>这里的 $f$ 是某个关于观测值的函数，不一定要是线性函数。</p>
+<p>此时我们的问题是，我们如何定义“最佳”的预测函数？ 一种方式是我们想尽可能地减少预测误差 (<em>prediction error</em>) ，即 $\hat{w}<em>{i} - w</em>{i}$ ，那么我们如何去衡量预测误差的大小呢？从理论上，预测误差的大小可以用下式表示（等价于 $L_{p}$ 范数）<br>$$<br>E|\hat{w}<em>{i} - w</em>{i}|^{p}<br>$$<br>即预测误差<strong>绝对值</strong>的 $p$ 次方的期望值。那么 $p$ 应该选多少呢？最普遍的选择是 2 ，因为 $L_2$ 范数计算简便，并且有其它优良性质。</p>
+<p>我们将最小化 $E|\hat{w}<em>{i} - w</em>{i}|^{2}$ 的方法称为<strong>最小均方误差预测</strong> (Minimum Mean Square Error Prediction) ，有时也称为<strong>最佳预测</strong> (Best Prediction, <strong>BP</strong>) 。我们可以证明此时的估计值等价于下式 (<em>Cochran</em> , 1951 或 Rao 1965 )<br>$$<br>\hat{w}<em>{i} &#x3D;  E(w</em>{i} | \mathbf{y} )<br>$$<br>也就是说等同于给定 $ \mathbf{y}$ 的 $w_{i}$ 的条件期望。</p>
+<p>证明 (来自于 <a target="_blank" rel="noopener" href="https://zh-cn.lambdageeks.com/conditional-variance-and-predictions/">条件方差和预测 | 其重要属性与 5+ 示例</a>) ：这里证明根据一个随机变量的观测值来预测另一个随机变量，假设我们有一个随机变量 X 的观测值，我们需要预测随机变量 Y ，证明最好的预测值为 $E(Y|X)$ 。假设 $g(X)$ 是任意一个预测函数，因此我们要证明<br>$$<br>E\left[(Y-g(X))^{2}\right] \geq E\left[(Y-E[Y \mid X])^{2}\right]<br>$$<br>我们有<br>$$<br>\begin{aligned}<br>E\left[(Y-g(X))^{2} \mid X\right]&#x3D;&amp; E\left[(Y-E[Y \mid X]+E[Y \mid X]-g(X))^{2} \mid X\right] \<br>&#x3D;&amp; E\left[(Y-E[Y \mid X])^{2} \mid X\right] \<br>&amp;+E\left[(E[Y \mid X]-g(X))^{2} \mid X\right] \<br>&amp;+2 E[(Y-E[Y \mid X])(E[Y \mid X]-g(X)) \mid X]<br>\end{aligned}<br>$$<br>在给定 X 的前提下，$\mathrm{E}[\mathrm{Y} \mid \mathrm{X}]-\mathrm{g}(\mathrm{X})$  是一个常数，因此上式的最后一项为 0 ，证明如下<br>$$<br>\begin{aligned}<br>&amp;E[(Y-E[Y \mid X])(E[Y \mid X]-g(X)) \mid X]  \<br>&amp;&#x3D;(E[Y \mid X]-g(X)) E[Y-E[Y \mid X] \mid X] \<br>&amp;&#x3D;(E[Y \mid X]-g(X))(E[Y \mid X]-E[Y \mid X]) \<br>&amp;&#x3D;0<br>\end{aligned}<br>$$<br>因此下式成立<br>$$<br>E\left[(Y-g(X))^{2} \mid X\right]&#x3D; E\left[(Y-E[Y \mid X])^{2} \mid X\right]<br>+E\left[(E[Y \mid X]-g(X))^{2} \mid X\right] \<br>$$<br>其中右手第二项是一个非负数，因此下式成立<br>$$<br>E\left[(Y-g(X))^{2}\right] \geq E\left[(Y-E[Y \mid X])^{2}\right.<br>$$<br>得证。</p>
+<p>因此我们必须先已知 $[\mathbf{y}, \mathbf{w}]$ 的联合分布，然后再推导条件分布。</p>
+<p><strong>BP</strong> 的一些性质如下：</p>
+<ol>
+<li>$E(\hat{w}<em>{i}) &#x3D;  E(w</em>{i})$ </li>
+<li>$Var(\hat{\mathbf{w}}- \mathbf{w} ) &#x3D; \text{ average conditional } Var(\mathbf{w | y})$ 。这个没看懂，感觉怪怪的。</li>
+<li>在所有可能的预测值中，$\hat{w}<em>{i} &#x3D;  E(w</em>{i} | \mathbf{y} )$ 最大化了 $\hat{w}<em>{i}$ 和 $w</em>{i}$ 的相关</li>
+</ol>
+<h1 id="最佳线性预测"><a href="#最佳线性预测" class="headerlink" title="最佳线性预测"></a>最佳线性预测</h1><p>通常在实践中，我们不知道 $[\mathbf{y}, \mathbf{w}]$ 的联合分布 ，我们就也没有办法计算条件分布。那么此时我们怎么办呢？我们可以将预测值的范围限制为<strong>线性</strong>预测值，这样我们可以极大地简化问题。我们称这种方法为 <strong>最佳线性预测</strong> (Best Linear Prediction, <strong>BLP</strong>)，也就是育种值估计方法中的<strong>选择指数法</strong> (Selection Index) 。</p>
+<p>我们先看一般 <strong>最佳线性预测</strong>的一般推导，假设我们的观测值向量为 $\mathbf{y}$ ，我们需要预测的随机变量是 $w$ （注意这里我们采用单个变量），我们采用的线性预测函数为 $\hat{w} &#x3D; \mathbf{a’y} + b$ ，这里 $\mathbf{a’}$ 是一个向量，$b$ 是一个标量。我们的目标是找到一组  $\mathbf{a’}$ 和 $b$，使得 $E(\hat{w} - w)^{2}$ 最小。</p>
+<p>均值，协方差等设定如下<br>$$<br>\begin{aligned}<br>E(w) &amp;&#x3D;\gamma, \<br>E(\mathbf{y}) &amp;&#x3D; \boldsymbol{\alpha}, \<br>\operatorname{Cov}(\mathbf{y}, w) &amp;&#x3D;\mathbf{c}, \text { and } \<br>\operatorname{Var}(\mathbf{y}) &amp;&#x3D;\mathbf{V}<br>\end{aligned}<br>$$<br>那么<br>$$<br>\begin{aligned}<br>E\left(\mathbf{a}^{\prime} \mathbf{y}+b-w\right)^{2}<br>&#x3D;&amp;E\left((\mathbf{a}^{\prime} \mathbf{y})^{2}+b^{2}+w^{2}+2(\mathbf{a}^{\prime} \mathbf{y})b-2(\mathbf{a}^{\prime} \mathbf{y})w-2bw\right)\<br>&#x3D;&amp;E((\mathbf{a}^{\prime} \mathbf{y})^{2})+b^{2}+E(w^{2})+2E((\mathbf{a}^{\prime} \mathbf{y}))b-2E((\mathbf{a}^{\prime} \mathbf{y})w)-2bE(w)\<br>&#x3D;&amp; \mathbf{a}^{\prime} \mathbf{V a} + (\mathbf{a}^{\prime} \boldsymbol{\alpha})^2 + b^{2} + \operatorname{Var}(w)+\gamma^{2}+2 \mathbf{a}^{\prime} \boldsymbol{\alpha} b - 2 \mathbf{a}^{\prime} (\mathbf{c}+ \boldsymbol{\alpha} \gamma) -2b \gamma\</p>
+<p>&#x3D;&amp; \mathbf{a}^{\prime} \mathbf{V a} + \mathbf{a}^{\prime} \boldsymbol{\alpha} \boldsymbol{\alpha}^{\prime} \mathbf{a}  + b^{2} + \operatorname{Var}(w)+\gamma^{2}+2  b \mathbf{a}^{\prime} \boldsymbol{\alpha} - 2 \mathbf{a}^{\prime} \mathbf{c}- 2 \gamma \mathbf{a}^{\prime} \boldsymbol{\alpha}  -2b \gamma\</p>
+<p>\end{aligned}<br>$$<br>分别对   $\mathbf{a’}$ 和 $b$ 求偏导，使之为 0，得到<br>$$<br>\begin{aligned}<br>&amp;\partial L_{2} &#x2F; \partial \mathbf{a}&#x3D; 2\mathbf{V} \mathbf{a}+ 2\boldsymbol{\alpha \alpha^{\prime}} \mathbf{a}+ 2b \boldsymbol{\alpha} - 2 \mathbf{c} - 2 \gamma \boldsymbol{\alpha} &#x3D; \mathbf{0} \<br>&amp;\partial L_{2} &#x2F; \partial b&#x3D;2b+2\mathbf{a}^{\prime} \boldsymbol{\alpha} - 2 \gamma&#x3D; 0<br>\end{aligned}<br>$$<br>整理得到下面的方程组<br>$$<br>\left(\begin{array}{cc}<br>\mathbf{V}+\boldsymbol{\alpha \alpha^{\prime}} &amp; \boldsymbol{\alpha} \<br>\boldsymbol{\alpha^{\prime}} &amp; 1<br>\end{array}\right)\left(\begin{array}{l}<br>\mathbf{a} \<br>b<br>\end{array}\right)&#x3D;\left(\begin{array}{c}<br>\mathbf{c}+\boldsymbol{\alpha} \gamma \<br>\gamma<br>\end{array}\right)<br>$$<br>根据第二个方程，我们得到 $b &#x3D; \gamma - \mathbf{a}^{\prime} \boldsymbol{\alpha} &#x3D; \gamma -  \boldsymbol{\alpha}^{\prime} \mathbf{a}$ ，带入到第一个方程得到<br>$$<br>\begin{aligned}<br>(\mathbf{V}+\boldsymbol{\alpha \alpha^{\prime}}) \mathbf{a} + (\gamma - \boldsymbol{\alpha}^{\prime} \mathbf{a}) \boldsymbol{\alpha}  - \mathbf{c} -  \gamma \boldsymbol{\alpha} &amp;&#x3D; \mathbf{0} \<br>(\mathbf{V}+\boldsymbol{\alpha \alpha^{\prime}}) \mathbf{a} -  (\boldsymbol{\alpha}^{\prime} \mathbf{a})\boldsymbol{\alpha}  - \mathbf{c} &amp;&#x3D; \mathbf{0} \<br>(\mathbf{V}+\boldsymbol{\alpha \alpha^{\prime}}) \mathbf{a} - \boldsymbol{\alpha} (\boldsymbol{\alpha}^{\prime} \mathbf{a})  - \mathbf{c} &amp;&#x3D; \mathbf{0} \<br>\mathbf{Va} &amp;&#x3D; \mathbf{c} \</p>
+<p>\end{aligned}<br>$$<br>因此我们得到解为<br>$$<br>\mathbf{a} &#x3D; \mathbf{V^{-1}c}, \quad b &#x3D;  \gamma-\boldsymbol{\alpha}^{\prime} \mathbf{V}^{-1} \mathbf{c}<br>$$<br>因此，预测值为<br>$$<br>\hat{w}&#x3D;\gamma+\mathbf{c}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\boldsymbol{\alpha})<br>$$<br>从单个元素推广至向量，得到<br>$$<br>\mathbf{\hat{w}}&#x3D;\boldsymbol{\gamma}+\mathbf{C}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\boldsymbol{\alpha})<br>$$<br>其中，$\boldsymbol{\gamma} &#x3D; E(\mathbf{w})$  ， $\mathbf{C} &#x3D; Cov(\mathbf{y}, \mathbf{w}^{\prime})$ 。</p>
+<p>当 $\mathbf{y}, w$ 的共同分布为多元正态分布时，BLP 就是 $E(w \mid y)$ ，即此时 BLP &#x3D; BP 。</p>
+<h2 id="均值及协方差"><a href="#均值及协方差" class="headerlink" title="均值及协方差"></a>均值及协方差</h2><p>首先我们看期望，BLP是一个无偏估计值，即<br>$$<br>E(\hat{w})&#x3D;E(w)<br>$$<br>证明：<br>$$<br>\begin{aligned}<br>E(\hat{w}) &amp;&#x3D;E\left[\gamma+\mathbf{c}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\boldsymbol{\alpha})\right] \<br>&amp;&#x3D;\gamma+\mathbf{c}^{\prime} \mathbf{V}^{-1}(\boldsymbol{\alpha}-\boldsymbol{\alpha}) \<br>&amp;&#x3D;\gamma&#x3D;E(w) .<br>\end{aligned}<br>$$<br>其协方差矩阵为<br>$$<br>\operatorname{Var}(\hat{w})&#x3D;\operatorname{Var}\left(\mathbf{c}^{\prime} \mathbf{V}^{-1} \mathbf{y}\right)&#x3D;\mathbf{c}^{\prime} \mathbf{V}^{-1} \mathbf{V} \mathbf{V}^{-1} \mathbf{c}&#x3D;\mathbf{c}^{\prime} \mathbf{V}^{-1} \mathbf{c}<br>$$<br>其与真实值的协方差矩阵为<br>$$<br>\operatorname{Cov}(\hat{w}, w)&#x3D;\mathbf{c}^{\prime} \mathbf{V}^{-1} \operatorname{Cov}(\mathbf{y}, w)&#x3D;\mathbf{c}^{\prime} \mathbf{V}^{-1} \mathbf{c}&#x3D;\operatorname{Var}(\hat{w})<br>$$<br>误差方差为<br>$$<br>\begin{aligned}<br>\operatorname{Var}(\hat{w}-w)&amp;&#x3D;\operatorname{Var}(w)+\operatorname{Var}(\hat{w})-2\operatorname{Cov}(\hat{w}, w)\<br>&amp;&#x3D;\operatorname{Var}(w)+\operatorname{Var}(\hat{w})-2\operatorname{Var}(\hat{w})\<br>&amp;&#x3D;\operatorname{Var}(w)-\operatorname{Var}(\hat{w})<br>\end{aligned}<br>$$<br>下面我们证明 BLP 最大化了 $r_{\hat{w} w}$ ，根据相关系数公式，我们有一般公式<br>$$<br>\begin{aligned}<br>r_{\hat{w} w} &amp;&#x3D; \frac{Cov(\hat{w} ,w)}{\left(Var(\hat{w} ) Var(w)\right)^{0.5}} \<br>&amp;&#x3D; \frac{Cov(\mathbf{a’y} + b ,w)}{\left(Var(\mathbf{a’y} + b) Var(w)\right)^{0.5}} \<br>&amp;&#x3D; \frac{\mathbf{a’c}}{\left(\mathbf{a’Va}  Var(w)\right)^{0.5}} \</p>
+<p>\end{aligned}<br>$$<br>取对数（容易看出  $r_{\hat{w} w} &gt; 0$ ），得到<br>$$<br>\log r&#x3D;\log \mathbf{a}^{\prime} \mathbf{c}-0.5 \log \left[\mathbf{a}^{\prime} \mathbf{V} \mathbf{a}\right]-0.5 \log \operatorname{Var}(w)<br>$$<br>对 $\mathbf{a}$ 微分，使之为 0 ，得到<br>$$<br>\partial \log r &#x2F;\partial \mathbf{a} &#x3D; \frac{\mathbf{c}}{\mathbf{a’c}} - \frac{\mathbf{Va}}{\mathbf{a’Va}} &#x3D; \mathbf{0}<br>$$<br>我们得到<br>$$<br>\frac{\mathbf{c}}{\mathbf{a’c}} &#x3D; \frac{\mathbf{Va}}{\mathbf{a’Va}}<br>$$<br>注意到两边的分母均为标量，因此 $\mathbf{Va}$ 和 $\mathbf{c}$ 这两个向量平行，即满足下式，其中 $k$ 是一个标量<br>$$<br>\mathbf{Va} &#x3D; k \mathbf{c}<br>$$<br>因此，我们得到 $\mathbf{a} &#x3D; k \mathbf{V^{-1}c}$ ，带入到上式中，得到<br>$$<br>\frac{\mathbf{c}}{k\mathbf{c’V^{-1}c}} &#x3D; \frac{\mathbf{c}}{k\mathbf{c’V^{-1}c}}<br>$$<br>因此 $k$ 可以取任意值，不妨设 $k&#x3D;1$ ，此时 $\mathbf{a} &#x3D; \mathbf{V^{-1}c}$ ，即为 BLP 估计值，因此我们证明了 BLP  最大化了 $r_{\hat{w} w}$ 。</p>
+<h2 id="选择指数法"><a href="#选择指数法" class="headerlink" title="选择指数法"></a>选择指数法</h2><p>下面的内容来自于张沅老师的 《畜禽育种中的线性模型》，选择指数法就是BLP在育种中的应用。</p>
+<p>选择指数法需要满足三个条件或者假设：</p>
+<ol>
+<li>不存在系统环境效应，或者所有系统环境效应均已知</li>
+<li>被选择的个体间不存在固定的遗传差异</li>
+<li>误差和育种值的方差，协方差矩阵均已知</li>
+</ol>
+<p>其实前两个条件可以合并为不存在固定效应或者已知固定效应，也就是说此时的模型对应为<strong>随机模型</strong>。</p>
+<p>根据定义，选择指数的公式为<br>$$<br>I &#x3D; \sum b_{i}(y_{i} - \mu_{i})<br>$$<br>其中：</p>
+<p>$I$ &#x3D; 某个体一个性状的选择指数</p>
+<p>$b_{i}$ &#x3D; 与该个体有关的第 $i$ 个信息的加权系数（偏回归系数）</p>
+<p>$y_{i}$ &#x3D; 第 $i$ 个信息来源的表型值</p>
+<p>$u_{i}$ &#x3D; 与该表型值对应的总体均数</p>
+<p>上式可以用矩阵形式表示：<br>$$<br>I&#x3D;\mathbf{b’d}<br>$$<br>其中：</p>
+<p>$\mathbf{b}$ &#x3D; 加权系数向量</p>
+<p>$\mathbf{d&#x3D;y- \boldsymbol{\mu}} $ ，即各信息来源的表型值与各自的群体平均数离差向量</p>
+<p>我们确定了选择指数的公式之后，我们需要找一组合适的加权系数，设该个体的真实育种值为 $A$ ，则代价函数为  $E(I-A)^{2}$  ，根据协方差公式，我们有 $ Var(I-A) &#x3D; E(I-A)^{2} -  (E(I-A))^{2} &#x3D; E(I-A)^{2}$ ，因此等价于需要一个 $\mathbf{b}$ 向量使得误差方差  $ Var(I-A) $ 最小，我们有<br>$$<br>\begin{aligned}<br>\operatorname{Var}(I-A) &amp;&#x3D;\operatorname{Var}(I)+\operatorname{Var}(A)-2 \operatorname{Cov}(I, A) \<br>&amp;&#x3D;\operatorname{Var}\left(\mathbf{b}^{\prime} \mathbf{d}\right)+\sigma_{A}^{2}-2 \operatorname{Cov}\left(\mathbf{b}^{\prime} \mathbf{d}, A\right) \<br>&amp;&#x3D;\mathbf{b}^{\prime} \operatorname{\mathbf{Vb}}+\sigma_{A}^{2}-2 \mathbf{b}^{\prime} \mathbf{c}<br>\end{aligned}<br>$$<br>其中<br>$$<br>\mathbf{V}&#x3D;\operatorname{Var}(\mathbf{d})&#x3D;\operatorname{Var}(\mathbf{y}-\boldsymbol{\mu})&#x3D;\operatorname{Var}(\mathbf{y})<br>$$</p>
+<p>$$<br>\mathbf{c}&#x3D;\operatorname{Cov}(\mathbf{d}, \mathrm{A})&#x3D;\operatorname{Cov}(\mathbf{y}, \mathrm{A})<br>$$</p>
+<p>求上式关于 $\mathbf{b}$ 的最小值，我们求偏导数，使之为 $\mathbf{0}$ 得到<br>$$<br>\frac{\partial}{\partial b} \operatorname{Var}(I-A)&#x3D;2 \mathbf{Vb}-2 \mathbf{ c}&#x3D;\mathbf{0}<br>$$<br>我们得到 $\mathbf{Vb &#x3D; c}$ ，因此我们有<br>$$<br>\mathbf{b &#x3D; V^{-1} c}<br>$$<br>如果我们根据单一表型来预测育种值，即此时 $\mathbf{y}$ 是一个标量，那么有<br>$$<br>b &#x3D; \mathbf{  V^{-1} c } &#x3D; (Cov(y))^{-1} Cov(y,A) &#x3D; \frac{Cov(y,A)}{Cov(y)}<br>$$<br>根据数量遗传学理论，我们知道两个个体的加性遗传相关等于两个个体的育种值之间的相关，即<br>$$<br>a_{XY} &#x3D; \frac{Cov(A_{X},A_{Y})}{\sigma_{X}\sigma_{Y}}<br>$$<br>这里由于所有个体属于同一群体，因此我们有  $\sigma_{X} &#x3D; \sigma_{Y} &#x3D; \sigma_{A}$ ，因此 $a_{XY} &#x3D; \frac{Cov(A_{X},A_{Y})}{\sigma_{A}^{2}}$ 。假设我们的目标个体称为 $X$ ，因此$\mathbf{c}$ 向量中的元素 $c_{i} &#x3D;\operatorname{Cov}(y_{i}, \mathrm{A_{X}})  &#x3D;\operatorname{Cov}(\mathrm{A_{i}+e_{i}}, \mathrm{A_{X}}) &#x3D;\operatorname{Cov}(\mathrm{A_{i}}, \mathrm{A_{X}}) &#x3D; a_{iX} \sigma_{A}^{2}  $  ，即等于相应的加性遗传相关乘以加性遗传方差。设 $\mathbf{a}$ 为个体与各信息来源的个体间加性遗传相关的向量，因此我们有 $\mathbf{c &#x3D; a \sigma_{A}^{2}}$ ，因此 $\mathbf{b}$ 的计算公式可以写为<br>$$<br>\mathbf{b &#x3D; V^{-1}  a \sigma_{A}^{2}}<br>$$<br>因此，选择指数的基本公式可以写为：<br>$$<br>I &#x3D; \mathbf{c’V^{-1}(y-\boldsymbol{\mu})} &#x3D; \sigma_{A}^{2} \mathbf{a’V^{-1}(y-\boldsymbol{\mu})}<br>$$</p>
+<p>从单个元素推广至向量，得到<br>$$<br>\mathbf{I}&#x3D;\mathbf{C}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})&#x3D;\mathbf{GZ’} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X}\boldsymbol{\beta})<br>$$<br>其中，$\mathbf{C}^{\prime} &#x3D; Cov(\boldsymbol{\mu}, \mathbf{y}^{\prime}) &#x3D; \mathbf{GZ’}$ </p>
+<p>选择指数估计的准确性的高低，直接取决于信息来源的种类和数量。而准确度的高低又直接关系到将获得的遗传进展的大小，所以这是一个非常重要的指标。<strong>准确性通常用真实育种值与估计育种值的相关系数来表示</strong>，即：<br>$$<br>r_{AI} &#x3D; \frac{Cov(A,I)}{\sigma_{A} \sigma_{I}}<br>$$<br>因为 $\sigma_{I}^{2}&#x3D;\mathbf{b}^{\prime} \mathbf{V b} &#x3D; \mathbf{b}^{\prime} \mathbf{c},\quad  \operatorname{Cov}(A, I)&#x3D;\mathbf{b}^{\prime} \mathbf{c}&#x3D;\sigma_{I}^{2}$ ，所以<br>$$<br>r_{AI} &#x3D; \frac{ \sigma_{I}^{2}}{\sigma_{A} \sigma_{I}} &#x3D; \frac{ \sigma_{I}}{\sigma_{A} } &#x3D; \frac{\mathbf{(b’c)}^{0.5}}{\sigma_{A} } &#x3D; \frac{(\mathbf{b’a }\sigma^{2}<em>{A})^{0.5}}{\sigma</em>{A} } &#x3D; (\mathbf{b’a })^{0.5}<br>$$<br>BLP 的一些性质为</p>
+<ol>
+<li>在所有关于 $\mathbf{y}$ 的线性组合中，<strong>BLP</strong>  最大化了 $I$ 和 $A$ 的相关</li>
+<li><strong>BLP</strong> 具有不变性，即 $\text{BLP of }\mathbf{m^{\prime}w} &#x3D; \mathbf{m^{\prime}\hat{w}}$ </li>
+<li>当  $[\mathbf{y}, \mathbf{w}]$ 服从多变量正态分布是，此时的 <strong>BLP</strong>  就是 <strong>BP</strong></li>
+</ol>
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><p>最主要的缺点就是需要已知 $\mathbf{}$ $\mathbf{y}$ 的均值，即 $\mathbf{X} \boldsymbol{\beta}$ ，这在实际情况中基本是不可能实现的。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<li>Henderson，1973，SIRE EVALUATION AND GENETIC  TRENDS</li>
+<li>Henderson，《Applications_of_Linear_Models_in_Animal_Breeding》, 1984</li>
+<li>张沅，张勤，《畜禽育种中的线性模型》</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/7fc57f76/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            混合线性模型三之BLUP方法
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/5e674d74/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">混合线性模型一之广义最小二乘</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

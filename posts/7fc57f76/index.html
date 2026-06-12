@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    混合线性模型三之BLUP方法 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-混合线性模型三之BLUP方法"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  混合线性模型三之BLUP方法
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/7fc57f76/" class="article-date">
+  <time datetime="2022-02-24T08:40:43.000Z" itemprop="datePublished">2022-02-24</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">44 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在前面的章节中，我们提到了 BLP 方法需要已知固定效应的值，而这在实践中往往不可能实现，由此引出 BLUP 方法，这应该也是本系列的最后一篇。</p>
+<span id="more"></span>
+
+<h1 id="BLUP"><a href="#BLUP" class="headerlink" title="BLUP"></a>BLUP</h1><p>我们先看 BLUP 方法的一般推导，假设我们想要预测一个随机变量 $w$ ，我们只知道其均值为 $\mathbf{k}^{\prime} \boldsymbol{\beta}$ ，方差为 $v$ ，其与 $\mathbf{y}^{\prime}$ 的协方差为 $Cov(w, \mathbf{y}^{\prime}) &#x3D; \mathbf{c}^{\prime}$ ，我们该如何取预测 $w$ 呢？</p>
+<p>一种可行的方案是我们找到一个关于 $\mathbf{y}$ 的线性函数，其均值为  $\mathbf{k}^{\prime} \boldsymbol{\beta}$ （即无偏），并且其在所有线性无偏估计值中具有最小的<strong>预测误差方差</strong>，这种方法我们称为<strong>最佳线性无偏预测法 (BLUP)</strong> 。</p>
+<p>假设预测函数为 $\mathbf{a’y}$ ，其期望为 $E(\mathbf{a}^{\prime} \mathbf{y})&#x3D;\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta}$ ，我们需要使之为   $\mathbf{k}^{\prime} \boldsymbol{\beta}$  ，即 $\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta} &#x3D; \mathbf{k}^{\prime} \boldsymbol{\beta}$ 对于所有可能的 $\boldsymbol{\beta}$ 恒成立，因此存在<br>$$<br>\mathbf{a}^{\prime} \mathbf{X}&#x3D;\mathbf{k}^{\prime}<br>$$<br>预测误差方差为下式，其中 $v &#x3D; Var(w)$<br>$$<br>Var(\mathbf{a’y}-w) &#x3D; \mathbf{a’Va} - 2 \mathbf{a’c}+v<br>$$<br>构建拉格朗日函数如下<br>$$<br>\mathbf{L} &#x3D; 0.5 (\mathbf{a’Va} - 2 \mathbf{a’c}+v) + (\mathbf{a}^{\prime} \mathbf{X}-\mathbf{k}^{\prime}) \boldsymbol{\theta}<br>$$<br>分别对 $\mathbf{a}$ 和 $\boldsymbol{\theta}$ 求偏导，使之为 0 ，得到<br>$$<br>\begin{aligned}<br>&amp;\partial \mathbf{L} &#x2F; \partial \mathbf{a}&#x3D; \mathbf{V} \mathbf{a} - \mathbf{c} +\mathbf{X} \boldsymbol{\theta}&#x3D; \mathbf{0} \<br>&amp;\partial \mathbf{L} &#x2F; \partial \boldsymbol{\theta}&#x3D;\mathbf{X’a-k} &#x3D; \mathbf{0}<br>\end{aligned}<br>$$<br>整理一下，我们得到方程组如下<br>$$<br>\left(\begin{array}{ll}<br>\mathbf{V} &amp; \mathbf{X} \<br>\mathbf{X}^{\prime} &amp; 0<br>\end{array}\right)\left(\begin{array}{l}<br>\mathbf{a} \<br>\boldsymbol{\theta}<br>\end{array}\right)&#x3D;\left(\begin{array}{l}<br>\mathbf{c} \<br>\mathbf{k}<br>\end{array}\right)<br>$$<br>这个方程组和广义最小二乘的方程组很相似。下面我们开始求解，对第一个方程进行变换，得到<br>$$<br>\begin{aligned}<br>\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta} &amp;&#x3D; \mathbf{c} \<br>\mathbf{a}  &amp;&#x3D; \mathbf{V^{-1}(c-X \boldsymbol{\theta}}) \<br>\mathbf{X’a} &amp;&#x3D; \mathbf{X’V^{-1}(c-X \boldsymbol{\theta}}) \<br>\mathbf{k}  &amp;&#x3D; \mathbf{X’V^{-1}(c-X \boldsymbol{\theta}}) \</p>
+<p>\end{aligned}<br>$$<br>因此我们得到了一个只关于 $\boldsymbol{\theta}$ 的方程组<br>$$<br>\mathbf{X’V^{-1}X \boldsymbol{\theta}} &#x3D; \mathbf{X’V^{-1}c-k}<br>$$<br>我们需要先证明这个方程组相容，我们只需要证明对于任何一个广义逆 $\mathbf{ (X’V^{-1}X)^{-} }$ ，$\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}(X’V^{-1}c-k)&#x3D;X’V^{-1}c-k}$ 均成立即可。<strong>假设  $\mathbf{k}^{\prime} \boldsymbol{\beta}$ 可估计</strong>，则必然存在某个  $\mathbf{a_{0}}$ 向量使得  $\mathbf{k &#x3D; X’a_{0}}$ ，因此上式可以写成  $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}(X’V^{-1}c-X’a_{0})&#x3D;X’V^{-1}c-X’a_{0}}$ 。我们设这里的 $\mathbf{A&#x3D;V^{-1&#x2F;2}X}$ ，这里的 $\mathbf{V^{-1&#x2F;2}}$ 是 $\mathbf{V^{1&#x2F;2}}$ 的逆矩阵，易得 $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}X’} &#x3D; \mathbf{A’A(A’A)^{-}A’V^{1&#x2F;2}} &#x3D; \mathbf{A’V^{1&#x2F;2}} &#x3D;  \mathbf{X’V^{-1&#x2F;2} V^{1&#x2F;2}} &#x3D; \mathbf{X’}$ ，因此得证   $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}(X’V^{-1}c-X’a_{0})&#x3D;X’V^{-1}c-X’a_{0}}$  ，即我们证明这个方程组相容。</p>
+<p>因此  $\boldsymbol{\theta}$  的一个解为<br>$$<br>\mathbf{(X’V^{-1}X)^{-}(X’V^{-1}c-k)}<br>$$<br>我们将其带入到第一个方程 $\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta} &#x3D; \mathbf{c}$  ，得到<br>$$<br>\begin{aligned}<br>\mathbf{a}&amp;&#x3D;-\mathbf{V}^{-1} \mathbf{X} \boldsymbol{\theta}+\mathbf{V}^{-1} \mathbf{c} \<br>&amp;&#x3D;\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{k}-\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{c}+\mathbf{V}^{-1} \mathbf{c}<br>\end{aligned}<br>$$<br>此时我们的预测值为 （这里需要<strong>设定 $\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}$ 同样是一个对称矩阵</strong> ）<br>$$<br>\mathbf{a}^{\prime} \mathbf{y}&#x3D;\mathbf{k}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}+\mathbf{c}^{\prime} \mathbf{V}^{-1}\left[\mathbf{y}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}\right]<br>$$<br>由于 $\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}&#x3D;\boldsymbol{\beta}^{o}$ ，所以预测值可以写为<br>$$<br>\hat{w} &#x3D; \mathbf{k}^{\prime} \boldsymbol{\beta}^{o}+\mathbf{c}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}^{o}\right)<br>$$<br>我们注意到，如果 $\mathbf{k}^{\prime} \boldsymbol{\beta}&#x3D;0$ 或者如果 $\boldsymbol{\beta}$ 已知，那么此时的预测值就是 $\mathbf{c}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}^{o}\right)$ ，就是选择指数法的预测公式。因此，<strong>BLUP 就是用 $\boldsymbol{\beta}^{0}$ 替换 $\boldsymbol{\beta}$ 的 BLP</strong>  。</p>
+<p>从元素推广到向量，得到<br>$$<br>\mathbf{\hat{w}} &#x3D; \mathbf{K}^{\prime} \boldsymbol{\beta}^{o}+\mathbf{C}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}^{o}\right)<br>$$<br>其中，$\mathbf{C} &#x3D; Cov(\mathbf{y}, \mathbf{w}^{\prime})$ 。</p>
+<h2 id="方差及协方差"><a href="#方差及协方差" class="headerlink" title="方差及协方差"></a>方差及协方差</h2><p>我们现在来看一些有用的方差和协方差，我们有<br>$$<br>\mathbf{\hat{w}}&#x3D;\left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{y}<br>$$<br><strong>假设 $\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}$ 是一个对称矩阵，并且是一个自反广义逆矩阵</strong>。因此我们有<br>$$<br>\begin{aligned}<br>\operatorname{Var}(\hat{\mathbf{w}})<br>&#x3D;&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{V} \left(\mathbf{V^{-1}X(X’V^{-1}X)^{-}K + V^{-1}C - V^{-1}X(X’V^{-1}X)^{-}X’V^{-1}C}\right) \<br>&#x3D;&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}<br>+\mathbf{C}^{\prime}<br>-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \right)<br>\left(\mathbf{V^{-1}X(X’V^{-1}X)^{-}K + V^{-1}C - V^{-1}X(X’V^{-1}X)^{-}X’V^{-1}C}\right) \</p>
+<p>&#x3D;&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}</p>
+<ul>
+<li>\mathbf{C}^{\prime}\mathbf{V^{-1}X(X’V^{-1}X)^{-}K}</li>
+</ul>
+<ul>
+<li>\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\mathbf{K} \<br>&amp; \quad +\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V^{-1}C}</li>
+</ul>
+<ul>
+<li>\mathbf{C’V^{-1}C} - \mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V^{-1}C} \<br>&amp; \quad -\mathbf{K’}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\mathbf{X’V^{-1}C}- \mathbf{C’ V^{-1}X(X’V^{-1}X)^{-}X’V^{-1}C} + \mathbf{C’V^{-1}X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\mathbf{X’V^{-1}C} \</li>
+</ul>
+<p>&#x3D;&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>\end{aligned}<br>$$<br>协方差<br>$$<br>\begin{aligned}<br>\operatorname{Cov}\left(\hat{\mathbf{w}}, \mathbf{w}^{\prime}\right)<br>&#x3D;&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \operatorname{Cov}\left(\mathbf{y}, \mathbf{w}^{\prime}\right) \</p>
+<p>&#x3D;&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{C} \</p>
+<p>&#x3D;&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C}+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>&#x3D;&amp; \operatorname{Var}(\hat{\mathbf{w}}) \<br>\end{aligned}<br>$$<br>预测误差方差为<br>$$<br>\begin{aligned}<br>\operatorname{Var}(\hat{\mathbf{w}}-\mathbf{w})<br>&#x3D;&amp; \operatorname{Var}(\mathbf{\hat{w}})-\operatorname{Cov}\left(\hat{\mathbf{w}}, \mathbf{w}^{\prime}\right)-\operatorname{Cov}\left(\mathbf{w}, \hat{\mathbf{w}}^{\prime}\right)+\operatorname{Var}(\mathbf{w}) \</p>
+<p>&#x3D;&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>&amp;+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} +\mathbf{G}<br>\end{aligned}<br>$$</p>
+<h2 id="BLUP-的性质"><a href="#BLUP-的性质" class="headerlink" title="BLUP 的性质"></a>BLUP 的性质</h2><ol>
+<li>在所有的线性无偏预测值中，BLUP 最大化了 $\hat{w}<em>{i}$ 和 $w</em>{i}$ 的相关</li>
+<li><strong>BLUP</strong> 具有不变性，即 $\text{BLUP of }\mathbf{m^{\prime}w} &#x3D; \mathbf{m^{\prime}\hat{w}}$</li>
+<li>在<strong>正态</strong>分布假设下，我们有<ul>
+<li>$E(\mathbf{w | \hat{w}}) &#x3D; \mathbf{\hat{w}}$ </li>
+<li>$Var( \mathbf{\hat{w}} -  \mathbf{w}) &#x3D; Var( \mathbf{w} | \mathbf{\hat{w}}) $</li>
+<li>$\mathbf{\hat{w}}$ 是最大似然估计值，并且是 $\mathbf{w}$ 的条件均值的最佳线性无偏估计值</li>
+<li>$\mathbf{\hat{w}}$ 元素正确排序的可能性最大</li>
+</ul>
+</li>
+</ol>
+<h1 id="混合模型方程组"><a href="#混合模型方程组" class="headerlink" title="混合模型方程组"></a>混合模型方程组</h1><p>上面的BLUP计算公式中涉及到 $\mathbf{V}^{-1}$ 的计算，当观测值较多时， $\mathbf{V}^{-1}$ 计算困难甚至不可计算，为此 Henderson 提出了求解 $\mathbf{\hat{w}}$ 的另一种方法， 这个方法原来被 Henderson 称为最大似然法，但是实际上这个方法比最大似然方法更加具有普遍性，因为它其实不需要<strong>正态假设</strong>。这个方法就是<strong>混合模型方程组</strong> (Mixed Model Equation, MME) . </p>
+<p>对于一般的混合线性模型<br>$$<br>\mathbf{y} &#x3D; \mathbf{X} \boldsymbol{\beta}+ \mathbf{Zu}+ \mathbf{e}<br>$$</p>
+<p>均值和方差，协方差如下</p>
+<p>$$<br>\begin{gathered}<br>E(\mathbf{u})&#x3D;\mathbf{0}, E(\mathbf{e})&#x3D;\mathbf{0}, E(\mathbf{y})&#x3D;\mathbf{X} \beta \<br>\operatorname{Var}(\mathbf{u})&#x3D;\mathbf{G}, \operatorname{Var}(\mathbf{e})&#x3D;\mathbf{R}, \operatorname{Cov}\left(\mathbf{u}, \mathbf{e}^{\prime}\right)&#x3D;\mathbf{0}, \operatorname{Var}(\mathbf{y})&#x3D;\mathbf{Z G Z}^{\prime}+\mathbf{R}<br>\end{gathered}<br>$$</p>
+<p>我们沿着 Henderson 一开始推出 MME 的思路，我们假设 $\mathbf{u}$ 和 $\mathbf{e}$ 服从正态分布， $\mathbf{y}$ 和 $\mathbf{u}$ 服从联合多变量高斯分布<br>$$<br>\mathbf{u}  \sim N(\mathbf{0}, \mathbf{G}) \<br>\mathbf{e} \sim N(\mathbf{0}, \mathbf{R})<br>$$<br> 那么 $\mathbf{y}$ 和 $\mathbf{u}$ 的联合密度函数为<br>$$<br>f(\mathbf{y}, \mathbf{u})&#x3D;f_{1}(\mathbf{y} \mid \mathbf{u}) f_{2}(\mathbf{u})<br>$$<br>根据多元正态分布，我们知道多元正态分布的条件分布 也是正态分布，其均值和协方差矩阵满足公式<br>$$<br>\begin{aligned}<br>E(\mathbf{y} \mid \mathbf{x}) &amp;&#x3D;\boldsymbol{\mu}<em>{y}+\mathbf{\Sigma}</em>{y x} \Sigma_{x x}^{-1}\left(\mathbf{x}-\boldsymbol{\mu}<em>{x}\right), \<br>\operatorname{cov}(\mathbf{y} \mid \mathbf{x}) &amp;&#x3D;\mathbf{\Sigma}</em>{y y}-\mathbf{\Sigma}<em>{y x} \mathbf{\Sigma}</em>{x x}^{-1} \mathbf{\Sigma}<em>{x y} .<br>\end{aligned}<br>$$<br>因此，我们有<br>$$<br>\begin{aligned}<br>E(\mathbf{y} \mid \mathbf{u}) &amp;&#x3D;\boldsymbol{\mu}</em>{y}+\mathbf{\Sigma}<em>\mathbf{y u’} \Sigma</em>\mathbf{u u’}^{-1}\left(\mathbf{u}-E(\mathbf{u})\right) \<br>&amp;&#x3D; \mathbf{X} \boldsymbol{\beta} + \mathbf{ZG G^{-1}u}  \<br>&amp;&#x3D; \mathbf{X} \boldsymbol{\beta} + \mathbf{Zu}  </p>
+<p>\</p>
+<p>\operatorname{cov}(\mathbf{y} \mid \mathbf{u}) &amp;&#x3D;\mathbf{\Sigma}<em>{y y’}-\mathbf{\Sigma}</em>{y u’} \mathbf{\Sigma}<em>{u u’}^{-1} \mathbf{\Sigma}</em>{u y’} \<br>&amp;&#x3D;\mathbf{ZGZ’+R} - \mathbf{(ZG)(G^{-1})(GZ’)} \<br>&amp;&#x3D;\mathbf{R} \</p>
+<p>\end{aligned}<br>$$<br>因此，我们有<br>$$<br>\mathbf{y|u}  \sim N(\mathbf{X} \boldsymbol{\beta} + \mathbf{Zu}  , \mathbf{R}) \<br>$$<br>根据多元正态分布的概率密度公式，我们有<br>$$<br>\begin{aligned}<br>&amp;f_{1}(\mathbf{y} \mid \mathbf{u})&#x3D;C_{1} \exp \left{-\frac{1}{2}(\mathbf{y}-\mathbf{X} \beta-\mathbf{Z u})^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \beta-\mathbf{Z u})\right} \<br>&amp;f_{2}(\mathbf{u})&#x3D;C_{2} \exp \left{-\frac{1}{2} \mathbf{u}^{\prime} \mathbf{G}^{-1} \mathbf{u}\right}<br>\end{aligned}<br>$$<br>其中 $C_{1}$ 和 $C_{2}$ 为常数，如下<br>$$<br>C_{1}&#x3D;(2 \pi)^{-\frac{n}{2}}|R|^{-\frac{1}{2}}, \quad C_{2}&#x3D;(2 \pi)^{-\frac{q}{2}}|G|^{-\frac{1}{2}}<br>$$<br>于是<br>$$<br>f(\mathbf{y}, \mathbf{u})&#x3D;C \exp \left{-\frac{1}{2}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u})^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta} -\mathbf{Z u})-\frac{1}{2} \mathbf{u}^{\prime} \mathbf{G}^{-1} \mathbf{u}\right}<br>$$<br>其中 $C&#x3D;C_{1} \times C_{2}$ 。</p>
+<p>取对数得到<br>$$<br>\log f(\mathbf{y}, \mathbf{u})&#x3D; \log (C) -\frac{1}{2}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u})^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta} -\mathbf{Z u})-\frac{1}{2} \mathbf{u}^{\prime} \mathbf{G}^{-1} \mathbf{u}<br>$$<br>根据最大似然的思想，我们要找一组参数 $\boldsymbol{\hat{\beta}}$ 和 $\mathbf{\hat{u}}$ 使得  $\log f(\mathbf{y}, \mathbf{u})$ 最大。我们分别针对 $\boldsymbol{\beta}$ 和 $\mathbf{u}$ 求偏导，得到<br>$$<br>\begin{aligned}<br>&amp;\frac{\partial \log f(\mathbf{y}, \mathbf{u})}{\partial \boldsymbol{\beta}}<br>&#x3D;\mathbf{X’R^{-1}}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u})<br>&#x3D;\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y}-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} \beta-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z u} &#x3D; \mathbf{0} \<br>&amp;\frac{\partial \log f(\mathbf{y}, \mathbf{u})}{\partial \mathbf{u}}<br>&#x3D;\mathbf{Z’R^{-1}}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u}) -\mathbf{G}^{-1} \mathbf{u}<br>&#x3D;\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} \beta-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z u}-\mathbf{G}^{-1} \mathbf{u} &#x3D; \mathbf{0}<br>\end{aligned}<br>$$<br>整理一下，可得<br>$$<br>\begin{aligned}<br>&amp;\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}}+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \hat{\mathbf{u}}&#x3D;\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>&amp;\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}}+\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right) \hat{\mathbf{u}}&#x3D;\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{aligned}<br>$$<br>我们也可以整理成方程组的形式<br>$$<br>\left[\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>\end{array}\right]\left[\begin{array}{l}<br>\boldsymbol{\hat{\beta}}  \<br>\hat{\mathbf{u}}<br>\end{array}\right]&#x3D;\left[\begin{array}{l}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right]<br>$$<br>此方程组就称为<strong>混合模型方程组</strong>。</p>
+<p>我们下面证明混合模型方程组与根据 BLUP 的定义直接得到的  $\boldsymbol{\hat{\beta}}$ 和 $\mathbf{\hat{u}}$  等价，也就是说混合模型方程组实际不需要正态假设。</p>
+<h2 id="证明等价"><a href="#证明等价" class="headerlink" title="证明等价"></a>证明等价</h2><p>由混合模型方程组的第二个方程得<br>$$<br>\mathbf{u}&#x3D;\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}})<br>$$<br>这里需要证明 $\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}$ 可逆，由于 $\mathbf{G}$ 阵是正定矩阵，因此其逆矩阵 $\mathbf{G^{-1}}$ 也是正定矩阵，易证  $\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}$ 为半正定矩阵，因此  $\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}$ 也是正定矩阵，因此其可逆。</p>
+<p>将该式带入到第一个方程得到<br>$$<br>\begin{aligned}<br>&amp;\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}}-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}} \<br>&amp;&#x3D;\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y}-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{aligned}<br>$$<br>变换一下得到<br>$$<br>\begin{aligned}<br>\mathbf{X’}\left(\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\right)\mathbf{X}\boldsymbol{\hat{\beta}} &amp;&#x3D;  \mathbf{X’}\left(\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\right)\mathbf{y} \</p>
+<p>\mathbf{X’}\mathbf{V^{-1}}\mathbf{X}\boldsymbol{\hat{\beta}} &amp;&#x3D;  \mathbf{X’}\mathbf{V^{-1}}\mathbf{y} \<br>\end{aligned}<br>$$<br>其中有 $\mathbf{V}^{-1}&#x3D;\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}$ ，推导可见<a href="https://vincere.fun/posts/5e674d74/">混合线性模型一之广义最小二乘</a> 。</p>
+<p>因此，混合模型方程组得到的  $\boldsymbol{\hat{\beta}}$ 就是广义最小二乘估计值。</p>
+<p>然后我们再需要证明  $\mathbf{\hat{u}} &#x3D; \mathbf{C}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}\right)$   ，即等于选择指数法估计值。<br>$$<br>\begin{aligned}<br>\mathbf{u} &amp;&#x3D;\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>&amp;&#x3D;\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{V} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \widehat{\beta}) \<br>&amp;&#x3D;\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\left(\mathbf{Z G Z}^{\prime}+\mathbf{R}\right) \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>&amp;&#x3D;\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right) \mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>&amp;&#x3D;\mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>&amp;&#x3D;\mathbf{C}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \quad( \because \mathbf{C}&#x3D;\mathbf{Z G})<br>\end{aligned}<br>$$<br> 得证。</p>
+<p>因此我们证明了混合模型方程组与根据 BLUP 的定义直接得到的  $\boldsymbol{\hat{\beta}}$ 和 $\mathbf{\hat{u}}$  等价，所以在家畜育种中，混合模型方程组已成了 BLUP 法的同义词。</p>
+<p>但是这种从最大似然法推导出来混合模型方程组的方式，和 BLUP 的定义似乎缺少概念上的直接联系，下面我们尝试直接从 BLUP 的定义出发，直接推导得到混合模型方程组。</p>
+<h2 id="重新推导"><a href="#重新推导" class="headerlink" title="重新推导"></a>重新推导</h2><p>根据 BLUP 定义，对于单个变量 $w$ ，我们有方程组<br>$$<br>\left(\begin{array}{ll}<br>\mathbf{V} &amp; \mathbf{X} \<br>\mathbf{X}^{\prime} &amp; 0<br>\end{array}\right)\left(\begin{array}{l}<br>\mathbf{a} \<br>\boldsymbol{\theta}<br>\end{array}\right)&#x3D;\left(\begin{array}{l}<br>\mathbf{c} \<br>\mathbf{k}<br>\end{array}\right)<br>$$<br>推广至向量 $\mathbf{w}$ ，我们有下面的方程组 (注意这里的 $\boldsymbol{\theta}$ 是一个矩阵，上面是一个向量 )。矩阵 $\mathbf{A}$ 满足 $\mathbf{\hat{w} &#x3D; A’y}$ 。<br>$$<br>\left(\begin{array}{ll}<br>\mathbf{V} &amp; \mathbf{X} \<br>\mathbf{X}^{\prime} &amp; 0<br>\end{array}\right)\left(\begin{array}{l}<br>\mathbf{A} \<br>\boldsymbol{\theta}<br>\end{array}\right)&#x3D;\left(\begin{array}{l}<br>\mathbf{C} \<br>\mathbf{K}<br>\end{array}\right)<br>$$<br>将 $\mathbf{V &#x3D; ZGZ’ + R}$ 和 $\mathbf{C&#x3D;ZG}$ 带入第一个方程，得到<br>$$<br>\mathbf{(ZGZ’ + R)A} + \mathbf{X}\boldsymbol{\theta} &#x3D; \mathbf{CG} \<br>$$<br>或者写成<br>$$<br>\mathbf{RA} + \mathbf{ZG(Z’A-I)} + \mathbf{X}\boldsymbol{\theta} &#x3D; \mathbf{0}<br>$$<br>令 $\mathbf{T&#x3D;G(Z’A-I)}$ ，则 $\mathbf{Z’A-G^{-1}T&#x3D;I}$ ，于是有方程组<br>$$<br>\mathbf{RA} + \mathbf{ZT} + \mathbf{X}\boldsymbol{\theta} &#x3D; \mathbf{0}\<br>\mathbf{Z’A-G^{-1}T&#x3D;I} \<br>\mathbf{X’A&#x3D;K}<br>$$<br>由其中的第一个方程可得<br>$$<br>\mathbf{A} &#x3D; -\mathbf{R^{-1}X\boldsymbol{\theta} - R^{-1}ZT}<br>$$<br>带入到第二方程，得<br>$$<br>\begin{aligned}<br>-\mathbf{Z’R^{-1}X\boldsymbol{\theta} - Z’R^{-1}ZT-G^{-1}T} &amp;&#x3D; \mathbf{I}<br>\end{aligned}<br>$$<br>带入到第三方程，得<br>$$<br>-\mathbf{X’R^{-1}X\boldsymbol{\theta} - X’R^{-1}ZT} &#x3D; \mathbf{K}<br>$$<br>整理成方程组得格式为<br>$$<br>\left[\begin{array}{ll}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>\end{array}\right]\left[\begin{array}{c}<br>\boldsymbol{\theta} \<br>\mathbf{T}<br>\end{array}\right]&#x3D;\left[\begin{array}{c}<br>-\mathbf{K} \<br>-\mathbf{I}<br>\end{array}\right]<br>$$<br>前面前面的推导，我们知道这个方程组应该是相容的。我们将上式系数矩阵的一个广义逆表示为（<strong>假设这个广义逆也是一个对称矩阵</strong>，满足 $\mathbf{C_{12}} &#x3D; \mathbf{C_{21}}^{\prime}$ ，$\mathbf{C_{11}}$ 和 $\mathbf{C_{22}}$ 也是对称矩阵）<br>$$<br>\left[\begin{array}{ll}<br>\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>\end{array}\right]<br>$$<br>则该方程组的解为<br>$$<br>\left[\begin{array}{l}<br>\boldsymbol{\theta} \<br>\mathbf{T}<br>\end{array}\right]&#x3D;\left[\begin{array}{ll}<br>\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>\end{array}\right]\left[\begin{array}{l}<br>-\mathbf{K} \<br>-\mathbf{I}<br>\end{array}\right]<br>$$<br>于是<br>$$<br>\begin{aligned}<br>\mathbf{A} &amp;&#x3D; \left[\begin{array}{l}<br>\mathbf{R^{-1}X} &amp;<br>\mathbf{R^{-1}Z}<br>\end{array}\right] \left[\begin{array}{l}<br>-\boldsymbol{\theta} \<br>-\mathbf{T}<br>\end{array}\right] \<br>\<br>&amp;&#x3D; \left[\begin{array}{l}<br>\mathbf{R^{-1}X} &amp;<br>\mathbf{R^{-1}Z}<br>\end{array}\right]<br>\left[\begin{array}{ll}<br>\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>\end{array}\right]\left[\begin{array}{l}<br>\mathbf{K} \<br>\mathbf{I}<br>\end{array}\right]</p>
+<p>\end{aligned}<br>$$<br>因此<br>$$<br>\begin{aligned}<br>\mathbf{\hat{w}} &amp;&#x3D; \mathbf{A’y} \<br>&amp;&#x3D; \left[\begin{array}{l}<br>\mathbf{K’} &amp;<br>\mathbf{I}<br>\end{array}\right]<br>\left[\begin{array}{ll}<br>\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>\end{array}\right]<br>\left[\begin{array}{l}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right]<br>\end{aligned}<br>$$<br>同时根据上面的推导，我们有<br>$$<br>\mathbf{\hat{w}} &#x3D; \mathbf{K}^{\prime} \boldsymbol{\hat{\beta}}+\mathbf{C}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}\right)&#x3D;\mathbf{K}^{\prime} \boldsymbol{\hat{\beta}}+ \mathbf{\hat{u}} &#x3D;<br>\left[\begin{array}{l}<br>\mathbf{K’} &amp;<br>\mathbf{I}<br>\end{array} \right]<br>\left[\begin{array}{l}<br>\boldsymbol{\hat{\beta}} \<br>\mathbf{\hat{u}}<br>\end{array} \right]<br>$$<br>因此<br>$$<br>\left[\begin{array}{l}<br>\boldsymbol{\hat{\beta}} \<br>\mathbf{\hat{u}}<br>\end{array}\right]&#x3D;\left[\begin{array}{ll}<br>\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>\end{array}\right]\left[\begin{array}{l}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right]<br>$$<br>即<br>$$<br>\left[\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>\end{array}\right]\left[\begin{array}{l}<br>\boldsymbol{\hat{\beta}}  \<br>\hat{\mathbf{u}}<br>\end{array}\right]&#x3D;\left[\begin{array}{l}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right]<br>$$<br>证明完毕。</p>
+<h2 id="性质"><a href="#性质" class="headerlink" title="性质"></a>性质</h2><p><strong>假设 $\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}$ 是一个对称矩阵，并且是一个自反广义逆矩阵</strong>。</p>
+<h3 id="固定效应估计值"><a href="#固定效应估计值" class="headerlink" title="固定效应估计值"></a>固定效应估计值</h3><p>固定效应估计值就是一个广义最小二乘估计值，公式如下，其性质不再赘述。<br>$$<br>\boldsymbol{\hat{\beta}}&#x3D;\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}<br>$$</p>
+<h3 id="随机效应估计值"><a href="#随机效应估计值" class="headerlink" title="随机效应估计值"></a>随机效应估计值</h3><p>随机效应计算公式为<br>$$<br>\begin{aligned}<br>\mathbf{\hat{u}} &amp;&#x3D;\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>&amp;&#x3D;\mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>\end{aligned}<br>$$<br>根据广义最小二乘估计值的性质，我们易得 $\mathbf{X} \boldsymbol{\hat{\beta}}$ 是一个可估计函数，即 $\mathbf{X} \boldsymbol{\hat{\beta}}$  的值唯一，因此 $\mathbf{\hat{u}}$ 也是<strong>唯一的</strong>。</p>
+<p>首先看期望<br>$$<br>\begin{aligned}<br>E(\hat{\mathbf{u}}) &amp;\left.&#x3D;\mathbf{G Z}^{\prime} \mathbf{V}^{-1}\left(\mathbf{X} \boldsymbol{\beta}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X} \boldsymbol{\beta}\right)\right) \<br>&amp;&#x3D;\mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{X} \boldsymbol{\beta}-\mathbf{X} \boldsymbol{\beta})&#x3D;0<br>\end{aligned}<br>$$<br>其中存在  $\mathbf{X} \left( \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}  &#x3D; \mathbf{X}$ ，证明如下，我们设 $\mathbf{A&#x3D;V^{-1&#x2F;2}X}$ ，这里的 $\mathbf{V^{-1&#x2F;2}}$ 是 $\mathbf{V^{1&#x2F;2}}$ 的逆矩阵，易得<br>$$<br>\mathbf{X} \left( \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X} &#x3D; \mathbf{V^{1&#x2F;2}A(A’A)^{-}A’A} &#x3D; \mathbf{V^{1&#x2F;2}A} &#x3D; \mathbf{X}<br>$$<br>第二，我们看随机效应的协方差矩阵，根据上面的 BLUP的一般推导，我们有<br>$$<br>\operatorname{Var}(\hat{\mathbf{w}}) &#x3D;  \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C}<br>-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>$$<br>这里 $\mathbf{u}$ 均值为 $\mathbf{0}$ ，即 $\mathbf{K &#x3D; 0}$ ，同时有 $\mathbf{C&#x3D;ZG}$ 带入得到<br>$$<br>\begin{aligned}<br>\operatorname{Var}(\hat{\mathbf{u}}) &amp;&#x3D;  \mathbf{GZ’} \mathbf{V}^{-1} \mathbf{ZG}<br>-\mathbf{GZ’} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{ZG} \<br>&amp; &#x3D;\mathbf{G} \mathbf{Z}^{\prime} \mathbf{V}^{-1}\left(\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1}\right) \mathbf{Z G}<br>\end{aligned}<br>$$<br>根据上面的 BLUP的一般推导，我们有<br>$$<br>\operatorname{Cov}\left(\hat{\mathbf{u}}, \mathbf{u}^{\prime}\right)<br>&#x3D; \operatorname{Var}(\hat{\mathbf{u}})<br>$$<br>固定效应的可估计函数与随机效应估计值的协方差矩阵为<br>$$<br>\begin{aligned}<br>\operatorname{Cov}\left(\mathbf{T} \boldsymbol{\hat{\beta}}, \mathbf{\hat{u}}^{\prime}\right)<br>&amp;&#x3D; \mathbf{T}\operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{\hat{u}}^{\prime}\right) \<br>&amp;&#x3D; \mathbf{T}\operatorname{Cov}\left(\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}, \left( \mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{I}-\mathbf{X} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} ) \mathbf{y} \right)^{\prime}\right) \<br>&amp;&#x3D;\mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{V} \left( \mathbf{I} - \mathbf{V^{-1}X\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} X’}  \right) \mathbf{V^{-1}ZG} \<br>&amp;&#x3D;\mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}  \left( \mathbf{I} - \mathbf{V^{-1}X\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} X’}  \right) \mathbf{V^{-1}ZG} \</p>
+<p>&amp;&#x3D;\mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V^{-1}ZG}  - \mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}   \mathbf{V^{-1}ZG} \</p>
+<p>&amp;&#x3D;\mathbf{0}</p>
+<p>\end{aligned}<br>$$<br>根据通式<br>$$<br>\begin{aligned}<br>\operatorname{Var}(\hat{\mathbf{w}}-\mathbf{w})<br>&#x3D;&amp; \operatorname{Var}(\mathbf{\hat{w}})-\operatorname{Cov}\left(\hat{\mathbf{w}}, \mathbf{w}^{\prime}\right)-\operatorname{Cov}\left(\mathbf{w}, \hat{\mathbf{w}}^{\prime}\right)+\operatorname{Var}(\mathbf{w}) \</p>
+<p>&#x3D;&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>&amp;+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} +\mathbf{G}<br>\end{aligned}<br>$$<br>我们有<br>$$<br>\begin{aligned}<br>\operatorname{Var}(\hat{\mathbf{u}}-\mathbf{u})<br>&amp;&#x3D; -\mathbf{GZ’V^{-1}ZG} + \mathbf{GZ’}\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{ZG} + \mathbf{G} \<br>&amp;&#x3D;\mathbf{G}-\mathbf{G Z}^{\prime} \mathbf{V}^{-1}\left(\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1}\right) \mathbf{Z G} \<br>\end{aligned}<br>$$</p>
+<h3 id="系数矩阵广义逆矩阵的性质"><a href="#系数矩阵广义逆矩阵的性质" class="headerlink" title="系数矩阵广义逆矩阵的性质"></a>系数矩阵广义逆矩阵的性质</h3><p>假设混合模型方程组的系数矩阵的<strong>任意一个对称的</strong>广义逆矩阵为<br>$$<br>\left[\begin{array}{ll}<br>\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{12}^{\prime} &amp; \mathbf{C}</em>{22}<br>\end{array}\right]<br>$$<br>则存在下式<br>$$<br>\begin{aligned}<br>&amp;\operatorname{Var}(\boldsymbol{\hat{\beta}})&#x3D;\mathbf{ C}<em>{11}  \<br>&amp;\operatorname{Var}(\hat{\mathbf{u}})&#x3D;\operatorname{Cov}(\hat{\mathbf{u}}, \mathbf{u})&#x3D;\mathbf{G}-\mathbf{C}</em>{22} \<br>&amp;\operatorname{Var}(\hat{\mathbf{u}}-\mathbf{u})&#x3D;\mathbf{C}<em>{22} \<br>&amp;\operatorname{Cov}\left( \boldsymbol{\hat{\beta}}, \quad \hat{\mathbf{u}}^{\prime}\right)&#x3D;\mathbf{0} \<br>&amp;\operatorname{Cov}( \boldsymbol{\hat{\beta}}, \quad \mathbf{u^{\prime}})&#x3D;-\mathbf{ C}</em>{12} \<br>&amp;\operatorname{Cov}( \boldsymbol{\hat{\beta}}, \quad \hat{\mathbf{u}}^{\prime}-\mathbf{u}^{\prime})&#x3D;\mathbf{ C}<em>{12}<br>\end{aligned}<br>$$<br>下面的证明是基于<strong>系数矩阵满秩的前提下</strong>，即此时的广义逆就是逆矩阵存在下式成立。<br>$$<br>\left[\begin{array}{cc}<br>\mathbf{C}</em>{11} &amp; \mathbf{C}<em>{12} \<br>\mathbf{C}</em>{12}^{\prime} &amp; \mathbf{C}_{22}<br>\end{array}\right]<br>\left[\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp;<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>\end{array}\right] </p>
+<p>&#x3D; \left[\begin{array}{cc}<br>\mathbf{I} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{I}<br>\end{array}\right]<br>$$<br>这是 Henderson 在 1975 年提出的，我们有</p>
+<h1 id="left-begin-array-l-boldsymbol-hat-beta-hat-mathbf-u-end-array-right-left-begin-array-lll-mathbf-C-11-mathbf-C-12-mathbf-C-12-prime-mathbf-C-22-end-array-right-left-begin-array-l-mathbf-X-prime-mathbf-R-1-mathbf-y-mathbf-Z-prime-mathbf-R-1-mathbf-y-end-array-right-left-begin-array-l-mathbf-Q-1-prime-mathbf-Q-2-prime-end-array-right-mathbf-y-其中，我们设-left-begin-array-l-mathbf-Q-1-prime-mathbf-Q-2-prime-end-array-right"><a href="#left-begin-array-l-boldsymbol-hat-beta-hat-mathbf-u-end-array-right-left-begin-array-lll-mathbf-C-11-mathbf-C-12-mathbf-C-12-prime-mathbf-C-22-end-array-right-left-begin-array-l-mathbf-X-prime-mathbf-R-1-mathbf-y-mathbf-Z-prime-mathbf-R-1-mathbf-y-end-array-right-left-begin-array-l-mathbf-Q-1-prime-mathbf-Q-2-prime-end-array-right-mathbf-y-其中，我们设-left-begin-array-l-mathbf-Q-1-prime-mathbf-Q-2-prime-end-array-right" class="headerlink" title="$$\left(\begin{array}{l}\boldsymbol{\hat{\beta}} \\hat{\mathbf{u}}\end{array}\right)&#x3D;\left[\begin{array}{lll}\mathbf{C}{11} &amp; &amp; \mathbf{C}{12} \\mathbf{C}{12}^{\prime} &amp; &amp; \mathbf{C}{22}\end{array}\right]\left[\begin{array}{l}\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}\end{array}\right]&#x3D;\left(\begin{array}{l}\mathbf{Q}{1}^{\prime} \\mathbf{Q}{2}^{\prime}\end{array}\right) \mathbf{y}$$其中，我们设$$\left(\begin{array}{l}\mathbf{Q}{1}^{\prime} \\mathbf{Q}{2}^{\prime}\end{array}\right) "></a>$$<br>\left(\begin{array}{l}<br>\boldsymbol{\hat{\beta}} \<br>\hat{\mathbf{u}}<br>\end{array}\right)&#x3D;\left[\begin{array}{lll}<br>\mathbf{C}<em>{11} &amp; &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{12}^{\prime} &amp; &amp; \mathbf{C}</em>{22}<br>\end{array}\right]\left[\begin{array}{l}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>\end{array}\right]&#x3D;\left(\begin{array}{l}<br>\mathbf{Q}<em>{1}^{\prime} \<br>\mathbf{Q}</em>{2}^{\prime}<br>\end{array}\right) \mathbf{y}<br>$$<br>其中，我们设<br>$$<br>\left(\begin{array}{l}<br>\mathbf{Q}<em>{1}^{\prime} \<br>\mathbf{Q}</em>{2}^{\prime}<br>\end{array}\right) </h1><p>\left[\begin{array}{lll}<br>\mathbf{C}<em>{11} &amp; &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{12}^{\prime} &amp; &amp; \mathbf{C}</em>{22}<br>\end{array}\right]\left[\begin{array}{l}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1}  \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1}<br>\end{array}\right]<br>$$<br>继续拆开，得到<br>$$<br>\begin{aligned}<br>\mathbf{Q}<em>{1}^{\prime} &amp;&#x3D; \mathbf{C}</em>{11} \mathbf{X}^{\prime} \mathbf{R}^{-1}  + \mathbf{C}<em>{12} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \<br>\mathbf{Q}</em>{2}^{\prime} &amp;&#x3D; \mathbf{C}<em>{12}^{\prime} \mathbf{X}^{\prime} \mathbf{R}^{-1}  + \mathbf{C}</em>{22} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \<br>\end{aligned}<br>$$<br>或者<br>$$<br>\begin{aligned}<br>\mathbf{Q}<em>{1} &amp;&#x3D; \mathbf{R}^{-1}\mathbf{X} \mathbf{C}</em>{11}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}<em>{12}^{\prime}  \<br>\mathbf{Q}</em>{2} &amp;&#x3D; \mathbf{R}^{-1}\mathbf{X} \mathbf{C}<em>{12}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}</em>{22}  \<br>\end{aligned}<br>$$<br>因此，我们有<br>$$<br>\begin{aligned}<br>\boldsymbol{\hat{\beta}} &amp;&#x3D; \mathbf{Q}<em>{1}^{\prime} \mathbf{y} \<br>\mathbf{\hat{u}} &amp;&#x3D; \mathbf{Q}</em>{2}^{\prime} \mathbf{y} \<br>\end{aligned}<br>$$<br>我们可以得到下面这个等式<br>$$<br>\begin{aligned}<br>\left[\begin{array}{l}<br>\mathbf{Q}<em>{1}^{\prime} \<br>\mathbf{Q}</em>{2}^{\prime}<br>\end{array}\right][\mathbf{X} \quad \vdots \quad  \mathbf{Z}]<br>&amp;&#x3D;<br>\left[\begin{array}{lll}<br>\mathbf{C}<em>{11} &amp; &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{12}^{\prime} &amp; &amp; \mathbf{C}</em>{22}<br>\end{array}\right]\left[\begin{array}{l}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1}  \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1}<br>\end{array}\right] [\mathbf{X} \quad \vdots \quad  \mathbf{Z}]<br>\<br>&amp;&#x3D;\left[\begin{array}{cc}<br>\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>\mathbf{C}<em>{12}^{\prime} &amp; \mathbf{C}</em>{22}<br>\end{array}\right]\left(\left[\begin{array}{cc}<br>\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp;<br>\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>\end{array}\right]-\left[\begin{array}{cc}<br>\mathbf{0} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{G}^{-1}<br>\end{array}\right]\right) \<br>&amp;&#x3D;\left(\begin{array}{cc}<br>\mathbf{I} &amp; \mathbf{0} \<br>\mathbf{0} &amp; \mathbf{I}<br>\end{array}\right)-\left(\begin{array}{cc}<br>\mathbf{0} &amp; \mathbf{C}<em>{12} \mathbf{G}^{-1} \<br>\mathbf{0} &amp; \mathbf{C}</em>{22} \mathbf{G}^{-1}<br>\end{array}\right)<br>\end{aligned}<br>$$<br>因此我们得到<br>$$<br>\begin{aligned}<br>&amp;\mathbf{Q_{1}^{\prime} X&#x3D;I} \<br>&amp;\mathbf{Q_{1}^{\prime} Z&#x3D;-C_{12} G^{-1}}  \<br>&amp;\mathbf{Q_{2}^{\prime} X&#x3D;0}  \<br>&amp;\mathbf{Q_{2}^{\prime} Z&#x3D;I-C_{22} G^{-1}}<br>\end{aligned}<br>$$<br>利用这些结果，我们得到<br>$$<br>\begin{aligned}<br>\operatorname{Var}(\boldsymbol{\hat{\beta}})<br>&amp;&#x3D;\operatorname{Var}(\mathbf{Q}<em>{1}^{\prime} \mathbf{y})\<br>&amp;&#x3D;\mathbf{Q}</em>{1}^{\prime}\left(\mathbf{R}+\mathbf{Z} \mathbf{G} \mathbf{Z}^{\prime}\right) \mathbf{Q}<em>{1} \<br>&amp;&#x3D;\mathbf{Q}</em>{1}^{\prime}\mathbf{R}\mathbf{Q}<em>{1}+ \mathbf{Q}</em>{1}^{\prime} \mathbf{Z} \mathbf{G} \mathbf{Z}^{\prime} \mathbf{Q}_{1} \</p>
+<p>&amp;&#x3D;\mathbf{Q}<em>{1}^{\prime}\mathbf{R} \left( \mathbf{R}^{-1}\mathbf{X} \mathbf{C}</em>{11}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}<em>{12}^{\prime} \right)+ \mathbf{Q}</em>{1}^{\prime} \mathbf{Z} \mathbf{G} \mathbf{Z}^{\prime} \mathbf{Q}_{1} \</p>
+<p>&amp;&#x3D;\mathbf{Q}<em>{1}^{\prime} \mathbf{X C}</em>{11}+\mathbf{Q}<em>{1}^{\prime} \mathbf{Z C}</em>{12}^{\prime}+(\mathbf{Q}<em>{1}^{\prime} \mathbf{Z}) \mathbf{ G } (\mathbf{Q}</em>{1}^{\prime} \mathbf{Z})^{\prime} \</p>
+<p>&amp;&#x3D;\mathbf{I C}<em>{11}-\mathbf{C}</em>{12} \mathbf{G}^{-1} \mathbf{C}<em>{12}^{\prime}+ (-\mathbf{C}</em>{12} \mathbf{ G }^{-1}) \mathbf{ G } (-\mathbf{C}<em>{12} \mathbf{ G }^{-1})^{\prime} \<br>&amp;&#x3D;\mathbf{ C}</em>{11}-\mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{C}</em>{12}^{\prime}+ \mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{C}</em>{12}^{\prime} \<br>&amp;&#x3D;\mathbf{C}_{11}<br>\end{aligned}<br>$$</p>
+<p>$$<br>\begin{aligned}<br>\operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \hat{\mathbf{u}}^{\prime}\right)<br>&amp;&#x3D;\operatorname{Cov}\left( \mathbf{Q}<em>{1}^{\prime} \mathbf{y}, (\mathbf{Q}</em>{2}^{\prime} \mathbf{y})^{\prime}\right)  \<br>&amp;&#x3D;\mathbf{Q}<em>{1}^{\prime}\left(\mathbf{R}+\mathbf{ZGZ}^{\prime}\right) \mathbf{Q}</em>{2} \<br>&amp;&#x3D;\mathbf{Q}<em>{1}^{\prime}\mathbf{R}\mathbf{Q}</em>{2}+\mathbf{Q}<em>{1}^{\prime}\mathbf{ZGZ}^{\prime}\mathbf{Q}</em>{2} \<br>&amp;&#x3D;\mathbf{Q}<em>{1}^{\prime}\mathbf{R} \left(  \mathbf{R}^{-1}\mathbf{X} \mathbf{C}</em>{12}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}<em>{22}\right) +(\mathbf{Q}</em>{1}^{\prime}\mathbf{Z})\mathbf{G}(\mathbf{Q}<em>{2}^{\prime}\mathbf{Z})^{\prime} \<br>&amp;&#x3D;\mathbf{Q}</em>{1}{ }^{\prime} \mathbf{X C}<em>{12}+\mathbf{Q}</em>{1}{ }^{\prime} \mathbf{Z C}<em>{22}+(\mathbf{Q}</em>{1}^{\prime}\mathbf{Z})\mathbf{G}(\mathbf{Q}<em>{2}^{\prime}\mathbf{Z})^{\prime} \<br>&amp;&#x3D;\mathbf{I C}</em>{12}-\mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{C}</em>{22}-\mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{G}\left(\mathbf{I}-\mathbf{G}^{-1} \mathbf{C}</em>{22}\right) \<br>&amp;&#x3D; \mathbf{0}<br>\end{aligned}<br>$$</p>
+<p>$$<br>\begin{aligned}<br>\operatorname{Cov}\left(\boldsymbol{\hat{\mathbf{\beta}}}, \mathbf{u}^{\prime}\right)<br>&amp;&#x3D; \operatorname{Cov}\left(\mathbf{Q}<em>{1}^{\prime} \mathbf{y}, \mathbf{u}^{\prime}\right) \<br>&amp;&#x3D;\mathbf{Q}</em>{1}^{\prime} \mathbf{ZG} \<br>&amp;&#x3D;-\mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{G} \<br>&amp;&#x3D;-\mathbf{C}</em>{12}<br>\end{aligned}<br>$$</p>
+<p>$$<br>\begin{aligned}<br>\operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{\hat{u}^{\prime}-\mathbf{u}^{\prime}}\right)<br>&amp;&#x3D; \operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{\hat{u}^{\prime}}\right) - \operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{u}^{\prime}\right) \<br>&amp;&#x3D;0-\left(-\mathbf{C}<em>{12}\right) \<br>&amp;&#x3D;\mathbf{C}</em>{12}<br>\end{aligned}<br>$$</p>
+<p>$$<br>\begin{aligned}<br>\operatorname{Var}(\hat{\mathbf{u}})<br>&amp;&#x3D; \operatorname{Var}(\mathbf{Q}<em>{2}^{\prime} \mathbf{y})  \<br>&amp;&#x3D;\mathbf{Q}</em>{2}^{\prime}\left(\mathbf{R}+\mathbf{Z G Z}^{\prime}\right) \mathbf{Q}<em>{2} \<br>&amp;&#x3D;\mathbf{Q}</em>{2}^{\prime} \mathbf{R} \mathbf{Q}<em>{2} + (\mathbf{Q}</em>{2}^{\prime} \mathbf{Z}) \mathbf{G} (\mathbf{Q}<em>{2}^{\prime} \mathbf{Z})^{\prime}  \<br>&amp;&#x3D;\mathbf{Q}</em>{2}^{\prime} \mathbf{R} \left( \mathbf{R}^{-1}\mathbf{X} \mathbf{C}<em>{12}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}</em>{22}  \right) + \left( \mathbf{I-C_{22} G^{-1}} \right) \mathbf{G} \left( \mathbf{I- G^{-1} C_{22}} \right)  \</p>
+<p>&amp;&#x3D;\mathbf{Q}<em>{2}^{\prime} \mathbf{X C}</em>{12}+\mathbf{Q}<em>{2}^{\prime} \mathbf{Z C}</em>{22} + \left( \mathbf{G-C_{22} } \right)  \left( \mathbf{I- G^{-1} C_{22}} \right)  \<br>&amp;&#x3D;\mathbf{0}+\left(\mathbf{I}-\mathbf{C}<em>{22} \mathbf{G}^{-1}\right) \mathbf{C}</em>{22}+ \left( \mathbf{G-C_{22} } \right)  \left( \mathbf{I- G^{-1} C_{22}} \right) \<br>&amp;&#x3D;\mathbf{C}<em>{22}-\mathbf{C}</em>{22} \mathbf{G}^{-1}\mathbf{C}<em>{22} + \mathbf{G-C</em>{22} } - \mathbf{C}<em>{22} +\mathbf{C}</em>{22} \mathbf{G}^{-1}\mathbf{C}_{22}\</p>
+<p>&amp;&#x3D;\mathbf{G}-\mathbf{C}_{22}<br>\end{aligned}<br>$$</p>
+<p>$$<br>\begin{aligned}<br>\operatorname{Cov}(\hat{\mathbf{u}}, \mathbf{u})<br>&amp;&#x3D;\operatorname{Cov}( \mathbf{Q}<em>{2}^{\prime} \mathbf{y} , \mathbf{u}) \<br>&amp;&#x3D;\mathbf{Q}</em>{2}^{\prime} \mathbf{Z G} \<br>&amp;&#x3D;\left(\mathbf{I}-\mathbf{C}<em>{22} \mathbf{G}^{-1}\right) \mathbf{G} \<br>&amp;&#x3D;\mathbf{G}-\mathbf{C}</em>{22}<br>\end{aligned}<br>$$</p>
+<p>$$<br>\begin{aligned}<br>\operatorname{Var}(\hat{\mathbf{u}}-\mathbf{u})<br>&amp;&#x3D;\operatorname{Var}(\hat{\mathbf{u}})</p>
+<ul>
+<li>\operatorname{Cov}(\hat{\mathbf{u}}, \mathbf{u})</li>
+<li>\operatorname{Cov}(\mathbf{u}, \hat{\mathbf{u}})</li>
+</ul>
+<ul>
+<li>\operatorname{Var}(\mathbf{u})<br>\<br>&amp;&#x3D;\mathbf{G}-\mathbf{C}<em>{22}-2\left(\mathbf{G}-\mathbf{C}</em>{22}\right)+\mathbf{G} \<br>&amp;&#x3D;\mathbf{C}_{22}<br>\end{aligned}<br>$$</li>
+</ul>
+<p>全部证明完毕。</p>
+<h2 id="简化方程组"><a href="#简化方程组" class="headerlink" title="简化方程组"></a>简化方程组</h2><p>在家畜育种的实际运用中，我们常有<br>$$<br>\operatorname{Var}(\mathbf{e})&#x3D;\mathbf{R}&#x3D;\mathbf{I} \sigma_{e}^{2}, \quad \operatorname{Var}(\mathbf{u})&#x3D;\mathbf{G}&#x3D;\mathbf{A} \sigma_{u}^{2}<br>$$<br>此时，我们可以对混合模型方程组的两侧均消去 $\mathbf{R^{-1}}$ ，得到一个简化版本<br>$$<br>\left[\begin{array}{ll}<br>\mathbf{X}^{\prime} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{Z} \<br>\mathbf{Z}^{\prime} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{Z}+k \mathbf{A}^{-1}<br>\end{array}\right]\left[\begin{array}{l}<br>\boldsymbol{\hat{\beta}} \<br>\mathbf{\hat{u}}<br>\end{array}\right]&#x3D;\left[\begin{array}{c}<br>\mathbf{X^{\prime} y} \<br>\mathbf{Z^{\prime} y}<br>\end{array}\right]<br>$$<br>其中<br>$$<br>k&#x3D;\sigma_{e}^{2} &#x2F; \sigma_{u}^{2}<br>$$</p>
+<h2 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h2><p>混合模型方程组中不涉及 $\mathbf{V}$ 矩阵，在常规评估中， $\mathbf{A^{-1}}$ 计算比 $\mathbf{V^{-1}}$ 容易得多，当然这主要得益于 Henderson 提出了一种不用求逆直接构建  $\mathbf{A^{-1}}$ 的方法。 </p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<li>Henderson，1975，Best Linear Unbiased Estimation and Prediction under a Selection Model</li>
+<li>Henderson，《Applications_of_Linear_Models_in_Animal_Breeding》, 1984</li>
+<li>张沅，张勤，《畜禽育种中的线性模型》</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/ea64e7f3/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            近交系数及A逆的计算
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/c9ff3048/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">混合线性模型二之选择指数法</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

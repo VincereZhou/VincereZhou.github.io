@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    网络版报告五之python包jinja2 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-网络版报告五之python包jinja2"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  网络版报告五之python包jinja2
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/ea2afea8/" class="article-date">
+  <time datetime="2026-06-12T06:23:36.000Z" itemprop="datePublished">2026-06-12</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">4.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">18 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>网络版报告实现动态的关键 - python 包 jinja2 。</p>
+<span id="more"></span>
+
+<h1 id="jinja2"><a href="#jinja2" class="headerlink" title="jinja2"></a>jinja2</h1><p>Jinja2是一个基于Python的模板引擎，用于生成HTML或其他格式的文本文件。它能够让开发者将数据动态插入到静态模板文件中，从而生成动态Web页面。</p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>使用 pip 安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install Jinja2 </span><br></pre></td></tr></table></figure>
+
+<p>或者 conda 安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c conda-forge jinja2</span><br></pre></td></tr></table></figure>
+
+<h1 id="基础用法"><a href="#基础用法" class="headerlink" title="基础用法"></a>基础用法</h1><p><strong>Jinja2 就是一个“填空工具”。</strong></p>
+<p>它允许你在 HTML 里挖坑，然后 Python 往里填土（数据）。</p>
+<p>1️⃣ 准备一个模板（<code>template/template.html</code>）</p>
+<p>注意看 <code> &#123;&#123; project_name &#125;&#125; </code> ，这就是坑。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>&#123;&#123; project_name &#125;&#125;<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>负责人：&#123;&#123; pi_name &#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>2️⃣ 准备 Python 数据（<code>run.py</code>）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, FileSystemLoader</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1) 创建环境，告诉 Jinja2 去哪个文件夹找模板</span></span><br><span class="line">env = Environment(loader=FileSystemLoader(<span class="string">&#x27;template&#x27;</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2) 加载模板</span></span><br><span class="line">template = env.get_template(<span class="string">&#x27;template.html&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3) 准备数据（字典格式）</span></span><br><span class="line">data = &#123;</span><br><span class="line">    <span class="string">&quot;project_name&quot;</span>: <span class="string">&quot;小麦GWAS分析&quot;</span>,</span><br><span class="line">    <span class="string">&quot;pi_name&quot;</span>: <span class="string">&quot;张三&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4) 渲染 → 得到最终 HTML 字符串</span></span><br><span class="line"><span class="comment"># 把 data（字典）里的数据，塞进模板里对应的占位符中，填充完成后，把整份结果作为一个「字符串」交还给你，存进 html_content。</span></span><br><span class="line">html_content = template.render(data)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5) 将最终 HTML 字符串写入文件</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;report.html&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(html_content)</span><br></pre></td></tr></table></figure>
+
+<p>运行 <code>python run.py</code>，生成 <code>report.html</code>：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>小麦GWAS分析<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>负责人：张三<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>✅ <strong>这就是 Jinja2 的全部核心：挖坑 -&gt; 填土。</strong></p>
+<h2 id="过滤器"><a href="#过滤器" class="headerlink" title="过滤器"></a>过滤器</h2><p>过滤器就是<strong>管道处理</strong>：把左边的变量”喂”进去，经过函数处理，吐出一个新值。<strong>不改变原变量，只影响输出。</strong></p>
+<p>语法核心是管道符 <code>|</code>，像 Linux 的管道一样直观：</p>
+<figure class="highlight jinja"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="template-variable">&#123;&#123; 变量 | 过滤器 &#125;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以<strong>链式串联</strong>，上一个的输出变成下一个的输入：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; name | striptags | trim | upper &#125;&#125;</span><br><span class="line"><span class="comment">&lt;!-- 等价于 upper(trim(striptags(name))) --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>常用的字符串过滤器</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; <span class="string">&quot;hello&quot;</span> | upper &#125;&#125;         →  <span class="string">&quot;HELLO&quot;</span></span><br><span class="line">&#123;&#123; <span class="string">&quot;HELLO&quot;</span> | lower &#125;&#125;         →  <span class="string">&quot;hello&quot;</span></span><br><span class="line">&#123;&#123; <span class="string">&quot;hello world&quot;</span> | capitalize &#125;&#125;  →  <span class="string">&quot;Hello world&quot;</span>  （首字母大写，其余小写）</span><br><span class="line">&#123;&#123; <span class="string">&quot;hello world&quot;</span> | title &#125;&#125;    →  <span class="string">&quot;Hello World&quot;</span>     （每个单词首字母大写）</span><br><span class="line">&#123;&#123; <span class="string">&quot;  hi  &quot;</span> | trim &#125;&#125;          →  <span class="string">&quot;hi&quot;</span>              （去首尾空白）</span><br><span class="line">&#123;&#123; <span class="string">&quot;hello&quot;</span> | reverse &#125;&#125;        →  <span class="string">&quot;olleh&quot;</span></span><br><span class="line">&#123;&#123; <span class="string">&quot;hello&quot;</span> | length &#125;&#125;         →  <span class="number">5</span></span><br><span class="line"></span><br><span class="line">&#123;&#123; <span class="string">&quot;a&lt;b&gt;c&quot;</span> | e &#125;&#125;             或  &#123;&#123; <span class="string">&quot;a&lt;b&gt;c&quot;</span> | escape &#125;&#125;  →  转义 HTML 尖括号</span><br><span class="line">&#123;&#123; html_content | safe &#125;&#125;      →  标记为<span class="string">&quot;安全&quot;</span>，不转义（慎用！只用于可信 HTML）</span><br><span class="line">&#123;&#123; <span class="string">&quot;&lt;b&gt;hi&lt;/b&gt;&quot;</span> | striptags &#125;&#125; →  <span class="string">&quot;hi&quot;</span>               （剥掉所有 HTML 标签）</span><br></pre></td></tr></table></figure>
+
+<p>常用的数值过滤器</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; -<span class="number">5</span> | <span class="built_in">abs</span> &#125;&#125;                 →  <span class="number">5</span></span><br><span class="line">&#123;&#123; <span class="string">&quot;42&quot;</span> | <span class="built_in">int</span> &#125;&#125;               →  <span class="number">42</span></span><br><span class="line">&#123;&#123; <span class="string">&quot;3.14&quot;</span> | <span class="built_in">float</span> &#125;&#125;           →  <span class="number">3.14</span></span><br><span class="line">&#123;&#123; <span class="number">3.14159</span> | <span class="built_in">round</span>(<span class="number">2</span>) &#125;&#125;       →  <span class="number">3.14</span></span><br><span class="line">&#123;&#123; <span class="number">3.14159</span> | <span class="built_in">round</span>(<span class="number">2</span>, <span class="string">&#x27;ceil&#x27;</span>) &#125;&#125;  →  <span class="number">3.15</span>  （向上取整）</span><br><span class="line">&#123;&#123; <span class="number">3.14159</span> | <span class="built_in">round</span>(<span class="number">2</span>, <span class="string">&#x27;floor&#x27;</span>) &#125;&#125; →  <span class="number">3.14</span> （向下取整）</span><br></pre></td></tr></table></figure>
+
+<p>也可以用来设定默认值</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; username | default(<span class="string">&#x27;匿名用户&#x27;</span>) &#125;&#125;</span><br><span class="line">&#123;&#123; bio | default(<span class="string">&#x27;这家伙很懒，什么都没写&#x27;</span>, true) &#125;&#125;</span><br><span class="line">&lt;!-- 第二个参数 boolean=true 时，把 <span class="string">&#x27;&#x27;</span> / none / false 也都视为<span class="string">&quot;空&quot;</span>，触发默认值 --&gt;</span><br></pre></td></tr></table></figure>
+
+<p>不过不应该依赖这个过滤器来处理数据，这个只是用来补位。</p>
+<blockquote>
+<p><strong>凡是能在 Python 里干净处理的数据转换，就应该放在 Python 里。</strong></p>
+</blockquote>
+<h2 id="所有变量都会转为字符串"><a href="#所有变量都会转为字符串" class="headerlink" title="所有变量都会转为字符串"></a>所有变量都会转为字符串</h2><p>这里要强调一点，HTML 是一种<strong>标记语言（Markup）</strong>，不是编程语言。你写在 HTML 里的一切——标签名、属性值、文本内容——<strong>本质上都是字符序列</strong>。因此所有准备的python数据在 Jinja2  调用过程中都会把它变成字符串嵌入到 HTML 文本流里（调用 <code>str()</code> 函数）。甚至于逻辑值 True 会转为 “True”。</p>
+<p>举个例子</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">data = &#123;</span><br><span class="line">    <span class="string">&quot;scores&quot;</span>: [<span class="number">98</span>, <span class="number">87</span>, <span class="number">76</span>],</span><br><span class="line">    <span class="string">&quot;info&quot;</span>: &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;小明&quot;</span>, <span class="string">&quot;vip&quot;</span>: <span class="literal">True</span>&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 这里 scores 就是 Python 的 list，info 就是 Python 的 dict --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>第一名：&#123;&#123; data.scores[0] &#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span>          &#123;# 98 → 输出 &quot;98&quot; #&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>名字：&#123;&#123; data.info.name &#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span>             &#123;# &quot;小明&quot; #&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>是否VIP：&#123;&#123; data.info.vip &#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span>          &#123;# True → 输出 &quot;True&quot; #&#125;</span><br><span class="line"></span><br><span class="line">&#123;% for s in data.scores %&#125;</span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>&#123;&#123; s &#125;&#125;<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="变量可以放进属性值中"><a href="#变量可以放进属性值中" class="headerlink" title="变量可以放进属性值中"></a>变量可以放进属性值中</h2><p>Jinja2 变量<strong>不仅能</strong>放进 HTML 文本内容里（文本节点），也完全可以放进<strong>属性值</strong>里，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;p class=&quot;&#123;&#123; cls &#125;&#125;&quot;&gt;&#123;&#123; text &#125;&#125;&lt;/p&gt;</span><br><span class="line"></span><br><span class="line">&lt;input type=&quot;text&quot; value=&quot;&#123;&#123; username &#125;&#125;&quot;&gt;</span><br><span class="line"></span><br><span class="line">&lt;img src=&quot;&#123;&#123; avatar_url &#125;&#125;&quot; alt=&quot;&#123;&#123; alt_text &#125;&#125;&quot;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>渲染时发生在服务器端：Jinja2 先把<code> &#123;&#123; ... &#125;&#125; </code> 替换为字符串值（并做 HTML 转义），<strong>生成一个纯 HTML 文本</strong>发给浏览器。浏览器收到后正常解析标签和属性。</p>
+<h2 id="缺少的变量会在HTML中显示为空字符串"><a href="#缺少的变量会在HTML中显示为空字符串" class="headerlink" title="缺少的变量会在HTML中显示为空字符串"></a>缺少的变量会在HTML中显示为空字符串</h2><p>如果传入的字典数据少了一个或几个 key ，那么在HTML中相应位置会显示为空字符串（<code>&quot;&quot;</code>），并且不会报错。</p>
+<p>为什么会这样？这是因为 Jinja2 的 context 本质上是个查表过程：<code>context[&quot;score&quot;]</code>→ 找不到 → <strong>不抛 KeyError，而是返回一个 Undefined对象</strong>。</p>
+<p>而这个默认的 <code>Undefined</code>类被设计为</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>操作</strong></th>
+<th align="left"><strong>行为</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>str(undefined)</code>&#x2F; <code> &#123;&#123; undefined &#125;&#125; </code>打印输出</td>
+<td align="left">✅ 返回 <strong>空字符串 “”</strong>（静默，不报错）</td>
+</tr>
+<tr>
+<td align="left"><code>not undefined</code></td>
+<td align="left"><code>True</code>（所以 <code> &#123;% if missing % &#125; </code>走进 <code>else</code>分支）</td>
+</tr>
+<tr>
+<td align="left"><code>for x in undefined</code></td>
+<td align="left">可迭代（零次，静默跳过）</td>
+</tr>
+<tr>
+<td align="left"><code>undefined + 1</code>、<code>undefined.some_attr</code>等其它操作</td>
+<td align="left">❌ 抛 <strong>UndefinedError</strong></td>
+</tr>
+</tbody></table>
+<p>也就是说：<strong>只是孤单地<code> &#123;&#123;  score &#125;&#125; </code> 打印它 → 空白；但如果后续代码拿它做别的计算又不防备 → 可能炸。</strong></p>
+<p>下面有三种应对方式：</p>
+<p><strong>方案1</strong>：<code>|default()</code>过滤器（最常用，推荐）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;p&gt;分数：&#123;&#123; score | default(&#x27;未录入&#x27;) &#125;&#125;&lt;/p&gt;</span><br><span class="line">&lt;p&gt;分数：&#123;&#123; score | default(&#x27;&#x27;) &#125;&#125;&lt;/p&gt;   &#123;# 保留原空白行为，但语义更明确 #&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>方案 2</strong>：用 <code>is defined</code>判断 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;% if score is defined %&#125;</span><br><span class="line">  &lt;p&gt;分数：&#123;&#123; score &#125;&#125;&lt;/p&gt;</span><br><span class="line">&#123;% else %&#125;</span><br><span class="line">  &lt;p&gt;分数：未录入&lt;/p&gt;</span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>方案3</strong>：开严格模式（开发阶段强烈建议）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, StrictUndefined</span><br><span class="line"></span><br><span class="line">env = Environment(</span><br><span class="line">    loader=FileSystemLoader(<span class="string">&quot;templates&quot;</span>),</span><br><span class="line">    undefined=StrictUndefined   <span class="comment"># ← 缺变量直接抛 UndefinedError，不让你蒙混过关</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>这样<code> &#123;&#123;  score &#125;&#125; </code> 且 score 不在 data 里 → <strong>立刻报错</strong>，逼你在 Python 侧把数据准备完整：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jinja2.exceptions.UndefinedError: &#x27;score&#x27; is undefined</span><br></pre></td></tr></table></figure>
+
+<p>这在团队协作&#x2F;正式项目里是最安全的做法——<strong>空白往往是 bug 的遮羞布，报错才是早发现早治疗。</strong></p>
+<h1 id="for循环（画表格的神器）"><a href="#for循环（画表格的神器）" class="headerlink" title="for循环（画表格的神器）"></a>for循环（画表格的神器）</h1><p>你的 GWAS 报告里有很多性状，一个个写会累死。用 <code>&#123;% for %&#125;</code>。</p>
+<p>Python 数据</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">data = &#123;</span><br><span class="line">    <span class="string">&quot;traits&quot;</span>: [</span><br><span class="line">        &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;株高&quot;</span>, <span class="string">&quot;snp&quot;</span>: <span class="number">120</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;产量&quot;</span>, <span class="string">&quot;snp&quot;</span>: <span class="number">98</span>&#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里内容部分是一个“字典列表”，可以在<strong>pandas 里把 DataFrame 转成”字典列表”</strong> ，方法是 <code>df1.to_dict(&#39;records&#39;)</code> </p>
+<p>HTML 模板（这里 <code>item.name</code> 是 <code>jinja2</code> 的写法，也可以写成 <code>item[&quot;name&quot;]</code>  ，见下）。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">border</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">th</span>&gt;</span>性状<span class="tag">&lt;/<span class="name">th</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">th</span>&gt;</span>SNP数<span class="tag">&lt;/<span class="name">th</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line">    &#123;% for item in traits %&#125;</span><br><span class="line">    <span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">td</span>&gt;</span>&#123;&#123; item.name &#125;&#125;<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">td</span>&gt;</span>&#123;&#123; item.snp &#125;&#125;<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line">    &#123;% endfor %&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>✅ <strong>渲染结果</strong>：自动生成两行表格。</p>
+<p>这里 for 循环主体里面有 HTML 的标签，如 <code>&lt;tr&gt;</code> 等，看上去有些困惑。其实不用想那么多，所有的for 循环主体中的内容都是jinja2当作字符串处理，具体解释如下。</p>
+<blockquote>
+<p><code>&#123;% for %&#125;</code>不管里面写的是什么——不管是纯文字、<code>&#123;&#123; &#125;&#125;</code>、还是 <code>&lt;tr&gt;&lt;td&gt;</code>这种 HTML 标签源码——它只认一个规则：从 <code>&#123; % for %&#125;</code>到 <code>&#123;% endfor %&#125;</code>之间的一切，都是"模板体"，每次迭代就原样展开一次。</p></blockquote>
+<p><strong>Jinja2 工作在”文本&#x2F;源码”层面</strong>，它根本不关心哪些是 HTML 标签、哪些是内容——它只认三样东西：</p>
+<ul>
+<li><code> &#123; % for ... % &#125; </code> 和<code> &#123; % endfor % &#125; </code>  → 控制结构</li>
+<li><code> &#123;&#123; ... &#125;&#125; </code> → 表达式，求值后替换成文本</li>
+<li>其余所有字符 → <strong>原样保留，原样输出</strong></li>
+</ul>
+<h2 id="df1-to-dict-records"><a href="#df1-to-dict-records" class="headerlink" title="df1.to_dict(&#39;records&#39;)"></a><code>df1.to_dict(&#39;records&#39;)</code></h2><p><strong><code>df1.to_dict(&#39;records&#39;)</code> &#x3D; 把”表格的每一行”变成一个字典，再把所有行拼成一个列表。</strong></p>
+<p>最终结果长这样👇</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  &#123;<span class="string">&#x27;id&#x27;</span>: <span class="number">1</span>, <span class="string">&#x27;name&#x27;</span>: <span class="string">&#x27;小明&#x27;</span>, <span class="string">&#x27;score&#x27;</span>: <span class="number">92</span>&#125;,</span><br><span class="line">  &#123;<span class="string">&#x27;id&#x27;</span>: <span class="number">2</span>, <span class="string">&#x27;name&#x27;</span>: <span class="string">&#x27;小红&#x27;</span>, <span class="string">&#x27;score&#x27;</span>: <span class="number">88</span>&#125;,</span><br><span class="line">  &#123;<span class="string">&#x27;id&#x27;</span>: <span class="number">3</span>, <span class="string">&#x27;name&#x27;</span>: <span class="string">&#x27;小刚&#x27;</span>, <span class="string">&#x27;score&#x27;</span>: <span class="number">105</span>&#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>每一行变成一个字典，键值对是一个字段的名称和值。</p>
+<h3 id="为什么要用-records-这个参数？"><a href="#为什么要用-records-这个参数？" class="headerlink" title="为什么要用 records 这个参数？"></a>为什么要用 <code>records</code> 这个参数？</h3><p>因为 <code>to_dict()</code> 有很多种”形状”，<code>records</code> 只是其中一种。</p>
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>结果长什么样</th>
+<th>适合干嘛</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>df.to_dict(&#39;records&#39;)</code></td>
+<td><strong>[{列:值}, …]</strong></td>
+<td>✅ <strong>最适合 Flask &#x2F; Jinja2 &#x2F; 前端</strong></td>
+</tr>
+<tr>
+<td><code>df.to_dict()</code></td>
+<td><code>&#123;列: &#123;行:值&#125;&#125;</code></td>
+<td>❌ 模板里很难用</td>
+</tr>
+<tr>
+<td><code>df.to_dict(&#39;list&#39;)</code></td>
+<td><code>&#123;列: [值列表]&#125;</code></td>
+<td>❌ 不适合逐行展示</td>
+</tr>
+</tbody></table>
+<p>而在 jinja2 中只能使用  <code>records</code> 模式。</p>
+<h3 id="有缺失值怎么办？"><a href="#有缺失值怎么办？" class="headerlink" title="有缺失值怎么办？"></a>有缺失值怎么办？</h3><p>如果 <code>df1</code> 里有 <strong>NaN（空值）</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&#x27;fenxi&#x27;</span>: nan&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Jinja2 会直接显示成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nan</span><br></pre></td></tr></table></figure>
+
+<p>✅ 推荐你在转之前清理一下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">df1 = df1.fillna(<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">dup_info = df1.to_dict(<span class="string">&#x27;records&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这样模板里就永远是空字符串，而不是 <code>nan</code>。</p>
+<h3 id="数据框内容为空会怎么样？"><a href="#数据框内容为空会怎么样？" class="headerlink" title="数据框内容为空会怎么样？"></a>数据框内容为空会怎么样？</h3><p><code>df1.to_dict(&#39;records&#39;)</code>在空数据框时，会返回一个空列表 <code>[]</code>。包括有列标题但是没有数据，完全没有列的情况均会返回一个空列表。</p>
+<h2 id="两种访问变量属性语法比较"><a href="#两种访问变量属性语法比较" class="headerlink" title="两种访问变量属性语法比较"></a>两种访问变量属性语法比较</h2><h3 id="两种写法的查找顺序"><a href="#两种写法的查找顺序" class="headerlink" title="两种写法的查找顺序"></a>两种写法的查找顺序</h3><p><code>foo.bar</code> 的查找顺序（这里的 <code>bar</code> 只会视为字符串 <code>&quot;bar&quot;</code>）：</p>
+<ol>
+<li>先查 <strong>属性</strong>：<code>getattr(foo, &#39;bar&#39;)</code> → foo 上有没有叫 <code>bar</code> 的属性？</li>
+<li>没有 → 再查 <strong>键</strong>：<code>foo.__getitem__(&#39;bar&#39;)</code> → foo 里有没有键 <code>&#39;bar&#39;</code>？</li>
+<li>还没有 → 返回 <strong>undefined</strong></li>
+</ol>
+<p><code>foo[&#39;bar&#39;]</code> 的查找顺序（顺序相反，加引号<code>&#39;bar&#39;</code>是字符串，不加引号 <code>bar</code>就是变量）：</p>
+<ol>
+<li>先查 <strong>键</strong>：<code>foo.__getitem__(&#39;bar&#39;)</code></li>
+<li>没有 → 再查 <strong>属性</strong>：<code>getattr(foo, &#39;bar&#39;)</code></li>
+<li>还没有 → 返回 <strong>undefined</strong></li>
+</ol>
+<h3 id="两种写法比较和举例"><a href="#两种写法比较和举例" class="headerlink" title="两种写法比较和举例"></a>两种写法比较和举例</h3><table>
+<thead>
+<tr>
+<th align="left"><strong>写法</strong></th>
+<th align="left"><strong>读法</strong></th>
+<th align="left"><strong>适用场景</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><code>s.id</code></strong> &#x2F; <strong><code>s.name</code></strong></td>
+<td align="left">dot notation</td>
+<td align="left">key 是<strong>合法标识符</strong>（字母数字下划线、不以数字开头、无空格），最简洁好看 ✅</td>
+</tr>
+<tr>
+<td align="left"><strong>s[“id”]</strong> &#x2F; <strong>s[“full name”]</strong></td>
+<td align="left">subscript &#x2F; bracket</td>
+<td align="left">key 含<strong>空格、横杠、中文</strong>（虽然中文也能点，但 <code>[]</code>更稳），或 key 是<strong>动态的</strong></td>
+</tr>
+</tbody></table>
+<p>举例如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;% set item = &#123;</span><br><span class="line">  &quot;id&quot;: 1,</span><br><span class="line">  &quot;product name&quot;: &quot;iPhone 16&quot;,   ← 空格！点号搞不定</span><br><span class="line">  &quot;price&quot;: 5999</span><br><span class="line">&#125; %&#125;</span><br><span class="line"></span><br><span class="line">&#123;&#123; item.id &#125;&#125;           ✅ &quot;iPhone 16&quot; 里没空格，可以</span><br><span class="line">&#123;&#123; item.price &#125;&#125;         ✅ 5999</span><br><span class="line">&#123;&#123; item[&quot;product name&quot;] &#125;&#125; ✅ 必须中括号，因为点号认不了空格</span><br><span class="line">&#123;&#123; item.product name &#125;&#125;  ❌ 语法层面就崩了（Jinja2 把 `name` 当独立 token 了）</span><br></pre></td></tr></table></figure>
+
+<p>如果 key 是<strong>动态的</strong>（存在另一个变量里），也必须使用 <code>s[id]</code> 写法（不加引号，表示变量）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;% set key = &quot;price&quot; %&#125;</span><br><span class="line">&#123;&#123; item[key] &#125;&#125;     ✅ 1000 用变量当 key</span><br><span class="line">&#123;&#123; item.key &#125;&#125;      ❌ 这会去找字面量键 &quot;key&quot;，不是 price</span><br></pre></td></tr></table></figure>
+
+<h2 id="for-else-循环"><a href="#for-else-循环" class="headerlink" title="for - else 循环"></a>for - else 循环</h2><p>这里和 python 的 <code>for...else</code> 语句不同，jinja2 中的 <code>else</code> 本身是一个空列表占位器。</p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left"><strong>Python 的 for…else</strong></th>
+<th align="left">**Jinja2 的 <code> &#123; % for % &#125; </code>… <code> &#123; % else % &#125; </code> **</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>else 何时触发</strong></td>
+<td align="left">循环<strong>正常跑完、没碰到 break</strong></td>
+<td align="left">循环<strong>一次都没迭代</strong>（序列空 &#x2F; 过滤后啥也没剩）</td>
+</tr>
+<tr>
+<td align="left"><strong>break 存在吗</strong></td>
+<td align="left">有</td>
+<td align="left">❌ Jinja2 <strong>没有 break &#x2F; continue</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>else 的语义</strong></td>
+<td align="left">“没被打断”</td>
+<td align="left"><strong>“空列表兜底”</strong>（empty fallback）</td>
+</tr>
+</tbody></table>
+<p>基本语法骨架为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;% for item in sequence %&#125;</span><br><span class="line">  ...每次迭代渲染的内容...</span><br><span class="line">&#123;% else %&#125;</span><br><span class="line">  ...序列为空/没迭代任何一项时，才渲染这里...</span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="三种会触发-123-else-125-的情况"><a href="#三种会触发-123-else-125-的情况" class="headerlink" title="三种会触发 &#123; % else % &#125; 的情况"></a>三种会触发<code> &#123; % else % &#125; </code>的情况</h3><p><strong>① 列表本身就是空的</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;% for u in users %&#125;</span><br><span class="line">  &lt;li&gt;&#123;&#123; u.name &#125;&#125;&lt;/li&gt;</span><br><span class="line">&#123;% else %&#125;</span><br><span class="line">  &lt;li&gt;（暂无用户）&lt;/li&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># users = []  →  else 分支渲染</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>② 列表本身不空，但 <code>if</code> 过滤把所有人踢掉了</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;% for u in users if u.score &gt;= 60 %&#125;</span><br><span class="line">  &lt;li&gt;&#123;&#123; u.name &#125;&#125; 及格&lt;/li&gt;</span><br><span class="line">&#123;% else %&#125;</span><br><span class="line">  &lt;li&gt;（全班全挂了，一个及格的都没有）&lt;/li&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设所有人都 score &lt; 60 → 过滤后有效序列长度为 0 → else 触发</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>③ 变量干脆没传 &#x2F; 是 Undefined</strong>（取决于你的 undefined 配置）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;% for u in users %&#125;</span><br><span class="line">  ...</span><br><span class="line">&#123;% else %&#125;</span><br><span class="line">  暂无数据</span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>默认配置下，如果 <code>users</code> 压根没传进 context，Jinja2 会把它当一个 Undefined 对象——<strong>迭代它 &#x3D; 零次</strong>，所以也会掉进 else（或报错，看你开了 <code>StrictUndefined</code> 没）。这也是为什么我之前建议你 Python 侧兜底成 <code>data[&quot;users&quot;] = users or []</code>。</p>
+<h3 id="for-else-示例"><a href="#for-else-示例" class="headerlink" title="for-else 示例"></a>for-else 示例</h3><p>python示例代码如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, FileSystemLoader</span><br><span class="line"></span><br><span class="line">env = Environment(</span><br><span class="line">    loader=FileSystemLoader(<span class="string">&quot;templates&quot;</span>),</span><br><span class="line">    keep_trailing_newline=<span class="literal">True</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">template = env.get_template(<span class="string">&quot;table.html&quot;</span>)</span><br><span class="line"></span><br><span class="line">students = [</span><br><span class="line">    &#123;<span class="string">&quot;id&quot;</span>: <span class="number">1</span>, <span class="string">&quot;name&quot;</span>: <span class="string">&quot;小明&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">92</span>,  <span class="string">&quot;vip&quot;</span>: <span class="literal">True</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;id&quot;</span>: <span class="number">2</span>, <span class="string">&quot;name&quot;</span>: <span class="string">&quot;小红&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">88</span>,  <span class="string">&quot;vip&quot;</span>: <span class="literal">False</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;id&quot;</span>: <span class="number">3</span>, <span class="string">&quot;name&quot;</span>: <span class="string">&quot;小刚&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">105</span>, <span class="string">&quot;vip&quot;</span>: <span class="literal">True</span>&#125;,</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">html = template.render(students=students)</span><br><span class="line"><span class="built_in">print</span>(html)</span><br></pre></td></tr></table></figure>
+
+<p>模板如下（这里的 <code>loop.index</code> 是 <code>for</code> 循环的内部变量，应该是迭代次数，从1开始；但是这里逻辑错了，应该是使用 <code>s.id</code> 才对，这才是第一列）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html lang=&quot;zh-CN&quot;&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">  &lt;meta charset=&quot;UTF-8&quot;&gt;</span><br><span class="line">  &lt;title&gt;成绩表&lt;/title&gt;</span><br><span class="line">  &lt;style&gt;</span><br><span class="line">    table &#123; border-collapse: collapse; width: 420px; &#125;</span><br><span class="line">    th, td &#123; border: 1px solid #ccc; padding: 6px 10px; text-align: left; &#125;</span><br><span class="line">    th &#123; background: #f3f3f3; &#125;</span><br><span class="line">    .vip &#123; color: #d00; font-weight: bold; &#125;</span><br><span class="line">  &lt;/style&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"></span><br><span class="line">&lt;table&gt;</span><br><span class="line">  &lt;thead&gt;</span><br><span class="line">    &lt;tr&gt;</span><br><span class="line">      &lt;th&gt;#&lt;/th&gt;</span><br><span class="line">      &lt;th&gt;姓名&lt;/th&gt;</span><br><span class="line">      &lt;th&gt;分数&lt;/th&gt;</span><br><span class="line">      &lt;th&gt;状态&lt;/th&gt;</span><br><span class="line">    &lt;/tr&gt;</span><br><span class="line">  &lt;/thead&gt;</span><br><span class="line"></span><br><span class="line">  &lt;tbody&gt;</span><br><span class="line">    &#123;% for s in students %&#125;</span><br><span class="line">    &lt;tr&gt;</span><br><span class="line">      &lt;td&gt;&#123;&#123; loop.index &#125;&#125;&lt;/td&gt;                  &lt;!-- 序号（从1开始） --&gt;</span><br><span class="line">      &lt;td&gt;&#123;&#123; s.name &#125;&#125;&lt;/td&gt;</span><br><span class="line">      &lt;td&gt;&#123;&#123; s.score &#125;&#125;&lt;/td&gt;</span><br><span class="line">      &lt;td&gt;</span><br><span class="line">        &#123;% if s.vip %&#125;</span><br><span class="line">          &lt;span class=&quot;vip&quot;&gt;VIP&lt;/span&gt;</span><br><span class="line">        &#123;% else %&#125;</span><br><span class="line">          普通</span><br><span class="line">        &#123;% endif %&#125;</span><br><span class="line">      &lt;/td&gt;</span><br><span class="line">    &lt;/tr&gt;</span><br><span class="line">    &#123;% else %&#125;</span><br><span class="line">    &lt;tr&gt;&lt;td colspan=&quot;4&quot;&gt;暂无数据&lt;/td&gt;&lt;/tr&gt;</span><br><span class="line">    &#123;% endfor %&#125;</span><br><span class="line">  &lt;/tbody&gt;</span><br><span class="line">&lt;/table&gt;</span><br><span class="line"></span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ 注意 <strong>colspan&#x3D;”4”</strong>：因为表头有 4 列，合并占位才不会表格缺格变形。</p>
+</blockquote>
+<h1 id="if-判断（有没有图）"><a href="#if-判断（有没有图）" class="headerlink" title="if 判断（有没有图）"></a>if 判断（有没有图）</h1><p>有时候有图，有时候没图，用 <code> &#123; % if % &#125; </code> 。</p>
+<p>Python 数据</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data = &#123;</span><br><span class="line">    <span class="string">&quot;has_image&quot;</span>: <span class="literal">True</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>HTML 模板</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;% if has_image %&#125;</span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>✅ 图片已生成<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">&#123;% else %&#125;</span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>❌ 没有图片<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><table>
+<thead>
+<tr>
+<th>符号</th>
+<th>叫法</th>
+<th>干啥用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code> &#123;&#123;  &#125;&#125; </code></td>
+<td><strong>变量</strong></td>
+<td>填文字、数字</td>
+</tr>
+<tr>
+<td><code> &#123; %  % &#125; </code></td>
+<td><strong>逻辑</strong></td>
+<td>循环（for）、判断（if）</td>
+</tr>
+<tr>
+<td><code> &#123; # # &#125; </code></td>
+<td><strong>注释</strong></td>
+<td>给自己看的笔记（不会出现在最终的HTML中）</td>
+</tr>
+</tbody></table>
+<h1 id="其他网络版报告的注意事项"><a href="#其他网络版报告的注意事项" class="headerlink" title="其他网络版报告的注意事项"></a>其他网络版报告的注意事项</h1><h2 id="5个特殊字符需要转义"><a href="#5个特殊字符需要转义" class="headerlink" title="5个特殊字符需要转义"></a>5个特殊字符需要转义</h2><table>
+<thead>
+<tr>
+<th align="left">字符</th>
+<th align="left">是否需要转义</th>
+<th align="left">转义后</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>&lt;</code></td>
+<td align="left"><strong>必须</strong>（文本中）</td>
+<td align="left"><code>&amp;lt;</code></td>
+</tr>
+<tr>
+<td align="left"><code>&gt;</code></td>
+<td align="left"><strong>必须</strong>（文本中）</td>
+<td align="left"><code>&amp;gt;</code></td>
+</tr>
+<tr>
+<td align="left"><code>&amp;</code></td>
+<td align="left"><strong>必须</strong></td>
+<td align="left"><code>&amp;amp;</code></td>
+</tr>
+<tr>
+<td align="left"><code>&quot;</code></td>
+<td align="left">仅在双引号属性值内必须转义</td>
+<td align="left"><code>&amp;quot;</code></td>
+</tr>
+<tr>
+<td align="left"><code>&#39;</code></td>
+<td align="left">仅在单引号属性值内必须转义</td>
+<td align="left"><code>&amp;apos;</code> 或 <code>&amp;#39;</code></td>
+</tr>
+<tr>
+<td align="left">其他所有字符（包括汉字、字母、数字、标点、空格、换行、Emoji等）</td>
+<td align="left"><strong>不需要</strong></td>
+<td align="left">直接打</td>
+</tr>
+</tbody></table>
+<p><strong>最佳实践</strong>：始终在文本内容中使用 <code>&lt;</code>、<code>&gt;</code>、<code>&amp;</code> 的转义形式（前2个是元素的构成部分，<code>&amp;</code>是转义的开始字符），而引号只在属性值中注意转义。其他字符放心直接输入。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>1.<a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Structuring_content">https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Structuring_content</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/e0ee8b5b/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">网络版报告四之JavaScript基础</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

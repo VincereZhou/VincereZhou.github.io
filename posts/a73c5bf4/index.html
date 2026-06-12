@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    使用vcftools计算FST |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-使用vcftools计算FST"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  使用vcftools计算FST
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/a73c5bf4/" class="article-date">
+  <time datetime="2025-12-29T07:48:19.000Z" itemprop="datePublished">2025-12-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.7k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">6 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>vcftools可以计算群体间<strong>固定指数（Fst）</strong>， 来筛选和优先处理遗传标记（如SNP）。下面内容主要来自于 deepseek 。</p>
+<span id="more"></span>
+
+<h1 id="理论介绍"><a href="#理论介绍" class="headerlink" title="理论介绍"></a>理论介绍</h1><h2 id="核心方法：Weir和Cockerham的Fst算法"><a href="#核心方法：Weir和Cockerham的Fst算法" class="headerlink" title="核心方法：Weir和Cockerham的Fst算法"></a><strong>核心方法：Weir和Cockerham的Fst算法</strong></h2><ul>
+<li><strong>方法来源</strong>：<br> 由统计遗传学家Bruce Weir和Cockerham于1984年提出的<strong>经典Fst计算方法</strong>，该方法通过方差分析（ANOVA）量化群体间的遗传分化。</li>
+<li>为什么选择它：<ul>
+<li><strong>统计严谨性</strong>：考虑样本量和群体结构</li>
+<li><strong>广泛验证</strong>：适用于多种生物（人类、动植物、微生物）</li>
+</ul>
+</li>
+</ul>
+<h2 id="Fst（固定指数）的本质"><a href="#Fst（固定指数）的本质" class="headerlink" title="Fst（固定指数）的本质"></a><strong>Fst（固定指数）的本质</strong></h2><ul>
+<li><p>定义：衡量不同亚群间遗传变异的差异程度</p>
+<ul>
+<li><strong>低Fst（0-0.05）</strong>：群体间基因流强（如人类非洲群体间的变异）</li>
+<li><strong>高Fst（&gt;0.15）</strong>：强遗传分化（如人类欧洲与东亚群体的差异）</li>
+</ul>
+</li>
+<li><p><strong>计算公式</strong>：$Fst &#x3D; \frac{H_T - H_S}{H_T}$<br> 其中$H_T$&#x3D;总群体杂合度，$H_S$&#x3D;群体内平均杂合度</p>
+<p> 基于 <a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bb0beec0ed63">https://www.jianshu.com/p/bb0beec0ed63</a> ，计算 FST 只需要每个群体的基因频率就能计算（但我看不同网页的计算方法还是有区别，而且貌似这样手动计算的结果和软件结果并不一致）</p>
+<p> 1）找出每个亚群的等位基因频率。</p>
+<p> 2）查找复合群体的平均等位基因频率</p>
+<p> 3）计算每个亚群的杂合度（2pq）</p>
+<p> 4）计算这些亚群杂合度的平均值，这是HS。</p>
+<p> 5）根据总体等位基因频率计算杂合度，这是HT。</p>
+<p> 6）最后，计算FST &#x3D;（HT-HS）&#x2F; HT</p>
+<p> <img src="/1.png"></p>
+<p> 另一个网页 <a target="_blank" rel="noopener" href="https://blog.csdn.net/u014182497/article/details/52672308">https://blog.csdn.net/u014182497/article/details/52672308</a> ，这里计算方式与上面有区别，如下：</p>
+<ul>
+<li>这里.<code>2）查找复合群体的平均等位基因频率</code> 不是使用每个群体的等位基因型的算数平均值，而是就是用这个整个复合群体的等位基因频率（用全部样本算等位基因频率）</li>
+<li>这里<code>4）计算这些亚群杂合度的平均值，这是HS。</code> 不是用的算数平均值，而是加权平均值，分子为每个亚群期望杂合度乘以<strong>亚群样本数目</strong>的求和，分母为整个复合群体的样本数目。</li>
+</ul>
+</li>
+</ul>
+<h2 id="筛选SNP的实际应用"><a href="#筛选SNP的实际应用" class="headerlink" title="筛选SNP的实际应用"></a><strong>筛选SNP的实际应用</strong></h2><table>
+<thead>
+<tr>
+<th><strong>Fst范围</strong></th>
+<th><strong>遗传学意义</strong></th>
+<th><strong>应用场景</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0-0.05</td>
+<td>弱分化</td>
+<td>排除（背景噪音）</td>
+</tr>
+<tr>
+<td>0.05-0.15</td>
+<td>中度分化</td>
+<td>潜在功能位点</td>
+</tr>
+<tr>
+<td><strong>&gt;0.15</strong></td>
+<td><strong>强分化标志</strong></td>
+<td><strong>优先研究</strong></td>
+</tr>
+</tbody></table>
+<p><strong>筛选逻辑</strong>：</p>
+<blockquote>
+<p>“高Fst SNP” → 群体间显著差异 → 可能受自然选择 → 功能重要性验证</p>
+</blockquote>
+<h2 id="实用案例解析"><a href="#实用案例解析" class="headerlink" title="实用案例解析"></a>实用案例解析</h2><p>假设用此方法分析<strong>非洲 vs. 欧洲人群的SNP数据</strong>：</p>
+<ul>
+<li><strong>发现</strong>：位于乳糖酶基因（LCT）的SNP <code>rs4988235</code>的Fst&#x3D;0.32</li>
+<li>解读：<ul>
+<li>高Fst反映欧洲人群乳糖耐受突变的选择压力</li>
+<li>优先对此SNP进行功能研究</li>
+</ul>
+</li>
+</ul>
+<h2 id="与其他方法的比较"><a href="#与其他方法的比较" class="headerlink" title="与其他方法的比较"></a>与其他方法的比较</h2><table>
+<thead>
+<tr>
+<th><strong>方法</strong></th>
+<th><strong>优势</strong></th>
+<th><strong>劣势</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Weir-Fst</td>
+<td>校正样本偏差</td>
+<td>计算速度较慢</td>
+</tr>
+<tr>
+<td>Hudson-Fst</td>
+<td>计算效率高</td>
+<td>忽略群体层次结构</td>
+</tr>
+<tr>
+<td>PCA</td>
+<td>直观可视化群体结构</td>
+<td>难以量化具体位点分化程度</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>结论：Weir-Cockerham方法因其统计严谨性，成为群体遗传学分析的<strong>金标准</strong>。</p>
+</blockquote>
+<p>以下是使用 <strong>vcftools</strong> 计算 <strong>Weir-Cockerham 群体分化指数（Fst）</strong> 的完整流程，结合群体遗传学原理和实操步骤，涵盖数据准备、命令执行、结果解读及可视化方法。内容综合自权威生信教程与文献 。</p>
+<h1 id="实际计算"><a href="#实际计算" class="headerlink" title="实际计算"></a>实际计算</h1><h2 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h2><p>输入文件要求</p>
+<ul>
+<li><p><strong>VCF 文件</strong>：包含所有样本的基因型数据（需经质控过滤，如 MAF &gt; 0.05、缺失率 &lt; 20% 等）。</p>
+</li>
+<li><p>群体分组文件：两个文本文件（如 pop1.txt、pop2.txt），每行一个样本 ID（需与 VCF 中的样本名一致）。</p>
+<p>示例 <code>pop1.txt</code> 内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Sample1</span><br><span class="line">  Sample2</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="Fst-计算命令"><a href="#Fst-计算命令" class="headerlink" title="Fst 计算命令"></a>Fst 计算命令</h2><h3 id="1-单点位点-Fst-计算"><a href="#1-单点位点-Fst-计算" class="headerlink" title="1. 单点位点 Fst 计算"></a>1. <strong>单点位点 Fst 计算</strong></h3><p>逐个位点计算，每个位点的FST是<strong>无偏估计量</strong>，但受抽样误差影响大，易出现负值（理论下限为0，负值需视为0）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vcftools --vcf filtered.vcf \</span><br><span class="line">  --weir-fst-pop pop1.txt \</span><br><span class="line">  --weir-fst-pop pop2.txt \</span><br><span class="line">  --out single_snp_fst</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>输出文件：single_snp_fst.weir.fst</p>
+<ul>
+<li>列说明：<br> <code>CHROM</code> | <code>POS</code> | <code>WEIR_AND_COCKERHAM_FST</code>（Fst 值）</li>
+<li><strong>注意</strong>：单点 Fst 值波动较大，可能包含负值（理论应为 0-1），负值通常视为 0 。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-滑动窗口-Fst-计算（推荐）"><a href="#2-滑动窗口-Fst-计算（推荐）" class="headerlink" title="2. 滑动窗口 Fst 计算（推荐）"></a>2. <strong>滑动窗口 Fst 计算（推荐）</strong></h3><p>将基因组划分为固定长度（如50 kb）或固定SNP数量（如1,000个位点）的窗口，计算窗口内所有SNP FST的加权平均值。</p>
+<p>加权方式：</p>
+<ul>
+<li><strong>等权重</strong>：直接取算术平均</li>
+<li><strong>杂合度权重</strong>：按每个SNP的 $H_T$ 加权，减少低多态性位点的噪声影响。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vcftools --vcf filtered.vcf \</span><br><span class="line">  --weir-fst-pop pop1.txt \</span><br><span class="line">  --weir-fst-pop pop2.txt \</span><br><span class="line">  --fst-window-size 100000 \  # 窗口大小（单位：bp）</span><br><span class="line">  --fst-window-step 50000 \   # 步长（单位：bp）</span><br><span class="line">  --out window_fst</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>输出文件：window_fst.windowed.weir.fst</p>
+<ul>
+<li>列说明：<br> <code>CHROM</code> | <code>BIN_START</code> | <code>BIN_END</code> | <code>N_VARIANTS</code>（窗口内 SNP 数） | <code>WEIGHTED_FST</code>（加权 Fst） | <code>MEAN_FST</code>（平均 Fst）</li>
+</ul>
+</li>
+<li><p>参数建议：</p>
+<ul>
+<li>窗口大小：<strong>50kb–500kb</strong>（依基因组密度调整）</li>
+</ul>
+</li>
+<li><p>步长：一般为窗口大小的 50%（如 100kb 窗口 + 50kb 步长）。</p>
+</li>
+</ul>
+<h3 id="两种方式比较"><a href="#两种方式比较" class="headerlink" title="两种方式比较"></a>两种方式比较</h3><table>
+<thead>
+<tr>
+<th><strong>特性</strong></th>
+<th><strong>单点FST</strong></th>
+<th><strong>滑动窗口FST</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>稳定性</strong></td>
+<td>高方差，易受测序错误或低频等位基因影响</td>
+<td>低方差，通过平均抑制随机噪声</td>
+</tr>
+<tr>
+<td><strong>负值处理</strong></td>
+<td>常见负值（抽样偏差），需手动设为0</td>
+<td>负值被平均抵消，极少出现</td>
+</tr>
+<tr>
+<td><strong>连锁不平衡（LD）</strong></td>
+<td>忽略LD，假设位点独立</td>
+<td>隐含考虑LD，窗口内SNP多为连锁区域</td>
+</tr>
+</tbody></table>
+<p><strong>单点FST</strong>适用场景：</p>
+<ul>
+<li><p>精细定位受选择位点（如因果突变）</p>
+</li>
+<li><p>群体分层校正（如PCA前筛选高分化位点）。</p>
+</li>
+<li><p><strong>局限性</strong>：<br> 单个SNP的FST波动大（例如中性位点偶然偏高），假阳性率高，需结合p值或经验阈值（如top 1%）筛选。</p>
+</li>
+</ul>
+<p><strong>滑动窗口FST</strong>适用场景：</p>
+<ul>
+<li>检测受选择基因组区域（如驯化基因、环境适应区块）</li>
+<li>比较不同亚群的分化模式（如地理隔离 vs. 人工选择）。</li>
+<li>优势：<ul>
+<li><strong>增强信号连续性</strong>：自然选择常作用于基因簇（如MHC区域），窗口FST可捕获局部选择信号。</li>
+<li><strong>支持可视化</strong>：可直接用于曼哈顿图或热图，展示全基因组分化模式。</li>
+</ul>
+</li>
+</ul>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ol>
+<li><p><strong>负值处理</strong>：Weir-Cockerham 方法可能计算负 Fst 值（因样本抽样偏差），通常<strong>取值为 0</strong> 或<strong>过滤负值位点</strong> 。</p>
+</li>
+<li><p>窗口选择：</p>
+<ul>
+<li>窗口过小 → 噪声大；窗口过大 → 掩盖局部选择信号。</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>建议尝试不同窗口参数，结合功能注释验证候选基因 。</li>
+</ul>
+<ol start="3">
+<li><strong>群体结构干扰</strong>：<br> 若群体存在亚结构（如 PCA 显示分层），需先校正群体结构，否则 Fst 可能偏高 。</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" rel="tag">数据分析</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/20a2e4dc/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            软件学习-GCTB
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/dab46aae/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">python进阶-类</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    不满秩的线性回归模型的参数估计 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-不满秩的线性回归模型的参数估计"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  不满秩的线性回归模型的参数估计
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/1c2f25ac/" class="article-date">
+  <time datetime="2022-06-03T08:52:59.000Z" itemprop="datePublished">2022-06-03</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/">理论学习</a> / <a class="article-category-link" href="/categories/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">9.8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">47 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>上一篇<a href="https://vincere.fun/posts/55264e6f/">矩阵微分与正规方程组推导</a>，我推导了线性回归模型中的正规方程组，以及当矩阵 $\mathbf{X}$ 满秩时的最小二乘估计值，现在我们考虑当 $\mathbf{X}$ 不满秩时的情况。</p>
+<p>本章节内容主要来自于 《linear models in statistics》第二版的第十二章 <em>Analysis-of-Variance Models</em> 。</p>
+<span id="more"></span>
+
+<h1 id="含有均值列的线性模型系数矩阵一定不满秩"><a href="#含有均值列的线性模型系数矩阵一定不满秩" class="headerlink" title="含有均值列的线性模型系数矩阵一定不满秩"></a>含有均值列的线性模型系数矩阵一定不满秩</h1><p>一般我们设计的模型中均包含均值列，即全为1的列，而对于任何一个固定效应，每个个体只在一个水平为1，其余水平为0，因此将任何一个固定效应的所有水平的列加在一起，就等于均值列，因此设计矩阵的列之间存在线性相关，设计矩阵一定不满秩，最小二乘解不唯一，不是所有固定效应的水平均可估计。</p>
+<p>所以如果模型中包含均值列，那么是<strong>一定</strong>不满秩，而不是可能不满秩。</p>
+<h1 id="不满秩的模型"><a href="#不满秩的模型" class="headerlink" title="不满秩的模型"></a>不满秩的模型</h1><p>首先我们看单变量的模型的例子，假设是平衡数据（各个水平的观测值相同）。</p>
+<h2 id="单变量模型"><a href="#单变量模型" class="headerlink" title="单变量模型"></a>单变量模型</h2><p>假设研究人员开发了两种用于增加汽油日程的化学添加剂，假设不添加任何添加剂的情况下，一加仑的汽油平均可以跑 $\mu$ 英里。那么假设我们添加化学物质 1，我们期望一加仑汽油的里程数增加 $\tau_{1}$ 英里；而添加化学物质 2，一加仑汽油的里程数增加 $\tau_{1}$ 英里。</p>
+<p>因此，这个模型可以表示为<br>$$<br>y_{1}&#x3D;\mu+\tau_{1}+\varepsilon_{1}, \quad y_{2}&#x3D;\mu+\tau_{2}+\varepsilon_{2}<br>$$<br>其中 $y_1$ 是添加化学物质 1 的日程数， $y_2$ 是添加化学物质 2 的日程数。我们想要估计参数 $\mu, \tau_{1}$ 和  $\tau_{2}$ ，并且做假设检验，例如 $H_{0}: \tau_{1}&#x3D;\tau_{2}$ 。</p>
+<p>假设我们做了6次实验，其中每个化学物质做了3次，用矩阵形式表示为<br>$$<br>\left(\begin{array}{l}<br>y_{11} \<br>y_{12} \<br>y_{13} \<br>y_{21} \<br>y_{22} \<br>y_{23}<br>\end{array}\right)&#x3D;\left(\begin{array}{lll}<br>1 &amp; 1 &amp; 0 \<br>1 &amp; 1 &amp; 0 \<br>1 &amp; 1 &amp; 0 \<br>1 &amp; 0 &amp; 1 \<br>1 &amp; 0 &amp; 1 \<br>1 &amp; 0 &amp; 1<br>\end{array}\right)\left(\begin{array}{l}<br>\mu \<br>\tau_{1} \<br>\tau_{2}<br>\end{array}\right)+\left(\begin{array}{l}<br>\varepsilon_{11} \<br>\varepsilon_{12} \<br>\varepsilon_{13} \<br>\varepsilon_{21} \<br>\varepsilon_{22} \<br>\varepsilon_{23}<br>\end{array}\right)<br>$$<br>或者<br>$$<br>\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}<br>$$<br>其中 $\mathbf{X}$ 是一个 $6 \times 3$ 的矩阵，秩为2 ，因为第一列等于第二列和第三列的和。此时我们无法得到估计值 $\hat{\boldsymbol{\beta}}&#x3D;\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{y}$ ，因为 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1}$ 不存在。</p>
+<p>这里我们考虑这些参数的含义。参数 $\mu$ 表示不添加任何化学物质的均值，$\tau_{1}$ 和 $\tau_{2}$ 表示两个化学物质的增加量。举个例子，假设 $\mu&#x3D;15, \tau_{1}&#x3D;1$,  $\tau_{2}&#x3D;3$ ，那么模型为<br>$$<br>\begin{array}{ll}<br>y_{1 j}&#x3D;15+1+\varepsilon_{1 j}&#x3D;16+\varepsilon_{1 j}, &amp; j&#x3D;1,2,3, \<br>y_{2 j}&#x3D;15+3+\varepsilon_{2 j}&#x3D;18+\varepsilon_{2 j}, &amp; j&#x3D;1,2,3 .<br>\end{array}<br>$$<br>然而，我们从数据中能得到的是 $y_{1 j}&#x3D;16+\varepsilon_{1 j}$ 和  $y_{2 j}&#x3D;18+\varepsilon_{2 j}$ ，我们无法得到 $\mu&#x3D;15, \tau_{1}&#x3D;1$ 和  $\tau_{2}&#x3D;3$  ，因为很多模型都可以得到这两个式子，比如<br>$$<br>\begin{array}{ll}<br>y_{1 j}&#x3D;10+6+\varepsilon_{1 j}, &amp; j&#x3D;1,2,3, \<br>y_{2 j}&#x3D;10+8+\varepsilon_{2 j}, &amp; j&#x3D;1,2,3,<br>\end{array}<br>$$<br>又比如，<br>$$<br>\begin{array}{ll}<br>y_{1 j}&#x3D;25-9+\varepsilon_{1 j}, &amp; j&#x3D;1,2,3 \<br>y_{2 j}&#x3D;25-7+\varepsilon_{2 j}, &amp; j&#x3D;1,2,3<br>\end{array}<br>$$<br>我们有无穷的参数组合可以实现这一点。也就是说，我们无法得到唯一的 $\mu, \tau_{1}$ 和  $\tau_{2}$ ，此时我们称这个模型为 <strong>过度参数化的</strong> (<em>overparameterized</em>) 。在平衡数据中，你增加数据量无助于这一点，因为不会改变 $\mathbf{X}$ 的秩。 </p>
+<p>我们很多种方法可以解决这一点，来获得唯一的估计值，但是这些方法各有利弊。第一种，重新定义一个模型，减少参数的数目，使得参数估计值唯一；第二种，模型不变，但是对参数增加<strong>约束条件</strong>，使得参数估计值唯一；第三种，模型不变，估计某个唯一的<strong>参数的线性组合</strong>。下面我们来简单地介绍这三种方法。</p>
+<p><strong>第一种方法</strong>：为了减少参数数量，考虑到下面两个式子成立<br>$$<br>y_{1 j}&#x3D;16+\varepsilon_{1 j} \quad \text { and } \quad y_{2 j}&#x3D;18+\varepsilon_{2 j}<br>$$<br>这里，16 和 18 是添加两种化学物质之后的均值，我们可以将其标记为 $\mu_{1}$ 和  $\mu_{2}$ ，我们可以将模型修改为<br>$$<br>y_{1 j}&#x3D;\mu_{1}+\varepsilon_{1 j} \quad \text { and } \quad y_{2 j}&#x3D;\mu_{2}+\varepsilon_{2 j} .<br>$$<br>此时我们要估计的参数就是  $\mu_{1}$ 和  $\mu_{2}$ ，观测值的矩阵表示式为<br>$$<br>\left(\begin{array}{l}<br>y_{11} \<br>y_{12} \<br>y_{13} \<br>y_{21} \<br>y_{22} \<br>y_{23}<br>\end{array}\right)&#x3D;\left(\begin{array}{ll}<br>1 &amp; 0 \<br>1 &amp; 0 \<br>1 &amp; 0 \<br>0 &amp; 1 \<br>0 &amp; 1 \<br>0 &amp; 1<br>\end{array}\right)\left(\begin{array}{l}<br>\mu_{1} \<br>\mu_{2}<br>\end{array}\right)+\left(\begin{array}{l}<br>\varepsilon_{11} \<br>\varepsilon_{12} \<br>\varepsilon_{13} \<br>\varepsilon_{21} \<br>\varepsilon_{22} \<br>\varepsilon_{23}<br>\end{array}\right),<br>$$<br>这可以写作<br>$$<br>\mathbf{y}&#x3D;\mathbf{W} \boldsymbol{\mu}+\boldsymbol{\varepsilon}<br>$$<br>其中矩阵 $\mathbf{W}$ 是一个满秩矩阵，因此我们可以得到唯一的参数估计值为<br>$$<br>\hat{\boldsymbol{\mu}}&#x3D;\left(\begin{array}{l}<br>\hat{\mu}<em>{1} \<br>\hat{\mu}</em>{2}<br>\end{array}\right)&#x3D;\left(\mathbf{W}^{\prime} \mathbf{W}\right)^{-1} \mathbf{W}^{\prime} \mathbf{y}<br>$$<br>这种解决方法也称为 <strong>再参数化</strong> (<em>reparameterization</em>)</p>
+<p><strong>第二种方法</strong>：我们需要添加一个约束条件，我们定义加了约束条件的参数为 $\mu^{<em>}, \tau_{1}^{</em>}$ 和 $\tau_{2}^{<em>}$，约束条件为  $\tau_{1}^{</em>}+\tau_{2}^{<em>}&#x3D;0$ 。此时定义的 $\mu^{</em>}$ 有一个特殊含义， 表示采用处理后的新的均值，而 $\tau_{1}^{<em>}$ 和 $\tau_{2}^{</em>}$ 表示对这个均值的偏差。采用这个限制条件，上面的例子可以<strong>唯一</strong>的表示为<br>$$<br>y_{1 j}&#x3D;17-1+\varepsilon_{1 j}, \quad y_{2 j}&#x3D;17+1+\varepsilon_{2 j} .<br>$$<br>这种约束条件通常称为 <strong>附加条件</strong> (<em>side conditions</em>) ，我们可以将上面的模型用 $\tau_{2}^{<em>}&#x3D;-\tau_{1}^{</em>}$ 表示为</p>
+<p>$y_{1 j}&#x3D;\mu^{<em>}+\tau_{1}^{</em>}+\varepsilon_{1 j}$ 和 $y_{2 j}&#x3D;\mu^{<em>}-\tau_{1}^{</em>}+\varepsilon_{i j}$ ，观测值向量可以表示为<br>$$<br>\left(\begin{array}{l}<br>y_{11} \<br>y_{12} \<br>y_{13} \<br>y_{21} \<br>y_{22} \<br>y_{23}<br>\end{array}\right)&#x3D;\left(\begin{array}{rr}<br>1 &amp; 1 \<br>1 &amp; 1 \<br>1 &amp; 1 \<br>1 &amp; -1 \<br>1 &amp; -1 \<br>1 &amp; -1<br>\end{array}\right)\left(\begin{array}{c}<br>\mu^{<em>} \<br>\tau_{1}^{</em>}<br>\end{array}\right)+\left(\begin{array}{l}<br>\varepsilon_{11} \<br>\varepsilon_{12} \<br>\varepsilon_{13} \<br>\varepsilon_{21} \<br>\varepsilon_{22} \<br>\varepsilon_{23}<br>\end{array}\right)<br>$$<br>或者<br>$$<br>\mathbf{y}&#x3D;\mathbf{X}^{<em>} \boldsymbol{\mu}^{</em>}+\boldsymbol{\varepsilon}<br>$$<br>这里 $\mathbf{X}^{*}$ 是一个满秩矩阵，因此可以得到唯一的一个参数估计值。但是需要注意，添加的约束条件相当于对参数做了一个新的定义。</p>
+<p><strong>第三种方法</strong>：我们从之前的结果可以看到，一些参数的线性组合的值是唯一的。比如 $\tau_{1}-\tau_{2}&#x3D;-2, \quad \mu+\tau_{1}&#x3D;16$  和 $\mu+\tau_{2}&#x3D;18$ 对于所有可能的参数的值均成立，因为我们可以估计这种唯一的线性组合的值。</p>
+<h2 id="双变量模型"><a href="#双变量模型" class="headerlink" title="双变量模型"></a>双变量模型</h2><p>和单变量相比无新增内容，略</p>
+<h1 id="估计参数"><a href="#估计参数" class="headerlink" title="估计参数"></a>估计参数</h1><p>在这一章节中，我们考虑不满秩的模型 $\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}$ 的参数 $\boldsymbol{\beta}$ 的估计。这里我们采用再参数化或者添加约束条件，这里也不假设正态分布。</p>
+<h2 id="估计-boldsymbol-beta"><a href="#估计-boldsymbol-beta" class="headerlink" title="估计  $\boldsymbol{\beta}$"></a>估计  $\boldsymbol{\beta}$</h2><p>我们将其一般化，考虑固定模型<br>$$<br>\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon},<br>$$<br>根据最小二乘，存在正规方程组<br>$$<br>\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}<br>$$<br>这里 $\mathbf{X}$ 是一个 $n \times p$ 且秩为 $k &lt; p \leq n$ 的矩阵，即不满秩，因此 $\mathbf{X}^{\prime} \mathbf{X}$ 无逆矩阵，正规方程组无唯一解。但是，我们可以证明 $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ 有解（无穷多解）。</p>
+<p>根据广义逆的性质，对于线性方程组 $\mathbf{Ax &#x3D;c }$ ，当且仅当对于任意一个 $\mathbf{A}^{-}$ ， $\mathbf{A A}^{-} \mathbf{c}&#x3D;\mathbf{c}$  均成立时，方程组才相容。因此我们只需要证明  $\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{y}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ ，这里 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$ 是任意一个广义逆，根据广义逆性质我们知道 $\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}&#x3D;\mathbf{X}^{\prime}$ ，因此该式子成立，正规方程组相容。</p>
+<p>既然正规方程组相容，那么它的一个解可以用广义逆表示为<br>$$<br>\hat{\boldsymbol{\beta}}&#x3D;\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{y}<br>$$<br>这里 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$ 是  $\mathbf{X}^{\prime} \mathbf{X}$ 的任意一个广义逆。此时 $\hat{\boldsymbol{\beta}}$ 的期望值为<br>$$<br>\begin{aligned}<br>E(\hat{\boldsymbol{\beta}}) &amp;&#x3D;\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} E(\mathbf{y}) \<br>&amp;&#x3D;\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta} .<br>\end{aligned}<br>$$<br>因为 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X} \neq \mathbf{I}$ ，因此  $\hat{\boldsymbol{\beta}}$ 是 $\boldsymbol{\beta}$ 的一个<strong>有偏估计值</strong>。并且 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}$ 会随着  $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$  的选择而发生改变，也就是说，每一个选中的 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$ 的 $E(\hat{\boldsymbol{\beta}})$ 均不相同。</p>
+<p>我们可以进一步证明，此时所有的 $\mathbf{y}$ 的线性组合均不是  $\boldsymbol{\beta}$ 的无偏估计值。假设我们存在一个 $p \times n$ 的矩阵 $\mathbf{A}$ 使得 $E(\mathbf{A y})&#x3D;\boldsymbol{\beta}$ ，那么<br>$$<br>\boldsymbol{\beta}&#x3D;E(\mathbf{A y})&#x3D;E[\mathbf{A}(\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon})]&#x3D;E(\mathbf{A} \mathbf{X} \boldsymbol{\beta})+\mathbf{A} E(\boldsymbol{\varepsilon})&#x3D;\mathbf{A} \mathbf{X} \boldsymbol{\beta}<br>$$<br>该式对所有可能的 $\boldsymbol{\beta}$ 均成立，因此我们有 $\mathbf{A X}&#x3D;\mathbf{I}<em>{p}$ 。但是我们知道 $\operatorname{rank}( \mathbf{A} \mathbf{X}) \leq \operatorname{rank}(\mathbf{X}) &#x3D; k &lt; p$ ，而 $\operatorname{rank}( \mathbf{I}</em>{p} ) &#x3D; p$ ，因此 $\mathbf{A X}$ 不可能等于 $\mathbf{I}_{p}$ ，因此我们证明没有一个  $\mathbf{y}$ 的线性组合是  $\boldsymbol{\beta}$ 的无偏估计值 ，得证。</p>
+<h2 id="估计-boldsymbol-beta-的函数"><a href="#估计-boldsymbol-beta-的函数" class="headerlink" title="估计  $\boldsymbol{\beta}$ 的函数"></a>估计  $\boldsymbol{\beta}$ 的函数</h2><p>上面我们证明了我们无法估计 $\boldsymbol{\beta}$ ，那么我们能不能估计任何一个  $\boldsymbol{\beta}$ 的线性组合呢？也就是说，估计  $ \boldsymbol{\lambda^{\prime} \boldsymbol{\beta}}$ 。</p>
+<p>如果存在一个观测值 $\mathbf{y}$ 的线性组合的期望等于  $ \boldsymbol{\lambda^{\prime} \boldsymbol{\beta}}$ ，我们就称这个参数的线性组合  $ \boldsymbol{\lambda^{\prime} \boldsymbol{\beta}}$ 是<strong>可估计的</strong> (<em>estimable</em>) ，也就是说，存在一个向量 $\mathbf{a}$ ，使得下式成立<br>$$<br>E\left(\mathbf{a}^{\prime} \mathbf{y}\right)&#x3D;\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}<br>$$<br>在下面的定理中，我们用三种方法来确定是否一个线性函数  $ \boldsymbol{\lambda^{\prime} \boldsymbol{\beta}}$  是可以估计的。</p>
+<p><strong>定理</strong>：在模型  $\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}$ 中，其中 $E(\mathbf{y})&#x3D;\mathbf{X} \boldsymbol{\beta}$ ，$\mathbf{X}$ 是一个 $n \times p$ 的秩为 $k &lt; p \leq n $ 的矩阵。那么当且仅当下面任何一个等式条件成立时，线性函数 $\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$ 可估计。</p>
+<p>(1) $\boldsymbol{\lambda}^{\prime}$ 是 $\mathbf{X}$ 的行的线性组合，也就是说存在一个向量 $\mathbf{a}$ 使得下式成立<br>$$<br>\mathbf{X}^{\prime} \mathbf{a} &#x3D;\boldsymbol{\lambda} \Rightarrow \mathbf{a}^{\prime} \mathbf{X}&#x3D;\boldsymbol{\lambda}^{\prime}<br>$$<br>(2)  $\boldsymbol{\lambda}^{\prime}$ 是 $\mathbf{X}^{\prime} \mathbf{X}$ 的行的线性组合，或者 $\boldsymbol{\lambda}$  是 $\mathbf{X}^{\prime} \mathbf{X}$ 的列的线性组合，也就是说，存在一个向量 $\mathbf{r}$ 使得<br>$$<br>\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X}&#x3D;\boldsymbol{\lambda}^{\prime} \quad \text { or } \quad \mathbf{X}^{\prime} \mathbf{X} \mathbf{r}&#x3D;\boldsymbol{\lambda}<br>$$<br>(3) $\boldsymbol{\lambda}$ 或者 $\boldsymbol{\lambda}^{\prime}$ 满足下式<br>$$<br>\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda}&#x3D;\boldsymbol{\lambda} \quad \text { or } \quad \boldsymbol{\lambda}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X}&#x3D;\boldsymbol{\lambda}^{\prime}<br>$$<br>其中 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$ 是  $\mathbf{X}^{\prime} \mathbf{X}$  的任何一个（对称的）广义逆。</p>
+<p><strong>证明</strong>：对于 (1) ，我们同时证明 “if” 和 “only if” ；对于 (2) 和 (3) ，这里只证明了  “if” 部分。</p>
+<p>(1) 如果存在一个向量 $\mathbf{a}$ 使得 $\boldsymbol{\lambda}^{\prime}&#x3D;\mathbf{a}^{\prime} \mathbf{X}$ ，那么我没有<br>$$<br>E\left(\mathbf{a}^{\prime} \mathbf{y}\right)&#x3D;\mathbf{a}^{\prime} E(\mathbf{y})&#x3D;\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta}&#x3D;\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}<br>$$<br>反过来，如果 $\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$ 可估计，那么存在一个向量 $\mathbf{a}$ 使得 $E\left(\mathbf{a}^{\prime} \mathbf{y}\right)&#x3D;\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$ ，因此 $\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta}&#x3D;\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$ 对于所有可能的 $\boldsymbol{\beta}$ 均成立，因此 $\mathbf{a}^{\prime} \mathbf{X}&#x3D;\boldsymbol{\lambda}^{\prime} $</p>
+<p>(2) 如果 $\mathbf{X}^{\prime} \mathbf{X} \mathbf{r}&#x3D;\boldsymbol{\lambda}$ ，通过定义 $\mathbf{a}&#x3D;\mathbf{X r}$ ，我们得到<br>$$<br>\begin{aligned}<br>E\left(\mathbf{a}^{\prime} \mathbf{y}\right) &amp;&#x3D;E\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}\right)&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} E(\mathbf{y}) \<br>&amp;&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}&#x3D;\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}<br>\end{aligned}<br>$$<br>(3) 如果 $\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda}&#x3D;\boldsymbol{\lambda}$ ，那么 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda}$ 就是上面 $\mathbf{X}^{\prime} \mathbf{X r}&#x3D;\boldsymbol{\lambda}$ 的一个解。</p>
+<p>根据这个定理第一条等式，我们知道对于 $i&#x3D;1,2, \ldots, n$，$\mathbf{x}<em>{i}^{\prime} \boldsymbol{\beta}$ 均可估计，其中 $\mathbf{x}</em>{i}^{\prime}$ 是矩阵 $\mathbf{X}$ 的第 $i$ 行。因此 $\mathbf{X} \boldsymbol{\beta}$ 的每一行 (元素) 均是可估计的，我们可以说  $\mathbf{X} \boldsymbol{\beta}$ 本身是可以估计的。同样地，根据第二条等式，我们得到 $\mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}$ 的每一行 (元素) 均是可估计的，因此 $\mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}$ 也是可估计的。反过来说，所有的可估计函数都可以从 $\mathbf{X} \boldsymbol{\beta}$ 或 $\mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}$ 中得到。</p>
+<p>如果系数向量 $\boldsymbol{\lambda}<em>{1}, \boldsymbol{\lambda}</em>{2}, \ldots, \boldsymbol{\lambda}<em>{m}$ 之间线性无关，那么这些线性函数 $\boldsymbol{\lambda}</em>{1}^{\prime} \boldsymbol{\beta}, \boldsymbol{\lambda}<em>{2}^{\prime} \boldsymbol{\beta}, \ldots, \boldsymbol{\lambda}</em>{m}^{\prime} \boldsymbol{\beta}$ 称为线性无关的。下面的定理给出了线性无关的可估计函数的数目。</p>
+<p><strong>定理</strong>：在不满秩的模型 $\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}$ 中，线性无关的可估计函数的数目等于 $\mathbf{X}$ 的秩。</p>
+<p>缺证明，见 Graybill (1976, pp. 485 – 486)</p>
+<h1 id="估计值"><a href="#估计值" class="headerlink" title="估计值"></a>估计值</h1><h2 id="boldsymbol-lambda-prime-boldsymbol-beta-的估计值"><a href="#boldsymbol-lambda-prime-boldsymbol-beta-的估计值" class="headerlink" title="$ \boldsymbol{\lambda^{\prime} \boldsymbol{\beta}}$ 的估计值"></a>$ \boldsymbol{\lambda^{\prime} \boldsymbol{\beta}}$ 的估计值</h2><p>根据上面的定理第一条和第二条，我们有 $\lambda^{\prime} \boldsymbol{\beta}$ 的估计值 $\mathbf{a}^{\prime} \mathbf{y}$ 和 $\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ ，其中 $\mathbf{a}^{\prime}$ 和 $\mathbf{r}^{\prime}$ 满足 $\boldsymbol{\lambda}^{\prime}&#x3D;\mathbf{a}^{\prime} \mathbf{X}$ 和 $\boldsymbol{\lambda}^{\prime}&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X}$ 。 $\lambda^{\prime} \boldsymbol{\beta}$ 第三个估计值就是 $\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}$ ，其中$\hat{\boldsymbol{\beta}}$ 是 $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ 的任意一个解。在下面的定理，我们讨论 $\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ 和 $\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}$ 的一些性质，我们不会讨论 $\mathbf{a}^{\prime} \mathbf{y}$ 的性质，因为这个式子不能保证有最小方差（个人理解 $\mathbf{a}^{\prime} \mathbf{y}$ 中的 $\mathbf{a}^{\prime}$ 是不唯一的，因此 $\mathbf{a}^{\prime} \mathbf{y}$ 不一定满足最小方差）。</p>
+<p><strong>定理</strong>：如果 $ \boldsymbol{\lambda^{\prime} \boldsymbol{\beta}}$ 是不满秩模型的一个可估计函数，设 $\hat{\boldsymbol{\beta}}$ 是正规方程组 $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ 的任意一个解，$\mathbf{r}$ 是 $\mathbf{X}^{\prime} \mathbf{X} \mathbf{r}&#x3D;\boldsymbol{\lambda}$ 的任意一个解。那么两个估计值 $\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}$ 和 $\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ 有下面的性质：</p>
+<ol>
+<li>$E\left(\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}\right)&#x3D;E\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}\right)&#x3D;\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$</li>
+<li>对于任意一个 $\hat{\boldsymbol{\beta}}$ 或 $\mathbf{r}$  ，$\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}} &#x3D; \mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ </li>
+<li>$\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}$ 和  $\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ 的值不会随着 $\hat{\boldsymbol{\beta}}$ 或 $\mathbf{r}$ 的选择而改变。</li>
+</ol>
+<p>证明：</p>
+<p>(1) 我们有<br>$$<br>E\left(\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}\right)&#x3D;\boldsymbol{\lambda}^{\prime} E(\hat{\boldsymbol{\beta}})&#x3D;\boldsymbol{\lambda}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}<br>$$<br>根据上面的定理的第三条等式，我们有 $\boldsymbol{\lambda}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X}&#x3D;\boldsymbol{\lambda}^{\prime}$ ，因此<br>$$<br>E\left(\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}\right)&#x3D;\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}<br>$$<br>同样地，我们有<br>$$<br>E\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}\right)&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} E(\mathbf{y})&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}&#x3D;\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}<br>$$<br>(2) 对于正规方程组 $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ 乘以 $\mathbf{r}^{\prime}$ 得到<br>$$<br>\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}<br>$$<br>因为  $\boldsymbol{\lambda}^{\prime}&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X}$  ，带入得到<br>$$<br>\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}<br>$$<br>(3) 为了证明 $\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ 与 $\mathbf{r}$ 的选择无关，设 $\mathbf{r}<em>{1}$ 和 $\mathbf{r}</em>{2}$ 满足 $\mathbf{X}^{\prime} \mathbf{X} \mathbf{r}<em>{1}&#x3D;\mathbf{X}^{\prime} \mathbf{X} \mathbf{r}</em>{2}&#x3D;\boldsymbol{\lambda}$ ，那么<br>$$<br>\mathbf{r}<em>{1}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{r}</em>{1}^{\prime} \mathbf{X}^{\prime} \mathbf{y} \quad \text { and } \quad \mathbf{r}<em>{2}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{r}</em>{2}^{\prime} \mathbf{X}^{\prime} \mathbf{y}<br>$$<br>因为 $\mathbf{r}<em>{1}^{\prime} \mathbf{X}^{\prime} \mathbf{X}&#x3D;\mathbf{r}</em>{2}^{\prime} \mathbf{X}^{\prime} \mathbf{X}$ ，因此我们有 $\mathbf{r}<em>{1}^{\prime} \mathbf{X}^{\prime} \mathbf{y}&#x3D;\mathbf{r}</em>{2}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ 。</p>
+<p>同样的，我们可以证明  $\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}$ 的值不会随着  $\hat{\boldsymbol{\beta}}$ 的选择而改变，设  $\hat{\boldsymbol{\beta}<em>{1}}$ 和 $\hat{\boldsymbol{\beta}</em>{2}}$  是正规方程组  $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$  的两个解，那么</p>
+<p>根据上面定理，我们知道存在一个向量 $\mathbf{r}$ ，使得 $\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X}&#x3D;\boldsymbol{\lambda}^{\prime}$ 。 因此<br>$$<br>\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}<em>{1}} &#x3D; \mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}</em>{1}} &#x3D; \mathbf{r}^{\prime}\mathbf{X}^{\prime} \mathbf{y} \<br>\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}<em>{2}} &#x3D; \mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}</em>{2}} &#x3D; \mathbf{r}^{\prime}\mathbf{X}^{\prime} \mathbf{y}<br>$$<br>因此  $\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}<em>{1}}  &#x3D; \boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}</em>{2}}$ 。</p>
+<p> 估计值 $\boldsymbol{\lambda}^{\prime} \boldsymbol{\hat{\beta}}$  或  $\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ 的方差有以下定理。</p>
+<p><strong>定理</strong>：$\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$ 是不满秩模型 $\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}$ 的一个可估计函数，$\operatorname{cov}(\mathbf{y})&#x3D;\sigma^{2} \mathbf{I}$ ，$\mathbf{r}$ 是 $\mathbf{X}^{\prime} \mathbf{X r}&#x3D;\boldsymbol{\lambda}$ 的一个解， $\hat{\boldsymbol{\beta}}$ 是  $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ 的一个解，那么 $\boldsymbol{\lambda}^{\prime} \boldsymbol{\hat{\beta}}$  或  $\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ 的方差有以下性质：</p>
+<p>(1) $\operatorname{var}\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}\right)&#x3D;\sigma^{2} \mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \mathbf{r}&#x3D;\sigma^{2} \mathbf{r}^{\prime} \boldsymbol{\lambda} &#x3D; \sigma^{2} \boldsymbol{\lambda}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda}$<br>(2) $\operatorname{var}\left(\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}\right)&#x3D;\sigma^{2} \boldsymbol{\lambda}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda}$<br>( 3) $\operatorname{var}\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}\right)$ 和 $\operatorname{var}\left(\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}\right)$ 值唯一，也就是说与 $\mathbf{r}$ 或 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$的选择无关，因此 $\operatorname{var}\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}\right) &#x3D; \operatorname{var}\left(\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}\right)$ 。</p>
+<p><strong>证明</strong>：</p>
+<p>(1)<br>$$<br>\begin{aligned}<br>\operatorname{var}\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}\right) &amp;&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} \operatorname{cov}(\mathbf{y}) \mathbf{X r}  \<br>&amp;&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime}\left(\sigma^{2} \mathbf{I}\right) \mathbf{X} \mathbf{r}\<br>&amp;&#x3D;\sigma^{2} \mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \mathbf{r} \<br>&amp;&#x3D;\sigma^{2} \mathbf{r}^{\prime} \boldsymbol{\lambda}<br>\end{aligned}<br>$$<br>(2)<br>$$<br>\begin{aligned}<br>\operatorname{var}\left(\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}\right) &amp;&#x3D;\boldsymbol{\lambda}^{\prime} \operatorname{cov}(\hat{\boldsymbol{\beta}}) \boldsymbol{\lambda} \<br>&amp;&#x3D;\boldsymbol{\lambda}^{\prime} \operatorname{cov}(\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\mathbf{X}^{\prime} \mathbf{y}) \boldsymbol{\lambda} \<br>&amp;&#x3D;\boldsymbol{\lambda}^{\prime} \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\mathbf{X}^{\prime}  \operatorname{cov}(\mathbf{y}) \mathbf{X}  \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda} \<br>&amp;&#x3D;\boldsymbol{\lambda}^{\prime} \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\mathbf{X}^{\prime}  (\sigma^2 \mathbf{I}) \mathbf{X}  \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda} \<br>&amp;&#x3D;\sigma^{2} \boldsymbol{\lambda}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda}<br>\end{aligned}<br>$$<br>根据定理 $\boldsymbol{\lambda}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X}&#x3D;\boldsymbol{\lambda}^{\prime}$，因此<br>$$<br>\operatorname{var}\left(\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}\right)&#x3D;\sigma^{2} \boldsymbol{\lambda}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda}<br>$$<br>(3)  为了 证明 $\mathbf{r}^{\prime} \boldsymbol{\lambda}$ 与 $\mathbf{r}$ 无关，设  $\mathbf{r}<em>{1}$ 和 $\mathbf{r}</em>{2}$ 满足 $\mathbf{X}^{\prime} \mathbf{X r}<em>{1}&#x3D;\boldsymbol{\lambda}$ 和 $\mathbf{X}^{\prime} \mathbf{X} \mathbf{r}</em>{2}&#x3D;\boldsymbol{\lambda}$ 。这两个等式分别乘以 $\mathbf{r}<em>{2}^{\prime}$ 和 $\mathbf{r}</em>{1}^{\prime}$ ，得到<br>$$<br>\mathbf{r}<em>{2}^{\prime} \mathbf{X}^{\prime} \mathbf{X r}</em>{1}&#x3D;\mathbf{r}<em>{2}^{\prime} \boldsymbol{\lambda} \quad \text { and } \quad \mathbf{r}</em>{1}^{\prime} \mathbf{X}^{\prime} \mathbf{X r}<em>{2}&#x3D;\mathbf{r}</em>{1}^{\prime} \boldsymbol{\lambda} .<br>$$<br>这两个式子的左手项互为转置且为标量，因此二者相等，因此右手项也相等，得到<br>$$<br>\mathbf{r}<em>{2}^{\prime} \boldsymbol{\lambda}&#x3D;\mathbf{r}</em>{1}^{\prime} \boldsymbol{\lambda}<br>$$<br>为了证明 $\boldsymbol{\lambda}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda}$ 与 $\mathbf{X}^{\prime} \mathbf{X}^{-}$ 的选择无关，设 $\mathbf{G}<em>{1}$ 和 $\mathbf{G}</em>{2}$ 是 $\mathbf{X}^{\prime} \mathbf{X}$ 的两个广义逆，根据广义逆的性质，无论 $(\mathbf{A}^{\prime} \mathbf{A})^{-}$ 取何值， $\mathbf{A}\left(\mathbf{A}^{\prime} \mathbf{A}\right)^{-} \mathbf{A}^{\prime}$  均保持不变（缺证明）。因此我们得到<br>$$<br>\mathbf{X G}<em>{1} \mathbf{X}^{\prime}&#x3D;\mathbf{X} \mathbf{G}</em>{2} \mathbf{X}^{\prime}<br>$$<br>两边均乘以 $\mathbf{a}$ 使得  $\mathbf{a}^{\prime} \mathbf{X}&#x3D;\boldsymbol{\lambda}^{\prime}$ ，我们得到<br>$$<br>\begin{aligned}<br>\mathbf{a}^{\prime} \mathbf{X G}<em>{1} \mathbf{X}^{\prime} \mathbf{a} &amp;&#x3D;\mathbf{a}^{\prime} \mathbf{X G}</em>{2} \mathbf{X}^{\prime} \mathbf{a}, \<br>\boldsymbol{\lambda}^{\prime} \mathbf{G}<em>{1} \boldsymbol{\lambda} &amp;&#x3D;\boldsymbol{\lambda}^{\prime} \mathbf{G}</em>{2} \boldsymbol{\lambda} .<br>\end{aligned}<br>$$<br>得证。</p>
+<p>两个可估计函数的估计值存在以下定理。</p>
+<p><strong>定理</strong>：如果 $\boldsymbol{\lambda}<em>{1}^{\prime} \boldsymbol{\beta}$ 和 $\boldsymbol{\lambda}</em>{2}^{\prime} \boldsymbol{\beta}$ 是不满秩模型的两个可估计函数，$\operatorname{cov}(\mathbf{y})&#x3D;\sigma^{2} \mathbf{I}$ ，这两个可估计函数的估计值的协方差为<br>$$<br>\operatorname{cov}\left(\boldsymbol{\lambda}<em>{1}^{\prime} \hat{\boldsymbol{\beta}}, \boldsymbol{\lambda}</em>{2}^{\prime} \hat{\boldsymbol{\beta}}\right)&#x3D;\sigma^{2} \mathbf{r}<em>{1}^{\prime} \boldsymbol{\lambda}</em>{2}&#x3D;\sigma^{2} \boldsymbol{\lambda}<em>{1}^{\prime} \mathbf{r}</em>{2}&#x3D;\sigma^{2} \boldsymbol{\lambda}<em>{1}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \boldsymbol{\lambda}</em>{2},<br>$$<br>其中 $\mathbf{X}^{\prime} \mathbf{X} \mathbf{r}<em>{1}&#x3D;\boldsymbol{\lambda}</em>{1}$ 和 $\mathbf{X}^{\prime} \mathbf{X} \mathbf{r}<em>{2}&#x3D;\boldsymbol{\lambda}</em>{2}$ 。缺证明。</p>
+<p><strong>定理</strong>：如果 $\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$ 是不满秩模型的一个可估计函数，$\operatorname{cov}(\mathbf{y})&#x3D;\sigma^{2} \mathbf{I}$ ， 那么估计值 $\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}$ 和 $\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ 是 <strong>BLUE</strong> 值。</p>
+<p>证明：假设 $\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$ 可以表示为 $\mathbf{a}^{\prime} \mathbf{y}$ ，我们表示 $\mathbf{a}^{\prime}&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime}+\mathbf{c}^{\prime}$ (为什么这是一个一般的式子?)，其中 $\mathbf{r}$ 是 $\mathbf{X}^{\prime} \mathbf{X r}&#x3D;\boldsymbol{\lambda}$ 的一个解。为了确保无偏性，我们必须保证<br>$$<br>\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}&#x3D;E\left(\mathbf{a}^{\prime} \mathbf{y}\right)&#x3D;\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta}&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}+\mathbf{c}^{\prime} \mathbf{X} \boldsymbol{\beta}&#x3D;\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X}+\mathbf{c}^{\prime} \mathbf{X}\right) \boldsymbol{\beta}&#x3D;\left(\boldsymbol{\lambda}^{\prime}+\mathbf{c}^{\prime} \mathbf{X}\right) \boldsymbol{\beta}<br>$$<br>该式必须对所有 $\boldsymbol{\beta}$ 均成立，因此我们得到<br>$$<br>\mathbf{c}^{\prime} \mathbf{X}&#x3D;\mathbf{0}^{\prime}<br>$$<br>我们进一步得到<br>$$<br>\begin{aligned}<br>\operatorname{var}\left(\mathbf{a}^{\prime} \mathbf{y}\right) &amp;&#x3D;\mathbf{a}^{\prime} \operatorname{cov}(\mathbf{y}) \mathbf{a}&#x3D;\mathbf{a}^{\prime} \sigma^{2} \mathbf{I} \mathbf{a}&#x3D;\sigma^{2} \mathbf{a}^{\prime} \mathbf{a} \<br>&amp;&#x3D;\sigma^{2}\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime}+\mathbf{c}^{\prime}\right)(\mathbf{X} \mathbf{r}+\mathbf{c}) \<br>&amp;&#x3D;\sigma^{2}\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \mathbf{r}+\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{c}+\mathbf{c}^{\prime} \mathbf{X} \mathbf{r}+\mathbf{c}^{\prime} \mathbf{c}\right) \<br>&amp;&#x3D;\sigma^{2}\left(\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{X} \mathbf{r}+\mathbf{c}^{\prime} \mathbf{c}\right) .<br>\end{aligned}<br>$$<br>因此为了最小化 $\operatorname{var}\left(\mathbf{a}^{\prime} \mathbf{y}\right)$ ，我们只能使得 $\mathbf{c}&#x3D;\mathbf{0}$ ，此时满足 $\mathbf{c}^{\prime} \mathbf{X}&#x3D;\mathbf{0}^{\prime}$ 。因此  $\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$  的 BLUE 值就是 $\mathbf{a}^{\prime} \mathbf{y}&#x3D;\mathbf{r}^{\prime} \mathbf{X}^{\prime} \mathbf{y}$ 。</p>
+<p>这个证明感觉不够好，不够清晰。</p>
+<h2 id="sigma-2-的估计值"><a href="#sigma-2-的估计值" class="headerlink" title="$\sigma^{2}$ 的估计值"></a>$\sigma^{2}$ 的估计值</h2><p>SSE 计算公式为<br>$$<br>\operatorname{SSE}&#x3D;(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}})^{\prime}(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}})<br>$$<br>这里 $\hat{\boldsymbol{\beta}}$ 是 $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ 的任意一个解。SSE 的另外两个表达式为<br>$$<br>\begin{gathered}<br>\mathrm{SSE}&#x3D;\mathbf{y}^{\prime} \mathbf{y}-\hat{\boldsymbol{\beta}}^{\prime} \mathbf{X}^{\prime} \mathbf{y} \<br>\mathrm{SSE}&#x3D;\mathbf{y}^{\prime}\left[\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}\right] \mathbf{y}<br>\end{gathered}<br>$$<br>我们定义 $s^2$ 作为 $\sigma^{2}$ 的估计值，计算公式为<br>$$<br>s^{2}&#x3D;\frac{\mathrm{SSE}}{n-k}<br>$$<br>这里 $n$ 是 $\mathbf{X}$ 矩阵的行数，$k&#x3D;\operatorname{rank}(\mathbf{X})$</p>
+<p>$s^2$ 的两个性质表示为以下定理。</p>
+<p><strong>定理</strong>：在不满秩模型中定义的 $s^2$ ，$\operatorname{cov}(\mathbf{y})&#x3D;\sigma^{2} \mathbf{I}$ ，我们有以下性质：</p>
+<p>(1) $E\left(s^{2}\right)&#x3D;\sigma^{2}$</p>
+<p>(2) $s^2$ 不会随着 $\hat{\boldsymbol{\beta}}$ 或  $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$ 的选择而改变</p>
+<p>证明：</p>
+<p>(1) 根据公式，我们有 $E(\mathrm{SSE})&#x3D;E\left{\mathbf{y}^{\prime}\left[\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}\right] \mathbf{y}\right}$ ，根据二次型的期望计算公式 $E\left(\mathbf{y}^{\prime} \mathbf{A} \mathbf{y}\right)&#x3D;\operatorname{tr}(\mathbf{A} \mathbf{\Sigma})+\boldsymbol{\mu}^{\prime} \mathbf{A} \boldsymbol{\mu} $ ，我们得到<br>$$<br>\begin{aligned}<br>E(\mathrm{SSE})&amp;&#x3D;\operatorname{tr}\left{\left[\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}\right]\left(\sigma^{2} \mathbf{I}\right)\right}+\boldsymbol{\beta}^{\prime} \mathbf{X}^{\prime}\left[\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}\right] \mathbf{X} \boldsymbol{\beta} \<br>&amp;&#x3D;\operatorname{tr}\left{\left[\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}\right]\left(\sigma^{2} \mathbf{I}\right)\right}+\boldsymbol{\beta}^{\prime} \mathbf{X}^{\prime}\mathbf{X} \boldsymbol{\beta} -\boldsymbol{\beta}^{\prime} \mathbf{X}^{\prime}  \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta} \<br>&amp;&#x3D;\operatorname{tr}\left{\left[\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}\right]\left(\sigma^{2} \mathbf{I}\right)\right} \</p>
+<p>&amp;&#x3D;\sigma^{2}\left{\operatorname{tr}(\mathbf{I})-\operatorname{tr}\left[\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\right]\right} \<br>&amp;&#x3D;(n-k) \sigma^{2}</p>
+<p>\end{aligned}<br>$$<br>这里 $k&#x3D;\operatorname{rank}\left(\mathbf{X}^{\prime} \mathbf{X}\right)&#x3D;\operatorname{rank}(\mathbf{X})$ 。</p>
+<p>这里少了一步证明，就是 $\operatorname{tr}\left[\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\right] &#x3D; k$ 的证明，首先根据广义逆的性质，我们有 $\operatorname{rank}\left(\mathbf{A}^{-} \mathbf{A}\right)&#x3D;\operatorname{rank}\left(\mathbf{A} \mathbf{A}^{-}\right)&#x3D;\operatorname{rank}(\mathbf{A})&#x3D;r$ ，因此 $\operatorname{rank}\left[\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\right] &#x3D; k$ 。而 $\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$ 同时是一个幂等矩阵，因此 $\operatorname{tr}\left[\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\right] &#x3D;\operatorname{rank}\left[\mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\right] &#x3D; k$  。</p>
+<p>(2) 因为 $\mathbf{X} \boldsymbol{\beta}$ 可估计，因此 $X \hat{\boldsymbol{\beta}}$ 对于不同的  $\hat{\boldsymbol{\beta}}$  具有不变性，因此 $\mathrm{SSE}&#x3D;(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}})^{\prime}(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}})$ 具有不变性。从另一个公式来说，$\mathrm{SSE}&#x3D;\mathbf{y}^{\prime}\left[\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}\right] \mathbf{y}$ 中的 $\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}$ 也具有不变性，同样可证明 SSE 具有不变性，因此 $s^2$ 具有不变性。</p>
+<h2 id="假设正态分布的模型"><a href="#假设正态分布的模型" class="headerlink" title="假设正态分布的模型"></a>假设正态分布的模型</h2><p>对于不满秩的模型 $\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}$ ，我们现在假设<br>$$<br>\mathbf{y} \text { is } N_{n}\left(\mathbf{X} \boldsymbol{\beta}, \sigma^{2} \mathbf{I}\right) \quad \text { or } \quad \boldsymbol{\varepsilon} \text { is } N_{n}\left(\mathbf{0}, \sigma^{2} \mathbf{I}\right)<br>$$<br>新增了正态分布假设后，我们现在可以计算得到最大似然估计值。</p>
+<p><strong>定理</strong>：如果 $\mathbf{y} \sim  N_{n}\left(\mathbf{X} \boldsymbol{\beta}, \sigma^{2} \mathbf{I}\right)$  ，其中 $\mathbf{X}$ 是一个 $n \times p$ 的秩为 $k &lt; p \leq n$ 的矩阵，那么 $\boldsymbol{\beta}$ 和 $\sigma^{2}$ 的最大似然估计值为<br>$$<br>\begin{gathered}<br>\hat{\boldsymbol{\beta}}&#x3D;\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{y}, \<br>\hat{\sigma}^{2}&#x3D;\frac{1}{n}(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}})^{\prime}(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}}) .<br>\end{gathered}<br>$$<br><strong>证明</strong>：不满秩模型和满秩模型一样，其似然函数和对数似然函数为<br>$$<br>\begin{gathered}<br>L\left(\boldsymbol{\beta}, \sigma^{2}\right)&#x3D;\frac{1}{\left(2 \pi \sigma^{2}\right)^{n &#x2F; 2}} e^{-(\mathbf{y}-\mathbf{X} \boldsymbol{\beta})^{\prime}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}) &#x2F; 2 \sigma^{2}}, \<br>\ln L\left(\boldsymbol{\beta}, \sigma^{2}\right)&#x3D;-\frac{n}{2} \ln (2 \pi)-\frac{n}{2} \ln \sigma^{2}-\frac{1}{2 \sigma^{2}}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta})^{\prime}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}) .<br>\end{gathered}<br>$$<br>求偏导，使之为0，得到（缺证明）<br>$$<br>\begin{gathered}<br>\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}, \<br>\hat{\sigma}^{2}&#x3D;\frac{1}{n}(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}})^{\prime}(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}}),<br>\end{gathered}<br>$$<br>这里 $\hat{\boldsymbol{\beta}} $ 是任意一个解，即<br>$$<br>\hat{\boldsymbol{\beta}}&#x3D;\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{y}<br>$$<br>同样的，这里 $\hat{\boldsymbol{\beta}}$ 与最小二乘估计值一样，但是 $\hat{\sigma}^{2}$ 是<strong>有偏的</strong>。</p>
+<p>下面的定理给出最大似然估计值的一些性质。</p>
+<p><strong>定理</strong>：上面的最大似然估计值有以下性质</p>
+<p>(1) $\hat{\boldsymbol{\beta}}$ is $N_{p}\left[\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}, \sigma^{2}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\right] .$<br>(2) $(n-k) s^{2} &#x2F; \sigma^{2}$ is $\chi^{2}(n-k)$.<br>(3) $\hat{\boldsymbol{\beta}}$ and $s^{2}$ are independent.</p>
+<p>缺证明，证明过程与满秩模型应该差不多。注意到 $\hat{\boldsymbol{\beta}}$ 的均值和协方差矩阵等都受到  $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$ 选择的影响，而 $s^{2}$ 则对于  $\hat{\boldsymbol{\beta}}$  或  $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$  的选择具有不变性。</p>
+<p><strong>定理</strong>：对于正态分布假设下的不满秩模型，如果 $\boldsymbol{\lambda}^{\prime} \boldsymbol{\beta}$ 是一个可估计函数，那么 $\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}$ 在所有的无偏估计值中具有最小的方差（注意，没有线性两个字）。</p>
+<p>如果没有正态假设，那么  $\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}$  仅仅是 <strong>BLUE</strong> , 也就是<strong>线性</strong>无偏估计值中方差最小的。但是满足正态假设后，  $\boldsymbol{\lambda}^{\prime} \hat{\boldsymbol{\beta}}$  是 <strong>BUE</strong> ，是所有无偏估计值中方差最小的 。</p>
+<h1 id="不满秩模型中最小二乘估计值的几何含义"><a href="#不满秩模型中最小二乘估计值的几何含义" class="headerlink" title="不满秩模型中最小二乘估计值的几何含义"></a>不满秩模型中最小二乘估计值的几何含义</h1><p>不满秩模型类似与满秩模型，但是有一些重要的差别。</p>
+<p>我们还是有三个空间，参数空间，数据空间和预测空间。$n \times p$ 的矩阵 $\mathbf{X}$ 可以拆分为<br>$$<br>\mathbf{X}&#x3D;\left(\mathbf{x}<em>{1}, \mathbf{x}</em>{2}, \ldots, \mathbf{x}_{p}\right)<br>$$<br>矩阵 $\mathbf{X}$ 的每一列均是数据空间中的向量，但是由于 $\operatorname{rank}(\mathbf{X})&#x3D;k&lt;p$ ，因此这些列向量之间不是线性独立的，但是预测空间还是由这些列的所有可能的线性组合组成。此时，参数空间的维度是 $p$ ，但是预测空间的维度是 $k &lt; p$ 。因此，矩阵乘积  $\mathbf{X u}$ ，这里 $\mathbf{u}$ 是参数空间的任意一个向量，是一个从参数空间到预测空间的<strong>多对一</strong>的映射（根据矩阵 $\mathbf{X}$ 列向量之间的线性相关的关系，易知存在多个不同的  $\mathbf{u}$ 可以得到相同的乘积）。</p>
+<p>根据模型设定  $\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}$  ，其中 $E(\mathbf{y})&#x3D;\mathbf{X} \boldsymbol{\beta}$ , 根据最小二乘的思想，我们想从预测空间找到一个 $E(\mathbf{y})$ 的估计值  $\hat{\mathbf{y}}$  ，使得其与 $\mathbf{y}$ 的距离最近。这里我们同样需要需要满足  $\hat{\boldsymbol{\varepsilon}}&#x3D;\mathbf{y}-\hat{\mathbf{y}}$ 与预测空间正交，因此同样有 $\mathbf{X}^{\prime} \hat{\boldsymbol{\varepsilon}}&#x3D;\mathbf{0}$ ，得到正规方程组 $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ 。</p>
+<p>然后我们再根据这个  $\hat{\mathbf{y}}$  ，推导 $\boldsymbol{\beta}$ 的估计值。由于这里是<strong>多对一</strong>的映射，因此可以得到   $\hat{\mathbf{y}}$  的  $\hat{\boldsymbol{\beta}}$ 不唯一，求解正规方程组，得到 $\hat{\boldsymbol{\beta}}&#x3D;\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{y}$ ，也就是说我们有无穷多个解。但是<strong>注意 $\hat{\mathbf{y}}&#x3D;\mathbf{X} \hat{\boldsymbol{\beta}}$ 是唯一的</strong>。</p>
+<h1 id="再参数化"><a href="#再参数化" class="headerlink" title="再参数化"></a>再参数化</h1><p> 我们现在来正式地了解一下再参数化的例子。在再参数化中，我们将一个不满秩的模型 $\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}$ ，其中 $\mathbf{X}$ 是一个 $n \times p$ 的秩为 $k &lt; p \leq n$ 的矩阵，转化为一个满秩的模型 $\mathbf{y}&#x3D;\mathbf{Z} \boldsymbol{\gamma}+\boldsymbol{\varepsilon}$ ，其中 $\mathbf{Z}$ 是一个 $n \times k$ 的秩为 $k $ 的矩阵，并且 $\boldsymbol{\gamma}&#x3D;\mathbf{U} \boldsymbol{\beta}$ 是由 $k$ 个<strong>线性独立的</strong> $\boldsymbol{\beta}$ 的可估计函数组成的向量。因此我们可以写作<br>$$<br>\mathbf{Z} \boldsymbol{\gamma}&#x3D;\mathbf{Z} \boldsymbol{U} \boldsymbol{\beta}&#x3D;\mathbf{X} \boldsymbol{\beta}<br>$$<br>这里 $\mathbf{X}&#x3D;\mathbf{Z U}$ ，由于 $\mathbf{U}$ 是一个 $k \times p$ 的秩为 $k$ 的矩阵（秩为 $k$ ，是因为根据要求， $\mathbf{U}$ 的行彼此独立），因此 $\mathbf{U} \mathbf{U}^{\prime}$ 是一个非奇异矩阵，我们可以对 $\mathbf{Z U}&#x3D;\mathbf{X}$ 乘以 $\mathbf{U}^{\prime}$ 来得到 $\mathbf{Z}$ 的表达式<br>$$<br>\begin{aligned}<br>\mathbf{Z} \mathbf{U} \mathbf{U}^{\prime} &amp;&#x3D;\mathbf{X} \mathbf{U}^{\prime} \<br>\mathbf{Z} &amp;&#x3D;\mathbf{X} \mathbf{U}^{\prime}\left(\mathbf{U} \mathbf{U}^{\prime}\right)^{-1} .<br>\end{aligned}<br>$$<br>我们可以证明  $\mathbf{Z}$ 满秩，我们有 $\operatorname{rank}(\mathbf{Z}) \geq \operatorname{rank}(\mathbf{Z} \mathbf{U})&#x3D;\operatorname{rank}(\mathbf{X})&#x3D;k$ ，但是  $\mathbf{Z}$ 的秩最大值为 $k$ ，因此  $\mathbf{Z}$ 的秩为 $k$ 。因此，$\mathbf{y}&#x3D;\mathbf{Z} \boldsymbol{\gamma}+\boldsymbol{\varepsilon}$ 是一个满秩的模型，可以得到唯一的解 $\hat{\gamma}&#x3D;\left(\mathbf{Z}^{\prime} \mathbf{Z}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{y}$ 。</p>
+<p>在再参数化的满秩模型中，$\sigma^{2}$ 的无偏估计值为<br>$$<br>s^{2}&#x3D;\frac{1}{n-k}(\mathbf{y}-\mathbf{Z} \hat{\gamma})^{\prime}(\mathbf{y}-\mathbf{Z} \hat{\gamma})<br>$$<br>因为 $\mathbf{Z} \boldsymbol{\gamma}&#x3D;\mathbf{X} \boldsymbol{\beta}$ ，因此 $\mathbf{Z} \hat{\gamma}$ 和 $\mathbf{X} \hat{\boldsymbol{\beta}}$ 也是相同的，也就是预测值是相同的。<br>$$<br>\mathbf{Z} \hat{\boldsymbol{\gamma}}&#x3D;\mathbf{X} \hat{\boldsymbol{\beta}}<br>$$<br>然后两次计算的 SSE 也是相同的<br>$$<br>(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}})^{\prime}(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}})&#x3D;(\mathbf{y}-\mathbf{Z} \hat{\boldsymbol{\gamma}})^{\prime}(\mathbf{y}-\mathbf{Z} \hat{\boldsymbol{\gamma}})<br>$$</p>
+<h1 id="附加条件"><a href="#附加条件" class="headerlink" title="附加条件"></a>附加条件</h1><p>通过添加<strong>附加条件</strong> (<em>side conditions</em>) 使得参数估计值唯一，此时得到的参数估计值<strong>与某个特定的广义逆参数估计值相同</strong>。</p>
+<p>我们知道 $\mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}$ 可以理解为 $p$ 个可估计函数组成的向量，如果一个附加条件（的左手项）是一个可估计函数，那么这个附加条件（的左手项）可以表示为  $\mathbf{X}^{\prime} \mathbf{X} \boldsymbol{\beta}$ 的行的线性组合，因此无法有助于改善 $\mathbf{X}$ 的秩亏缺的状态，因此正规方程组 $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ 还是没有唯一解 。因此，<strong>附加条件必须是一个不可估计函数</strong>。</p>
+<p>$\mathbf{X}$ 是一个 $n \times p$ 的秩为 $k &lt; p \leq n$ 的矩阵，因此 $\mathbf{X}$ 缺少的秩为 $p-k$ 。为了得到唯一估计值 $\hat{\boldsymbol{\beta}}$ ，我们需要添加附件条件使得 $\mathbf{X}$ 满秩。因此，我们定义附加条件 $\mathbf{T} \boldsymbol{\beta}&#x3D;\mathbf{0}$ 或 $\mathbf{T} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{0}$ ，其中 $\mathbf{T}$ 是一个 $(p-k) \times p$ 的秩为 $p-k$ 的矩阵，并且 $\mathbf{T} \boldsymbol{\beta}$ 是由<strong>不可估计函数</strong>组成的向量。</p>
+<p><strong>定理</strong>：在满足上面的条件下，同时满足 $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ 和  $\mathbf{T} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{0}$ 的参数估计值 $\hat{\boldsymbol{\beta}}$ 是<strong>唯一的</strong>。</p>
+<p><strong>证明</strong>：这里我们有两个方程组<br>$$<br>\begin{aligned}<br>&amp;\mathbf{y}&#x3D;\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon} \<br>&amp;\mathbf{0}&#x3D;\mathbf{T} \boldsymbol{\beta}+\mathbf{0}<br>\end{aligned}<br>$$<br>我们可以将其合并为一个<br>$$<br>\left(\begin{array}{l}<br>\mathbf{y} \<br>\mathbf{0}<br>\end{array}\right)&#x3D;\left(\begin{array}{c}<br>\mathbf{X} \<br>\mathbf{T}<br>\end{array}\right) \boldsymbol{\beta}+\left(\begin{array}{l}<br>\boldsymbol{\varepsilon} \<br>\mathbf{0}<br>\end{array}\right)<br>$$<br>因为矩阵 $\mathbf{T}$ 的行之间线性无关，并且不是 $\mathbf{X}$ 的行的线性函数，因此矩阵 $\left(\begin{array}{l}\mathbf{X} \ \mathbf{T}\end{array}\right)$ 是一个 $(n+p-k) \times p$ 的秩为 $p$ 的矩阵，也就是满秩矩阵。因此 $\left(\begin{array}{l}\mathbf{X} \ \mathbf{T}\end{array}\right)^{\prime}\left(\begin{array}{l}\mathbf{X} \ \mathbf{T}\end{array}\right)$ 是一个 $p \times p$ 的秩为 $p$ 的矩阵，最小二乘的正规方程组<br>$$<br>\left(\begin{array}{l}<br>\mathbf{X} \<br>\mathbf{T}<br>\end{array}\right)^{\prime}\left(\begin{array}{c}<br>\mathbf{X} \<br>\mathbf{T}<br>\end{array}\right) \hat{\boldsymbol{\beta}}&#x3D;\left(\begin{array}{c}<br>\mathbf{X} \<br>\mathbf{T}<br>\end{array}\right)^{\prime}\left(\begin{array}{l}<br>\mathbf{y} \<br>\mathbf{0}<br>\end{array}\right)<br>$$<br>具有唯一解，为<br>$$<br>\begin{aligned}<br>\hat{\boldsymbol{\beta}} &amp;&#x3D;\left[\left(\begin{array}{l}<br>\mathbf{X} \<br>\mathbf{T}<br>\end{array}\right)^{\prime}\left(\begin{array}{l}<br>\mathbf{X} \<br>\mathbf{T}<br>\end{array}\right)\right]^{-1}\left(\begin{array}{l}<br>\mathbf{X} \<br>\mathbf{T}<br>\end{array}\right)^{\prime}\left(\begin{array}{l}<br>\mathbf{y} \<br>\mathbf{0}<br>\end{array}\right) \<br>&amp;&#x3D;\left[\left(\mathbf{X}^{\prime}, \mathbf{T}^{\prime}\right)\left(\begin{array}{l}<br>\mathbf{X} \<br>\mathbf{T}<br>\end{array}\right)\right]^{-1}\left(\mathbf{X}^{\prime}, \mathbf{T}^{\prime}\right)\left(\begin{array}{l}<br>\mathbf{y} \<br>\mathbf{0}<br>\end{array}\right) \<br>&amp;&#x3D;\left(\mathbf{X}^{\prime} \mathbf{X}+\mathbf{T}^{\prime} \mathbf{T}\right)^{-1}\left(\mathbf{X}^{\prime} \mathbf{y}+\mathbf{T}^{\prime} \mathbf{0}\right) \<br>&amp;&#x3D;\left(\mathbf{X}^{\prime} \mathbf{X}+\mathbf{T}^{\prime} \mathbf{T}\right)^{-1} \mathbf{X}^{\prime} \mathbf{y} .<br>\end{aligned}<br>$$<br>添加附加条件的方式不适合满秩的模型，如果模型满秩，此时 $\mathbf{X}^{\prime} \mathbf{X}$ 是一个 $p \times  p$ 的非奇异矩阵，也就是说  $\mathbf{X}^{\prime} \mathbf{X}$ 有 $p$ 的线性无关的行，因此   $\mathbf{X}^{\prime} \mathbf{X}$ 的所有行是 $\mathbb{R}^{p}$ 的一组基，因此任意一个 $\mathbf{T}$ 矩阵的行一定是   $\mathbf{X}^{\prime} \mathbf{X}$ 的所有行的线性组合，也就是说，你找不到一个 $\mathbf{T}$ 矩阵，使得 $\mathbf{T} \boldsymbol{\beta}$ 是由不可估计函数组成的向量。</p>
+<p>这里得到 $\hat{\boldsymbol{\beta}}$ 仍然满足原始的正规方程组 $\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{X}^{\prime} \mathbf{y}$ ，因为<br>$$<br>\begin{aligned}<br>\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}+\mathbf{T}^{\prime} \mathbf{T} \hat{\boldsymbol{\beta}}&amp;&#x3D;\mathbf{X}^{\prime} \mathbf{y} \quad \because \mathbf{T} \hat{\boldsymbol{\beta}}&#x3D;\mathbf{0} \<br>\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}&amp;&#x3D;\mathbf{X}^{\prime} \mathbf{y} \<br>\end{aligned}<br>$$<br>我有几个问题，这里 $\mathbf{X}$ 矩阵的秩 $k$ 在实际数据中是一个不确定的数，也就是说我们需要添加的附加条件的数目 $p-k$ 也不定；第二，我们怎么找到这个 $\mathbf{T}$ 矩阵，使得 $\mathbf{T} \boldsymbol{\beta}$ 是由不可估计函数组成的向量呢？我感觉这个方法不好实现，就是在实际处理中，用了附件条件也不一定能得到唯一解，可能还是要求广义逆的解。再说了，最终得到的所谓的唯一的  $\hat{\boldsymbol{\beta}}$  ，实际上还是之前的不满秩矩阵的一个解，我感觉没有必要非要这么折腾一下，可以直接求广义逆的解。</p>
+<p>从现实的角度来看，好像一般是几种方式联合使用，比如添加附加条件 + 广义逆求解，再参数化 + 广义逆求解等。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0/" rel="tag">理论学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" rel="tag">线性模型</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/abc85283/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            最小二乘中的可估计函数
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/46823193/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">矩阵分解</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "yHN3kf7fHt5wvleM2DVoHLdY-gzGzoHsz",
+    app_key: "RPIwmdftljIzOtAULwc7JCAp",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "靓仔，看完留个评论再走哇！\n只需要填入昵称和邮箱就可以了",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 与只只在一起天数 -->
+	<ul>
+		<li><span id="lovetime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("03/04/2021 22:11:00");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            lovetime_span.innerHTML = "只只和男朋友在一起了 " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
