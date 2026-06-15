@@ -6894,16 +6894,20 @@ y_{\text{final}} = \beta_0 + \beta_1 \cdot \hat{y}_{\text{Lasso}} + \beta_2 \cdo
 <span class="math display">\[\text{Obj}^{(t)} = \sum_{i=1}^n l(y_i, \hat{y}_i^{(t-1)} + f_t(x_i)) + \Omega(f_t)\]</span></p>
 <p>由于 <span class="math inline">\(l(y_i, \hat{y}_i^{(t-1)})\)</span> 是常数，为了优化 <span class="math inline">\(f_t\)</span>，XGBoost 使用了<strong>二阶泰勒展开</strong>来近似损失函数：
 <span class="math display">\[\text{Obj}^{(t)} \approx \sum_{i=1}^n \left[ l(y_i, \hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \frac{1}{2} h_i f_t^2(x_i) \right] + \Omega(f_t)\]</span></p>
-<p>其中：
-* <strong><span class="math inline">\(g_i = \partial_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})\)</span></strong>：损失函数的一阶导数（梯度）。
-* <strong><span class="math inline">\(h_i = \partial^2_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})\)</span></strong>：损失函数的二阶导数（海森矩阵）。</p>
+<p>其中：</p>
+<ul>
+<li><strong><span class="math inline">\(g_i = \partial_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})\)</span></strong>：损失函数的一阶导数（梯度）。</li>
+<li><strong><span class="math inline">\(h_i = \partial^2_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})\)</span></strong>：损失函数的二阶导数（海森矩阵）。</li>
+</ul>
 <h4 id="树的参数化与最优权重">3. 树的参数化与最优权重</h4>
 <p>定义树 <span class="math inline">\(f_t(x) = w_{q(x)}\)</span>，其中 <span class="math inline">\(q(x)\)</span> 将样本映射到叶子节点，<span class="math inline">\(w_j\)</span> 是第 <span class="math inline">\(j\)</span> 个叶子节点的分数（权重）。
 正则化项定义为：
-<span class="math display">\[\Omega(f_t) = \gamma T + \frac{1}{2} \lambda \sum_{j=1}^T w_j^2\]</span>
-* <span class="math inline">\(T\)</span>：叶子节点数。
-* <span class="math inline">\(\gamma\)</span>：惩罚分裂的复杂度（Gamma）。
-* <span class="math inline">\(\lambda\)</span>：L2 正则化系数。</p>
+<span class="math display">\[\Omega(f_t) = \gamma T + \frac{1}{2} \lambda \sum_{j=1}^T w_j^2\]</span></p>
+<ul>
+<li><span class="math inline">\(T\)</span>：叶子节点数。</li>
+<li><span class="math inline">\(\gamma\)</span>：惩罚分裂的复杂度（Gamma）。</li>
+<li><span class="math inline">\(\lambda\)</span>：L2 正则化系数。</li>
+</ul>
 <p>将样本按叶子节点分组（<span class="math inline">\(I_j = \{i | q(x_i)=j\}\)</span>），目标函数简化为：
 <span class="math display">\[\text{Obj}^{(t)} = \sum_{j=1}^T \left[ (\sum_{i \in I_j} g_i) w_j + \frac{1}{2} (\sum_{i \in I_j} h_i + \lambda) w_j^2 \right] + \gamma T\]</span></p>
 <p>对 <span class="math inline">\(w_j\)</span> 求导并令其为 0，得到最优叶子权重：
