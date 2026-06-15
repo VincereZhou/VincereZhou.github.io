@@ -1,6 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>记录一次网站崩溃事件和网站使用小结</title>
+    <url>/posts/a0d04094/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>如题，记录一次网站崩溃事件和这个网站使用小结。</p>
+<span id="more"></span>
+<h1 id="网站崩溃事件始末">网站崩溃事件始末</h1>
+<p>一开始我是发现网站所有<strong>行内公式</strong>都不显示了，后面又发现有的<strong>图片</strong>不显示了。</p>
+<h2 id="公式的问题">公式的问题</h2>
+<p>公式我之前用的是 <code>markdown-it-latex2img</code> ，一通查找，根据浏览器开发工具和AI的解释，发现这个插件挂了。</p>
+<p>原因是<code>markdown-it-latex2img</code>默认走的是 <strong>math.now.sh远程服务</strong> 。把你的 LaTeX 公式发给 <strong>math.now.sh这个第三方网站</strong> → 它用 MathJax 在服务端渲染 → 返回一个图片。<strong>这个服务现在已经挂了/极不稳定</strong>，所以所有公式 <code>&lt;img&gt;</code>全是裂开的，浏览器显示”资源解析服务请求失败”。</p>
+<p>然后 AI 让我 <code>hexo-renderer-marked</code> + <code>hexo-filter-mathjax</code> ，公式显示还是不行（忘记咋样了）。后来 AI 让我用 <code>hexo-renderer-markdown-it</code> + <code>hexo-filter-mathjax</code> ，公式显示还是不行，比如 <code>$\mathbf&#123;H&#125;_&#123;1&#125;$</code> 就不会正常显示，<code>_1</code>会当成 <em>斜体</em>， AI 让我将所有公式都用 <code></code> 包起来，醉了。</p>
+<p>我查看了除了 <code>marked</code> 和 <code>markdown-it</code> ，还有 <code>pandoc</code> 这一个方式，但是 AI 一直建议我坚持用 <code>markdown-it</code> ，别用 <code>pandoc</code> 。最后我强制让 AI 给出 <code>pandoc</code> 的解决思路，结果最后用 <code>pandoc</code> 和 前缀 <code>mathjax</code> 完全解决了这个问题。</p>
+<p>顺便说一句，以前我没遇到公式显示问题，那是因为 <code>markdown-it-latex2img</code> 直接转换成图片了，所以不会被错误解释成 HTML 的结构。</p>
+<h2 id="图片的问题">图片的问题</h2>
+<p>根据浏览器开发工具，发现是路径的问题，不知道为什么，变成是从网页的根目录去查找图片。</p>
+<p>我其实不知道原因，不清楚为什么会变成这样，我是按照 hexo 的说明设置了相对路径的。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">post_asset_folder: true</span><br></pre></td></tr></table></figure>
+<p>我虽然也是一通弄，但我感觉都不是解决的做法。我感觉我都没有问题，它就是网站自己抽风了。</p>
+<p>最后应该就是 <code>hexo clean</code> 后重新部署一下就好了（符合重启解决90%的软件问题这一定律）。</p>
+<h2 id="我的收获">我的收获</h2>
+<ol type="1">
+<li>引入第三方网站是不靠谱的做法，万一它崩了，就会跟着崩。比如不建议使用图床</li>
+<li>公式问题的感觉在于 markdown 和 html 的语法差异，公式的内容被 <code>markdown-it</code> 等插件当成文本使用 HTML 地语法错误地解释了（比如 <code>_1</code> 在 markdown 的 latex 语法中下标，但是在 html 中被误认为斜体 ）。而 pandoc 是它们这几个中唯一真正懂数学公式的，所以能解决这个问题</li>
+<li>前端真有学一点的必要，比如浏览器开发工具</li>
+<li>AI 真的有附和你说的话或它自己说的话的倾向，比如这次一直强调让我别用 <code>pandoc</code>。以后不能全信一个AI ，我现在都是同时用2个AI。</li>
+<li>以后上传文档还是得检查一下网页显示的格式和内容有没有变化</li>
+</ol>
+<h2 id="额外的改变取消评论">额外的改变：取消评论</h2>
+<p>之前弄了一个 valine 评论系统 ，用的 <a href="https://www.leancloud.cn/">leancloud</a> 做的免费数据库。</p>
+<p>但是 leancloud 不提供服务了，马上就不能用了，所以我就取消了评论系统。在此感谢 leancloud 给我提供的服务，让我相当于过了把瘾。</p>
+<p>另外说一下关于联系我的事情，网站关于我的页面，我只留了电话和邮箱，但是这个邮箱我不常登录，所以通过这个邮箱很可能联系不上我，或者说很不及时。没办法，我也不想接受太多的个人消息。之前文章下的评论我都是会通过 leancloud 数据库查看所有评论，但是由于现在评论系统关了，所以之后联系我就只能随缘了。</p>
+<h1 id="网站使用小结">网站使用小结</h1>
+<p>首先回顾一下我开通这个网站/博客的动机</p>
+<blockquote>
+<h1 id="为什么开通个人博客">为什么开通个人博客？</h1>
+<p>我在B站关注了一位up主，名字叫codesheep（程序羊），他是华科出来的硕士（自称”资质平平“，感觉自己都不用活了）。自称看了他的视频，才产生了构建个人博客的想法。我看他宣传开通个人博客的视频，应该是在去葫芦岛旅游前（2019年7月27号）。按照大佬的说法，开通个人博客，有百利而无一害，比如避免自己重复掉坑、能够吸引一点关注、可能对其他人有帮助、结交同性朋友等。我想了想，感觉说得都很对，我没办法反驳，心里就种下了种子。等从葫芦岛回来，有空余时间的时候就可以动手做了。
+本科毕业的时候，我从一件事情上吸取到了一个教训。那时候我发现我有很多买回来的书，就一直放着，很多都没看，就一直放着，直到毕业。最后，我感觉实在有点累赘，就或卖或送打发了。这些买回来的书，如果一开始没去看，可能我永远都不会去翻他。其他事情应该也是一样的吧。对于想做的事，一开始不着手去做的话，这辈子都不会做了吧。毕竟，一辈子其实想想也没有多长。</p>
+</blockquote>
+<p>现在再回头看看，下面这些功能都实现了多少。</p>
+<ul>
+<li><strong>避免自己重复掉坑</strong> ：做到了，这个网站配合 <code>onedrive</code> 形成了我的外置大脑，准确地说，是外置大脑硬盘。</li>
+<li><strong>能够吸引一点关注</strong>：有一点但不多。我之前也弄了一下谷歌和百度收录的事情，但是我看谷歌能搜到我的网页，但是百度貌似不行。谷歌网页显示每个月大概有 60 次左右的点击，这和没有也差不多了。但是：
+<ul>
+<li>第一我不追求这个，这个网站的最大用户就是我自己；</li>
+<li>第二我本来这个网页也是靠了 github 弄的，没花钱，估计真有很多人访问估计也顶不住；</li>
+<li>第三就是内容小众，上限摆在这了；</li>
+<li>第四，AI时代来临了，估计大家用搜索引擎都会比以前更少了。</li>
+</ul></li>
+<li><strong>可能对其他人有帮助</strong>：这个应该有点，反正最起码对我自己有帮助</li>
+</ul>
+<p>另外，再说说我觉得其他的作用。</p>
+<ul>
+<li><strong>催更作用</strong>：我有一段时间一直没更新网站文章，应该是 25年一年多吧，但是这个网站在这多少就会有点愧疚心理，确实起到了催更的作用。</li>
+<li><strong>成就感</strong>：我觉得这个网站确实给我带来了成就感，我往上面多发一篇博客，就证明我多前进了一步，这个网站的内容更丰富了一步。这是我感觉在别人的平台不能带给我的，所以我始终是用这个我自己的网站，因为它就相当于我的一个化身。</li>
+</ul>
+<p>别的没啥说的了，最后感谢 up主程序羊，感谢 hexo ，感谢 ayer 主题，感谢计算机，感谢编程。最后说一下，我觉得用编程来解决问题太酷了，我觉得重点就在于可复现，这种可以完美复现的东西太酷了。</p>
+]]></content>
+  </entry>
+  <entry>
     <title>网络版报告五之python包jinja2</title>
     <url>/posts/ea2afea8/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>网络版报告实现动态的关键 - python 包 jinja2 。</p>
