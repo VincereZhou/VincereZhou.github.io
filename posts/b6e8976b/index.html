@@ -96,156 +96,147 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>证明LU分解及单位下三角矩阵的性质。</p>
+  <p>证明LU分解及单位下三角矩阵的性质。</p>
 <span id="more"></span>
 <p>单位下三角矩阵指对角线元素均为 1 的下三角矩阵，一个很好的例子就是 LU 分解得到的 L 矩阵。</p>
-<h1>证明LU分解</h1>
+<h1 id="证明lu分解">证明LU分解</h1>
 <p>我们考虑对一个矩阵进行高斯消元（假设这里不考虑换行），消元的过程就是对原始矩阵左乘很多个初等矩阵。</p>
-<h1>举个例子，考虑下面的矩阵 $\mathbf{A}$<br>
-$$<br>
-\left[<br>
-\begin{array}{c}<br>
-2 &amp; 1 \<br>
-8 &amp; 7 \<br>
-\end{array}<br>
-\right]<br>
-$$<br>
-消元的过程等于左乘一个初等矩阵 $\mathbf{E_{21}}$<br>
-$$<br>
-\left[<br>
-\begin{array}{c}<br>
-1 &amp; 0 \<br>
--4 &amp; 1 \<br>
-\end{array}<br>
-\right]<br>
-\left[<br>
-\begin{array}{c}<br>
-2 &amp; 1 \<br>
-8 &amp; 7 \<br>
-\end{array}<br>
-\right]</h1>
-<p>\left[<br>
-\begin{array}{c}<br>
-2 &amp; 1 \<br>
-0 &amp; 3 \<br>
-\end{array}<br>
-\right]<br>
-$$<br>
-这样就能一次性得到 $\mathbf{U}$ 矩阵了。</p>
-<p>但是如果我们要得到 $\mathbf{A = LU}$ , 那么我们就需要  $\mathbf{E_{21}}$ 求逆放在右手项中，在这个例子中， $\mathbf{E_{21}}$ 的逆矩阵只需要将 -4 改为 4，即<br>
-$$<br>
-\left[<br>
-\begin{array}{c}<br>
-2 &amp; 1 \<br>
-8 &amp; 7 \<br>
-\end{array}<br>
-\right] = \left[<br>
-\begin{array}{c}<br>
-1 &amp; 0 \<br>
-4 &amp; 1 \<br>
-\end{array}<br>
-\right]<br>
-\left[<br>
-\begin{array}{c}<br>
-2 &amp; 1 \<br>
-0 &amp; 3 \<br>
-\end{array}<br>
-\right]<br>
-$$<br>
-这是最简单的 $2 \times 2$ 的情况。</p>
-<p>这里我们可以换一个格式来证明，使用高斯变换矩阵，高斯变换矩阵是只有某一列存在非零元素的单位下三角矩阵，即<br>
-$$<br>
-\mathbf{L}<em>i=\left[\begin{array}{cccccccc}<br>
-1 &amp; &amp; &amp; \ldots &amp; &amp; &amp; &amp; 0 \<br>
-0 &amp; \ddots &amp; &amp; &amp; &amp; &amp; &amp; \<br>
-0 &amp; \ddots &amp; 1 &amp; &amp; &amp; &amp; &amp; \vdots \<br>
-0 &amp; \ddots &amp; 0 &amp; 1 &amp; &amp; &amp; &amp; \vdots \<br>
-&amp; &amp; 0 &amp; l</em>{i+1, i} &amp; 1 &amp; &amp; &amp; \vdots \<br>
-\vdots &amp; &amp; 0 &amp; l_{i+2, i} &amp; 0 &amp; \ddots &amp; &amp; \<br>
-&amp; &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; 1 &amp; \<br>
-0 &amp; \ldots &amp; 0 &amp; l_{n, i} &amp; 0 &amp; \ldots &amp; 0 &amp; 1<br>
-\end{array}\right]<br>
-$$<br>
-其可以写为<br>
-$$<br>
-\mathbf{L}<em>{i} = \mathbf{I} + \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T}<br>
-$$<br>
-其中<br>
-$$<br>
-\mathbf{l}</em>{k} = (0\cdots0,l_{i+1,i},\cdots,l_{n,i})^{T}<br>
-$$<br>
-其逆矩阵为 $\mathbf{L}<em>{i}^{-1} = \mathbf{I} - \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T}$， 因为 $(\mathbf{I} - \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T})(\mathbf{I} + \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T}) = \mathbf{I} - \mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T}\mathbf{l}</em>{i} \mathbf{e}_{i}^{T} = \mathbf{I}$ 。</p>
-<p>所以其逆矩阵仍为高斯变换矩阵，如下<br>
-$$<br>
-\mathbf{L}<em>i^{-1} =\left[\begin{array}{cccccccc}<br>
-1 &amp; &amp; &amp; \ldots &amp; &amp; &amp; &amp; 0 \<br>
-0 &amp; \ddots &amp; &amp; &amp; &amp; &amp; &amp; \<br>
-0 &amp; \ddots &amp; 1 &amp; &amp; &amp; &amp; &amp; \vdots \<br>
-0 &amp; \ddots &amp; 0 &amp; 1 &amp; &amp; &amp; &amp; \vdots \<br>
-&amp; &amp; 0 &amp; -l</em>{i+1, i} &amp; 1 &amp; &amp; &amp; \vdots \<br>
-\vdots &amp; &amp; 0 &amp; -l_{i+2, i} &amp; 0 &amp; \ddots &amp; &amp; \<br>
-&amp; &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; 1 &amp; \<br>
-0 &amp; \ldots &amp; 0 &amp; -l_{n, i} &amp; 0 &amp; \ldots &amp; 0 &amp; 1<br>
-\end{array}\right]<br>
-$$<br>
-这一点很好理解，左乘 $\mathbf{L}<em>{i}$ 的作用是对 $i+1$ 到 $n$ 行均加上了第 $i$ 行的倍数，而左乘 $\mathbf{L}</em>{i}^{-1}$ 的作用是对 $i+1$ 到 $n$ 行均减去了第 $i$ 行的相应倍数，因此就还原了原来的矩阵，因此 $\mathbf{L}<em>{i} \mathbf{L}</em>{i}^{-1} = \mathbf{I}$ 。</p>
-<p>对于一个 $n \times n$ 的矩阵 $\mathbf{A}$ ，经过了消元之后（假设没有换行），则有<br>
-$$<br>
-\mathbf{L}<em>{n-1}^{-1} \cdots\mathbf{L}</em>{1}^{-1} \mathbf{A} = \mathbf{U}<br>
-$$<br>
-因此我们有<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{L} &amp;= \mathbf{L}<em>{1}\mathbf{L}</em>{2} \cdots \mathbf{L}<em>{n-1} \<br>
-&amp;= (\mathbf{I} + \mathbf{l}</em>{1} \mathbf{e}<em>{1}^{T}) (\mathbf{I} + \mathbf{l}</em>{2} \mathbf{e}<em>{2}^{T}) \cdots (\mathbf{I} + \mathbf{l}</em>{n-1} \mathbf{e}<em>{n-1}^{T}) \<br>
-\end{aligned}<br>
-$$<br>
-这里我们可以证明，对于 $i &lt; j$ ，存在<br>
-$$<br>
-\mathbf{l}</em>{i} \mathbf{e}<em>{i}^{T} \mathbf{l}</em>{j} \mathbf{e}<em>{j}^{T} = \mathbf{l}</em>{i} (\mathbf{e}<em>{i}^{T} \mathbf{l}</em>{j}) \mathbf{e}<em>{j}^{T} = 0 \times \mathbf{l}</em>{i} \mathbf{e}<em>{j}^{T} = \mathbf{0}<br>
-$$<br>
-因此对于上面的式子，我们有<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{L} &amp;= \mathbf{L}</em>{1}\mathbf{L}<em>{2} \cdots \mathbf{L}</em>{n-1} \<br>
-&amp;= (\mathbf{I} + \mathbf{l}<em>{1} \mathbf{e}</em>{1}^{T}) (\mathbf{I} + \mathbf{l}<em>{2} \mathbf{e}</em>{2}^{T}) \cdots (\mathbf{I} + \mathbf{l}<em>{n-1} \mathbf{e}</em>{n-1}^{T}) \<br>
-&amp;= (\mathbf{I} + \mathbf{l}<em>{1} \mathbf{e}</em>{1}^{T} + \mathbf{l}<em>{2} \mathbf{e}</em>{2}^{T}) \cdots (\mathbf{I} + \mathbf{l}<em>{n-1} \mathbf{e}</em>{n-1}^{T}) \<br>
-&amp;= (\mathbf{I} + \mathbf{l}<em>{1} \mathbf{e}</em>{1}^{T} + \mathbf{l}<em>{2} \mathbf{e}</em>{2}^{T}+ \mathbf{l}<em>{3} \mathbf{e}</em>{3}^{T}) \cdots (\mathbf{I} + \mathbf{l}<em>{n-1} \mathbf{e}</em>{n-1}^{T}) \<br>
-&amp;\cdots \<br>
-&amp;= \mathbf{I} + \mathbf{l}<em>{1} \mathbf{e}</em>{1}^{T} + \cdots + \mathbf{l}<em>{n-1} \mathbf{e}</em>{n-1}^{T}</p>
-<p>\end{aligned}<br>
-$$<br>
-即<br>
-$$<br>
-\mathbf{L}=\mathbf{L}<em>1 \mathbf{L}<em>2 \ldots \mathbf{L}</em>{n-1}=\left[\begin{array}{ccccc}<br>
-1 &amp; &amp; &amp; &amp; \<br>
-l</em>{21} &amp; 1 &amp; &amp; &amp; \<br>
-1_{31} &amp; 1_{32} &amp; \ddots &amp; &amp; \<br>
-\vdots &amp; \vdots &amp; \ddots &amp; 1 &amp; \<br>
-l_{\mathrm{n} 1} &amp; 1_{\mathrm{n} 2} &amp; \cdots &amp; l_{\mathrm{n}, \mathrm{n}-1} &amp; 1<br>
-\end{array}\right]<br>
-$$<br>
+<p>举个例子，考虑下面的矩阵 <span class="math inline">\(\mathbf{A}\)</span>
+<span class="math display">\[
+\left[
+\begin{array}{c}
+2 &amp; 1 \\
+8 &amp; 7 \\
+\end{array}
+\right]
+\]</span>
+消元的过程等于左乘一个初等矩阵 <span class="math inline">\(\mathbf{E_{21}}\)</span>
+<span class="math display">\[
+\left[
+\begin{array}{c}
+1 &amp; 0 \\
+-4 &amp; 1 \\
+\end{array}
+\right]
+\left[
+\begin{array}{c}
+2 &amp; 1 \\
+8 &amp; 7 \\
+\end{array}
+\right]
+= 
+\left[
+\begin{array}{c}
+2 &amp; 1 \\
+0 &amp; 3 \\
+\end{array}
+\right]
+\]</span>
+这样就能一次性得到 <span class="math inline">\(\mathbf{U}\)</span> 矩阵了。</p>
+<p>但是如果我们要得到 <span class="math inline">\(\mathbf{A = LU}\)</span> , 那么我们就需要 <span class="math inline">\(\mathbf{E_{21}}\)</span> 求逆放在右手项中，在这个例子中， <span class="math inline">\(\mathbf{E_{21}}\)</span> 的逆矩阵只需要将 -4 改为 4，即
+<span class="math display">\[
+\left[
+\begin{array}{c}
+2 &amp; 1 \\
+8 &amp; 7 \\
+\end{array}
+\right] = \left[
+\begin{array}{c}
+1 &amp; 0 \\
+4 &amp; 1 \\
+\end{array}
+\right]
+\left[
+\begin{array}{c}
+2 &amp; 1 \\
+0 &amp; 3 \\
+\end{array}
+\right]
+\]</span>
+这是最简单的 <span class="math inline">\(2 \times 2\)</span> 的情况。</p>
+<p>这里我们可以换一个格式来证明，使用高斯变换矩阵，高斯变换矩阵是只有某一列存在非零元素的单位下三角矩阵，即
+<span class="math display">\[
+\mathbf{L}_i=\left[\begin{array}{cccccccc}
+1 &amp; &amp; &amp; \ldots &amp; &amp; &amp; &amp; 0 \\
+0 &amp; \ddots &amp; &amp; &amp; &amp; &amp; &amp; \\
+0 &amp; \ddots &amp; 1 &amp; &amp; &amp; &amp; &amp; \vdots \\
+0 &amp; \ddots &amp; 0 &amp; 1 &amp; &amp; &amp; &amp; \vdots \\
+&amp; &amp; 0 &amp; l_{i+1, i} &amp; 1 &amp; &amp; &amp; \vdots \\
+\vdots &amp; &amp; 0 &amp; l_{i+2, i} &amp; 0 &amp; \ddots &amp; &amp; \\
+&amp; &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; 1 &amp; \\
+0 &amp; \ldots &amp; 0 &amp; l_{n, i} &amp; 0 &amp; \ldots &amp; 0 &amp; 1
+\end{array}\right]
+\]</span>
+其可以写为
+<span class="math display">\[
+\mathbf{L}_{i} = \mathbf{I} + \mathbf{l}_{i} \mathbf{e}_{i}^{T}
+\]</span>
+其中
+<span class="math display">\[
+\mathbf{l}_{k} = (0\cdots0,l_{i+1,i},\cdots,l_{n,i})^{T}
+\]</span>
+其逆矩阵为 <span class="math inline">\(\mathbf{L}_{i}^{-1} = \mathbf{I} - \mathbf{l}_{i} \mathbf{e}_{i}^{T}\)</span>， 因为 <span class="math inline">\((\mathbf{I} - \mathbf{l}_{i} \mathbf{e}_{i}^{T})(\mathbf{I} + \mathbf{l}_{i} \mathbf{e}_{i}^{T}) = \mathbf{I} - \mathbf{l}_{i} \mathbf{e}_{i}^{T}\mathbf{l}_{i} \mathbf{e}_{i}^{T} = \mathbf{I}\)</span> 。</p>
+<p>所以其逆矩阵仍为高斯变换矩阵，如下
+<span class="math display">\[
+\mathbf{L}_i^{-1} =\left[\begin{array}{cccccccc}
+1 &amp; &amp; &amp; \ldots &amp; &amp; &amp; &amp; 0 \\
+0 &amp; \ddots &amp; &amp; &amp; &amp; &amp; &amp; \\
+0 &amp; \ddots &amp; 1 &amp; &amp; &amp; &amp; &amp; \vdots \\
+0 &amp; \ddots &amp; 0 &amp; 1 &amp; &amp; &amp; &amp; \vdots \\
+&amp; &amp; 0 &amp; -l_{i+1, i} &amp; 1 &amp; &amp; &amp; \vdots \\
+\vdots &amp; &amp; 0 &amp; -l_{i+2, i} &amp; 0 &amp; \ddots &amp; &amp; \\
+&amp; &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; 1 &amp; \\
+0 &amp; \ldots &amp; 0 &amp; -l_{n, i} &amp; 0 &amp; \ldots &amp; 0 &amp; 1
+\end{array}\right]
+\]</span>
+这一点很好理解，左乘 <span class="math inline">\(\mathbf{L}_{i}\)</span> 的作用是对 <span class="math inline">\(i+1\)</span> 到 <span class="math inline">\(n\)</span> 行均加上了第 <span class="math inline">\(i\)</span> 行的倍数，而左乘 <span class="math inline">\(\mathbf{L}_{i}^{-1}\)</span> 的作用是对 <span class="math inline">\(i+1\)</span> 到 <span class="math inline">\(n\)</span> 行均减去了第 <span class="math inline">\(i\)</span> 行的相应倍数，因此就还原了原来的矩阵，因此 <span class="math inline">\(\mathbf{L}_{i} \mathbf{L}_{i}^{-1} = \mathbf{I}\)</span> 。</p>
+对于一个 <span class="math inline">\(n \times n\)</span> 的矩阵 <span class="math inline">\(\mathbf{A}\)</span> ，经过了消元之后（假设没有换行），则有
+<span class="math display">\[
+\mathbf{L}_{n-1}^{-1} \cdots\mathbf{L}_{1}^{-1} \mathbf{A} = \mathbf{U}
+\]</span>
+因此我们有
+<span class="math display">\[
+\begin{aligned}
+\mathbf{L} &amp;= \mathbf{L}_{1}\mathbf{L}_{2} \cdots \mathbf{L}_{n-1} \\
+&amp;= (\mathbf{I} + \mathbf{l}_{1} \mathbf{e}_{1}^{T}) (\mathbf{I} + \mathbf{l}_{2} \mathbf{e}_{2}^{T}) \cdots (\mathbf{I} + \mathbf{l}_{n-1} \mathbf{e}_{n-1}^{T}) \\  
+\end{aligned}
+\]</span>
+这里我们可以证明，对于 <span class="math inline">\(i &lt; j\)</span> ，存在
+<span class="math display">\[
+\mathbf{l}_{i} \mathbf{e}_{i}^{T} \mathbf{l}_{j} \mathbf{e}_{j}^{T} = \mathbf{l}_{i} (\mathbf{e}_{i}^{T} \mathbf{l}_{j}) \mathbf{e}_{j}^{T} = 0 \times \mathbf{l}_{i} \mathbf{e}_{j}^{T} = \mathbf{0}
+\]</span>
+因此对于上面的式子，我们有
+$$
+<span class="math display">\[\begin{aligned}
+\mathbf{L} &amp;= \mathbf{L}_{1}\mathbf{L}_{2} \cdots \mathbf{L}_{n-1} \\
+&amp;= (\mathbf{I} + \mathbf{l}_{1} \mathbf{e}_{1}^{T}) (\mathbf{I} + \mathbf{l}_{2} \mathbf{e}_{2}^{T}) \cdots (\mathbf{I} + \mathbf{l}_{n-1} \mathbf{e}_{n-1}^{T}) \\  
+&amp;= (\mathbf{I} + \mathbf{l}_{1} \mathbf{e}_{1}^{T} + \mathbf{l}_{2} \mathbf{e}_{2}^{T}) \cdots (\mathbf{I} + \mathbf{l}_{n-1} \mathbf{e}_{n-1}^{T}) \\
+&amp;= (\mathbf{I} + \mathbf{l}_{1} \mathbf{e}_{1}^{T} + \mathbf{l}_{2} \mathbf{e}_{2}^{T}+ \mathbf{l}_{3} \mathbf{e}_{3}^{T}) \cdots (\mathbf{I} + \mathbf{l}_{n-1} \mathbf{e}_{n-1}^{T}) \\
+&amp;\cdots \\
+&amp;= \mathbf{I} + \mathbf{l}_{1} \mathbf{e}_{1}^{T} + \cdots + \mathbf{l}_{n-1} \mathbf{e}_{n-1}^{T}
+
+\end{aligned}\]</span>
+<p><span class="math display">\[
+即
+\]</span>
+=_1 <em>2 </em>{n-1}=$$
 得证。</p>
-<h1>单位下三角矩阵的性质</h1>
-<ol>
-<li>
-<p>多个单位下三角矩阵的乘积仍为单位下三角矩阵</p>
-<p>证明：先以两个单位下三角矩阵的乘积为例，假设 $\mathbf{A}$ 和 $\mathbf{B}$ 是两个 n 维的单位下三角矩阵，根据矩阵乘积性质，$\mathbf{AB}$ 的每一行均是 $\mathbf{B}$ 的行的线性组合，$\mathbf{AB}$ 的第 $i$ 行等于 $a_{i1} \mathbf{b}<em>{1}^{T} + a</em>{i2} \mathbf{b}<em>{2}^{T} + \cdots +  \mathbf{b}</em>{i}^{T}$ ，易得 $\mathbf{AB}$ 的对角线元素均为 1，因此  $\mathbf{AB}$ 为单位下三角矩阵，这可以推广至多个下三角矩阵的乘积。</p>
-</li>
-<li>
-<p>单位下三角矩阵的逆矩阵仍为单位下三角矩阵</p>
-<p>证明：根据上面的推导，对于任意一个单位下三角矩阵 $\mathbf{L}$ ，其可以分解为 $\mathbf{L}=\mathbf{L}<em>1 \mathbf{L}<em>2 \ldots \mathbf{L}</em>{n-1}$ ，因此 $\mathbf{L}^{-1} = \mathbf{L}</em>{n-1}^{-1} \cdots\mathbf{L}_{1}^{-1}$ ，由于多个单位下三角矩阵的乘积仍为单位下三角矩阵，因此 $\mathbf{L}^{-1}$ 也是单位下三角矩阵。</p>
-</li>
+<h1 id="单位下三角矩阵的性质">单位下三角矩阵的性质</h1>
+<ol type="1">
+<li><p>多个单位下三角矩阵的乘积仍为单位下三角矩阵</p>
+<p>证明：先以两个单位下三角矩阵的乘积为例，假设 <span class="math inline">\(\mathbf{A}\)</span> 和 <span class="math inline">\(\mathbf{B}\)</span> 是两个 n 维的单位下三角矩阵，根据矩阵乘积性质，<span class="math inline">\(\mathbf{AB}\)</span> 的每一行均是 <span class="math inline">\(\mathbf{B}\)</span> 的行的线性组合，<span class="math inline">\(\mathbf{AB}\)</span> 的第 <span class="math inline">\(i\)</span> 行等于 <span class="math inline">\(a_{i1} \mathbf{b}_{1}^{T} + a_{i2} \mathbf{b}_{2}^{T} + \cdots +  \mathbf{b}_{i}^{T}\)</span> ，易得 <span class="math inline">\(\mathbf{AB}\)</span> 的对角线元素均为 1，因此 <span class="math inline">\(\mathbf{AB}\)</span> 为单位下三角矩阵，这可以推广至多个下三角矩阵的乘积。</p></li>
+<li><p>单位下三角矩阵的逆矩阵仍为单位下三角矩阵</p>
+<p>证明：根据上面的推导，对于任意一个单位下三角矩阵 <span class="math inline">\(\mathbf{L}\)</span> ，其可以分解为 <span class="math inline">\(\mathbf{L}=\mathbf{L}_1 \mathbf{L}_2 \ldots \mathbf{L}_{n-1}\)</span> ，因此 <span class="math inline">\(\mathbf{L}^{-1} = \mathbf{L}_{n-1}^{-1} \cdots\mathbf{L}_{1}^{-1}\)</span> ，由于多个单位下三角矩阵的乘积仍为单位下三角矩阵，因此 <span class="math inline">\(\mathbf{L}^{-1}\)</span> 也是单位下三角矩阵。</p></li>
 </ol>
-<h1>高斯消元的时间复杂度</h1>
-<p>假设存在一个 $100 \times 100$ 的矩阵，由于一般的数学计算都是乘法和减法合并在一块，因此这里我们只考虑乘法的次数。</p>
-<p>对于第一步，消除第一列的计算次数差不多是 $100^{2}$ (准确次数是 $99 \times 100$ ，因为不考虑第一行)，消除第二列的计算次数差不多是 $99^{2}$ (准确次数是 $98 \times 99$ ），以此类推。</p>
-<p>一般化得到，对于一个维度为 n 的矩阵，高斯消元的计算次数大约为<br>
-$$<br>
-n^{2} + \cdots + 1^{2} = \frac{n^{3}}{3} +   \frac{n^{2}}{2} +   \frac{n}{6} \approx \frac{n^{3}}{3}<br>
-$$</p>
-<h1>参考文献</h1>
-<ol>
+<h1 id="高斯消元的时间复杂度">高斯消元的时间复杂度</h1>
+<p>假设存在一个 <span class="math inline">\(100 \times 100\)</span> 的矩阵，由于一般的数学计算都是乘法和减法合并在一块，因此这里我们只考虑乘法的次数。</p>
+<p>对于第一步，消除第一列的计算次数差不多是 <span class="math inline">\(100^{2}\)</span> (准确次数是 <span class="math inline">\(99 \times 100\)</span> ，因为不考虑第一行)，消除第二列的计算次数差不多是 <span class="math inline">\(99^{2}\)</span> (准确次数是 <span class="math inline">\(98 \times 99\)</span> ），以此类推。</p>
+<p>一般化得到，对于一个维度为 n 的矩阵，高斯消元的计算次数大约为
+<span class="math display">\[
+n^{2} + \cdots + 1^{2} = \frac{n^{3}}{3} +   \frac{n^{2}}{2} +   \frac{n}{6} \approx \frac{n^{3}}{3}
+\]</span></p>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
 <li>MIT-线性代数课程</li>
 <li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/363948873">矩阵的LU分解</a></li>
 </ol>
@@ -674,8 +665,22 @@ $$</p>
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

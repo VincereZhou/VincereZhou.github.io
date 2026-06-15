@@ -96,14 +96,14 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>python基础部分备忘录。</p>
+  <p>python基础部分备忘录。</p>
 <span id="more"></span>
-<h1>python 基础</h1>
+<h1 id="python-基础">python 基础</h1>
 <p>python 是一门解释型语言，无需编译。</p>
 <h2 id="数据类型">数据类型</h2>
 <p>不可变对象：数值（Numbers），字符串 （String) ， 元组 （Tuple) ，逻辑值 （Bool)</p>
 <p>可变对象：列表（List)，字典（Dictionary），集合（Set)</p>
-<h3 id="None">None</h3>
+<h3 id="none">None</h3>
 <p>None是Python的空值类型。如果一个函数没有明确的返回值，就会默认返回None。</p>
 <p>判断是否为空值，要用 <code>is</code>(内存地址是否相同)</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">37</span>]: a = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">38</span>]: a <span class="keyword">is</span> <span class="literal">None</span></span><br><span class="line">Out[<span class="number">38</span>]: <span class="literal">True</span></span><br></pre></td></tr></table></figure>
@@ -115,11 +115,11 @@
 <p>在 python 中，变量名称和变量本身的值是一种引用（指针）的关系，我个人就是理解为标签和人的关系，每个人均至少需要贴一个标签，一个人身上可以有多个标签，赋值的过程就是将左侧的标签对应上右侧的值。</p>
 <p>因此对于不可变对象，如果修改某个变量的值（因为这个过程是新建了一个值），不会影响其它变量，以字符串举例如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">a=&#x27;ABC&#x27;</span><br><span class="line">b=a</span><br><span class="line">a=&#x27;XYZ&#x27;</span><br><span class="line"># 问此时b是什么？</span><br><span class="line"># 咋一看，b=a，此时a=&#x27;XYZ&#x27;,b也应该是&#x27;XYZ&#x27;</span><br><span class="line"># 实际上不是，变量的名称和值是映射的关系，</span><br><span class="line"># 这里的逻辑是首先内存中创建了一个值’ABC&#x27;,变量a 映射到了ABC, 之后变量b也映射到了ABC</span><br><span class="line"># 最后将a又映射到XYZ，过程见下图</span><br></pre></td></tr></table></figure>
-<p><img src="1.png" alt="1"></p>
+<p><img src="1.png" alt="1" /></p>
 <p>但是，对于可变对象，则相反。举个例子，下面这种形式b也会改变（<strong>因为列表是可变对象，这里是修改了原列表</strong>）</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a=[<span class="number">1</span>,<span class="number">2</span>]</span><br><span class="line">b=a</span><br><span class="line">a.append(<span class="number">3</span>) <span class="comment">#b一样会改变</span></span><br></pre></td></tr></table></figure>
 <p>如果是 a=[1,2] , b=[1,2]，这个时候修改a，对b就没有任何影响了，因为这时候是创建了两个列表对象。</p>
-<h2 id="函数中修改全局变量（变量作用域）">函数中修改全局变量（变量作用域）</h2>
+<h2 id="函数中修改全局变量变量作用域">函数中修改全局变量（变量作用域）</h2>
 <p>可变对象：当函数内修改同名变量时，函数外的同名变量也会随之改变，所以<strong>使用修改可变对象没有作用域的概念</strong>。</p>
 <p>不可变对象：当函数内修改同名变量时，<strong>会先复制过来再修改</strong>，函数外部的变量不变。（如果一定要修改，可以使用 <code>global x</code>，x为全局变量名）</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">test</span>(<span class="params">a,b</span>):</span><br><span class="line">    a=a+<span class="number">1</span></span><br><span class="line">    b.append(<span class="number">13</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;inner a: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(a))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;inner b: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(b))</span><br><span class="line"></span><br><span class="line">a=<span class="number">5</span></span><br><span class="line">b=[<span class="number">10</span>,<span class="number">11</span>]</span><br><span class="line"></span><br><span class="line">test(a,b)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;outer a: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(a))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;outer b: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(b))</span><br></pre></td></tr></table></figure>
@@ -127,21 +127,15 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">inner a: <span class="number">6</span></span><br><span class="line">inner b: [<span class="number">10</span>, <span class="number">11</span>, <span class="number">13</span>]</span><br><span class="line">outer a: <span class="number">5</span></span><br><span class="line">outer b: [<span class="number">10</span>, <span class="number">11</span>, <span class="number">13</span>]</span><br></pre></td></tr></table></figure>
 <p>注意如果再次运行 <code>test(a,b)</code>，那么列表 b 中还会新增一个元素 13 ，为了避免出现问题，<strong>避免使用可变对象作为函数参数</strong>。我们可以在函数内部中定义新的局部可变对象，也可以直接读取或修改全局变量中的可变对象。</p>
 <h3 id="变量查找顺序">变量查找顺序</h3>
-<p>函数内部 – 父函数（如果有）-- 全局 – python 内置变量</p>
+<p>函数内部 – 父函数（如果有）– 全局 – python 内置变量</p>
 <p><strong>UnboundLocalError</strong> ： 函数先调用，后修改同名全局变量。</p>
-<h3 id="函数调用和修改同名全局变量（针对不可变变量）">函数调用和修改同名全局变量（针对不可变变量）</h3>
-<ol>
-<li>
-<p>光调用 ： python 认为是全局变量，没有问题</p>
-</li>
-<li>
-<p>光修改：  python 认为是局部变量（只是和全局变量同名），也没有问题</p>
-</li>
-<li>
-<p>调用+修改 ，分为两种情况</p>
+<h3 id="函数调用和修改同名全局变量针对不可变变量">函数调用和修改同名全局变量（针对不可变变量）</h3>
+<ol type="1">
+<li><p>光调用 ： python 认为是全局变量，没有问题</p></li>
+<li><p>光修改： python 认为是局部变量（只是和全局变量同名），也没有问题</p></li>
+<li><p>调用+修改 ，分为两种情况</p>
 <p>3.1 先改，后调用：python 认为是局部变量，python 认为是局部变量，没有问题</p>
-<p>3.2 先调用，后改：python 认为是修改全局变量，<strong>报错</strong>。</p>
-</li>
+<p>3.2 先调用，后改：python 认为是修改全局变量，<strong>报错</strong>。</p></li>
 </ol>
 <p>其实不用那么麻烦，命名的时候注意一点，<strong>避免函数内的变量名和全局变量同名</strong>就好了。</p>
 <h3 id="函数返回值">函数返回值</h3>
@@ -164,12 +158,12 @@
 <h3 id="字符串运算符">字符串运算符</h3>
 <ul>
 <li>+ : 连接字符串</li>
-<li>* : 重复，比如 a=“hello” , a*2 为 “hellohello&quot;</li>
-<li>[startnum:endnum] :  获取子字符串</li>
+<li>* : 重复，比如 a=“hello” , a*2 为 “hellohello”</li>
+<li>[startnum:endnum] : 获取子字符串</li>
 <li>in : 判断子字符串是否在大字符串中</li>
 <li>not in</li>
-<li>“”&quot;  “”&quot; : 允许跨行</li>
-<li>str.lower()  : 全部转为小写</li>
+<li>““” ““” : 允许跨行</li>
+<li>str.lower() : 全部转为小写</li>
 <li>str.upper() : 全部转为大写</li>
 <li>str.replace(old, new) : 替换字符串</li>
 </ul>
@@ -193,7 +187,7 @@
 </ul>
 <h2 id="递归函数">递归函数</h2>
 <p>递归函数有两点：</p>
-<ol>
+<ol type="1">
 <li>自己引用自己</li>
 <li>有一个明确的递归结束条件（不然就成死循环了）</li>
 </ol>
@@ -210,7 +204,7 @@
 <li>step : 步长，默认为1（正索引），-1 表示负索引</li>
 </ul>
 <p>注意：这里的正索引指的是<strong>方向从左到右</strong>，而不是单纯的索引号的增加。</p>
-<p>所以 <code>[:-1]</code>  表示从第一个位置，一直向右，读到倒数第二个位置（即不要最后一个）。<code>[-2:]</code> 表示提取最后两个位置</p>
+<p>所以 <code>[:-1]</code> 表示从第一个位置，一直向右，读到倒数第二个位置（即不要最后一个）。<code>[-2:]</code> 表示提取最后两个位置</p>
 <h2 id="列表排序">列表排序</h2>
 <p>简单列表</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a=[3,1,2]</span><br><span class="line">b=sorted(a,reverse=True/False)</span><br><span class="line">a.sort(reverse=True/False)</span><br></pre></td></tr></table></figure>
@@ -223,222 +217,214 @@
 <ul>
 <li>del a : 只是删除对象的一个引用</li>
 </ul>
-<h1>python 标准库</h1>
-<p><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/index.html">https://docs.python.org/zh-cn/3/library/index.html</a></p>
+<h1 id="python-标准库">python 标准库</h1>
+<p>https://docs.python.org/zh-cn/3/library/index.html</p>
 <h2 id="内置函数">内置函数</h2>
-<h3 id="enumerate-iterable-start-0"><code>enumerate</code>(<em>iterable</em>, <em>start=0</em>)</h3>
+<h3 id="enumerateiterable-start0"><code>enumerate</code>(<em>iterable</em>, <em>start=0</em>)</h3>
 <p>返回一个枚举对象。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>seasons = [<span class="string">&#x27;Spring&#x27;</span>, <span class="string">&#x27;Summer&#x27;</span>, <span class="string">&#x27;Fall&#x27;</span>, <span class="string">&#x27;Winter&#x27;</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">enumerate</span>(seasons)</span><br><span class="line">&lt;<span class="built_in">enumerate</span> <span class="built_in">object</span> at <span class="number">0x2ba732af1c40</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">list</span>(<span class="built_in">enumerate</span>(seasons))</span><br><span class="line">[(<span class="number">0</span>, <span class="string">&#x27;Spring&#x27;</span>), (<span class="number">1</span>, <span class="string">&#x27;Summer&#x27;</span>), (<span class="number">2</span>, <span class="string">&#x27;Fall&#x27;</span>), (<span class="number">3</span>, <span class="string">&#x27;Winter&#x27;</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">list</span>(<span class="built_in">enumerate</span>(seasons, start=<span class="number">1</span>))</span><br><span class="line">[(<span class="number">1</span>, <span class="string">&#x27;Spring&#x27;</span>), (<span class="number">2</span>, <span class="string">&#x27;Summer&#x27;</span>), (<span class="number">3</span>, <span class="string">&#x27;Fall&#x27;</span>), (<span class="number">4</span>, <span class="string">&#x27;Winter&#x27;</span>)]</span><br></pre></td></tr></table></figure>
 <p>等价于：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">enumerate</span>(<span class="params">sequence, start=<span class="number">0</span></span>):</span><br><span class="line">    n = start</span><br><span class="line">    <span class="keyword">for</span> elem <span class="keyword">in</span> sequence:</span><br><span class="line">        <span class="keyword">yield</span> n, elem</span><br><span class="line">        n += <span class="number">1</span></span><br></pre></td></tr></table></figure>
-<h3 id="zip-iterables"><code>zip</code>(*<em>iterables</em>)</h3>
+<h3 id="zipiterables"><code>zip</code>(**iterables*)</h3>
 <p>创建一个聚合了来自每个可迭代对象中的元素的<strong>元组</strong>的迭代器。</p>
-<p>**当所输入可迭代对象中最短的一个被耗尽时，迭代器将停止迭代。 **</p>
+<p><strong>当所输入可迭代对象中最短的一个被耗尽时，迭代器将停止迭代。 </strong></p>
 <p>相当于：（没看懂）</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">def zip(*iterables):</span><br><span class="line">    # zip(&#x27;ABCD&#x27;, &#x27;xy&#x27;) --&gt; Ax By</span><br><span class="line">    sentinel = object()</span><br><span class="line">    iterators = [iter(it) for it in iterables]</span><br><span class="line">    while iterators:</span><br><span class="line">        result = []</span><br><span class="line">        for it in iterators:</span><br><span class="line">            elem = next(it, sentinel)</span><br><span class="line">            if elem is sentinel:</span><br><span class="line">                return</span><br><span class="line">            result.append(elem)</span><br><span class="line">        yield tuple(result)</span><br></pre></td></tr></table></figure>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>x = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>y = [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>zipped = <span class="built_in">zip</span>(x, y)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">list</span>(zipped)</span><br><span class="line">[(<span class="number">1</span>, <span class="number">4</span>), (<span class="number">2</span>, <span class="number">5</span>), (<span class="number">3</span>, <span class="number">6</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">list</span>(<span class="built_in">zip</span>(*<span class="built_in">zip</span>(x, y))) <span class="comment">#返回原来的两个列表</span></span><br><span class="line">[(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>), (<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x2, y2 = <span class="built_in">zip</span>(*<span class="built_in">zip</span>(x, y))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x == <span class="built_in">list</span>(x2) <span class="keyword">and</span> y == <span class="built_in">list</span>(y2)</span><br><span class="line"><span class="literal">True</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>zip 也可以用于使用两个列表构建字典</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">73</span>]: mapping = <span class="built_in">dict</span>(<span class="built_in">zip</span>(<span class="built_in">range</span>(<span class="number">5</span>),<span class="built_in">reversed</span>(<span class="built_in">range</span>(<span class="number">5</span>))))</span><br><span class="line"></span><br><span class="line">In [<span class="number">74</span>]: mapping</span><br><span class="line">Out[<span class="number">74</span>]: &#123;<span class="number">0</span>: <span class="number">4</span>, <span class="number">1</span>: <span class="number">3</span>, <span class="number">2</span>: <span class="number">2</span>, <span class="number">3</span>: <span class="number">1</span>, <span class="number">4</span>: <span class="number">0</span>&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <h2 id="内置类型">内置类型</h2>
-<h3 id="数字类型-—-int-float-complex">数字类型 — int, float, complex</h3>
+<h3 id="数字类型-int-float-complex">数字类型 — int, float, complex</h3>
 <table>
-<thead>
-<tr>
-<th style="text-align:left"></th>
-<th style="text-align:left"></th>
-<th style="text-align:left"></th>
-<th style="text-align:left"></th>
-</tr>
-</thead>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 24%" />
+<col style="width: 3%" />
+<col style="width: 58%" />
+</colgroup>
 <tbody>
 <tr>
-<td style="text-align:left">运算</td>
-<td style="text-align:left">结果</td>
-<td style="text-align:left">注释</td>
-<td style="text-align:left">完整文档</td>
+<td style="text-align: left;">运算</td>
+<td style="text-align: left;">结果</td>
+<td style="text-align: left;">注释</td>
+<td style="text-align: left;">完整文档</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>x // y</code></td>
-<td style="text-align:left"><em>x</em> 和 <em>y</em> 的商数（整除）</td>
-<td style="text-align:left">整除</td>
-<td style="text-align:left"></td>
+<td style="text-align: left;"><code>x // y</code></td>
+<td style="text-align: left;"><em>x</em> 和 <em>y</em> 的商数（整除）</td>
+<td style="text-align: left;">整除</td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>x % y</code></td>
-<td style="text-align:left"><code>x / y</code> 的余数</td>
-<td style="text-align:left">(2)</td>
-<td style="text-align:left"></td>
+<td style="text-align: left;"><code>x % y</code></td>
+<td style="text-align: left;"><code>x / y</code> 的余数</td>
+<td style="text-align: left;">(2)</td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>abs(x)</code></td>
-<td style="text-align:left"><em>x</em> 的绝对值或大小</td>
-<td style="text-align:left"></td>
-<td style="text-align:left"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/functions.html#abs"><code>abs()</code></a></td>
+<td style="text-align: left;"><code>abs(x)</code></td>
+<td style="text-align: left;"><em>x</em> 的绝对值或大小</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/functions.html#abs"><code>abs()</code></a></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>divmod(x, y)</code></td>
-<td style="text-align:left"><code>(x // y, x % y)</code></td>
-<td style="text-align:left">(2)</td>
-<td style="text-align:left"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/functions.html#divmod"><code>divmod()</code></a></td>
+<td style="text-align: left;"><code>divmod(x, y)</code></td>
+<td style="text-align: left;"><code>(x // y, x % y)</code></td>
+<td style="text-align: left;">(2)</td>
+<td style="text-align: left;"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/functions.html#divmod"><code>divmod()</code></a></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>pow(x, y)</code></td>
-<td style="text-align:left"><em>x</em> 的 <em>y</em> 次幂</td>
-<td style="text-align:left">(5)</td>
-<td style="text-align:left"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/functions.html#pow"><code>pow()</code></a></td>
+<td style="text-align: left;"><code>pow(x, y)</code></td>
+<td style="text-align: left;"><em>x</em> 的 <em>y</em> 次幂</td>
+<td style="text-align: left;">(5)</td>
+<td style="text-align: left;"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/functions.html#pow"><code>pow()</code></a></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>x ** y</code></td>
-<td style="text-align:left"><em>x</em> 的 <em>y</em> 次幂</td>
-<td style="text-align:left">(5)</td>
-<td style="text-align:left"></td>
+<td style="text-align: left;"><code>x ** y</code></td>
+<td style="text-align: left;"><em>x</em> 的 <em>y</em> 次幂</td>
+<td style="text-align: left;">(5)</td>
+<td style="text-align: left;"></td>
 </tr>
 </tbody>
 </table>
 <p>注释：</p>
-<ol>
-<li>
-<p>也称为整数除法。 结果值是一个整数，但结果的类型不一定是 int。 运算结果总是向负无穷的方向舍入: <code>1//2</code> 为 <code>0</code>, <code>(-1)//2</code> 为 <code>-1</code>, <code>1//(-2)</code> 为 <code>-1</code> 而 <code>(-1)//(-2)</code> 为 <code>0</code>。</p>
-</li>
-<li>
-<p><strong>从浮点数转换为整数会被舍入</strong>；请参阅 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.floor"><code>math.floor()</code></a> 和 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.ceil"><code>math.ceil()</code></a> 函数查看转换的完整定义。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">int</span>(<span class="number">1.9</span>)</span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>float 也接受字符串 “nan” 和附带可选前缀 “+” 或 “-” 的 “inf” 分别表示非数字 (NaN) 以及正或负无穷。</p>
-</li>
-<li>
-<p>Python 将 <code>pow(0, 0)</code> 和 <code>0 ** 0</code> 定义为 <code>1</code>，这是编程语言的普遍做法。</p>
-</li>
+<ol type="1">
+<li><p>也称为整数除法。 结果值是一个整数，但结果的类型不一定是 int。 运算结果总是向负无穷的方向舍入: <code>1//2</code> 为 <code>0</code>, <code>(-1)//2</code> 为 <code>-1</code>, <code>1//(-2)</code> 为 <code>-1</code> 而 <code>(-1)//(-2)</code> 为 <code>0</code>。</p></li>
+<li><p><strong>从浮点数转换为整数会被舍入</strong>；请参阅 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.floor"><code>math.floor()</code></a> 和 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.ceil"><code>math.ceil()</code></a> 函数查看转换的完整定义。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">int</span>(<span class="number">1.9</span>)</span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure></li>
+<li><p>float 也接受字符串 “nan” 和附带可选前缀 “+” 或 “-” 的 “inf” 分别表示非数字 (NaN) 以及正或负无穷。</p></li>
+<li><p>Python 将 <code>pow(0, 0)</code> 和 <code>0 ** 0</code> 定义为 <code>1</code>，这是编程语言的普遍做法。</p></li>
 </ol>
 <p>浮点型类型还包括以下运算。</p>
 <table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
 <thead>
 <tr>
-<th style="text-align:left">运算</th>
-<th style="text-align:left">结果</th>
+<th style="text-align: left;">运算</th>
+<th style="text-align: left;">结果</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.trunc"><code>math.trunc(x)</code></a></td>
-<td style="text-align:left"><em>x</em> 截断为 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/numbers.html#numbers.Integral"><code>Integral</code></a></td>
+<td style="text-align: left;"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.trunc"><code>math.trunc(x)</code></a></td>
+<td style="text-align: left;"><em>x</em> 截断为 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/numbers.html#numbers.Integral"><code>Integral</code></a></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>round(x[, n]）</code></td>
-<td style="text-align:left"><em>x</em> 舍入到 <em>n</em> 位小数，半数值会舍入到偶数。 如果省略 <em>n</em>，则默认为 0。</td>
+<td style="text-align: left;"><code>round(x[, n]）</code></td>
+<td style="text-align: left;"><em>x</em> 舍入到 <em>n</em> 位小数，半数值会舍入到偶数。 如果省略 <em>n</em>，则默认为 0。</td>
 </tr>
 <tr>
-<td style="text-align:left"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.floor"><code>math.floor(x)</code></a></td>
-<td style="text-align:left">&lt;= <em>x</em> 的最大 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/numbers.html#numbers.Integral"><code>Integral</code></a></td>
+<td style="text-align: left;"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.floor"><code>math.floor(x)</code></a></td>
+<td style="text-align: left;">&lt;= <em>x</em> 的最大 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/numbers.html#numbers.Integral"><code>Integral</code></a></td>
 </tr>
 <tr>
-<td style="text-align:left"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.ceil"><code>math.ceil(x)</code></a></td>
-<td style="text-align:left">&gt;= <em>x</em> 的最小 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/numbers.html#numbers.Integral"><code>Integral</code></a></td>
+<td style="text-align: left;"><a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/math.html#math.ceil"><code>math.ceil(x)</code></a></td>
+<td style="text-align: left;">&gt;= <em>x</em> 的最小 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/numbers.html#numbers.Integral"><code>Integral</code></a></td>
 </tr>
 </tbody>
 </table>
-<h3 id="序列类型-–-list-tuple-range">序列类型 – list, tuple, range</h3>
+<h3 id="序列类型-list-tuple-range">序列类型 – list, tuple, range</h3>
 <h4 id="通用序列操作">通用序列操作</h4>
 <p>此表按优先级升序列出了序列操作。 在表格中，<em>s</em> 和 <em>t</em> 是具有相同类型的序列，<em>n</em>, <em>i</em>, <em>j</em> 和 <em>k</em> 是整数而 <em>x</em> 是任何满足 <em>s</em> 所规定的类型和值限制的任意对象。</p>
 <table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 68%" />
+<col style="width: 6%" />
+</colgroup>
 <thead>
 <tr>
-<th style="text-align:left">运算</th>
-<th style="text-align:left">结果</th>
-<th style="text-align:left">注释</th>
+<th style="text-align: left;">运算</th>
+<th style="text-align: left;">结果</th>
+<th style="text-align: left;">注释</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left"><code>x in s</code></td>
-<td style="text-align:left">如果 <em>s</em> 中的某项等于 <em>x</em> 则结果为 <code>True</code>，否则为 <code>False</code></td>
-<td style="text-align:left">(1)</td>
+<td style="text-align: left;"><code>x in s</code></td>
+<td style="text-align: left;">如果 <em>s</em> 中的某项等于 <em>x</em> 则结果为 <code>True</code>，否则为 <code>False</code></td>
+<td style="text-align: left;">(1)</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>x not in s</code></td>
-<td style="text-align:left">如果 <em>s</em> 中的某项等于 <em>x</em> 则结果为 <code>False</code>，否则为 <code>True</code></td>
-<td style="text-align:left">(1)</td>
+<td style="text-align: left;"><code>x not in s</code></td>
+<td style="text-align: left;">如果 <em>s</em> 中的某项等于 <em>x</em> 则结果为 <code>False</code>，否则为 <code>True</code></td>
+<td style="text-align: left;">(1)</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>s + t</code></td>
-<td style="text-align:left"><em>s</em> 与 <em>t</em> 相拼接</td>
-<td style="text-align:left">(6)(7)</td>
+<td style="text-align: left;"><code>s + t</code></td>
+<td style="text-align: left;"><em>s</em> 与 <em>t</em> 相拼接</td>
+<td style="text-align: left;">(6)(7)</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>s * n</code> 或 <code>n * s</code></td>
-<td style="text-align:left">相当于 <em>s</em> 与自身进行 <em>n</em> 次拼接</td>
-<td style="text-align:left">(2)(7)</td>
+<td style="text-align: left;"><code>s * n</code> 或 <code>n * s</code></td>
+<td style="text-align: left;">相当于 <em>s</em> 与自身进行 <em>n</em> 次拼接</td>
+<td style="text-align: left;">(2)(7)</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>s[i]</code></td>
-<td style="text-align:left"><em>s</em> 的第 <em>i</em> 项，起始为 0</td>
-<td style="text-align:left">(3)</td>
+<td style="text-align: left;"><code>s[i]</code></td>
+<td style="text-align: left;"><em>s</em> 的第 <em>i</em> 项，起始为 0</td>
+<td style="text-align: left;">(3)</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>s[i:j]</code></td>
-<td style="text-align:left"><em>s</em> 从 <em>i</em> 到 <em>j</em> 的切片</td>
-<td style="text-align:left">(3)(4)</td>
+<td style="text-align: left;"><code>s[i:j]</code></td>
+<td style="text-align: left;"><em>s</em> 从 <em>i</em> 到 <em>j</em> 的切片</td>
+<td style="text-align: left;">(3)(4)</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>s[i:j:k]</code></td>
-<td style="text-align:left"><em>s</em> 从 <em>i</em> 到 <em>j</em> 步长为 <em>k</em> 的切片</td>
-<td style="text-align:left">(3)(5)</td>
+<td style="text-align: left;"><code>s[i:j:k]</code></td>
+<td style="text-align: left;"><em>s</em> 从 <em>i</em> 到 <em>j</em> 步长为 <em>k</em> 的切片</td>
+<td style="text-align: left;">(3)(5)</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>len(s)</code></td>
-<td style="text-align:left"><em>s</em> 的长度</td>
-<td style="text-align:left"></td>
+<td style="text-align: left;"><code>len(s)</code></td>
+<td style="text-align: left;"><em>s</em> 的长度</td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>min(s)</code></td>
-<td style="text-align:left"><em>s</em> 的最小项</td>
-<td style="text-align:left"></td>
+<td style="text-align: left;"><code>min(s)</code></td>
+<td style="text-align: left;"><em>s</em> 的最小项</td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>max(s)</code></td>
-<td style="text-align:left"><em>s</em> 的最大项</td>
-<td style="text-align:left"></td>
+<td style="text-align: left;"><code>max(s)</code></td>
+<td style="text-align: left;"><em>s</em> 的最大项</td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>s.index(x[, i[, j]])</code></td>
-<td style="text-align:left"><em>x</em> 在 <em>s</em> 中首次出现项的索引号（索引号在 <em>i</em> 或其后且在 <em>j</em> 之前）</td>
-<td style="text-align:left">(8)</td>
+<td style="text-align: left;"><code>s.index(x[, i[, j]])</code></td>
+<td style="text-align: left;"><em>x</em> 在 <em>s</em> 中首次出现项的索引号（索引号在 <em>i</em> 或其后且在 <em>j</em> 之前）</td>
+<td style="text-align: left;">(8)</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>s.count(x)</code></td>
-<td style="text-align:left"><em>x</em> 在 <em>s</em> 中出现的总次数</td>
-<td style="text-align:left"></td>
+<td style="text-align: left;"><code>s.count(x)</code></td>
+<td style="text-align: left;"><em>x</em> 在 <em>s</em> 中出现的总次数</td>
+<td style="text-align: left;"></td>
 </tr>
 </tbody>
 </table>
-<ol start="2">
-<li>
-<p>注意：这里的<code>*</code> 号并不是拷贝，而是<strong>多次引用</strong>。例如下式，由于是引用，修改任一元素都是对这一个空列表的修改。</p>
+<ol start="2" type="1">
+<li><p>注意：这里的<code>*</code> 号并不是拷贝，而是<strong>多次引用</strong>。例如下式，由于是引用，修改任一元素都是对这一个空列表的修改。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; lists = [[]] * 3</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; lists</span></span><br><span class="line">[[], [], []]</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; lists[0].append(3)</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; lists</span></span><br><span class="line">[[3], [3], [3]]</span><br></pre></td></tr></table></figure>
 <p>你可以用以下方式创建以不同列表为元素的列表:</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>lists = [[] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>lists[<span class="number">0</span>].append(<span class="number">3</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>lists[<span class="number">1</span>].append(<span class="number">5</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>lists[<span class="number">2</span>].append(<span class="number">7</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>lists</span><br><span class="line">[[<span class="number">3</span>], [<span class="number">5</span>], [<span class="number">7</span>]]</span><br></pre></td></tr></table></figure>
 <p>但是如果是可变对象，则没有影响</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">16</span>]: a = [<span class="number">0</span>] * <span class="number">3</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">17</span>]: a[<span class="number">0</span>] = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">18</span>]: a</span><br><span class="line">Out[<span class="number">18</span>]: [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>切片中的 i 或 j 如果为负值， 索引号会被替换为 <code>len(s) + i</code> 或 <code>len(s) + j</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">16</span>]: a = [<span class="number">0</span>] * <span class="number">3</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">17</span>]: a[<span class="number">0</span>] = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">18</span>]: a</span><br><span class="line">Out[<span class="number">18</span>]: [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br></pre></td></tr></table></figure></li>
+<li><p>切片中的 i 或 j 如果为负值， 索引号会被替换为 <code>len(s) + i</code> 或 <code>len(s) + j</code></p>
 <p>例如 a[-2:] 中的 -2 会被替换为 len(a)-2</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a=<span class="built_in">list</span>(<span class="built_in">range</span>(<span class="number">1</span>,<span class="number">11</span>))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a[-<span class="number">2</span>:]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a[<span class="built_in">len</span>(a)-<span class="number">2</span>:]</span><br><span class="line">[<span class="number">9</span>, <span class="number">10</span>]</span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>s 从i 到 j 的切片需要满足<strong>i &lt;j</strong>。如果 i 或 j 大于 <code>len(s)</code> ，则使用 <code>len(s)</code>。 如果 <em>i</em> 被省略或为 <code>None</code>，则使用 <code>0</code>。 如果 <em>j</em> 被省略或为 <code>None</code>，则使用 <code>len(s)</code>。 如果 <em>i</em> 大于等于 <em>j</em>，则切片为空。</p>
-</li>
-<li>
-<p>拼接不可变序列总是会生成新的对象。 这意味着通过重复拼接来构建序列的运行时开销将会基于序列总长度的乘方。 想要获得线性的运行时开销，你必须改用下列替代方案之一</p>
-<p>这里主要讨论<strong>拼接字符串</strong>。当我们使用加号(+)操作符去连接大量的字符串的时候是非常低效率的， 因为加号连接会引起内存复制以及垃圾回收操作。</p>
-</li>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a=<span class="built_in">list</span>(<span class="built_in">range</span>(<span class="number">1</span>,<span class="number">11</span>))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a[-<span class="number">2</span>:]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a[<span class="built_in">len</span>(a)-<span class="number">2</span>:]</span><br><span class="line">[<span class="number">9</span>, <span class="number">10</span>]</span><br></pre></td></tr></table></figure></li>
+<li><p>s 从i 到 j 的切片需要满足<strong>i &lt;j</strong>。如果 i 或 j 大于 <code>len(s)</code> ，则使用 <code>len(s)</code>。 如果 <em>i</em> 被省略或为 <code>None</code>，则使用 <code>0</code>。 如果 <em>j</em> 被省略或为 <code>None</code>，则使用 <code>len(s)</code>。 如果 <em>i</em> 大于等于 <em>j</em>，则切片为空。</p></li>
+<li><p>拼接不可变序列总是会生成新的对象。 这意味着通过重复拼接来构建序列的运行时开销将会基于序列总长度的乘方。 想要获得线性的运行时开销，你必须改用下列替代方案之一</p>
+<p>这里主要讨论<strong>拼接字符串</strong>。当我们使用加号(+)操作符去连接大量的字符串的时候是非常低效率的， 因为加号连接会引起内存复制以及垃圾回收操作。</p></li>
 </ol>
-<h1>将错误信息输出到标准错误输出（stderr）</h1>
-<h3 id="方法1：使用-print-的-file-参数">方法1：使用 print 的 file 参数</h3>
+<h1 id="将错误信息输出到标准错误输出stderr">将错误信息输出到标准错误输出（stderr）</h1>
+<h3 id="方法1使用-print-的-file-参数">方法1：使用 print 的 file 参数</h3>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将错误信息输出到 stderr</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Error: duplicated id <span class="subst">&#123;f[<span class="number">0</span>]&#125;</span> in <span class="subst">&#123;sys.argv[<span class="number">2</span>]&#125;</span>&quot;</span>, file=sys.stderr)</span><br><span class="line">sys.exit(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<h3 id="方法2：使用-sys-stderr-write">方法2：使用 sys.stderr.write()</h3>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># 直接写入 stderr</span></span><br><span class="line">sys.stderr.write(<span class="string">f&quot;Error: duplicated id <span class="subst">&#123;f[<span class="number">0</span>]&#125;</span> in <span class="subst">&#123;sys.argv[<span class="number">2</span>]&#125;</span>\n&quot;</span>)</span><br><span class="line">sys.exit(<span class="number">1</span>)</span><br></pre></td></tr></table></figure> 
+<h3 id="方法2使用-sys.stderr.write">方法2：使用 sys.stderr.write()</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># 直接写入 stderr</span></span><br><span class="line">sys.stderr.write(<span class="string">f&quot;Error: duplicated id <span class="subst">&#123;f[<span class="number">0</span>]&#125;</span> in <span class="subst">&#123;sys.argv[<span class="number">2</span>]&#125;</span>\n&quot;</span>)</span><br><span class="line">sys.exit(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+ 
       <!-- reward -->
       
     </div>
@@ -863,8 +849,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

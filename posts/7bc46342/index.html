@@ -96,14 +96,20 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>当系谱中个体-父-母三者均有基因型时，计算该trios的孟德尔错误率。</p>
+  <p>当系谱中个体-父-母三者均有基因型时，计算该trios的孟德尔错误率。</p>
 <span id="more"></span>
-<h1>原理简介</h1>
+<h1 id="原理简介">原理简介</h1>
 <p>上一篇见 <a href="https://vincere.fun/posts/42752926/">基于芯片数据的亲子鉴定分析代码</a></p>
 <p>原理非常简单，就是孟德尔定律，之前只是针对亲子两个个体之间统计孟德尔错误位点，现在这个程序就是计算父母子三者之间不符合孟德尔定理的位点数目和比例，举个例子，如果父母的基因型都是 AA，子代基因型只要不是 AA ，就算一个孟德尔错误位点。</p>
 <p>但是想要<strong>快速</strong>统计trios的孟德尔错误位点并不容易，假设父母子在某个位点均不为缺失，那么父母子总共可能的基因型情况有 18 种（不区分两个亲本），其中不符合孟德尔定律的有 8 种情况，那么我们怎么快速统计孟德尔错误位点总数呢？</p>
 <p>下表为trios所有基因型情况的统计（这里设 1 和 3 为两种纯和子，2 为杂合子）。</p>
 <table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 41%" />
+<col style="width: 41%" />
+</colgroup>
 <thead>
 <tr>
 <th>亲本1</th>
@@ -154,6 +160,14 @@
 <p>根据我之前的做法，我是通过亲子对基因型的乘积来判断这个位点是否为孟德尔错误位点，这里我同样沿用了这种做法。</p>
 <p>首先将后代/个体的基因型编码改为从 1 2 3 分别改为 5 7 8，亲本基因型编码不变，此时 trios所有基因型情况和 trios 基因型乘积情况见下表。</p>
 <table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
 <thead>
 <tr>
 <th>亲本1</th>
@@ -215,7 +229,7 @@
 </tr>
 </tbody>
 </table>
-<p>我们发现，此时符合孟德尔定律的 trios 基因型乘积和 违背孟德尔定律的 trios 基因型乘积之间<strong>没有重叠的数字</strong>，然后你就同样可以直接根据<strong>trios 基因型的乘积</strong>来判断该位点是否符合孟德尔定律。此时，8 种违背孟德尔定律的基因型情况对应的基因型乘积为 ${7,8,15,16,24,30,45,63}$ 。</p>
+<p>我们发现，此时符合孟德尔定律的 trios 基因型乘积和 违背孟德尔定律的 trios 基因型乘积之间<strong>没有重叠的数字</strong>，然后你就同样可以直接根据<strong>trios 基因型的乘积</strong>来判断该位点是否符合孟德尔定律。此时，8 种违背孟德尔定律的基因型情况对应的基因型乘积为 <span class="math inline">\(\{7,8,15,16,24,30,45,63\}\)</span> 。</p>
  
       <!-- reward -->
       
@@ -641,8 +655,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

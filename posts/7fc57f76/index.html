@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">7.8k</span>
+            <span class="post-count">7.7k</span>
         </span>
     </span>
 
@@ -96,763 +96,739 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>在前面的章节中，我们提到了 BLP 方法需要已知固定效应的值，而这在实践中往往不可能实现，由此引出 BLUP 方法，这应该也是本系列的最后一篇。</p>
+  <p>在前面的章节中，我们提到了 BLP 方法需要已知固定效应的值，而这在实践中往往不可能实现，由此引出 BLUP 方法，这应该也是本系列的最后一篇。</p>
 <span id="more"></span>
-<h1>BLUP</h1>
-<p>我们先看 BLUP 方法的一般推导，假设我们想要预测一个随机变量 $w$ ，我们只知道其均值为 $\mathbf{k}^{\prime} \boldsymbol{\beta}$ ，方差为 $v$ ，其与 $\mathbf{y}^{\prime}$ 的协方差为 $Cov(w, \mathbf{y}^{\prime}) = \mathbf{c}^{\prime}$ ，我们该如何取预测 $w$ 呢？</p>
-<p>一种可行的方案是我们找到一个关于 $\mathbf{y}$ 的线性函数，其均值为  $\mathbf{k}^{\prime} \boldsymbol{\beta}$ （即无偏），并且其在所有线性无偏估计值中具有最小的<strong>预测误差方差</strong>，这种方法我们称为<strong>最佳线性无偏预测法 (BLUP)</strong> 。</p>
-<p>假设预测函数为 $\mathbf{a’y}$ ，其期望为 $E(\mathbf{a}^{\prime} \mathbf{y})=\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta}$ ，我们需要使之为   $\mathbf{k}^{\prime} \boldsymbol{\beta}$  ，即 $\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta} = \mathbf{k}^{\prime} \boldsymbol{\beta}$ 对于所有可能的 $\boldsymbol{\beta}$ 恒成立，因此存在<br>
-$$<br>
-\mathbf{a}^{\prime} \mathbf{X}=\mathbf{k}^{\prime}<br>
-$$<br>
-预测误差方差为下式，其中 $v = Var(w)$<br>
-$$<br>
-Var(\mathbf{a’y}-w) = \mathbf{a’Va} - 2 \mathbf{a’c}+v<br>
-$$<br>
-构建拉格朗日函数如下<br>
-$$<br>
-\mathbf{L} = 0.5 (\mathbf{a’Va} - 2 \mathbf{a’c}+v) + (\mathbf{a}^{\prime} \mathbf{X}-\mathbf{k}^{\prime}) \boldsymbol{\theta}<br>
-$$<br>
-分别对 $\mathbf{a}$ 和 $\boldsymbol{\theta}$ 求偏导，使之为 0 ，得到<br>
-$$<br>
-\begin{aligned}<br>
-&amp;\partial \mathbf{L} / \partial \mathbf{a}= \mathbf{V} \mathbf{a} - \mathbf{c} +\mathbf{X} \boldsymbol{\theta}= \mathbf{0} \<br>
-&amp;\partial \mathbf{L} / \partial \boldsymbol{\theta}=\mathbf{X’a-k} = \mathbf{0}<br>
-\end{aligned}<br>
-$$<br>
-整理一下，我们得到方程组如下<br>
-$$<br>
-\left(\begin{array}{ll}<br>
-\mathbf{V} &amp; \mathbf{X} \<br>
-\mathbf{X}^{\prime} &amp; 0<br>
-\end{array}\right)\left(\begin{array}{l}<br>
-\mathbf{a} \<br>
-\boldsymbol{\theta}<br>
-\end{array}\right)=\left(\begin{array}{l}<br>
-\mathbf{c} \<br>
-\mathbf{k}<br>
-\end{array}\right)<br>
-$$<br>
-这个方程组和广义最小二乘的方程组很相似。下面我们开始求解，对第一个方程进行变换，得到<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta} &amp;= \mathbf{c} \<br>
-\mathbf{a}  &amp;= \mathbf{V^{-1}(c-X \boldsymbol{\theta}}) \<br>
-\mathbf{X’a} &amp;= \mathbf{X’V^{-1}(c-X \boldsymbol{\theta}}) \<br>
-\mathbf{k}  &amp;= \mathbf{X’V^{-1}(c-X \boldsymbol{\theta}}) \</p>
-<p>\end{aligned}<br>
-$$<br>
-因此我们得到了一个只关于 $\boldsymbol{\theta}$ 的方程组<br>
-$$<br>
-\mathbf{X’V^{-1}X \boldsymbol{\theta}} = \mathbf{X’V^{-1}c-k}<br>
-$$<br>
-我们需要先证明这个方程组相容，我们只需要证明对于任何一个广义逆 $\mathbf{ (X’V^{-1}X)^{-} }$ ，$\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}(X’V^{-1}c-k)=X’V^{-1}c-k}$ 均成立即可。<strong>假设  $\mathbf{k}^{\prime} \boldsymbol{\beta}$ 可估计</strong>，则必然存在某个  $\mathbf{a_{0}}$ 向量使得  $\mathbf{k = X’a_{0}}$ ，因此上式可以写成  $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}(X’V^{-1}c-X’a_{0})=X’V^{-1}c-X’a_{0}}$ 。我们设这里的 $\mathbf{A=V^{-1/2}X}$ ，这里的 $\mathbf{V^{-1/2}}$ 是 $\mathbf{V^{1/2}}$ 的逆矩阵，易得 $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}X’} = \mathbf{A’A(A’A)^{-}A’V^{1/2}} = \mathbf{A’V^{1/2}} =  \mathbf{X’V^{-1/2} V^{1/2}} = \mathbf{X’}$ ，因此得证   $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}(X’V^{-1}c-X’a_{0})=X’V^{-1}c-X’a_{0}}$  ，即我们证明这个方程组相容。</p>
-<p>因此  $\boldsymbol{\theta}$  的一个解为<br>
-$$<br>
-\mathbf{(X’V^{-1}X)^{-}(X’V^{-1}c-k)}<br>
-$$<br>
-我们将其带入到第一个方程 $\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta} = \mathbf{c}$  ，得到<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{a}&amp;=-\mathbf{V}^{-1} \mathbf{X} \boldsymbol{\theta}+\mathbf{V}^{-1} \mathbf{c} \<br>
-&amp;=\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{k}-\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{c}+\mathbf{V}^{-1} \mathbf{c}<br>
-\end{aligned}<br>
-$$<br>
-此时我们的预测值为 （这里需要<strong>设定 $\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}$ 同样是一个对称矩阵</strong> ）<br>
-$$<br>
-\mathbf{a}^{\prime} \mathbf{y}=\mathbf{k}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}+\mathbf{c}^{\prime} \mathbf{V}^{-1}\left[\mathbf{y}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}\right]<br>
-$$<br>
-由于 $\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}=\boldsymbol{\beta}^{o}$ ，所以预测值可以写为<br>
-$$<br>
-\hat{w} = \mathbf{k}^{\prime} \boldsymbol{\beta}^{o}+\mathbf{c}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}^{o}\right)<br>
-$$<br>
-我们注意到，如果 $\mathbf{k}^{\prime} \boldsymbol{\beta}=0$ 或者如果 $\boldsymbol{\beta}$ 已知，那么此时的预测值就是 $\mathbf{c}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}^{o}\right)$ ，就是选择指数法的预测公式。因此，<strong>BLUP 就是用 $\boldsymbol{\beta}^{0}$ 替换 $\boldsymbol{\beta}$ 的 BLP</strong>  。</p>
-<p>从元素推广到向量，得到<br>
-$$<br>
-\mathbf{\hat{w}} = \mathbf{K}^{\prime} \boldsymbol{\beta}^{o}+\mathbf{C}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}^{o}\right)<br>
-$$<br>
-其中，$\mathbf{C} = Cov(\mathbf{y}, \mathbf{w}^{\prime})$ 。</p>
+<h1 id="blup">BLUP</h1>
+<p>我们先看 BLUP 方法的一般推导，假设我们想要预测一个随机变量 <span class="math inline">\(w\)</span> ，我们只知道其均值为 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> ，方差为 <span class="math inline">\(v\)</span> ，其与 <span class="math inline">\(\mathbf{y}^{\prime}\)</span> 的协方差为 <span class="math inline">\(Cov(w, \mathbf{y}^{\prime}) = \mathbf{c}^{\prime}\)</span> ，我们该如何取预测 <span class="math inline">\(w\)</span> 呢？</p>
+<p>一种可行的方案是我们找到一个关于 <span class="math inline">\(\mathbf{y}\)</span> 的线性函数，其均值为 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> （即无偏），并且其在所有线性无偏估计值中具有最小的<strong>预测误差方差</strong>，这种方法我们称为<strong>最佳线性无偏预测法 (BLUP)</strong> 。</p>
+假设预测函数为 <span class="math inline">\(\mathbf{a&#39;y}\)</span> ，其期望为 <span class="math inline">\(E(\mathbf{a}^{\prime} \mathbf{y})=\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta}\)</span> ，我们需要使之为 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> ，即 <span class="math inline">\(\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta} = \mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> 对于所有可能的 <span class="math inline">\(\boldsymbol{\beta}\)</span> 恒成立，因此存在
+<span class="math display">\[
+\mathbf{a}^{\prime} \mathbf{X}=\mathbf{k}^{\prime}
+\]</span>
+预测误差方差为下式，其中 <span class="math inline">\(v = Var(w)\)</span>
+<span class="math display">\[
+Var(\mathbf{a&#39;y}-w) = \mathbf{a&#39;Va} - 2 \mathbf{a&#39;c}+v
+\]</span>
+构建拉格朗日函数如下
+<span class="math display">\[
+\mathbf{L} = 0.5 (\mathbf{a&#39;Va} - 2 \mathbf{a&#39;c}+v) + (\mathbf{a}^{\prime} \mathbf{X}-\mathbf{k}^{\prime}) \boldsymbol{\theta}
+\]</span>
+分别对 <span class="math inline">\(\mathbf{a}\)</span> 和 <span class="math inline">\(\boldsymbol{\theta}\)</span> 求偏导，使之为 0 ，得到
+<span class="math display">\[
+\begin{aligned}
+&amp;\partial \mathbf{L} / \partial \mathbf{a}= \mathbf{V} \mathbf{a} - \mathbf{c} +\mathbf{X} \boldsymbol{\theta}= \mathbf{0} \\
+&amp;\partial \mathbf{L} / \partial \boldsymbol{\theta}=\mathbf{X’a-k} = \mathbf{0}
+\end{aligned}
+\]</span>
+整理一下，我们得到方程组如下
+<span class="math display">\[
+\left(\begin{array}{ll}
+\mathbf{V} &amp; \mathbf{X} \\
+\mathbf{X}^{\prime} &amp; 0
+\end{array}\right)\left(\begin{array}{l}
+\mathbf{a} \\
+\boldsymbol{\theta}
+\end{array}\right)=\left(\begin{array}{l}
+\mathbf{c} \\
+\mathbf{k}
+\end{array}\right)
+\]</span>
+这个方程组和广义最小二乘的方程组很相似。下面我们开始求解，对第一个方程进行变换，得到
+$$
+<span class="math display">\[\begin{aligned}
+\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta} &amp;= \mathbf{c} \\
+\mathbf{a}  &amp;= \mathbf{V^{-1}(c-X \boldsymbol{\theta}}) \\
+\mathbf{X&#39;a} &amp;= \mathbf{X&#39;V^{-1}(c-X \boldsymbol{\theta}}) \\
+\mathbf{k}  &amp;= \mathbf{X&#39;V^{-1}(c-X \boldsymbol{\theta}}) \\
+
+\end{aligned}\]</span>
+<p><span class="math display">\[
+因此我们得到了一个只关于 $\boldsymbol{\theta}$ 的方程组
+\]</span>
+ = 
+$$
+我们需要先证明这个方程组相容，我们只需要证明对于任何一个广义逆 <span class="math inline">\(\mathbf{ (X&#39;V^{-1}X)^{-} }\)</span> ，<span class="math inline">\(\mathbf{(X&#39;V^{-1}X) (X&#39;V^{-1}X)^{-}(X&#39;V^{-1}c-k)=X&#39;V^{-1}c-k}\)</span> 均成立即可。<strong>假设 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> 可估计</strong>，则必然存在某个 <span class="math inline">\(\mathbf{a_{0}}\)</span> 向量使得 <span class="math inline">\(\mathbf{k = X&#39;a_{0}}\)</span> ，因此上式可以写成 <span class="math inline">\(\mathbf{(X&#39;V^{-1}X) (X&#39;V^{-1}X)^{-}(X&#39;V^{-1}c-X&#39;a_{0})=X&#39;V^{-1}c-X&#39;a_{0}}\)</span> 。我们设这里的 <span class="math inline">\(\mathbf{A=V^{-1/2}X}\)</span> ，这里的 <span class="math inline">\(\mathbf{V^{-1/2}}\)</span> 是 <span class="math inline">\(\mathbf{V^{1/2}}\)</span> 的逆矩阵，易得 <span class="math inline">\(\mathbf{(X&#39;V^{-1}X) (X&#39;V^{-1}X)^{-}X&#39;} = \mathbf{A&#39;A(A&#39;A)^{-}A&#39;V^{1/2}} = \mathbf{A&#39;V^{1/2}} =  \mathbf{X&#39;V^{-1/2} V^{1/2}} = \mathbf{X&#39;}\)</span> ，因此得证 <span class="math inline">\(\mathbf{(X&#39;V^{-1}X) (X&#39;V^{-1}X)^{-}(X&#39;V^{-1}c-X&#39;a_{0})=X&#39;V^{-1}c-X&#39;a_{0}}\)</span> ，即我们证明这个方程组相容。</p>
+<p>因此 <span class="math inline">\(\boldsymbol{\theta}\)</span> 的一个解为
+<span class="math display">\[
+\mathbf{(X&#39;V^{-1}X)^{-}(X&#39;V^{-1}c-k)}
+\]</span>
+我们将其带入到第一个方程 <span class="math inline">\(\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta} = \mathbf{c}\)</span> ，得到
+<span class="math display">\[
+\begin{aligned}
+\mathbf{a}&amp;=-\mathbf{V}^{-1} \mathbf{X} \boldsymbol{\theta}+\mathbf{V}^{-1} \mathbf{c} \\
+&amp;=\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{k}-\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{c}+\mathbf{V}^{-1} \mathbf{c}
+\end{aligned}
+\]</span>
+此时我们的预测值为 （这里需要<strong>设定 <span class="math inline">\(\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\)</span> 同样是一个对称矩阵</strong> ）
+<span class="math display">\[
+\mathbf{a}^{\prime} \mathbf{y}=\mathbf{k}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}+\mathbf{c}^{\prime} \mathbf{V}^{-1}\left[\mathbf{y}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}\right]
+\]</span>
+由于 <span class="math inline">\(\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}=\boldsymbol{\beta}^{o}\)</span> ，所以预测值可以写为
+<span class="math display">\[
+\hat{w} = \mathbf{k}^{\prime} \boldsymbol{\beta}^{o}+\mathbf{c}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}^{o}\right)
+\]</span>
+我们注意到，如果 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}=0\)</span> 或者如果 <span class="math inline">\(\boldsymbol{\beta}\)</span> 已知，那么此时的预测值就是 <span class="math inline">\(\mathbf{c}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}^{o}\right)\)</span> ，就是选择指数法的预测公式。因此，<strong>BLUP 就是用 <span class="math inline">\(\boldsymbol{\beta}^{0}\)</span> 替换 <span class="math inline">\(\boldsymbol{\beta}\)</span> 的 BLP</strong> 。</p>
+<p>从元素推广到向量，得到
+<span class="math display">\[
+\mathbf{\hat{w}} = \mathbf{K}^{\prime} \boldsymbol{\beta}^{o}+\mathbf{C}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}^{o}\right)
+\]</span>
+其中，<span class="math inline">\(\mathbf{C} = Cov(\mathbf{y}, \mathbf{w}^{\prime})\)</span> 。</p>
 <h2 id="方差及协方差">方差及协方差</h2>
-<p>我们现在来看一些有用的方差和协方差，我们有<br>
-$$<br>
-\mathbf{\hat{w}}=\left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{y}<br>
-$$<br>
-<strong>假设 $\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}$ 是一个对称矩阵，并且是一个自反广义逆矩阵</strong>。因此我们有<br>
-$$<br>
-\begin{aligned}<br>
-\operatorname{Var}(\hat{\mathbf{w}})<br>
-=&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{V} \left(\mathbf{V^{-1}X(X’V^{-1}X)^{-}K + V^{-1}C - V^{-1}X(X’V^{-1}X)^{-}X’V^{-1}C}\right) \<br>
-=&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}<br>
-+\mathbf{C}^{\prime}<br>
--\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \right)<br>
-\left(\mathbf{V^{-1}X(X’V^{-1}X)^{-}K + V^{-1}C - V^{-1}X(X’V^{-1}X)^{-}X’V^{-1}C}\right) \</p>
-<p>=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}</p>
-<ul>
-<li>\mathbf{C}^{\prime}\mathbf{V^{-1}X(X’V^{-1}X)^{-}K}</li>
-</ul>
-<ul>
-<li>\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\mathbf{K} \<br>
-&amp; \quad +\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V^{-1}C}</li>
-</ul>
-<ul>
-<li>\mathbf{C’V^{-1}C} - \mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V^{-1}C} \<br>
-&amp; \quad -\mathbf{K’}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\mathbf{X’V^{-1}C}- \mathbf{C’ V^{-1}X(X’V^{-1}X)^{-}X’V^{-1}C} + \mathbf{C’V^{-1}X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\mathbf{X’V^{-1}C} \</li>
-</ul>
-<p>=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>
-&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>
-\end{aligned}<br>
-$$<br>
-协方差<br>
-$$<br>
-\begin{aligned}<br>
-\operatorname{Cov}\left(\hat{\mathbf{w}}, \mathbf{w}^{\prime}\right)<br>
-=&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \operatorname{Cov}\left(\mathbf{y}, \mathbf{w}^{\prime}\right) \</p>
-<p>=&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{C} \</p>
-<p>=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C}+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>
-&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>
-=&amp; \operatorname{Var}(\hat{\mathbf{w}}) \<br>
-\end{aligned}<br>
-$$<br>
-预测误差方差为<br>
-$$<br>
-\begin{aligned}<br>
-\operatorname{Var}(\hat{\mathbf{w}}-\mathbf{w})<br>
-=&amp; \operatorname{Var}(\mathbf{\hat{w}})-\operatorname{Cov}\left(\hat{\mathbf{w}}, \mathbf{w}^{\prime}\right)-\operatorname{Cov}\left(\mathbf{w}, \hat{\mathbf{w}}^{\prime}\right)+\operatorname{Var}(\mathbf{w}) \</p>
-<p>=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>
-&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>
-&amp;+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} +\mathbf{G}<br>
-\end{aligned}<br>
-$$</p>
-<h2 id="BLUP-的性质">BLUP 的性质</h2>
-<ol>
-<li>在所有的线性无偏预测值中，BLUP 最大化了 $\hat{w}<em>{i}$ 和 $w</em>{i}$ 的相关</li>
-<li><strong>BLUP</strong> 具有不变性，即 $\text{BLUP of }\mathbf{m^{\prime}w} = \mathbf{m^{\prime}\hat{w}}$</li>
+我们现在来看一些有用的方差和协方差，我们有
+<span class="math display">\[
+\mathbf{\hat{w}}=\left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{y}
+\]</span>
+<strong>假设 <span class="math inline">\(\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\)</span> 是一个对称矩阵，并且是一个自反广义逆矩阵</strong>。因此我们有
+$$
+<span class="math display">\[\begin{aligned}
+\operatorname{Var}(\hat{\mathbf{w}})
+=&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{V} \left(\mathbf{V^{-1}X(X&#39;V^{-1}X)^{-}K + V^{-1}C - V^{-1}X(X&#39;V^{-1}X)^{-}X&#39;V^{-1}C}\right) \\
+=&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}
++\mathbf{C}^{\prime} 
+-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \right)
+\left(\mathbf{V^{-1}X(X&#39;V^{-1}X)^{-}K + V^{-1}C - V^{-1}X(X&#39;V^{-1}X)^{-}X&#39;V^{-1}C}\right) \\
+
+=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}
++ \mathbf{C}^{\prime}\mathbf{V^{-1}X(X&#39;V^{-1}X)^{-}K} 
+- \mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\mathbf{K} \\
+&amp; \quad +\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V^{-1}C}
++ \mathbf{C&#39;V^{-1}C} - \mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V^{-1}C} \\
+&amp; \quad -\mathbf{K&#39;}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\mathbf{X&#39;V^{-1}C}- \mathbf{C&#39; V^{-1}X(X&#39;V^{-1}X)^{-}X&#39;V^{-1}C} + \mathbf{C&#39;V^{-1}X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\mathbf{X&#39;V^{-1}C} \\
+
+
+
+
+=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \\
+&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \\
+\end{aligned}\]</span>
+<span class="math display">\[
+协方差
+\]</span>
+<span class="math display">\[\begin{aligned}
+\operatorname{Cov}\left(\hat{\mathbf{w}}, \mathbf{w}^{\prime}\right)
+=&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \operatorname{Cov}\left(\mathbf{y}, \mathbf{w}^{\prime}\right) \\
+
+=&amp; \left(\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} +\mathbf{C}^{\prime} \mathbf{V}^{-1}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \right) \mathbf{C} \\
+
+
+=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C}+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \\
+&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \\
+=&amp; \operatorname{Var}(\hat{\mathbf{w}}) \\
+\end{aligned}\]</span>
+<span class="math display">\[
+预测误差方差为
+\]</span>
+<span class="math display">\[\begin{aligned}
+\operatorname{Var}(\hat{\mathbf{w}}-\mathbf{w})
+=&amp; \operatorname{Var}(\mathbf{\hat{w}})-\operatorname{Cov}\left(\hat{\mathbf{w}}, \mathbf{w}^{\prime}\right)-\operatorname{Cov}\left(\mathbf{w}, \hat{\mathbf{w}}^{\prime}\right)+\operatorname{Var}(\mathbf{w}) \\
+
+=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \\
+&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \\
+&amp;+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} +\mathbf{G}
+\end{aligned}\]</span>
+<p>$$</p>
+<h2 id="blup-的性质">BLUP 的性质</h2>
+<ol type="1">
+<li>在所有的线性无偏预测值中，BLUP 最大化了 <span class="math inline">\(\hat{w}_{i}\)</span> 和 <span class="math inline">\(w_{i}\)</span> 的相关</li>
+<li><strong>BLUP</strong> 具有不变性，即 <span class="math inline">\(\text{BLUP of }\mathbf{m^{\prime}w} = \mathbf{m^{\prime}\hat{w}}\)</span></li>
 <li>在<strong>正态</strong>分布假设下，我们有
 <ul>
-<li>$E(\mathbf{w | \hat{w}}) = \mathbf{\hat{w}}$</li>
-<li>$Var( \mathbf{\hat{w}} -  \mathbf{w}) = Var( \mathbf{w} | \mathbf{\hat{w}}) $</li>
-<li>$\mathbf{\hat{w}}$ 是最大似然估计值，并且是 $\mathbf{w}$ 的条件均值的最佳线性无偏估计值</li>
-<li>$\mathbf{\hat{w}}$ 元素正确排序的可能性最大</li>
-</ul>
-</li>
+<li><span class="math inline">\(E(\mathbf{w | \hat{w}}) = \mathbf{\hat{w}}\)</span></li>
+<li>$Var(  - ) = Var(  | ) $</li>
+<li><span class="math inline">\(\mathbf{\hat{w}}\)</span> 是最大似然估计值，并且是 <span class="math inline">\(\mathbf{w}\)</span> 的条件均值的最佳线性无偏估计值</li>
+<li><span class="math inline">\(\mathbf{\hat{w}}\)</span> 元素正确排序的可能性最大</li>
+</ul></li>
 </ol>
-<h1>混合模型方程组</h1>
-<p>上面的BLUP计算公式中涉及到 $\mathbf{V}^{-1}$ 的计算，当观测值较多时， $\mathbf{V}^{-1}$ 计算困难甚至不可计算，为此 Henderson 提出了求解 $\mathbf{\hat{w}}$ 的另一种方法， 这个方法原来被 Henderson 称为最大似然法，但是实际上这个方法比最大似然方法更加具有普遍性，因为它其实不需要<strong>正态假设</strong>。这个方法就是<strong>混合模型方程组</strong> (Mixed Model Equation, MME) .</p>
-<p>对于一般的混合线性模型<br>
-$$<br>
-\mathbf{y} = \mathbf{X} \boldsymbol{\beta}+ \mathbf{Zu}+ \mathbf{e}<br>
-$$</p>
+<h1 id="混合模型方程组">混合模型方程组</h1>
+<p>上面的BLUP计算公式中涉及到 <span class="math inline">\(\mathbf{V}^{-1}\)</span> 的计算，当观测值较多时， <span class="math inline">\(\mathbf{V}^{-1}\)</span> 计算困难甚至不可计算，为此 Henderson 提出了求解 <span class="math inline">\(\mathbf{\hat{w}}\)</span> 的另一种方法， 这个方法原来被 Henderson 称为最大似然法，但是实际上这个方法比最大似然方法更加具有普遍性，因为它其实不需要<strong>正态假设</strong>。这个方法就是<strong>混合模型方程组</strong> (Mixed Model Equation, MME) .</p>
+<p>对于一般的混合线性模型
+<span class="math display">\[
+\mathbf{y} = \mathbf{X} \boldsymbol{\beta}+ \mathbf{Zu}+ \mathbf{e}
+\]</span></p>
 <p>均值和方差，协方差如下</p>
-<p>$$<br>
-\begin{gathered}<br>
-E(\mathbf{u})=\mathbf{0}, E(\mathbf{e})=\mathbf{0}, E(\mathbf{y})=\mathbf{X} \beta \<br>
-\operatorname{Var}(\mathbf{u})=\mathbf{G}, \operatorname{Var}(\mathbf{e})=\mathbf{R}, \operatorname{Cov}\left(\mathbf{u}, \mathbf{e}^{\prime}\right)=\mathbf{0}, \operatorname{Var}(\mathbf{y})=\mathbf{Z G Z}^{\prime}+\mathbf{R}<br>
-\end{gathered}<br>
-$$</p>
-<p>我们沿着 Henderson 一开始推出 MME 的思路，我们假设 $\mathbf{u}$ 和 $\mathbf{e}$ 服从正态分布， $\mathbf{y}$ 和 $\mathbf{u}$ 服从联合多变量高斯分布<br>
-$$<br>
-\mathbf{u}  \sim N(\mathbf{0}, \mathbf{G}) \<br>
-\mathbf{e} \sim N(\mathbf{0}, \mathbf{R})<br>
-$$<br>
-那么 $\mathbf{y}$ 和 $\mathbf{u}$ 的联合密度函数为<br>
-$$<br>
-f(\mathbf{y}, \mathbf{u})=f_{1}(\mathbf{y} \mid \mathbf{u}) f_{2}(\mathbf{u})<br>
-$$<br>
-根据多元正态分布，我们知道多元正态分布的条件分布 也是正态分布，其均值和协方差矩阵满足公式<br>
-$$<br>
-\begin{aligned}<br>
-E(\mathbf{y} \mid \mathbf{x}) &amp;=\boldsymbol{\mu}<em>{y}+\mathbf{\Sigma}</em>{y x} \Sigma_{x x}^{-1}\left(\mathbf{x}-\boldsymbol{\mu}<em>{x}\right), \<br>
-\operatorname{cov}(\mathbf{y} \mid \mathbf{x}) &amp;=\mathbf{\Sigma}</em>{y y}-\mathbf{\Sigma}<em>{y x} \mathbf{\Sigma}</em>{x x}^{-1} \mathbf{\Sigma}<em>{x y} .<br>
-\end{aligned}<br>
-$$<br>
-因此，我们有<br>
-$$<br>
-\begin{aligned}<br>
-E(\mathbf{y} \mid \mathbf{u}) &amp;=\boldsymbol{\mu}</em>{y}+\mathbf{\Sigma}<em>\mathbf{y u’} \Sigma</em>\mathbf{u u’}^{-1}\left(\mathbf{u}-E(\mathbf{u})\right) \<br>
-&amp;= \mathbf{X} \boldsymbol{\beta} + \mathbf{ZG G^{-1}u}  \<br>
-&amp;= \mathbf{X} \boldsymbol{\beta} + \mathbf{Zu}</p>
-<p>\</p>
-<p>\operatorname{cov}(\mathbf{y} \mid \mathbf{u}) &amp;=\mathbf{\Sigma}<em>{y y’}-\mathbf{\Sigma}</em>{y u’} \mathbf{\Sigma}<em>{u u’}^{-1} \mathbf{\Sigma}</em>{u y’} \<br>
-&amp;=\mathbf{ZGZ’+R} - \mathbf{(ZG)(G^{-1})(GZ’)} \<br>
-&amp;=\mathbf{R} \</p>
-<p>\end{aligned}<br>
-$$<br>
-因此，我们有<br>
-$$<br>
-\mathbf{y|u}  \sim N(\mathbf{X} \boldsymbol{\beta} + \mathbf{Zu}  , \mathbf{R}) \<br>
-$$<br>
-根据多元正态分布的概率密度公式，我们有<br>
-$$<br>
-\begin{aligned}<br>
-&amp;f_{1}(\mathbf{y} \mid \mathbf{u})=C_{1} \exp \left{-\frac{1}{2}(\mathbf{y}-\mathbf{X} \beta-\mathbf{Z u})^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \beta-\mathbf{Z u})\right} \<br>
-&amp;f_{2}(\mathbf{u})=C_{2} \exp \left{-\frac{1}{2} \mathbf{u}^{\prime} \mathbf{G}^{-1} \mathbf{u}\right}<br>
-\end{aligned}<br>
-$$<br>
-其中 $C_{1}$ 和 $C_{2}$ 为常数，如下<br>
-$$<br>
-C_{1}=(2 \pi)^{-\frac{n}{2}}|R|^{-\frac{1}{2}}, \quad C_{2}=(2 \pi)^{-\frac{q}{2}}|G|^{-\frac{1}{2}}<br>
-$$<br>
-于是<br>
-$$<br>
-f(\mathbf{y}, \mathbf{u})=C \exp \left{-\frac{1}{2}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u})^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta} -\mathbf{Z u})-\frac{1}{2} \mathbf{u}^{\prime} \mathbf{G}^{-1} \mathbf{u}\right}<br>
-$$<br>
-其中 $C=C_{1} \times C_{2}$ 。</p>
-<p>取对数得到<br>
-$$<br>
-\log f(\mathbf{y}, \mathbf{u})= \log © -\frac{1}{2}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u})^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta} -\mathbf{Z u})-\frac{1}{2} \mathbf{u}^{\prime} \mathbf{G}^{-1} \mathbf{u}<br>
-$$<br>
-根据最大似然的思想，我们要找一组参数 $\boldsymbol{\hat{\beta}}$ 和 $\mathbf{\hat{u}}$ 使得  $\log f(\mathbf{y}, \mathbf{u})$ 最大。我们分别针对 $\boldsymbol{\beta}$ 和 $\mathbf{u}$ 求偏导，得到<br>
-$$<br>
-\begin{aligned}<br>
-&amp;\frac{\partial \log f(\mathbf{y}, \mathbf{u})}{\partial \boldsymbol{\beta}}<br>
-=\mathbf{X’R^{-1}}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u})<br>
-=\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y}-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} \beta-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z u} = \mathbf{0} \<br>
-&amp;\frac{\partial \log f(\mathbf{y}, \mathbf{u})}{\partial \mathbf{u}}<br>
-=\mathbf{Z’R^{-1}}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u}) -\mathbf{G}^{-1} \mathbf{u}<br>
-=\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} \beta-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z u}-\mathbf{G}^{-1} \mathbf{u} = \mathbf{0}<br>
-\end{aligned}<br>
-$$<br>
-整理一下，可得<br>
-$$<br>
-\begin{aligned}<br>
-&amp;\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}}+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \hat{\mathbf{u}}=\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
-&amp;\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}}+\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right) \hat{\mathbf{u}}=\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
-\end{aligned}<br>
-$$<br>
-我们也可以整理成方程组的形式<br>
-$$<br>
-\left[\begin{array}{cc}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-\boldsymbol{\hat{\beta}}  \<br>
-\hat{\mathbf{u}}<br>
-\end{array}\right]=\left[\begin{array}{l}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
-\end{array}\right]<br>
-$$<br>
+<p><span class="math display">\[
+\begin{gathered}
+E(\mathbf{u})=\mathbf{0}, E(\mathbf{e})=\mathbf{0}, E(\mathbf{y})=\mathbf{X} \beta \\
+\operatorname{Var}(\mathbf{u})=\mathbf{G}, \operatorname{Var}(\mathbf{e})=\mathbf{R}, \operatorname{Cov}\left(\mathbf{u}, \mathbf{e}^{\prime}\right)=\mathbf{0}, \operatorname{Var}(\mathbf{y})=\mathbf{Z G Z}^{\prime}+\mathbf{R}
+\end{gathered}
+\]</span></p>
+我们沿着 Henderson 一开始推出 MME 的思路，我们假设 <span class="math inline">\(\mathbf{u}\)</span> 和 <span class="math inline">\(\mathbf{e}\)</span> 服从正态分布， <span class="math inline">\(\mathbf{y}\)</span> 和 <span class="math inline">\(\mathbf{u}\)</span> 服从联合多变量高斯分布
+<span class="math display">\[
+\mathbf{u}  \sim N(\mathbf{0}, \mathbf{G}) \\
+\mathbf{e} \sim N(\mathbf{0}, \mathbf{R})
+\]</span>
+那么 <span class="math inline">\(\mathbf{y}\)</span> 和 <span class="math inline">\(\mathbf{u}\)</span> 的联合密度函数为
+<span class="math display">\[
+f(\mathbf{y}, \mathbf{u})=f_{1}(\mathbf{y} \mid \mathbf{u}) f_{2}(\mathbf{u})
+\]</span>
+根据多元正态分布，我们知道多元正态分布的条件分布 也是正态分布，其均值和协方差矩阵满足公式
+<span class="math display">\[
+\begin{aligned}
+E(\mathbf{y} \mid \mathbf{x}) &amp;=\boldsymbol{\mu}_{y}+\mathbf{\Sigma}_{y x} \Sigma_{x x}^{-1}\left(\mathbf{x}-\boldsymbol{\mu}_{x}\right), \\
+\operatorname{cov}(\mathbf{y} \mid \mathbf{x}) &amp;=\mathbf{\Sigma}_{y y}-\mathbf{\Sigma}_{y x} \mathbf{\Sigma}_{x x}^{-1} \mathbf{\Sigma}_{x y} .
+\end{aligned}
+\]</span>
+因此，我们有
+$$
+<span class="math display">\[\begin{aligned}
+E(\mathbf{y} \mid \mathbf{u}) &amp;=\boldsymbol{\mu}_{y}+\mathbf{\Sigma}_\mathbf{y u&#39;} \Sigma_\mathbf{u u&#39;}^{-1}\left(\mathbf{u}-E(\mathbf{u})\right) \\
+&amp;= \mathbf{X} \boldsymbol{\beta} + \mathbf{ZG G^{-1}u}  \\
+&amp;= \mathbf{X} \boldsymbol{\beta} + \mathbf{Zu}  
+
+\\
+
+\operatorname{cov}(\mathbf{y} \mid \mathbf{u}) &amp;=\mathbf{\Sigma}_{y y&#39;}-\mathbf{\Sigma}_{y u&#39;} \mathbf{\Sigma}_{u u&#39;}^{-1} \mathbf{\Sigma}_{u y&#39;} \\
+&amp;=\mathbf{ZGZ&#39;+R} - \mathbf{(ZG)(G^{-1})(GZ&#39;)} \\
+&amp;=\mathbf{R} \\
+
+\end{aligned}\]</span>
+<span class="math display">\[
+因此，我们有
+\]</span>
+ N(  +  , ) \
+<span class="math display">\[
+根据多元正态分布的概率密度公式，我们有
+\]</span>
+<span class="math display">\[\begin{aligned}
+&amp;f_{1}(\mathbf{y} \mid \mathbf{u})=C_{1} \exp \left\{-\frac{1}{2}(\mathbf{y}-\mathbf{X} \beta-\mathbf{Z u})^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \beta-\mathbf{Z u})\right\} \\
+&amp;f_{2}(\mathbf{u})=C_{2} \exp \left\{-\frac{1}{2} \mathbf{u}^{\prime} \mathbf{G}^{-1} \mathbf{u}\right\}
+\end{aligned}\]</span>
+<p><span class="math display">\[
+其中 $C_{1}$ 和 $C_{2}$ 为常数，如下
+\]</span>
+C_{1}=(2 )<sup>{-}|R|</sup>{-}, C_{2}=(2 )<sup>{-}|G|</sup>{-}
+<span class="math display">\[
+于是
+\]</span>
+f(, )=C {-(- -)^{} ^{-1}(-  -)- ^{} ^{-1} }
+$$
+其中 <span class="math inline">\(C=C_{1} \times C_{2}\)</span> 。</p>
+<p>取对数得到
+<span class="math display">\[
+\log f(\mathbf{y}, \mathbf{u})= \log (C) -\frac{1}{2}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u})^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta} -\mathbf{Z u})-\frac{1}{2} \mathbf{u}^{\prime} \mathbf{G}^{-1} \mathbf{u}
+\]</span>
+根据最大似然的思想，我们要找一组参数 <span class="math inline">\(\boldsymbol{\hat{\beta}}\)</span> 和 <span class="math inline">\(\mathbf{\hat{u}}\)</span> 使得 <span class="math inline">\(\log f(\mathbf{y}, \mathbf{u})\)</span> 最大。我们分别针对 <span class="math inline">\(\boldsymbol{\beta}\)</span> 和 <span class="math inline">\(\mathbf{u}\)</span> 求偏导，得到
+<span class="math display">\[
+\begin{aligned}
+&amp;\frac{\partial \log f(\mathbf{y}, \mathbf{u})}{\partial \boldsymbol{\beta}}
+=\mathbf{X&#39;R^{-1}}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u})
+=\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y}-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} \beta-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z u} = \mathbf{0} \\
+&amp;\frac{\partial \log f(\mathbf{y}, \mathbf{u})}{\partial \mathbf{u}}
+=\mathbf{Z&#39;R^{-1}}(\mathbf{y}-\mathbf{X} \boldsymbol{\beta}-\mathbf{Z u}) -\mathbf{G}^{-1} \mathbf{u}
+=\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} \beta-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z u}-\mathbf{G}^{-1} \mathbf{u} = \mathbf{0}
+\end{aligned}
+\]</span>
+整理一下，可得
+<span class="math display">\[
+\begin{aligned}
+&amp;\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}}+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \hat{\mathbf{u}}=\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \\
+&amp;\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}}+\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right) \hat{\mathbf{u}}=\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}
+\end{aligned}
+\]</span>
+我们也可以整理成方程组的形式
+<span class="math display">\[
+\left[\begin{array}{cc}
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \\
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}
+\end{array}\right]\left[\begin{array}{l}
+\boldsymbol{\hat{\beta}}  \\
+\hat{\mathbf{u}}
+\end{array}\right]=\left[\begin{array}{l}
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \\
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}
+\end{array}\right]
+\]</span>
 此方程组就称为<strong>混合模型方程组</strong>。</p>
-<p>我们下面证明混合模型方程组与根据 BLUP 的定义直接得到的  $\boldsymbol{\hat{\beta}}$ 和 $\mathbf{\hat{u}}$  等价，也就是说混合模型方程组实际不需要正态假设。</p>
+<p>我们下面证明混合模型方程组与根据 BLUP 的定义直接得到的 <span class="math inline">\(\boldsymbol{\hat{\beta}}\)</span> 和 <span class="math inline">\(\mathbf{\hat{u}}\)</span> 等价，也就是说混合模型方程组实际不需要正态假设。</p>
 <h2 id="证明等价">证明等价</h2>
-<p>由混合模型方程组的第二个方程得<br>
-$$<br>
-\mathbf{u}=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}})<br>
-$$<br>
-这里需要证明 $\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}$ 可逆，由于 $\mathbf{G}$ 阵是正定矩阵，因此其逆矩阵 $\mathbf{G^{-1}}$ 也是正定矩阵，易证  $\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}$ 为半正定矩阵，因此  $\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}$ 也是正定矩阵，因此其可逆。</p>
-<p>将该式带入到第一个方程得到<br>
-$$<br>
-\begin{aligned}<br>
-&amp;\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}}-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}} \<br>
-&amp;=\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y}-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
-\end{aligned}<br>
-$$<br>
-变换一下得到<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{X’}\left(\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\right)\mathbf{X}\boldsymbol{\hat{\beta}} &amp;=  \mathbf{X’}\left(\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\right)\mathbf{y} \</p>
-<p>\mathbf{X’}\mathbf{V^{-1}}\mathbf{X}\boldsymbol{\hat{\beta}} &amp;=  \mathbf{X’}\mathbf{V^{-1}}\mathbf{y} \<br>
-\end{aligned}<br>
-$$<br>
-其中有 $\mathbf{V}^{-1}=\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}$ ，推导可见<a href="https://vincere.fun/posts/5e674d74/">混合线性模型一之广义最小二乘</a> 。</p>
-<p>因此，混合模型方程组得到的  $\boldsymbol{\hat{\beta}}$ 就是广义最小二乘估计值。</p>
-<p>然后我们再需要证明  $\mathbf{\hat{u}} = \mathbf{C}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}\right)$   ，即等于选择指数法估计值。<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{u} &amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>
-&amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{V} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \widehat{\beta}) \<br>
-&amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\left(\mathbf{Z G Z}^{\prime}+\mathbf{R}\right) \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>
-&amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right) \mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>
-&amp;=\mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>
-&amp;=\mathbf{C}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \quad( \because \mathbf{C}=\mathbf{Z G})<br>
-\end{aligned}<br>
-$$<br>
+<p>由混合模型方程组的第二个方程得
+<span class="math display">\[
+\mathbf{u}=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}})
+\]</span>
+这里需要证明 <span class="math inline">\(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\)</span> 可逆，由于 <span class="math inline">\(\mathbf{G}\)</span> 阵是正定矩阵，因此其逆矩阵 <span class="math inline">\(\mathbf{G^{-1}}\)</span> 也是正定矩阵，易证 <span class="math inline">\(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}\)</span> 为半正定矩阵，因此 <span class="math inline">\(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\)</span> 也是正定矩阵，因此其可逆。</p>
+将该式带入到第一个方程得到
+<span class="math display">\[
+\begin{aligned}
+&amp;\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}}-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} \boldsymbol{\hat{\beta}} \\
+&amp;=\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y}-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}
+\end{aligned}
+\]</span>
+变换一下得到
+$$
+<span class="math display">\[\begin{aligned}
+\mathbf{X&#39;}\left(\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\right)\mathbf{X}\boldsymbol{\hat{\beta}} &amp;=  \mathbf{X&#39;}\left(\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\right)\mathbf{y} \\
+
+
+\mathbf{X&#39;}\mathbf{V^{-1}}\mathbf{X}\boldsymbol{\hat{\beta}} &amp;=  \mathbf{X&#39;}\mathbf{V^{-1}}\mathbf{y} \\
+\end{aligned}\]</span>
+<p>$$
+其中有 <span class="math inline">\(\mathbf{V}^{-1}=\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\)</span> ，推导可见<a href="https://vincere.fun/posts/5e674d74/">混合线性模型一之广义最小二乘</a> 。</p>
+<p>因此，混合模型方程组得到的 <span class="math inline">\(\boldsymbol{\hat{\beta}}\)</span> 就是广义最小二乘估计值。</p>
+<p>然后我们再需要证明 <span class="math inline">\(\mathbf{\hat{u}} = \mathbf{C}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}\right)\)</span> ，即等于选择指数法估计值。
+<span class="math display">\[
+\begin{aligned}
+\mathbf{u} &amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \\
+&amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{V} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \widehat{\beta}) \\
+&amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\left(\mathbf{Z G Z}^{\prime}+\mathbf{R}\right) \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \\
+&amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right) \mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \\
+&amp;=\mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \\
+&amp;=\mathbf{C}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \quad( \because \mathbf{C}=\mathbf{Z G})
+\end{aligned}
+\]</span>
 得证。</p>
-<p>因此我们证明了混合模型方程组与根据 BLUP 的定义直接得到的  $\boldsymbol{\hat{\beta}}$ 和 $\mathbf{\hat{u}}$  等价，所以在家畜育种中，混合模型方程组已成了 BLUP 法的同义词。</p>
+<p>因此我们证明了混合模型方程组与根据 BLUP 的定义直接得到的 <span class="math inline">\(\boldsymbol{\hat{\beta}}\)</span> 和 <span class="math inline">\(\mathbf{\hat{u}}\)</span> 等价，所以在家畜育种中，混合模型方程组已成了 BLUP 法的同义词。</p>
 <p>但是这种从最大似然法推导出来混合模型方程组的方式，和 BLUP 的定义似乎缺少概念上的直接联系，下面我们尝试直接从 BLUP 的定义出发，直接推导得到混合模型方程组。</p>
 <h2 id="重新推导">重新推导</h2>
-<p>根据 BLUP 定义，对于单个变量 $w$ ，我们有方程组<br>
-$$<br>
-\left(\begin{array}{ll}<br>
-\mathbf{V} &amp; \mathbf{X} \<br>
-\mathbf{X}^{\prime} &amp; 0<br>
-\end{array}\right)\left(\begin{array}{l}<br>
-\mathbf{a} \<br>
-\boldsymbol{\theta}<br>
-\end{array}\right)=\left(\begin{array}{l}<br>
-\mathbf{c} \<br>
-\mathbf{k}<br>
-\end{array}\right)<br>
-$$<br>
-推广至向量 $\mathbf{w}$ ，我们有下面的方程组 (注意这里的 $\boldsymbol{\theta}$ 是一个矩阵，上面是一个向量 )。矩阵 $\mathbf{A}$ 满足 $\mathbf{\hat{w} = A’y}$ 。<br>
-$$<br>
-\left(\begin{array}{ll}<br>
-\mathbf{V} &amp; \mathbf{X} \<br>
-\mathbf{X}^{\prime} &amp; 0<br>
-\end{array}\right)\left(\begin{array}{l}<br>
-\mathbf{A} \<br>
-\boldsymbol{\theta}<br>
-\end{array}\right)=\left(\begin{array}{l}<br>
-\mathbf{C} \<br>
-\mathbf{K}<br>
-\end{array}\right)<br>
-$$<br>
-将 $\mathbf{V = ZGZ’ + R}$ 和 $\mathbf{C=ZG}$ 带入第一个方程，得到<br>
-$$<br>
-\mathbf{(ZGZ’ + R)A} + \mathbf{X}\boldsymbol{\theta} = \mathbf{CG} \<br>
-$$<br>
-或者写成<br>
-$$<br>
-\mathbf{RA} + \mathbf{ZG(Z’A-I)} + \mathbf{X}\boldsymbol{\theta} = \mathbf{0}<br>
-$$<br>
-令 $\mathbf{T=G(Z’A-I)}$ ，则 $\mathbf{Z’A-G^{-1}T=I}$ ，于是有方程组<br>
-$$<br>
-\mathbf{RA} + \mathbf{ZT} + \mathbf{X}\boldsymbol{\theta} = \mathbf{0}\<br>
-\mathbf{Z’A-G^{-1}T=I} \<br>
-\mathbf{X’A=K}<br>
-$$<br>
-由其中的第一个方程可得<br>
-$$<br>
-\mathbf{A} = -\mathbf{R^{-1}X\boldsymbol{\theta} - R^{-1}ZT}<br>
-$$<br>
-带入到第二方程，得<br>
-$$<br>
-\begin{aligned}<br>
--\mathbf{Z’R^{-1}X\boldsymbol{\theta} - Z’R^{-1}ZT-G^{-1}T} &amp;= \mathbf{I}<br>
-\end{aligned}<br>
-$$<br>
-带入到第三方程，得<br>
-$$<br>
--\mathbf{X’R^{-1}X\boldsymbol{\theta} - X’R^{-1}ZT} = \mathbf{K}<br>
-$$<br>
-整理成方程组得格式为<br>
-$$<br>
-\left[\begin{array}{ll}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>
-\end{array}\right]\left[\begin{array}{c}<br>
-\boldsymbol{\theta} \<br>
-\mathbf{T}<br>
-\end{array}\right]=\left[\begin{array}{c}<br>
--\mathbf{K} \<br>
--\mathbf{I}<br>
-\end{array}\right]<br>
-$$<br>
-前面前面的推导，我们知道这个方程组应该是相容的。我们将上式系数矩阵的一个广义逆表示为（<strong>假设这个广义逆也是一个对称矩阵</strong>，满足 $\mathbf{C_{12}} = \mathbf{C_{21}}^{\prime}$ ，$\mathbf{C_{11}}$ 和 $\mathbf{C_{22}}$ 也是对称矩阵）<br>
-$$<br>
-\left[\begin{array}{ll}<br>
-\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]<br>
-$$<br>
-则该方程组的解为<br>
-$$<br>
-\left[\begin{array}{l}<br>
-\boldsymbol{\theta} \<br>
-\mathbf{T}<br>
-\end{array}\right]=\left[\begin{array}{ll}<br>
-\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
--\mathbf{K} \<br>
--\mathbf{I}<br>
-\end{array}\right]<br>
-$$<br>
-于是<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{A} &amp;= \left[\begin{array}{l}<br>
-\mathbf{R^{-1}X} &amp;<br>
-\mathbf{R^{-1}Z}<br>
-\end{array}\right] \left[\begin{array}{l}<br>
--\boldsymbol{\theta} \<br>
--\mathbf{T}<br>
-\end{array}\right] \<br>
-\<br>
-&amp;= \left[\begin{array}{l}<br>
-\mathbf{R^{-1}X} &amp;<br>
-\mathbf{R^{-1}Z}<br>
-\end{array}\right]<br>
-\left[\begin{array}{ll}<br>
-\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-\mathbf{K} \<br>
-\mathbf{I}<br>
-\end{array}\right]</p>
-<p>\end{aligned}<br>
-$$<br>
-因此<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{\hat{w}} &amp;= \mathbf{A’y} \<br>
-&amp;= \left[\begin{array}{l}<br>
-\mathbf{K’} &amp;<br>
-\mathbf{I}<br>
-\end{array}\right]<br>
-\left[\begin{array}{ll}<br>
-\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]<br>
-\left[\begin{array}{l}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
-\end{array}\right]<br>
-\end{aligned}<br>
-$$<br>
-同时根据上面的推导，我们有<br>
-$$<br>
-\mathbf{\hat{w}} = \mathbf{K}^{\prime} \boldsymbol{\hat{\beta}}+\mathbf{C}^{\prime} \mathbf{V}^{-1}\left(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}\right)=\mathbf{K}^{\prime} \boldsymbol{\hat{\beta}}+ \mathbf{\hat{u}} =<br>
-\left[\begin{array}{l}<br>
-\mathbf{K’} &amp;<br>
-\mathbf{I}<br>
-\end{array} \right]<br>
-\left[\begin{array}{l}<br>
-\boldsymbol{\hat{\beta}} \<br>
-\mathbf{\hat{u}}<br>
-\end{array} \right]<br>
-$$<br>
-因此<br>
-$$<br>
-\left[\begin{array}{l}<br>
-\boldsymbol{\hat{\beta}} \<br>
-\mathbf{\hat{u}}<br>
-\end{array}\right]=\left[\begin{array}{ll}<br>
-\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{21} &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
-\end{array}\right]<br>
-$$<br>
-即<br>
-$$<br>
-\left[\begin{array}{cc}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-\boldsymbol{\hat{\beta}}  \<br>
-\hat{\mathbf{u}}<br>
-\end{array}\right]=\left[\begin{array}{l}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
-\end{array}\right]<br>
-$$<br>
+根据 BLUP 定义，对于单个变量 <span class="math inline">\(w\)</span> ，我们有方程组
+<span class="math display">\[
+\left(\begin{array}{ll}
+\mathbf{V} &amp; \mathbf{X} \\
+\mathbf{X}^{\prime} &amp; 0
+\end{array}\right)\left(\begin{array}{l}
+\mathbf{a} \\
+\boldsymbol{\theta}
+\end{array}\right)=\left(\begin{array}{l}
+\mathbf{c} \\
+\mathbf{k}
+\end{array}\right)
+\]</span>
+推广至向量 <span class="math inline">\(\mathbf{w}\)</span> ，我们有下面的方程组 (注意这里的 <span class="math inline">\(\boldsymbol{\theta}\)</span> 是一个矩阵，上面是一个向量 )。矩阵 <span class="math inline">\(\mathbf{A}\)</span> 满足 <span class="math inline">\(\mathbf{\hat{w} = A&#39;y}\)</span> 。
+<span class="math display">\[
+\left(\begin{array}{ll}
+\mathbf{V} &amp; \mathbf{X} \\
+\mathbf{X}^{\prime} &amp; 0
+\end{array}\right)\left(\begin{array}{l}
+\mathbf{A} \\
+\boldsymbol{\theta}
+\end{array}\right)=\left(\begin{array}{l}
+\mathbf{C} \\
+\mathbf{K}
+\end{array}\right)
+\]</span>
+将 <span class="math inline">\(\mathbf{V = ZGZ&#39; + R}\)</span> 和 <span class="math inline">\(\mathbf{C=ZG}\)</span> 带入第一个方程，得到
+<span class="math display">\[
+\mathbf{(ZGZ&#39; + R)A} + \mathbf{X}\boldsymbol{\theta} = \mathbf{CG} \\
+\]</span>
+或者写成
+<span class="math display">\[
+\mathbf{RA} + \mathbf{ZG(Z&#39;A-I)} + \mathbf{X}\boldsymbol{\theta} = \mathbf{0}
+\]</span>
+令 <span class="math inline">\(\mathbf{T=G(Z&#39;A-I)}\)</span> ，则 <span class="math inline">\(\mathbf{Z&#39;A-G^{-1}T=I}\)</span> ，于是有方程组
+<span class="math display">\[
+\mathbf{RA} + \mathbf{ZT} + \mathbf{X}\boldsymbol{\theta} = \mathbf{0}\\
+\mathbf{Z&#39;A-G^{-1}T=I} \\
+\mathbf{X&#39;A=K}
+\]</span>
+由其中的第一个方程可得
+<span class="math display">\[
+\mathbf{A} = -\mathbf{R^{-1}X\boldsymbol{\theta} - R^{-1}ZT}
+\]</span>
+带入到第二方程，得
+<span class="math display">\[
+\begin{aligned}
+-\mathbf{Z&#39;R^{-1}X\boldsymbol{\theta} - Z&#39;R^{-1}ZT-G^{-1}T} &amp;= \mathbf{I}
+\end{aligned}
+\]</span>
+带入到第三方程，得
+<span class="math display">\[
+-\mathbf{X&#39;R^{-1}X\boldsymbol{\theta} - X’R^{-1}ZT} = \mathbf{K}
+\]</span>
+整理成方程组得格式为
+<span class="math display">\[
+\left[\begin{array}{ll}
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \\
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}
+\end{array}\right]\left[\begin{array}{c}
+\boldsymbol{\theta} \\
+\mathbf{T}
+\end{array}\right]=\left[\begin{array}{c}
+-\mathbf{K} \\
+-\mathbf{I}
+\end{array}\right]
+\]</span>
+前面前面的推导，我们知道这个方程组应该是相容的。我们将上式系数矩阵的一个广义逆表示为（<strong>假设这个广义逆也是一个对称矩阵</strong>，满足 <span class="math inline">\(\mathbf{C_{12}} = \mathbf{C_{21}}^{\prime}\)</span> ，<span class="math inline">\(\mathbf{C_{11}}\)</span> 和 <span class="math inline">\(\mathbf{C_{22}}\)</span> 也是对称矩阵）
+<span class="math display">\[
+\left[\begin{array}{ll}
+\mathbf{C}_{11} &amp; \mathbf{C}_{12} \\
+\mathbf{C}_{21} &amp; \mathbf{C}_{22}
+\end{array}\right]
+\]</span>
+则该方程组的解为
+<span class="math display">\[
+\left[\begin{array}{l}
+\boldsymbol{\theta} \\
+\mathbf{T}
+\end{array}\right]=\left[\begin{array}{ll}
+\mathbf{C}_{11} &amp; \mathbf{C}_{12} \\
+\mathbf{C}_{21} &amp; \mathbf{C}_{22}
+\end{array}\right]\left[\begin{array}{l}
+-\mathbf{K} \\
+-\mathbf{I}
+\end{array}\right]
+\]</span>
+于是
+$$
+<span class="math display">\[\begin{aligned}
+\mathbf{A} &amp;= \left[\begin{array}{l}
+\mathbf{R^{-1}X} &amp;
+\mathbf{R^{-1}Z} 
+\end{array}\right] \left[\begin{array}{l}
+-\boldsymbol{\theta} \\
+-\mathbf{T}
+\end{array}\right] \\
+\\
+&amp;= \left[\begin{array}{l}
+\mathbf{R^{-1}X} &amp;
+\mathbf{R^{-1}Z} 
+\end{array}\right] 
+\left[\begin{array}{ll}
+\mathbf{C}_{11} &amp; \mathbf{C}_{12} \\
+\mathbf{C}_{21} &amp; \mathbf{C}_{22}
+\end{array}\right]\left[\begin{array}{l}
+\mathbf{K} \\
+\mathbf{I}
+\end{array}\right]
+
+\end{aligned}\]</span>
+<span class="math display">\[
+因此
+\]</span>
+<span class="math display">\[\begin{aligned}
+\mathbf{\hat{w}} &amp;= \mathbf{A&#39;y} \\
+&amp;= \left[\begin{array}{l}
+\mathbf{K&#39;} &amp;
+\mathbf{I}
+\end{array}\right]
+\left[\begin{array}{ll}
+\mathbf{C}_{11} &amp; \mathbf{C}_{12} \\
+\mathbf{C}_{21} &amp; \mathbf{C}_{22}
+\end{array}\right]
+\left[\begin{array}{l}
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \\
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}
+\end{array}\right]
+\end{aligned}\]</span>
+<p><span class="math display">\[
+同时根据上面的推导，我们有
+\]</span>
+ = ^{} +^{} ^{-1}(- )=^{} +  =
+<span class="math display">\[
+因此
+\]</span>
+=<span class="math display">\[
+即
+\]</span>
+=$$
 证明完毕。</p>
 <h2 id="性质">性质</h2>
-<p><strong>假设 $\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}$ 是一个对称矩阵，并且是一个自反广义逆矩阵</strong>。</p>
+<p><strong>假设 <span class="math inline">\(\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-}\)</span> 是一个对称矩阵，并且是一个自反广义逆矩阵</strong>。</p>
 <h3 id="固定效应估计值">固定效应估计值</h3>
-<p>固定效应估计值就是一个广义最小二乘估计值，公式如下，其性质不再赘述。<br>
-$$<br>
-\boldsymbol{\hat{\beta}}=\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}<br>
-$$</p>
+<p>固定效应估计值就是一个广义最小二乘估计值，公式如下，其性质不再赘述。
+<span class="math display">\[
+\boldsymbol{\hat{\beta}}=\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}
+\]</span></p>
 <h3 id="随机效应估计值">随机效应估计值</h3>
-<p>随机效应计算公式为<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{\hat{u}} &amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>
-&amp;=\mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \<br>
-\end{aligned}<br>
-$$<br>
-根据广义最小二乘估计值的性质，我们易得 $\mathbf{X} \boldsymbol{\hat{\beta}}$ 是一个可估计函数，即 $\mathbf{X} \boldsymbol{\hat{\beta}}$  的值唯一，因此 $\mathbf{\hat{u}}$ 也是<strong>唯一的</strong>。</p>
-<p>首先看期望<br>
-$$<br>
-\begin{aligned}<br>
-E(\hat{\mathbf{u}}) &amp;\left.=\mathbf{G Z}^{\prime} \mathbf{V}^{-1}\left(\mathbf{X} \boldsymbol{\beta}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X} \boldsymbol{\beta}\right)\right) \<br>
-&amp;=\mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{X} \boldsymbol{\beta}-\mathbf{X} \boldsymbol{\beta})=0<br>
-\end{aligned}<br>
-$$<br>
-其中存在  $\mathbf{X} \left( \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}  = \mathbf{X}$ ，证明如下，我们设 $\mathbf{A=V^{-1/2}X}$ ，这里的 $\mathbf{V^{-1/2}}$ 是 $\mathbf{V^{1/2}}$ 的逆矩阵，易得<br>
-$$<br>
-\mathbf{X} \left( \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X} = \mathbf{V^{1/2}A(A’A)^{-}A’A} = \mathbf{V^{1/2}A} = \mathbf{X}<br>
-$$<br>
-第二，我们看随机效应的协方差矩阵，根据上面的 BLUP的一般推导，我们有<br>
-$$<br>
-\operatorname{Var}(\hat{\mathbf{w}}) =  \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C}<br>
--\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>
-$$<br>
-这里 $\mathbf{u}$ 均值为 $\mathbf{0}$ ，即 $\mathbf{K = 0}$ ，同时有 $\mathbf{C=ZG}$ 带入得到<br>
-$$<br>
-\begin{aligned}<br>
-\operatorname{Var}(\hat{\mathbf{u}}) &amp;=  \mathbf{GZ’} \mathbf{V}^{-1} \mathbf{ZG}<br>
--\mathbf{GZ’} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{ZG} \<br>
-&amp; =\mathbf{G} \mathbf{Z}^{\prime} \mathbf{V}^{-1}\left(\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1}\right) \mathbf{Z G}<br>
-\end{aligned}<br>
-$$<br>
-根据上面的 BLUP的一般推导，我们有<br>
-$$<br>
-\operatorname{Cov}\left(\hat{\mathbf{u}}, \mathbf{u}^{\prime}\right)<br>
-= \operatorname{Var}(\hat{\mathbf{u}})<br>
-$$<br>
-固定效应的可估计函数与随机效应估计值的协方差矩阵为<br>
-$$<br>
-\begin{aligned}<br>
-\operatorname{Cov}\left(\mathbf{T} \boldsymbol{\hat{\beta}}, \mathbf{\hat{u}}^{\prime}\right)<br>
-&amp;= \mathbf{T}\operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{\hat{u}}^{\prime}\right) \<br>
-&amp;= \mathbf{T}\operatorname{Cov}\left(\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}, \left( \mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{I}-\mathbf{X} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} ) \mathbf{y} \right)^{\prime}\right) \<br>
-&amp;=\mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{V} \left( \mathbf{I} - \mathbf{V^{-1}X\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} X’}  \right) \mathbf{V^{-1}ZG} \<br>
-&amp;=\mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}  \left( \mathbf{I} - \mathbf{V^{-1}X\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} X’}  \right) \mathbf{V^{-1}ZG} \</p>
-<p>&amp;=\mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V^{-1}ZG}  - \mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}   \mathbf{V^{-1}ZG} \</p>
-<p>&amp;=\mathbf{0}</p>
-<p>\end{aligned}<br>
-$$<br>
-根据通式<br>
-$$<br>
-\begin{aligned}<br>
-\operatorname{Var}(\hat{\mathbf{w}}-\mathbf{w})<br>
-=&amp; \operatorname{Var}(\mathbf{\hat{w}})-\operatorname{Cov}\left(\hat{\mathbf{w}}, \mathbf{w}^{\prime}\right)-\operatorname{Cov}\left(\mathbf{w}, \hat{\mathbf{w}}^{\prime}\right)+\operatorname{Var}(\mathbf{w}) \</p>
-<p>=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>
-&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \<br>
-&amp;+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} +\mathbf{G}<br>
-\end{aligned}<br>
-$$<br>
-我们有<br>
-$$<br>
-\begin{aligned}<br>
-\operatorname{Var}(\hat{\mathbf{u}}-\mathbf{u})<br>
-&amp;= -\mathbf{GZ’V^{-1}ZG} + \mathbf{GZ’}\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{ZG} + \mathbf{G} \<br>
-&amp;=\mathbf{G}-\mathbf{G Z}^{\prime} \mathbf{V}^{-1}\left(\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1}\right) \mathbf{Z G} \<br>
-\end{aligned}<br>
-$$</p>
+<p>随机效应计算公式为
+<span class="math display">\[
+\begin{aligned}
+\mathbf{\hat{u}} &amp;=\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \\
+&amp;=\mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}) \\
+\end{aligned}
+\]</span>
+根据广义最小二乘估计值的性质，我们易得 <span class="math inline">\(\mathbf{X} \boldsymbol{\hat{\beta}}\)</span> 是一个可估计函数，即 <span class="math inline">\(\mathbf{X} \boldsymbol{\hat{\beta}}\)</span> 的值唯一，因此 <span class="math inline">\(\mathbf{\hat{u}}\)</span> 也是<strong>唯一的</strong>。</p>
+首先看期望
+<span class="math display">\[
+\begin{aligned}
+E(\hat{\mathbf{u}}) &amp;\left.=\mathbf{G Z}^{\prime} \mathbf{V}^{-1}\left(\mathbf{X} \boldsymbol{\beta}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X} \boldsymbol{\beta}\right)\right) \\
+&amp;=\mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{X} \boldsymbol{\beta}-\mathbf{X} \boldsymbol{\beta})=0
+\end{aligned}
+\]</span>
+其中存在 <span class="math inline">\(\mathbf{X} \left( \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}  = \mathbf{X}\)</span> ，证明如下，我们设 <span class="math inline">\(\mathbf{A=V^{-1/2}X}\)</span> ，这里的 <span class="math inline">\(\mathbf{V^{-1/2}}\)</span> 是 <span class="math inline">\(\mathbf{V^{1/2}}\)</span> 的逆矩阵，易得
+<span class="math display">\[
+\mathbf{X} \left( \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X} = \mathbf{V^{1/2}A(A&#39;A)^{-}A&#39;A} = \mathbf{V^{1/2}A} = \mathbf{X}
+\]</span>
+第二，我们看随机效应的协方差矩阵，根据上面的 BLUP的一般推导，我们有
+<span class="math display">\[
+\operatorname{Var}(\hat{\mathbf{w}}) =  \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} 
+-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \\
+\]</span>
+这里 <span class="math inline">\(\mathbf{u}\)</span> 均值为 <span class="math inline">\(\mathbf{0}\)</span> ，即 <span class="math inline">\(\mathbf{K = 0}\)</span> ，同时有 <span class="math inline">\(\mathbf{C=ZG}\)</span> 带入得到
+<span class="math display">\[
+\begin{aligned}
+\operatorname{Var}(\hat{\mathbf{u}}) &amp;=  \mathbf{GZ&#39;} \mathbf{V}^{-1} \mathbf{ZG} 
+-\mathbf{GZ&#39;} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{ZG} \\
+&amp; =\mathbf{G} \mathbf{Z}^{\prime} \mathbf{V}^{-1}\left(\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1}\right) \mathbf{Z G}
+\end{aligned}
+\]</span>
+根据上面的 BLUP的一般推导，我们有
+<span class="math display">\[
+\operatorname{Cov}\left(\hat{\mathbf{u}}, \mathbf{u}^{\prime}\right)
+= \operatorname{Var}(\hat{\mathbf{u}})
+\]</span>
+固定效应的可估计函数与随机效应估计值的协方差矩阵为
+$$
+<span class="math display">\[\begin{aligned}
+\operatorname{Cov}\left(\mathbf{T} \boldsymbol{\hat{\beta}}, \mathbf{\hat{u}}^{\prime}\right)
+&amp;= \mathbf{T}\operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{\hat{u}}^{\prime}\right) \\
+&amp;= \mathbf{T}\operatorname{Cov}\left(\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}, \left( \mathbf{G Z}^{\prime} \mathbf{V}^{-1}(\mathbf{I}-\mathbf{X} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} ) \mathbf{y} \right)^{\prime}\right) \\
+&amp;=\mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{V} \left( \mathbf{I} - \mathbf{V^{-1}X\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} X&#39;}  \right) \mathbf{V^{-1}ZG} \\
+&amp;=\mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}  \left( \mathbf{I} - \mathbf{V^{-1}X\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} X&#39;}  \right) \mathbf{V^{-1}ZG} \\
+
+&amp;=\mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V^{-1}ZG}  - \mathbf{T} \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}   \mathbf{V^{-1}ZG} \\
+
+&amp;=\mathbf{0}
+
+\end{aligned}\]</span>
+<span class="math display">\[
+根据通式
+\]</span>
+<span class="math display">\[\begin{aligned}
+\operatorname{Var}(\hat{\mathbf{w}}-\mathbf{w})
+=&amp; \operatorname{Var}(\mathbf{\hat{w}})-\operatorname{Cov}\left(\hat{\mathbf{w}}, \mathbf{w}^{\prime}\right)-\operatorname{Cov}\left(\mathbf{w}, \hat{\mathbf{w}}^{\prime}\right)+\operatorname{Var}(\mathbf{w}) \\
+
+=&amp; \mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} \\
+&amp;-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K}-\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{C} \\
+&amp;+\mathbf{C}^{\prime} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{C} +\mathbf{G}
+\end{aligned}\]</span>
+<span class="math display">\[
+我们有
+\]</span>
+<span class="math display">\[\begin{aligned}
+\operatorname{Var}(\hat{\mathbf{u}}-\mathbf{u})
+&amp;= -\mathbf{GZ&#39;V^{-1}ZG} + \mathbf{GZ&#39;}\mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{ZG} + \mathbf{G} \\
+&amp;=\mathbf{G}-\mathbf{G Z}^{\prime} \mathbf{V}^{-1}\left(\mathbf{I}-\mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1}\right) \mathbf{Z G} \\
+\end{aligned}\]</span>
+<p>$$</p>
 <h3 id="系数矩阵广义逆矩阵的性质">系数矩阵广义逆矩阵的性质</h3>
-<p>假设混合模型方程组的系数矩阵的<strong>任意一个对称的</strong>广义逆矩阵为<br>
-$$<br>
-\left[\begin{array}{ll}<br>
-\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{12}^{\prime} &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]<br>
-$$<br>
-则存在下式<br>
-$$<br>
-\begin{aligned}<br>
-&amp;\operatorname{Var}(\boldsymbol{\hat{\beta}})=\mathbf{ C}<em>{11}  \<br>
-&amp;\operatorname{Var}(\hat{\mathbf{u}})=\operatorname{Cov}(\hat{\mathbf{u}}, \mathbf{u})=\mathbf{G}-\mathbf{C}</em>{22} \<br>
-&amp;\operatorname{Var}(\hat{\mathbf{u}}-\mathbf{u})=\mathbf{C}<em>{22} \<br>
-&amp;\operatorname{Cov}\left( \boldsymbol{\hat{\beta}}, \quad \hat{\mathbf{u}}^{\prime}\right)=\mathbf{0} \<br>
-&amp;\operatorname{Cov}( \boldsymbol{\hat{\beta}}, \quad \mathbf{u^{\prime}})=-\mathbf{ C}</em>{12} \<br>
-&amp;\operatorname{Cov}( \boldsymbol{\hat{\beta}}, \quad \hat{\mathbf{u}}^{\prime}-\mathbf{u}^{\prime})=\mathbf{ C}<em>{12}<br>
-\end{aligned}<br>
-$$<br>
-下面的证明是基于<strong>系数矩阵满秩的前提下</strong>，即此时的广义逆就是逆矩阵存在下式成立。<br>
-$$<br>
-\left[\begin{array}{cc}<br>
-\mathbf{C}</em>{11} &amp; \mathbf{C}<em>{12} \<br>
-\mathbf{C}</em>{12}^{\prime} &amp; \mathbf{C}_{22}<br>
-\end{array}\right]<br>
-\left[\begin{array}{cc}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp;<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>
-\end{array}\right]</p>
-<p>= \left[\begin{array}{cc}<br>
-\mathbf{I} &amp; \mathbf{0} \<br>
-\mathbf{0} &amp; \mathbf{I}<br>
-\end{array}\right]<br>
-$$<br>
+<p>假设混合模型方程组的系数矩阵的<strong>任意一个对称的</strong>广义逆矩阵为
+<span class="math display">\[
+\left[\begin{array}{ll}
+\mathbf{C}_{11} &amp; \mathbf{C}_{12} \\
+\mathbf{C}_{12}^{\prime} &amp; \mathbf{C}_{22}
+\end{array}\right]
+\]</span>
+则存在下式
+<span class="math display">\[
+\begin{aligned}
+&amp;\operatorname{Var}(\boldsymbol{\hat{\beta}})=\mathbf{ C}_{11}  \\
+&amp;\operatorname{Var}(\hat{\mathbf{u}})=\operatorname{Cov}(\hat{\mathbf{u}}, \mathbf{u})=\mathbf{G}-\mathbf{C}_{22} \\
+&amp;\operatorname{Var}(\hat{\mathbf{u}}-\mathbf{u})=\mathbf{C}_{22} \\
+&amp;\operatorname{Cov}\left( \boldsymbol{\hat{\beta}}, \quad \hat{\mathbf{u}}^{\prime}\right)=\mathbf{0} \\
+&amp;\operatorname{Cov}( \boldsymbol{\hat{\beta}}, \quad \mathbf{u^{\prime}})=-\mathbf{ C}_{12} \\
+&amp;\operatorname{Cov}( \boldsymbol{\hat{\beta}}, \quad \hat{\mathbf{u}}^{\prime}-\mathbf{u}^{\prime})=\mathbf{ C}_{12}
+\end{aligned}
+\]</span>
+下面的证明是基于<strong>系数矩阵满秩的前提下</strong>，即此时的广义逆就是逆矩阵存在下式成立。
+$$
+</p>
+<p>= $$
 这是 Henderson 在 1975 年提出的，我们有</p>
-<h1>$$<br>
-\left(\begin{array}{l}<br>
-\boldsymbol{\hat{\beta}} \<br>
-\hat{\mathbf{u}}<br>
-\end{array}\right)=\left[\begin{array}{lll}<br>
-\mathbf{C}<em>{11} &amp; &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{12}^{\prime} &amp; &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}<br>
-\end{array}\right]=\left(\begin{array}{l}<br>
-\mathbf{Q}<em>{1}^{\prime} \<br>
-\mathbf{Q}</em>{2}^{\prime}<br>
-\end{array}\right) \mathbf{y}<br>
-$$<br>
-其中，我们设<br>
-$$<br>
-\left(\begin{array}{l}<br>
-\mathbf{Q}<em>{1}^{\prime} \<br>
-\mathbf{Q}</em>{2}^{\prime}<br>
-\end{array}\right)</h1>
-<p>\left[\begin{array}{lll}<br>
-\mathbf{C}<em>{11} &amp; &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{12}^{\prime} &amp; &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1}  \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1}<br>
-\end{array}\right]<br>
-$$<br>
-继续拆开，得到<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{Q}<em>{1}^{\prime} &amp;= \mathbf{C}</em>{11} \mathbf{X}^{\prime} \mathbf{R}^{-1}  + \mathbf{C}<em>{12} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \<br>
-\mathbf{Q}</em>{2}^{\prime} &amp;= \mathbf{C}<em>{12}^{\prime} \mathbf{X}^{\prime} \mathbf{R}^{-1}  + \mathbf{C}</em>{22} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \<br>
-\end{aligned}<br>
-$$<br>
-或者<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{Q}<em>{1} &amp;= \mathbf{R}^{-1}\mathbf{X} \mathbf{C}</em>{11}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}<em>{12}^{\prime}  \<br>
-\mathbf{Q}</em>{2} &amp;= \mathbf{R}^{-1}\mathbf{X} \mathbf{C}<em>{12}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}</em>{22}  \<br>
-\end{aligned}<br>
-$$<br>
-因此，我们有<br>
-$$<br>
-\begin{aligned}<br>
-\boldsymbol{\hat{\beta}} &amp;= \mathbf{Q}<em>{1}^{\prime} \mathbf{y} \<br>
-\mathbf{\hat{u}} &amp;= \mathbf{Q}</em>{2}^{\prime} \mathbf{y} \<br>
-\end{aligned}<br>
-$$<br>
-我们可以得到下面这个等式<br>
-$$<br>
-\begin{aligned}<br>
-\left[\begin{array}{l}<br>
-\mathbf{Q}<em>{1}^{\prime} \<br>
-\mathbf{Q}</em>{2}^{\prime}<br>
-\end{array}\right][\mathbf{X} \quad \vdots \quad  \mathbf{Z}]<br>
-&amp;=<br>
-\left[\begin{array}{lll}<br>
-\mathbf{C}<em>{11} &amp; &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{12}^{\prime} &amp; &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1}  \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1}<br>
-\end{array}\right] [\mathbf{X} \quad \vdots \quad  \mathbf{Z}]<br>
-\<br>
-&amp;=\left[\begin{array}{cc}<br>
-\mathbf{C}<em>{11} &amp; \mathbf{C}</em>{12} \<br>
-\mathbf{C}<em>{12}^{\prime} &amp; \mathbf{C}</em>{22}<br>
-\end{array}\right]\left(\left[\begin{array}{cc}<br>
-\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp;<br>
-\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}<br>
-\end{array}\right]-\left[\begin{array}{cc}<br>
-\mathbf{0} &amp; \mathbf{0} \<br>
-\mathbf{0} &amp; \mathbf{G}^{-1}<br>
-\end{array}\right]\right) \<br>
-&amp;=\left(\begin{array}{cc}<br>
-\mathbf{I} &amp; \mathbf{0} \<br>
-\mathbf{0} &amp; \mathbf{I}<br>
-\end{array}\right)-\left(\begin{array}{cc}<br>
-\mathbf{0} &amp; \mathbf{C}<em>{12} \mathbf{G}^{-1} \<br>
-\mathbf{0} &amp; \mathbf{C}</em>{22} \mathbf{G}^{-1}<br>
-\end{array}\right)<br>
-\end{aligned}<br>
-$$<br>
-因此我们得到<br>
-$$<br>
-\begin{aligned}<br>
-&amp;\mathbf{Q_{1}^{\prime} X=I} \<br>
-&amp;\mathbf{Q_{1}^{\prime} Z=-C_{12} G^{-1}}  \<br>
-&amp;\mathbf{Q_{2}^{\prime} X=0}  \<br>
-&amp;\mathbf{Q_{2}^{\prime} Z=I-C_{22} G^{-1}}<br>
-\end{aligned}<br>
-$$<br>
-利用这些结果，我们得到<br>
-$$<br>
-\begin{aligned}<br>
-\operatorname{Var}(\boldsymbol{\hat{\beta}})<br>
-&amp;=\operatorname{Var}(\mathbf{Q}<em>{1}^{\prime} \mathbf{y})\<br>
-&amp;=\mathbf{Q}</em>{1}^{\prime}\left(\mathbf{R}+\mathbf{Z} \mathbf{G} \mathbf{Z}^{\prime}\right) \mathbf{Q}<em>{1} \<br>
-&amp;=\mathbf{Q}</em>{1}^{\prime}\mathbf{R}\mathbf{Q}<em>{1}+ \mathbf{Q}</em>{1}^{\prime} \mathbf{Z} \mathbf{G} \mathbf{Z}^{\prime} \mathbf{Q}_{1} \</p>
-<p>&amp;=\mathbf{Q}<em>{1}^{\prime}\mathbf{R} \left( \mathbf{R}^{-1}\mathbf{X} \mathbf{C}</em>{11}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}<em>{12}^{\prime} \right)+ \mathbf{Q}</em>{1}^{\prime} \mathbf{Z} \mathbf{G} \mathbf{Z}^{\prime} \mathbf{Q}_{1} \</p>
-<p>&amp;=\mathbf{Q}<em>{1}^{\prime} \mathbf{X C}</em>{11}+\mathbf{Q}<em>{1}^{\prime} \mathbf{Z C}</em>{12}^{\prime}+(\mathbf{Q}<em>{1}^{\prime} \mathbf{Z}) \mathbf{ G } (\mathbf{Q}</em>{1}^{\prime} \mathbf{Z})^{\prime} \</p>
-<p>&amp;=\mathbf{I C}<em>{11}-\mathbf{C}</em>{12} \mathbf{G}^{-1} \mathbf{C}<em>{12}^{\prime}+ (-\mathbf{C}</em>{12} \mathbf{ G }^{-1}) \mathbf{ G } (-\mathbf{C}<em>{12} \mathbf{ G }^{-1})^{\prime} \<br>
-&amp;=\mathbf{ C}</em>{11}-\mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{C}</em>{12}^{\prime}+ \mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{C}</em>{12}^{\prime} \<br>
-&amp;=\mathbf{C}_{11}<br>
-\end{aligned}<br>
-$$</p>
-<p>$$<br>
-\begin{aligned}<br>
-\operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \hat{\mathbf{u}}^{\prime}\right)<br>
-&amp;=\operatorname{Cov}\left( \mathbf{Q}<em>{1}^{\prime} \mathbf{y}, (\mathbf{Q}</em>{2}^{\prime} \mathbf{y})^{\prime}\right)  \<br>
-&amp;=\mathbf{Q}<em>{1}^{\prime}\left(\mathbf{R}+\mathbf{ZGZ}^{\prime}\right) \mathbf{Q}</em>{2} \<br>
-&amp;=\mathbf{Q}<em>{1}^{\prime}\mathbf{R}\mathbf{Q}</em>{2}+\mathbf{Q}<em>{1}^{\prime}\mathbf{ZGZ}^{\prime}\mathbf{Q}</em>{2} \<br>
-&amp;=\mathbf{Q}<em>{1}^{\prime}\mathbf{R} \left(  \mathbf{R}^{-1}\mathbf{X} \mathbf{C}</em>{12}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}<em>{22}\right) +(\mathbf{Q}</em>{1}^{\prime}\mathbf{Z})\mathbf{G}(\mathbf{Q}<em>{2}^{\prime}\mathbf{Z})^{\prime} \<br>
-&amp;=\mathbf{Q}</em>{1}{ }^{\prime} \mathbf{X C}<em>{12}+\mathbf{Q}</em>{1}{ }^{\prime} \mathbf{Z C}<em>{22}+(\mathbf{Q}</em>{1}^{\prime}\mathbf{Z})\mathbf{G}(\mathbf{Q}<em>{2}^{\prime}\mathbf{Z})^{\prime} \<br>
-&amp;=\mathbf{I C}</em>{12}-\mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{C}</em>{22}-\mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{G}\left(\mathbf{I}-\mathbf{G}^{-1} \mathbf{C}</em>{22}\right) \<br>
-&amp;= \mathbf{0}<br>
-\end{aligned}<br>
-$$</p>
-<p>$$<br>
-\begin{aligned}<br>
-\operatorname{Cov}\left(\boldsymbol{\hat{\mathbf{\beta}}}, \mathbf{u}^{\prime}\right)<br>
-&amp;= \operatorname{Cov}\left(\mathbf{Q}<em>{1}^{\prime} \mathbf{y}, \mathbf{u}^{\prime}\right) \<br>
-&amp;=\mathbf{Q}</em>{1}^{\prime} \mathbf{ZG} \<br>
-&amp;=-\mathbf{C}<em>{12} \mathbf{G}^{-1} \mathbf{G} \<br>
-&amp;=-\mathbf{C}</em>{12}<br>
-\end{aligned}<br>
-$$</p>
-<p>$$<br>
-\begin{aligned}<br>
-\operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{\hat{u}^{\prime}-\mathbf{u}^{\prime}}\right)<br>
-&amp;= \operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{\hat{u}^{\prime}}\right) - \operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{u}^{\prime}\right) \<br>
-&amp;=0-\left(-\mathbf{C}<em>{12}\right) \<br>
-&amp;=\mathbf{C}</em>{12}<br>
-\end{aligned}<br>
-$$</p>
-<p>$$<br>
-\begin{aligned}<br>
-\operatorname{Var}(\hat{\mathbf{u}})<br>
-&amp;= \operatorname{Var}(\mathbf{Q}<em>{2}^{\prime} \mathbf{y})  \<br>
-&amp;=\mathbf{Q}</em>{2}^{\prime}\left(\mathbf{R}+\mathbf{Z G Z}^{\prime}\right) \mathbf{Q}<em>{2} \<br>
-&amp;=\mathbf{Q}</em>{2}^{\prime} \mathbf{R} \mathbf{Q}<em>{2} + (\mathbf{Q}</em>{2}^{\prime} \mathbf{Z}) \mathbf{G} (\mathbf{Q}<em>{2}^{\prime} \mathbf{Z})^{\prime}  \<br>
-&amp;=\mathbf{Q}</em>{2}^{\prime} \mathbf{R} \left( \mathbf{R}^{-1}\mathbf{X} \mathbf{C}<em>{12}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}</em>{22}  \right) + \left( \mathbf{I-C_{22} G^{-1}} \right) \mathbf{G} \left( \mathbf{I- G^{-1} C_{22}} \right)  \</p>
-<p>&amp;=\mathbf{Q}<em>{2}^{\prime} \mathbf{X C}</em>{12}+\mathbf{Q}<em>{2}^{\prime} \mathbf{Z C}</em>{22} + \left( \mathbf{G-C_{22} } \right)  \left( \mathbf{I- G^{-1} C_{22}} \right)  \<br>
-&amp;=\mathbf{0}+\left(\mathbf{I}-\mathbf{C}<em>{22} \mathbf{G}^{-1}\right) \mathbf{C}</em>{22}+ \left( \mathbf{G-C_{22} } \right)  \left( \mathbf{I- G^{-1} C_{22}} \right) \<br>
-&amp;=\mathbf{C}<em>{22}-\mathbf{C}</em>{22} \mathbf{G}^{-1}\mathbf{C}<em>{22} + \mathbf{G-C</em>{22} } - \mathbf{C}<em>{22} +\mathbf{C}</em>{22} \mathbf{G}^{-1}\mathbf{C}_{22}\</p>
-<p>&amp;=\mathbf{G}-\mathbf{C}_{22}<br>
-\end{aligned}<br>
-$$</p>
-<p>$$<br>
-\begin{aligned}<br>
-\operatorname{Cov}(\hat{\mathbf{u}}, \mathbf{u})<br>
-&amp;=\operatorname{Cov}( \mathbf{Q}<em>{2}^{\prime} \mathbf{y} , \mathbf{u}) \<br>
-&amp;=\mathbf{Q}</em>{2}^{\prime} \mathbf{Z G} \<br>
-&amp;=\left(\mathbf{I}-\mathbf{C}<em>{22} \mathbf{G}^{-1}\right) \mathbf{G} \<br>
-&amp;=\mathbf{G}-\mathbf{C}</em>{22}<br>
-\end{aligned}<br>
-$$</p>
-<p>$$<br>
-\begin{aligned}<br>
-\operatorname{Var}(\hat{\mathbf{u}}-\mathbf{u})<br>
-&amp;=\operatorname{Var}(\hat{\mathbf{u}})</p>
-<ul>
-<li>\operatorname{Cov}(\hat{\mathbf{u}}, \mathbf{u})</li>
-<li>\operatorname{Cov}(\mathbf{u}, \hat{\mathbf{u}})</li>
-</ul>
-<ul>
-<li>\operatorname{Var}(\mathbf{u})<br>
-\<br>
-&amp;=\mathbf{G}-\mathbf{C}<em>{22}-2\left(\mathbf{G}-\mathbf{C}</em>{22}\right)+\mathbf{G} \<br>
-&amp;=\mathbf{C}_{22}<br>
-\end{aligned}<br>
-$$</li>
-</ul>
+<span class="math display">\[
+\left(\begin{array}{l}
+\boldsymbol{\hat{\beta}} \\
+\hat{\mathbf{u}}
+\end{array}\right)=\left[\begin{array}{lll}
+\mathbf{C}_{11} &amp; &amp; \mathbf{C}_{12} \\
+\mathbf{C}_{12}^{\prime} &amp; &amp; \mathbf{C}_{22}
+\end{array}\right]\left[\begin{array}{l}
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{y} \\
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{y}
+\end{array}\right]=\left(\begin{array}{l}
+\mathbf{Q}_{1}^{\prime} \\
+\mathbf{Q}_{2}^{\prime}
+\end{array}\right) \mathbf{y}
+\]</span>
+其中，我们设
+<span class="math display">\[
+\left(\begin{array}{l}
+\mathbf{Q}_{1}^{\prime} \\
+\mathbf{Q}_{2}^{\prime}
+\end{array}\right) 
+=
+\left[\begin{array}{lll}
+\mathbf{C}_{11} &amp; &amp; \mathbf{C}_{12} \\
+\mathbf{C}_{12}^{\prime} &amp; &amp; \mathbf{C}_{22}
+\end{array}\right]\left[\begin{array}{l}
+\mathbf{X}^{\prime} \mathbf{R}^{-1}  \\
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} 
+\end{array}\right]
+\]</span>
+继续拆开，得到
+<span class="math display">\[
+\begin{aligned}
+\mathbf{Q}_{1}^{\prime} &amp;= \mathbf{C}_{11} \mathbf{X}^{\prime} \mathbf{R}^{-1}  + \mathbf{C}_{12} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \\
+\mathbf{Q}_{2}^{\prime} &amp;= \mathbf{C}_{12}^{\prime} \mathbf{X}^{\prime} \mathbf{R}^{-1}  + \mathbf{C}_{22} \mathbf{Z}^{\prime} \mathbf{R}^{-1} \\
+\end{aligned}
+\]</span>
+或者
+<span class="math display">\[
+\begin{aligned}
+\mathbf{Q}_{1} &amp;= \mathbf{R}^{-1}\mathbf{X} \mathbf{C}_{11}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}_{12}^{\prime}  \\
+\mathbf{Q}_{2} &amp;= \mathbf{R}^{-1}\mathbf{X} \mathbf{C}_{12}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}_{22}  \\
+\end{aligned}
+\]</span>
+因此，我们有
+<span class="math display">\[
+\begin{aligned}
+\boldsymbol{\hat{\beta}} &amp;= \mathbf{Q}_{1}^{\prime} \mathbf{y} \\
+\mathbf{\hat{u}} &amp;= \mathbf{Q}_{2}^{\prime} \mathbf{y} \\
+\end{aligned}
+\]</span>
+我们可以得到下面这个等式
+<span class="math display">\[
+\begin{aligned}
+\left[\begin{array}{l}
+\mathbf{Q}_{1}^{\prime} \\
+\mathbf{Q}_{2}^{\prime}
+\end{array}\right][\mathbf{X} \quad \vdots \quad  \mathbf{Z}] 
+&amp;=
+\left[\begin{array}{lll}
+\mathbf{C}_{11} &amp; &amp; \mathbf{C}_{12} \\
+\mathbf{C}_{12}^{\prime} &amp; &amp; \mathbf{C}_{22}
+\end{array}\right]\left[\begin{array}{l}
+\mathbf{X}^{\prime} \mathbf{R}^{-1}  \\
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} 
+\end{array}\right] [\mathbf{X} \quad \vdots \quad  \mathbf{Z}] 
+\\
+&amp;=\left[\begin{array}{cc}
+\mathbf{C}_{11} &amp; \mathbf{C}_{12} \\
+\mathbf{C}_{12}^{\prime} &amp; \mathbf{C}_{22}
+\end{array}\right]\left(\left[\begin{array}{cc}
+\mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{R}^{-1} \mathbf{Z} \\
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{X} &amp; 
+\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}
+\end{array}\right]-\left[\begin{array}{cc}
+\mathbf{0} &amp; \mathbf{0} \\
+\mathbf{0} &amp; \mathbf{G}^{-1}
+\end{array}\right]\right) \\
+&amp;=\left(\begin{array}{cc}
+\mathbf{I} &amp; \mathbf{0} \\
+\mathbf{0} &amp; \mathbf{I}
+\end{array}\right)-\left(\begin{array}{cc}
+\mathbf{0} &amp; \mathbf{C}_{12} \mathbf{G}^{-1} \\
+\mathbf{0} &amp; \mathbf{C}_{22} \mathbf{G}^{-1}
+\end{array}\right)
+\end{aligned}
+\]</span>
+因此我们得到
+<span class="math display">\[
+\begin{aligned}
+&amp;\mathbf{Q_{1}^{\prime} X=I} \\
+&amp;\mathbf{Q_{1}^{\prime} Z=-C_{12} G^{-1}}  \\
+&amp;\mathbf{Q_{2}^{\prime} X=0}  \\
+&amp;\mathbf{Q_{2}^{\prime} Z=I-C_{22} G^{-1}} 
+\end{aligned}
+\]</span>
+利用这些结果，我们得到
+$$
+<span class="math display">\[\begin{aligned}
+\operatorname{Var}(\boldsymbol{\hat{\beta}})
+&amp;=\operatorname{Var}(\mathbf{Q}_{1}^{\prime} \mathbf{y})\\
+&amp;=\mathbf{Q}_{1}^{\prime}\left(\mathbf{R}+\mathbf{Z} \mathbf{G} \mathbf{Z}^{\prime}\right) \mathbf{Q}_{1} \\
+&amp;=\mathbf{Q}_{1}^{\prime}\mathbf{R}\mathbf{Q}_{1}+ \mathbf{Q}_{1}^{\prime} \mathbf{Z} \mathbf{G} \mathbf{Z}^{\prime} \mathbf{Q}_{1} \\
+
+&amp;=\mathbf{Q}_{1}^{\prime}\mathbf{R} \left( \mathbf{R}^{-1}\mathbf{X} \mathbf{C}_{11}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}_{12}^{\prime} \right)+ \mathbf{Q}_{1}^{\prime} \mathbf{Z} \mathbf{G} \mathbf{Z}^{\prime} \mathbf{Q}_{1} \\
+
+&amp;=\mathbf{Q}_{1}^{\prime} \mathbf{X C}_{11}+\mathbf{Q}_{1}^{\prime} \mathbf{Z C}_{12}^{\prime}+(\mathbf{Q}_{1}^{\prime} \mathbf{Z}) \mathbf{ G } (\mathbf{Q}_{1}^{\prime} \mathbf{Z})^{\prime} \\
+
+&amp;=\mathbf{I C}_{11}-\mathbf{C}_{12} \mathbf{G}^{-1} \mathbf{C}_{12}^{\prime}+ (-\mathbf{C}_{12} \mathbf{ G }^{-1}) \mathbf{ G } (-\mathbf{C}_{12} \mathbf{ G }^{-1})^{\prime} \\
+&amp;=\mathbf{ C}_{11}-\mathbf{C}_{12} \mathbf{G}^{-1} \mathbf{C}_{12}^{\prime}+ \mathbf{C}_{12} \mathbf{G}^{-1} \mathbf{C}_{12}^{\prime} \\
+&amp;=\mathbf{C}_{11}
+\end{aligned}\]</span>
+<p>$$</p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \hat{\mathbf{u}}^{\prime}\right) 
+&amp;=\operatorname{Cov}\left( \mathbf{Q}_{1}^{\prime} \mathbf{y}, (\mathbf{Q}_{2}^{\prime} \mathbf{y})^{\prime}\right)  \\
+&amp;=\mathbf{Q}_{1}^{\prime}\left(\mathbf{R}+\mathbf{ZGZ}^{\prime}\right) \mathbf{Q}_{2} \\
+&amp;=\mathbf{Q}_{1}^{\prime}\mathbf{R}\mathbf{Q}_{2}+\mathbf{Q}_{1}^{\prime}\mathbf{ZGZ}^{\prime}\mathbf{Q}_{2} \\
+&amp;=\mathbf{Q}_{1}^{\prime}\mathbf{R} \left(  \mathbf{R}^{-1}\mathbf{X} \mathbf{C}_{12}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}_{22}\right) +(\mathbf{Q}_{1}^{\prime}\mathbf{Z})\mathbf{G}(\mathbf{Q}_{2}^{\prime}\mathbf{Z})^{\prime} \\
+&amp;=\mathbf{Q}_{1}{ }^{\prime} \mathbf{X C}_{12}+\mathbf{Q}_{1}{ }^{\prime} \mathbf{Z C}_{22}+(\mathbf{Q}_{1}^{\prime}\mathbf{Z})\mathbf{G}(\mathbf{Q}_{2}^{\prime}\mathbf{Z})^{\prime} \\
+&amp;=\mathbf{I C}_{12}-\mathbf{C}_{12} \mathbf{G}^{-1} \mathbf{C}_{22}-\mathbf{C}_{12} \mathbf{G}^{-1} \mathbf{G}\left(\mathbf{I}-\mathbf{G}^{-1} \mathbf{C}_{22}\right) \\
+&amp;= \mathbf{0}
+\end{aligned}
+\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{Cov}\left(\boldsymbol{\hat{\mathbf{\beta}}}, \mathbf{u}^{\prime}\right)
+&amp;= \operatorname{Cov}\left(\mathbf{Q}_{1}^{\prime} \mathbf{y}, \mathbf{u}^{\prime}\right) \\
+&amp;=\mathbf{Q}_{1}^{\prime} \mathbf{ZG} \\
+&amp;=-\mathbf{C}_{12} \mathbf{G}^{-1} \mathbf{G} \\
+&amp;=-\mathbf{C}_{12} 
+\end{aligned}
+\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{\hat{u}^{\prime}-\mathbf{u}^{\prime}}\right) 
+&amp;= \operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{\hat{u}^{\prime}}\right) - \operatorname{Cov}\left(\boldsymbol{\hat{\beta}}, \mathbf{u}^{\prime}\right) \\
+&amp;=0-\left(-\mathbf{C}_{12}\right) \\
+&amp;=\mathbf{C}_{12}
+\end{aligned}
+\]</span></p>
+$$
+<span class="math display">\[\begin{aligned}
+\operatorname{Var}(\hat{\mathbf{u}}) 
+&amp;= \operatorname{Var}(\mathbf{Q}_{2}^{\prime} \mathbf{y})  \\
+&amp;=\mathbf{Q}_{2}^{\prime}\left(\mathbf{R}+\mathbf{Z G Z}^{\prime}\right) \mathbf{Q}_{2} \\
+&amp;=\mathbf{Q}_{2}^{\prime} \mathbf{R} \mathbf{Q}_{2} + (\mathbf{Q}_{2}^{\prime} \mathbf{Z}) \mathbf{G} (\mathbf{Q}_{2}^{\prime} \mathbf{Z})^{\prime}  \\
+&amp;=\mathbf{Q}_{2}^{\prime} \mathbf{R} \left( \mathbf{R}^{-1}\mathbf{X} \mathbf{C}_{12}   + \mathbf{R}^{-1}\mathbf{Z} \mathbf{C}_{22}  \right) + \left( \mathbf{I-C_{22} G^{-1}} \right) \mathbf{G} \left( \mathbf{I- G^{-1} C_{22}} \right)  \\
+
+&amp;=\mathbf{Q}_{2}^{\prime} \mathbf{X C}_{12}+\mathbf{Q}_{2}^{\prime} \mathbf{Z C}_{22} + \left( \mathbf{G-C_{22} } \right)  \left( \mathbf{I- G^{-1} C_{22}} \right)  \\
+&amp;=\mathbf{0}+\left(\mathbf{I}-\mathbf{C}_{22} \mathbf{G}^{-1}\right) \mathbf{C}_{22}+ \left( \mathbf{G-C_{22} } \right)  \left( \mathbf{I- G^{-1} C_{22}} \right) \\
+&amp;=\mathbf{C}_{22}-\mathbf{C}_{22} \mathbf{G}^{-1}\mathbf{C}_{22} + \mathbf{G-C_{22} } - \mathbf{C}_{22} +\mathbf{C}_{22} \mathbf{G}^{-1}\mathbf{C}_{22}\\
+
+
+&amp;=\mathbf{G}-\mathbf{C}_{22}
+\end{aligned}\]</span>
+<p>$$</p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{Cov}(\hat{\mathbf{u}}, \mathbf{u})
+&amp;=\operatorname{Cov}( \mathbf{Q}_{2}^{\prime} \mathbf{y} , \mathbf{u}) \\
+&amp;=\mathbf{Q}_{2}^{\prime} \mathbf{Z G} \\
+&amp;=\left(\mathbf{I}-\mathbf{C}_{22} \mathbf{G}^{-1}\right) \mathbf{G} \\
+&amp;=\mathbf{G}-\mathbf{C}_{22}
+\end{aligned}
+\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{Var}(\hat{\mathbf{u}}-\mathbf{u}) 
+&amp;=\operatorname{Var}(\hat{\mathbf{u}})
+- \operatorname{Cov}(\hat{\mathbf{u}}, \mathbf{u})
+- \operatorname{Cov}(\mathbf{u}, \hat{\mathbf{u}})
++ \operatorname{Var}(\mathbf{u})
+\\
+&amp;=\mathbf{G}-\mathbf{C}_{22}-2\left(\mathbf{G}-\mathbf{C}_{22}\right)+\mathbf{G} \\
+&amp;=\mathbf{C}_{22}
+\end{aligned}
+\]</span></p>
 <p>全部证明完毕。</p>
 <h2 id="简化方程组">简化方程组</h2>
-<p>在家畜育种的实际运用中，我们常有<br>
-$$<br>
-\operatorname{Var}(\mathbf{e})=\mathbf{R}=\mathbf{I} \sigma_{e}^{2}, \quad \operatorname{Var}(\mathbf{u})=\mathbf{G}=\mathbf{A} \sigma_{u}^{2}<br>
-$$<br>
-此时，我们可以对混合模型方程组的两侧均消去 $\mathbf{R^{-1}}$ ，得到一个简化版本<br>
-$$<br>
-\left[\begin{array}{ll}<br>
-\mathbf{X}^{\prime} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{Z} \<br>
-\mathbf{Z}^{\prime} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{Z}+k \mathbf{A}^{-1}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-\boldsymbol{\hat{\beta}} \<br>
-\mathbf{\hat{u}}<br>
-\end{array}\right]=\left[\begin{array}{c}<br>
-\mathbf{X^{\prime} y} \<br>
-\mathbf{Z^{\prime} y}<br>
-\end{array}\right]<br>
-$$<br>
-其中<br>
-$$<br>
-k=\sigma_{e}^{2} / \sigma_{u}^{2}<br>
-$$</p>
+<p>在家畜育种的实际运用中，我们常有
+<span class="math display">\[
+\operatorname{Var}(\mathbf{e})=\mathbf{R}=\mathbf{I} \sigma_{e}^{2}, \quad \operatorname{Var}(\mathbf{u})=\mathbf{G}=\mathbf{A} \sigma_{u}^{2}
+\]</span>
+此时，我们可以对混合模型方程组的两侧均消去 <span class="math inline">\(\mathbf{R^{-1}}\)</span> ，得到一个简化版本
+<span class="math display">\[
+\left[\begin{array}{ll}
+\mathbf{X}^{\prime} \mathbf{X} &amp; \mathbf{X}^{\prime} \mathbf{Z} \\
+\mathbf{Z}^{\prime} \mathbf{X} &amp; \mathbf{Z}^{\prime} \mathbf{Z}+k \mathbf{A}^{-1}
+\end{array}\right]\left[\begin{array}{l}
+\boldsymbol{\hat{\beta}} \\
+\mathbf{\hat{u}}
+\end{array}\right]=\left[\begin{array}{c}
+\mathbf{X^{\prime} y} \\
+\mathbf{Z^{\prime} y}
+\end{array}\right] 
+\]</span>
+其中
+<span class="math display">\[
+k=\sigma_{e}^{2} / \sigma_{u}^{2}
+\]</span></p>
 <h2 id="优势">优势</h2>
-<p>混合模型方程组中不涉及 $\mathbf{V}$ 矩阵，在常规评估中， $\mathbf{A^{-1}}$ 计算比 $\mathbf{V^{-1}}$ 容易得多，当然这主要得益于 Henderson 提出了一种不用求逆直接构建  $\mathbf{A^{-1}}$ 的方法。</p>
-<h1>参考文献</h1>
-<ol>
+<p>混合模型方程组中不涉及 <span class="math inline">\(\mathbf{V}\)</span> 矩阵，在常规评估中， <span class="math inline">\(\mathbf{A^{-1}}\)</span> 计算比 <span class="math inline">\(\mathbf{V^{-1}}\)</span> 容易得多，当然这主要得益于 Henderson 提出了一种不用求逆直接构建 <span class="math inline">\(\mathbf{A^{-1}}\)</span> 的方法。</p>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
 <li>Henderson，1975，Best Linear Unbiased Estimation and Prediction under a Selection Model</li>
 <li>Henderson，《Applications_of_Linear_Models_in_Animal_Breeding》, 1984</li>
 <li>张沅，张勤，《畜禽育种中的线性模型》</li>
@@ -1282,8 +1258,22 @@ $$</p>
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

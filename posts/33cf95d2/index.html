@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">4.4k</span>
+            <span class="post-count">4.5k</span>
         </span>
     </span>
 
@@ -96,46 +96,46 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用blupf90运行阈值模型</p>
+  <p>使用blupf90运行阈值模型</p>
 <span id="more"></span>
-<h1>阈值模型理论</h1>
-<p>有些性状属于<strong>有序多分类</strong>的性状，例如产犊难易程度性状，产仔数等。这些性状本身不服从正态分布，但是育种家们通常会将这类性状的表型值归因于某个潜在的无法观测到的服从正态分布的连续性状，称为<strong>liability</strong> （有的人称为易感性，我下面还是称呼为潜在变量）。因此观测到的分类表型可以解释为其潜在变量超过了某个特定阈值后的表型。因此，对于有 $m$ 个分类的分类变量，这里总共有 $m-1$ 个阈值 ($t_{1} &lt; t_{2}&lt;t_{3},…,t_{m-1}$) 。</p>
-<p>阈值模型需要用到正态分布的一些函数，假设我们的性状是产羔数，其有4个分类，此时潜在变量具有3个阈值的分布如下图所示，其中 $N_{j}$ 表示当潜在变量超过 $t_{j-1}$ 之后的表示产羔数为 $j$ 的表型。</p>
-<p><img src="1.png" alt=""></p>
-<p>假设潜在变量 $l$ 服从 $N(0,1)$ 的分布，其正态分布曲线在点 $t_{j}$ 的高度为 $\phi(t_{j})$ 为<br>
-$$<br>
-\phi(t_{j}) = \exp(-0.5t_{j}^2)/\sqrt{2\pi}<br>
-$$<br>
-这里我们用 $\Phi()$ 表示正态分布的累积分布函数，因此 $\Phi(k)$ 或  $\Phi_{k}$ 会计算出正态分布曲线左侧截止到第 $k$ 个分类的面积。假设我们有 $m$ 个分类，因此当 $k=m$ 时， $\Phi_{k}=1$ 。</p>
-<p>我们定义 $P(k)$ 为表型观测值为第 $k$ 个分类的概率，因此$P(k)$ 或 $P_{k}$ 可以计算为 $P(k) = \Phi(k) -\Phi(k-1)$ ，其中 $\Phi(0)=0$  。或者我们用阈值模型的表示方式，每个阈值用 $t_{j}$ 表示，此时$P(t_{j}) = \Phi(t_{j}) -\Phi(t_{j-1})$ 。</p>
-<p>我们对潜在变量的分析模型如下<br>
-$$<br>
-\mathbf{y=Xb+Zu+e}<br>
-$$<br>
-其中 $\mathbf{y}$ 是潜在变量的向量，其它和正常的模型一样。</p>
-<p>因为  $\mathbf{y}$ 是没有观测到的，因此我们不可能通过构建MME来求解。</p>
-<p>假设 $\mathbf{H^{\prime} = [t^{\prime}, b^{\prime}, u^{\prime}]}$ ，  Gianola 和 Foulley (1983) 给出了最大化后验分布 $\mathbf{L(H)}$ 的 log 函数的估计值 $\mathbf{\hat{H}}$ 的式子，其中用到了一阶导和二阶导，公式如下（看不太懂，但是这个方法只有在给定方差组分时进行遗传评估的方法，<strong>没有估计方差组分的内容</strong>）<br>
-$$<br>
-\left[\begin{array}{rrl}<br>
-\mathbf{Q} &amp; \mathbf{~L}^{\prime} \mathbf{X} &amp; \mathbf{L}^{\prime} \mathbf{Z} \<br>
-\mathbf{X}^{\prime} \mathbf{L} &amp; \mathbf{X}^{\prime} \mathbf{WX} &amp; \mathbf{X}^{\prime} \mathbf{W Z} \<br>
-\mathbf{Z}^{\prime} \mathbf{L} &amp; \mathbf{Z}^{\prime} \mathbf{W X} &amp; \mathbf{Z}^{\prime} \mathbf{W Z}+\mathbf{A}^{-1} \mathbf{G}^{-1}<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-\Delta \mathbf{t} \<br>
-\Delta \mathbf{~b} \<br>
-\Delta \mathbf{u}<br>
-\end{array}\right]=\left[\begin{array}{l}<br>
-\mathbf{p} \<br>
-\mathbf{X}^{\prime} \mathbf{v} \<br>
-\mathbf{Z}^{\prime} \mathbf{v}-\mathbf{A}^{-1} \mathbf{G}^{-1} \mathbf{u}<br>
-\end{array}\right]<br>
-$$<br>
-其中 $\mathbf{G} = \mathbf{I}\sigma^{2}<em>{s}$，或 $\mathbf{G} = \mathbf{I}\sigma^{2}</em>{u}$ ，其中 $\sigma^{2}<em>{s}$ 或  $\sigma^{2}</em>{u}$ 是父性效应方差或加性效应方差。</p>
+<h1 id="阈值模型理论">阈值模型理论</h1>
+<p>有些性状属于<strong>有序多分类</strong>的性状，例如产犊难易程度性状，产仔数等。这些性状本身不服从正态分布，但是育种家们通常会将这类性状的表型值归因于某个潜在的无法观测到的服从正态分布的连续性状，称为<strong>liability</strong> （有的人称为易感性，我下面还是称呼为潜在变量）。因此观测到的分类表型可以解释为其潜在变量超过了某个特定阈值后的表型。因此，对于有 <span class="math inline">\(m\)</span> 个分类的分类变量，这里总共有 <span class="math inline">\(m-1\)</span> 个阈值 (<span class="math inline">\(t_{1} &lt; t_{2}&lt;t_{3},...,t_{m-1}\)</span>) 。</p>
+<p>阈值模型需要用到正态分布的一些函数，假设我们的性状是产羔数，其有4个分类，此时潜在变量具有3个阈值的分布如下图所示，其中 <span class="math inline">\(N_{j}\)</span> 表示当潜在变量超过 <span class="math inline">\(t_{j-1}\)</span> 之后的表示产羔数为 <span class="math inline">\(j\)</span> 的表型。</p>
+<p><img src="1.png" /></p>
+<p>假设潜在变量 <span class="math inline">\(l\)</span> 服从 <span class="math inline">\(N(0,1)\)</span> 的分布，其正态分布曲线在点 <span class="math inline">\(t_{j}\)</span> 的高度为 <span class="math inline">\(\phi(t_{j})\)</span> 为
+<span class="math display">\[
+\phi(t_{j}) = \exp(-0.5t_{j}^2)/\sqrt{2\pi}
+\]</span>
+这里我们用 <span class="math inline">\(\Phi()\)</span> 表示正态分布的累积分布函数，因此 <span class="math inline">\(\Phi(k)\)</span> 或 <span class="math inline">\(\Phi_{k}\)</span> 会计算出正态分布曲线左侧截止到第 <span class="math inline">\(k\)</span> 个分类的面积。假设我们有 <span class="math inline">\(m\)</span> 个分类，因此当 <span class="math inline">\(k=m\)</span> 时， <span class="math inline">\(\Phi_{k}=1\)</span> 。</p>
+<p>我们定义 <span class="math inline">\(P(k)\)</span> 为表型观测值为第 <span class="math inline">\(k\)</span> 个分类的概率，因此<span class="math inline">\(P(k)\)</span> 或 <span class="math inline">\(P_{k}\)</span> 可以计算为 <span class="math inline">\(P(k) = \Phi(k) -\Phi(k-1)\)</span> ，其中 <span class="math inline">\(\Phi(0)=0\)</span> 。或者我们用阈值模型的表示方式，每个阈值用 <span class="math inline">\(t_{j}\)</span> 表示，此时<span class="math inline">\(P(t_{j}) = \Phi(t_{j}) -\Phi(t_{j-1})\)</span> 。</p>
+<p>我们对潜在变量的分析模型如下
+<span class="math display">\[
+\mathbf{y=Xb+Zu+e}
+\]</span>
+其中 <span class="math inline">\(\mathbf{y}\)</span> 是潜在变量的向量，其它和正常的模型一样。</p>
+<p>因为 <span class="math inline">\(\mathbf{y}\)</span> 是没有观测到的，因此我们不可能通过构建MME来求解。</p>
+<p>假设 <span class="math inline">\(\mathbf{H^{\prime} = [t^{\prime}, b^{\prime}, u^{\prime}]}\)</span> ， Gianola 和 Foulley (1983) 给出了最大化后验分布 <span class="math inline">\(\mathbf{L(H)}\)</span> 的 log 函数的估计值 <span class="math inline">\(\mathbf{\hat{H}}\)</span> 的式子，其中用到了一阶导和二阶导，公式如下（看不太懂，但是这个方法只有在给定方差组分时进行遗传评估的方法，<strong>没有估计方差组分的内容</strong>）
+<span class="math display">\[
+\left[\begin{array}{rrl}
+\mathbf{Q} &amp; \mathbf{~L}^{\prime} \mathbf{X} &amp; \mathbf{L}^{\prime} \mathbf{Z} \\
+\mathbf{X}^{\prime} \mathbf{L} &amp; \mathbf{X}^{\prime} \mathbf{WX} &amp; \mathbf{X}^{\prime} \mathbf{W Z} \\
+\mathbf{Z}^{\prime} \mathbf{L} &amp; \mathbf{Z}^{\prime} \mathbf{W X} &amp; \mathbf{Z}^{\prime} \mathbf{W Z}+\mathbf{A}^{-1} \mathbf{G}^{-1}
+\end{array}\right]\left[\begin{array}{l}
+\Delta \mathbf{t} \\
+\Delta \mathbf{~b} \\
+\Delta \mathbf{u}
+\end{array}\right]=\left[\begin{array}{l}
+\mathbf{p} \\
+\mathbf{X}^{\prime} \mathbf{v} \\
+\mathbf{Z}^{\prime} \mathbf{v}-\mathbf{A}^{-1} \mathbf{G}^{-1} \mathbf{u}
+\end{array}\right]
+\]</span>
+其中 <span class="math inline">\(\mathbf{G} = \mathbf{I}\sigma^{2}_{s}\)</span>，或 <span class="math inline">\(\mathbf{G} = \mathbf{I}\sigma^{2}_{u}\)</span> ，其中 <span class="math inline">\(\sigma^{2}_{s}\)</span> 或 <span class="math inline">\(\sigma^{2}_{u}\)</span> 是父性效应方差或加性效应方差。</p>
 <p>很多式子不是很清楚，就先这样吧。</p>
-<h1>blupf90 实操</h1>
+<h1 id="blupf90-实操">blupf90 实操</h1>
 <h2 id="吉布斯抽样">吉布斯抽样</h2>
 <p>在blupf90官方文档的估计方差组分章节中有吉布斯抽样的内容。吉布斯抽样（Gibbs Sampling）与REML方法完全不同。此处我们不探讨该技术的理论背景，细节可参考Sorensen和Gianola（2002）或Misztal（2008）的著作。简而言之，<strong>吉布斯抽样是一种基于当前可用信息，通过随机数生成样本，从中提取后验分布的迭代过程</strong>。在单轮抽样中，吉布斯采样器会执行以下操作：</p>
-<ol>
+<ol type="1">
 <li><strong>参数求解</strong>：利用当前方差组分（variance components）求解混合模型方程组；</li>
 <li><strong>添加噪声</strong>：为每个解的估计值添加一个微小随机数（噪声）；</li>
 <li><strong>协方差估计</strong>：基于更新后的解，通过随机数生成协方差估计值。</li>
@@ -146,7 +146,7 @@ $$<br>
 <li>样本标准差（后验标准差）对应频率学派方法（如REML）中的标准误（standard error）。</li>
 </ul>
 <p>基础的吉布斯抽样分析包含下面这2步：</p>
-<ol>
+<ol type="1">
 <li>使用 <strong>THRGIBBSF90</strong> 来生成对方差组分的抽样（<strong>注意不能在同一个文件夹同时跑2个吉布斯抽样</strong>，因此会彼此覆盖结果文件 <code>gibbs_samples</code>）</li>
 <li>使用 <strong>POSTGIBBSF90</strong> 来整理抽样结果（确认设置的抽样次数和 burn-in 用于估计方差组分已经足够大了）</li>
 </ol>
@@ -155,78 +155,78 @@ $$<br>
 <h2 id="对方差组分的限制">对方差组分的限制</h2>
 <p>当某些方差组分不存在时，这里如同 AIREML ，也支持将相应的方差组分设为 0 。但是与 AIREMLF90 不同的是，AIREMLF90 不会再估计不存在的方差组分，但是 THRGIBBSF90 仍然会估计所有的方差组分，然后将相应的不存在的方差组分设为 0 。</p>
 <p>有一点与 AIREMLF90 相同，当估计的方差组分超过参数空间时，THRGIBBSF90 会尝试固定相应的需要估计的方差组分（我的理解，是不是说某个遗传参数的估计值超出了参数空间，就仍然使用之前的值）。在这个过程中，可能会出现某个方差组分为 0 的情况，此时这个方差组分之后的估计值会一直为 0 （因为没有信息）。因此如果出现这种某个方差组分碰巧为 0 的情况，你就要考虑可能模型欠佳，或者数据量不足以估计出这些方差组分。</p>
-<h2 id="THRGIBBSF90-结果文件">THRGIBBSF90 结果文件</h2>
+<h2 id="thrgibbsf90-结果文件">THRGIBBSF90 结果文件</h2>
 <h3 id="日志信息">日志信息</h3>
 <p>打印在屏幕上的日志信息如下图，首先是每一轮抽样的方差组分结果（基于每多少次迭代保存1次结果这个参数抽取结果），这个程序本身也会计算每一次抽样的育种值结果，在抽样结束后也会打印出一些统计指标如下</p>
-<p><img src="2.png" alt=""></p>
+<p><img src="2.png" /></p>
 <p>其中两个值说明如下，同理另外两个就是残差。</p>
 <ul>
 <li><code>ave G</code> ： 方差组分的后验均值</li>
-<li><code>SD G</code> :   方差组分的后验标准差</li>
+<li><code>SD G</code> : 方差组分的后验标准差</li>
 <li><code>ave R</code> ： 残差的后验均值</li>
-<li><code>SD R</code> :   残差的后验标准差</li>
+<li><code>SD R</code> : 残差的后验标准差</li>
 </ul>
-<p>接下来的内容如下，这里是一些不重要的信息，<code>Last seeds</code> 是随机数生成器的 Seeds 信息（不重要），<code> Number of samples kept</code> 是剔除 burn-in 之后的抽样次数，<code>solutions stored in a binary file: &quot;last_solutions&quot;</code> 表示最后一次抽样结果保存为 “last_solutions” （这个文件不重要）</p>
-<p><img src="3.png" alt=""></p>
+<p>接下来的内容如下，这里是一些不重要的信息，<code>Last seeds</code> 是随机数生成器的 Seeds 信息（不重要），<code>Number of samples kept</code> 是剔除 burn-in 之后的抽样次数，<code>solutions stored in a binary file: "last_solutions"</code> 表示最后一次抽样结果保存为 “last_solutions” （这个文件不重要）</p>
+<p><img src="3.png" /></p>
 <p>接下来是 DIC 和相应的信息， DIC 是 AIC 一样用于比较2个模型的优劣的指标（越小越好）（下面的公式推导没有看懂）。</p>
 <p>其中信息如下</p>
 <ul>
-<li><code> detR</code> ： 残差协方差矩阵的后验均值的行列式（$|\mathbf{R}_{0}|$）。</li>
+<li><code>detR</code> ： 残差协方差矩阵的后验均值的行列式（<span class="math inline">\(|\mathbf{R}_{0}|\)</span>）。</li>
 <li><code># stored samples</code> ： 有多少次抽样结果存储在文件中（等于 (总抽样次数-burn-in次数)/保存抽样结果的频数）</li>
-<li><code>D-bar</code> : $\bar{D}$</li>
-<li><code>D(theta-bar)</code> :  $D(\bar{\theta})$</li>
-<li><code>DIC = 2*D-bar - D(theta-bar)</code> :  $\text{DIC} = 2 \bar{D} - D(\bar{\theta})$</li>
-<li><code> Effective number of parameters</code> :  $\bar{D} - D(\bar{\theta})$</li>
-<li><code>solutions stored in file: &quot;binary_final_solutions&quot;</code>  :  抽样的后验均值结果存储在 binary_final_solutions 文件中</li>
+<li><code>D-bar</code> : <span class="math inline">\(\bar{D}\)</span></li>
+<li><code>D(theta-bar)</code> : <span class="math inline">\(D(\bar{\theta})\)</span></li>
+<li><code>DIC = 2*D-bar - D(theta-bar)</code> : <span class="math inline">\(\text{DIC} = 2 \bar{D} - D(\bar{\theta})\)</span></li>
+<li><code>Effective number of parameters</code> : <span class="math inline">\(\bar{D} - D(\bar{\theta})\)</span></li>
+<li><code>solutions stored in file: "binary_final_solutions"</code> : 抽样的后验均值结果存储在 binary_final_solutions 文件中</li>
 </ul>
-<p><img src="4.png" alt=""></p>
-<p>这里我们以 $\log\mathbf{L(\boldsymbol{\theta})}$ 作为参数 $\boldsymbol{\theta}$ 的似然换数，$N$ 是表型数目，$\hat{\sigma}_{e[k]}^{2}$ 表示第 $k$ 次抽样（在 burn-in 之后）的残差方差。</p>
-<p>我定义第 $k$ 次的偏差 $D_{k}$ 为<br>
-$$<br>
-D_k=-2 \log L\left(\hat{\theta}<em>k\right)=-2 \sum</em>{i=1}^N\left[C+\frac{\hat{e}<em>i^2}{\hat{\sigma}</em>{e[k]}^2}\right]<br>
-$$<br>
-这里 $C$ 为 $\log(2\pi\hat{\sigma}<em>{e[k]}^{2})$ ，$\hat{e}</em>{i}$ 为某个观测值 $i$ 的残差（$y-\hat{y}$ ）。</p>
-<p>通过  burn-in 之后的 $m$ 次抽样后，$\bar{D}$ （$D$ 的期望值的估计值）定义为<br>
-$$<br>
-\bar{D} = \frac{\sum_{k=1}^{m}D_{k}}{m}<br>
-$$<br>
-我们以同样的方式计算 $\sigma_{e}^{2}$ 后验均值的估计值。我们使用上面计算  $D_{k}$ 的公式来计算后验偏差 $D(\bar{\theta})$ ，只是 $\hat{\sigma}<em>{e[k]}^{2}$ 替换为了其后验均值   $\hat{\sigma}</em>{e}^{2}$<br>
-$$<br>
-D(\bar{\theta})=-2 \log L(\hat{\boldsymbol{\theta}})=-2 \sum_{i=1}^N\left[C+\frac{\hat{e}_i^2}{\hat{\sigma}<em>e^2}\right]<br>
-$$<br>
-这些统计量都是使用 burn-in 之后的抽样结果，之后按照下面的公式计算统计量 DIC<br>
-$$<br>
-\text{DIC} = 2 \bar{D} - D(\bar{\theta})<br>
-$$<br>
-THRGIBBSF90 会将每一个 $D</em>{k}$ 值存储在文件 <code>fort.99</code> 中。</p>
+<p><img src="4.png" /></p>
+<p>这里我们以 <span class="math inline">\(\log\mathbf{L(\boldsymbol{\theta})}\)</span> 作为参数 <span class="math inline">\(\boldsymbol{\theta}\)</span> 的似然换数，<span class="math inline">\(N\)</span> 是表型数目，<span class="math inline">\(\hat{\sigma}_{e[k]}^{2}\)</span> 表示第 <span class="math inline">\(k\)</span> 次抽样（在 burn-in 之后）的残差方差。</p>
+<p>我定义第 <span class="math inline">\(k\)</span> 次的偏差 <span class="math inline">\(D_{k}\)</span> 为
+<span class="math display">\[
+D_k=-2 \log L\left(\hat{\theta}_k\right)=-2 \sum_{i=1}^N\left[C+\frac{\hat{e}_i^2}{\hat{\sigma}_{e[k]}^2}\right]
+\]</span>
+这里 <span class="math inline">\(C\)</span> 为 <span class="math inline">\(\log(2\pi\hat{\sigma}_{e[k]}^{2})\)</span> ，<span class="math inline">\(\hat{e}_{i}\)</span> 为某个观测值 <span class="math inline">\(i\)</span> 的残差（<span class="math inline">\(y-\hat{y}\)</span> ）。</p>
+<p>通过 burn-in 之后的 <span class="math inline">\(m\)</span> 次抽样后，<span class="math inline">\(\bar{D}\)</span> （<span class="math inline">\(D\)</span> 的期望值的估计值）定义为
+<span class="math display">\[
+\bar{D} = \frac{\sum_{k=1}^{m}D_{k}}{m}
+\]</span>
+我们以同样的方式计算 <span class="math inline">\(\sigma_{e}^{2}\)</span> 后验均值的估计值。我们使用上面计算 <span class="math inline">\(D_{k}\)</span> 的公式来计算后验偏差 <span class="math inline">\(D(\bar{\theta})\)</span> ，只是 <span class="math inline">\(\hat{\sigma}_{e[k]}^{2}\)</span> 替换为了其后验均值 <span class="math inline">\(\hat{\sigma}_{e}^{2}\)</span>
+<span class="math display">\[
+D(\bar{\theta})=-2 \log L(\hat{\boldsymbol{\theta}})=-2 \sum_{i=1}^N\left[C+\frac{\hat{e}_i^2}{\hat{\sigma}_e^2}\right]
+\]</span>
+这些统计量都是使用 burn-in 之后的抽样结果，之后按照下面的公式计算统计量 DIC
+<span class="math display">\[
+\text{DIC} = 2 \bar{D} - D(\bar{\theta})
+\]</span>
+THRGIBBSF90 会将每一个 <span class="math inline">\(D_{k}\)</span> 值存储在文件 <code>fort.99</code> 中。</p>
 <h3 id="生成的文件">生成的文件</h3>
 <p>THRGIBBSF90 会生成下面的文件</p>
 <ul>
-<li><strong>gibbs_samples</strong> ：burn-in后，特定轮次中方差组分（variance components）的抽样样本。<br>
+<li><strong>gibbs_samples</strong> ：burn-in后，特定轮次中方差组分（variance components）的抽样样本。
 <em>（示例：用于绘制后验分布直方图或计算方差组分的后验均值）</em></li>
-<li><strong>fort.99</strong>： burn-in后，特定轮次中模型的偏差值（Deviance）。<br>
+<li><strong>fort.99</strong>： burn-in后，特定轮次中模型的偏差值（Deviance）。
 <em>（说明：常用于监控吉布斯抽样收敛性，偏差值波动趋稳表明链稳定）</em></li>
-<li><strong>last_solutions</strong> ：最后一次抽样得到的解（如固定效应和随机效应估计值），以二进制形式保存。<br>
+<li><strong>last_solutions</strong> ：最后一次抽样得到的解（如固定效应和随机效应估计值），以二进制形式保存。
 <em>（用途：可作为后续分析的初始值或检查抽样终点状态）</em></li>
-<li><strong>binary_final_solutions</strong> ：  burn-in后 特定轮次中抽样解的后验均值，以二进制形式保存。<br>
+<li><strong>binary_final_solutions</strong> ： burn-in后 特定轮次中抽样解的后验均值，以二进制形式保存。
 <em>（示例：直接用于基因组预测或遗传评估报告）</em></li>
 </ul>
-<p>这里所说的特定轮次，就是基于我们所设置的每 $n$ 轮抽样保存一次结果（总次数等于 (总抽样次数-burn-in次数)/n）。</p>
+<p>这里所说的特定轮次，就是基于我们所设置的每 <span class="math inline">\(n\)</span> 轮抽样保存一次结果（总次数等于 (总抽样次数-burn-in次数)/n）。</p>
 <p>这里 <strong>gibbs_samples</strong> 文件和 <strong>fort.99</strong> 文件 会被 <strong>POSTGIBBSF90</strong> 软件用于后续分析。</p>
-<h2 id="Post-Gibbs-分析">Post Gibbs 分析</h2>
+<h2 id="post-gibbs-分析">Post Gibbs 分析</h2>
 <p><strong>POSTGIBBSF90</strong> 模块会执行 post-Gibbs 分析，其输入文件为参数卡名称，gibbs_samples 文件和 fort.99 文件 。</p>
 <p>运行时第一个参数是参数卡名称，之后脚本会问你 Burn-in 的数目 （这里实际是问你需要<strong>额外</strong>丢弃的抽样数目）</p>
-<p><img src="5.png" alt=""></p>
+<p><img src="5.png" /></p>
 <p>这是一个需要谨慎的问题，你不能直接使用 <strong>THRGIBBSF90</strong> 使用的 burn-in 数目，因为这些抽样结果早已经被丢弃了（没有保存在文件中）。这里问的是你需要额外丢弃的抽样结果数目，因此你的回答应该是</p>
 <ul>
 <li>0 ： 如果你不需要丢弃额外的抽样结果</li>
 <li>一个整数，表示你想要丢弃额外的抽样结果</li>
 </ul>
 <p>之后，脚本会问你下面的问题</p>
-<p><img src="6.png" alt=""></p>
+<p><img src="6.png" /></p>
 <p>这里你不能直接输入1 ，这里问的是你之前分析的 interval 参数，因此如果你要保留全部抽样结果，你就要输入 THRGIBBSF90 分析时使用的参数（或者之前interval 参数的整数倍）。</p>
 <p>之后会输出下面的2个表格，每一个表格对应方差组分的统计值。</p>
-<p><img src="7.png" alt=""></p>
+<p><img src="7.png" /></p>
 <p>方差组分可以通过 <code>Pos. eff1 eff2 trt1 trt2</code> 这些列来确认：</p>
 <ul>
 <li><code>Pos.</code> ： 一个参数的位置索引（应该就和行号一样，没用）</li>
@@ -235,29 +235,27 @@ THRGIBBSF90 会将每一个 $D</em>{k}$ 值存储在文件 <code>fort.99</code> 
 </ul>
 <p>在这个例子中，我们有2个方差组分，第一个加性方差是第4个因子，第二个就是残差。因此这里 position 1 就是加性方差，position 2 就是残差。</p>
 <p>这里我们提取一些重要信息说明如下（我测试了一下，后验均值和标准差和日志信息一致）</p>
-<p><img src="8.png" alt=""></p>
-<p>表格里面有好几个方差组分的点估计值，包括<code>mean</code>， <code>median</code> ， <code>mode</code> （众数）。具体用哪个值更合理取决于后验分布的偏态情况。如果后验分布高度偏态，并且 <code>mean</code> 和 <code>mode</code> 结果相差很大，此时使用  <code>mode</code> 或 <code>median</code>  结果可能更好。注意这里</p>
-<p><strong>高后验密度区间（HPD95）<strong>是评估参数精度的常用统计量，属于区间估计范畴。其计算方式为：将排序后的样本按</strong>截断前2.5%最大值和后2.5%最小值</strong>，得到区间的上下界。</p>
-<p>你可以通过**独立链大小（Independent chain size）<strong>和</strong>自相关系数（Autocorrelations）**可判断保存的样本是否足够：</p>
-<ol>
+<p><img src="8.png" /></p>
+<p>表格里面有好几个方差组分的点估计值，包括<code>mean</code>， <code>median</code> ， <code>mode</code> （众数）。具体用哪个值更合理取决于后验分布的偏态情况。如果后验分布高度偏态，并且 <code>mean</code> 和 <code>mode</code> 结果相差很大，此时使用 <code>mode</code> 或 <code>median</code> 结果可能更好。注意这里</p>
+<p><strong>高后验密度区间（HPD95）</strong>是评估参数精度的常用统计量，属于区间估计范畴。其计算方式为：将排序后的样本按<strong>截断前2.5%最大值和后2.5%最小值</strong>，得到区间的上下界。</p>
+<p>你可以通过<strong>独立链大小（Independent chain size）</strong>和<strong>自相关系数（Autocorrelations）</strong>可判断保存的样本是否足够：</p>
+<ol type="1">
 <li><strong>自相关性（Autocorrelations）</strong>
 <ul>
 <li>相邻样本通常高度相关（因下一个样本基于当前样本生成）；</li>
 <li>若远隔样本间仍存在高自相关性，表明样本间依赖性强，绝对值相似度高，此时样本无法充分反映后验分布的信息；</li>
 <li>这个参数告诉我们<strong>自相关系数指示达到0相关所需的样本间隔数</strong>。</li>
-</ul>
-</li>
+</ul></li>
 <li><strong>独立链大小（Independent chain size）</strong>
 <ul>
 <li>对应可视为独立样本的数量（如独立链大小为3，则等效于仅用3个独立样本计算后验均值和标准差，显然不足）；</li>
 <li>该指标直接提示是否需增加样本量。</li>
-</ul>
-</li>
+</ul></li>
 </ol>
 <p>展示完上面的表格后，软件会提示下面的信息</p>
-<p><img src="9.png" alt=""></p>
+<p><img src="9.png" /></p>
 <p><strong>POSTGIBBSF90</strong> 支持通过外部软件 <strong>Gnuplot</strong> 绘制样本的<strong>时间序列图</strong>或<strong>直方图</strong>。操作说明如下：</p>
-<ol>
+<ol type="1">
 <li><strong>输入1</strong>：生成时间序列图（需系统已安装 Gnuplot；安装命令为 <code>sudo yum install gnuplot</code> ）；</li>
 <li><strong>输入2</strong>：生成抽样结果的直方图；</li>
 <li><strong>输入0</strong>：退出程序。</li>
@@ -270,8 +268,7 @@ THRGIBBSF90 会将每一个 $D</em>{k}$ 值存储在文件 <code>fort.99</code> 
 <ul>
 <li><strong>初始抽样结果几乎保持为初始值不变</strong> ，则需延长预烧期；</li>
 <li><strong>样本长期滞留于特定值域</strong> ，这说明后验均值无法代表整体分布，需增加抽样总量。</li>
-</ul>
-</li>
+</ul></li>
 </ul>
 <p>如果我们输入2表示画抽样直方图，之后会提示 <code>Type position and # bins</code> ，让你输入参数的位置索引和 画图柱子数目</p>
 <p><strong>直方图（Histogram）</strong> 介绍如下</p>
@@ -281,28 +278,27 @@ THRGIBBSF90 会将每一个 $D</em>{k}$ 值存储在文件 <code>fort.99</code> 
 <li>异常情况：
 <ul>
 <li><strong>双峰分布</strong>或<strong>分布过于平坦</strong> → 需检查参数卡文件是否存在人为错误，或增加总抽样次数。</li>
+</ul></li>
 </ul>
-</li>
-</ul>
-<h3 id="生成的文件-2">生成的文件</h3>
+<h3 id="生成的文件-1">生成的文件</h3>
 <p><strong>POSTGIBBSF90</strong> 会生成下面7个文件</p>
 <ul>
-<li><strong>postout</strong><br>
+<li><strong>postout</strong>
 与屏幕显示内容完全一致的输出文件（2个统计信息的表格内容）。</li>
-<li><strong>postind</strong><br>
+<li><strong>postind</strong>
 方差组分（variance components）与其在模型中的位置索引的对应关系文件。</li>
-<li><strong>postmean</strong><br>
+<li><strong>postmean</strong>
 以用户友好格式（如表格）展示的<strong>后验均值</strong>结果文件。</li>
-<li><strong>postmeanCorr</strong><br>
-以用户友好格式展示的相关性后验均值文件。<br>
+<li><strong>postmeanCorr</strong>
+以用户友好格式展示的相关性后验均值文件。
 <em>（示例：遗传相关性的点估计值）</em></li>
-<li><strong>postsd</strong><br>
-后验标准差（Posterior Standard Deviation）的数值记录文件。<br>
+<li><strong>postsd</strong>
+后验标准差（Posterior Standard Deviation）的数值记录文件。
 <em>（用途：评估参数估计的精确性，值越小表示置信度越高）</em></li>
-<li><strong>fort.998</strong><br>
-基于 <code>fort.99</code> 文件计算的**对数似然值（logL）**记录文件。</li>
-<li><strong>postgibbs_samples</strong><br>
-经过<strong>预烧期（burn-in）剔除</strong>和**间隔抽样（thinning）**处理后的最终抽样结果集合。</li>
+<li><strong>fort.998</strong>
+基于 <code>fort.99</code> 文件计算的<strong>对数似然值（logL）</strong>记录文件。</li>
+<li><strong>postgibbs_samples</strong>
+经过<strong>预烧期（burn-in）剔除</strong>和<strong>间隔抽样（thinning）</strong>处理后的最终抽样结果集合。</li>
 </ul>
 <p>这里 <strong>postgibbs_samples</strong> 文件是文本文件，可以用于计算一些你自己感兴趣的别的统计指标。其内容如下表，说明如下</p>
 <ul>
@@ -327,14 +323,10 @@ THRGIBBSF90 会将每一个 $D</em>{k}$ 值存储在文件 <code>fort.99</code> 
 <p>如果是下面的写法，<code>OPTION solution mean</code> 这个选项是需要估计方差组分的。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">OPTION cat 3</span><br><span class="line">OPTION solution mean</span><br></pre></td></tr></table></figure>
 <p>后续需要跑一下 postgibbsf90 ，确认结果没有问题</p>
-<h1>参考文献</h1>
-<ol>
-<li>
-<p>Linear models for the prediction of animal breeding values[M]. Cabi, 2014.</p>
-</li>
-<li>
-<p><a target="_blank" rel="noopener" href="http://nce.ads.uga.edu/wiki/doku.php?id=readme.gibbsf90plus">http://nce.ads.uga.edu/wiki/doku.php?id=readme.gibbsf90plus</a></p>
-</li>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li><p>Linear models for the prediction of animal breeding values[M]. Cabi, 2014.</p></li>
+<li><p>http://nce.ads.uga.edu/wiki/doku.php?id=readme.gibbsf90plus</p></li>
 </ol>
  
       <!-- reward -->
@@ -761,8 +753,22 @@ THRGIBBSF90 会将每一个 $D</em>{k}$ 值存储在文件 <code>fort.99</code> 
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

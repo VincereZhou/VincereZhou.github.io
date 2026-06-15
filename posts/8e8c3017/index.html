@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">617</span>
+            <span class="post-count">618</span>
         </span>
     </span>
 
@@ -96,42 +96,37 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 rrBLUP 包计算 SNP 效用的方法。</p>
+  <p>使用 rrBLUP 包计算 SNP 效用的方法。</p>
 <span id="more"></span>
-<h1>表型和基因型处理</h1>
-<ol>
-<li>
-<p>表型文件中必须剔除存在缺失的行。</p>
-</li>
-<li>
-<p>基因型质控填充，将位点编码必须为 {-1,0,1} 。</p>
-</li>
-<li>
-<p>表型文件和基因型文件中的个体顺序必须保持一致（只能使用既有表型又有基因型的个体数据）。</p>
-</li>
+<h1 id="表型和基因型处理">表型和基因型处理</h1>
+<ol type="1">
+<li><p>表型文件中必须剔除存在缺失的行。</p></li>
+<li><p>基因型质控填充，将位点编码必须为 {-1,0,1} 。</p></li>
+<li><p>表型文件和基因型文件中的个体顺序必须保持一致（只能使用既有表型又有基因型的个体数据）。</p></li>
 </ol>
-<h1>求解</h1>
+<h1 id="求解">求解</h1>
 <p>这里我们主要用到的就是 <code>rrBLUP</code> 包中的 <code>mixed.solve</code> 函数，这里还可以手动填充固定效应（必须列满秩），用法如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mixed.solve<span class="punctuation">(</span>y<span class="punctuation">,</span> Z<span class="operator">=</span><span class="literal">NULL</span><span class="punctuation">,</span> K<span class="operator">=</span><span class="literal">NULL</span><span class="punctuation">,</span> X<span class="operator">=</span><span class="literal">NULL</span><span class="punctuation">,</span> method<span class="operator">=</span><span class="string">&quot;REML&quot;</span><span class="punctuation">,</span></span><br><span class="line">			bounds<span class="operator">=</span><span class="built_in">c</span><span class="punctuation">(</span><span class="number">1e-09</span><span class="punctuation">,</span> <span class="number">1e+09</span><span class="punctuation">)</span><span class="punctuation">,</span> SE<span class="operator">=</span><span class="literal">FALSE</span><span class="punctuation">,</span> return.Hinv<span class="operator">=</span><span class="literal">FALSE</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
 <p>参数：</p>
-<p>y:  $n \times 1$ 的表型向量，不能有缺失 （NA），必须与 X 和 Z 的行顺序保持一致。</p>
-<p>Z: $n \times m$ 的随机效应矩阵，如果不设置，默认为单位矩阵。</p>
-<p>K: $m \times m$ 的随机效应协方差矩阵，必须为半正定矩阵。如果不设置，默认为单位矩阵。</p>
-<p>X: $n \times p$ 的固定效应设计矩阵，如果不设置，则为 1 向量。<strong>X 必须为列满秩序矩阵</strong>。</p>
+<p>y: <span class="math inline">\(n \times 1\)</span> 的表型向量，不能有缺失 （NA），必须与 X 和 Z 的行顺序保持一致。</p>
+<p>Z: <span class="math inline">\(n \times m\)</span> 的随机效应矩阵，如果不设置，默认为单位矩阵。</p>
+<p>K: <span class="math inline">\(m \times m\)</span> 的随机效应协方差矩阵，必须为半正定矩阵。如果不设置，默认为单位矩阵。</p>
+<p>X: <span class="math inline">\(n \times p\)</span> 的固定效应设计矩阵，如果不设置，则为 1 向量。<strong>X 必须为列满秩序矩阵</strong>。</p>
 <p>method: “ML”, “REML”</p>
 <p>bounds: 两个元素的数组，表明 ridge 参数的下限和上限。</p>
 <p>SE ：如果 TRUE , 则计算标准误</p>
-<p>return.Hinv: 如果 TRUE,  返回 reverse of  $H = ZKZ’ + \lambda I$ ，这对 GWAS 有用。</p>
-<p>正常来说，如果固定效应为均值，那么就只需要设置 y 和 Z (填充后的基因型矩阵，由**{-1,0,1}**构成)即可。</p>
+<p>return.Hinv: 如果 TRUE, 返回 reverse of <span class="math inline">\(H = ZKZ&#39; + \lambda I\)</span> ，这对 GWAS 有用。</p>
+<p>正常来说，如果固定效应为均值，那么就只需要设置 y 和 Z (填充后的基因型矩阵，由<strong>{-1,0,1}</strong>构成)即可。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">out &lt;- mixed.solve(y, Z=marker)</span><br></pre></td></tr></table></figure>
 <p>返回值如下， 其中我们需要的 <strong>snp 效应就是$u</strong>。</p>
-<p><img src="1.png" alt="1"></p>
-<h1>举例</h1>
+<p><img src="1.png" alt="1" /></p>
+<h1 id="举例">举例</h1>
 <p>下面是一个实际应用的脚本例子。</p>
 <p>这里的两个输入文件 <code>rrblup.phe</code> 与 <code>rrblup.raw</code> 是事先处理好的，二者中的个体顺序保持一致。 而 <code>rrblup.raw</code> 中的内容是通过 plink 软件的 <code>--recodeA</code> 选项生成的。</p>
 <p>输出文件夹 <code>rrblup_results</code> 中的每一个文件表示一个结果，其中 <code>u.csv</code> 就是我们需要的 SNP 效应值。</p>
 <p>经过手动比较，<code>rrBLUP</code> 和 <code>GBLUP</code> 计算得到的个体 GEBV 相关系数为 1， 没有问题。</p>
-<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 运行 rrblup</span></span><br><span class="line">library<span class="punctuation">(</span><span class="string">&quot;rrBLUP&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">raw_file <span class="operator">=</span> read.table<span class="punctuation">(</span><span class="string">&quot;rrblup.raw&quot;</span><span class="punctuation">,</span> header<span class="operator">=</span><span class="built_in">T</span><span class="punctuation">)</span></span><br><span class="line">phe_file <span class="operator">=</span> read.table<span class="punctuation">(</span><span class="string">&quot;rrblup.phe&quot;</span><span class="punctuation">,</span> header<span class="operator">=</span><span class="built_in">F</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 表型</span></span><br><span class="line">y <span class="operator">=</span> phe_file<span class="punctuation">[</span><span class="punctuation">,</span><span class="number">2</span><span class="punctuation">]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基因型</span></span><br><span class="line">X <span class="operator">=</span> as.matrix<span class="punctuation">(</span>raw_file<span class="punctuation">[</span><span class="punctuation">,</span><span class="number">7</span><span class="operator">:</span>ncol<span class="punctuation">(</span>raw_file<span class="punctuation">)</span><span class="punctuation">]</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">X <span class="operator">=</span> X <span class="operator">-</span><span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># rrblup</span></span><br><span class="line">out <span class="operator">&lt;-</span> mixed.solve<span class="punctuation">(</span>y<span class="punctuation">,</span> Z<span class="operator">=</span>X<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">dir.create<span class="punctuation">(</span><span class="string">&quot;rrblup_results&quot;</span><span class="punctuation">,</span> showWarnings <span class="operator">=</span> <span class="literal">FALSE</span><span class="punctuation">)</span> </span><br><span class="line">setwd<span class="punctuation">(</span><span class="string">&quot;rrblup_results&quot;</span><span class="punctuation">)</span></span><br><span class="line"><span class="keyword">for</span> <span class="punctuation">(</span>i <span class="keyword">in</span> <span class="number">1</span><span class="operator">:</span><span class="built_in">length</span><span class="punctuation">(</span>out<span class="punctuation">)</span><span class="punctuation">)</span><span class="punctuation">&#123;</span></span><br><span class="line">    list_name <span class="operator">=</span> <span class="built_in">names</span><span class="punctuation">(</span>out<span class="punctuation">)</span><span class="punctuation">[</span>i<span class="punctuation">]</span></span><br><span class="line">    out_file_name <span class="operator">=</span> paste0<span class="punctuation">(</span>list_name<span class="punctuation">,</span><span class="string">&quot;.csv&quot;</span><span class="punctuation">)</span>   </span><br><span class="line">    write.csv<span class="punctuation">(</span>out<span class="punctuation">[</span>i<span class="punctuation">]</span><span class="punctuation">,</span>file<span class="operator">=</span>out_file_name<span class="punctuation">,</span><span class="built_in">quote</span> <span class="operator">=</span> <span class="literal">FALSE</span><span class="punctuation">,</span> row.names<span class="operator">=</span><span class="literal">FALSE</span><span class="punctuation">)</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure> 
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 运行 rrblup</span></span><br><span class="line">library<span class="punctuation">(</span><span class="string">&quot;rrBLUP&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">raw_file <span class="operator">=</span> read.table<span class="punctuation">(</span><span class="string">&quot;rrblup.raw&quot;</span><span class="punctuation">,</span> header<span class="operator">=</span><span class="built_in">T</span><span class="punctuation">)</span></span><br><span class="line">phe_file <span class="operator">=</span> read.table<span class="punctuation">(</span><span class="string">&quot;rrblup.phe&quot;</span><span class="punctuation">,</span> header<span class="operator">=</span><span class="built_in">F</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 表型</span></span><br><span class="line">y <span class="operator">=</span> phe_file<span class="punctuation">[</span><span class="punctuation">,</span><span class="number">2</span><span class="punctuation">]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基因型</span></span><br><span class="line">X <span class="operator">=</span> as.matrix<span class="punctuation">(</span>raw_file<span class="punctuation">[</span><span class="punctuation">,</span><span class="number">7</span><span class="operator">:</span>ncol<span class="punctuation">(</span>raw_file<span class="punctuation">)</span><span class="punctuation">]</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">X <span class="operator">=</span> X <span class="operator">-</span><span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># rrblup</span></span><br><span class="line">out <span class="operator">&lt;-</span> mixed.solve<span class="punctuation">(</span>y<span class="punctuation">,</span> Z<span class="operator">=</span>X<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">dir.create<span class="punctuation">(</span><span class="string">&quot;rrblup_results&quot;</span><span class="punctuation">,</span> showWarnings <span class="operator">=</span> <span class="literal">FALSE</span><span class="punctuation">)</span> </span><br><span class="line">setwd<span class="punctuation">(</span><span class="string">&quot;rrblup_results&quot;</span><span class="punctuation">)</span></span><br><span class="line"><span class="keyword">for</span> <span class="punctuation">(</span>i <span class="keyword">in</span> <span class="number">1</span><span class="operator">:</span><span class="built_in">length</span><span class="punctuation">(</span>out<span class="punctuation">)</span><span class="punctuation">)</span><span class="punctuation">&#123;</span></span><br><span class="line">    list_name <span class="operator">=</span> <span class="built_in">names</span><span class="punctuation">(</span>out<span class="punctuation">)</span><span class="punctuation">[</span>i<span class="punctuation">]</span></span><br><span class="line">    out_file_name <span class="operator">=</span> paste0<span class="punctuation">(</span>list_name<span class="punctuation">,</span><span class="string">&quot;.csv&quot;</span><span class="punctuation">)</span>   </span><br><span class="line">    write.csv<span class="punctuation">(</span>out<span class="punctuation">[</span>i<span class="punctuation">]</span><span class="punctuation">,</span>file<span class="operator">=</span>out_file_name<span class="punctuation">,</span><span class="built_in">quote</span> <span class="operator">=</span> <span class="literal">FALSE</span><span class="punctuation">,</span> row.names<span class="operator">=</span><span class="literal">FALSE</span><span class="punctuation">)</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+ 
       <!-- reward -->
       
     </div>
@@ -556,8 +551,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

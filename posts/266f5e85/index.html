@@ -92,10 +92,10 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>下载参考基因组的多线程下载工具。</p>
+  <p>下载参考基因组的多线程下载工具。</p>
 <p>Axel 只能在 linux 中使用，而 aria2 可以在 linux ，windows 等多个系统使用，并且能力更强。</p>
 <span id="more"></span>
-<h1>Axel</h1>
+<h1 id="axel">Axel</h1>
 <h2 id="安装">安装</h2>
 <p>非root需要用 conda 安装</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c bioconda axel</span><br></pre></td></tr></table></figure>
@@ -109,18 +109,13 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ERROR 500: Internal Server Error.</span><br><span class="line">Initializing download: http://muskdb.cn/api/file/download/LS/LS.gff3</span><br></pre></td></tr></table></figure>
 <p>计算节点不能联网，也不能用。</p>
 <p>因此只能是本地下载下来，然后上传到云服务器上。</p>
-<h1>aria2</h1>
-<h2 id="Windows-安装与使用">Windows 安装与使用</h2>
+<h1 id="aria2">aria2</h1>
+<h2 id="windows-安装与使用">Windows 安装与使用</h2>
 <p>你不需要复杂的编译，直接下载解压就能用：</p>
-<ol>
-<li>
-<p><strong>下载</strong>：访问 <a target="_blank" rel="noopener" href="https://github.com/aria2/aria2/releases">aria2 GitHub 发布页</a>，找到 <code>aria2-1.37.0-win-64bit-build1.zip</code>（版本号可能更新）并下载。</p>
-</li>
-<li>
-<p><strong>解压</strong>：把里面的 <code>aria2c.exe</code>复制到<strong>环境变量</strong>文件夹。</p>
-</li>
-<li>
-<p><strong>使用</strong>：打开命令行窗口</p>
+<ol type="1">
+<li><p><strong>下载</strong>：访问 <a target="_blank" rel="noopener" href="https://github.com/aria2/aria2/releases">aria2 GitHub 发布页</a>，找到 <code>aria2-1.37.0-win-64bit-build1.zip</code>（版本号可能更新）并下载。</p></li>
+<li><p><strong>解压</strong>：把里面的 <code>aria2c.exe</code>复制到<strong>环境变量</strong>文件夹。</p></li>
+<li><p><strong>使用</strong>：打开命令行窗口</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aria2c.exe -x 16 -s 16 &quot;你的下载链接&quot;</span><br></pre></td></tr></table></figure>
 <ul>
 <li><code>-x 16</code>：指定最大连接数为 16（多线程）。</li>
@@ -128,12 +123,9 @@
 <li>通常情况下，只要 <code>-x</code>的数值大于等于 <code>-s</code>，aria2 就会按 <code>-s</code>设定的块数进行下载。对于你这种单文件 HTTP 下载，直接设置 <code>-x 16 -s 16</code>即可。如果下载速度不理想，可以尝试增加到 32（即 <code>-x 32 -s 32</code>）。</li>
 </ul>
 <p>下载参考基因组使用参数如下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aria2c.exe -x 8 -s 8</span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>最终提示下面信息，说明下载完成</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Status Legend:</span><br><span class="line">(OK):download completed.</span><br></pre></td></tr></table></figure>
-</li>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aria2c.exe -x 8 -s 8</span><br></pre></td></tr></table></figure></li>
+<li><p>最终提示下面信息，说明下载完成</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Status Legend:</span><br><span class="line">(OK):download completed.</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h2 id="linux-安装与使用">linux 安装与使用</h2>
 <p>运行下面命令</p>
@@ -148,28 +140,33 @@
 </ul>
 <h2 id="与-axel-对比">与 axel 对比</h2>
 <table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 44%" />
+<col style="width: 44%" />
+</colgroup>
 <thead>
 <tr>
-<th style="text-align:left"><strong>特性</strong></th>
-<th style="text-align:left"><strong>aria2</strong></th>
-<th style="text-align:left"><strong>axel</strong></th>
+<th style="text-align: left;"><strong>特性</strong></th>
+<th style="text-align: left;"><strong>aria2</strong></th>
+<th style="text-align: left;"><strong>axel</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left"><strong>速度与效率</strong></td>
-<td style="text-align:left"><strong>更强</strong>。支持更高的线程数（如 32 线程），且资源占用优化得更好，在面对限速严格的服务器时往往能榨取更多带宽。</td>
-<td style="text-align:left"><strong>较快</strong>。轻量级，但在极高线程数下的表现通常不如 aria2。</td>
+<td style="text-align: left;"><strong>速度与效率</strong></td>
+<td style="text-align: left;"><strong>更强</strong>。支持更高的线程数（如 32 线程），且资源占用优化得更好，在面对限速严格的服务器时往往能榨取更多带宽。</td>
+<td style="text-align: left;"><strong>较快</strong>。轻量级，但在极高线程数下的表现通常不如 aria2。</td>
 </tr>
 <tr>
-<td style="text-align:left"><strong>稳定性</strong></td>
-<td style="text-align:left"><strong>极高</strong>。支持断点续传非常完善，即使网络波动中断，重新执行命令也能无缝继续，极少出现文件损坏。</td>
-<td style="text-align:left"><strong>一般</strong>。虽然也支持续传，但在某些复杂的网络环境下，偶尔会出现下载卡死或校验失败的情况。</td>
+<td style="text-align: left;"><strong>稳定性</strong></td>
+<td style="text-align: left;"><strong>极高</strong>。支持断点续传非常完善，即使网络波动中断，重新执行命令也能无缝继续，极少出现文件损坏。</td>
+<td style="text-align: left;"><strong>一般</strong>。虽然也支持续传，但在某些复杂的网络环境下，偶尔会出现下载卡死或校验失败的情况。</td>
 </tr>
 <tr>
-<td style="text-align:left"><strong>功能丰富度</strong></td>
-<td style="text-align:left"><strong>全能型</strong>。除了 HTTP/HTTPS/FTP，还支持磁力链接、BT 种子，甚至可以当离线下载服务器使用。</td>
-<td style="text-align:left"><strong>轻量型</strong>。专注于单纯的 HTTP/FTP 多线程加速，功能单一。</td>
+<td style="text-align: left;"><strong>功能丰富度</strong></td>
+<td style="text-align: left;"><strong>全能型</strong>。除了 HTTP/HTTPS/FTP，还支持磁力链接、BT 种子，甚至可以当离线下载服务器使用。</td>
+<td style="text-align: left;"><strong>轻量型</strong>。专注于单纯的 HTTP/FTP 多线程加速，功能单一。</td>
 </tr>
 </tbody>
 </table>
@@ -597,8 +594,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

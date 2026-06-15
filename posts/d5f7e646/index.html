@@ -96,14 +96,14 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>openpyxl 是一个处理 excel 的 python 包，但是相比于 pandas ，除了速度上可能有优势外，个人感觉没有 pandas 更好用。</p>
+  <p>openpyxl 是一个处理 excel 的 python 包，但是相比于 pandas ，除了速度上可能有优势外，个人感觉没有 pandas 更好用。</p>
 <span id="more"></span>
-<h1>创建工作簿</h1>
+<h1 id="创建工作簿">创建工作簿</h1>
 <p>这里我们可以直接使用这个包来创建一个 excel 文件，只需要导入 <code>workbook</code> 类</p>
 <figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">1</span>]: from openpyxl <span class="keyword">import</span> Workbook</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">2</span>]: wb = Workbook()</span><br></pre></td></tr></table></figure>
 <p>一个工作簿至少有一个工作表 (worksheet)。你可以使用 <code>workbook.active</code> 的属性来得到一个工作表，使用这种方法得到的是第一个工作表。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">3</span>]: ws = wb.active</span><br></pre></td></tr></table></figure>
-<p>你可以使用  <code>Workbook.create_sheet()</code> 方法来创建新的工作表</p>
+<p>你可以使用 <code>Workbook.create_sheet()</code> 方法来创建新的工作表</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">4</span>]: &gt;&gt;&gt; ws1 = wb.create_sheet(<span class="string">&quot;Mysheet&quot;</span>) <span class="comment"># insert at the end (default)</span></span><br><span class="line">   ...: <span class="comment"># or</span></span><br><span class="line">   ...: &gt;&gt;&gt; ws2 = wb.create_sheet(<span class="string">&quot;Mysheet&quot;</span>, <span class="number">0</span>) <span class="comment"># insert at first position</span></span><br><span class="line">   ...: <span class="comment"># or</span></span><br><span class="line">   ...: &gt;&gt;&gt; ws3 = wb.create_sheet(<span class="string">&quot;Mysheet&quot;</span>, -<span class="number">1</span>) <span class="comment"># insert at the penultimate position</span></span><br></pre></td></tr></table></figure>
 <p>默认创建的sheet 表的名称为 Sheet, Sheet1, Sheet2, …，你可以通过 <code>Worksheet.title</code> 属性来随时修改名称</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">7</span>]: ws.title = <span class="string">&quot;New Title&quot;</span></span><br></pre></td></tr></table></figure>
@@ -115,7 +115,7 @@
 <figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">10</span>]: &gt;&gt;&gt; for sheet <span class="keyword">in</span> wb:</span><br><span class="line">    ...: ...     <span class="built_in">print</span>(sheet.title)</span><br><span class="line">    ...:</span><br><span class="line">Mysheet1</span><br><span class="line">New Title</span><br><span class="line">Mysheet2</span><br><span class="line">Mysheet</span><br></pre></td></tr></table></figure>
 <p>你可以在一个工作簿中复制一个表格，使用 <code>Workbook.copy_worksheet()</code> 方法</p>
 <figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">11</span>]: &gt;&gt;&gt; source = wb.active</span><br><span class="line">    ...: &gt;&gt;&gt; <span class="keyword">target</span> = wb.copy_worksheet(source)</span><br></pre></td></tr></table></figure>
-<h1>处理数据</h1>
+<h1 id="处理数据">处理数据</h1>
 <h2 id="获取一个单元格">获取一个单元格</h2>
 <p>一旦得到了一个表格，我们可以直接获取或修改某个单元格的值</p>
 <figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">12</span>]: &gt;&gt;&gt; c = ws[<span class="string">&#x27;A4&#x27;</span>]</span><br><span class="line">    ...: &gt;&gt;&gt; ws[<span class="string">&#x27;A4&#x27;</span>] = <span class="number">4</span></span><br><span class="line">    ...:</span><br><span class="line"></span><br></pre></td></tr></table></figure>
@@ -134,35 +134,31 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">22</span>]: &gt;&gt;&gt; <span class="keyword">for</span> col <span class="keyword">in</span> ws.iter_cols(min_row=<span class="number">1</span>, max_col=<span class="number">3</span>, max_row=<span class="number">2</span>):</span><br><span class="line">    ...: ...     <span class="keyword">for</span> cell <span class="keyword">in</span> col:</span><br><span class="line">    ...: ...         <span class="built_in">print</span>(cell)</span><br><span class="line">    ...:</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.A1&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.A2&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.B1&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.B2&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.C1&gt;</span><br><span class="line">&lt;Cell <span class="string">&#x27;New Title&#x27;</span>.C2&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>如果你需要迭代一个表格的所有行，你可以</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">23</span>]: &gt;&gt;&gt; ws = wb.active</span><br><span class="line">    ...: &gt;&gt;&gt; ws[<span class="string">&#x27;C9&#x27;</span>] = <span class="string">&#x27;hello world&#x27;</span></span><br><span class="line">    ...: &gt;&gt;&gt; <span class="built_in">tuple</span>(ws.rows)</span><br><span class="line">Out[<span class="number">23</span>]:</span><br><span class="line">((&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A1&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B1&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C1&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A2&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B2&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C2&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A3&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B3&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C3&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A4&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B4&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C4&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A5&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B5&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C5&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A6&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B6&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C6&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A7&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B7&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C7&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A8&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B8&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C8&gt;),</span><br><span class="line"> (&lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.A9&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.B9&gt;, &lt;Cell <span class="string">&#x27;Mysheet1&#x27;</span>.C9&gt;))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>或  <code>Worksheet.columns</code> 属性。</p>
+<p>或 <code>Worksheet.columns</code> 属性。</p>
 <h2 id="只获取值">只获取值</h2>
-<p>如果你只想要获得一个表格中的值，你可以使用  <code>Worksheet.values</code> 属性。它会迭代一个表格中的所有的行，但是只会返回表格的值 (<strong>这才是目的</strong>)</p>
+<p>如果你只想要获得一个表格中的值，你可以使用 <code>Worksheet.values</code> 属性。它会迭代一个表格中的所有的行，但是只会返回表格的值 (<strong>这才是目的</strong>)</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">24</span>]: <span class="keyword">for</span> row <span class="keyword">in</span> ws.values:</span><br><span class="line">    ...:     <span class="keyword">for</span> value <span class="keyword">in</span> row:</span><br><span class="line">    ...:         <span class="built_in">print</span>(value)</span><br></pre></td></tr></table></figure>
-<p><code>Worksheet.iter_rows()</code> 和 <code>Worksheet.iter_cols()</code>  也可以通过 <code>values_only</code> 参数来返回单元格的值</p>
+<p><code>Worksheet.iter_rows()</code> 和 <code>Worksheet.iter_cols()</code> 也可以通过 <code>values_only</code> 参数来返回单元格的值</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">25</span>]: &gt;&gt;&gt; <span class="keyword">for</span> row <span class="keyword">in</span> ws.iter_rows(min_row=<span class="number">1</span>, max_col=<span class="number">3</span>, max_row=<span class="number">2</span>, values_only=<span class="literal">True</span>):</span><br><span class="line">    ...: ...   <span class="built_in">print</span>(row)</span><br><span class="line">    ...:</span><br><span class="line">(<span class="literal">None</span>, <span class="literal">None</span>, <span class="literal">None</span>)</span><br><span class="line">(<span class="literal">None</span>, <span class="literal">None</span>, <span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
-<h1>追加 (append)</h1>
+<h1 id="追加-append">追加 (append)</h1>
 <p>append是按行向Excel中追加数据，从当前行的下一行开始追加。默认从第1行开始，如果想要从指定的行开始需要通过sheet._current_row =row_num设置。</p>
 <p>输入数据类型可以是列表，元组和字典。</p>
 <p>列表和元组的作用是一样的，第一个元素对应插入行 A1 列的元素，以此类推。</p>
 <p>字典的话，键必须是 1234 或者 “A”,“B”,“C” ，对应列号；值必须是单个元素，对应单元格的值。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> openpyxl <span class="keyword">import</span> Workbook</span><br><span class="line">wb=Workbook()</span><br><span class="line">ws=wb.create_sheet(<span class="string">&#x27;hello&#x27;</span>)</span><br><span class="line">ws._current_row=<span class="number">20</span></span><br><span class="line"><span class="comment"># 将当前行指定在20行</span></span><br><span class="line">ws.append([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>])</span><br><span class="line"><span class="comment"># 1,2,3,4将会插入到21行，的第A,B,C,D列</span></span><br></pre></td></tr></table></figure>
-<h1>数据存储</h1>
+<h1 id="数据存储">数据存储</h1>
 <p>一旦你获得了一个单元格，你可以分配一个值。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">26</span>]: &gt;&gt;&gt; c.value = <span class="string">&#x27;hello, world&#x27;</span></span><br><span class="line">    ...: &gt;&gt;&gt; <span class="built_in">print</span>(c.value)</span><br><span class="line">    ...: <span class="string">&#x27;hello, world&#x27;</span></span><br><span class="line">    ...:</span><br><span class="line">    ...: &gt;&gt;&gt; d.value = <span class="number">3.14</span></span><br><span class="line">    ...: &gt;&gt;&gt; <span class="built_in">print</span>(d.value)</span><br><span class="line">    ...: <span class="number">3.14</span></span><br></pre></td></tr></table></figure>
 <h2 id="保存为文件">保存为文件</h2>
-<p>使用  <code>Workbook.save()</code> 方法来保存文件，注意这会<strong>覆盖旧文件</strong>。</p>
+<p>使用 <code>Workbook.save()</code> 方法来保存文件，注意这会<strong>覆盖旧文件</strong>。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>wb = Workbook()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>wb.save(<span class="string">&#x27;balances.xlsx&#x27;</span>)</span><br></pre></td></tr></table></figure>
-<h1>导入文件</h1>
-<p>使用  <code>openpyxl.load_workbook()</code> 来打开一个 excel 文件</p>
+<h1 id="导入文件">导入文件</h1>
+<p>使用 <code>openpyxl.load_workbook()</code> 来打开一个 excel 文件</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> openpyxl <span class="keyword">import</span> load_workbook</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>wb2 = load_workbook(<span class="string">&#x27;test.xlsx&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(wb2.sheetnames)</span><br></pre></td></tr></table></figure>
-<h1>文献</h1>
-<ol>
-<li>
-<p><a target="_blank" rel="noopener" href="https://openpyxl.readthedocs.io/en/stable/tutorial.html">https://openpyxl.readthedocs.io/en/stable/tutorial.html</a></p>
-</li>
-<li>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/539094399">Python 处理数据（Excel）—— openpyxl 之append</a></p>
-</li>
+<h1 id="文献">文献</h1>
+<ol type="1">
+<li><p>https://openpyxl.readthedocs.io/en/stable/tutorial.html</p></li>
+<li><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/539094399">Python 处理数据（Excel）—— openpyxl 之append</a></p></li>
 </ol>
  
       <!-- reward -->
@@ -589,8 +585,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3.5k</span>
+            <span class="post-count">3.3k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">16 分钟</span>
+            <span class="post-count">15 分钟</span>
         </span>
     </span>
 </div>
@@ -96,269 +96,261 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>当数据量很大时，对混合模型方程组的系数矩阵直接求逆困难或不可实现，需要采用迭代求解的方法。</p>
+  <p>当数据量很大时，对混合模型方程组的系数矩阵直接求逆困难或不可实现，需要采用迭代求解的方法。</p>
 <span id="more"></span>
-<h1>迭代求解的基本方法</h1>
+<h1 id="迭代求解的基本方法">迭代求解的基本方法</h1>
 <h2 id="雅可比迭代法">雅可比迭代法</h2>
-<p>设有线性方程组<br>
-$$<br>
-\mathbf{Ab} = \mathbf{r}<br>
-$$<br>
-其中，$\mathbf{A}$ 是 $p \times p$ 的系数矩阵；$\mathbf{b}$ 为待求解的 $p$ 维向量；$\mathbf{r}$ 为右手项的 $p$ 维向量。</p>
-<p>如果见矩阵 $\mathbf{A}$ 分解为<br>
-$$<br>
-\mathbf{A} = \mathbf{M+N}<br>
-$$<br>
-其中，$\mathbf{M}$ 为一可逆矩阵，将其代入上式，则有<br>
-$$<br>
-\mathbf{Mb} = \mathbf{-Nb+r}<br>
-$$<br>
-或写成<br>
-$$<br>
-\mathbf{b} = \mathbf{Qb +f}<br>
-$$<br>
-其中，$\mathbf{Q} = \mathbf{-M^{-1}N}$，$\mathbf{f} = \mathbf{M^{-1}r}$ 。</p>
-<p>那么我们可以构建出迭代方法<br>
-$$<br>
-\mathbf{b^{(t+1)}} = \mathbf{Qb^{(t)}+f}<br>
-$$<br>
-如果在 $t \rightarrow \infty$ 时 ,  $\mathbf{b^{(t)}} \rightarrow \mathbf{b^{<em>}}$ ，我们称迭代收敛，且 $\mathbf{b^{</em>}}$ 就是该方程组的解。</p>
-<p>例如，对于 $p =3$ 时，设 $\mathbf{A} = {a_{ij}}$ ，<strong>其对角线元素均不为0</strong>，即 $a_{ii} \neq 0$ ，则我们可取 $\mathbf{M}$ 和 $\mathbf{N}$ 为<br>
-$$<br>
-\mathbf{M}=\left[\begin{array}{ccc}<br>
-a_{11} &amp; 0 &amp; 0 \<br>
-0 &amp; a_{22} &amp; 0 \<br>
-0 &amp; 0 &amp; a_{33}<br>
-\end{array}\right], \mathbf{N}=\left[\begin{array}{ccc}<br>
-0 &amp; a_{12} &amp; a_{13} \<br>
-a_{21} &amp; 0 &amp; a_{23} \<br>
-a_{31} &amp; a_{32} &amp; 0<br>
-\end{array}\right]<br>
-$$<br>
-那么我们可以得到<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{Q} &amp;= \mathbf{-M^{-1}N} \<br>
-&amp;=- \left[\begin{array}{ccc}<br>
-1/a_{11} &amp; 0 &amp; 0 \<br>
-0 &amp; 1/a_{22} &amp; 0 \<br>
-0 &amp; 0 &amp; 1/a_{33}<br>
-\end{array}\right]<br>
-\left[\begin{array}{ccc}<br>
-0 &amp; a_{12} &amp; a_{13} \<br>
-a_{21} &amp; 0 &amp; a_{23} \<br>
-a_{31} &amp; a_{32} &amp; 0<br>
-\end{array}\right] \<br>
-&amp;=<br>
-\left[\begin{array}{ccc}<br>
-0 &amp; -\frac{a_{12}}{a_{11}} &amp; -\frac{a_{13}}{a_{11}} \<br>
--\frac{a_{21}}{a_{22}} &amp; 0 &amp; -\frac{a_{23}}{a_{22}} \<br>
--\frac{a_{31}}{a_{33}} &amp; -\frac{a_{32}}{a_{33}} &amp; 0<br>
-\end{array}\right] \<br>
-\</p>
-<p>\mathbf{f} &amp;= \mathbf{M^{-1}r} \<br>
-&amp;= \left[\begin{array}{ccc}<br>
-1/a_{11} &amp; 0 &amp; 0 \<br>
-0 &amp; 1/a_{22} &amp; 0 \<br>
-0 &amp; 0 &amp; 1/a_{33}<br>
-\end{array}\right]<br>
-\left[\begin{array}{ccc}<br>
-r_{1} \<br>
-r_{2} \<br>
-r_{3}<br>
-\end{array}\right] \<br>
-&amp;= \left[\begin{array}{l}<br>
-\frac{r_{1}}{a_{11}} \<br>
-\frac{r_{2}}{a_{22}} \<br>
-\frac{r_{3}}{a_{33}}<br>
-\end{array}\right] \</p>
-<p>\end{aligned}<br>
-$$<br>
-因此，我们有方程组<br>
-$$<br>
-\left[\begin{array}{l}<br>
-b_{1} \<br>
-b_{2} \<br>
-b_{3}<br>
-\end{array}\right]=\left[\begin{array}{ccc}<br>
-0 &amp; -\frac{a_{12}}{a_{11}} &amp; -\frac{a_{13}}{a_{11}} \<br>
--\frac{a_{21}}{a_{22}} &amp; 0 &amp; -\frac{a_{23}}{a_{22}} \<br>
--\frac{a_{31}}{a_{33}} &amp; -\frac{a_{32}}{a_{33}} &amp; 0<br>
-\end{array}\right]\left[\begin{array}{l}<br>
-b_{1} \<br>
-b_{2} \<br>
-b_{3}<br>
-\end{array}\right]+\left[\begin{array}{l}<br>
-\frac{r_{1}}{a_{11}} \<br>
-\frac{r_{2}}{a_{22}} \<br>
-\frac{r_{3}}{a_{33}}<br>
-\end{array}\right]<br>
-$$<br>
-即<br>
-$$<br>
-\left{\begin{array}{l}<br>
-b_{1}=\left(r_{1}-a_{12} b_{2}-a_{13} b_{3}\right) / a_{11} \<br>
-b_{2}=\left(r_{2}-a_{21} b_{1}-a_{23} b_{3}\right) / a_{22} \<br>
-b_{3}=\left(r_{3}-a_{31} b_{1}-a_{32} b_{2}\right) / a_{33}<br>
-\end{array}\right.<br>
-$$<br>
-因此，我们得到了一个迭代公式<br>
-$$<br>
-\left{\begin{array}{l}<br>
-b_{1}^{(t+1)}=\left(r_{1}-a_{12} b_{2}^{(t)}-a_{13} b_{3}^{(t)}\right) / a_{11} \<br>
-b_{2}^{(t+1)}=\left(r_{2}-a_{21} b_{1}^{(t)}-a_{23} b_{3}^{(t)}\right) / a_{22} \<br>
-b_{3}^{(t+1)}=\left(r_{3}-a_{31} b_{1}^{(t)}-a_{32} b_{2}^{(t)}\right) / a_{33}<br>
-\end{array}\right.<br>
-$$<br>
-将上面的情形推广至一般情况，即可以将 $\mathbf{Ab} = \mathbf{r}$ 改写为<br>
-$$<br>
-b_{i}=\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}-\sum_{j=i+1}^{p} a_{i j} b_{j}\right) / a_{i i}, \quad (i=1,2,\cdots,p)<br>
-$$<br>
-由此可得如下的一般迭代式<br>
-$$<br>
-b_{i}^{(t+1)}=\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t)}-\sum_{j=i+1}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i}, \quad (i=1,2,\cdots,p)<br>
-$$<br>
-或者写成<br>
-$$<br>
-b_{i}^{(t+1)}=b_{i}^{(t)}+\left(r_{i}-\sum_{j=1}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i}, \quad i=1, \cdots, p<br>
-$$<br>
-写成矩阵的形式，我们有<br>
-$$<br>
-\mathbf{b^{(t+1)}}= \mathbf{b^{(t)}+D^{-1}\left(r-A b^{(t)}\right)}<br>
-$$<br>
-或者<br>
-$$<br>
-\mathbf{b^{(t+1)}} = \mathbf{D^{-1}\left[r-(A-D) b^{(t)}\right]}<br>
-$$<br>
-其中 $\mathbf{D} = Diag{\mathbf{A}}$ ，是由 $\mathbf{A}$ 中的对角线元素构成的对角线矩阵。</p>
-<p>这个迭代法称为 <strong>雅可比</strong> (Jacobi) 迭代法。在计算时一般按 $b_{1}^{(t+1)}, b_{2}^{(t+1)}, \cdots$, $b_{p}^{(t+1)}$ 的顺序进行。注意在计算 $b_{i}^{(t+1)}$ 时, 在它前面的 $b_{1}^{(t+1)}, \cdots, b_{i-1}^{(t+1)}$ 已经计算出 来了, 而雅可比法并不利用这些最新的迭代值, 仍用 $b_{1}^{(t)}, \cdots, b_{i-1}^{(t)}$ 。</p>
-<p>写成伪代码的格式为<br>
-$$<br>
-\begin{aligned}<br>
-\text{do i=1,n}&amp; \<br>
-&amp;b_{i}^{(t+1)}=b_{i}^{(t)}+\left(r_{i}-\sum_{j=1}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i} \<br>
-\text{end do}&amp;\<br>
-\end{aligned}<br>
-$$</p>
+<p>设有线性方程组
+<span class="math display">\[
+\mathbf{Ab} = \mathbf{r}
+\]</span>
+其中，<span class="math inline">\(\mathbf{A}\)</span> 是 <span class="math inline">\(p \times p\)</span> 的系数矩阵；<span class="math inline">\(\mathbf{b}\)</span> 为待求解的 <span class="math inline">\(p\)</span> 维向量；<span class="math inline">\(\mathbf{r}\)</span> 为右手项的 <span class="math inline">\(p\)</span> 维向量。</p>
+<p>如果见矩阵 <span class="math inline">\(\mathbf{A}\)</span> 分解为
+<span class="math display">\[
+\mathbf{A} = \mathbf{M+N}
+\]</span>
+其中，<span class="math inline">\(\mathbf{M}\)</span> 为一可逆矩阵，将其代入上式，则有
+<span class="math display">\[
+\mathbf{Mb} = \mathbf{-Nb+r}
+\]</span>
+或写成
+<span class="math display">\[
+\mathbf{b} = \mathbf{Qb +f}
+\]</span>
+其中，<span class="math inline">\(\mathbf{Q} = \mathbf{-M^{-1}N}\)</span>，<span class="math inline">\(\mathbf{f} = \mathbf{M^{-1}r}\)</span> 。</p>
+<p>那么我们可以构建出迭代方法
+<span class="math display">\[
+\mathbf{b^{(t+1)}} = \mathbf{Qb^{(t)}+f}
+\]</span>
+如果在 <span class="math inline">\(t \rightarrow \infty\)</span> 时 , <span class="math inline">\(\mathbf{b^{(t)}} \rightarrow \mathbf{b^{*}}\)</span> ，我们称迭代收敛，且 <span class="math inline">\(\mathbf{b^{*}}\)</span> 就是该方程组的解。</p>
+例如，对于 <span class="math inline">\(p =3\)</span> 时，设 <span class="math inline">\(\mathbf{A} = \{a_{ij}\}\)</span> ，<strong>其对角线元素均不为0</strong>，即 <span class="math inline">\(a_{ii} \neq 0\)</span> ，则我们可取 <span class="math inline">\(\mathbf{M}\)</span> 和 <span class="math inline">\(\mathbf{N}\)</span> 为
+<span class="math display">\[
+\mathbf{M}=\left[\begin{array}{ccc}
+a_{11} &amp; 0 &amp; 0 \\
+0 &amp; a_{22} &amp; 0 \\
+0 &amp; 0 &amp; a_{33}
+\end{array}\right], \mathbf{N}=\left[\begin{array}{ccc}
+0 &amp; a_{12} &amp; a_{13} \\
+a_{21} &amp; 0 &amp; a_{23} \\
+a_{31} &amp; a_{32} &amp; 0
+\end{array}\right]
+\]</span>
+那么我们可以得到
+$$
+<span class="math display">\[\begin{aligned}
+\mathbf{Q} &amp;= \mathbf{-M^{-1}N} \\
+&amp;=- \left[\begin{array}{ccc}
+1/a_{11} &amp; 0 &amp; 0 \\
+0 &amp; 1/a_{22} &amp; 0 \\
+0 &amp; 0 &amp; 1/a_{33}
+\end{array}\right]
+\left[\begin{array}{ccc}
+0 &amp; a_{12} &amp; a_{13} \\
+a_{21} &amp; 0 &amp; a_{23} \\
+a_{31} &amp; a_{32} &amp; 0
+\end{array}\right] \\
+&amp;=
+\left[\begin{array}{ccc}
+0 &amp; -\frac{a_{12}}{a_{11}} &amp; -\frac{a_{13}}{a_{11}} \\
+-\frac{a_{21}}{a_{22}} &amp; 0 &amp; -\frac{a_{23}}{a_{22}} \\
+-\frac{a_{31}}{a_{33}} &amp; -\frac{a_{32}}{a_{33}} &amp; 0
+\end{array}\right] \\
+\\
+
+\mathbf{f} &amp;= \mathbf{M^{-1}r} \\
+&amp;= \left[\begin{array}{ccc}
+1/a_{11} &amp; 0 &amp; 0 \\
+0 &amp; 1/a_{22} &amp; 0 \\
+0 &amp; 0 &amp; 1/a_{33}
+\end{array}\right]
+\left[\begin{array}{ccc}
+r_{1} \\
+r_{2} \\
+r_{3}
+\end{array}\right] \\
+&amp;= \left[\begin{array}{l}
+\frac{r_{1}}{a_{11}} \\
+\frac{r_{2}}{a_{22}} \\
+\frac{r_{3}}{a_{33}}
+\end{array}\right] \\
+
+\end{aligned}\]</span>
+<span class="math display">\[
+因此，我们有方程组
+\]</span>
+=+<span class="math display">\[
+即
+\]</span>
+{
+<span class="math display">\[\begin{array}{l}
+b_{1}=\left(r_{1}-a_{12} b_{2}-a_{13} b_{3}\right) / a_{11} \\
+b_{2}=\left(r_{2}-a_{21} b_{1}-a_{23} b_{3}\right) / a_{22} \\
+b_{3}=\left(r_{3}-a_{31} b_{1}-a_{32} b_{2}\right) / a_{33}
+\end{array}\]</span>
+.
+<span class="math display">\[
+因此，我们得到了一个迭代公式
+\]</span>
+{
+<span class="math display">\[\begin{array}{l}
+b_{1}^{(t+1)}=\left(r_{1}-a_{12} b_{2}^{(t)}-a_{13} b_{3}^{(t)}\right) / a_{11} \\
+b_{2}^{(t+1)}=\left(r_{2}-a_{21} b_{1}^{(t)}-a_{23} b_{3}^{(t)}\right) / a_{22} \\
+b_{3}^{(t+1)}=\left(r_{3}-a_{31} b_{1}^{(t)}-a_{32} b_{2}^{(t)}\right) / a_{33}
+\end{array}\]</span>
+<p>.
+<span class="math display">\[
+将上面的情形推广至一般情况，即可以将 $\mathbf{Ab} = \mathbf{r}$ 改写为
+\]</span>
+b_{i}=(r_{i}-<em>{j=1}^{i-1} a</em>{i j} b_{j}-<em>{j=i+1}^{p} a</em>{i j} b_{j}) / a_{i i}, (i=1,2,,p)
+<span class="math display">\[
+由此可得如下的一般迭代式
+\]</span>
+b_{i}<sup>{(t+1)}=(r_{i}-_{j=1}</sup>{i-1} a_{i j} b_{j}<sup>{(t)}-_{j=i+1}</sup>{p} a_{i j} b_{j}^{(t)}) / a_{i i}, (i=1,2,,p)
+<span class="math display">\[
+或者写成
+\]</span>
+b_{i}<sup>{(t+1)}=b_{i}</sup>{(t)}+(r_{i}-<em>{j=1}^{p} a</em>{i j} b_{j}^{(t)}) / a_{i i}, i=1, , p
+<span class="math display">\[
+写成矩阵的形式，我们有
+\]</span>
+= 
+<span class="math display">\[
+或者
+\]</span>
+ = 
+$$
+其中 <span class="math inline">\(\mathbf{D} = Diag\{\mathbf{A}\}\)</span> ，是由 <span class="math inline">\(\mathbf{A}\)</span> 中的对角线元素构成的对角线矩阵。</p>
+<p>这个迭代法称为 <strong>雅可比</strong> (Jacobi) 迭代法。在计算时一般按 <span class="math inline">\(b_{1}^{(t+1)}, b_{2}^{(t+1)}, \cdots\)</span>, <span class="math inline">\(b_{p}^{(t+1)}\)</span> 的顺序进行。注意在计算 <span class="math inline">\(b_{i}^{(t+1)}\)</span> 时, 在它前面的 <span class="math inline">\(b_{1}^{(t+1)}, \cdots, b_{i-1}^{(t+1)}\)</span> 已经计算出 来了, 而雅可比法并不利用这些最新的迭代值, 仍用 <span class="math inline">\(b_{1}^{(t)}, \cdots, b_{i-1}^{(t)}\)</span> 。</p>
+<p>写成伪代码的格式为
+<span class="math display">\[
+\begin{aligned}
+\text{do i=1,n}&amp; \\
+&amp;b_{i}^{(t+1)}=b_{i}^{(t)}+\left(r_{i}-\sum_{j=1}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i} \\
+\text{end do}&amp;\\
+\end{aligned}
+\]</span></p>
 <h3 id="另一种理解">另一种理解</h3>
-<p>假设系数矩阵的对角线元素均不为0 （如果存在某些行的对角线元素为 0 ，可以与邻近的行进行交换位置），那么雅可比迭代法其实就是用第一个方程计算 $\hat{b}<em>{1}$ ，用第二个方程计算 $\hat{b}</em>{2}$ ，依次类推。以上面的 $p=3$ 的例子为例，我们将方程组写成标量形式，即：<br>
-$$<br>
-\begin{aligned}<br>
-&amp;a_{11} b_{1}+a_{12} b_{2}+a_{13} b_{3}=r_{1} \<br>
-&amp;a_{21} b_{1}+a_{22} b_{2}+a_{23} b_{3}=r_{2} \<br>
-&amp;a_{31} b_{1}+a_{32} b_{2}+a_{33} b_{3}=r_{3}<br>
-\end{aligned}<br>
-$$<br>
-用第一个方程计算 $\hat{b}<em>{1}$ ，用第二个方程计算 $\hat{b}</em>{2}$ ，用第三个方程计算 $\hat{b}<em>{3}$ ，得到下式<br>
-$$<br>
-\begin{aligned}<br>
-&amp;b</em>{1}^{(t+1)}=\left(1 / a_{11}\right)\left(r_{1}-a_{12} b_{2}^{(t)}-a_{13} b_{3}^{(t)}\right) \<br>
-&amp;b_{2}^{(t+1)}=\left(1 / a_{22}\right)\left(r_{2}-a_{21} b_{1}^{(t)}-a_{23} b_{3}^{(t)}\right) \<br>
-&amp;b_{3}^{(t+1)}=\left(1 / c_{33}\right)\left(r_{3}-c_{31} b_{1}^{(t)}-c_{32} b_{2}^{(t)}\right)<br>
-\end{aligned}<br>
-$$<br>
+<p>假设系数矩阵的对角线元素均不为0 （如果存在某些行的对角线元素为 0 ，可以与邻近的行进行交换位置），那么雅可比迭代法其实就是用第一个方程计算 <span class="math inline">\(\hat{b}_{1}\)</span> ，用第二个方程计算 <span class="math inline">\(\hat{b}_{2}\)</span> ，依次类推。以上面的 <span class="math inline">\(p=3\)</span> 的例子为例，我们将方程组写成标量形式，即：
+<span class="math display">\[
+\begin{aligned}
+&amp;a_{11} b_{1}+a_{12} b_{2}+a_{13} b_{3}=r_{1} \\
+&amp;a_{21} b_{1}+a_{22} b_{2}+a_{23} b_{3}=r_{2} \\
+&amp;a_{31} b_{1}+a_{32} b_{2}+a_{33} b_{3}=r_{3}
+\end{aligned}
+\]</span>
+用第一个方程计算 <span class="math inline">\(\hat{b}_{1}\)</span> ，用第二个方程计算 <span class="math inline">\(\hat{b}_{2}\)</span> ，用第三个方程计算 <span class="math inline">\(\hat{b}_{3}\)</span> ，得到下式
+<span class="math display">\[
+\begin{aligned}
+&amp;b_{1}^{(t+1)}=\left(1 / a_{11}\right)\left(r_{1}-a_{12} b_{2}^{(t)}-a_{13} b_{3}^{(t)}\right) \\
+&amp;b_{2}^{(t+1)}=\left(1 / a_{22}\right)\left(r_{2}-a_{21} b_{1}^{(t)}-a_{23} b_{3}^{(t)}\right) \\
+&amp;b_{3}^{(t+1)}=\left(1 / c_{33}\right)\left(r_{3}-c_{31} b_{1}^{(t)}-c_{32} b_{2}^{(t)}\right)
+\end{aligned}
+\]</span>
 我们同样得到雅可比的迭代公式，这种方式更好理解一点。</p>
-<h2 id="GS迭代法">GS迭代法</h2>
-<p>如果我们对这一点进行修改, 即在每个 $b_{i}^{(u+1)}$ 的计算中尽量利用最新的迭代值, 于是有<br>
-$$<br>
-b_{i}^{(t+1)}=\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i+1}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i}<br>
-$$<br>
-或者<br>
-$$<br>
-b_{i}^{(t+1)}=b_{i}^{(t)}+\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i}<br>
-$$<br>
-这种迭代方法称为 <strong>高斯-塞德尔</strong> (Gauss-Seidel, GS) 迭代法。此时编程更加容易，因为新解可以直接覆盖旧的解。伪代码如下<br>
-$$<br>
-\begin{aligned}<br>
-\text{do i=1,n}&amp; \<br>
-&amp;b_{i}=b_{i}+\left(r_{i}-\sum_{j=1}^{p} a_{i j} b_{j}\right) / a_{i i} \<br>
-\text{end do}&amp;\<br>
-\end{aligned}<br>
-$$<br>
-上式可以改写为<br>
-$$<br>
-\begin{aligned}<br>
-b_{i}^{(t+1)}&amp;=\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i+1}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i} \<br>
-a_{i i} b_{i}^{(t+1)} &amp;=\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i+1}^{p} a_{i j} b_{j}^{(t)}\right) \<br>
-\sum_{j=1}^{i} a_{i j} b_{j}^{(t+1)} &amp;= r_{i}-\sum_{j=i+1}^{p} a_{i j} b_{j}^{(t)} \</p>
-<p>\end{aligned}<br>
-$$<br>
-我们看如何将其写成矩阵的形式，首先我们矩阵 $\mathbf{A}$ 分解为如下形式<br>
-$$<br>
-\mathbf{A} = \mathbf{D+L+U}<br>
-$$<br>
-其中 $\mathbf{D} = Diag{\mathbf{A}}$ ，是由 $\mathbf{A}$ 中的对角线元素构成的对角线矩阵。 $\mathbf{L, U}$ 均为严格三角矩阵: $\mathbf{L}$ 为严格下 三角矩阵，即对角线以下的元素； $\mathbf{U}$ 为严格上三角矩阵，即对角线以上的元素。</p>
-<p>于是我们有<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{(L+D) \mathbf{b^{(t+1)}}} &amp;= \mathbf{r-U b^{(t)}} \<br>
-\mathbf{b^{(t+1)}} &amp;= \mathbf{(L+D)^{-1}\left{r-U b^{(t)}\right}} \<br>
-&amp;= \mathbf{(L+D)^{-1}\left{r-[A-(L+D)] b^{(t)}\right}}\<br>
-\end{aligned}<br>
-$$<br>
-与雅可比迭代的式子比较发现，这里是用  $\mathbf{L+D}$ 替代了雅可比迭代式子中的 $\mathbf{D}$ ，由于  $\mathbf{L+D}$  比  $\mathbf{D}$ 更接近 $\mathbf{A}$ , 因此 GS 迭代法的收敛速度一般更快。</p>
+<h2 id="gs迭代法">GS迭代法</h2>
+如果我们对这一点进行修改, 即在每个 <span class="math inline">\(b_{i}^{(u+1)}\)</span> 的计算中尽量利用最新的迭代值, 于是有
+<span class="math display">\[
+b_{i}^{(t+1)}=\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i+1}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i}
+\]</span>
+或者
+<span class="math display">\[
+b_{i}^{(t+1)}=b_{i}^{(t)}+\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i}
+\]</span>
+这种迭代方法称为 <strong>高斯-塞德尔</strong> (Gauss-Seidel, GS) 迭代法。此时编程更加容易，因为新解可以直接覆盖旧的解。伪代码如下
+<span class="math display">\[
+\begin{aligned}
+\text{do i=1,n}&amp; \\
+&amp;b_{i}=b_{i}+\left(r_{i}-\sum_{j=1}^{p} a_{i j} b_{j}\right) / a_{i i} \\
+\text{end do}&amp;\\
+\end{aligned}
+\]</span>
+上式可以改写为
+$$
+<span class="math display">\[\begin{aligned}
+b_{i}^{(t+1)}&amp;=\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i+1}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i} \\
+a_{i i} b_{i}^{(t+1)} &amp;=\left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i+1}^{p} a_{i j} b_{j}^{(t)}\right) \\
+\sum_{j=1}^{i} a_{i j} b_{j}^{(t+1)} &amp;= r_{i}-\sum_{j=i+1}^{p} a_{i j} b_{j}^{(t)} \\
+
+\end{aligned}\]</span>
+<p><span class="math display">\[
+我们看如何将其写成矩阵的形式，首先我们矩阵 $\mathbf{A}$ 分解为如下形式
+\]</span>
+ = 
+$$
+其中 <span class="math inline">\(\mathbf{D} = Diag\{\mathbf{A}\}\)</span> ，是由 <span class="math inline">\(\mathbf{A}\)</span> 中的对角线元素构成的对角线矩阵。 <span class="math inline">\(\mathbf{L, U}\)</span> 均为严格三角矩阵: <span class="math inline">\(\mathbf{L}\)</span> 为严格下 三角矩阵，即对角线以下的元素； <span class="math inline">\(\mathbf{U}\)</span> 为严格上三角矩阵，即对角线以上的元素。</p>
+<p>于是我们有
+<span class="math display">\[
+\begin{aligned}
+\mathbf{(L+D) \mathbf{b^{(t+1)}}} &amp;= \mathbf{r-U b^{(t)}} \\
+\mathbf{b^{(t+1)}} &amp;= \mathbf{(L+D)^{-1}\left\{r-U b^{(t)}\right\}} \\
+&amp;= \mathbf{(L+D)^{-1}\left\{r-[A-(L+D)] b^{(t)}\right\}}\\
+\end{aligned}
+\]</span>
+与雅可比迭代的式子比较发现，这里是用 <span class="math inline">\(\mathbf{L+D}\)</span> 替代了雅可比迭代式子中的 <span class="math inline">\(\mathbf{D}\)</span> ，由于 <span class="math inline">\(\mathbf{L+D}\)</span> 比 <span class="math inline">\(\mathbf{D}\)</span> 更接近 <span class="math inline">\(\mathbf{A}\)</span> , 因此 GS 迭代法的收敛速度一般更快。</p>
 <p>但要注意的是，这两种方法并不是在任何情况下都能收敛的。对于 GS 迭代法，它能够收敛的一个充分条件是<strong>方程组的系数矩阵为正定矩阵或半正定矩阵</strong>，由于混合线性方程组的系数矩阵一般来说都是正定矩阵，所以基本上可以不用担心它们的收敛问题。对于雅可比迭代法，一般来说，对于系数矩阵为对角优势矩阵（即在每一行中，均有对角线元素的值大于所有非对角线元素的值）的方程组，它是可以收敛的。但是混合模型方程组中的系数矩阵往往不是对角优势矩阵，因此不能保证它收敛，因此只有在对数据文件迭代 (iteration on data) 中才可能用到雅可比迭代。</p>
-<h2 id="SOR-迭代法">SOR 迭代法</h2>
-<p>GS 迭代法有时收敛速度较慢，此时可考虑<strong>逐次超松弛迭代法</strong> (successive over-relaxation, SOR) ，其迭代公式为<br>
-$$<br>
-b_{i}^{(t+1)}=b_{i}^{(t)}+ \omega \left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i}<br>
-$$<br>
-其中，$\omega$ 是松弛因子，适当选取 $\omega$ 可加快收敛速度，通常取 $1&lt;\omega&lt;2$  （那么如何选择一个合适的 $\omega$ 就成了一个新的问题）。当  $\omega = 1$ 时，SOR 迭代法就变成 GS 迭代法。 SOR 方法的伪代码如下<br>
-$$<br>
-\begin{aligned}<br>
-\text{do i=1,n}&amp; \<br>
-&amp;b_{i}=b_{i}+\omega\left(r_{i}-\sum_{j=1}^{p} a_{i j} b_{j}\right) / a_{i i} \<br>
-\text{end do}&amp;\<br>
-\end{aligned}<br>
-$$</p>
-<h2 id="PCG">PCG</h2>
+<h2 id="sor-迭代法">SOR 迭代法</h2>
+<p>GS 迭代法有时收敛速度较慢，此时可考虑<strong>逐次超松弛迭代法</strong> (successive over-relaxation, SOR) ，其迭代公式为
+<span class="math display">\[
+b_{i}^{(t+1)}=b_{i}^{(t)}+ \omega \left(r_{i}-\sum_{j=1}^{i-1} a_{i j} b_{j}^{(t+1)}-\sum_{j=i}^{p} a_{i j} b_{j}^{(t)}\right) / a_{i i}
+\]</span>
+其中，<span class="math inline">\(\omega\)</span> 是松弛因子，适当选取 <span class="math inline">\(\omega\)</span> 可加快收敛速度，通常取 <span class="math inline">\(1&lt;\omega&lt;2\)</span> （那么如何选择一个合适的 <span class="math inline">\(\omega\)</span> 就成了一个新的问题）。当 <span class="math inline">\(\omega = 1\)</span> 时，SOR 迭代法就变成 GS 迭代法。 SOR 方法的伪代码如下
+<span class="math display">\[
+\begin{aligned}
+\text{do i=1,n}&amp; \\
+&amp;b_{i}=b_{i}+\omega\left(r_{i}-\sum_{j=1}^{p} a_{i j} b_{j}\right) / a_{i i} \\
+\text{end do}&amp;\\
+\end{aligned}
+\]</span></p>
+<h2 id="pcg">PCG</h2>
 <p>在复杂问题中，<strong>预处理共轭梯度法</strong> (<em>Preconditioned conjugate gradient</em>, PCG) 比前面三种方法收敛速度都要快，其理论可见 Meurant (1999) 。</p>
-<p>PCG 和二阶雅可比算法有一些相似，二阶雅可比算法如下 (在动物模型，合适的参数是 $\alpha = 0.7-0.9$， $\beta =1$ 。)<br>
-$$<br>
-\mathbf{b}^{(\mathrm{n}+1)}=\mathbf{b}^{(\mathrm{n})}+\alpha\left(\mathbf{b}^{(\mathrm{n})}-\mathbf{b}^{(\mathrm{n}-1)}\right)+\beta \mathbf{D}^{-1}\left(\mathbf{r}-\mathrm{A} \mathbf{b}^{(\mathrm{n})}\right)<br>
-$$<br>
-PCG 算法采用相似的公式，只是 $\alpha$ 和 $\beta$ 在每一轮迭代中需要重新计算，并且这里的 $\mathbf{D}$ 改为了 $\mathbf{M}$ 矩阵，称为预处理矩阵。$\mathbf{M}$ 矩阵可能等于 $diag(\mathbf{A})$ 或者容易求逆的 $\mathbf{A}$ 矩阵的任意一种近似矩阵。</p>
-<p>PCG 迭代的完整的伪代码如下 (这里原方程组设为 $\mathbf{Ax} = \mathbf{b}$ )<br>
-$$<br>
-\begin{aligned}</p>
-<p>&amp;\mathbf{x}=0 ; \mathbf{r}=\mathbf{b}-\mathbf{A x} ; \mathrm{k}=1 \<br>
-&amp; \text{do while(} \mathbf{r’r} \text{ not sufficiently small)}  \<br>
-&amp; \quad \mathbf{z}=\mathbf{M}^{-1} \mathbf{r} \<br>
-&amp; \quad \tau_{\mathrm{k}-1}=\mathbf{z}^{\prime} \mathbf{r} \<br>
-&amp; \quad \text{if} (\mathrm{k}==1) \text{ then} \<br>
-&amp; \quad \quad \beta=0 ; \mathbf{p}=\mathbf{z} \<br>
-&amp; \quad \text{else} \</p>
-<p>&amp; \quad \quad \beta=\tau_{\mathrm{k}-1} / \tau_{\mathrm{k}-2} ; \mathbf{p}=\mathbf{z}+\beta \mathbf{p} \<br>
-&amp; \quad \text { end if } \<br>
-&amp; \quad \mathbf{w}=\mathbf{A p} \<br>
-&amp; \quad \alpha=\tau_{\mathrm{k}-1} /\left(\mathbf{p}^{\prime} \mathbf{w}\right) \<br>
-&amp; \quad \mathbf{x}=\mathbf{x}+\alpha \mathbf{p} \<br>
-&amp; \quad \text { if }(\bmod (\mathrm{k}, 100) /=0) \text { then } \<br>
-&amp; \quad \quad \mathbf{r}=\mathbf{r}-\alpha \mathbf{w} \<br>
-&amp; \quad \text { else } \<br>
-&amp; \quad \quad \mathbf{r}=\mathbf{b}-\mathbf{A} \mathbf{x} \<br>
-&amp; \quad \text { end if } \<br>
-&amp; \quad \mathrm{k}=\mathrm{k}+1\<br>
-&amp;\text{end do} \<br>
-\end{aligned}<br>
-$$<br>
-尽管看上去比较复杂，但是 PCG 方法很容易应用，因为这里唯一的复杂计算就是 $\mathbf{Ax}$ 和 $\mathbf{Ap}$ 。</p>
+<p>PCG 和二阶雅可比算法有一些相似，二阶雅可比算法如下 (在动物模型，合适的参数是 <span class="math inline">\(\alpha = 0.7-0.9\)</span>， <span class="math inline">\(\beta =1\)</span> 。)
+<span class="math display">\[
+\mathbf{b}^{(\mathrm{n}+1)}=\mathbf{b}^{(\mathrm{n})}+\alpha\left(\mathbf{b}^{(\mathrm{n})}-\mathbf{b}^{(\mathrm{n}-1)}\right)+\beta \mathbf{D}^{-1}\left(\mathbf{r}-\mathrm{A} \mathbf{b}^{(\mathrm{n})}\right)
+\]</span>
+PCG 算法采用相似的公式，只是 <span class="math inline">\(\alpha\)</span> 和 <span class="math inline">\(\beta\)</span> 在每一轮迭代中需要重新计算，并且这里的 <span class="math inline">\(\mathbf{D}\)</span> 改为了 <span class="math inline">\(\mathbf{M}\)</span> 矩阵，称为预处理矩阵。<span class="math inline">\(\mathbf{M}\)</span> 矩阵可能等于 <span class="math inline">\(diag(\mathbf{A})\)</span> 或者容易求逆的 <span class="math inline">\(\mathbf{A}\)</span> 矩阵的任意一种近似矩阵。</p>
+PCG 迭代的完整的伪代码如下 (这里原方程组设为 <span class="math inline">\(\mathbf{Ax} = \mathbf{b}\)</span> )
+$$
+<span class="math display">\[\begin{aligned}
+
+&amp;\mathbf{x}=0 ; \mathbf{r}=\mathbf{b}-\mathbf{A x} ; \mathrm{k}=1 \\
+&amp; \text{do while(} \mathbf{r&#39;r} \text{ not sufficiently small)}  \\
+&amp; \quad \mathbf{z}=\mathbf{M}^{-1} \mathbf{r} \\
+&amp; \quad \tau_{\mathrm{k}-1}=\mathbf{z}^{\prime} \mathbf{r} \\
+&amp; \quad \text{if} (\mathrm{k}==1) \text{ then} \\
+&amp; \quad \quad \beta=0 ; \mathbf{p}=\mathbf{z} \\
+&amp; \quad \text{else} \\
+
+&amp; \quad \quad \beta=\tau_{\mathrm{k}-1} / \tau_{\mathrm{k}-2} ; \mathbf{p}=\mathbf{z}+\beta \mathbf{p} \\
+&amp; \quad \text { end if } \\
+&amp; \quad \mathbf{w}=\mathbf{A p} \\
+&amp; \quad \alpha=\tau_{\mathrm{k}-1} /\left(\mathbf{p}^{\prime} \mathbf{w}\right) \\
+&amp; \quad \mathbf{x}=\mathbf{x}+\alpha \mathbf{p} \\
+&amp; \quad \text { if }(\bmod (\mathrm{k}, 100) /=0) \text { then } \\
+&amp; \quad \quad \mathbf{r}=\mathbf{r}-\alpha \mathbf{w} \\
+&amp; \quad \text { else } \\
+&amp; \quad \quad \mathbf{r}=\mathbf{b}-\mathbf{A} \mathbf{x} \\
+&amp; \quad \text { end if } \\
+&amp; \quad \mathrm{k}=\mathrm{k}+1\\
+&amp;\text{end do} \\
+\end{aligned}\]</span>
+<p>$$
+尽管看上去比较复杂，但是 PCG 方法很容易应用，因为这里唯一的复杂计算就是 <span class="math inline">\(\mathbf{Ax}\)</span> 和 <span class="math inline">\(\mathbf{Ap}\)</span> 。</p>
 <h2 id="迭代的收敛性">迭代的收敛性</h2>
-<p>“真实的”收敛标准为下式，其中  $\mathbf{b}$ 为精确解。<br>
-$$<br>
-\frac{|\mathbf{b^{(t)}-b}|}{|\mathbf{b}|}<br>
-$$<br>
-但是由于实际上我们不知道   $\mathbf{b}$ ，因此在迭代过程中，我们常用下面的两个收敛标准：</p>
-<p>第一种方式，根据两次迭代解的差距，公式如下。也就是说，如果两次迭代的解相差很小，则认为收敛。<br>
-$$<br>
-C_{d}^{(t)} = \frac{|\mathbf{b^{(t)}-b^{(t-1)}}|}{|\mathbf{b^{(t)}}|}=\frac{\sum_{i=1}^{p}\left(b_{i}^{(t)}-b_{i}^{(t-1)}\right)^{2}}{\sum_{i=1}^{p}\left(b_{i}^{(t)}\right)^{2}}&lt;\varepsilon<br>
-$$<br>
-第二种方式，根据左手项和右手项的差距，公式如下<br>
-$$<br>
-C_{r}^{(t)} = \frac{|\mathbf{r-Ab^{(t)}}|}{|\mathbf{r}|} &lt; \varepsilon<br>
-$$<br>
-其中 ，$\varepsilon&gt; 0$ 是预先给定的允许误差，通常是一个很小的数值。在每次迭代结束时，都检查上式是否成立，如果成立，就意味着本次迭代与上次迭代所得到的解已非常接近，可以认为迭代收敛，从而结束迭代，将当前迭代的解作为方程组的解。</p>
-<h1>混合模型方程组的迭代求解</h1>
+<p>“真实的”收敛标准为下式，其中 <span class="math inline">\(\mathbf{b}\)</span> 为精确解。
+<span class="math display">\[
+\frac{\|\mathbf{b^{(t)}-b}\|}{\|\mathbf{b}\|}
+\]</span>
+但是由于实际上我们不知道 <span class="math inline">\(\mathbf{b}\)</span> ，因此在迭代过程中，我们常用下面的两个收敛标准：</p>
+<p>第一种方式，根据两次迭代解的差距，公式如下。也就是说，如果两次迭代的解相差很小，则认为收敛。
+<span class="math display">\[
+C_{d}^{(t)} = \frac{\|\mathbf{b^{(t)}-b^{(t-1)}}\|}{\|\mathbf{b^{(t)}}\|}=\frac{\sum_{i=1}^{p}\left(b_{i}^{(t)}-b_{i}^{(t-1)}\right)^{2}}{\sum_{i=1}^{p}\left(b_{i}^{(t)}\right)^{2}}&lt;\varepsilon
+\]</span>
+第二种方式，根据左手项和右手项的差距，公式如下
+<span class="math display">\[
+C_{r}^{(t)} = \frac{\|\mathbf{r-Ab^{(t)}}\|}{\|\mathbf{r}\|} &lt; \varepsilon
+\]</span>
+其中 ，<span class="math inline">\(\varepsilon&gt; 0\)</span> 是预先给定的允许误差，通常是一个很小的数值。在每次迭代结束时，都检查上式是否成立，如果成立，就意味着本次迭代与上次迭代所得到的解已非常接近，可以认为迭代收敛，从而结束迭代，将当前迭代的解作为方程组的解。</p>
+<h1 id="混合模型方程组的迭代求解">混合模型方程组的迭代求解</h1>
 <h2 id="直接迭代求解">直接迭代求解</h2>
 <p>直接迭代求解是先计算出方程组系数矩阵和右手项的各个元素，然后用前面所介绍的方法进行迭代求解，这种解法也称为对方程组迭代 (iteration on equations) 。一般来说，<strong>当数据可以读入内存中时，我们会用 GS 或 SOR 迭代法</strong>。但是，PCG 方法现在越来越流行，比如将预处理矩阵设为对角矩阵的 PCG 方法可以对所有的模型均收敛，包括复杂性状，随机回归模型，母性效应模型等；PCG 方法的收敛速度一般也优于前几种方法；PCG 方法还不需要确定任何参数。PCG 方法的一个劣势是它需要更多的内存。</p>
 <h2 id="间接迭代解法">间接迭代解法</h2>
@@ -788,8 +780,22 @@ $$<br>
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

@@ -96,18 +96,18 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>使用 <code>http.client</code> 包获得网络时间。</p>
+  <p>使用 <code>http.client</code> 包获得网络时间。</p>
 <span id="more"></span>
-<h1>获得网络时间</h1>
+<h1 id="获得网络时间">获得网络时间</h1>
 <p>首先需要安装 <code>http.client</code> 这个包</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install http.client</span><br></pre></td></tr></table></figure>
 <p>运行下面的脚本</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> http.client</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">host = <span class="string">&#x27;www.baidu.com&#x27;</span></span><br><span class="line">conn=http.client.HTTPConnection(host)</span><br><span class="line">conn.request(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;/&quot;</span>)</span><br><span class="line">r=conn.getresponse()</span><br><span class="line">ts=  r.getheader(<span class="string">&#x27;date&#x27;</span>) <span class="comment">#获取http头date部分</span></span><br><span class="line"><span class="comment">#将GMT时间转换成北京时间</span></span><br><span class="line">ltime= time.strptime(ts[<span class="number">5</span>:<span class="number">25</span>], <span class="string">&quot;%d %b %Y %H:%M:%S&quot;</span>) <span class="comment"># GMT 时间</span></span><br><span class="line">ttime=time.localtime(time.mktime(ltime)+<span class="number">8</span>*<span class="number">60</span>*<span class="number">60</span>) <span class="comment"># 北京时间</span></span><br><span class="line">dat=<span class="string">f&quot;<span class="subst">&#123;ttime.tm_year&#125;</span>-<span class="subst">&#123;ttime.tm_mon:02d&#125;</span>-<span class="subst">&#123;ttime.tm_mday:02d&#125;</span>&quot;</span></span><br><span class="line">tm=<span class="string">f&quot;<span class="subst">&#123;ttime.tm_hour:02d&#125;</span>:<span class="subst">&#123;ttime.tm_min:02d&#125;</span>:<span class="subst">&#123;ttime.tm_sec:02d&#125;</span>&quot;</span></span><br><span class="line"><span class="built_in">print</span>(dat,tm)</span><br><span class="line"><span class="comment"># 或者也可以直接使用 strftime() 输出, 会自动补零</span></span><br><span class="line"><span class="built_in">print</span>(time.strftime(<span class="string">&quot;%Y-%m-%d&quot;</span>, ttime))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>输出</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2023-02-17 13:46:54</span><br></pre></td></tr></table></figure>
-<h1>参考文献</h1>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1570662">https://cloud.tencent.com/developer/article/1570662</a></li>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li>https://cloud.tencent.com/developer/article/1570662</li>
 </ol>
  
       <!-- reward -->
@@ -534,8 +534,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

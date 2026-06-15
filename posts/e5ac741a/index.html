@@ -96,34 +96,34 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>本章节是介绍 George and Liu 书中 Envelope Method 的应用</p>
+  <p>本章节是介绍 George and Liu 书中 Envelope Method 的应用</p>
 <span id="more"></span>
-<h1>Envelope 存储格式</h1>
-<p>这个存储格式中，数组 <strong>ENV</strong> 包含矩阵中每一行的 <em>envelope entries</em> ，一个长度为 $n+1$ 的索引向量 <strong>XENV</strong> ，其用于指示每一行的开始位置，而 $XENV(n+1) = |Env(\mathbf{A})| + 1$ ，如同之前的索引向量。</p>
-<p>$Env(\mathbf{A})$ 中的 ${ i,j}$ 元素对应关系如下：<br>
-$$<br>
-{ i,j} \rightarrow \mathrm{XENV}(i+1) - (i-j)<br>
-$$<br>
-换句话说，矩阵 $\mathbf{A}$ 的 <em>envelope</em> 区域的某个元素 $a_{ij}$ 可以表示为 $ENV(XENV(i+1) - (i-j))$ 。下图是一个例子，对于其中的 $a_{64}$ ，我们有 $ENV(\mathrm{XENV}(7) - (6-4)) = ENV(8) = a_{64}$ 。</p>
-<p><img src="41.png" alt="1"></p>
+<h1 id="envelope-存储格式">Envelope 存储格式</h1>
+<p>这个存储格式中，数组 <strong>ENV</strong> 包含矩阵中每一行的 <em>envelope entries</em> ，一个长度为 <span class="math inline">\(n+1\)</span> 的索引向量 <strong>XENV</strong> ，其用于指示每一行的开始位置，而 <span class="math inline">\(XENV(n+1) = |Env(\mathbf{A})| + 1\)</span> ，如同之前的索引向量。</p>
+<p><span class="math inline">\(Env(\mathbf{A})\)</span> 中的 <span class="math inline">\(\{ i,j\}\)</span> 元素对应关系如下：
+<span class="math display">\[
+\{ i,j\} \rightarrow \mathrm{XENV}(i+1) - (i-j)
+\]</span>
+换句话说，矩阵 <span class="math inline">\(\mathbf{A}\)</span> 的 <em>envelope</em> 区域的某个元素 <span class="math inline">\(a_{ij}\)</span> 可以表示为 <span class="math inline">\(ENV(XENV(i+1) - (i-j))\)</span> 。下图是一个例子，对于其中的 <span class="math inline">\(a_{64}\)</span> ，我们有 <span class="math inline">\(ENV(\mathrm{XENV}(7) - (6-4)) = ENV(8) = a_{64}\)</span> 。</p>
+<p><img src="41.png" alt="1" /></p>
 <p>更一般的操作是提取 <em>envelope</em> 区域的一行，这个可以按照下面的方式进行</p>
-<h3 id="The-Storage-Allocation-Subroutine-FNENV">The Storage Allocation Subroutine FNENV</h3>
-<p>在这一章节中我们讨论子程序 <strong>FNENV (FiNd ENVelope)</strong> ，这个子程序输入为矩阵 $\mathbf{A}$ 的图，存储在数组对**(XADJ, ADJNCY)** 中，伴随着其置换矩阵 <strong>PERM</strong> 以及其逆向量 <strong>INVP</strong> 。假如 $\mathrm{PERM}(i) = k$ ，那么就说明原始编号 $k$ 在新顺序中其编号是 $i$  。我们通常会用一个相应的长度为 $n$ 的置换向量 <strong>INVP</strong> (<em>the inverse permutation</em>) ，其满足 $\mathrm{INVP(PERM(i)) = i}$ 。也就是说，INVP(k) 表示原始编号 $k$ 在新顺序中的位置。</p>
-<p>这个子程序的目的是计算上面讨论的数组 <strong>XENV</strong> ，这可以用于存储 $\mathbf{PAP^{T}}$ 的 Cholesky 分解因子 $\mathbf{L}$ ；同时返回 <strong>ENVSZE</strong>，这是 $\mathbf{L}$ 的 <em>envelope size</em> ，等于$XENV(NEQNS +1)-1$ ，其中 <strong>NEQNS</strong> 为节点或者方程的数目。</p>
-<p>这里是说，$\mathbf{PAP^{T}}$ 和  $\mathbf{L}$ 的 <em>envelope</em> 的结构是一样的（证明略）。</p>
-<p>这个子程序的内容很简单，循环 <code>DO 200 I= ...</code> 对每一行进行处理，其中循环 <code>DO 100 I= ...</code> 会找到  $\mathbf{PAP^{T}}$ 第 $i$ 行的第一个非零元素的索引 (<strong>IFIRST</strong>) 。</p>
-<p><img src="42.png" alt="1"></p>
-<p><img src="43.png" alt="1"></p>
+<h3 id="the-storage-allocation-subroutine-fnenv">The Storage Allocation Subroutine FNENV</h3>
+<p>在这一章节中我们讨论子程序 <strong>FNENV (FiNd ENVelope)</strong> ，这个子程序输入为矩阵 <span class="math inline">\(\mathbf{A}\)</span> 的图，存储在数组对<strong>(XADJ, ADJNCY)</strong> 中，伴随着其置换矩阵 <strong>PERM</strong> 以及其逆向量 <strong>INVP</strong> 。假如 <span class="math inline">\(\mathrm{PERM}(i) = k\)</span> ，那么就说明原始编号 <span class="math inline">\(k\)</span> 在新顺序中其编号是 <span class="math inline">\(i\)</span> 。我们通常会用一个相应的长度为 <span class="math inline">\(n\)</span> 的置换向量 <strong>INVP</strong> (<em>the inverse permutation</em>) ，其满足 <span class="math inline">\(\mathrm{INVP(PERM(i)) = i}\)</span> 。也就是说，INVP(k) 表示原始编号 <span class="math inline">\(k\)</span> 在新顺序中的位置。</p>
+<p>这个子程序的目的是计算上面讨论的数组 <strong>XENV</strong> ，这可以用于存储 <span class="math inline">\(\mathbf{PAP^{T}}\)</span> 的 Cholesky 分解因子 <span class="math inline">\(\mathbf{L}\)</span> ；同时返回 <strong>ENVSZE</strong>，这是 <span class="math inline">\(\mathbf{L}\)</span> 的 <em>envelope size</em> ，等于<span class="math inline">\(XENV(NEQNS +1)-1\)</span> ，其中 <strong>NEQNS</strong> 为节点或者方程的数目。</p>
+<p>这里是说，<span class="math inline">\(\mathbf{PAP^{T}}\)</span> 和 <span class="math inline">\(\mathbf{L}\)</span> 的 <em>envelope</em> 的结构是一样的（证明略）。</p>
+<p>这个子程序的内容很简单，循环 <code>DO 200 I= ...</code> 对每一行进行处理，其中循环 <code>DO 100 I= ...</code> 会找到 <span class="math inline">\(\mathbf{PAP^{T}}\)</span> 第 <span class="math inline">\(i\)</span> 行的第一个非零元素的索引 (<strong>IFIRST</strong>) 。</p>
+<p><img src="42.png" alt="1" /></p>
+<p><img src="43.png" alt="1" /></p>
 <p>下面开始逐行解析脚本，首先初始化 BANDW=0, ENVSZE=1，注意这里的 ENVSZE 其实就是每行的初始位置。</p>
-<p>对于每一行进行循环，<code>XENV(I) = ENVSZE</code>  设置每一行的 XENV 的元素，这一行对应的置换矩阵的原始节点编号为 <code>IPERM = PERM(I)</code>，设这一行第一个非零元素位置为 IFIRST ，初始值设为 <code>i</code></p>
+<p>对于每一行进行循环，<code>XENV(I) = ENVSZE</code> 设置每一行的 XENV 的元素，这一行对应的置换矩阵的原始节点编号为 <code>IPERM = PERM(I)</code>，设这一行第一个非零元素位置为 IFIRST ，初始值设为 <code>i</code></p>
 <p>通过 <code>DO 100</code> 遍历其相邻的原始节点，<code>NABOR = ADJNCY(J)</code> 得到其原始编号，<code>NABOR = INVP(NABOR)</code> 进一步得到其在置换矩阵中的新编号，如果新编号低于 IFIRST ，则用这个编号覆盖 IFIRST ，最终得到 IFIRST 的真实值。</p>
-<p>通过 <code>I - IFIRST</code> 得到这一行的 <em>bandwidth</em> ，记为 <code>IBAND</code> ，下一行的初始位置更新为 <code>ENVSZE = ENVSZE + IBAND</code> ，如果 <code>BANDW</code> 小于  <code>IBAND</code> ，则 <code>BANDW = IBAND</code> ，最终得到矩阵的 <em>bandwidth</em> 。</p>
+<p>通过 <code>I - IFIRST</code> 得到这一行的 <em>bandwidth</em> ，记为 <code>IBAND</code> ，下一行的初始位置更新为 <code>ENVSZE = ENVSZE + IBAND</code> ，如果 <code>BANDW</code> 小于 <code>IBAND</code> ，则 <code>BANDW = IBAND</code> ，最终得到矩阵的 <em>bandwidth</em> 。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">	  BANDW = 0</span><br><span class="line">	  ENVSZE = 1</span><br><span class="line">	  DO 200 I=1, NEQNS</span><br><span class="line">	    XENV(I) = ENVSZE</span><br><span class="line">	    IPERM = PERM(I)</span><br><span class="line">	    JSTRT = XADJ(IPERM)</span><br><span class="line">	    JSTOP = XADJ(IPERM + 1) - 1</span><br><span class="line">	    IF (JSTOP .LT. JSTRT) GO TO 200</span><br><span class="line">          IFIRST = I</span><br><span class="line">          DO 100 J = JSTRT, JSTOP</span><br><span class="line">            NABOR = ADJNCY(J)</span><br><span class="line">            NABOR = INVP(NABOR)</span><br><span class="line">            IF ( NABOR .LT. IFIRST ) IFIRST = NABOR</span><br><span class="line">100       CONTINUE</span><br><span class="line">          IBAND = I - IFIRST</span><br><span class="line">          ENVSZE = ENVSZE + IBAND</span><br><span class="line">          IF (BANDW .LT. IBAND) BANDW = IBAND</span><br><span class="line">200   CONTINUE</span><br></pre></td></tr></table></figure>
 <p>最后，XENV 需要补上最后一个元素 <code>NEQNS+1</code></p>
 <p>实际的 <code>ENVSZE</code> 需要减1，程序终止</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  XENV(NEQNS+1) = ENVSZE</span><br><span class="line">  ENVSZE = ENVSZE - 1</span><br><span class="line">  RETURN</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
-<h1>参考文献</h1>
-<ol>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
 <li>George A, Liu J, Ng E. Computer solution of sparse linear systems[J]. Oak Ridge National Laboratory, 1994.</li>
 </ol>
  
@@ -551,8 +551,22 @@ $$<br>
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

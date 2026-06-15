@@ -92,9 +92,9 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>最近对 <code>rm</code> 命令有些恐惧，整理了一下比较安全的删除方式。</p>
+  <p>最近对 <code>rm</code> 命令有些恐惧，整理了一下比较安全的删除方式。</p>
 <span id="more"></span>
-<h1>rm 命令</h1>
+<h1 id="rm-命令">rm 命令</h1>
 <p>在<strong>交互式</strong>删除文件时，下面几个选项可以提高安全性。</p>
 <ul>
 <li><code>-I</code> : 当删除3个文件以上，或者存在 <code>-r</code> 选项（递归删除文件夹）时提醒一次</li>
@@ -103,25 +103,19 @@
 </ul>
 <p>另外先跑下面的命令也更加容易避免误删的情况</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pwd # 先确认当前目录</span><br><span class="line">ls # 确认当前目录有啥</span><br><span class="line">echo rm ...  # 先打印一下 rm 命令，确认一遍</span><br></pre></td></tr></table></figure>
-<h1>rm 命令的潜在危险</h1>
+<h1 id="rm-命令的潜在危险">rm 命令的潜在危险</h1>
 <p>在我看来，所有其他 linux 命令和 python/R 脚本对我来说都是<strong>可重复的</strong>（这一点很重要），只要保留原始文件，跑错了重新跑就行。</p>
 <p>但是，如果一旦误用了 <code>rm</code> 命令，那就是不可重复了，这就是 <code>rm</code> 命令的潜在危险。</p>
 <p>有人说 <code>rm -rf</code> 危险，我不这样认为，因为不可能每次都交互式删除文件。在非交互式删除文件的时候，我们往往使用相对路径来删除文件和文件夹。因此下面3点才是危险的。</p>
-<ol>
-<li>
-<p>不确认当前目录（<code>PWD</code>），就删除文件。</p>
-</li>
-<li>
-<p>使用太宽泛的通配符匹配，比如下面三种写法，第一种写法是绝对不能用的，肯定会误删，这种最好的写法是第三种（最好先 <code>ls slurm-*.log </code>看一下再删 ）。</p>
+<ol type="1">
+<li><p>不确认当前目录（<code>PWD</code>），就删除文件。</p></li>
+<li><p>使用太宽泛的通配符匹配，比如下面三种写法，第一种写法是绝对不能用的，肯定会误删，这种最好的写法是第三种（最好先 <code>ls slurm-*.log</code>看一下再删 ）。</p>
 <p>匹配的文件或文件夹最好越详细越好，甚至不用 <code>*</code> 号最好，因为越详细越不会错误匹配别的文件，而如果没有匹配的文件，<code>rm</code> 什么都不会做。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rm * </span><br><span class="line">rm *.log</span><br><span class="line">rm slurm-*.log </span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>路径中含有变量，因为变量可能没有赋值，比如运维的地狱笑话命令，如果下面命令中 <code>path</code> 没有赋值，那就成了删除根目录的全部文件。因此最好别用变量，变量要是没有赋值可能会出事。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm -rf $path/*</span><br></pre></td></tr></table></figure>
-</li>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rm * </span><br><span class="line">rm *.log</span><br><span class="line">rm slurm-*.log </span><br></pre></td></tr></table></figure></li>
+<li><p>路径中含有变量，因为变量可能没有赋值，比如运维的地狱笑话命令，如果下面命令中 <code>path</code> 没有赋值，那就成了删除根目录的全部文件。因此最好别用变量，变量要是没有赋值可能会出事。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm -rf $path/*</span><br></pre></td></tr></table></figure></li>
 </ol>
-<h1>回收桶</h1>
+<h1 id="回收桶">回收桶</h1>
 <p>Linux 上最常见的就是 <code>trash-cli</code>（很多发行版/conda 里可用）</p>
 <p>安装命令如下</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">conda install -c conda-forge trash-cli</span><br><span class="line"></span><br><span class="line"><span class="comment"># 日常用法：把“删除”变成可回收</span></span><br><span class="line">trash 文件或目录</span><br><span class="line"><span class="comment"># 查看</span></span><br><span class="line">trash-list</span><br><span class="line"><span class="comment"># 恢复</span></span><br><span class="line">restore-trash</span><br></pre></td></tr></table></figure>
@@ -131,36 +125,36 @@
 <table>
 <thead>
 <tr>
-<th style="text-align:left"><strong>命令</strong></th>
-<th style="text-align:left"><strong>作用</strong></th>
-<th style="text-align:left"><strong>类比</strong></th>
+<th style="text-align: left;"><strong>命令</strong></th>
+<th style="text-align: left;"><strong>作用</strong></th>
+<th style="text-align: left;"><strong>类比</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left"><code>trash-put</code></td>
-<td style="text-align:left"><strong>删（送回收站）</strong></td>
-<td style="text-align:left">替代 <code>rm</code></td>
+<td style="text-align: left;"><code>trash-put</code></td>
+<td style="text-align: left;"><strong>删（送回收站）</strong></td>
+<td style="text-align: left;">替代 <code>rm</code></td>
 </tr>
 <tr>
-<td style="text-align:left"><code>trash-list</code></td>
-<td style="text-align:left"><strong>查看回收站里有什么</strong></td>
-<td style="text-align:left"><code>ls</code>回收站</td>
+<td style="text-align: left;"><code>trash-list</code></td>
+<td style="text-align: left;"><strong>查看回收站里有什么</strong></td>
+<td style="text-align: left;"><code>ls</code>回收站</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>trash-restore</code></td>
-<td style="text-align:left"><strong>交互式恢复</strong></td>
-<td style="text-align:left">从回收站还原</td>
+<td style="text-align: left;"><code>trash-restore</code></td>
+<td style="text-align: left;"><strong>交互式恢复</strong></td>
+<td style="text-align: left;">从回收站还原</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>trash-empty</code></td>
-<td style="text-align:left"><strong>清空回收站（永久删）</strong></td>
-<td style="text-align:left">清空</td>
+<td style="text-align: left;"><code>trash-empty</code></td>
+<td style="text-align: left;"><strong>清空回收站（永久删）</strong></td>
+<td style="text-align: left;">清空</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>trash-rm</code></td>
-<td style="text-align:left"><strong>从回收站删指定项</strong></td>
-<td style="text-align:left">选择性永久删</td>
+<td style="text-align: left;"><code>trash-rm</code></td>
+<td style="text-align: left;"><strong>从回收站删指定项</strong></td>
+<td style="text-align: left;">选择性永久删</td>
 </tr>
 </tbody>
 </table>
@@ -190,7 +184,7 @@
 <p>回收站文件实际在哪？</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ls ~/.local/share/Trash/files/</span><br><span class="line">ls ~/.local/share/Trash/info/   # 元数据（含原始路径）</span><br></pre></td></tr></table></figure>
 <p>每个文件在 <code>info/</code>里有个 <code>.trashinfo</code>文件记录原路径和删除时间，这就是 <code>trash-list</code>的数据来源。</p>
-<h1>我目前的策略</h1>
+<h1 id="我目前的策略">我目前的策略</h1>
 <ul>
 <li>脚本里面还是用 <code>rm</code> 删除中间文件，不过最好写清楚删除文件的名称，少用通配符。</li>
 <li>交互式删除文件时使用 <code>trash-put</code> ，这种一般是删除小文件。</li>
@@ -618,8 +612,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

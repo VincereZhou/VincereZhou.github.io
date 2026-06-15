@@ -96,118 +96,115 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>EM 算法 (expectation-maximization)  是获得最大似然估计值的一种迭代算法，当原始的似然函数很复杂时，无法直接得到显式解时，我们可以选择使用 EM 算法。</p>
+  <p>EM 算法 (expectation-maximization) 是获得最大似然估计值的一种迭代算法，当原始的似然函数很复杂时，无法直接得到显式解时，我们可以选择使用 EM 算法。</p>
 <span id="more"></span>
-<h1>Jensen’s inequality</h1>
-<p>假设 $f$ 是一个定义域为实数的函数，只有当 $f^{\prime \prime}(x) \geq 0$  恒成立是，$f$ 才是一个<strong>凸函数</strong>。如果 $f$ 输入是一个向量，那么其为凸函数的条件一般化为，只有当其 hessian 矩阵是一个半正定矩阵成立 ($\boldsymbol{H} \geq 0$)。 如果 $f^{\prime \prime}(x) &gt; 0$  ($\boldsymbol{H} &gt; 0$) ，那么我们称 $f$ 是一个<strong>严格凸函数 (strictly convex)</strong> 。</p>
+<h1 id="jensens-inequality">Jensen’s inequality</h1>
+<p>假设 <span class="math inline">\(f\)</span> 是一个定义域为实数的函数，只有当 <span class="math inline">\(f^{\prime \prime}(x) \geq 0\)</span> 恒成立是，<span class="math inline">\(f\)</span> 才是一个<strong>凸函数</strong>。如果 <span class="math inline">\(f\)</span> 输入是一个向量，那么其为凸函数的条件一般化为，只有当其 hessian 矩阵是一个半正定矩阵成立 (<span class="math inline">\(\boldsymbol{H} \geq 0\)</span>)。 如果 <span class="math inline">\(f^{\prime \prime}(x) &gt; 0\)</span> (<span class="math inline">\(\boldsymbol{H} &gt; 0\)</span>) ，那么我们称 <span class="math inline">\(f\)</span> 是一个<strong>严格凸函数 (strictly convex)</strong> 。</p>
 <p><strong>Jensen’s inequality</strong> 表述如下：</p>
-<p><img src="3.png" alt="1"></p>
-<p>我们可以下面的图，这里 $f$ 是一个凸函数，X 是一个随机变量，其有一半概率为 a, 一半概率为 b 。从这个例子中，我们可以看到 $\mathrm{E}[f(X)] \geq f(\mathrm{E} X)$ 。</p>
-<p><img src="4.png" alt="1"></p>
-<p>注意：如果 $f$ 是一个凹函数，那么 $-f$ 就是凸函数。因此对于凹函数存在 $\mathrm{E}[f(X)] \leq f(\mathrm{E} X)$ 。</p>
-<h1>The EM algorithm</h1>
-<p>假设我们有一个包含 $m$ 个独立样本的训练集数据 $\left{x^{(1)}, \ldots, x^{(m)}\right}$ ，我们需要对一个模型 $p(x, z)$ 进行拟合参数，其中似然函数为：<br>
-$$<br>
-\begin{aligned}<br>
-\ell(\theta) &amp;=\sum_{i=1}^{m} \log p(x ; \theta) \<br>
-&amp;=\sum_{i=1}^{m} \log \sum_{z} p(x, z ; \theta)<br>
-\end{aligned}<br>
-$$<br>
-但是，我们想要找到 $\theta$ 的最大似然估计值很难。这里，$z^{(i)}$ 是隐藏的随机变量。如果我们已知 $z^{(i)}$ ，那么获取最大似然估计值就很容易。</p>
+<p><img src="3.png" alt="1" /></p>
+<p>我们可以下面的图，这里 <span class="math inline">\(f\)</span> 是一个凸函数，X 是一个随机变量，其有一半概率为 a, 一半概率为 b 。从这个例子中，我们可以看到 <span class="math inline">\(\mathrm{E}[f(X)] \geq f(\mathrm{E} X)\)</span> 。</p>
+<p><img src="4.png" alt="1" /></p>
+<p>注意：如果 <span class="math inline">\(f\)</span> 是一个凹函数，那么 <span class="math inline">\(-f\)</span> 就是凸函数。因此对于凹函数存在 <span class="math inline">\(\mathrm{E}[f(X)] \leq f(\mathrm{E} X)\)</span> 。</p>
+<h1 id="the-em-algorithm">The EM algorithm</h1>
+<p>假设我们有一个包含 <span class="math inline">\(m\)</span> 个独立样本的训练集数据 <span class="math inline">\(\left\{x^{(1)}, \ldots, x^{(m)}\right\}\)</span> ，我们需要对一个模型 <span class="math inline">\(p(x, z)\)</span> 进行拟合参数，其中似然函数为：
+<span class="math display">\[
+\begin{aligned}
+\ell(\theta) &amp;=\sum_{i=1}^{m} \log p(x ; \theta) \\
+&amp;=\sum_{i=1}^{m} \log \sum_{z} p(x, z ; \theta)
+\end{aligned}
+\]</span>
+但是，我们想要找到 <span class="math inline">\(\theta\)</span> 的最大似然估计值很难。这里，<span class="math inline">\(z^{(i)}\)</span> 是隐藏的随机变量。如果我们已知 <span class="math inline">\(z^{(i)}\)</span> ，那么获取最大似然估计值就很容易。</p>
 <p>在这种情况下，EM 算法提供了一种估计参数的最大似然估计值的有效方法（哈哈哈，估计最大似然估计值，“估计估计值”，双重估计）。</p>
 <blockquote>
-<p>Maximizing $\ell(\theta)$ explicitly might be difficult，our strategy will be to instead repeatedly construct a lower-bound on $\ell$ (E-step), and then optimize that lower-bound (M-step).</p>
+<p>Maximizing <span class="math inline">\(\ell(\theta)\)</span> explicitly might be difficult，our strategy will be to instead repeatedly construct a lower-bound on <span class="math inline">\(\ell\)</span> (E-step), and then optimize that lower-bound (M-step).</p>
 </blockquote>
-<p>对于每个个体 $i$ ，设 $Q_{i}$ 为 $z$ 的分布 $\left(\sum_{z} Q_{i}(z)=1, Q_{i}(z) \geq 0 \right)$ ，因此 (如果 $z$ 是连续变量，那么 $Q_{i}$ 就改为概率密度， <strong>$z$ 的求和式子改为积分</strong> ，也就是 $\sum_{z^{(i)}}$ 改为 $\int_{z^{(i)}} * dz^{(i)}$ )<br>
-$$<br>
-\begin{aligned}<br>
-\ell(\theta) = \sum_{i} \log p\left(x^{(i)} ; \theta\right) &amp;=\sum_{i} \log \sum_{z^{(i)}} p\left(x^{(i)}, z^{(i)} ; \theta\right) \<br>
-&amp;=\sum_{i} \log \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)} \<br>
-&amp; \geq \sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}<br>
-\end{aligned}<br>
-$$<br>
-最后一步应用了 Jensen 不等式。因为，我们知道 $\log(x)$ 是一个凹函数，因为 $f^{\prime \prime}(x)=-1 / x^{2}&lt;0$ 恒成立。并且，下式可视为 $\left[\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}\right]$ 对 $z^{(i)}$ 的期望<br>
-$$<br>
-\sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right)\left[\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}\right]<br>
-$$<br>
-通过 Jensen 不等式，我们有下式成立，得证上面公式的最后一步。这里的 ${z}^{(i)} \sim Q_{i}$  下标表示这是对  $z^{(i)}$ 的期望，其中  $z^{(i)}$ 服从分布 $Q_i$ 。</p>
-<p>$$<br>
-f\left(\mathrm{E}<em>{z^{(i)} \sim Q</em>{i}}\left[\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}\right]\right) \geq \mathrm{E}<em>{z^{(i)} \sim Q</em>{i}}\left[f\left(\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}\right)\right]<br>
-$$<br>
-现在，对于任何一个分布  $Q_i$ , 我们都能得到一个 $\ell(\theta)$ 的下限。我们对于 $Q_i$ 存在很多种选择，那么我们选择哪一个呢？如果我们对参数 $\theta$ 目前已有估计值，那么一个自然的选择是使得  $\ell(\theta)$ 的下限与  $\ell(\theta)$  的值很接近。换句话说，我们想让上面的不等式针对特定的  $\theta$ 变成等式，这样做可以使得每次迭代 $\ell(\theta)$  单调递增。</p>
-<p>为了使得  $\ell(\theta)$ 的下限等于 $\ell(\theta)$ ，我们需要上面的 Jensen 不等式在特定的 $\theta$ 时变成等式，也是就说要对常量求期望，即要求，对所有所有的  $z^{(i)}$  ，下式均为一个固定的常数。<br>
-$$<br>
-\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}=c<br>
-$$<br>
-做个变换得到：<br>
-$$<br>
-\sum_{z}p\left(x^{(i)}, z^{(i)} ; \theta\right) = \sum_{z}Q_{i}\left(z^{(i)}\right)c<br>
-$$<br>
-我们知道 $\sum_{z} Q_{i}\left(z^{(i)}\right)=1$ ，因此我们得到<br>
-$$<br>
-\sum_{z}p\left(x^{(i)}, z^{(i)} ; \theta\right) = c<br>
-$$<br>
-因此<br>
-$$<br>
-\begin{aligned}<br>
-Q_{i}\left(z^{(i)}\right)<br>
-&amp;=\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{c} \<br>
-&amp;=\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{\sum_{z} p\left(x^{(i)}, z ; \theta\right)} \<br>
-&amp;=\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{p\left(x^{(i)} ; \theta\right)} \<br>
-&amp;=p\left(z^{(i)} \mid x^{(i)} ; \theta\right)<br>
-\end{aligned}<br>
-$$<br>
-因此，这里我们简单地将   $Q_i$  设定为  $z^{(i)}$ 基于给定的 $x^{(i)}$ 和  $\theta$  的<strong>后验分布</strong> 。</p>
-<p>现在，通过我们选择的 $Q_i$ ，我们得到了想要最大化的 $\ell(\theta)$ 的下限，这是 E 步。在 M 步中，我们则基于 $\theta$  最大化 $\ell(\theta)$ 的下限公式，得到一组新的参数 $\theta$  。重复上面的步骤就是 EM 算法，描述如下：</p>
-<p><img src="1.png" alt="1"></p>
-<p>这里第二个式子还可以进一步简化：<br>
-$$<br>
-\begin{aligned}<br>
-\theta &amp; := \operatorname{arg} \max_{\theta} \sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)} \<br>
-&amp; := \operatorname{arg} \max_{\theta} \sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \left( \log p\left(x^{(i)}, z^{(i)} ; \theta\right) - \log Q_{i}\left(z^{(i)}\right) \right) \<br>
-&amp; := \operatorname{arg} \max_{\theta} \sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right)  \log p\left(x^{(i)}, z^{(i)} ; \theta\right) \quad \because \text{后一项与} \theta \text{无关，为常量}\<br>
-&amp; := \operatorname{arg} \max_{\theta} \sum_{i} \mathrm{E}<em>{z^{(i)}|x^{(i)}, \theta^{[t]}}   \log p\left(x^{(i)}, z^{(i)} ; \theta\right) \<br>
-&amp; := \operatorname{arg} \max</em>{\theta}  \mathrm{E}<em>{z^{(i)}|x^{(i)}, \theta^{[t]}} \left( \sum</em>{i}    \log p\left(x^{(i)}, z^{(i)} ; \theta\right) \right) \</p>
-<p>\end{aligned}<br>
-$$<br>
-其中， $\theta^{[t]}$ 是上一轮的参数值。</p>
-<p>还有一点小问题，因为 E 步是计算条件期望的，因此严格来说计算 $\sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right)  \log p\left(x^{(i)}, z^{(i)} ; \theta\right)$ 的过程应该放在 E 步。</p>
+<p>对于每个个体 <span class="math inline">\(i\)</span> ，设 <span class="math inline">\(Q_{i}\)</span> 为 <span class="math inline">\(z\)</span> 的分布 <span class="math inline">\(\left(\sum_{z} Q_{i}(z)=1, Q_{i}(z) \geq 0 \right)\)</span> ，因此 (如果 <span class="math inline">\(z\)</span> 是连续变量，那么 <span class="math inline">\(Q_{i}\)</span> 就改为概率密度， <strong><span class="math inline">\(z\)</span> 的求和式子改为积分</strong> ，也就是 <span class="math inline">\(\sum_{z^{(i)}}\)</span> 改为 <span class="math inline">\(\int_{z^{(i)}} * dz^{(i)}\)</span> )
+<span class="math display">\[
+\begin{aligned}
+\ell(\theta) = \sum_{i} \log p\left(x^{(i)} ; \theta\right) &amp;=\sum_{i} \log \sum_{z^{(i)}} p\left(x^{(i)}, z^{(i)} ; \theta\right) \\
+&amp;=\sum_{i} \log \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)} \\
+&amp; \geq \sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}
+\end{aligned}
+\]</span>
+最后一步应用了 Jensen 不等式。因为，我们知道 <span class="math inline">\(\log(x)\)</span> 是一个凹函数，因为 <span class="math inline">\(f^{\prime \prime}(x)=-1 / x^{2}&lt;0\)</span> 恒成立。并且，下式可视为 <span class="math inline">\(\left[\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}\right]\)</span> 对 <span class="math inline">\(z^{(i)}\)</span> 的期望
+<span class="math display">\[
+\sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right)\left[\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}\right]
+\]</span>
+通过 Jensen 不等式，我们有下式成立，得证上面公式的最后一步。这里的 <span class="math inline">\({z}^{(i)} \sim Q_{i}\)</span> 下标表示这是对 <span class="math inline">\(z^{(i)}\)</span> 的期望，其中 <span class="math inline">\(z^{(i)}\)</span> 服从分布 <span class="math inline">\(Q_i\)</span> 。</p>
+<p><span class="math display">\[
+f\left(\mathrm{E}_{z^{(i)} \sim Q_{i}}\left[\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}\right]\right) \geq \mathrm{E}_{z^{(i)} \sim Q_{i}}\left[f\left(\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}\right)\right]
+\]</span>
+现在，对于任何一个分布 <span class="math inline">\(Q_i\)</span> , 我们都能得到一个 <span class="math inline">\(\ell(\theta)\)</span> 的下限。我们对于 <span class="math inline">\(Q_i\)</span> 存在很多种选择，那么我们选择哪一个呢？如果我们对参数 <span class="math inline">\(\theta\)</span> 目前已有估计值，那么一个自然的选择是使得 <span class="math inline">\(\ell(\theta)\)</span> 的下限与 <span class="math inline">\(\ell(\theta)\)</span> 的值很接近。换句话说，我们想让上面的不等式针对特定的 <span class="math inline">\(\theta\)</span> 变成等式，这样做可以使得每次迭代 <span class="math inline">\(\ell(\theta)\)</span> 单调递增。</p>
+<p>为了使得 <span class="math inline">\(\ell(\theta)\)</span> 的下限等于 <span class="math inline">\(\ell(\theta)\)</span> ，我们需要上面的 Jensen 不等式在特定的 <span class="math inline">\(\theta\)</span> 时变成等式，也是就说要对常量求期望，即要求，对所有所有的 <span class="math inline">\(z^{(i)}\)</span> ，下式均为一个固定的常数。
+<span class="math display">\[
+\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}=c
+\]</span>
+做个变换得到：
+<span class="math display">\[
+\sum_{z}p\left(x^{(i)}, z^{(i)} ; \theta\right) = \sum_{z}Q_{i}\left(z^{(i)}\right)c
+\]</span>
+我们知道 <span class="math inline">\(\sum_{z} Q_{i}\left(z^{(i)}\right)=1\)</span> ，因此我们得到
+<span class="math display">\[
+\sum_{z}p\left(x^{(i)}, z^{(i)} ; \theta\right) = c
+\]</span>
+因此
+<span class="math display">\[
+\begin{aligned}
+Q_{i}\left(z^{(i)}\right) 
+&amp;=\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{c} \\
+&amp;=\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{\sum_{z} p\left(x^{(i)}, z ; \theta\right)} \\
+&amp;=\frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{p\left(x^{(i)} ; \theta\right)} \\
+&amp;=p\left(z^{(i)} \mid x^{(i)} ; \theta\right)
+\end{aligned}
+\]</span>
+因此，这里我们简单地将 <span class="math inline">\(Q_i\)</span> 设定为 <span class="math inline">\(z^{(i)}\)</span> 基于给定的 <span class="math inline">\(x^{(i)}\)</span> 和 <span class="math inline">\(\theta\)</span> 的<strong>后验分布</strong> 。</p>
+<p>现在，通过我们选择的 <span class="math inline">\(Q_i\)</span> ，我们得到了想要最大化的 <span class="math inline">\(\ell(\theta)\)</span> 的下限，这是 E 步。在 M 步中，我们则基于 <span class="math inline">\(\theta\)</span> 最大化 <span class="math inline">\(\ell(\theta)\)</span> 的下限公式，得到一组新的参数 <span class="math inline">\(\theta\)</span> 。重复上面的步骤就是 EM 算法，描述如下：</p>
+<p><img src="1.png" alt="1" /></p>
+这里第二个式子还可以进一步简化：
+$$
+<span class="math display">\[\begin{aligned}
+\theta &amp; := \operatorname{arg} \max_{\theta} \sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)} \\
+ &amp; := \operatorname{arg} \max_{\theta} \sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \left( \log p\left(x^{(i)}, z^{(i)} ; \theta\right) - \log Q_{i}\left(z^{(i)}\right) \right) \\
+ &amp; := \operatorname{arg} \max_{\theta} \sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right)  \log p\left(x^{(i)}, z^{(i)} ; \theta\right) \quad \because \text{后一项与} \theta \text{无关，为常量}\\ 
+ &amp; := \operatorname{arg} \max_{\theta} \sum_{i} \mathrm{E}_{z^{(i)}|x^{(i)}, \theta^{[t]}}   \log p\left(x^{(i)}, z^{(i)} ; \theta\right) \\ 
+ &amp; := \operatorname{arg} \max_{\theta}  \mathrm{E}_{z^{(i)}|x^{(i)}, \theta^{[t]}} \left( \sum_{i}    \log p\left(x^{(i)}, z^{(i)} ; \theta\right) \right) \\ 
+
+\end{aligned}\]</span>
+<p>$$
+其中， <span class="math inline">\(\theta^{[t]}\)</span> 是上一轮的参数值。</p>
+<p>还有一点小问题，因为 E 步是计算条件期望的，因此严格来说计算 <span class="math inline">\(\sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right)  \log p\left(x^{(i)}, z^{(i)} ; \theta\right)\)</span> 的过程应该放在 E 步。</p>
 <p>那么，我们如何知道EM算法是否收敛呢？</p>
-<h1>EM 算法的收敛性</h1>
-<p>我们这里证明 EM 算法只会单调地增加对数似然值，即证明 $\ell\left(\theta^{(t)}\right) \leq \ell\left(\theta^{(t+1)}\right)$ 。</p>
-<p>首先，我们通过选择 $Q_{i}$ ，我们使得 Jensen 不等式在当前参数下满足等式关系，因此，在求 $\theta^{(t+1)}$ 过程中， 存在：<br>
-$$<br>
-\ell\left(\theta^{(t)}\right)=\sum_{i} \sum_{z^{(i)}} Q_{i}^{(t+1)}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta^{(t)}\right)}{Q_{i}^{(t+1)}\left(z^{(i)}\right)}<br>
-$$<br>
-当我们通过 M 步对上式右手项最大化，获得  $\theta^{(t+1)}$ 后，此时：<br>
-$$<br>
-\begin{aligned}<br>
-\ell\left(\theta^{(t+1)}\right) &amp; \geq \sum_{i} \sum_{z^{(i)}} Q_{i}^{(t+1)}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta^{(t+1)}\right)}{Q_{i}^{(t+1)}\left(z^{(i)}\right)} \quad \because \text{Jensen’s inequality}\<br>
-&amp; \geq \sum_{i} \sum_{z^{(i)}} Q_{i}^{(t+1)}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta^{(t)}\right)}{Q_{i}^{(t+1)}\left(z^{(i)}\right)} \quad \because  \theta^{(t+1)} = \arg \max <em>{\theta} \sum</em>{i} \sum_{z^{(i)}} Q_{i}^{(t+1)}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}^{(t+1)}\left(z^{(i)}\right)}\<br>
-&amp;=\ell\left(\theta^{(t)}\right)<br>
-\end{aligned}<br>
-$$<br>
-因此，我们证明<br>
-$$<br>
-\ell\left(\theta^{(t)}\right) \leq \ell\left(\theta^{(t+1)}\right)<br>
-$$<br>
-因此，EM 算法只会使对数似然值不断增加，直至收敛。收敛的标准可以看两次迭代的  $\ell(\theta)$ 的增加量是否低于给定阈值。</p>
-<p><strong>注意</strong>，如果我们定义：<br>
-$$<br>
-J(Q, \theta)=\sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}<br>
-$$<br>
-我们知道 $\ell(\theta) \geq J(Q, \theta)$  。 EM 算法可以视为对 $J(Q, \theta)$ 的坐标上升法，其中 E 步可以视为固定 $\theta$ 对 $Q$ 的最大化（因为  $\theta$ 固定，因为  $J(Q, \theta)$  的最大值就是 $\ell(\theta)$ ，因此就是选择一个  $Q$ 使得不等式成立），而 M 步可以视为固定 $Q$  对 $\theta$ 的最大化（这一点很好理解  $\ell(\theta)$ ）。</p>
+<h1 id="em-算法的收敛性">EM 算法的收敛性</h1>
+<p>我们这里证明 EM 算法只会单调地增加对数似然值，即证明 <span class="math inline">\(\ell\left(\theta^{(t)}\right) \leq \ell\left(\theta^{(t+1)}\right)\)</span> 。</p>
+<p>首先，我们通过选择 <span class="math inline">\(Q_{i}\)</span> ，我们使得 Jensen 不等式在当前参数下满足等式关系，因此，在求 <span class="math inline">\(\theta^{(t+1)}\)</span> 过程中， 存在：
+<span class="math display">\[
+\ell\left(\theta^{(t)}\right)=\sum_{i} \sum_{z^{(i)}} Q_{i}^{(t+1)}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta^{(t)}\right)}{Q_{i}^{(t+1)}\left(z^{(i)}\right)}
+\]</span>
+当我们通过 M 步对上式右手项最大化，获得 <span class="math inline">\(\theta^{(t+1)}\)</span> 后，此时：
+<span class="math display">\[
+\begin{aligned}
+\ell\left(\theta^{(t+1)}\right) &amp; \geq \sum_{i} \sum_{z^{(i)}} Q_{i}^{(t+1)}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta^{(t+1)}\right)}{Q_{i}^{(t+1)}\left(z^{(i)}\right)} \quad \because \text{Jensen&#39;s inequality}\\
+&amp; \geq \sum_{i} \sum_{z^{(i)}} Q_{i}^{(t+1)}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta^{(t)}\right)}{Q_{i}^{(t+1)}\left(z^{(i)}\right)} \quad \because  \theta^{(t+1)} = \arg \max _{\theta} \sum_{i} \sum_{z^{(i)}} Q_{i}^{(t+1)}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}^{(t+1)}\left(z^{(i)}\right)}\\
+&amp;=\ell\left(\theta^{(t)}\right)
+\end{aligned}
+\]</span>
+因此，我们证明
+<span class="math display">\[
+\ell\left(\theta^{(t)}\right) \leq \ell\left(\theta^{(t+1)}\right)
+\]</span>
+因此，EM 算法只会使对数似然值不断增加，直至收敛。收敛的标准可以看两次迭代的 <span class="math inline">\(\ell(\theta)\)</span> 的增加量是否低于给定阈值。</p>
+<p><strong>注意</strong>，如果我们定义：
+<span class="math display">\[
+J(Q, \theta)=\sum_{i} \sum_{z^{(i)}} Q_{i}\left(z^{(i)}\right) \log \frac{p\left(x^{(i)}, z^{(i)} ; \theta\right)}{Q_{i}\left(z^{(i)}\right)}
+\]</span>
+我们知道 <span class="math inline">\(\ell(\theta) \geq J(Q, \theta)\)</span> 。 EM 算法可以视为对 <span class="math inline">\(J(Q, \theta)\)</span> 的坐标上升法，其中 E 步可以视为固定 <span class="math inline">\(\theta\)</span> 对 <span class="math inline">\(Q\)</span> 的最大化（因为 <span class="math inline">\(\theta\)</span> 固定，因为 <span class="math inline">\(J(Q, \theta)\)</span> 的最大值就是 <span class="math inline">\(\ell(\theta)\)</span> ，因此就是选择一个 <span class="math inline">\(Q\)</span> 使得不等式成立），而 M 步可以视为固定 <span class="math inline">\(Q\)</span> 对 <span class="math inline">\(\theta\)</span> 的最大化（这一点很好理解 <span class="math inline">\(\ell(\theta)\)</span> ）。</p>
 <p>下图为形象化的解释，其中红线为</p>
-<p><img src="2.png" alt="1"></p>
+<p><img src="2.png" alt="1" /></p>
 <p>因此 <strong>EM 算法一定会收敛</strong>，只不过收敛的位置可能是<strong>局部最优解</strong>。</p>
-<h1>参考文献</h1>
-<ol>
-<li>
-<p>Ng A. CS229 Lecture notes[J]. CS229 Lecture notes, 2000, 1(1): 1-3.</p>
-</li>
-<li>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/pinard/p/6912636.html">https://www.cnblogs.com/pinard/p/6912636.html</a></p>
-</li>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li><p>Ng A. CS229 Lecture notes[J]. CS229 Lecture notes, 2000, 1(1): 1-3.</p></li>
+<li><p>https://www.cnblogs.com/pinard/p/6912636.html</p></li>
 </ol>
  
       <!-- reward -->
@@ -634,8 +631,22 @@ $$<br>
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

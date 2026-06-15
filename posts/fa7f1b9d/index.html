@@ -92,15 +92,15 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>我对校正表型一直有些疑惑，以及对育种值准确性的计算有疑惑，这里写一下我困惑的地方和思考的结果。</p>
+  <p>我对校正表型一直有些疑惑，以及对育种值准确性的计算有疑惑，这里写一下我困惑的地方和思考的结果。</p>
 <span id="more"></span>
-<h1>整理目前的情况</h1>
+<h1 id="整理目前的情况">整理目前的情况</h1>
 <h2 id="动物的校正表型">动物的校正表型</h2>
 <h3 id="校正表型的由来">校正表型的由来</h3>
 <p>课本书上写，估计育种值的准确性是估计育种值和真实育种值的相关系数。由于实际数据的真实育种值未知，因此我们需要使用别的基准值来代替真实育种值，比如奶牛上可能会使用 <code>daughter yield deviation</code> 和 <code>Deregressed EBV</code> 之类的值，但是一般来说其他动物上用的最多的是校正表型。</p>
 <p>校正表型的另一个作用就是作用GS分析的因变量。</p>
 <h3 id="校正表型的计算">校正表型的计算</h3>
-<p>育种计算实际数据计算准确性的时候很多时候都会用到校正表型（ yc，有叫 corrected phenotypes ，也有 adjusted  phenotypes ），准确性一般使用估计育种值与校正表型的相关。</p>
+<p>育种计算实际数据计算准确性的时候很多时候都会用到校正表型（ yc，有叫 corrected phenotypes ，也有 adjusted phenotypes ），准确性一般使用估计育种值与校正表型的相关。</p>
 <p>校正表型的做法一般是用全部表型数据采用传统的常规评估得到的，但是这里还有一点疑义或者说分歧，如下</p>
 <ul>
 <li>有的文献写的是 <code>y-Xb</code>（表型剔除固定因子） （文献1-2）</li>
@@ -108,10 +108,10 @@
 </ul>
 <p>这两种做法当随机因子只有加性效应时没有区别，只有当存在其他随机因子时存在不一样（文献2中就是存在非加性随机因子，但是没有剔除这个随机因子）。</p>
 <p>如果是重复度量性状，那就是一个个体的多次校正表型求均值，才是最终使用的校正表型。</p>
-<h2 id="植物多年多点的BLUE值">植物多年多点的BLUE值</h2>
+<h2 id="植物多年多点的blue值">植物多年多点的BLUE值</h2>
 <h3 id="植物多年多点表型校正惯例">植物多年多点表型校正惯例</h3>
 <p>参考文献3和4的网页，植物的表型一般是多年多点的情况（还有一个可能的因素就是重复 rep，也就是同一年同一个地点存在多个重复），我看植物上的惯例是将品种作为固定因子，其他因子作为随机因子，如年，点，重复（一般用的是 点:重复，因为重复一般是嵌套在地点里的），还可以加入这些因子之间的互作效应。其校正表型就采用品种的 BLUE 值加截距（一般分析软件中当只有品种这一个固定因子的时候得到的 BLUE 值就是包括解决的）。</p>
-<h3 id="为什么用BLUE值">为什么用BLUE值</h3>
+<h3 id="为什么用blue值">为什么用BLUE值</h3>
 <p>其实我还没遇到过其他的数据的情况，只做过动植物，就是上面这两种情况，但是可以讨论一下。</p>
 <p>笼统地说，这种情况就是没有系谱，只有表型，因子除了个体本身的效应，就是环境因素，那么在使用 BLUP 分析的情况，就存在：</p>
 <ul>
@@ -120,9 +120,9 @@
 </ul>
 <p>这里我感觉环境因素的分类不是重点（植物上貌似都是将环境因素作为随机因子），作为固定因子和随机因子都可以。甚至有想法的话，可以做一下因子的检验。</p>
 <p>重点就在于个体效应是应当作为固定因子和随机因子。</p>
-<h4 id="Don’t-BLUP-twice">Don’t BLUP twice</h4>
+<h4 id="dont-blup-twice">Don’t BLUP twice</h4>
 <p>文献5（《Don’t BLUP twice》）是由植物遗传统计学大牛 <strong>James B. Holland</strong> 和 <strong>Hans-Peter Piepho</strong> 在 2024 年发表的短文，堪称近年来植物 GWAS（全基因组关联分析）和 GS（基因组选择）领域最硬核的“避坑指南”。它直接掐断了一个困扰无数研究生和研究员的纠结：<strong>“我在第一步校正表型的时候，到底该用 BLUE 还是 BLUP？”</strong></p>
-<h5 id="结论：用-BLUE-值">结论：用 BLUE 值</h5>
+<h5 id="结论用-blue-值">结论：用 BLUE 值</h5>
 <p>这篇文献的核心结论如下：</p>
 <ul>
 <li><strong>第一阶段（表型校正）</strong>：<strong>只是用表型数据</strong>，不用基因型数据。必须<strong>把品种效应值当作固定效应</strong>（Fixed Effect），<strong>其他环境效应为随机因子、固定因子或协变量（视具体情况而定）</strong>，提取品种效应的 BLUE 值。</li>
@@ -154,11 +154,13 @@
 <h5 id="两步法的改进">两步法的改进</h5>
 <p>当由于数据稀疏导致非遗传效应的方差参数估计准确性至关重要时，通过将基因型视为随机效应来改进模型可能会带来益处（我的理解就是数据量太少，导致无法估计随机环境因子的方差组分，此时可以这么做））。</p>
 <p>所建议的精细化方法在第一阶段包含两个具体步骤（George 和 Cavanagh 2015; Smith 等 2001; Verbyla 2023）：</p>
-<p>(i) 首先将基因型作为<strong>加性效应</strong>（加入G阵）拟合混合模型，并保存所有的非遗传方差分量估计值；</p>
-<p>(ii) 接着将基因型作为<strong>固定效应</strong>拟合相同的模型，同时代入第 (i) 步中获得的非遗传方差分量估计值（就是使用第一步非加性效应的方差组分，总感觉这样用不太对），进而计算出品系的 BLUE 值。</p>
+<ol type="i">
+<li><p>首先将基因型作为<strong>加性效应</strong>（加入G阵）拟合混合模型，并保存所有的非遗传方差分量估计值；</p></li>
+<li><p>接着将基因型作为<strong>固定效应</strong>拟合相同的模型，同时代入第 (i) 步中获得的非遗传方差分量估计值（就是使用第一步非加性效应的方差组分，总感觉这样用不太对），进而计算出品系的 BLUE 值。</p></li>
+</ol>
 <p>第二阶段的 GWAS 分析不变。</p>
 <p>总的分析流程示意图如下</p>
-<p><img src="1.png" alt=""></p>
+<p><img src="1.png" /></p>
 <h5 id="这种做法的问题">这种做法的问题</h5>
 <p>若数据存在不平衡，将品系 BLUEs 视为精度相同的独立“观测值”的两阶段分析，会造成部分信息流失（就是<strong>不同品种的BLUE值可靠程度不一样，这就是核心问题</strong>）。针对基因组预测，可利用多种加权分析方案（Piepho 等，2012；Damesa 等，2017；Endelman，2023）来校正由数据不平衡导致的 BLUEs 间精度差异与协方差。</p>
 <p>其中最精确的方法是将品系 BLUEs 的完整方差-协方差矩阵带入第二阶段分析，并将其整合为以品系 BLUEs 为响应变量的残差方差-协方差结构。该方法也是网状 Meta 分析（Network Meta-analysis）中的标准流程（Schwarzer 等，2015；Madden 等，2016），但其计算负荷较大，尤其当品系数目庞大时。采用对角近似（diagonal approximations）可节省计算资源，但这会以牺牲部分效率为代价（Damesa 等，2017；Verbyla，2023）。</p>
@@ -172,12 +174,12 @@
 <p>因此我们不能这么做，我们也需要在机器学习分析时也需要校正掉全部环境因素，因变量使用校正表型，自变量使用所有SNP的分型。</p>
 <p>更何况，如果是重复度量表型，我们就必须要将这多个表型用某种方式得到一个汇总的值。</p>
 <p>因此对我们这个专业的数据而言，机器学习使用的校正表型需要进行下面的处理：</p>
-<ol>
+<ol type="1">
 <li>从表型中剔除所有环境因子的效应</li>
 <li>重复度量表型要得到一个唯一的值</li>
 </ol>
 <p>按照机器学习的思路，那么最简单的办法就是线性回归，然后将环境因素都加到线性回归模型中，残差<code>e=y-Xb</code> 就是我们需要的校正表型。如果是多次度量性状，那就采用多次残差的均值。当然，多次度量性状也可以将品种效应加到线性回归模型中，就像植物的做法那样，采用品种效应的 BLUE 值作为校正表型。</p>
-<h1>汇总整理</h1>
+<h1 id="汇总整理">汇总整理</h1>
 <p>根据上面的内容，汇总一下我们得到存在下面的做法</p>
 <ul>
 <li>有系谱的情况下（动物）：使用 <code>y-Xb</code> 或 <code>ebv+e</code></li>
@@ -185,53 +187,43 @@
 <li>机器学习：采用线性回归的残差</li>
 </ul>
 <p>下面我得尝试从原理上进行解释和解惑。首先由于环境因子到底是固定因子还是随机因子对我们这个问题没有影响，因此从简化角度考虑，假设全部环境因子全设为固定因子。</p>
-<h2 id="植物的BLUE值做法不普适">植物的BLUE值做法不普适</h2>
+<h2 id="植物的blue值做法不普适">植物的BLUE值做法不普适</h2>
 <p>先看植物上的 <code>BLUE</code> 值，当所有环境因素也视为固定因子，此时的分析模型就是一个固定因素模型，更准确地说就是一个线性回归模型。如果表型不是重复度量表型，那么此时最小二乘方程组压根就无法求解（特征数目大于表型数目），或者更准确地说没有唯一解。</p>
 <p>实际上我们回到正常的混合线性模型中，广义最小二乘也是脱胎于最小二乘，这种情况也无法求解，因此当表型不是重复度量性状时，我们压根就不能将品种效应视为固定因子。（这其实就是固定因子的一个假设，固定因子的水平数目是有限的，隐含条件就是固定因子的水平数目肯定不能超过表型数目）</p>
 <p>也就是说，植物上的这种做法不是通用的，只能用于重复度量性状，尤其是这种多年多点的性状，所以不用再考虑这一做法了（不普适）。</p>
 <p>再回到植物的 BLUE 的做法，假设不是重复度量的性状，那么这种情况还能怎么处理呢？一种很自然的引申做法就是我们从线性回归模型中将品种效应去除（因为没法估计所以就得剔除），只保留所有的环境因素，然后使用 残差<code>e=y-xb</code> 作为校正表型，这才是<strong>普适</strong>的做法。这就和上面机器学习的处理思路合流了，二者完全一致。</p>
-<h2 id="动物到底是-y-Xb-还是-ebv-e？">动物到底是 <code>y-Xb</code> 还是 <code>ebv+e</code>？</h2>
-<p>下面这段话是我自己盘的，核心就是  <code>ebv+e</code> 间接使用了 BLUP 值，而 BLUP 值是有偏的，不能使用。</p>
-<p>这里我们知道当没有环境随机因子时，二者是相同的。所以我们就必须得考虑有环境随机因子的情况，假设存在一个固定环境因子 <code>fix1</code> ，存在一个随机环境因子 <code>rand1</code>。此时  <code>ebv+e</code> 就等于 <code>y - fix1 - rand1</code> ，而上面文献告诉我们不能用 BLUP 值，因为 BLUP 值会向群体均值收缩，收缩程度会受到数据结构的影响（数据量越多，收缩程度越小），因此 <code>rand1</code>的 BLUP 值也是这样，同样是受到数据结构的影响，数据不平衡程度越高，这个影响就越严重，因此可以说 <code>rand1</code>的 BLUP 值是有偏的，因此就不能使用，因此 <code>ebv+e = y - fix1 - rand1</code> 也是有偏的，不能使用（如果数据完全平衡，那么可以用，但这在实际数据是不可能的）。</p>
-<p>因此，我们要使用  <code>y-Xb</code> ，此时我们就完全没有用到 BLUP 值结果，只用到了 BLUE 值。而 BLUE值 <code>b</code> 是可以通过广义最小二乘方程组估计得到的，因此压根不用构建整个MME，也就不用计算随机因子的BLUP值。</p>
-<p>最后再分析一下使用  <code>y-Xb</code> 时随机因子的作用。在广义最小二乘方程组中，对应的模型公式是 <code>y=Xb+e</code> ，所有的随机因子其实都归到了残差里面，加入随机因子，其实就是对 <code>var(y)</code> (表型的协方差矩阵) 做了进一步优化，更符合真实情况，这样算出来的 <code>b</code> 会更准一点（不然正常线性回归就是残差乘以单位矩阵）。</p>
-<h2 id="最后统一于y-Xb">最后统一于<code>y-Xb</code></h2>
-<p>因此，这三种方式的最终均统一于 <code>y-Xb</code>  ，其模型为<br>
-$$<br>
-\boldsymbol{y=Xb+e}<br>
-$$<br>
+<h2 id="动物到底是-y-xb-还是-ebve">动物到底是 <code>y-Xb</code> 还是 <code>ebv+e</code>？</h2>
+<p>下面这段话是我自己盘的，核心就是 <code>ebv+e</code> 间接使用了 BLUP 值，而 BLUP 值是有偏的，不能使用。</p>
+<p>这里我们知道当没有环境随机因子时，二者是相同的。所以我们就必须得考虑有环境随机因子的情况，假设存在一个固定环境因子 <code>fix1</code> ，存在一个随机环境因子 <code>rand1</code>。此时 <code>ebv+e</code> 就等于 <code>y - fix1 - rand1</code> ，而上面文献告诉我们不能用 BLUP 值，因为 BLUP 值会向群体均值收缩，收缩程度会受到数据结构的影响（数据量越多，收缩程度越小），因此 <code>rand1</code>的 BLUP 值也是这样，同样是受到数据结构的影响，数据不平衡程度越高，这个影响就越严重，因此可以说 <code>rand1</code>的 BLUP 值是有偏的，因此就不能使用，因此 <code>ebv+e = y - fix1 - rand1</code> 也是有偏的，不能使用（如果数据完全平衡，那么可以用，但这在实际数据是不可能的）。</p>
+<p>因此，我们要使用 <code>y-Xb</code> ，此时我们就完全没有用到 BLUP 值结果，只用到了 BLUE 值。而 BLUE值 <code>b</code> 是可以通过广义最小二乘方程组估计得到的，因此压根不用构建整个MME，也就不用计算随机因子的BLUP值。</p>
+<p>最后再分析一下使用 <code>y-Xb</code> 时随机因子的作用。在广义最小二乘方程组中，对应的模型公式是 <code>y=Xb+e</code> ，所有的随机因子其实都归到了残差里面，加入随机因子，其实就是对 <code>var(y)</code> (表型的协方差矩阵) 做了进一步优化，更符合真实情况，这样算出来的 <code>b</code> 会更准一点（不然正常线性回归就是残差乘以单位矩阵）。</p>
+<h2 id="最后统一于y-xb">最后统一于<code>y-Xb</code></h2>
+<p>因此，这三种方式的最终均统一于 <code>y-Xb</code> ，其模型为
+<span class="math display">\[
+\boldsymbol{y=Xb+e}
+\]</span>
 又可以分为两种情况：</p>
-<ol>
+<ol type="1">
 <li>线性回归：不用讲，采用最小二乘方程组求解</li>
 <li>混合线性模型：随机因子仅仅是完善了<code>var(y)</code>，采用广义最小二乘方程组求解</li>
 </ol>
 <p>用校正表型作为两步法第二步的因变量这一点没有问题了，作用就用两点：</p>
-<ol>
+<ol type="1">
 <li>字面意思，剔除固定因子的影响（我的理解：固定因子水平的值是一个固定的值，因此这个影响是恒定的，比如A厂+5，B厂-3，这是必须要剔除了，不然表型是有偏的；而随机因子是满足均值是0的正态分布的随机数，这就像是随机的噪音，在算不准的情况可以保留，区别就是噪音大一点小一点而已）</li>
 <li>多次度量的表型得到一个唯一的值（当数据不平衡的情况下，也会存在上面植物<code>BLUE</code>值的问题，就是不同校正表型精度不一样，重复次数多的精度就高）</li>
 </ol>
-<h1>准确性为什么与校正表型求相关</h1>
+<h1 id="准确性为什么与校正表型求相关">准确性为什么与校正表型求相关</h1>
 <p>这也是我一直最困惑的一点，现在来看的话就是没有更好的指标了，无奈之选。</p>
-<p>按照我上面整理的来看，假设没有固定因子（只有截距），那么 <code>y-Xb</code>  其实还是 <code>y</code> ，此时校正表型就是表型。其实校正表型就是剔除了固定因子的表型，它的本质还是表型。这有点车轱辘话，我的意思就是校正表型和理论上的<strong>真实育种值</strong>没有半毛钱关系。我之前就是想不通这一点。</p>
+<p>按照我上面整理的来看，假设没有固定因子（只有截距），那么 <code>y-Xb</code> 其实还是 <code>y</code> ，此时校正表型就是表型。其实校正表型就是剔除了固定因子的表型，它的本质还是表型。这有点车轱辘话，我的意思就是校正表型和理论上的<strong>真实育种值</strong>没有半毛钱关系。我之前就是想不通这一点。</p>
 <p>那么按照理论来说，如果我没有记错的话，育种值和表型值的相关系数就是 h （遗传力的开方），这也就是为什么交叉验证的结果受到遗传力的影响，遗传力越高，交叉验证的准确性越高。</p>
 <p>我估计这也就是奶牛为什么一直用什么逆回归育种值，DRP 之类的指标，因为奶牛收集的表型数据比别的物种多得多，用这些指标应该是比校正表型更好。</p>
-<h1>参考文献</h1>
-<ol>
-<li>
-<p>Liu T, Qu H, Luo C, et al. Accuracy of genomic prediction for growth and carcass traits in Chinese triple-yellow chickens[J]. BMC genetics, 2014, 15(1): 110.</p>
-</li>
-<li>
-<p>Liu J, Yang G, Kong J, et al. Using single-step genomic best linear unbiased prediction to improve the efficiency of genetic evaluation on body weight in Macrobrachium rosenbergii[J]. Aquaculture, 2020, 528: 735577.</p>
-</li>
-<li>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/yijiaobani/article/details/103213440">https://blog.csdn.net/yijiaobani/article/details/103213440</a></p>
-</li>
-<li>
-<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/e6f36bb430ec">https://www.jianshu.com/p/e6f36bb430ec</a></p>
-</li>
-<li>
-<p>Holland J B, Piepho H P. Don’t BLUP twice[J]. G3: Genes, Genomes, Genetics, 2024, 14(12): jkae250.</p>
-</li>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li><p>Liu T, Qu H, Luo C, et al. Accuracy of genomic prediction for growth and carcass traits in Chinese triple-yellow chickens[J]. BMC genetics, 2014, 15(1): 110.</p></li>
+<li><p>Liu J, Yang G, Kong J, et al. Using single-step genomic best linear unbiased prediction to improve the efficiency of genetic evaluation on body weight in Macrobrachium rosenbergii[J]. Aquaculture, 2020, 528: 735577.</p></li>
+<li><p>https://blog.csdn.net/yijiaobani/article/details/103213440</p></li>
+<li><p>https://www.jianshu.com/p/e6f36bb430ec</p></li>
+<li><p>Holland J B, Piepho H P. Don’t BLUP twice[J]. G3: Genes, Genomes, Genetics, 2024, 14(12): jkae250.</p></li>
 </ol>
  
       <!-- reward -->
@@ -656,8 +648,22 @@ $$<br>
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

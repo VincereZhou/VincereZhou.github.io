@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.9k</span>
+            <span class="post-count">1.8k</span>
         </span>
     </span>
 
@@ -96,77 +96,78 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>我不知道有多少人认为自己对最小二乘法的思想理解不够清晰，其实如果从几何的角度，可以轻松掌握最小二乘的内涵。</p>
+  <p>我不知道有多少人认为自己对最小二乘法的思想理解不够清晰，其实如果从几何的角度，可以轻松掌握最小二乘的内涵。</p>
 <span id="more"></span>
-<h1>为什么是最小二乘/最小平方？</h1>
-<p>在学习线性回归的过程中，往往一给出模型式子 $y=\beta_{0}+\beta_{1} x_{1}+\beta_{2} x_{2}+\cdots+\beta_{k} x_{k}+\varepsilon $ ，后面就要讲到用最小二乘来估计参数 $\beta_i$  。但是在讲到最小二乘法的时候，要么就是把最小二乘法视为“显然”的“公理”，不加解释；要么从直观上来说，我们要找一条直线与这些点的距离要足够近，也就是是残差 $y_{i} -  \hat{y}_{i}$ 最小，但是由于残差有正有负，因此我们采用残差的平方，需要使得所有残差的平方和最小，然后我当时就产生了一个疑问，那为什么不用残差的绝对值呢？</p>
+<h1 id="为什么是最小二乘最小平方">为什么是最小二乘/最小平方？</h1>
+<p>在学习线性回归的过程中，往往一给出模型式子 $y=<em>{0}+</em>{1} x_{1}+<em>{2} x</em>{2}++<em>{k} x</em>{k}+$ ，后面就要讲到用最小二乘来估计参数 <span class="math inline">\(\beta_i\)</span> 。但是在讲到最小二乘法的时候，要么就是把最小二乘法视为“显然”的“公理”，不加解释；要么从直观上来说，我们要找一条直线与这些点的距离要足够近，也就是是残差 <span class="math inline">\(y_{i} -  \hat{y}_{i}\)</span> 最小，但是由于残差有正有负，因此我们采用残差的平方，需要使得所有残差的平方和最小，然后我当时就产生了一个疑问，那为什么不用残差的绝对值呢？</p>
 <p>后来听了吴恩达老师的课，我认识到当代价函数采用平方和的时候，对其求导很简单，因此此时求解比较容易。如果你采用残差的绝对值的形式，绝对值不是处处可导，求解比较麻烦。然后我就产生了一种想法，就是因为绝对值求解不易，所以最小二乘是为了求解方便的一种退而求其次的方法。</p>
 <p>最近，从《linear models in statistic》和 《linear algebra with applications》这两本书中，我发现从几何角度去看，最小二乘法其实是一种很自然的估计参数的方法。</p>
-<h1>最小二乘的参数估计值</h1>
-<p>根据我之前的博客 <a href="https://vincere.fun/posts/55264e6f/">矩阵微分与正规方程组推导</a> ，对于多元线性回归模型 $\mathbf{y}=\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}$ 而言，最小二乘估计值满足正规方程组<br>
-$$<br>
-\left(\mathbf{X}^{\prime} \mathbf{X}\right) \hat{\boldsymbol{\beta}}=\mathbf{X}^{\prime} \mathbf{y} .<br>
-$$<br>
-其中 $\mathbf{X}$ 为一个 $n \times (k+1)$ 的矩阵，这里 $n$ 是样本数目，$k$ 为特征数目，并且 $k+1 &lt; n$ 。</p>
-<p>如果  $\mathbf{X}$ 矩阵的秩为 $k+1$ ，那么该方程组存在唯一解<br>
-$$<br>
-\hat{\boldsymbol{\beta}}=\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{y}<br>
-$$<br>
-下面我们均假设  $\mathbf{X}$ 矩阵的秩为 $k+1$ ，即其为一个列满秩矩阵。</p>
-<h1>最小二乘的几何性质</h1>
+<h1 id="最小二乘的参数估计值">最小二乘的参数估计值</h1>
+<p>根据我之前的博客 <a href="https://vincere.fun/posts/55264e6f/">矩阵微分与正规方程组推导</a> ，对于多元线性回归模型 <span class="math inline">\(\mathbf{y}=\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}\)</span> 而言，最小二乘估计值满足正规方程组
+<span class="math display">\[
+\left(\mathbf{X}^{\prime} \mathbf{X}\right) \hat{\boldsymbol{\beta}}=\mathbf{X}^{\prime} \mathbf{y} .
+\]</span>
+其中 <span class="math inline">\(\mathbf{X}\)</span> 为一个 <span class="math inline">\(n \times (k+1)\)</span> 的矩阵，这里 <span class="math inline">\(n\)</span> 是样本数目，<span class="math inline">\(k\)</span> 为特征数目，并且 <span class="math inline">\(k+1 &lt; n\)</span> 。</p>
+<p>如果 <span class="math inline">\(\mathbf{X}\)</span> 矩阵的秩为 <span class="math inline">\(k+1\)</span> ，那么该方程组存在唯一解
+<span class="math display">\[
+\hat{\boldsymbol{\beta}}=\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{y}
+\]</span>
+下面我们均假设 <span class="math inline">\(\mathbf{X}\)</span> 矩阵的秩为 <span class="math inline">\(k+1\)</span> ，即其为一个列满秩矩阵。</p>
+<h1 id="最小二乘的几何性质">最小二乘的几何性质</h1>
 <p>我们现在完全从最小二乘的几何性质出发去推导这些参数估计值。这部分内容来源于 《linear models in statistic》。</p>
-<h2 id="参数空间、数据空间和预测空间">参数空间、数据空间和预测空间</h2>
-<p>最小二乘的几何方法首先要从两个高维空间中说起，一个 $(k+1)$ 维的空间，一个 $n$ 维的空间。未知参数向量 $\boldsymbol{\beta}$ 可以视为 $(k+1)$ 维的空间中的一个点，其坐标轴分别为  $(k+1)$ 个回归系数 $\beta_{0}, \beta_{1}, \beta_{0}, \ldots, \beta_{k}$ ，因此我们可以称这个空间为<strong>参数空间</strong> (<em>parameter space</em>) 。相似地，数据向量 $\mathbf{y}$ 可以视为在 $n$ 维向量空间中的一个点，其坐标轴分别为 $n$ 个观测值，我们称这个空间为<strong>数据空间</strong> (<em>data space</em>) 。</p>
-<p>多元线性回归的 $\mathbf{X}$ 矩阵可以写为下面的形式<br>
-$$<br>
-\mathbf{X}=\left(\mathbf{j}, \mathbf{x}<em>{1}, \mathbf{x}</em>{2}, \mathbf{x}<em>{3}, \ldots, \mathbf{x}</em>{k}\right)<br>
-$$<br>
-$\mathbf{X}$ 矩阵的每一列都是 $n$ 维向量，因此每一列都是数据空间中的一个点。因为我们假设 $\mathbf{X}$ 矩阵的秩为 $k+1$ ，因此其列向量是线性无关的，$\mathbf{X}$ 矩阵的列向量的线性组合组成了数据空间的一个子空间（易证其符合可加性和齐次性），可以写成<br>
-$$<br>
-\mathbf{X b}=b_{0} \mathbf{j}+b_{1} \mathbf{x}<em>{1}+b</em>{2} \mathbf{x}<em>{2}+\cdots+b</em>{k} \mathbf{x}_{k}<br>
-$$<br>
-其中 $\mathbf{b}$ 是任意一个 $k+1$ 的向量，因此  $\mathbf{b}$ 是参数空间中的一个向量。</p>
-<p>我们称$\mathbf{X}$ 矩阵的列向量的线性组合组成的子空间为<strong>预测空间</strong> (<em>prediction space</em>), $\mathbf{X}$ 矩阵的列组成了预测空间的一组基。</p>
+<h2 id="参数空间数据空间和预测空间">参数空间、数据空间和预测空间</h2>
+<p>最小二乘的几何方法首先要从两个高维空间中说起，一个 <span class="math inline">\((k+1)\)</span> 维的空间，一个 <span class="math inline">\(n\)</span> 维的空间。未知参数向量 <span class="math inline">\(\boldsymbol{\beta}\)</span> 可以视为 <span class="math inline">\((k+1)\)</span> 维的空间中的一个点，其坐标轴分别为 <span class="math inline">\((k+1)\)</span> 个回归系数 <span class="math inline">\(\beta_{0}, \beta_{1}, \beta_{0}, \ldots, \beta_{k}\)</span> ，因此我们可以称这个空间为<strong>参数空间</strong> (<em>parameter space</em>) 。相似地，数据向量 <span class="math inline">\(\mathbf{y}\)</span> 可以视为在 <span class="math inline">\(n\)</span> 维向量空间中的一个点，其坐标轴分别为 <span class="math inline">\(n\)</span> 个观测值，我们称这个空间为<strong>数据空间</strong> (<em>data space</em>) 。</p>
+<p>多元线性回归的 <span class="math inline">\(\mathbf{X}\)</span> 矩阵可以写为下面的形式
+<span class="math display">\[
+\mathbf{X}=\left(\mathbf{j}, \mathbf{x}_{1}, \mathbf{x}_{2}, \mathbf{x}_{3}, \ldots, \mathbf{x}_{k}\right)
+\]</span>
+<span class="math inline">\(\mathbf{X}\)</span> 矩阵的每一列都是 <span class="math inline">\(n\)</span> 维向量，因此每一列都是数据空间中的一个点。因为我们假设 <span class="math inline">\(\mathbf{X}\)</span> 矩阵的秩为 <span class="math inline">\(k+1\)</span> ，因此其列向量是线性无关的，<span class="math inline">\(\mathbf{X}\)</span> 矩阵的列向量的线性组合组成了数据空间的一个子空间（易证其符合可加性和齐次性），可以写成
+<span class="math display">\[
+\mathbf{X b}=b_{0} \mathbf{j}+b_{1} \mathbf{x}_{1}+b_{2} \mathbf{x}_{2}+\cdots+b_{k} \mathbf{x}_{k}
+\]</span>
+其中 <span class="math inline">\(\mathbf{b}\)</span> 是任意一个 <span class="math inline">\(k+1\)</span> 的向量，因此 <span class="math inline">\(\mathbf{b}\)</span> 是参数空间中的一个向量。</p>
+<p>我们称<span class="math inline">\(\mathbf{X}\)</span> 矩阵的列向量的线性组合组成的子空间为<strong>预测空间</strong> (<em>prediction space</em>), <span class="math inline">\(\mathbf{X}\)</span> 矩阵的列组成了预测空间的一组基。</p>
 <p>三个向量空间的可视化见下图</p>
-<p><img src="1.png" alt=""></p>
+<p><img src="1.png" /></p>
 <h2 id="多元线性回归模型的几何解释">多元线性回归模型的几何解释</h2>
-<p>多元线性回归认为 $\mathbf{y}=\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}$ ， $E(\mathbf{y})=\mathbf{X} \boldsymbol{\beta}$  。我 们的问题是 $\boldsymbol{\beta}, \boldsymbol{\varepsilon}$ 均不知道，我们可以其以几何形式表示为下图</p>
-<p><img src="2.png" alt=""></p>
-<p>如果我们忽略残差项 $\boldsymbol{\varepsilon}$ ，此时 $\mathbf{X} \boldsymbol{\beta}=\mathbf{y}$ 一般是一个超定方程组（独立的方程的数目超过了未知数的数目），超定方程组是无解的，也就是说我们一般无法找到一个 $\boldsymbol{\beta}$  ，使得 $\mathbf{X} \boldsymbol{\beta}$ 正好等于  $\mathbf{y}$ 。</p>
-<p>那么，我们估计 $E(\mathbf{y})$ 的一个合理的几何思想是从预测空间中找到一个点 $\mathbf{X} \boldsymbol{\hat{\beta}}$ 与 $\mathbf{y}$ 距离最近。而两个向量之间的距离我们用范数来定义为<br>
-$$<br>
-| \mathbf{y} - \mathbf{X} \boldsymbol{\hat{\beta}} |<br>
-$$<br>
-如果我们定义残差向量 $\boldsymbol{\hat{\varepsilon}} = \mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}$ ，此时也就是需要找到一个 $\boldsymbol{\hat{\beta}}$ ，使得 $|\boldsymbol{\hat{\varepsilon}}|$ 最小。最小化 $|\boldsymbol{\hat{\varepsilon}}|$ 等价于最小化 $|\boldsymbol{\hat{\varepsilon}}|^{2}$ ，而  $|\boldsymbol{\hat{\varepsilon}}|^{2}$ 就是<strong>残差平方和</strong>，因此此时的几何思想就是最小二乘的思想。</p>
-<p>进一步，我们可以发现与 $\mathbf{y}$ 距离最近的点， $\hat{\mathbf{y}}$  的一个条件是 $\hat{\boldsymbol{\varepsilon}}=\mathbf{y}-\hat{\mathbf{y}}$ 必须与预测空间（的所有向量）正交，也就是说，  $\hat{\mathbf{y}}$  是  $\mathbf{y}$  在预测空间 $R(A)$ 的<strong>投影</strong>（可以通过勾股定理来证明）。更进一步，由于预测空间被 $\mathbf{X}$ 的列张成，因此我们有<br>
-$$<br>
-\begin{aligned}<br>
-(\mathbf{Xb})^{\prime} \hat{\boldsymbol{\varepsilon}} = \mathbf{b}^{\prime}  \mathbf{X}^{\prime} \hat{\boldsymbol{\varepsilon}}  = \mathbf{0} \</p>
-<p>\end{aligned}<br>
-$$<br>
-该式对任意 $\mathbf{b}$ 均成立，因此我们有<br>
-$$<br>
-\mathbf{X}^{\prime} \hat{\boldsymbol{\varepsilon}}=\mathbf{0}<br>
-$$<br>
-即<br>
-$$<br>
-\mathbf{X}^{\prime}(\mathbf{y}-\hat{\mathbf{y}})=\mathbf{X}^{\prime}(\mathbf{y}-\mathbf{X} \hat{\boldsymbol{\beta}})=\mathbf{X}^{\prime} \mathbf{y}-\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}=\mathbf{0}<br>
+<p>多元线性回归认为 <span class="math inline">\(\mathbf{y}=\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\varepsilon}\)</span> ， <span class="math inline">\(E(\mathbf{y})=\mathbf{X} \boldsymbol{\beta}\)</span> 。我 们的问题是 <span class="math inline">\(\boldsymbol{\beta}, \boldsymbol{\varepsilon}\)</span> 均不知道，我们可以其以几何形式表示为下图</p>
+<p><img src="2.png" /></p>
+<p>如果我们忽略残差项 <span class="math inline">\(\boldsymbol{\varepsilon}\)</span> ，此时 <span class="math inline">\(\mathbf{X} \boldsymbol{\beta}=\mathbf{y}\)</span> 一般是一个超定方程组（独立的方程的数目超过了未知数的数目），超定方程组是无解的，也就是说我们一般无法找到一个 <span class="math inline">\(\boldsymbol{\beta}\)</span> ，使得 <span class="math inline">\(\mathbf{X} \boldsymbol{\beta}\)</span> 正好等于 <span class="math inline">\(\mathbf{y}\)</span> 。</p>
+<p>那么，我们估计 <span class="math inline">\(E(\mathbf{y})\)</span> 的一个合理的几何思想是从预测空间中找到一个点 <span class="math inline">\(\mathbf{X} \boldsymbol{\hat{\beta}}\)</span> 与 <span class="math inline">\(\mathbf{y}\)</span> 距离最近。而两个向量之间的距离我们用范数来定义为
+<span class="math display">\[
+\| \mathbf{y} - \mathbf{X} \boldsymbol{\hat{\beta}} \|
+\]</span>
+如果我们定义残差向量 <span class="math inline">\(\boldsymbol{\hat{\varepsilon}} = \mathbf{y}-\mathbf{X} \boldsymbol{\hat{\beta}}\)</span> ，此时也就是需要找到一个 <span class="math inline">\(\boldsymbol{\hat{\beta}}\)</span> ，使得 <span class="math inline">\(\|\boldsymbol{\hat{\varepsilon}}\|\)</span> 最小。最小化 <span class="math inline">\(\|\boldsymbol{\hat{\varepsilon}}\|\)</span> 等价于最小化 <span class="math inline">\(\|\boldsymbol{\hat{\varepsilon}}\|^{2}\)</span> ，而 <span class="math inline">\(\|\boldsymbol{\hat{\varepsilon}}\|^{2}\)</span> 就是<strong>残差平方和</strong>，因此此时的几何思想就是最小二乘的思想。</p>
+进一步，我们可以发现与 <span class="math inline">\(\mathbf{y}\)</span> 距离最近的点， <span class="math inline">\(\hat{\mathbf{y}}\)</span> 的一个条件是 <span class="math inline">\(\hat{\boldsymbol{\varepsilon}}=\mathbf{y}-\hat{\mathbf{y}}\)</span> 必须与预测空间（的所有向量）正交，也就是说， <span class="math inline">\(\hat{\mathbf{y}}\)</span> 是 <span class="math inline">\(\mathbf{y}\)</span> 在预测空间 <span class="math inline">\(R(A)\)</span> 的<strong>投影</strong>（可以通过勾股定理来证明）。更进一步，由于预测空间被 <span class="math inline">\(\mathbf{X}\)</span> 的列张成，因此我们有
+$$
+<span class="math display">\[\begin{aligned}
+(\mathbf{Xb})^{\prime} \hat{\boldsymbol{\varepsilon}} = \mathbf{b}^{\prime}  \mathbf{X}^{\prime} \hat{\boldsymbol{\varepsilon}}  = \mathbf{0} \\
+
+\end{aligned}\]</span>
+<p><span class="math display">\[
+该式对任意 $\mathbf{b}$ 均成立，因此我们有
+\]</span>
+^{} =
+<span class="math display">\[
+即
+\]</span>
+<sup>{}(-)=</sup>{}(- )=^{} -^{}  =
 $$</p>
-<p>$$<br>
-\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}=\mathbf{X}^{\prime} \mathbf{y}<br>
-$$</p>
-<p>由于 $\mathbf{X}$ 列满秩，因此存在唯一解<br>
-$$<br>
-\hat{\boldsymbol{\beta}}=\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{y}<br>
-$$<br>
+<p><span class="math display">\[
+\mathbf{X}^{\prime} \mathbf{X} \hat{\boldsymbol{\beta}}=\mathbf{X}^{\prime} \mathbf{y}
+\]</span></p>
+<p>由于 <span class="math inline">\(\mathbf{X}\)</span> 列满秩，因此存在唯一解
+<span class="math display">\[
+\hat{\boldsymbol{\beta}}=\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{y}
+\]</span>
 这里我们采用了纯粹的几何思想，我们同样得到了正规方程组和最小二乘估计值。</p>
 <h2 id="投影矩阵">投影矩阵</h2>
-<p>因为 $\mathbf{\hat{y}}$ 是任意一个 $n \times 1 $ 的 $\mathbf{y}$ 向量在 $m \times n$ 的矩阵 $\mathbf{X}$ 的列空间上的投影，其投影  $\mathbf{\hat{y}}$ 的计算公式为<br>
-$$<br>
-\mathbf{\hat{y}} =  \mathbf{X} \hat{\boldsymbol{\beta}}= \mathbf{X} \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{y} = \mathbf{Py}<br>
-$$<br>
-其中，$\mathbf{P} = \mathbf{X} \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime}$ ，我们称为投影矩阵。因此根据最小二乘法，我们得到了将任意一个向量投影到一个矩阵的列空间的一般公式。</p>
-<p>当 $\mathbf{X’X}$ 奇异时，此时我们有 $\mathbf{P} = \mathbf{X} \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}$ 。而且根据广义逆的性质，我们知道无论 $\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}$ 取何值，投影矩阵 $\mathbf{P}$ 均保持不变，因此投影  $\mathbf{\hat{y}}$ 也保持不变。但是 $\hat{\boldsymbol{\beta}}=\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{y}$ 有无穷多个解。</p>
+<p>因为 <span class="math inline">\(\mathbf{\hat{y}}\)</span> 是任意一个 $n  $ 的 <span class="math inline">\(\mathbf{y}\)</span> 向量在 <span class="math inline">\(m \times n\)</span> 的矩阵 <span class="math inline">\(\mathbf{X}\)</span> 的列空间上的投影，其投影 <span class="math inline">\(\mathbf{\hat{y}}\)</span> 的计算公式为
+<span class="math display">\[
+\mathbf{\hat{y}} =  \mathbf{X} \hat{\boldsymbol{\beta}}= \mathbf{X} \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{y} = \mathbf{Py}
+\]</span>
+其中，<span class="math inline">\(\mathbf{P} = \mathbf{X} \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime}\)</span> ，我们称为投影矩阵。因此根据最小二乘法，我们得到了将任意一个向量投影到一个矩阵的列空间的一般公式。</p>
+<p>当 <span class="math inline">\(\mathbf{X&#39;X}\)</span> 奇异时，此时我们有 <span class="math inline">\(\mathbf{P} = \mathbf{X} \left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime}\)</span> 。而且根据广义逆的性质，我们知道无论 <span class="math inline">\(\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-}\)</span> 取何值，投影矩阵 <span class="math inline">\(\mathbf{P}\)</span> 均保持不变，因此投影 <span class="math inline">\(\mathbf{\hat{y}}\)</span> 也保持不变。但是 <span class="math inline">\(\hat{\boldsymbol{\beta}}=\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{y}\)</span> 有无穷多个解。</p>
  
       <!-- reward -->
       
@@ -592,8 +593,22 @@ $$<br>
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

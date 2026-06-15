@@ -96,17 +96,17 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>最近发现百度上搜索不到我的博客，原来是一直没有弄搜索引擎收录的原因，就捣鼓了一下。</p>
-<span id="more"></span> 
-<h1>百度收录</h1>
+  <p>最近发现百度上搜索不到我的博客，原来是一直没有弄搜索引擎收录的原因，就捣鼓了一下。</p>
+<span id="more"></span>
+<h1 id="百度收录">百度收录</h1>
 <p>访问<a href="https://link.zhihu.com/?target=https%3A//ziyuan.baidu.com/">百度搜索资源平台官网</a>，注册或者登陆百度账号，依次选择【用户中心】-【站点管理】，添加你的网站</p>
 <p>选择文件验证，将文件放到 Source 根目录下。</p>
-<p>选择 HTML标签验证，放到<code>head.ejs</code>（D:\Desktop\blog\themes\ayer\layout_partial\head.ejs），<code>&lt;head&gt;</code>与 <code>&lt;/head&gt;</code>标签之间。</p>
+<p>选择 HTML标签验证，放到<code>head.ejs</code>（D:_partial.ejs），<code>&lt;head&gt;</code>与 <code>&lt;/head&gt;</code>标签之间。</p>
 <p>两种方式，这两种方式我都失败了，都提示<code>原因：301 网页存在跳转。</code></p>
-<p>尝试对网页 <a target="_blank" rel="noopener" href="https://vincerezhou.github.io">https://vincerezhou.github.io</a> 进行收录，失败</p>
-<p>尝试对网页 <a href="https://vincere.fun">https://vincere.fun</a> （去除 www）进行收录，文件验证失败原因如下，选择HTML标签验证，</p>
+<p>尝试对网页 https://vincerezhou.github.io 进行收录，失败</p>
+<p>尝试对网页 https://vincere.fun （去除 www）进行收录，文件验证失败原因如下，选择HTML标签验证，</p>
 <blockquote>
-<p>原因：验证的文件内容错误。<br>
+<p>原因：验证的文件内容错误。
 问题分析&amp;解决办法： 验证文件的内容与我们提供的不符，请确定是原样上传搜索资源平台的问题，检查方式：访问验证文件——查看源代码检查，部分服务器会自动加上一些内容导致校验失败。</p>
 </blockquote>
 <p>有人说应该这么做</p>
@@ -117,32 +117,28 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">layout: false</span><br><span class="line">---</span><br><span class="line">google-site-verification: googlexxxxxx.html</span><br></pre></td></tr></table></figure>
 <p>这样<code>hexo g</code>执行成功后，这个html验证文件中就不会有多余的内容，然后执行<code>hexo d</code>上传到远程仓库，这样百度、谷歌都验证成功了，为了保证一直验证成功，建议不要删除这个验证文件。</p>
 </blockquote>
-<p>选择HTML标签验证，放到<code>head.ejs</code>（D:\Desktop\blog\themes\ayer\layout_partial\head.ejs），<code>&lt;head&gt;</code>与 <code>&lt;/head&gt;</code>标签之间，<strong>成功了</strong>。</p>
+<p>选择HTML标签验证，放到<code>head.ejs</code>（D:_partial.ejs），<code>&lt;head&gt;</code>与 <code>&lt;/head&gt;</code>标签之间，<strong>成功了</strong>。</p>
 <blockquote>
-<p><a target="_blank" rel="noopener" href="https://vincere.xn--fun-zw2ey91ewf1dnwva">https://vincere.fun验证成功</a>！</p>
+<p>https://vincere.fun验证成功！</p>
 <p>建议您向百度搜索主动推送资源，缩短爬虫发现网页链接时间。<a target="_blank" rel="noopener" href="https://ziyuan.baidu.com/linksubmit/index">提交资源</a></p>
 </blockquote>
 <h2 id="提交百度搜索">提交百度搜索</h2>
 <h3 id="sitemap-提交">sitemap 提交</h3>
-<ol>
+<ol type="1">
 <li>执行命令，安装站点地图生成插件。</li>
 </ol>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cnpm install hexo-generator-sitemap --save</span><br><span class="line">cnpm install hexo-generator-baidu-sitemap --save</span><br></pre></td></tr></table></figure>
-<ol start="2">
+<ol start="2" type="1">
 <li>在博客根目录下的配置文件<code>_config.yml</code>中修改 ·<code>url:</code> 部分为真实网址</li>
 </ol>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vincere.fun</span><br></pre></td></tr></table></figure>
-<ol start="3">
+<ol start="3" type="1">
 <li>在博客根目录下的配置文件<code>_config.yml</code>中配置 sitemap</li>
 </ol>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># automatically generate sitemap</span><br><span class="line">sitemap:</span><br><span class="line">  path: sitemap.xml</span><br><span class="line">baidusitemap:</span><br><span class="line">  path: baidusitemap.xml</span><br></pre></td></tr></table></figure>
-<ol start="4">
-<li>
-<p>执行<code>hexo g -d</code>，会在<code>博客根目录/public</code>中生成两个文件， <code>sitemap.xml</code> 文件是搜索引擎通用的 sitemap 文件，<code>baidusitemap.xml</code> 是百度专用的 sitemap 文件。然后访问 <code>你的首页/sitemap.xml</code> 或者  <code>你的首页/baidusitemap.xml</code>  就可以看到网站地图了</p>
-</li>
-<li>
-<p>然后来到百度站长平台的 sitemap 提交页面，将你的 sitemap 地址提交即可（好像要两个都提交，一天只能提交一个文件），如果成功的话状态会显示为正常，初次提交要等几分钟，sitemap.xml 相比 baidusitemap.xml 来说等待时间也会更长，如果以后你博客有新的文章或其他页面，可以点击<strong>手动更新文件</strong>，更新一下新的 sitemap。</p>
-</li>
+<ol start="4" type="1">
+<li><p>执行<code>hexo g -d</code>，会在<code>博客根目录/public</code>中生成两个文件， <code>sitemap.xml</code> 文件是搜索引擎通用的 sitemap 文件，<code>baidusitemap.xml</code> 是百度专用的 sitemap 文件。然后访问 <code>你的首页/sitemap.xml</code> 或者 <code>你的首页/baidusitemap.xml</code> 就可以看到网站地图了</p></li>
+<li><p>然后来到百度站长平台的 sitemap 提交页面，将你的 sitemap 地址提交即可（好像要两个都提交，一天只能提交一个文件），如果成功的话状态会显示为正常，初次提交要等几分钟，sitemap.xml 相比 baidusitemap.xml 来说等待时间也会更长，如果以后你博客有新的文章或其他页面，可以点击<strong>手动更新文件</strong>，更新一下新的 sitemap。</p></li>
 </ol>
 <h4 id="解决无法抓取的问题">解决无法抓取的问题</h4>
 <p>提交完 sitemap 后显示无法抓取，按照网上的说法设置如下，好像还是显示无法抓取。</p>
@@ -161,8 +157,8 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 提交百度搜索</span><br><span class="line">baidu_url_submit:</span><br><span class="line">  count: 10               # 提交最新的多少个链接</span><br><span class="line">  host: vincere.fun    # 在百度站长平台中添加的域名</span><br><span class="line">  token: your_token      # 秘钥</span><br><span class="line">  path: baidu_urls.txt   # 文本文档的地址， 新链接会保存在此文本文档里</span><br></pre></td></tr></table></figure>
 <p>其中的 <code>token</code> 可以在【链接提交】-【API提交】下面看到，接口调用地址最后面 <code>token=xxxxx</code> 即为你的 <code>token</code></p>
 <blockquote>
-<p>推送接口<br>
-接口调用地址：<a target="_blank" rel="noopener" href="http://data.zz.baidu.com/urls?site=https://vincere.fun&amp;token=">http://data.zz.baidu.com/urls?site=https://vincere.fun&amp;token=</a>???</p>
+<p>推送接口
+接口调用地址：http://data.zz.baidu.com/urls?site=https://vincere.fun&amp;token=????</p>
 </blockquote>
 <p>然后在博客根目录下的配置文件<code>_config.yml</code>中修改 ·<code>url:</code> 部分为真实网址</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vincere.fun</span><br></pre></td></tr></table></figure>
@@ -171,23 +167,17 @@
 <p>最后执行 <code>hexo g -d</code> 部署一遍即可实现主动推送，推送成功的标志是：在执行部署命令最后会显示类似如下代码：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&quot;remain&quot;</span>:89,<span class="string">&quot;success&quot;</span>:10&#125;</span><br><span class="line">INFO  Deploy <span class="keyword">done</span>: baidu_url_submitter</span><br></pre></td></tr></table></figure>
 <p>这表示有 10 个页面已经主动推送成功，remain 的意思是当天剩余的可推送 89 条。</p>
-<h1>谷歌收录</h1>
+<h1 id="谷歌收录">谷歌收录</h1>
 <p>进入 <a target="_blank" rel="noopener" href="https://search.google.com/search-console/about">google search console</a> ，按照类似的方式进行收录，我是用了 CNAME 的方式。</p>
 <h2 id="提交sitemap">提交sitemap</h2>
 <p>点击<a target="_blank" rel="noopener" href="https://www.google.com/webmasters/tools/sitemap-list">添加站点地图</a>，选择要添加的网站，如下，点击【提交】。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vincere.fun/sitemap.xml</span><br></pre></td></tr></table></figure>
 <p>会提示正在处理数据，请在一天左右的时间内再次检查。</p>
-<h1>参考文献</h1>
-<ol>
-<li>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/100922816">https://zhuanlan.zhihu.com/p/100922816</a></p>
-</li>
-<li>
-<p><a target="_blank" rel="noopener" href="https://marmalade.vip/baidugoogleseo.html">https://marmalade.vip/baidugoogleseo.html</a></p>
-</li>
-<li>
-<p><a target="_blank" rel="noopener" href="https://chengzhy.github.io/2022/hexo-seo-note/">https://chengzhy.github.io/2022/hexo-seo-note/</a></p>
-</li>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li><p>https://zhuanlan.zhihu.com/p/100922816</p></li>
+<li><p>https://marmalade.vip/baidugoogleseo.html</p></li>
+<li><p>https://chengzhy.github.io/2022/hexo-seo-note/</p></li>
 </ol>
  
       <!-- reward -->
@@ -614,8 +604,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

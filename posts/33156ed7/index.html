@@ -96,31 +96,31 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>解读使用 airemlf90 估计方差组分的日志信息。</p>
+  <p>解读使用 airemlf90 估计方差组分的日志信息。</p>
 <span id="more"></span>
-<h1>估计方差组分日志信息</h1>
+<h1 id="估计方差组分日志信息">估计方差组分日志信息</h1>
 <p>估计方差组分时，我们会得到以下的信息（下图为第一次迭代结果）：</p>
-<p><img src="1.png" alt=""></p>
+<p><img src="1.png" /></p>
 <p>官方文档给出的解释如下：</p>
-<p><img src="2.png" alt=""></p>
+<p><img src="2.png" /></p>
 <p>我这里先解释一下整个过程吧，首先我们利用方差组分初始值构建 MME ，求解得到的相应 BLUE 和 BLUP 值，并且计算相应的对数似然值的 -2 倍，即 <code>-2logL</code> 。</p>
 <p>然后基于公式 <code>AIC = -2logL + 2p</code> 得到 AIC ，这里的 p 是需要估计的方差组分元素的数目（包含残差）。以截图为例，很明显是单性状模型，其中需要估计的方差组分为加性效应方差和残差方差，因此 p = 2；如果改为双性状模型，此时加性效应部分需要估计的元素数目为 3 （两个方差，一个协方差），同理残差部分需要估计的元素数目也为 3，因此 p = 6 。</p>
 <p>然后我们基于 AI 算法得到下一组方差组分，即图中的 <code>new R</code> 和 <code>new G</code> 。</p>
-<p>然后我们基于新的方差组分和上一次的方差组分，比较二者差异，计算两个统计量。第一个统计量 <code>convergence</code> 计算公式为<br>
-$$<br>
-C=\frac{\sum_i\left(\theta_i-\theta_i^<em>\right)^2}{\sum_i \theta_i^2}<br>
-$$<br>
-其中 $\theta_i$ 是当前估计得到的第 $i$ 个方差组分， $\theta_i^</em>$ 是之前（上一次）的第 $i$ 个方差组分 （$i$ 的范围是从 1 到 $p$ ）。</p>
-<p>通过 airemlf90 日志信息，实际计算发现，<strong>airemlf90在计算 $C$ 时没有使用残差的方差组分</strong>。以上图为例，即只用了加性方差计算 $C$ 。具体原因不太情况，官方文档没有说明这一点。</p>
-<p>另一个统计量 <code>the delta convergence</code> $\left(C_{\Delta}\right)$ ，计算公式如下<br>
-$$<br>
-C_{\Delta}=\frac{\sum_i\left|\theta_i-\theta_i^*\right|}{p}<br>
-$$<br>
-如果满足下面的任一条件（$\epsilon$ 为收敛阈值，默认为 $10^{-12}$ ），则迭代收敛。但是通常当一个统计量满足收敛条件时，另一个统计量也会同时满足收敛条件。<br>
-$$<br>
-C &lt; \epsilon \quad \text{or} \quad C_{\Delta} &lt; \sqrt{\epsilon}<br>
-$$</p>
-<h1>育种值结果</h1>
+<p>然后我们基于新的方差组分和上一次的方差组分，比较二者差异，计算两个统计量。第一个统计量 <code>convergence</code> 计算公式为
+<span class="math display">\[
+C=\frac{\sum_i\left(\theta_i-\theta_i^*\right)^2}{\sum_i \theta_i^2}
+\]</span>
+其中 <span class="math inline">\(\theta_i\)</span> 是当前估计得到的第 <span class="math inline">\(i\)</span> 个方差组分， <span class="math inline">\(\theta_i^*\)</span> 是之前（上一次）的第 <span class="math inline">\(i\)</span> 个方差组分 （<span class="math inline">\(i\)</span> 的范围是从 1 到 <span class="math inline">\(p\)</span> ）。</p>
+<p>通过 airemlf90 日志信息，实际计算发现，<strong>airemlf90在计算 <span class="math inline">\(C\)</span> 时没有使用残差的方差组分</strong>。以上图为例，即只用了加性方差计算 <span class="math inline">\(C\)</span> 。具体原因不太情况，官方文档没有说明这一点。</p>
+<p>另一个统计量 <code>the delta convergence</code> <span class="math inline">\(\left(C_{\Delta}\right)\)</span> ，计算公式如下
+<span class="math display">\[
+C_{\Delta}=\frac{\sum_i\left|\theta_i-\theta_i^*\right|}{p}
+\]</span>
+如果满足下面的任一条件（<span class="math inline">\(\epsilon\)</span> 为收敛阈值，默认为 <span class="math inline">\(10^{-12}\)</span> ），则迭代收敛。但是通常当一个统计量满足收敛条件时，另一个统计量也会同时满足收敛条件。
+<span class="math display">\[
+C &lt; \epsilon \quad \text{or} \quad C_{\Delta} &lt; \sqrt{\epsilon}
+\]</span></p>
+<h1 id="育种值结果">育种值结果</h1>
 <p>估计方差组分后会自动求解MME，并得到solutions文件。注意<strong>solutions是使用最终方差组分前一个迭代结果计算的</strong>。比如这里迭代了8次最后停止迭代了，solutions就是使用第7次迭代结果计算的，一般两次迭代之间区别很小。但是如果迭代结果之间波动很大，结果就不可靠了。</p>
  
       <!-- reward -->
@@ -547,8 +547,22 @@ $$</p>
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

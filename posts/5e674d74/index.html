@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3.5k</span>
+            <span class="post-count">3.6k</span>
         </span>
     </span>
 
@@ -96,194 +96,198 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>这是混合线性模型理论系列的第一篇，内容为概述及广义最小二乘（固定效应的估计）。</p>
+  <p>这是混合线性模型理论系列的第一篇，内容为概述及广义最小二乘（固定效应的估计）。</p>
 <span id="more"></span>
-<h1>混合线性模型概述</h1>
+<h1 id="混合线性模型概述">混合线性模型概述</h1>
 <h2 id="前言">前言</h2>
 <p>统计分析的目的是推断 (<em>inference</em>) 和预测 (<em>prediction</em>)，推断指估计参数的大小（比如确定哪些自变量有作用，哪些自变量没有作用），预测是对未来的观测值进行预测。</p>
-<p>假设我们定义我们的观测值向量是一个 $n$ 维的向量 $\mathbf{y}$ ，一般来说我们将观测值向量视为对真实的或概念上的<strong>总体</strong>的一次<strong>随机抽样</strong>，即向量 $\mathbf{y}$ 是一个随机向量，向量 $\mathbf{y}$ 的每一个元素是随机变量 。但是我们很少知道总体的分布，一般我们可能会假设总体服从多元正态分布。</p>
+<p>假设我们定义我们的观测值向量是一个 <span class="math inline">\(n\)</span> 维的向量 <span class="math inline">\(\mathbf{y}\)</span> ，一般来说我们将观测值向量视为对真实的或概念上的<strong>总体</strong>的一次<strong>随机抽样</strong>，即向量 <span class="math inline">\(\mathbf{y}\)</span> 是一个随机向量，向量 <span class="math inline">\(\mathbf{y}\)</span> 的每一个元素是随机变量 。但是我们很少知道总体的分布，一般我们可能会假设总体服从多元正态分布。</p>
 <h2 id="模型">模型</h2>
-<p>混合线性模型表示如下<br>
-$$<br>
-\mathbf{y}=\mathbf{X} \boldsymbol{\beta}+\mathbf{Zu}+\mathbf{e}<br>
-$$<br>
+<p>混合线性模型表示如下
+<span class="math display">\[
+\mathbf{y}=\mathbf{X} \boldsymbol{\beta}+\mathbf{Zu}+\mathbf{e}
+\]</span>
 其中，</p>
 <blockquote>
-<p>$\mathbf{X}$ 是一个已知的固定的 $n \times p \quad  (n &gt; p)$ 的矩阵， 其秩为 $r \leq p$ 。<br>
-$\boldsymbol{\beta}$ 是一个<strong>固定</strong>的由未知参数组成的 $p \times 1$ 向量 。<br>
-$\mathbf{Z}$ 是一个已知的固定的 $n \times q$ 矩阵。<br>
-$\mathbf{u}$ 是一个 $q \times 1$ 的<strong>随机</strong>向量。<br>
-$\mathbf{e}$ 是由随机误差组成的 $n \times 1$ 的随机向量</p>
+<p><span class="math inline">\(\mathbf{X}\)</span> 是一个已知的固定的 <span class="math inline">\(n \times p \quad  (n &gt; p)\)</span> 的矩阵， 其秩为 <span class="math inline">\(r \leq p\)</span> 。
+<span class="math inline">\(\boldsymbol{\beta}\)</span> 是一个<strong>固定</strong>的由未知参数组成的 <span class="math inline">\(p \times 1\)</span> 向量 。
+<span class="math inline">\(\mathbf{Z}\)</span> 是一个已知的固定的 <span class="math inline">\(n \times q\)</span> 矩阵。
+<span class="math inline">\(\mathbf{u}\)</span> 是一个 <span class="math inline">\(q \times 1\)</span> 的<strong>随机</strong>向量。
+<span class="math inline">\(\mathbf{e}\)</span> 是由随机误差组成的 <span class="math inline">\(n \times 1\)</span> 的随机向量</p>
 </blockquote>
-<p>注意：这里的 $\mathbf{y, u ,e}$ 均视为从某个真实的或者概念上的总体的一个<strong>随机抽样</strong>，即均为随机向量。这三者的均值和方差，协方差假设如下。<br>
-$$<br>
-\begin{gathered}<br>
-E(\mathbf{u})=\mathbf{0}, E(\mathbf{e})=\mathbf{0}, E(\mathbf{y})=\mathbf{X} \beta \<br>
-\operatorname{Var}(\mathbf{u})=\mathbf{G}, \operatorname{Var}(\mathbf{e})=\mathbf{R}, \operatorname{Cov}\left(\mathbf{u}, \mathbf{e}^{\prime}\right)=\mathbf{0}, \operatorname{Var}(\mathbf{y})=\mathbf{Z G Z}^{\prime}+\mathbf{R}<br>
-\end{gathered}<br>
-$$<br>
-这里的协方差矩阵 $\mathbf{G, R}$ 可能是已知的，也可能是未知的。由于 $\mathbf{u}$ 和 $\mathbf{e}$ 均无法观测，因此我们一般不知道 $\mathbf{G}$ 和 $\mathbf{R}$ ，但是我们可以对这两个协方差矩阵做一些假设，从而减少估计的参数数目。我们一般假设 $\mathbf{R}$ 的非对角线元素均为 0，对角线元素均相同，也就是不同样本具有相同的残差并且彼此的残差之间不相干，即假设 $\mathbf{R} = \sigma_{e}^{2} \mathbf{I}$ 。</p>
-<p>其中 $\boldsymbol{\beta}$ 称为<strong>固定效应</strong>，因为其元素均为<strong>固定的不变的常数</strong>，只是我们不知道具体的值；$\boldsymbol{\mu}$ 称为<strong>随机效应</strong>，因为它是从总体得到的一次随机抽样，其元素均为随机变量，我们无法完全控制其大小。</p>
-<p>除了随机误差外，完全由固定效应组成的模型称为<strong>固定效应模型</strong>，或<strong>固定模型</strong>；除群体平均数 $\mu$ 之外，完全由随机效应组成的模型称为<strong>随机效应模型</strong>，简称为<strong>随机模型</strong>。</p>
+<p>注意：这里的 <span class="math inline">\(\mathbf{y, u ,e}\)</span> 均视为从某个真实的或者概念上的总体的一个<strong>随机抽样</strong>，即均为随机向量。这三者的均值和方差，协方差假设如下。
+<span class="math display">\[
+\begin{gathered}
+E(\mathbf{u})=\mathbf{0}, E(\mathbf{e})=\mathbf{0}, E(\mathbf{y})=\mathbf{X} \beta \\
+\operatorname{Var}(\mathbf{u})=\mathbf{G}, \operatorname{Var}(\mathbf{e})=\mathbf{R}, \operatorname{Cov}\left(\mathbf{u}, \mathbf{e}^{\prime}\right)=\mathbf{0}, \operatorname{Var}(\mathbf{y})=\mathbf{Z G Z}^{\prime}+\mathbf{R}
+\end{gathered}
+\]</span>
+这里的协方差矩阵 <span class="math inline">\(\mathbf{G, R}\)</span> 可能是已知的，也可能是未知的。由于 <span class="math inline">\(\mathbf{u}\)</span> 和 <span class="math inline">\(\mathbf{e}\)</span> 均无法观测，因此我们一般不知道 <span class="math inline">\(\mathbf{G}\)</span> 和 <span class="math inline">\(\mathbf{R}\)</span> ，但是我们可以对这两个协方差矩阵做一些假设，从而减少估计的参数数目。我们一般假设 <span class="math inline">\(\mathbf{R}\)</span> 的非对角线元素均为 0，对角线元素均相同，也就是不同样本具有相同的残差并且彼此的残差之间不相干，即假设 <span class="math inline">\(\mathbf{R} = \sigma_{e}^{2} \mathbf{I}\)</span> 。</p>
+<p>其中 <span class="math inline">\(\boldsymbol{\beta}\)</span> 称为<strong>固定效应</strong>，因为其元素均为<strong>固定的不变的常数</strong>，只是我们不知道具体的值；<span class="math inline">\(\boldsymbol{\mu}\)</span> 称为<strong>随机效应</strong>，因为它是从总体得到的一次随机抽样，其元素均为随机变量，我们无法完全控制其大小。</p>
+<p>除了随机误差外，完全由固定效应组成的模型称为<strong>固定效应模型</strong>，或<strong>固定模型</strong>；除群体平均数 <span class="math inline">\(\mu\)</span> 之外，完全由随机效应组成的模型称为<strong>随机效应模型</strong>，简称为<strong>随机模型</strong>。</p>
 <p>其实所有的线性模型都可以表示为<strong>混合线性模型</strong>，固定模型和随机模型均可以视为混合线性模型的一个特例。这样一来我们可以通过这一个模型的通式来解决所有问题（线性问题）。</p>
-<p>在混合线性模型中，我们需要估计固定效应 $\boldsymbol{\beta}$ 和随机效应 $\boldsymbol{\mu}$ ，我们将固定效应的估计称为<strong>估计</strong>，将随机效应的估计称为<strong>预测</strong>。</p>
-<p>下面我们看如何通过广义最小二乘法来估计固定效应 $\boldsymbol{\beta}$ 。</p>
-<h1>广义最小二乘</h1>
-<p>在普通最小二乘中，我们假设 $\operatorname{Var}(\mathbf{y}) = \operatorname{Var}(\mathbf{e}) = \sigma_{e}^{2} \mathbf{I}$ ，此时得到的正规方程组 $\mathbf{X^{T}X } \boldsymbol{\hat{\beta}} = \mathbf{X^{T}y}$ 及满秩情况下的唯一解 $\boldsymbol{\beta}_{\mathrm{LS}}=\left(\boldsymbol{X}^{\mathrm{T}} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\mathrm{T}} \boldsymbol{y}$ 即为<strong>最佳线性无偏估计值</strong>  (<em>best linear unbiased estimators</em>, BLUE) 。这一部分内容可见 <a href="https://vincere.fun/posts/55264e6f/#">矩阵微分与正规方程组推导</a> 。</p>
-<p>但是如果 $\mathbf{y}$ 的协方差矩阵并不满足普通最小二乘的假设，此时如果我们仍采用普通最小二乘方法，此时得到的参数估计值就不再是 BLUE ，此时我们需要对 $\mathbf{y}$ 作相应的线性变换。</p>
-<p>我们考虑一般的情况，假设固定模型如下<br>
-$$<br>
-\mathbf{y} = \boldsymbol{X \beta} + \mathbf{e}<br>
-$$<br>
-假设$E(\mathbf{e}) = \mathbf{0}$，  $\operatorname{Var}(\mathbf{y}) = \operatorname{Var}(\mathbf{e}) = \mathbf{V}=\sigma^{2} \mathbf{R}$ ，其中 $\mathbf{R}$ 为一个 $n \times n$ 的相关系数矩阵，这里  $\mathbf{R}$ 是一个正定矩阵（ 因此 $\mathbf{R}^{-1}$ 同样是正定矩阵）。根据正定矩阵的性质，一定存在一个非奇异矩阵 $\mathbf{Q}$ 使得<br>
-$$<br>
-\mathbf{QQ^{\prime}= R^{-1}}<br>
-$$<br>
-用  $\mathbf{Q}$  对 $\mathbf{y}$ 作线性变换，有<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{y}^{<em>} &amp;=\mathbf{Q y} \<br>
-&amp;=\mathbf{Q} \mathbf{X} \boldsymbol{\beta}+\mathbf{Q} \mathbf{e} \<br>
-&amp;=\mathbf{X}^{</em>} \boldsymbol{\beta}+\mathbf{e}^{<em>}<br>
-\end{aligned}<br>
-$$<br>
-其中 $\mathbf{X}^{</em>}=\mathbf{Q} \mathbf{X}, \quad \mathbf{e}^{<em>}=\mathbf{Q} \mathbf{e}$  ，则<br>
-$$<br>
-\operatorname{Var}\left(\mathbf{y}^{</em>}\right)=\operatorname{Var}(\mathbf{Q y})=\mathbf{Q} \operatorname{Var}(\mathbf{y}) \mathbf{Q}^{\prime}=\sigma^{2} \mathbf{Q} \mathbf{R} \mathbf{Q}^{\prime}<br>
-$$<br>
-因为 $\mathbf{QQ^{\prime}= R^{-1}}$ ，对该式左乘 $\mathbf{Q}^{-1}$ ，右乘  $\mathbf{Q}^{‘-1}$ ，得到 $\mathbf{Q}^{-1} \mathbf{R}^{-1} \mathbf{Q}^{\prime-1}=\mathbf{I}$ ，即 $\mathbf{Q R Q}^{\prime}=\mathbf{I}$ ，于是<br>
-$$<br>
-\operatorname{Var}\left(\mathbf{y}^{<em>}\right)=\sigma^{2} \mathbf{I}<br>
-$$<br>
-因此，我们知道线性转换后的模型 $\mathbf{y}^{</em>}=\mathbf{X}^{<em>} \boldsymbol{\beta}+\mathrm{e}^{</em>}$ 符合普通最小二乘的假设，此时我们得到最小二乘方程组如下<br>
-$$<br>
-\mathbf{X}^{<em>'} \mathbf{X}^{</em>}\boldsymbol{\hat{\beta}}=\mathbf{X}^{<em>'} \mathbf{y}^{</em>}<br>
-$$<br>
-将 $\mathbf{X}^{<em>}=\mathbf{Q} \mathbf{X}$ ， $\mathbf{y}^{</em>} =\mathbf{Q y} $ 带入，得到<br>
-$$<br>
-\begin{aligned}<br>
-&amp;\mathbf{X}^{<em>'} \mathbf{X}^{</em>}\boldsymbol{\hat{\beta}}=\mathbf{X}^{<em>'} \mathbf{y}^{</em>} \<br>
-&amp;\mathbf{X’Q’} \mathbf{QX} \boldsymbol{\hat{\beta}}=\mathbf{X’Q’} \mathbf{Qy} \</p>
-<p>&amp;\mathbf{X’R^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X’R^{-1}} \mathbf{y} \</p>
-<p>\end{aligned}<br>
-$$<br>
-$\mathbf{X’R^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X’R^{-1}} \mathbf{y}$ 称为 <strong>广义最小二乘方程组</strong>。 当 $\mathbf{X}$ 满秩时，我们得到唯一的广义最小二乘估计值 $\boldsymbol{\hat{\beta}}= (\mathbf{X’R^{-1}} \mathbf{X})^{-1} \mathbf{X’R^{-1}} \mathbf{y}$ ，也就是最佳线性无偏估计值；当  $\mathbf{X}$ 不满秩时，我们有无穷个解，某个解可以表示为 $\boldsymbol{\hat{\beta}}= (\mathbf{X’R^{-1}} \mathbf{X})^{-} \mathbf{X’R^{-1}} \mathbf{y}$ ，其中 $(\mathbf{X’R^{-}} \mathbf{X})^{-}$ 为任意一个广义逆，此时若  $\boldsymbol{q’ \beta}$ 为可估计函数，则   $\boldsymbol{q’ \hat{\beta}}$  是对   $\boldsymbol{q’ \beta}$  的最佳线性无偏估计。</p>
-<p>对上面的<strong>广义最小二乘方程组</strong>的左右两侧均乘以 $1/\sigma^{2}$ ，我们得到该方程组的另一种形式。<br>
-$$<br>
-\mathbf{X’V^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X’V^{-1}} \mathbf{y}<br>
-$$<br>
-上面我们推导了固定模型的情况，我们可以轻松推广至一般的混合线性模型，设混合线性模型表达式同上，我们可以将随机效应和随机误差效应视为一体，即令 $\mathbf{Zu + e = e^{<em>}}$ ，此时模型写为<br>
-$$<br>
-\mathbf{y} = \boldsymbol{X \beta} + \mathbf{e}^{</em>}<br>
-$$<br>
-此时，$\operatorname{Var}(\mathbf{y}) = \operatorname{Var}(\mathbf{e^{*}}) =\mathbf{Z G Z}^{\prime}+\mathbf{R}$ ，即此时 $\mathbf{V} =\mathbf{Z G Z}^{\prime}+\mathbf{R}$ ，同样有 $\mathbf{X’V^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X’V^{-1}} \mathbf{y}$ 方程组成立。</p>
+<p>在混合线性模型中，我们需要估计固定效应 <span class="math inline">\(\boldsymbol{\beta}\)</span> 和随机效应 <span class="math inline">\(\boldsymbol{\mu}\)</span> ，我们将固定效应的估计称为<strong>估计</strong>，将随机效应的估计称为<strong>预测</strong>。</p>
+<p>下面我们看如何通过广义最小二乘法来估计固定效应 <span class="math inline">\(\boldsymbol{\beta}\)</span> 。</p>
+<h1 id="广义最小二乘">广义最小二乘</h1>
+<p>在普通最小二乘中，我们假设 <span class="math inline">\(\operatorname{Var}(\mathbf{y}) = \operatorname{Var}(\mathbf{e}) = \sigma_{e}^{2} \mathbf{I}\)</span> ，此时得到的正规方程组 <span class="math inline">\(\mathbf{X^{T}X } \boldsymbol{\hat{\beta}} = \mathbf{X^{T}y}\)</span> 及满秩情况下的唯一解 <span class="math inline">\(\boldsymbol{\beta}_{\mathrm{LS}}=\left(\boldsymbol{X}^{\mathrm{T}} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{\mathrm{T}} \boldsymbol{y}\)</span> 即为<strong>最佳线性无偏估计值</strong> (<em>best linear unbiased estimators</em>, BLUE) 。这一部分内容可见 <a href="https://vincere.fun/posts/55264e6f/#">矩阵微分与正规方程组推导</a> 。</p>
+<p>但是如果 <span class="math inline">\(\mathbf{y}\)</span> 的协方差矩阵并不满足普通最小二乘的假设，此时如果我们仍采用普通最小二乘方法，此时得到的参数估计值就不再是 BLUE ，此时我们需要对 <span class="math inline">\(\mathbf{y}\)</span> 作相应的线性变换。</p>
+我们考虑一般的情况，假设固定模型如下
+<span class="math display">\[
+\mathbf{y} = \boldsymbol{X \beta} + \mathbf{e}
+\]</span>
+假设<span class="math inline">\(E(\mathbf{e}) = \mathbf{0}\)</span>， <span class="math inline">\(\operatorname{Var}(\mathbf{y}) = \operatorname{Var}(\mathbf{e}) = \mathbf{V}=\sigma^{2} \mathbf{R}\)</span> ，其中 <span class="math inline">\(\mathbf{R}\)</span> 为一个 <span class="math inline">\(n \times n\)</span> 的相关系数矩阵，这里 <span class="math inline">\(\mathbf{R}\)</span> 是一个正定矩阵（ 因此 <span class="math inline">\(\mathbf{R}^{-1}\)</span> 同样是正定矩阵）。根据正定矩阵的性质，一定存在一个非奇异矩阵 <span class="math inline">\(\mathbf{Q}\)</span> 使得
+<span class="math display">\[
+\mathbf{QQ^{\prime}= R^{-1}}
+\]</span>
+用 <span class="math inline">\(\mathbf{Q}\)</span> 对 <span class="math inline">\(\mathbf{y}\)</span> 作线性变换，有
+<span class="math display">\[
+\begin{aligned}
+\mathbf{y}^{*} &amp;=\mathbf{Q y} \\
+&amp;=\mathbf{Q} \mathbf{X} \boldsymbol{\beta}+\mathbf{Q} \mathbf{e} \\
+&amp;=\mathbf{X}^{*} \boldsymbol{\beta}+\mathbf{e}^{*}
+\end{aligned}
+\]</span>
+其中 <span class="math inline">\(\mathbf{X}^{*}=\mathbf{Q} \mathbf{X}, \quad \mathbf{e}^{*}=\mathbf{Q} \mathbf{e}\)</span> ，则
+<span class="math display">\[
+\operatorname{Var}\left(\mathbf{y}^{*}\right)=\operatorname{Var}(\mathbf{Q y})=\mathbf{Q} \operatorname{Var}(\mathbf{y}) \mathbf{Q}^{\prime}=\sigma^{2} \mathbf{Q} \mathbf{R} \mathbf{Q}^{\prime}
+\]</span>
+因为 <span class="math inline">\(\mathbf{QQ^{\prime}= R^{-1}}\)</span> ，对该式左乘 <span class="math inline">\(\mathbf{Q}^{-1}\)</span> ，右乘 <span class="math inline">\(\mathbf{Q}^{&#39;-1}\)</span> ，得到 <span class="math inline">\(\mathbf{Q}^{-1} \mathbf{R}^{-1} \mathbf{Q}^{\prime-1}=\mathbf{I}\)</span> ，即 <span class="math inline">\(\mathbf{Q R Q}^{\prime}=\mathbf{I}\)</span> ，于是
+<span class="math display">\[
+\operatorname{Var}\left(\mathbf{y}^{*}\right)=\sigma^{2} \mathbf{I}
+\]</span>
+因此，我们知道线性转换后的模型 <span class="math inline">\(\mathbf{y}^{*}=\mathbf{X}^{*} \boldsymbol{\beta}+\mathrm{e}^{*}\)</span> 符合普通最小二乘的假设，此时我们得到最小二乘方程组如下
+<span class="math display">\[
+\mathbf{X}^{*&#39;} \mathbf{X}^{*}\boldsymbol{\hat{\beta}}=\mathbf{X}^{*&#39;} \mathbf{y}^{*}
+\]</span>
+将 <span class="math inline">\(\mathbf{X}^{*}=\mathbf{Q} \mathbf{X}\)</span> ， $^{*} = $ 带入，得到
+$$
+<span class="math display">\[\begin{aligned}
+&amp;\mathbf{X}^{*&#39;} \mathbf{X}^{*}\boldsymbol{\hat{\beta}}=\mathbf{X}^{*&#39;} \mathbf{y}^{*} \\
+&amp;\mathbf{X&#39;Q&#39;} \mathbf{QX} \boldsymbol{\hat{\beta}}=\mathbf{X&#39;Q&#39;} \mathbf{Qy} \\
+
+&amp;\mathbf{X&#39;R^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X&#39;R^{-1}} \mathbf{y} \\
+
+
+\end{aligned}\]</span>
+<p>$$
+<span class="math inline">\(\mathbf{X&#39;R^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X&#39;R^{-1}} \mathbf{y}\)</span> 称为 <strong>广义最小二乘方程组</strong>。 当 <span class="math inline">\(\mathbf{X}\)</span> 满秩时，我们得到唯一的广义最小二乘估计值 <span class="math inline">\(\boldsymbol{\hat{\beta}}= (\mathbf{X&#39;R^{-1}} \mathbf{X})^{-1} \mathbf{X&#39;R^{-1}} \mathbf{y}\)</span> ，也就是最佳线性无偏估计值；当 <span class="math inline">\(\mathbf{X}\)</span> 不满秩时，我们有无穷个解，某个解可以表示为 <span class="math inline">\(\boldsymbol{\hat{\beta}}= (\mathbf{X&#39;R^{-1}} \mathbf{X})^{-} \mathbf{X&#39;R^{-1}} \mathbf{y}\)</span> ，其中 <span class="math inline">\((\mathbf{X&#39;R^{-}} \mathbf{X})^{-}\)</span> 为任意一个广义逆，此时若 <span class="math inline">\(\boldsymbol{q&#39; \beta}\)</span> 为可估计函数，则 <span class="math inline">\(\boldsymbol{q&#39; \hat{\beta}}\)</span> 是对 <span class="math inline">\(\boldsymbol{q&#39; \beta}\)</span> 的最佳线性无偏估计。</p>
+<p>对上面的<strong>广义最小二乘方程组</strong>的左右两侧均乘以 <span class="math inline">\(1/\sigma^{2}\)</span> ，我们得到该方程组的另一种形式。
+<span class="math display">\[
+\mathbf{X&#39;V^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X&#39;V^{-1}} \mathbf{y}
+\]</span>
+上面我们推导了固定模型的情况，我们可以轻松推广至一般的混合线性模型，设混合线性模型表达式同上，我们可以将随机效应和随机误差效应视为一体，即令 <span class="math inline">\(\mathbf{Zu + e = e^{*}}\)</span> ，此时模型写为
+<span class="math display">\[
+\mathbf{y} = \boldsymbol{X \beta} + \mathbf{e}^{*}
+\]</span>
+此时，<span class="math inline">\(\operatorname{Var}(\mathbf{y}) = \operatorname{Var}(\mathbf{e^{*}}) =\mathbf{Z G Z}^{\prime}+\mathbf{R}\)</span> ，即此时 <span class="math inline">\(\mathbf{V} =\mathbf{Z G Z}^{\prime}+\mathbf{R}\)</span> ，同样有 <span class="math inline">\(\mathbf{X&#39;V^{-1}} \mathbf{X} \boldsymbol{\hat{\beta}}=\mathbf{X&#39;V^{-1}} \mathbf{y}\)</span> 方程组成立。</p>
 <h2 id="另一种证明">另一种证明</h2>
 <p>我们接着延续高斯-马尔可夫定理的思想，从所有的线性无偏估计值中找到一个“最佳的”估计值，这里“最佳”的意思是指估计值具有<strong>最小的</strong>方差。</p>
-<p>假设 $\mathbf{k}^{\prime} \boldsymbol{\beta}$ 是一个可估计函数，即我们可以找到一个向量  $\mathbf{a}$  使得  $\mathrm{E}\left(\mathbf{a}^{\prime} \mathbf{y}\right)=\mathbf{k}^{\prime} \boldsymbol{\beta}$ 。我们知道  $E\left(\mathbf{a}^{\prime} \mathbf{y}\right)=\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta}$ ，因此 $\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta} = \mathbf{k}^{\prime} \boldsymbol{\beta}$ 需要对所有可能的  $\boldsymbol{\beta}$ 均成立，那么当且仅当下式成立时 $\mathbf{k}^{\prime} \boldsymbol{\beta}$ 是一个可估计函数<br>
-$$<br>
-\mathbf{a}^{\prime} \mathbf{X}=\mathbf{k}^{\prime}<br>
-$$<br>
-同时，我们有<br>
-$$<br>
-\operatorname{Var}\left(\mathbf{a}^{\prime} \mathbf{y}\right)=\mathbf{a}^{\prime}(\operatorname{Var}(\mathbf{y})) \mathbf{a}=\mathbf{a}^{\prime} \mathbf{V a}<br>
-$$<br>
-这里我们假设 $\mathbf{V}$ 矩阵已知。</p>
-<p>因此我们是在满足约束条件  $\mathbf{a}^{\prime} \mathbf{X}=\mathbf{k}^{\prime}$ 的前提下使得 $\mathbf{a’Va}$ 的对角线元素最小，构建拉格朗日函数如下<br>
-$$<br>
-\mathbf{L}=\frac{1}{2}\mathbf{tr(a’Va) + (a’X-k’)\boldsymbol{\theta}}<br>
-$$<br>
-求偏导数，使之为 $\mathbf{0}$ 得到<br>
-$$<br>
-\begin{aligned}<br>
-&amp;\partial \mathbf{L} / \partial \mathbf{a}= \mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta}= \mathbf{0} \<br>
-&amp;\partial \mathbf{L} / \partial \boldsymbol{\theta}=\mathbf{X’a-k} = \mathbf{0}<br>
-\end{aligned}<br>
-$$<br>
-将两个式子整理成一个方程组，得到<br>
-$$<br>
-\left(\begin{array}{cc}<br>
-\mathbf{V} &amp; \mathbf{X} \<br>
-\mathbf{X}^{\prime} &amp; \mathbf{0}<br>
-\end{array}\right)\left(\begin{array}{l}<br>
-\mathbf{a} \<br>
-\boldsymbol{\theta}<br>
-\end{array}\right)=\left(\begin{array}{l}<br>
-\mathbf{0} \<br>
-\mathbf{k}<br>
-\end{array}\right)<br>
-$$<br>
-对第一个方程进行变换可得<br>
-$$<br>
-\begin{aligned}<br>
-\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta} &amp;= \mathbf{0} \<br>
-\mathbf{a}  &amp;= \mathbf{-V^{-1}X \boldsymbol{\theta}} \<br>
-\mathbf{X’a}  &amp;= \mathbf{-X’V^{-1}X \boldsymbol{\theta}} \<br>
-\mathbf{k}  &amp;= \mathbf{-X’V^{-1}X \boldsymbol{\theta}} \</p>
-<p>\end{aligned}<br>
-$$<br>
-因此我们得到了一个只关于 $\boldsymbol{\theta}$ 的方程组<br>
-$$<br>
-\mathbf{X’V^{-1}X \boldsymbol{\theta}} = \mathbf{-k}<br>
-$$<br>
-我们只需要证明对于任何一个广义逆 $\mathbf{ (X’V^{-1}X)^{-} }$ ，$\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}k=k}$ 均成立，则该方程组相容。因为  $\mathbf{k}^{\prime} \boldsymbol{\beta}$ 可估计，因此必然存在某个  $\mathbf{a_{0}}$ 向量使得  $\mathbf{k = X’a_{0}}$ ，因此上式可以写成  $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}X’a_{0}=X’a_{0}}$ 。我们设这里的 $\mathbf{A=V^{-1/2}X}$ ，这里的 $\mathbf{V^{-1/2}}$ 是 $\mathbf{V^{1/2}}$ 的逆矩阵，易得 $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}X’} = \mathbf{A’A(A’A)^{-}A’V^{1/2}} = \mathbf{A’V^{1/2}} =  \mathbf{X’V^{-1/2} V^{1/2}} = \mathbf{X’}$ ，因此得证   $\mathbf{(X’V^{-1}X) (X’V^{-1}X)^{-}X’a_{0}=X’a_{0}}$  。</p>
-<p>因此  $\boldsymbol{\theta}$  的一个解为<br>
-$$<br>
-\mathbf{-(X’V^{-1}X)^{-}k}<br>
-$$<br>
-带入到第一个方程 $\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta}= \mathbf{0}$ ，得到<br>
-$$<br>
-\mathbf{a}  = \mathbf{V^{-1}X (X’V^{-1}X)^{-}k}<br>
-$$<br>
-我们可以进一步证明无论 $\mathbf{ (X’V^{-1}X)^{-} }$ 如何取值，$\mathbf{a}$ 均不变。同样设  $\mathbf{A=V^{-1/2}X}$ ，$\mathbf{a}  = \mathbf{V^{-1}X (X’V^{-1}X)^{-}k} = \mathbf{V^{-1}X (X’V^{-1}X)^{-}X’a_{0}}$  ，则 $\mathbf{a = V^{-1/2} A(A’A)^{-}A’V^{1/2}a_{0}}$ 。根据广义逆的性质，无论 $(\mathbf{A}^{\prime} \mathbf{A})^{-}$ 取何值， $\mathbf{A}\left(\mathbf{A}^{\prime} \mathbf{A}\right)^{-} \mathbf{A}^{\prime}$  均保持不变，因此 $\mathbf{a}$ 保持不变。</p>
-<p>此时  $\mathbf{k}^{\prime} \boldsymbol{\beta}$  的 BLUE 为<br>
-$$<br>
-\mathbf{a’y} = \mathbf{k’(X’V^{-1}X)^{-}X’V^{-1}y}<br>
-$$<br>
-如果我们设<br>
-$$<br>
-\boldsymbol{\beta^{0}} = \mathbf{(X’V^{-1}X)^{-}X’V^{-1}y}<br>
-$$<br>
-即 $\boldsymbol{\beta^{0}}$ 是下式的任意一个解，即  $\boldsymbol{\beta^{0}}$ 是<strong>广义最小二乘方程组</strong>的一个解，其上标的 0 表示其是某一个解，而不是唯一解。<br>
-$$<br>
-\mathbf{(X’V^{-1}X)}\boldsymbol{\beta^{0}} = \mathbf{X’V^{-1}y}<br>
-$$<br>
-因此，我们得到   $\mathbf{k}^{\prime} \boldsymbol{\beta}$  的 BLUE 值就是  $\mathbf{k}^{\prime} \boldsymbol{\beta^{0}}$  。</p>
-<h2 id="V-1-的计算简化">$V^{-1}$ 的计算简化</h2>
-<p>在广义最小二乘估计时需要计算 $\mathbf{V^{-1}}$ ，当表型值数据量很大时， $\mathbf{V^{-1}}$ 计算困难甚至无法计算。Henderson 在 1959 年给出了  $\mathbf{V^{-1}}$ 的一个计算公式，如下：<br>
-$$<br>
-\mathbf{V}^{-1}=\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}<br>
-$$<br>
-一般 $\mathbf{R}^{-1}$ 很好计算，如果我们可以轻松计算 $\mathbf{G^{-1}}$ 和 $\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1}$ 的话 ，那么采用这个公式计算  $\mathbf{V^{-1}}$ 就很有优势。在个体动物模型中貌似没法简单计算  $\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1}$ ，所以这个计算公式现在好像没啥用了。</p>
-<p><strong>证明</strong>：我们只需要证明 $\mathbf{(R+ZGZ’)} \left(\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\right)  = \mathbf{I}$ 即可，我们有<br>
-$$<br>
-\begin{aligned}<br>
-&amp;\mathbf{\left(R+Z G Z^{\prime}\right)\left[R^{-1}-R^{-1} Z\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}\right]} \<br>
-&amp;=\mathbf{I+Z G Z^{\prime} R^{-1}-Z\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \<br>
-&amp; \quad-\mathbf{Z G Z^{\prime} R^{-1} Z\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \<br>
-&amp;=\mathbf{I+Z G Z^{\prime} R^{-1}-Z\left(I+G Z^{\prime} R^{-1} Z\right)\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \<br>
-&amp;=\mathbf{I+Z G Z^{\prime} R^{-1}-Z G\left(G^{-1}+Z^{\prime} R^{-1} Z\right)\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \<br>
-&amp;=\mathbf{ I+Z G Z^{\prime} R^{-1}-Z G Z^{\prime} R^{-1}} \<br>
-&amp;=\mathbf{I}<br>
-\end{aligned}<br>
-$$<br>
+<p>假设 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> 是一个可估计函数，即我们可以找到一个向量 <span class="math inline">\(\mathbf{a}\)</span> 使得 <span class="math inline">\(\mathrm{E}\left(\mathbf{a}^{\prime} \mathbf{y}\right)=\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> 。我们知道 <span class="math inline">\(E\left(\mathbf{a}^{\prime} \mathbf{y}\right)=\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta}\)</span> ，因此 <span class="math inline">\(\mathbf{a}^{\prime} \mathbf{X} \boldsymbol{\beta} = \mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> 需要对所有可能的 <span class="math inline">\(\boldsymbol{\beta}\)</span> 均成立，那么当且仅当下式成立时 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> 是一个可估计函数
+<span class="math display">\[
+\mathbf{a}^{\prime} \mathbf{X}=\mathbf{k}^{\prime}
+\]</span>
+同时，我们有
+<span class="math display">\[
+\operatorname{Var}\left(\mathbf{a}^{\prime} \mathbf{y}\right)=\mathbf{a}^{\prime}(\operatorname{Var}(\mathbf{y})) \mathbf{a}=\mathbf{a}^{\prime} \mathbf{V a}
+\]</span>
+这里我们假设 <span class="math inline">\(\mathbf{V}\)</span> 矩阵已知。</p>
+因此我们是在满足约束条件 <span class="math inline">\(\mathbf{a}^{\prime} \mathbf{X}=\mathbf{k}^{\prime}\)</span> 的前提下使得 <span class="math inline">\(\mathbf{a&#39;Va}\)</span> 的对角线元素最小，构建拉格朗日函数如下
+<span class="math display">\[
+\mathbf{L}=\frac{1}{2}\mathbf{tr(a&#39;Va) + (a&#39;X-k&#39;)\boldsymbol{\theta}}
+\]</span>
+求偏导数，使之为 <span class="math inline">\(\mathbf{0}\)</span> 得到
+<span class="math display">\[
+\begin{aligned}
+&amp;\partial \mathbf{L} / \partial \mathbf{a}= \mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta}= \mathbf{0} \\
+&amp;\partial \mathbf{L} / \partial \boldsymbol{\theta}=\mathbf{X’a-k} = \mathbf{0}
+\end{aligned}
+\]</span>
+将两个式子整理成一个方程组，得到
+<span class="math display">\[
+\left(\begin{array}{cc}
+\mathbf{V} &amp; \mathbf{X} \\
+\mathbf{X}^{\prime} &amp; \mathbf{0}
+\end{array}\right)\left(\begin{array}{l}
+\mathbf{a} \\
+\boldsymbol{\theta}
+\end{array}\right)=\left(\begin{array}{l}
+\mathbf{0} \\
+\mathbf{k}
+\end{array}\right)
+\]</span>
+对第一个方程进行变换可得
+$$
+<span class="math display">\[\begin{aligned}
+\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta} &amp;= \mathbf{0} \\
+\mathbf{a}  &amp;= \mathbf{-V^{-1}X \boldsymbol{\theta}} \\
+\mathbf{X&#39;a}  &amp;= \mathbf{-X&#39;V^{-1}X \boldsymbol{\theta}} \\
+\mathbf{k}  &amp;= \mathbf{-X&#39;V^{-1}X \boldsymbol{\theta}} \\
+
+\end{aligned}\]</span>
+<p><span class="math display">\[
+因此我们得到了一个只关于 $\boldsymbol{\theta}$ 的方程组
+\]</span>
+ = 
+$$
+我们只需要证明对于任何一个广义逆 <span class="math inline">\(\mathbf{ (X&#39;V^{-1}X)^{-} }\)</span> ，<span class="math inline">\(\mathbf{(X&#39;V^{-1}X) (X&#39;V^{-1}X)^{-}k=k}\)</span> 均成立，则该方程组相容。因为 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> 可估计，因此必然存在某个 <span class="math inline">\(\mathbf{a_{0}}\)</span> 向量使得 <span class="math inline">\(\mathbf{k = X&#39;a_{0}}\)</span> ，因此上式可以写成 <span class="math inline">\(\mathbf{(X&#39;V^{-1}X) (X&#39;V^{-1}X)^{-}X&#39;a_{0}=X&#39;a_{0}}\)</span> 。我们设这里的 <span class="math inline">\(\mathbf{A=V^{-1/2}X}\)</span> ，这里的 <span class="math inline">\(\mathbf{V^{-1/2}}\)</span> 是 <span class="math inline">\(\mathbf{V^{1/2}}\)</span> 的逆矩阵，易得 <span class="math inline">\(\mathbf{(X&#39;V^{-1}X) (X&#39;V^{-1}X)^{-}X&#39;} = \mathbf{A&#39;A(A&#39;A)^{-}A&#39;V^{1/2}} = \mathbf{A&#39;V^{1/2}} =  \mathbf{X&#39;V^{-1/2} V^{1/2}} = \mathbf{X&#39;}\)</span> ，因此得证 <span class="math inline">\(\mathbf{(X&#39;V^{-1}X) (X&#39;V^{-1}X)^{-}X&#39;a_{0}=X&#39;a_{0}}\)</span> 。</p>
+<p>因此 <span class="math inline">\(\boldsymbol{\theta}\)</span> 的一个解为
+<span class="math display">\[
+\mathbf{-(X&#39;V^{-1}X)^{-}k}
+\]</span>
+带入到第一个方程 <span class="math inline">\(\mathbf{V} \mathbf{a}+\mathbf{X} \boldsymbol{\theta}= \mathbf{0}\)</span> ，得到
+<span class="math display">\[
+\mathbf{a}  = \mathbf{V^{-1}X (X&#39;V^{-1}X)^{-}k}
+\]</span>
+我们可以进一步证明无论 <span class="math inline">\(\mathbf{ (X&#39;V^{-1}X)^{-} }\)</span> 如何取值，<span class="math inline">\(\mathbf{a}\)</span> 均不变。同样设 <span class="math inline">\(\mathbf{A=V^{-1/2}X}\)</span> ，<span class="math inline">\(\mathbf{a}  = \mathbf{V^{-1}X (X&#39;V^{-1}X)^{-}k} = \mathbf{V^{-1}X (X&#39;V^{-1}X)^{-}X&#39;a_{0}}\)</span> ，则 <span class="math inline">\(\mathbf{a = V^{-1/2} A(A&#39;A)^{-}A&#39;V^{1/2}a_{0}}\)</span> 。根据广义逆的性质，无论 <span class="math inline">\((\mathbf{A}^{\prime} \mathbf{A})^{-}\)</span> 取何值， <span class="math inline">\(\mathbf{A}\left(\mathbf{A}^{\prime} \mathbf{A}\right)^{-} \mathbf{A}^{\prime}\)</span> 均保持不变，因此 <span class="math inline">\(\mathbf{a}\)</span> 保持不变。</p>
+<p>此时 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> 的 BLUE 为
+<span class="math display">\[
+\mathbf{a&#39;y} = \mathbf{k&#39;(X&#39;V^{-1}X)^{-}X&#39;V^{-1}y}
+\]</span>
+如果我们设
+<span class="math display">\[
+\boldsymbol{\beta^{0}} = \mathbf{(X&#39;V^{-1}X)^{-}X&#39;V^{-1}y}
+\]</span>
+即 <span class="math inline">\(\boldsymbol{\beta^{0}}\)</span> 是下式的任意一个解，即 <span class="math inline">\(\boldsymbol{\beta^{0}}\)</span> 是<strong>广义最小二乘方程组</strong>的一个解，其上标的 0 表示其是某一个解，而不是唯一解。
+<span class="math display">\[
+\mathbf{(X&#39;V^{-1}X)}\boldsymbol{\beta^{0}} = \mathbf{X&#39;V^{-1}y}
+\]</span>
+因此，我们得到 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta}\)</span> 的 BLUE 值就是 <span class="math inline">\(\mathbf{k}^{\prime} \boldsymbol{\beta^{0}}\)</span> 。</p>
+<h2 id="v-1-的计算简化"><span class="math inline">\(V^{-1}\)</span> 的计算简化</h2>
+<p>在广义最小二乘估计时需要计算 <span class="math inline">\(\mathbf{V^{-1}}\)</span> ，当表型值数据量很大时， <span class="math inline">\(\mathbf{V^{-1}}\)</span> 计算困难甚至无法计算。Henderson 在 1959 年给出了 <span class="math inline">\(\mathbf{V^{-1}}\)</span> 的一个计算公式，如下：
+<span class="math display">\[
+\mathbf{V}^{-1}=\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}
+\]</span>
+一般 <span class="math inline">\(\mathbf{R}^{-1}\)</span> 很好计算，如果我们可以轻松计算 <span class="math inline">\(\mathbf{G^{-1}}\)</span> 和 <span class="math inline">\(\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1}\)</span> 的话 ，那么采用这个公式计算 <span class="math inline">\(\mathbf{V^{-1}}\)</span> 就很有优势。在个体动物模型中貌似没法简单计算 <span class="math inline">\(\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1}\)</span> ，所以这个计算公式现在好像没啥用了。</p>
+<p><strong>证明</strong>：我们只需要证明 <span class="math inline">\(\mathbf{(R+ZGZ&#39;)} \left(\mathbf{R}^{-1}-\mathbf{R}^{-1} \mathbf{Z}\left(\mathbf{Z}^{\prime} \mathbf{R}^{-1} \mathbf{Z}+\mathbf{G}^{-1}\right)^{-1} \mathbf{Z}^{\prime} \mathbf{R}^{-1}\right)  = \mathbf{I}\)</span> 即可，我们有
+<span class="math display">\[
+\begin{aligned}
+&amp;\mathbf{\left(R+Z G Z^{\prime}\right)\left[R^{-1}-R^{-1} Z\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}\right]} \\
+&amp;=\mathbf{I+Z G Z^{\prime} R^{-1}-Z\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \\
+&amp; \quad-\mathbf{Z G Z^{\prime} R^{-1} Z\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \\
+&amp;=\mathbf{I+Z G Z^{\prime} R^{-1}-Z\left(I+G Z^{\prime} R^{-1} Z\right)\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \\
+&amp;=\mathbf{I+Z G Z^{\prime} R^{-1}-Z G\left(G^{-1}+Z^{\prime} R^{-1} Z\right)\left(Z^{\prime} R^{-1} Z+G^{-1}\right)^{-1} Z^{\prime} R^{-1}} \\
+&amp;=\mathbf{ I+Z G Z^{\prime} R^{-1}-Z G Z^{\prime} R^{-1}} \\
+&amp;=\mathbf{I}
+\end{aligned}
+\]</span>
 得证。</p>
 <p>其实这里可以推导出一个一般定理，如下：</p>
-<p>对于矩阵 $\mathbf{A}<em>{m \times m}, \mathbf{B}</em>{m \times n}, \mathbf{C}<em>{n \times n}, \mathbf{D}</em>{n \times m}$, 其中 $\mathbf{A}, \mathbf{C}, \mathbf{C}^{-1}+\mathbf{D}\mathbf{A}^{-1}\mathbf{B}$ 可逆，则存在以下结果，证明过程同上。<br>
-$$<br>
-(\boldsymbol{A}+\boldsymbol{B C D})^{-1}=\boldsymbol{A}^{-1}-\boldsymbol{A}^{-1} \boldsymbol{B}\left(\boldsymbol{C}^{-1}+\boldsymbol{D} \boldsymbol{A}^{-1} \boldsymbol{B}\right)^{-1} \boldsymbol{D} \boldsymbol{A}^{-1}<br>
-$$</p>
-<h2 id="BLUE的方差">BLUE的方差</h2>
-<p>假设我们有一个可估计的函数  $\mathbf{K}^{\prime} \boldsymbol{\beta^{0}}$  ，那么其方差为<br>
-$$<br>
-\begin{aligned}<br>
-\operatorname{Var}\left(\mathbf{K}^{\prime} \boldsymbol{\beta}^{o}\right) &amp;=\operatorname{Var}\left[\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}\right] \<br>
-&amp;=\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{V} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K} \<br>
-&amp;=\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K} \quad\text { 注：这里应该需要假设  } \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \text{是一个自反广义逆矩阵}<br>
-\end{aligned}<br>
-$$<br>
-由于   $\mathbf{K}^{\prime} \boldsymbol{\beta^{0}}$   可估计，因此一定可以找到一个矩阵 $\mathbf{A}<em>{0}$ 使得 $\mathbf{K = X’A</em>{0}}$ ，同上易证 $\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K} $ 具有不变性。</p>
-<h1>参考文献</h1>
-<ol>
+<p>对于矩阵 <span class="math inline">\(\mathbf{A}_{m \times m}, \mathbf{B}_{m \times n}, \mathbf{C}_{n \times n}, \mathbf{D}_{n \times m}\)</span>, 其中 <span class="math inline">\(\mathbf{A}, \mathbf{C}, \mathbf{C}^{-1}+\mathbf{D}\mathbf{A}^{-1}\mathbf{B}\)</span> 可逆，则存在以下结果，证明过程同上。
+<span class="math display">\[
+(\boldsymbol{A}+\boldsymbol{B C D})^{-1}=\boldsymbol{A}^{-1}-\boldsymbol{A}^{-1} \boldsymbol{B}\left(\boldsymbol{C}^{-1}+\boldsymbol{D} \boldsymbol{A}^{-1} \boldsymbol{B}\right)^{-1} \boldsymbol{D} \boldsymbol{A}^{-1}
+\]</span></p>
+<h2 id="blue的方差">BLUE的方差</h2>
+<p>假设我们有一个可估计的函数 <span class="math inline">\(\mathbf{K}^{\prime} \boldsymbol{\beta^{0}}\)</span> ，那么其方差为
+<span class="math display">\[
+\begin{aligned}
+\operatorname{Var}\left(\mathbf{K}^{\prime} \boldsymbol{\beta}^{o}\right) &amp;=\operatorname{Var}\left[\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{y}\right] \\
+&amp;=\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{V} \mathbf{V}^{-1} \mathbf{X}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K} \\
+&amp;=\mathbf{K}^{\prime}\left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \mathbf{K} \quad\text { 注：这里应该需要假设  } \left(\mathbf{X}^{\prime} \mathbf{V}^{-1} \mathbf{X}\right)^{-} \text{是一个自反广义逆矩阵}\
+\end{aligned}
+\]</span>
+由于 <span class="math inline">\(\mathbf{K}^{\prime} \boldsymbol{\beta^{0}}\)</span> 可估计，因此一定可以找到一个矩阵 <span class="math inline">\(\mathbf{A}_{0}\)</span> 使得 <span class="math inline">\(\mathbf{K = X&#39;A_{0}}\)</span> ，同上易证 $<sup>{}(</sup>{} ^{-1} )^{-}  $ 具有不变性。</p>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
 <li>Henderson，The Estimation of Environmental and Genetic Trends from Records Subject to Culling, 1959</li>
 <li>Henderson，《Applications_of_Linear_Models_in_Animal_Breeding》, 1984</li>
 <li>张沅，张勤，《畜禽育种中的线性模型》</li>
@@ -713,8 +717,22 @@ $$<br>
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

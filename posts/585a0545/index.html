@@ -96,9 +96,9 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>主要基于《数据科学中的R语言》的学习笔记。</p>
+  <p>主要基于《数据科学中的R语言》的学习笔记。</p>
 <span id="more"></span>
-<h1>dplyr</h1>
+<h1 id="dplyr">dplyr</h1>
 <p>dplyr 定义了数据处理的规范语法，其中主要包含以下10个主要的函数。</p>
 <ul>
 <li><code>mutate()</code>, <code>select()</code>, <code>rename()</code> , <code>filter()</code></li>
@@ -119,7 +119,7 @@
 <p>假设我们要新增一列奖励分 reward ，那么我们运行以下代码：</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">reward <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">2</span><span class="punctuation">,</span> <span class="number">5</span><span class="punctuation">,</span> <span class="number">9</span><span class="punctuation">,</span> <span class="number">8</span><span class="punctuation">,</span> <span class="number">5</span><span class="punctuation">,</span> <span class="number">6</span><span class="punctuation">)</span></span><br><span class="line">mutate<span class="punctuation">(</span>.data <span class="operator">=</span> df<span class="punctuation">,</span> extra <span class="operator">=</span> reward<span class="punctuation">)</span> </span><br></pre></td></tr></table></figure>
 <p><code>mutate()</code> 不会修改原数据框 <code>df</code>，而是会直接打印出来。</p>
-<p>其第一个参数是 <code>.data</code>，接受要处理的数据框，比如这里的<code>df</code>（由于几乎所有 dplyr 的函数第一个参数都是 这个，因此  <code>.data</code> 可以省略不写 ）。</p>
+<p>其第一个参数是 <code>.data</code>，接受要处理的数据框，比如这里的<code>df</code>（由于几乎所有 dplyr 的函数第一个参数都是 这个，因此 <code>.data</code> 可以省略不写 ）。</p>
 <p>第二个参数是<code>Name-value</code>对, 比如<code>extra = reward</code>。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">&gt;</span> mutate<span class="punctuation">(</span>.data <span class="operator">=</span> df<span class="punctuation">,</span> extra <span class="operator">=</span> reward<span class="punctuation">)</span> </span><br><span class="line">   name    type score extra</span><br><span class="line"><span class="number">1</span> Alice english    <span class="number">80</span>     <span class="number">2</span></span><br><span class="line"><span class="number">2</span> Alice    math    <span class="number">60</span>     <span class="number">5</span></span><br><span class="line"><span class="number">3</span>   Bob english    <span class="number">70</span>     <span class="number">9</span></span><br><span class="line"><span class="number">4</span>   Bob    math    <span class="number">69</span>     <span class="number">8</span></span><br><span class="line"><span class="number">5</span> Carol english    <span class="number">80</span>     <span class="number">5</span></span><br><span class="line"><span class="number">6</span> Carol    math    <span class="number">90</span>     <span class="number">6</span></span><br></pre></td></tr></table></figure>
 <p>使用管道的方式如下，这是更加通用的写法。</p>
@@ -179,20 +179,20 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">df_new %&gt;% arrange(-total)</span><br><span class="line">df_new %&gt;% arrange(desc(total))</span><br></pre></td></tr></table></figure>
 <p>也可对多个变量依次排序。比如，我们先按学科类型排序，然后按照成绩从高到底降序排列</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">df_new <span class="operator">%&gt;%</span> </span><br><span class="line">  arrange<span class="punctuation">(</span>type<span class="punctuation">,</span> desc<span class="punctuation">(</span>total<span class="punctuation">)</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-<h2 id="左联结-left-join">左联结 <code>left_join()</code></h2>
+<h2 id="左联结-left_join">左联结 <code>left_join()</code></h2>
 <p>左联结是保存第一个表的所有内容，第二个表的内容允许缺失（NA）。</p>
 <p>正常写法如下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">left_join(df1, df2, by = &quot;name&quot;)</span><br></pre></td></tr></table></figure>
 <p>管道写法如下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df1 %&gt;% left_join(df2, by = &quot;name&quot;)</span><br></pre></td></tr></table></figure>
-<h2 id="右联结-right-join">右联结 <code>right_join()</code></h2>
+<h2 id="右联结-right_join">右联结 <code>right_join()</code></h2>
 <p>右联结同理</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df1 %&gt;% right_join(df2, by = &quot;name&quot;)</span><br></pre></td></tr></table></figure>
-<h2 id="满联结-full-join">满联结 <code>full_join()</code></h2>
+<h2 id="满联结-full_join">满联结 <code>full_join()</code></h2>
 <p>有时候，我们不想丢失项，可以使用<code>full_join()</code>，该函数确保条目是完整的，信息缺失的地方为<code>NA</code>。</p>
 <p>也就是两个表的键的<strong>并集</strong>。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df1 %&gt;% full_join(df2, by = &quot;name&quot;)</span><br></pre></td></tr></table></figure>
-<h2 id="内联结inner-join">内联结<code>inner_join()</code></h2>
+<h2 id="内联结inner_join">内联结<code>inner_join()</code></h2>
 <p>两个表的键的<strong>交集</strong>（两个表的共同的键）。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df1 %&gt;% inner_join(df2, by = &quot;name&quot;)</span><br></pre></td></tr></table></figure>
 <h2 id="去重-distinct">去重 <code>distinct()</code></h2>
@@ -217,13 +217,13 @@
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">df <span class="operator">%&gt;%</span>  count<span class="punctuation">(</span>score <span class="operator">&gt;</span> <span class="number">70</span><span class="punctuation">)</span></span><br><span class="line">df <span class="operator">%&gt;%</span>  count<span class="punctuation">(</span>type<span class="punctuation">,</span> score <span class="operator">&gt;</span> <span class="number">70</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">  score &gt; 70 n</span><br><span class="line">1      FALSE 3</span><br><span class="line">2       TRUE 3</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">     type score &gt; 70 n</span><br><span class="line">1 english      FALSE 1</span><br><span class="line">2 english       TRUE 2</span><br><span class="line">3    math      FALSE 2</span><br><span class="line">4    math       TRUE 1</span><br></pre></td></tr></table></figure>
-<h1>数据规整</h1>
+<h1 id="数据规整">数据规整</h1>
 <h2 id="宽表格变成长表格">宽表格变成长表格</h2>
 <p>假定这里有 <code>A</code>, <code>B</code>, <code>C</code> 和 <code>D</code> 四种植物每天生长的记录，</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">plant_height <span class="operator">&lt;-</span> data.frame<span class="punctuation">(</span></span><br><span class="line">  Day <span class="operator">=</span> <span class="number">1</span><span class="operator">:</span><span class="number">5</span><span class="punctuation">,</span></span><br><span class="line">  A <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">0.7</span><span class="punctuation">,</span> <span class="number">1.0</span><span class="punctuation">,</span> <span class="number">1.5</span><span class="punctuation">,</span> <span class="number">1.8</span><span class="punctuation">,</span> <span class="number">2.2</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  B <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">0.5</span><span class="punctuation">,</span> <span class="number">0.7</span><span class="punctuation">,</span> <span class="number">0.9</span><span class="punctuation">,</span> <span class="number">1.3</span><span class="punctuation">,</span> <span class="number">1.8</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  C <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">0.3</span><span class="punctuation">,</span> <span class="number">0.6</span><span class="punctuation">,</span> <span class="number">1.0</span><span class="punctuation">,</span> <span class="number">1.2</span><span class="punctuation">,</span> <span class="number">2.2</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">  D <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">0.4</span><span class="punctuation">,</span> <span class="number">0.7</span><span class="punctuation">,</span> <span class="number">1.2</span><span class="punctuation">,</span> <span class="number">1.5</span><span class="punctuation">,</span> <span class="number">3.2</span><span class="punctuation">)</span></span><br><span class="line"><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">plant_height</span><br></pre></td></tr></table></figure>
 <p>假如我们想用不同的颜色画出四种植物<strong>生长曲线</strong>，然而，发现遇到了问题？数据的格式与我们期望的不一样！</p>
 <p>怎么解决呢？想用上面的语句，数据就得变形。那么怎么变形呢？</p>
-<p><img src="1.png" alt=""></p>
+<p><img src="1.png" /></p>
 <p>我们可以使用下面两个函数</p>
 <ul>
 <li><code>tidyr::pivot_longer()</code> 宽表格变成长表格</li>
@@ -255,13 +255,13 @@
 <p>我们想原始数据框的<strong>列名</strong>，转换成多个变量，比如<code>A,B,C</code>成为物种(species)变量，（height, width, depth）成为parameter变量。</p>
 <p>用<code>pivot_longer()</code>函数，</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">plant_record <span class="operator">%&gt;%</span> </span><br><span class="line">  tidyr<span class="operator">::</span>pivot_longer<span class="punctuation">(</span></span><br><span class="line">    cols <span class="operator">=</span> <span class="operator">!</span>day<span class="punctuation">,</span></span><br><span class="line">    names_to <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;species&quot;</span><span class="punctuation">,</span> <span class="string">&quot;parameter&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">    names_pattern <span class="operator">=</span> <span class="string">&quot;(.*)_(.*)&quot;</span><span class="punctuation">,</span></span><br><span class="line">    values_to <span class="operator">=</span> <span class="string">&quot;value&quot;</span></span><br><span class="line"><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
-<p><img src="2.png" alt=""></p>
+<p><img src="2.png" /></p>
 <p>我们希望原始数据框的列名中，一部分进入变量，一部分保持原来的列名：</p>
 <p>其中 <code>.value</code> 说明这里不是单个列名，而是匹配得到的多个值做列名。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">plant_record_longer <span class="operator">&lt;-</span> plant_record <span class="operator">%&gt;%</span> </span><br><span class="line">  tidyr<span class="operator">::</span>pivot_longer<span class="punctuation">(</span></span><br><span class="line">   cols <span class="operator">=</span> <span class="operator">!</span>day<span class="punctuation">,</span></span><br><span class="line">   names_to <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;species&quot;</span><span class="punctuation">,</span> <span class="string">&quot;.value&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">   names_pattern <span class="operator">=</span> <span class="string">&quot;(.*)_(.*)&quot;</span></span><br><span class="line"><span class="punctuation">)</span></span><br><span class="line">plant_record_longer</span><br></pre></td></tr></table></figure>
-<p><img src="3.png" alt=""></p>
+<p><img src="3.png" /></p>
 <p>反过来，又该怎么弄呢？</p>
-<p><img src="4.png" alt=""></p>
+<p><img src="4.png" /></p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">plant_record_longer <span class="operator">%&gt;%</span> </span><br><span class="line">  tidyr<span class="operator">::</span>pivot_wider<span class="punctuation">(</span></span><br><span class="line">    names_from <span class="operator">=</span> species<span class="punctuation">,</span></span><br><span class="line">    values_from <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span>height<span class="punctuation">,</span> width<span class="punctuation">,</span> depth<span class="punctuation">)</span><span class="punctuation">,</span></span><br><span class="line">    names_glue <span class="operator">=</span> <span class="string">&quot;&#123;species&#125;_&#123;.value&#125;&quot;</span></span><br><span class="line">  <span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
 <h2 id="separate-与-unite"><code>separate()</code> 与 <code>unite()</code></h2>
 <p><code>separate()</code> 用于将一列基于某个分隔符拆分为多列。其常用参数为：</p>
@@ -279,7 +279,7 @@
 <li>参数<code>remove</code> ： 是否移除需要合并的列</li>
 </ul>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tb1 %&gt;%</span><br><span class="line">  unite(col = &quot;price&quot;, c(low, high), sep = &quot;:&quot;, remove = FALSE)</span><br></pre></td></tr></table></figure>
-<h2 id="drop-na-与-replace-na"><code>drop_na()</code> 与 <code>replace_na()</code></h2>
+<h2 id="drop_na-与-replace_na"><code>drop_na()</code> 与 <code>replace_na()</code></h2>
 <p>使用数据如下</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">df <span class="operator">&lt;-</span> tibble<span class="operator">::</span>tribble<span class="punctuation">(</span></span><br><span class="line">    <span class="operator">~</span>name<span class="punctuation">,</span>     <span class="operator">~</span>type<span class="punctuation">,</span> <span class="operator">~</span>score<span class="punctuation">,</span> <span class="operator">~</span>extra<span class="punctuation">,</span></span><br><span class="line">  <span class="string">&quot;Alice&quot;</span><span class="punctuation">,</span> <span class="string">&quot;english&quot;</span><span class="punctuation">,</span>     <span class="number">80</span><span class="punctuation">,</span>     <span class="number">10</span><span class="punctuation">,</span></span><br><span class="line">  <span class="string">&quot;Alice&quot;</span><span class="punctuation">,</span>    <span class="string">&quot;math&quot;</span><span class="punctuation">,</span>     <span class="literal">NA</span><span class="punctuation">,</span>      <span class="number">5</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;Bob&quot;</span><span class="punctuation">,</span> <span class="string">&quot;english&quot;</span><span class="punctuation">,</span>     <span class="literal">NA</span><span class="punctuation">,</span>      <span class="number">9</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;Bob&quot;</span><span class="punctuation">,</span>    <span class="string">&quot;math&quot;</span><span class="punctuation">,</span>     <span class="number">69</span><span class="punctuation">,</span>     <span class="literal">NA</span><span class="punctuation">,</span></span><br><span class="line">  <span class="string">&quot;Carol&quot;</span><span class="punctuation">,</span> <span class="string">&quot;english&quot;</span><span class="punctuation">,</span>     <span class="number">80</span><span class="punctuation">,</span>     <span class="number">10</span><span class="punctuation">,</span></span><br><span class="line">  <span class="string">&quot;Carol&quot;</span><span class="punctuation">,</span>    <span class="string">&quot;math&quot;</span><span class="punctuation">,</span>     <span class="number">90</span><span class="punctuation">,</span>      <span class="number">5</span></span><br><span class="line">  <span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">df</span><br></pre></td></tr></table></figure>
 <p>如果score列中有缺失值<code>NA</code>，就删除所在的行</p>
@@ -292,7 +292,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df %&gt;% mutate(score = replace_na(score, 0))</span><br></pre></td></tr></table></figure>
 <p>如果将 score 中的 NA 替换为平均值</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">df %&gt;%</span><br><span class="line">  mutate(</span><br><span class="line">    score = replace_na(score, mean(score, na.rm = TRUE))</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
-<h1>字符串处理  (正则)</h1>
+<h1 id="字符串处理-正则">字符串处理 (正则)</h1>
 <h2 id="字符串长度">字符串长度</h2>
 <p>想获取字符串的长度，可以使用<code>str_length()</code>函数</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str_length(&quot;R for data science&quot;)</span><br></pre></td></tr></table></figure>
@@ -352,7 +352,7 @@
 <p>如果输入的是一个单个字符串，也可以使用 <code>str_split_1()</code> 函数，输出为一个字符串向量。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str_split_1(lines, &quot; &quot;)</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str_split_1(lines, &quot; &quot;)</span><br></pre></td></tr></table></figure>
-<h1>因子型变量</h1>
+<h1 id="因子型变量">因子型变量</h1>
 <h2 id="什么是因子">什么是因子</h2>
 <p>因子是把数据进行<strong>分类</strong>并标记为不同层级(level，有时候也翻译成因子水平， 我个人觉得翻译为层级，更接近它的特性，因此，我都会用层级来描述)的数据对象，他们可以存储字符串和整数。因子类型有三个属性：</p>
 <ul>
@@ -365,7 +365,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[1] low    high   medium medium low    high   high  </span><br><span class="line">Levels: high low medium</span><br></pre></td></tr></table></figure>
 <p>因子层级会自动按照<strong>字符串的字母顺序排序</strong>，比如<code>high low medium</code>。也可以指定顺序，</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">factor(income, levels = c(&quot;low&quot;, &quot;high&quot;, &quot;medium&quot;) )</span><br></pre></td></tr></table></figure>
-<p>不属于因子层级中的值, 会作为缺失值。比如这里因子层只有<code>c(&quot;low&quot;, &quot;high&quot;)</code>，那么”medium”会被当作NA。</p>
+<p>不属于因子层级中的值, 会作为缺失值。比如这里因子层只有<code>c("low", "high")</code>，那么”medium”会被当作NA。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">factor(income, levels = c(&quot;low&quot;, &quot;high&quot;) )</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[1] low  high &lt;NA&gt; &lt;NA&gt; low  high high</span><br><span class="line">Levels: low high</span><br></pre></td></tr></table></figure>
 <p>在R 4.0之前，<code>data.frame()</code>中<code>stringsAsFactors</code>选项，默认将字符串类型转换为因子类型，但这个默认也带来一些不方便，因此在R 4.0之后取消了这个默认。</p>
@@ -393,7 +393,7 @@
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x <span class="operator">%&gt;%</span> fct_reorder<span class="punctuation">(</span>x<span class="punctuation">,</span> .fun <span class="operator">=</span> <span class="built_in">length</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[1] low    high   medium medium low    high   high  </span><br><span class="line">Levels: low medium high</span><br></pre></td></tr></table></figure>
 <h2 id="应用">应用</h2>
-<h3 id="fct-reorder">fct_reorder()</h3>
+<h3 id="fct_reorder">fct_reorder()</h3>
 <p>调整因子层级有什么用呢？</p>
 <p>这个功能在 <code>ggplot()</code> 可视化中调整分类变量的顺序非常方便。这里我们使用以下数据框</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">d &lt;- tibble(</span><br><span class="line">  x = c(&quot;a&quot;,&quot;a&quot;, &quot;b&quot;, &quot;b&quot;, &quot;c&quot;, &quot;c&quot;),</span><br><span class="line">  y = c(2, 2, 1, 5,  0, 3)</span><br><span class="line">  </span><br><span class="line">)</span><br><span class="line">d</span><br></pre></td></tr></table></figure>
@@ -412,13 +412,13 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">d %&gt;% </span><br><span class="line">  ggplot(aes(x = fct_reorder(x, y, .fun = median, .desc = TRUE), y = y)) +</span><br><span class="line">  geom_point()</span><br></pre></td></tr></table></figure>
 <p>但这样会造成x坐标标签一大串，因此建议可以写<code>mutate()</code>函数里</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">d %&gt;% </span><br><span class="line">  mutate(x = fct_reorder(x, y, .fun = median, .desc = TRUE)) %&gt;% </span><br><span class="line">  ggplot(aes(x = x, y = y)) +</span><br><span class="line">  geom_point()</span><br></pre></td></tr></table></figure>
-<h3 id="fct-rev">fct_rev()</h3>
+<h3 id="fct_rev">fct_rev()</h3>
 <p>按照因子层级的逆序排序，原来是 a-b-c，逆序排列就是 c-b-a 。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">d %&gt;% </span><br><span class="line">  mutate(x = fct_rev(x)) %&gt;% </span><br><span class="line">  ggplot(aes(x = x, y = y)) +</span><br><span class="line">  geom_point()</span><br></pre></td></tr></table></figure>
-<h3 id="fct-relevel">fct_relevel()</h3>
+<h3 id="fct_relevel">fct_relevel()</h3>
 <p>自定义因子层级的排序方式</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">d %&gt;% </span><br><span class="line">  mutate(</span><br><span class="line">    x = fct_relevel(x, c(&quot;c&quot;, &quot;a&quot;, &quot;b&quot;))</span><br><span class="line">  ) %&gt;% </span><br><span class="line"></span><br><span class="line">  ggplot(aes(x = x, y = y)) +</span><br><span class="line">  geom_point()</span><br></pre></td></tr></table></figure>
-<h1><s>简单数据框</s></h1>
+<h1 id="简单数据框"><del>简单数据框</del></h1>
 <p>个人感觉 tibble 用处不大</p>
 <h2 id="人性化的tibble">人性化的tibble</h2>
 <p>tibble继承了data.frame，是弱类型的。换句话说，tibble是data.frame的子类型。</p>
@@ -507,7 +507,7 @@
 <p>把行索引转换为单独的一列</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rowid_to_column(df, var = &quot;rowid&quot;)</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">##   rowid  mpg cyl disp</span><br><span class="line">## 1     1 21.0   6  160</span><br><span class="line">## 2     2 21.0   6  160</span><br><span class="line">## 3     3 22.8   4  108</span><br></pre></td></tr></table></figure>
-<h1>函数式编程</h1>
+<h1 id="函数式编程">函数式编程</h1>
 <h2 id="向量化运算">向量化运算</h2>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a &lt;- c(2, 4, 3, 1, 5, 7)</span><br></pre></td></tr></table></figure>
 <p>用<code>for()</code>循环，让向量的每个元素乘以2</p>
@@ -524,11 +524,11 @@
 <p>要想访问某个元素，可以这样</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a_list[&quot;num&quot;]</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">## $num</span><br><span class="line">## [1] 8 9</span><br></pre></td></tr></table></figure>
-<p>注意返回结果，第一行是<code>$num</code>，说明返回的结果仍然是列表, 相比<code>a_list</code>来说，<code>a_list[&quot;num&quot;]</code>是只包含一个元素的列表。</p>
+<p>注意返回结果，第一行是<code>$num</code>，说明返回的结果仍然是列表, 相比<code>a_list</code>来说，<code>a_list["num"]</code>是只包含一个元素的列表。</p>
 <p>想将num元素里面的向量提取出来，就得用两个<code>[[</code></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a_list[[&quot;num&quot;]]</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">## [1] 8 9</span><br></pre></td></tr></table></figure>
-<p>大家知道程序员都是偷懒的，为了节省体力，用一个美元符号<code>$</code>代替<code>[[&quot; &quot;]]</code>六个字符</p>
+<p>大家知道程序员都是偷懒的，为了节省体力，用一个美元符号<code>$</code>代替<code>[[" "]]</code>六个字符</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a_list$num</span><br></pre></td></tr></table></figure>
 <p>在tidyverse里，还可以用</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a_list %&gt;% pluck(1)</span><br></pre></td></tr></table></figure>
@@ -581,7 +581,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exams %&gt;% map_df(mean)</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">## # A tibble: 1 × 5</span><br><span class="line">##   student1 student2 student3 student4 student5</span><br><span class="line">##      &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;</span><br><span class="line">## 1     77.8     81.4       69     78.9     73.2</span><br></pre></td></tr></table></figure>
 <p>更多函数见下图</p>
-<p><img src="5.png" alt=""></p>
+<p><img src="5.png" /></p>
 <h3 id="额外参数">额外参数</h3>
 <p>将每位同学的成绩排序，默认的是升序。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">map(exams, sort)</span><br></pre></td></tr></table></figure>
@@ -606,7 +606,7 @@
 <h2 id="map2">map2()</h2>
 <p>事实上，purrr()家族还有其它<code>map()</code>函数，可以在多个向量中迭代。也就说，同时接受多个向量的元素，并行计算。比如，<code>map2()</code>函数可以处理两个向量，而<code>pmap()</code>函数可以处理更多向量。</p>
 <p><code>map2()</code>函数和<code>map()</code>函数类似，不同在于<code>map2()</code>接受两个的向量，这两个向量必须是<strong>等长</strong></p>
-<p><img src="6.png" alt=""></p>
+<p><img src="6.png" /></p>
 <p>在<code>map()</code>函数使用匿名函数，可以用 <code>.</code> 代表输入向量的每个元素。在<code>map2()</code>函数， <code>.</code>不够用，所有需要需要用 <code>.x</code> 代表第一个向量的元素，<code>.y</code>代表第二个向量的元素</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x &lt;- c(1, 2, 3)</span><br><span class="line">y &lt;- c(4, 5, 6)</span><br><span class="line"></span><br><span class="line">map2(x, y, ~ .x + .y)</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">## [[1]]</span><br><span class="line">## [1] 5</span><br><span class="line">## </span><br><span class="line">## [[2]]</span><br><span class="line">## [1] 7</span><br><span class="line">## </span><br><span class="line">## [[3]]</span><br><span class="line">## [1] 9</span><br></pre></td></tr></table></figure>
@@ -626,7 +626,7 @@
 <p>tibble本质上就是list，这种结构就是<code>pmap()</code>所需要的，因此，直接应用函数即可。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">tibble(</span><br><span class="line">  a = c(50, 60, 70),</span><br><span class="line">  b = c(10, 90, 40),</span><br><span class="line">  c = c(1, 105, 200)</span><br><span class="line">) %&gt;% </span><br><span class="line">  pmap_dbl(min)</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">## [1]  1 60 40</span><br></pre></td></tr></table></figure>
-<h3 id="匿名函数-2">匿名函数</h3>
+<h3 id="匿名函数-1">匿名函数</h3>
 <p><code>pmap()</code>可以接受多个向量，因此在<code>pmap()</code>种使用匿名函数，就需要一种新的方法来标识每个向量。</p>
 <p>由于向量是多个，因此不再用<code>.x</code>， <code>.y</code>，而是用<code>..1</code>, <code>..2</code>, <code>..3</code> 分别代表第一个向量、第二个向量和第三个向量。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pmap(</span><br><span class="line">  list(1:5, 5:1, 2), ~ ..1 + ..2 - ..3</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
@@ -1066,8 +1066,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>

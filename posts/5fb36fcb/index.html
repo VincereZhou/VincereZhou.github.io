@@ -92,10 +92,10 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>参考一篇文献中的做法，可以利用多等位标记进行GWAS分析。</p>
+  <p>参考一篇文献中的做法，可以利用多等位标记进行GWAS分析。</p>
 <span id="more"></span>
 <p>多等位标记和一般的二等位标记的处理不同的地方主要就是质控填充这一块，还有就是如何将多等位标记转为二等位标记。</p>
-<h1>质控</h1>
+<h1 id="质控">质控</h1>
 <p>使用 vcftools 进行质控，举例如下，质控标准为：</p>
 <ul>
 <li>等位碱基数目为 2 或 3</li>
@@ -105,15 +105,15 @@
 <p>这里 <code>--recode-INFO-all</code> 是保留所有的 INFO 信息；<code>--recode -c</code> 是打印到屏幕上，然后使用 <code>bgzip -c</code> 进行压缩。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vcftools --gzvcf ../vcf.finalINDEL.vcf.gz --min-alleles 2 --max-alleles 3 --max-missing 0.9 --maf 0.05 --recode-INFO-all --recode -c |bgzip -c &gt; qc2.vcf.gz &amp;</span><br></pre></td></tr></table></figure>
 <p>测试 vcftools 质控哈温平衡 (<code>--hwe 0.000001</code>) ，发现所有的多等位碱基均被剔除了，因此对于含有多等位碱基的基因型数据不建议质控哈温平衡。</p>
-<h1>填充</h1>
-<p>使用 shapeit4 填充，发现填充结果中所有的多等位碱基均被剔除，因此说明 shapeit4  只能填充二等位碱基的标记。</p>
+<h1 id="填充">填充</h1>
+<p>使用 shapeit4 填充，发现填充结果中所有的多等位碱基均被剔除，因此说明 shapeit4 只能填充二等位碱基的标记。</p>
 <p>改为使用 beagle 5.2 填充，多等位碱基的标记可以正常填充，填充前后位点数目一致，检查前 10000 个位点发现填充基因前后基因型一致，说明填充没有问题。</p>
-<h1>拆分多等位位点</h1>
+<h1 id="拆分多等位位点">拆分多等位位点</h1>
 <p>使用 bcftools norm 拆分多等位位点（一个多等位标记拆分位多行，每一个 alt 基因占据一行）， 具体命令如下，查看拆分结果，发现其结果就是将其它 alt 变异的基因型改为 0（同 ref 碱基） 。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcftools norm --multiallelics -both val_all_phased_auto.vcf.gz -Oz -o val_all_phased_norm.vcf.gz &amp;</span><br></pre></td></tr></table></figure>
 <p>拆分后的 VCF 就满足了二等位的条件，可以正常进行 GWAS 分析。</p>
-<h1>参考文献</h1>
-<p>1.Blaj I, Tetens J, Bennewitz J, et al. Structural variants and tandem repeats in the founder individuals of four F2 pig crosses and implications to F2 GWAS results[J]. BMC genomics, 2022, 23(1): 1-14.</p>
+<h1 id="参考文献">参考文献</h1>
+<p>1.Blaj I, Tetens J, Bennewitz J, et al. Structural variants and tandem repeats in the founder individuals of four F2 pig crosses and implications to F2 GWAS results[J]. BMC genomics, 2022, 23(1): 1-14.</p>
  
       <!-- reward -->
       
@@ -539,8 +539,22 @@
 <!-- CanvasBackground -->
 
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
     
   </div>
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
 
 </html>
