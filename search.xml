@@ -10,7 +10,7 @@
 <h2 id="公式的问题">公式的问题</h2>
 <p>公式我之前用的是 <code>markdown-it-latex2img</code> ，一通查找，根据浏览器开发工具和AI的解释，发现这个插件挂了。</p>
 <p>原因是<code>markdown-it-latex2img</code>默认走的是 <strong>math.now.sh远程服务</strong> 。把你的 LaTeX 公式发给 <strong>math.now.sh这个第三方网站</strong> → 它用 MathJax 在服务端渲染 → 返回一个图片。<strong>这个服务现在已经挂了/极不稳定</strong>，所以所有公式 <code>&lt;img&gt;</code>全是裂开的，浏览器显示”资源解析服务请求失败”。</p>
-<p>然后 AI 让我 <code>hexo-renderer-marked</code> + <code>hexo-filter-mathjax</code> ，公式显示还是不行（忘记咋样了）。后来 AI 让我用 <code>hexo-renderer-markdown-it</code> + <code>hexo-filter-mathjax</code> ，公式显示还是不行，比如 <code>$\mathbf&#123;H&#125;_&#123;1&#125;$</code> 就不会正常显示，<code>_1</code>会当成 <em>斜体</em>， AI 让我将所有公式都用 <code></code> 包起来，醉了。</p>
+<p>然后 AI 让我 <code>hexo-renderer-marked</code> + <code>hexo-filter-mathjax</code> ，公式显示还是不行（忘记咋样了）。后来 AI 让我用 <code>hexo-renderer-markdown-it</code> + <code>hexo-filter-mathjax</code> ，公式显示还是不行，比如 <code>$\mathbf&#123;H&#125;_&#123;1&#125;$</code> 就不会正常显示，<code>_1</code>会当成 <em>斜体</em>， AI 让我将所有公式都用  包起来，醉了。</p>
 <p>我查看了除了 <code>marked</code> 和 <code>markdown-it</code> ，还有 <code>pandoc</code> 这一个方式，但是 AI 一直建议我坚持用 <code>markdown-it</code> ，别用 <code>pandoc</code> 。最后我强制让 AI 给出 <code>pandoc</code> 的解决思路，结果最后用 <code>pandoc</code> 和 前缀 <code>mathjax</code> 完全解决了这个问题。</p>
 <p>顺便说一句，以前我没遇到公式显示问题，那是因为 <code>markdown-it-latex2img</code> 直接转换成图片了，所以不会被错误解释成 HTML 的结构。</p>
 <h2 id="图片的问题">图片的问题</h2>
