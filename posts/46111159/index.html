@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    HTML中空白符号和多余空格的处理 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-HTML中空白符号和多余空格的处理"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  HTML中空白符号和多余空格的处理
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/46111159/" class="article-date">
+  <time datetime="2026-06-17T09:14:18.000Z" itemprop="datePublished">2026-06-17</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">5.7k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">21 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>HTML 的空白字符处理规则，<strong>连续的空白字符（换行+空格）会被折叠成 1 个空格</strong>。所以有时渲染的页面里会有一个多余的空格，你要是不介意也没事，</p>
+<span id="more"></span>
+<h1 id="html-中的空白">HTML 中的空白</h1>
+<p>比如下面这两个代码片段是等效的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;p id=&quot;noWhitespace&quot;&gt;狗狗很 呆 萌。&lt;/p&gt;</span><br><span class="line"></span><br><span class="line">&lt;p id=&quot;whitespace&quot;&gt;狗狗很</span><br><span class="line">    呆</span><br><span class="line">        萌。&lt;/p&gt;</span><br></pre></td></tr></table></figure>
+<p>无论你在 HTML 元素内容中使用了多少空白（可以包括一个或多个空格字符，也包括换行），<strong>HTML 解析器在渲染代码时都会将每个空白序列减少为单个空格</strong>。</p>
+<p>那么为什么要使用这么多空白呢？答案是可读性。这里主要指的是<strong>代码缩进</strong>，一般每个嵌套的元素都比它所在的元素多缩进两个空格，这种结构易于人类阅读。</p>
+<p>但是<strong>你在代码编辑器里为了“保持格式美观”而敲下的缩进空格（以及换行符），和你在文字内容里打出的空格，是没有任何区别的</strong>。它们都是实实在在的空白字符（U+0020），都会被纳入“空白序列”的解析过程中。</p>
+<h1 id="容易产生的问题">容易产生的问题</h1>
+<p>最常见的情况如下，就是一段话可能很长，可能就人为分成了多行</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">表 1.1　所有性状显著位点和候选基因数目统计表</span><br><span class="line">Table 1.1 Summary statistics of significant loci and candidate genes across all traits</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在谷歌浏览器显示的效果如下，这两行还是会变成一行，其中的换行符就变成一个空格。（如果是一段连续的内容看着就有点间断了）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">表 1.1　所有性状显著位点和候选基因数目统计表 Table 1.1 Summary statistics of significant loci and candidate genes across all traits </span><br></pre></td></tr></table></figure>
+<p>这里其实还要分情况讨论：</p>
+<ol type="1">
+<li>英文内容：没有关系，因为英文本身就是靠空格分隔的，只有在一个需要空格的地方换行就行</li>
+<li>中文内容：有问题，因为中文内容本身是没有空格的。多出一个空格其实是不规范的。</li>
+</ol>
+<h1 id="解决办法">解决办法</h1>
+<ol type="1">
+<li><p>不要换行（一行要是太长了，可读性变差，查看源码要一直滑动水平滚动条，额，不过可以用编辑器的自动换行功能，但是总体来说还是不推荐）</p></li>
+<li><p>用 HTML 注释吃掉换行，举例如下。原理是换行符号被包在注释里了，而注释是不会被解析的（这种写法也影响了可读性）。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">class</span>=<span class="string">&#x27;paragraph&#x27;</span>&gt;</span>提取合格的gDNA... 20-24 小时，<span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">--&gt;</span>接着对 gDNA 进行片段化...<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>用火狐浏览器（中文会移除换行产生的空格，这样不用做任何改变）。不过要是发给客户就不行了，因为不太能要求客户更换或安装浏览器，毕竟谷歌系浏览器是主流。</p></li>
+<li><p>不管它，多一个空格就多一个空格（强迫症做不到）</p></li>
+</ol>
+<p>总体来说，只能无奈使用 HTML 注释吃掉换行。这纯粹是一种妥协性的做法，这是谷歌/edge这些浏览器没有考虑中文造成的问题（火狐不错，给火狐点赞）。</p>
+<p>第二种做法其实是利用了标签内部的空白符号是被HTML忽视的，比如</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 这四个完全等价，解析结果一模一样 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">caption</span> <span class="attr">class</span>=<span class="string">&quot;x&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">caption</span></span></span><br><span class="line"><span class="tag">  <span class="attr">class</span>=<span class="string">&quot;x&quot;</span></span></span><br><span class="line"><span class="tag">&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">caption</span> <span class="attr">class</span>=<span class="string">&quot;x&quot;</span> &gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">caption</span>  <span class="attr">class</span>  =  <span class="string">&quot;x&quot;</span>  &gt;</span></span><br></pre></td></tr></table></figure>
+<p>所以不是只有注释标签<code>&lt;!-- --&gt;</code> ，其他也可以这么做（就可以用本身的标签这么做，拆分到两行中）。比如下面将 <code>&lt;br&gt;</code> 拆分到两行中（将换行符 <code>\n</code> 包在 <code>&lt;br&gt;</code> 中）。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">caption</span>&gt;</span>表 1.1　所有性状显著位点和候选基因数目统计表<span class="tag">&lt;<span class="name">br</span></span></span><br><span class="line"><span class="tag">&gt;</span>Table 1.1 Summary statistics of significant loci and candidate genes across all traits<span class="tag">&lt;/<span class="name">caption</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="原理">原理</h1>
+<p><strong>HTML中元素中的空白字符最终的渲染行为，由 CSS 的 white-space 属性决定。</strong></p>
+<p>但是”标签定义内部”（<code>&lt;</code>和 <code>&gt;</code>之间，不含属性值里面）中的空白字符（换行、缩进、多余空格）<strong>会被忽略，且不进 DOM</strong>。</p>
+<h2 id="html中的空白字符">HTML中的空白字符</h2>
+<p>空白字符在不同编程语言环境中具有不同含义。对文档空白字符而言，仅包含空格（U+0020）、制表符（U+0009）、换行符（LF，U+000A）和回车符（CR，U+000D），其中回车符在所有方面都等同于空格。这些字符可用于格式化代码以提升可读性。我们的源代码中充斥着大量此类空白字符，通常仅在生产构建阶段为缩减文件大小而将其移除。</p>
+<p>请注意，此列表不包含不可分割空格（U+00A0，HTML 中的 <code>&amp;nbsp;</code>）。因此这些字符不会触发任何折叠 (<strong>Collapsing</strong>，)，这也是它们常被用于在 HTML 中创建更长空格的原因。</p>
+<p>CSS 还定义了<a target="_blank" rel="noopener" href="https://drafts.csswg.org/css-text-4/#segment-break"><em>分段符</em></a>的概念，在 HTML 语境中其功能等同于换行符。</p>
+<p>根据 <strong>HTML 标准（WHATWG 规范）</strong>，被官方定义为“空白字符”（White space characters）的共有 <strong>5 个</strong>。</p>
+<p>我按日常使用频率从高到低列给你：</p>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 10%" />
+<col style="width: 7%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr>
+<th>字符名称</th>
+<th>Unicode 编码</th>
+<th>转义写法</th>
+<th>你看到的样子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>空格</strong>（Space）</td>
+<td><code>U+0020</code></td>
+<td><code>&amp;#32;</code></td>
+<td>键盘上最长的那个空格键，最常用</td>
+</tr>
+<tr>
+<td><strong>水平制表符</strong>（Tab）</td>
+<td><code>U+0009</code></td>
+<td><code>&amp;#9;</code></td>
+<td>键盘 <code>Tab</code> 键，通常显示为一段水平空白（宽度不固定）</td>
+</tr>
+<tr>
+<td><strong>换行符</strong>（LF，Line Feed）</td>
+<td><code>U+000A</code></td>
+<td><code>&amp;#10;</code></td>
+<td>代码里按回车键产生的换行（Unix/Linux/macOS 系统）</td>
+</tr>
+<tr>
+<td><strong>回车符</strong>（CR，Carriage Return）</td>
+<td><code>U+000D</code></td>
+<td><code>&amp;#13;</code></td>
+<td>老式 Mac 或 Windows 系统里的换行符（通常与 LF 成对出现 <code>\r\n</code>）</td>
+</tr>
+<tr>
+<td><strong>换页符</strong>（FF，Form Feed）</td>
+<td><code>U+000C</code></td>
+<td><code>&amp;#12;</code></td>
+<td>几乎见不到，历史遗留的打印机分页字符，在网页中极少使用</td>
+</tr>
+</tbody>
+</table>
+<h2 id="html如何处理空白字符">HTML如何处理空白字符</h2>
+<p>“HTML 会忽略空白字符”是一个普遍存在的误解，事实并非如此：<strong>HTML 会完整保留源代码中所有空白文本内容</strong>。作为标记语言，HTML 会生成一个 DOM（<strong>文档对象模型</strong>，Document Object Model），其中文本内容的所有空白字符均被完整保留，可通过 DOM API 进行检索和操作。若 HTML 从 DOM 中移除空白字符，那么作为基于 DOM 工作的下游渲染引擎，CSS 将无法通过<code>white-space</code>属性保留这些空白。</p>
+<p>简单的说，原封不动进入 DOM。</p>
+<blockquote>
+<p><strong>备注：</strong>需要明确的是，我们讨论的是 HTML 标签之间的空白字符，这些空白字符在 DOM 中会转化为文本节点。</p>
+</blockquote>
+<h2 id="css如何处理空白字符">CSS如何处理空白字符</h2>
+<p>当 DOM 被传递给 CSS 进行渲染时，默认情况下空白字符会被大量移除。这意味着代码的格式化方式对最终用户不可见——在元素周围和内部创建空间是 CSS 的职责。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!doctype <span class="keyword">html</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">h1</span>&gt;</span>      Hello      World!     <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>该源代码在 <code>doctype</code> 标签后包含若干换行符，并在 <code>&lt;h1&gt;</code> 标签前后及内部存在大量空格字符。但浏览器会忽略这些空白字符，仅显示“Hello World!”字样，仿佛这些字符根本不存在。</p>
+<p>CSS 会忽略大部分（但并非全部）空白字符。在此示例中，当页面在浏览器中渲染时，“Hello”与“World!”之间的一个空格仍然存在。CSS 采用特定算法来判定哪些空白字符对用户无关紧要，并决定如何移除或转换这些字符。我们将在接下来的章节中详细说明该处理机制的工作原理。</p>
+<h3 id="折叠与转换-collapsing-and-transformation">折叠与转换 (<strong>Collapsing and Transformation</strong>)</h3>
+<p>让我们看一个例子。为了使空白字符更突出，我们还添加了注释，将所有空格显示为◦，所有制表符显示为⇥，所有换行符显示为⏎：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>   Hello</span><br><span class="line">				<span class="tag">&lt;<span class="name">span</span>&gt;</span> World!<span class="tag">&lt;/<span class="name">span</span>&gt;</span>	  <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">&lt;h1&gt;◦◦◦Hello◦⏎</span></span><br><span class="line"><span class="comment">⇥⇥⇥⇥&lt;span&gt;◦World!&lt;/span&gt;⇥◦◦&lt;/h1&gt;</span></span><br><span class="line"><span class="comment">--&gt;</span></span><br></pre></td></tr></table></figure>
+<p>还是渲染成 “Hello World!”字样</p>
+<p><code>&lt;h1&gt;</code> 元素包含：</p>
+<ul>
+<li>一个文本节点（包含一些空格、单词“Hello”、一个换行符和一些制表符）。</li>
+<li>一个行内元素（<code>&lt;span&gt;</code>，包含一个空格和单词“World!”）。</li>
+<li>另外一个文本节点（只包含制表符和空格）。</li>
+</ul>
+<p>由于 <code>&lt;h1&gt;</code> 只包含行级元素，它建立了行内格式化上下文。这是浏览器引擎可能使用的布局渲染上下文之一。</p>
+<p>在这个上下文中，空白字符的处理可以总结如下：</p>
+<blockquote>
+<p><strong>备注：</strong>该算法可通过<code>white-space-collapse</code>属性（或其简写属性 <code>white-space</code>）进行配置。我们将首先假设其默认值（<code>white-space-collapse: collapse</code>），然后探讨不同属性值如何影响该算法。</p>
+</blockquote>
+<ol type="1">
+<li><p>首先，换行符前后紧邻的所有空格和制表符都会被忽略。因此，如果我们参考之前的示例标记：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;h1&gt;◦◦◦Hello◦⏎</span><br><span class="line">⇥⇥⇥⇥&lt;span&gt;◦World!&lt;/span&gt;⇥◦◦&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
+<p>应用这条规则，会得到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;h1&gt;◦◦◦Hello⏎</span><br><span class="line">&lt;span&gt;◦World!&lt;/span&gt;⇥◦◦&lt;/h1&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>然后，连续的换行符被折叠为单个换行符。此示例中不存在。</p></li>
+<li><p>接下来，源代码中的行通过移除所有剩余换行符合并为单行。具体处理方式取决于换行符前后的上下文：换行符要么转换为空格（U+0020），要么直接删除。具体采用哪种方式取决于浏览器和语言环境。在本例的英文文本中（单词间以空格分隔），所有换行符都将被“转换”为空格。最终结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;h1&gt;◦◦◦Hello◦&lt;span&gt;◦World!&lt;/span&gt;⇥◦◦&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
+<p>值得注意的是，在没有词间分隔符的语言（如中文）中，行与行之间不留空格。因此：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;div&gt;你好</span><br><span class="line">世界&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+<p>根据浏览器的启发式算法，可能会渲染为“你好世界”，中间不带空格（<strong>火狐浏览器会这么做</strong>，中文会移除换行产生的空格。但是谷歌不会）。</p>
+<blockquote>
+<p>Firefox的做法（即折叠或移除换行产生的空格）更接近CSS规范的最新建议。</p>
+<ul>
+<li><strong>规范依据</strong>：CSS Text Module Level 4 中有一个“<code>line-break-transform</code>”的示例（Example 19），它明确指出：<strong>在中日韩文字之间，换行符应当被移除，而不是替换为一个空格</strong>。Firefox的行为正是遵循了这一原则。</li>
+<li><strong>核心逻辑</strong>：对于中文、日文等不使用空格分隔词汇的书写系统，换行符本身不代表任何语义，因此不应产生一个可见的空格。</li>
+</ul>
+<p>Chrome的做法（即保留折叠后的空格）则遵循了另一种规范解读或更旧的实现。</p>
+<ul>
+<li><strong>规范依据</strong>：这更符合CSS Text Module Level 3 中对空白字符处理的一般规则，即连续的空白字符（包括换行符）会被折叠成一个<strong>可见的</strong>空格字符。</li>
+<li><strong>其他浏览器</strong>：Safari的行为与Chrome类似。</li>
+</ul>
+</blockquote></li>
+<li><p>然后，所有的制表符都会转换为空格字符，所以示例将变为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;h1&gt;◦◦◦Hello◦&lt;span&gt;◦World!&lt;/span&gt;◦◦◦&lt;/h1&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>之后，任何紧接在另一个空格之后的空格（即使跨越两个独立的行级元素）都会被忽略，因此最终结果为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;h1&gt;◦Hello◦&lt;span&gt;World!&lt;/span&gt;◦&lt;/h1&gt;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>这就是为什么人们在访问网页时，会看到“Hello World!”这句话很好地写在页面的顶部，而不是一个奇怪的缩进的“Hello”，但在下面一行有一个更奇怪的缩进的“World!”。</p>
+<p>完成上述步骤后，浏览器会处理换行和双向文本，此处我们不予考虑。请注意，在 <code>&lt;h1&gt;</code> 标签开头与 <code>&lt;/h1&gt;</code> 标签闭合之间仍存在空白字符，但这些空白字符不会在浏览器中显示。接下来我们将处理此问题，具体将在每行布局时进行。</p>
+<p>不同的<code>white-space-collapse</code>值会跳过此算法的不同部分：</p>
+<ul>
+<li><code>preserve</code> 和 <code>break-spaces</code>：跳过整个算法，不发生任何空白字符折叠或转换。</li>
+<li><code>preserve-breaks</code>：跳过第二步和第三步，保留换行符。</li>
+<li><code>preserve-spaces</code>：跳过整个算法，算法变为仅将制表符和换行符转换为空格。</li>
+</ul>
+<p>简而言之，不同类型的空白字符将按以下方式进行折叠和转换（下面内容没看懂）：</p>
+<ul>
+<li>制表符通常转换为空格。</li>
+<li>若需折叠分段符：
+<ul>
+<li>连续的分段符序列将折叠为单个分段符。</li>
+<li>在使用空白字符分隔单词的语言（如英语）中，它们将转换为空白字符；而在不使用空白字符分隔单词的语言（如中文）中，则完全移除。</li>
+</ul></li>
+<li>若需折叠空白字符：
+<ul>
+<li>断行符前后空白字符或制表符将被移除。</li>
+<li>连续空白字符序列折叠为单个空白字符。</li>
+</ul></li>
+<li>保留空白字符时，连续空白字符视为不可断行，但会在每组空白字符末尾进行软换行——即下一行始终从下一个非空白字符开始。但当采用 <code>break-spaces</code> 值时，每个空白字符后都可能发生软换行，因此下一行可能以一个或多个空白字符开头。</li>
+</ul>
+<h3 id="修剪与定位-trimming-and-positioning">修剪与定位 (<strong>Trimming and Positioning</strong>)</h3>
+<p>在行内和区块格式化上下文中，元素均按<em>行</em>进行排版。行内格式化上下文中，行通过文本换行生成。而在块级格式化上下文中，每个块级元素各自形成独立行。每行布局时，空白字符会继续被处理。让我们通过示例说明其工作原理。</p>
+<p>本例中，我们仍像之前那样在注释中标记了空白字符。共有三个仅含空白字符的文本节点：第一个位于首个 <code>&lt;div&gt;</code> 之前，第二个位于两个 <code>&lt;div&gt;</code> 之间，第三个位于第二个 <code>&lt;div&gt;</code> 之后。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">div</span>&gt;</span>	Hello	<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line">   <span class="tag">&lt;<span class="name">div</span>&gt;</span>  World!   <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">&lt;body&gt;⏎</span></span><br><span class="line"><span class="comment">⇥&lt;div&gt;⇥Hello⇥&lt;/div&gt;⏎</span></span><br><span class="line"><span class="comment">⏎</span></span><br><span class="line"><span class="comment">◦◦◦&lt;div&gt;◦◦World!◦◦&lt;/div&gt;◦◦⏎</span></span><br><span class="line"><span class="comment">&lt;/body&gt;</span></span><br><span class="line"><span class="comment">--&gt;</span></span><br></pre></td></tr></table></figure>
+<p>渲染结果如下（没有任何多余的空白字符）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Hello</span><br><span class="line">World!</span><br></pre></td></tr></table></figure>
+<p>示例中的空白字符处理方式总结如下：（这里假设 <code>white-space-collapse: collapse</code>）</p>
+<ol type="1">
+<li><p>首先，空白字符会像上一节所示那样被折叠，转换为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;body&gt;◦&lt;div&gt;◦Hello◦&lt;/div&gt;◦&lt;div&gt;◦World!◦&lt;/div&gt;◦&lt;/body&gt;</span><br></pre></td></tr></table></figure>
+<p>随后，行布局将根据 <code>&lt;body&gt;</code> 建立的块级格式化上下文进行排版。在此示例中，<code>&lt;body&gt;</code> 的五个子节点各自作为独立行进行布局。（此代码块中的每行代表渲染布局中的独立行，而非原始 HTML 代码中的行）：</p>
+<p>（这里应该是包括了2个<code>&lt;div&gt;</code>和3个空格，才说的5个子节点）</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">◦</span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>◦Hello◦<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">◦</span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>◦World!◦<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">◦</span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>请注意，如果行过长，每行可能会换行并生成更多行。实际上，浏览器在布局过程中会确定每行的内容。关于文本换行机制的具体原理，我们在此不作赘述。</p></li>
+<li><p>行首的空白字符序列将被移除（彻底删除，这就是修剪，移除行首行尾空白字符），因此示例变为：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>Hello◦<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>World!◦<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>此时保留的每个制表符均按 <code>tab-size</code>（默认是8，也就是一个制表符的宽度是8个空格的宽度） 进行渲染。这仅当 <code>white-space-collapse</code> 设置为 <code>preserve</code> 或 <code>break-spaces</code> 时生效，因为其他所有设置都会将制表符转换为空格符。</p></li>
+<li><p>行尾的空白字符序列将被移除，因此上文变为：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>Hello<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>World!<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>当前存在的三个空行在最终布局中不会占用任何空间，因为它们不包含任何可见内容。因此页面最终仅有两行会占据空间。浏览网页的用户会看到“Hello”和“World!”分别显示在两行上，这完全符合预期中两个 <code>&lt;div&gt;</code> 元素的布局效果。浏览器本质上会忽略 HTML 代码中包含的所有空白字符。</p></li>
+</ol>
+<p>不同的 <code>white-space-collapse</code> 值会跳过此算法的不同部分：</p>
+<ul>
+<li><code>preserve</code> 和 <code>break-spaces</code>：跳过整个算法（除了第三步），不发生任何空白字符折叠或转换。</li>
+<li><code>preserve-breaks</code>：跳过整个算法，因此行首行尾的空白字符得以保留。</li>
+<li><code>preserve-spaces</code>：应用与 <code>collapse</code> 值相同的算法。</li>
+</ul>
+<p>这里都只是说了修剪，没有说到定位，定位就是下面表格中的挂起（不显示行尾的空白字符，但是实际存在）。</p>
+<h2 id="white-space-属性">white-space 属性</h2>
+<p>这个属性指定了两件事：</p>
+<ul>
+<li>空白字符是否合并，以及如何合并。</li>
+<li>是否换行，以及如何换行。</li>
+</ul>
+<p><code>white-space</code> 属性可以被指定为从下面的值列表中选择的单个关键字，或者是表示 <code>white-space-collapse</code> 和 <code>text-wrap</code> 属性的简写的两个值。</p>
+<p>下面的表格总结了各种 <code>white-space</code> 关键字值的行为：</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 8%" />
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>换行符</th>
+<th>空格和制表符</th>
+<th>文本换行</th>
+<th>行末空格</th>
+<th>行末的其他空白分隔符</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>normal</code></td>
+<td>合并</td>
+<td>合并</td>
+<td>换行</td>
+<td>移除</td>
+<td>挂起</td>
+</tr>
+<tr>
+<td><code>nowrap</code></td>
+<td>合并</td>
+<td>合并</td>
+<td>不换行</td>
+<td>移除</td>
+<td>挂起</td>
+</tr>
+<tr>
+<td><code>pre</code></td>
+<td>保留</td>
+<td>保留</td>
+<td>不换行</td>
+<td>保留</td>
+<td>不换行</td>
+</tr>
+<tr>
+<td><code>pre-wrap</code></td>
+<td>保留</td>
+<td>保留</td>
+<td>换行</td>
+<td>挂起</td>
+<td>挂起</td>
+</tr>
+<tr>
+<td><code>pre-line</code></td>
+<td>保留</td>
+<td>合并</td>
+<td>换行</td>
+<td>移除</td>
+<td>挂起</td>
+</tr>
+<tr>
+<td><code>break-spaces</code></td>
+<td>保留</td>
+<td>保留</td>
+<td>换行</td>
+<td>换行</td>
+<td>换行</td>
+</tr>
+</tbody>
+</table>
+<p>解释如下：</p>
+<ul>
+<li><p>表格中的<strong>文本换行</strong>是说当一行文本的长度超过其容器的宽度时，浏览器是否允许在不借助 <code>&lt;br&gt;</code> 标签的情况下，自动把多余的文字折到下一行。</p></li>
+<li><p><strong>“行末”</strong> 指的是：<strong>在浏览器自动换行（或 <code>&lt;br&gt;</code> 强制换行）之后，每一行文字末尾的那些空白字符。</strong></p>
+<ul>
+<li><strong>“行末空格”</strong>：特指普通的空格字符（<code>U+0020</code>）。例如 <code>"Hello "</code>（Hello后面有个空格），如果这个空格正好在换行前，它就是行末空格。</li>
+<li><strong>“行末的其他空白分隔符”</strong>：通常指<strong>制表符（Tab，U+0009）</strong>，以及其他极罕见的 Unicode 空白分隔符（但网页中 99.9% 的情况就是指 Tab）。</li>
+</ul></li>
+<li><p><strong>“挂起” （Positioning / Hanging）：这个空白字符还在 DOM 里，但在生成行框时，浏览器</strong>保留<strong>这个空白字符，但把它</strong>“挂”在行框的右边界之外。</p>
+<ul>
+<li><p>它<strong>不占</strong>行框内部的水平空间（因此不会导致溢出的宽度，也不会把后面的文字挤到下一行）。</p></li>
+<li><p>但它<strong>存在于</strong> DOM 中，如果你用鼠标选中该行文字并复制，这个空格<strong>会被复制出来</strong>。</p></li>
+</ul></li>
+</ul>
+<p>你可以把它想象成：<strong>这行文字末尾有一个透明的“小尾巴”</strong>。</p>
+<ul>
+<li><p>它<strong>存在</strong>（如果你选中这行文字复制，末尾的这个空格<strong>会被复制</strong>）。</p>
+<ul>
+<li>但它<strong>不占位</strong>（它不会把后面的文字挤到下一行，也不会让容器出现横向滚动条）。</li>
+</ul>
+<p>用“行末空格”举例，对比不同值的表现：</p>
+<p>假设一行文字是 <code>"Apple "</code>（Apple后面有个空格），且这行刚好顶到容器右边界：</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 7%" />
+<col style="width: 49%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th>white-space 值</th>
+<th>行为</th>
+<th>渲染结果（视觉上）</th>
+<th>复制时带空格吗？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>normal / pre-line</strong></td>
+<td><strong>移除</strong></td>
+<td>空格彻底消失，相当于删掉了</td>
+<td>❌ 不带</td>
+</tr>
+<tr>
+<td><strong>pre-wrap</strong></td>
+<td><strong>挂起</strong></td>
+<td>空格<strong>看不见也占不到宽度</strong>，但它在源码里</td>
+<td>✅ <strong>带</strong>（粘贴出来会有空格）</td>
+</tr>
+<tr>
+<td><strong>break-spaces</strong></td>
+<td><strong>换行</strong></td>
+<td>空格<strong>强制占宽</strong>，如果空间不够，空格自己会折到下一行开头</td>
+<td>✅ 带</td>
+</tr>
+</tbody>
+</table>
+<p>为什么会有“挂起”这种奇怪操作？</p>
+<p>这是 CSS 规范为了解决一个经典矛盾而设计的：</p>
+<ul>
+<li><strong>矛盾</strong>：在 <code>&lt;pre&gt;</code> 或 <code>pre-wrap</code> 模式下，代码里的所有空格必须“保留原样”（为了数据准确）。</li>
+<li><strong>问题</strong>：行尾空格通常是程序员<strong>无意中敲出来的垃圾字符</strong>。如果程序员在代码行末不小心敲了个空格，比如 <code>const a = 1;</code>（分号后面有个空格）。如果按照“保留”逻辑，这个空格会强行撑宽容器，导致出现<strong>横向滚动条</strong>，非常难看。</li>
+<li><strong>解法（挂起）</strong>：浏览器就把这个行末空格“挂”在边界外面。这样，<strong>程序员复制代码时，空格还在（保证代码执行不出错）</strong>；但<strong>页面排版时，容器没有被撑开（保证界面美观）</strong>。</li>
+</ul></li>
+<li><p>这里没有说<strong>行首空格</strong>怎么操作，但是实际行首空格要么是保留，要么是移除。根据 CSS 规范，行首空格的处理规则其实隐藏在 <strong>“空格和制表符”</strong> 这一列的逻辑里。 <strong>“空格和制表符”</strong> 如果是合并行首空格就是移除， 如果是保留行首空格就是<strong>原样保留占宽</strong>。</p></li>
+</ul>
+<h2 id="例子">例子</h2>
+<p>先看下面的例子，用 <code>&lt;br&gt;</code> 换行，写成两行</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">  表 1.1　所有性状显著位点和候选基因数目统计表<span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">  Table 1.1 Summary statistics of significant loci and candidate genes across all traits</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>解析一下，具体哪里会产生额外的空格？</p>
+<p>首先，按照折叠与转换的规则</p>
+<ol type="1">
+<li><strong><code>&lt;p&gt;</code> 和 表 之间</strong>：换行符 + 缩进（空格）会变成一个<strong>前导空格</strong>，渲染为“ 表 1.1…” （表前面有个空格）。</li>
+<li><strong><code>&lt;br&gt;</code>和 Table 之间</strong>：换行符 + 缩进会变成一个<strong>前导空格</strong>，渲染为第二行开头有个空格，即“ Table 1.1…”（这是最明显、最不好看的地方）。</li>
+<li><strong>traits 和 <code>&lt;/p&gt;</code> 之间</strong>：换行符会变成一个<strong>尾随空格</strong>，虽然肉眼看不见，但复制文本时末尾会多一个空格。</li>
+</ol>
+<p>之后进行修剪，会移除这两行开头和结尾的空白字符，因此实际效果没有额外的空格。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">表 1.1　所有性状显著位点和候选基因数目统计表</span><br><span class="line">Table 1.1 Summary statistics of significant loci and candidate genes across all traits</span><br></pre></td></tr></table></figure>
+<h1 id="参考">参考</h1>
+<ol type="1">
+<li>https://developer.mozilla.org/zh-CN/docs/Web/CSS/Guides/Text/Whitespace</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/a0d04094/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">记录一次网站崩溃事件和网站使用小结</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
