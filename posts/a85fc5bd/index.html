@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    R画图中文显示问题与showtext包 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-R画图中文显示问题与showtext包"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  R画图中文显示问题与showtext包
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/a85fc5bd/" class="article-date">
+  <time datetime="2026-06-24T09:05:20.000Z" itemprop="datePublished">2026-06-24</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">5.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">18 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>解决 R 画图输出 PDF 时中文无法正常显示的问题，深挖了一下，最终的思路是使用 <code>cairo_pdf</code>，而<code>showtext</code> 包作为备选方案。</p>
+<span id="more"></span>
+<p>先看 R 中底层画图函数的原理。</p>
+<h1 id="pdf工作原理"><code>pdf()</code>工作原理</h1>
+<p>R 默认的 <code>pdf()</code> 设备并不真正“绘制”文字，而只是“描述”文字信息（如字符和字体）。这导致文字显示效果依赖系统是否安装了对应字体。</p>
+<p>当你用 <code>pdf()</code> 输出时，R 并没有在硬盘上把“中”这个字的线条曲线计算出来并画进文件里。它只是在 PDF 文件中写入了一行代码，大意是：“<strong>此处需显示 Unicode 字符 20013，请使用名为 SimSun 的字体来渲染。</strong>”’</p>
+<p><strong>后果（依赖系统）</strong>：这份 PDF 文件相当于一张“蓝图”，它把渲染文字的具体工作甩锅给了 PDF 阅读器（如 Adobe Reader）。当别人打开这个 PDF 时，阅读器会去打开的那台电脑的系统中查找有没有 <code>SimSun</code> 字体。</p>
+<ul>
+<li><strong>有</strong> → 正常显示。</li>
+<li><strong>没有</strong> → 阅读器懵了，只能显示空白或方框（这就是为什么你发给别人的 PDF 中文会乱码）。</li>
+</ul>
+<p><code>showtext</code> 则不同，它利用 <strong>FreeType</strong> 库将每个字符的轮廓分析并转换成当前图形设备能直接绘制的多边形或位图。因此，它生成的图形是<strong>设备无关</strong>的。（<strong>图形一旦生成，其显示效果不再依赖于后续运行环境的硬件或软件配置</strong>）</p>
+<h2 id="pdf中的字体family参数"><code>pdf()</code>中的字体（<code>family</code>参数）</h2>
+<p><code>pdf()</code> 设备的 <code>family</code> 参数只能使用一个非常有限的、内置的字体列表。</p>
+<ul>
+<li><strong>可用字体</strong>：仅限 “AvantGarde”, “Bookman”, “Courier”, “Helvetica”, “Helvetica-Narrow”, “NewCenturySchoolbook”, “Palatino” 或 “Times”。这些都是PostScript基础字体，<strong>不支持中文</strong>。</li>
+<li><strong>查看方式</strong>：使用 <code>names(pdfFonts())</code> 可以列出当前 R 会话中所有已注册的 PDF 字体名称。</li>
+<li><strong>添加字体</strong>：理论上可以使用 <code>pdfFonts()</code> 函数添加，但它要求提供 Adobe Font Metrics (.afm) 文件，操作复杂且不常用。</li>
+<li><strong>设置错误</strong>：如果指定的 <code>family</code> 不在上述“白名单”中，<code>pdf()</code> <strong>不会报错</strong>，而是会静默地回退到默认字体 “Helvetica”。这就是为什么即使设置了 <code>family="SimSun"</code>，生成的 PDF 依然无法显示中文。</li>
+</ul>
+<h1 id="png-工作原理"><code>png()</code> 工作原理</h1>
+<p>与 <code>pdf()</code> 只写“描述信息”不同，<code>png()</code> 是一个<strong>光栅（位图）设备</strong>。它的工作流程是：</p>
+<ul>
+<li><strong>即时渲染</strong>：当你运行 <code>png()</code> 和 <code>plot()</code> 时，R 会立刻调用你电脑<strong>操作系统底层的图形引擎</strong>（比如 Windows 的 GDI，或 Linux/macOS 的 Cairo 库）。</li>
+<li><strong>画成像素</strong>：这个底层引擎会去你电脑的字体库里找到对应的字体文件，把“中”这个字渲染成一堆<strong>有颜色深浅的像素点（位图）</strong>，然后把这堆像素点写入 <code>.png</code> 文件。</li>
+<li><strong>结果固化</strong>：一旦 <code>.png</code> 文件保存完成，它就只是一张由像素组成的图片了。</li>
+</ul>
+<h2 id="png-中的字体family参数"><code>png()</code> 中的字体（<code>family</code>参数）</h2>
+<p><code>png()</code> 设备的行为则与 <code>pdf()</code> 完全不同，它依赖操作系统来渲染文字。</p>
+<ul>
+<li><strong>可用字体</strong>：理论上，它能使用你<strong>操作系统安装的任意字体</strong>。在 Windows 上，它使用 GDI 引擎；在 Linux/macOS 上，如果使用 <code>type = "cairo"</code>（貌似这是默认值），则能访问系统的全部字体。</li>
+<li><strong>查看方式</strong>：最可靠的方法是使用第三方包来列出系统字体（查看方式下面会说）。</li>
+<li><strong>添加字体</strong>：在操作系统层面安装字体即可，无需在 R 中特别“添加”。</li>
+<li><strong>设置错误</strong>：如果指定的 <code>family</code> 在系统中不存在，<code>png()</code> <strong>也不会报错</strong>，而是会触发操作系统的<strong>字体回退机制</strong>，自动用一个相近的字体替代。所以有时指定了错误的字体名，图表仍能显示文字，但可能不是你想要的字体。</li>
+</ul>
+<h2 id="为什么-png-有时能显示中文">为什么 PNG 有时能显示中文？</h2>
+<p>例如代码中写的是 <code>family = "Times"</code>， <strong>Times 字体并不包含中文字形</strong>，那为什么最终能正常显示中文呢？</p>
+<ul>
+<li>在生成 <strong>PNG</strong> 时，R 底层的位图渲染引擎（如 <code>agg</code> 或默认 <code>png</code> 设备）在遇到字体缺失的字形时，会触发<strong>操作系统的字体回退机制</strong>。</li>
+<li>系统会“悄悄”地从你电脑里找一个能显示中文的默认字体（比如 Windows 的“微软雅黑”或 macOS 的“PingFang”）替你把中文字画出来。因为最终输出的是像素点阵，只要画面上显示了字，你就看不出来它用了替身。</li>
+</ul>
+<h1 id="总结pdf-与-png-的本质区别">总结：<code>pdf()</code> 与 <code>png()</code> 的本质区别</h1>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 44%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr>
+<th>特性</th>
+<th>默认 <code>pdf()</code></th>
+<th>默认 <code>png()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>存储内容</strong></td>
+<td>存储<strong>文本代码</strong>（如 Unicode 编码）和<strong>字体名字</strong>。</td>
+<td>存储<strong>绘制好的像素点阵</strong>（已经是图片了）。</td>
+</tr>
+<tr>
+<td><strong>渲染时机</strong></td>
+<td><strong>阅读时</strong>（你或别人打开 PDF 的那一瞬间）。</td>
+<td><strong>生成时</strong>（你运行 R 代码保存图片的那一瞬间）。</td>
+</tr>
+<tr>
+<td><strong>依赖主体</strong></td>
+<td>依赖<strong>读者</strong>的电脑是否安装对应字体。</td>
+<td>依赖<strong>作者（你）</strong>的电脑是否安装对应字体。</td>
+</tr>
+<tr>
+<td><strong>跨设备表现</strong></td>
+<td>换个电脑打开，字体可能变方框。</td>
+<td>换个电脑打开，图片永远长那样（因为已经是像素了）。</td>
+</tr>
+</tbody>
+</table>
+<h1 id="如何查看系统字体">如何查看系统字体</h1>
+<h2 id="r-systemfonts包">R-systemfonts包</h2>
+<ul>
+<li><p><strong>systemfonts包</strong>：<code>systemfonts::system_fonts()</code> 可以返回一个数据框，列出你系统上安装的所有字体。</p>
+<p>用下面命令只返回所有可用字体名称。</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemfonts<span class="operator">::</span>system_fonts<span class="punctuation">(</span><span class="punctuation">)</span><span class="operator">$</span>family</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="linux系统-fc-list-命令">linux系统 <code>fc-list</code> 命令</h2>
+<p><code>fc-list</code> 是 <code>fontconfig</code> 库自带的命令行工具，几乎所有现代 Linux 发行版都预装了它。</p>
+<ul>
+<li><p><strong>列出所有字体</strong>：直接在终端输入以下命令，即可列出系统上所有已安装的字体及其文件路径。
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fc-list</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>只查看字体家族名称</strong>：输出可能会很长。如果你只关心字体的“家族名称”（即可以在 <code>family</code> 参数中使用的名字），可以用下面这个命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fc-list : family | <span class="built_in">sort</span> -u</span><br></pre></td></tr></table></figure>
+<p>这个命令的输出会更简洁，例如：
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DejaVu Serif</span><br><span class="line">DejaVu Sans Mono</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">    </span><br><span class="line">*   **按名称搜索特定字体**：如果你知道字体名称的一部分，可以用 `grep` 进行过滤。</span><br><span class="line">    </span><br><span class="line">    ```bash</span><br><span class="line">    fc-list : family | grep -i &quot;noto&quot;   # 查找 Noto 字体</span><br><span class="line">fc-list : family | grep -i &quot;song&quot;   # 查找宋体类</span><br><span class="line">    fc-list : family | grep -i &quot;hei&quot;    # 查找黑体类</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>精确查找某个字体家族</strong>：要查找一个特定的字体家族（如 “DejaVu Serif”），可以使用更精确的查询。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fc-list :family=<span class="string">&quot;DejaVu Serif&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="查看中文字体">查看中文字体</h3>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">只看中文（lang=zh）</span></span><br><span class="line">fc-list :lang=zh</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">只看中文，只打家族名（去重）</span></span><br><span class="line">fc-list :lang=zh family | sort -u</span><br></pre></td></tr></table></figure>
+<h3 id="直接查看字体目录">直接查看字体目录</h3>
+<p>另一种更原始的方法是直接查看系统存放字体文件的目录。</p>
+<ul>
+<li><p><strong>系统字体目录</strong>：通常为 <code>/usr/share/fonts/</code>。
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /usr/share/fonts/</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>用户字体目录</strong>：通常为 <code>~/.local/share/fonts/</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> ~/.fonts/</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>递归查看</strong>：字体文件可能存放在这些目录的子文件夹中，可以递归查看。
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find /usr/share/fonts/ -name <span class="string">&quot;*.ttf&quot;</span> -o -name <span class="string">&quot;*.otf&quot;</span></span><br></pre></td></tr></table></figure></p></li>
+</ul>
+<blockquote>
+<p><strong>注意</strong>：直接查看目录只能看到文件名（如 <code>Arial.ttf</code>），其对应的、在 <code>family</code> 参数中使用的<strong>字体名称</strong>可能不同，因此这种方法不如 <code>fc-list</code> 直接。</p>
+</blockquote>
+<h3 id="其他相关命令">其他相关命令</h3>
+<ul>
+<li><strong><code>fc-match</code></strong>：这个命令用于<strong>匹配</strong>一个字体模式，并告诉你系统会实际使用哪个字体文件。这对于排查“为什么我指定的字体不生效”这类问题非常有用。
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fc-match <span class="string">&quot;Arial&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li><strong><code>luafindfont</code></strong>：如果你安装了 TeX 系统（如 TeX Live），可能会有 <code>luafindfont</code> 命令，它也能列出系统字体。</li>
+</ul>
+<h2 id="安装思源黑体字体">安装思源黑体字体</h2>
+<p>建议安装 <strong>Noto Sans CJK SC（思源黑体）</strong>，这是 Google 和 Adobe 联合发布的<strong>目前 Linux 下最完美的开源简体中文字体</strong>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 1. 下载 Noto Sans CJK SC（约 30MB）</span><br><span class="line"># 同时下载下载常规和粗体</span><br><span class="line">mkdir -p ~/.local/share/fonts/</span><br><span class="line">cd ~/.local/share/fonts/</span><br><span class="line"></span><br><span class="line">wget -O NotoSansCJKsc-Regular.otf \</span><br><span class="line">  https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf</span><br><span class="line"></span><br><span class="line">wget -O NotoSansCJKsc-Bold.otf \</span><br><span class="line">  https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Bold.otf</span><br><span class="line"></span><br><span class="line"># 2. 刷新字体缓存</span><br><span class="line">fc-cache -fv ~/.local/share/fonts/</span><br><span class="line"></span><br><span class="line"># 3. 验证</span><br><span class="line">fc-list :lang=zh family | grep -i &quot;noto&quot;</span><br><span class="line">fc-list | grep &quot;Noto Sans CJK SC&quot; | head</span><br></pre></td></tr></table></figure>
+<p>安装后，在 R 里直接使用 <code>family = "Noto Sans CJK SC"</code>。</p>
+<p>不然我这里只能用 <code>WenQuanYi Micro Hei</code>（文泉驿微米黑）</p>
+<h1 id="showtext-优势">showtext 优势</h1>
+<p>其核心优势在于：</p>
+<ul>
+<li><strong>字体支持广泛</strong>：支持 TrueType、OpenType、Type 1 以及网页字体等多种格式。</li>
+<li><strong>输出格式多样</strong>：支持 PNG、PDF、SVG 等绝大多数 R 图形输出格式。</li>
+<li><strong>设备无关，一劳永逸</strong>：它将文本字符转换为多边形（矢量图）或光栅图像（位图）。这意味着图形生成后不再依赖原始字体文件，在任何设备上显示效果都一致。
+<ul>
+<li>当设备是矢量设备（<code>pdf</code>、<code>svg</code>、<code>cairo_pdf</code>）时，<code>showtext</code> 提取轮廓（矢量路径/多边形）并将其作为矢量对象直接绘制到该设备上。</li>
+<li>当设备是光栅设备（<code>png</code>、<code>jpeg</code>、<code>tiff</code>，或 <code>windows()</code>/<code>quartz()</code> 中的屏幕设备，取决于具体实现方式）时，<code>showtext</code> 在内存中渲染一个光栅位图（使用 FreeType 的着色器），然后将该位图绘制到设备上。</li>
+</ul></li>
+<li><strong>无需外部软件</strong>：与 <code>extrafont</code> 包不同，<code>showtext</code> 不依赖 Ghostscript 等外部软件。</li>
+</ul>
+<p>基于上面的资料，根据我的理解，showtext 主要还是用于 pdf ，png 本身并不特别需要 showtext 。</p>
+<h1 id="showtext-用法">showtext 用法</h1>
+<p><code>showtext</code> 依赖于 <strong><code>sysfonts</code></strong> 和 <strong><code>showtextdb</code></strong> 包，安装 <code>showtext</code> 时会自动安装。</p>
+<h2 id="基本用法">基本用法</h2>
+<p>以下是使用 <code>showtext</code> 的基本流程：</p>
+<ol type="1">
+<li><p><strong>加载并启用</strong></p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">library<span class="punctuation">(</span>showtext<span class="punctuation">)</span></span><br><span class="line">showtext_auto<span class="punctuation">(</span><span class="punctuation">)</span>  <span class="comment"># 全局启用</span></span><br></pre></td></tr></table></figure></li>
+<li><p><strong>添加字体</strong></p>
+<ul>
+<li><p><strong>从本地文件添加</strong>：使用 <code>font_add()</code>，需要指定字体名称和文件路径。</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Windows 示例</span></span><br><span class="line">font_add<span class="punctuation">(</span>family <span class="operator">=</span> <span class="string">&quot;my_song&quot;</span><span class="punctuation">,</span> regular <span class="operator">=</span> <span class="string">&quot;C:/Windows/Fonts/simsun.ttc&quot;</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment"># macOS 示例</span></span><br><span class="line">font_add<span class="punctuation">(</span>family <span class="operator">=</span> <span class="string">&quot;my_pingfang&quot;</span><span class="punctuation">,</span> regular <span class="operator">=</span> <span class="string">&quot;/System/Library/Fonts/PingFang.ttc&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure></li>
+<li><p><strong>从 Google Fonts 添加</strong>：使用 <code>font_add_google()</code>，只需提供字体名称。</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">font_add_google<span class="punctuation">(</span><span class="string">&quot;Noto Sans SC&quot;</span><span class="punctuation">,</span> <span class="string">&quot;noto_sc&quot;</span><span class="punctuation">)</span> <span class="comment"># 支持中文的思源黑体</span></span><br></pre></td></tr></table></figure></li>
+</ul></li>
+<li><p><strong>在绘图时使用</strong>
+在 <code>ggplot2</code> 或基础绘图中，通过 <code>family</code> 参数指定你刚刚添加的字体名称。</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 ggplot2 中</span></span><br><span class="line">p <span class="operator">+</span> theme<span class="punctuation">(</span>text <span class="operator">=</span> element_text<span class="punctuation">(</span>family <span class="operator">=</span> <span class="string">&quot;my_song&quot;</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="常用函数一览">常用函数一览</h2>
+<ul>
+<li><strong><code>font_add()</code></strong>: 从本地路径加载字体文件。</li>
+<li><strong><code>font_add_google()</code></strong>: 从 Google Fonts 加载在线字体。</li>
+<li><strong><code>showtext_auto()</code></strong>: 开启全局自动使用 <code>showtext</code> 模式。</li>
+<li><strong><code>showtext_begin()</code> / <code>showtext_end()</code></strong>: 在指定代码块内启用/停用 <code>showtext</code>。</li>
+<li><strong><code>showtext_opts()</code></strong>: 设置 <code>showtext</code> 的选项。</li>
+</ul>
+<h2 id="font_add函数"><code>font_add()</code>函数</h2>
+<p><code>font_add()</code> 函数来自 <code>sysfonts</code> 包，它的核心作用是为 R 的绘图环境<strong>注册并加载新的字体</strong>。它本质上是 <code>showtext</code> 等包的“字体后勤官”。</p>
+<p><code>font_add()</code> 的基本用法和参数如下：</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">font_add<span class="punctuation">(</span>family<span class="punctuation">,</span> regular<span class="punctuation">,</span> bold <span class="operator">=</span> <span class="literal">NULL</span><span class="punctuation">,</span> italic <span class="operator">=</span> <span class="literal">NULL</span><span class="punctuation">,</span> bolditalic <span class="operator">=</span> <span class="literal">NULL</span><span class="punctuation">,</span> symbol <span class="operator">=</span> <span class="literal">NULL</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>基本只用到前2个参数，其他就不介绍了。就是你起的字体别名以及字体文件的路径。</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr>
+<th>参数</th>
+<th>类型</th>
+<th>是否必需</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>family</strong></td>
+<td>字符型</td>
+<td><strong>是</strong></td>
+<td>你为这个字体<strong>起的别名</strong>。可以是任意字符串，不必是字体的真实名称。之后在R里就靠这个名字来调用它。</td>
+</tr>
+<tr>
+<td><strong>regular</strong></td>
+<td>字符型</td>
+<td><strong>是</strong></td>
+<td><strong>常规字重</strong>的字体文件<strong>路径</strong>。这是必须提供的核心参数。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="font_add_google函数"><code>font_add_google()</code>函数</h2>
+<p><code>font_add_google()</code> 函数同样来自 <code>sysfonts</code> 包，它提供了一种极其便利的方式来使用 <strong>Google Fonts</strong> 项目中的海量开源字体。</p>
+<p>与需要提供本地字体文件路径的 <code>font_add()</code> 不同，<code>font_add_google()</code> 会自动从网络下载并注册字体，让你可以轻松使用成千上万种字体。</p>
+<p><code>font_add_google()</code> 的基本用法和参数如下：</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">font_add_google<span class="punctuation">(</span>name<span class="punctuation">,</span> family <span class="operator">=</span> name<span class="punctuation">,</span> regular.wt <span class="operator">=</span> <span class="number">400</span><span class="punctuation">,</span> bold.wt <span class="operator">=</span> <span class="number">700</span><span class="punctuation">,</span> </span><br><span class="line">                repo <span class="operator">=</span> <span class="string">&quot;http://fonts.gstatic.com/&quot;</span><span class="punctuation">,</span> db_cache <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span> </span><br><span class="line">                handle <span class="operator">=</span> curl<span class="operator">::</span>new_handle<span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 71%" />
+</colgroup>
+<thead>
+<tr>
+<th>参数</th>
+<th>类型</th>
+<th>是否必需</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>name</strong></td>
+<td>字符型</td>
+<td><strong>是</strong></td>
+<td>在 Google Fonts 官网上查到的<strong>字体真实名称</strong>，例如 <code>"Gochi Hand"</code>。</td>
+</tr>
+<tr>
+<td><strong>family</strong></td>
+<td>字符型</td>
+<td>否</td>
+<td>在 R 中使用的<strong>字体别名</strong>，可以不与 <code>name</code> 相同。默认与 <code>name</code> 一致。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="原理">原理</h3>
+<p><code>font_add_google()</code> 的工作流程是全自动的：</p>
+<ol type="1">
+<li><strong>搜索</strong>：根据 <code>name</code> 参数在 Google Fonts 仓库中查找对应的字体家族。</li>
+<li><strong>下载</strong>：自动下载该字体家族的所有常用样式（<code>regular</code>, <code>bold</code>, <code>italic</code>, <code>bold italic</code>）的字体文件，保存在 R 会话的<strong>临时目录</strong>中。下载的字体文件会一直保留，直到你<strong>关闭当前的 R 会话</strong>。每次新会话调用 <code>font_add_google()</code> 都需要联网重新下载。</li>
+<li><strong>注册</strong>：将下载的字体注册到 <code>sysfonts</code> 中，并赋予 <code>family</code> 参数指定的别名。</li>
+</ol>
+<p><strong>如果你需要永久安装</strong>：如果你希望某个 Google Font 能永久使用，<strong>无论是否联网</strong>，最佳做法是：</p>
+<ul>
+<li>从 <a target="_blank" rel="noopener" href="https://fonts.google.com/">Google Fonts</a> 官网手动下载字体文件（<code>.ttf</code> 或 <code>.otf</code>）。</li>
+<li>将文件安装到你的<strong>操作系统字体目录</strong>中（Windows 是 <code>C:\Windows\Fonts</code>，macOS 是 <code>~/Library/Fonts/</code>）。</li>
+<li>然后使用 <code>font_add()</code> 并指定本地文件路径来加载它。</li>
+</ul>
+<h2 id="showtext_opts函数"><code>showtext_opts()</code>函数</h2>
+<p>根据官方文档，<code>showtext_opts()</code> 函数用于设置影响 <code>showtext</code> 包绘图外观的全局参数。它目前主要接受两个参数：<code>nseg</code> 和 <code>dpi</code>。</p>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 25%" />
+<col style="width: 34%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用对象</th>
+<th>功能说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>nseg</strong></td>
+<td><strong>矢量图形设备</strong> (如 <code>pdf()</code>, <code>svg()</code>)</td>
+<td>控制字符轮廓的<strong>平滑度</strong>。它指定了用多少条线段来逼近字符曲线上的一个片段。</td>
+<td>值越大，文字轮廓越平滑，但生成的矢量图文件体积也越大。通常设置在 <strong>5 到 20</strong> 之间即可获得不错的效果。</td>
+</tr>
+<tr>
+<td><strong>dpi</strong></td>
+<td><strong>位图及屏幕图形设备</strong> (如 <code>png()</code>, <code>x11()</code>)</td>
+<td>设置设备的<strong>分辨率</strong>。它用于根据点(<code>point</code>)大小确定文字的像素(<code>pixel</code>)大小。</td>
+<td><strong>对 pdf() 等矢量设备无效</strong>。默认值为 <code>96</code>。</td>
+</tr>
+</tbody>
+</table>
+<h1 id="另一种方法修改设备驱动为-cairo_pdf">另一种方法：修改设备驱动为 <code>cairo_pdf</code></h1>
+<p>在不使用 <code>showtext</code> 的情况下，只要将 <code>ggsave</code> 的图形设备换成支持 Cairo 渲染的 PDF 设备，它就能像 PNG 一样利用系统字体回显中文。</p>
+<p><strong>修改方式</strong>：在 <code>ggsave</code> 中显式指定 <code>device</code>：</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 把原来的 ggsave 改成这样（注意 file 扩展名为 .pdf）</span></span><br><span class="line">myplot <span class="operator">&lt;-</span> p <span class="operator">+</span> theme<span class="punctuation">(</span>text <span class="operator">=</span> element_text<span class="punctuation">(</span>family <span class="operator">=</span> <span class="string">&quot;SimSun&quot;</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line">ggsave<span class="punctuation">(</span>file <span class="operator">=</span> <span class="string">&quot;Sites_number.pdf&quot;</span><span class="punctuation">,</span> myplot<span class="punctuation">,</span> </span><br><span class="line">       width <span class="operator">=</span> <span class="number">6</span><span class="punctuation">,</span> height <span class="operator">=</span> <span class="number">4</span><span class="punctuation">,</span> </span><br><span class="line">       device <span class="operator">=</span> cairo_pdf<span class="punctuation">,</span>  <span class="comment"># 关键就在这里</span></span><br><span class="line">       <span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<h2 id="字体回退">字体回退</h2>
+<p>这个好处是在 pdf 中还是文本对象，可以正常复制。而 showtext 是转变成了矢量化图像，不可选择和复制。另外<code>cairo_pdf()</code> <strong>具备字体回退机制</strong>。当指定的 <code>family</code> 不支持中文时，它会尝试自动寻找一个系统中已安装的合适字体来替代。</p>
+<p><code>cairo_pdf()</code> 回退原理：它使用 <strong>fontconfig</strong> 来查找和管理字体。当指定的字体缺失某个字符（如中文字符）时，fontconfig 会根据其规则和策略，自动从系统已安装的字体中，挑选一个能显示该字符的字体进行替换。这使得 <code>cairo_pdf()</code> 能支持更广泛的 UTF-8 字符。</p>
+<h3 id="关键注意事项">关键注意事项</h3>
+<p>虽然 <code>cairo_pdf()</code> 能回退，但在实际使用中有两个重要限制：</p>
+<ol type="1">
+<li><strong>回退依赖系统字体</strong>：<code>cairo_pdf()</code> 的字体查找<strong>仅限系统已安装的字体</strong>。如果系统缺乏任何包含中文字形的字体，回退机制将失效。</li>
+<li><strong>回退可能“全局化”</strong>：一个常见的副作用是，一旦 fontconfig 为了显示中文而启用了某个中文字体，这个字体可能会被用于渲染图表中的<strong>所有</strong>文本（包括英文）。这可能导致图表中英文的字体风格与预期不符。</li>
+</ol>
+<p>因此，<code>cairo_pdf()</code> 确实能像 <code>png()</code> 一样进行字体回退，甚至更智能。但为了获得最可控、最专业的输出效果，特别是对于有严格字体要求的科研图表，更推荐的做法是<strong>主动指定一个支持中文的字体</strong>。</p>
+<h2 id="优势">优势</h2>
+<p>只要你是用 <code>cairo_pdf()</code> 生成的 PDF，对方无论用 Windows、macOS 还是 Linux，无论有没有安装对应的中文字体，<strong>打开后都能正常显示中文</strong>。</p>
+<p>为什么能这么确定？这要从 <code>cairo_pdf()</code> 的核心机制说起。</p>
+<p><code>cairo_pdf()</code> 之所以强大，是因为它默认采用了 <strong>“字体子集化嵌入”</strong> 技术。这意味着：</p>
+<ol type="1">
+<li><strong>它不只是“引用”字体</strong>：默认的 <code>pdf()</code> 只是告诉阅读器“这里要用宋体”，至于宋体长什么样，它不管。</li>
+<li><strong>它把“笔迹”直接写进文件</strong>：<code>cairo_pdf()</code> 会把你图中<strong>实际用到的每一个字</strong>（比如“染”“色”“体”这三个字）的矢量轮廓（笔画的几何曲线）提取出来，压缩成一个非常小的“字体子集”，然后直接打包放进 PDF 文件里。</li>
+</ol>
+<p>因为 PDF 文件里已经<strong>自带</strong>了这几个字的“笔迹数据”，所以对方打开 PDF 时，PDF 阅读器会优先使用文件内部的数据来渲染这些文字。它根本不需要去对方的系统里找字体，自然<strong>绝对不会变成方框</strong>。</p>
+<p>与默认 <code>pdf()</code> 的终极对比</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 35%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>特性</th>
+<th>默认 <code>pdf()</code></th>
+<th><code>cairo_pdf()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>存储内容</strong></td>
+<td>只存字符编码（如“中”的 Unicode 码）</td>
+<td>存字符编码 + <strong>完整的字形轮廓数据</strong></td>
+</tr>
+<tr>
+<td><strong>对方无字体时</strong></td>
+<td><strong>变方框</strong> ❌</td>
+<td><strong>正常显示</strong> ✅</td>
+</tr>
+<tr>
+<td><strong>文件大小</strong></td>
+<td>极小（几 KB）</td>
+<td>稍大（嵌入了几何数据，通常几十到几百 KB）</td>
+</tr>
+<tr>
+<td><strong>文字是否可选/可搜索</strong></td>
+<td>✅ 可以</td>
+<td>✅ <strong>可以</strong>（因为保留了文本编码映射）</td>
+</tr>
+<tr>
+<td><strong>跨平台一致性</strong></td>
+<td>极差</td>
+<td>极好</td>
+</tr>
+</tbody>
+</table>
+<h1 id="两种方法怎么选---用-cairo_pdf">两种方法怎么选 - 用 <code>cairo_pdf</code></h1>
+<p><strong><code>cairo_pdf()</code> 是科研绘图的“正规军”，<code>showtext</code> 是解决特殊缺字体环境的“特种兵”。正常情况下，请坚定选择 <code>cairo_pdf()</code>，它更专业、更轻量、更符合学术出版规范。</strong></p>
+<p>无脑用 <code>cairo_pdf()</code>。<code>showtext</code> 可以作为“备胎”，仅在特定极端环境下使用。</p>
+<p>为什么这么选？下面我结合科研绘图的硬指标，为你进行深度拆解。</p>
+<h2 id="科研图片的命门文字必须可选可搜索">1. 科研图片的“命门”：文字必须可选可搜索</h2>
+<p>在学术投稿中，PDF 通常用于生成高分辨率预览图或直接用于出版。</p>
+<ul>
+<li><strong><code>cairo_pdf()</code> 生成的是“真·文本”</strong>：它嵌入字体子集，但文字在 PDF 里依然保留为 <strong>“文本对象（Text Object）”</strong>。这意味着，编辑或审稿人可以用鼠标<strong>选中、复制</strong>你图里的“染色体”三个字；文献数据库抓取 PDF 时，也能提取出你的图例文字。这是学术出版最规范的做法。</li>
+<li><strong><code>showtext</code> 生成的是“假·文本”（轮廓路径）</strong>：它将文字全部转成了<strong>“贝塞尔曲线（多边形）”</strong>。在 PDF 里，这些文字在视觉上没问题，但在软件层面，它们是一堆图形，<strong>不可选中、不可复制、不可搜索</strong>。如果你的图例被出版社系统 OCR（光学字符识别）或索引，<code>showtext</code> 出来的东西是盲文。</li>
+</ul>
+<h2 id="后续转换-pngcairo_pdf-更省心质量更稳">2. 后续转换 PNG：<code>cairo_pdf()</code> 更省心、质量更稳</h2>
+<p>既然你提到“后续可能会将 PDF 转为 PNG”，那这里有一个很多人踩过的坑：</p>
+<ul>
+<li><strong><code>cairo_pdf()</code> + Ghostscript/ImageMagick 转换</strong>：因为 PDF 里存的是标准文本和嵌入字体，转换工具（如 <code>pdftoppm</code>）在渲染时，能直接识别出这些文字并以极高的精度栅格化，抗锯齿效果很好。<strong>无需额外设置</strong>。</li>
+<li><strong><code>showtext</code> + 转换</strong>：因为文字是“多边形”，转换工具需要去渲染复杂的几何路径。这通常没问题，但如果你在 <code>ggsave</code> 或 <code>showtext_opts()</code> 中没有<strong>正确设置参数</strong>，转换时可能会出现文字边缘毛刺、粗细不一的情况。</li>
+</ul>
+<h2 id="性能与文件大小">3. 性能与文件大小</h2>
+<ul>
+<li><strong><code>cairo_pdf()</code></strong>：将字体子集化嵌入，文件体积非常小（通常几十 KB），且生成速度极快。</li>
+<li><strong><code>showtext</code></strong>：将成千上万个汉字轮廓拆解成成千上万条 tiny 的 <code>move to</code>、<code>line to</code> 路径。如果一张图里标注较多，<code>showtext</code> 生成的 PDF 文件可能从几十 KB 膨胀到 <strong>几十 MB</strong>，这会严重影响你插入 Word 或 LaTeX 时的编译速度。</li>
+</ul>
+<hr />
+<h2 id="什么情况下才用-showtext">🚨 什么情况下才用 <code>showtext</code>？</h2>
+<p><code>showtext</code> 也有它的“高光时刻”，只在以下两种情况下它才是必选项：</p>
+<ol type="1">
+<li><strong>你想用极其小众的 Google Fonts（如手写艺术字）</strong>，而系统没装，你又不想折腾系统字体安装。</li>
+<li><strong>你跑在极其精简的 Linux Docker 容器里</strong>，连 Cairo 库版本都老掉牙，且无法安装系统中文字体，但你手头有 <code>.ttf</code> 文件可以随代码一起带走。</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/cc458b03/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            JavaScript库-mathjax3使用笔记
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/46111159/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">HTML中空白符号和多余空格的处理</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    HTML中图表编号自动化 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-HTML中图表编号自动化"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  HTML中图表编号自动化
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/f1421d82/" class="article-date">
+  <time datetime="2026-06-24T09:08:08.000Z" itemprop="datePublished">2026-06-24</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.6k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">7 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>网页中图表的图 n 这种编号进行自动编号的技术，这里采用 JS脚本实现。</p>
+<span id="more"></span>
+<h1 id="图表应该如何编号">图表应该如何编号</h1>
+<ol type="1">
+<li><p>正常期刊论文就是直接从1开始编号，也就是图1，图2这种</p></li>
+<li><p>长篇论文/书籍中可能会按照章进行编号（因为图表可能很多），<strong>图3-1</strong>和<strong>图3.1</strong>这两种方式都存在</p>
+<ul>
+<li>英文书籍中<strong>第3章第1个图主流采用 Figure 3.1</strong>这种方式， 3-1 的方式偶见于工程报告传统。</li>
+<li>中文的主流做法则是<strong>图3-1</strong>这种方式，3.1 也是合规写法，但是应该更推荐用 3-1 。估计是为了避免和章节混淆（因为 3.1 放在章节中是第3章第1节的意思）。所以使用 3-1 在防混淆这件事上其实设计得更好。</li>
+</ul>
+<p>其实这就是约定俗成而已，深挖一下应该是语言和语法传统的原因。英文里就是用 <code>.</code> 表示层级隶属关系，而<code>-</code>除了连字符，还有减号/范围的含义，如果不加前缀 Figure 就会产生误解。但是中文语境下的 <code>-</code> 只有连字符的含义，没有数值含义。</p></li>
+</ol>
+<h1 id="从1开始自动编号的做法">从1开始自动编号的做法</h1>
+<p>首先你的代码中本身应该是编号的地方改为占位符 <code>@N</code> ，图表加一个类别 “fig-auto” 或 “tbl-auto” （图表一定要有标题，标题中要有 <code>@N</code>，不然就会跳号了）</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">figure</span> <span class="attr">class</span>=<span class="string">&quot;fig-auto&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;flowchart.png&quot;</span> <span class="attr">alt</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">figcaption</span>&gt;</span></span><br><span class="line">    图 @N　GWAS分析标准流程<span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">    Figure @N　GWAS analysis workflow</span><br><span class="line">  <span class="tag">&lt;/<span class="name">figcaption</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">figure</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">class</span>=<span class="string">&quot;tbl-auto&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">caption</span>&gt;</span></span><br><span class="line">    表 @N　所有性状显著位点和候选基因数目统计表<span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">    Table @N　Summary statistics of significant loci and candidate genes across all traits</span><br><span class="line">  <span class="tag">&lt;/<span class="name">caption</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">thead</span>&gt;</span>…<span class="tag">&lt;/<span class="name">thead</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">tbody</span>&gt;</span>…<span class="tag">&lt;/<span class="name">tbody</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>然后使用的 JS 脚本如下</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">  <span class="comment">/* ---- 图 ---- */</span></span><br><span class="line">  <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(<span class="string">&#x27;figure.fig-auto&#x27;</span>).<span class="title function_">forEach</span>(<span class="function">(<span class="params">fig, i</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> n = i + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">const</span> cap = fig.<span class="title function_">querySelector</span>(<span class="string">&#x27;:scope &gt; figcaption&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (!cap) <span class="keyword">return</span>;</span><br><span class="line">    <span class="title function_">replaceTextInNode</span>(cap, <span class="string">&#x27;@N&#x27;</span>, <span class="string">&#x27; &#x27;</span> + n);   <span class="comment">// 把编号嵌进文本节点</span></span><br><span class="line">    <span class="comment">// 第一行的 &quot;图 &quot; 前缀你已经手写在了 HTML 里，我们只替换 @N</span></span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* ---- 表 ---- */</span></span><br><span class="line">  <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(<span class="string">&#x27;table.tbl-auto&#x27;</span>).<span class="title function_">forEach</span>(<span class="function">(<span class="params">tbl, i</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> n = i + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">const</span> cap = tbl.<span class="title function_">querySelector</span>(<span class="string">&#x27;:scope &gt; caption&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (!cap) <span class="keyword">return</span>;</span><br><span class="line">    <span class="title function_">replaceTextInNode</span>(cap, <span class="string">&#x27;@N&#x27;</span>, <span class="string">&#x27; &#x27;</span> + n);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* 核心：只改 TEXT_NODE 的 textContent，不动 innerHTML，不杀事件监听器 */</span></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">replaceTextInNode</span>(<span class="params">root, placeholder, replacement</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> walker = <span class="variable language_">document</span>.<span class="title function_">createTreeWalker</span>(</span><br><span class="line">      root,</span><br><span class="line">      <span class="title class_">NodeFilter</span>.<span class="property">SHOW_TEXT</span>,</span><br><span class="line">      <span class="literal">null</span>,</span><br><span class="line">      <span class="literal">false</span></span><br><span class="line">    );</span><br><span class="line">    <span class="keyword">const</span> nodesToChange = [];</span><br><span class="line">    <span class="keyword">while</span> (walker.<span class="title function_">nextNode</span>()) &#123;</span><br><span class="line">      <span class="keyword">if</span> (walker.<span class="property">currentNode</span>.<span class="property">nodeValue</span>.<span class="title function_">includes</span>(placeholder)) &#123;</span><br><span class="line">        nodesToChange.<span class="title function_">push</span>(walker.<span class="property">currentNode</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    nodesToChange.<span class="title function_">forEach</span>(<span class="function"><span class="params">node</span> =&gt;</span> &#123;</span><br><span class="line">      node.<span class="property">nodeValue</span> = node.<span class="property">nodeValue</span>.<span class="title function_">replace</span>(</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">RegExp</span>(escapeRegExp(placeholder), <span class="string">&#x27;g&#x27;</span>),</span><br><span class="line">        replacement</span><br><span class="line">      );</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">escapeRegExp</span>(<span class="params">string</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> string.<span class="title function_">replace</span>(<span class="regexp">/[.*+?^$&#123;&#125;()|[\]\\]/g</span>, <span class="string">&#x27;\\$&amp;&#x27;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>这个脚本的做法是</p>
+<ul>
+<li>选取所有类名为 <code>fig-auto</code> 的 <code>&lt;figure&gt;</code> 元素，遍历它们，<code>i</code> 是从 0 开始的下标，编号 <code>n = i + 1</code>（从 1 开始）。然后将 <code>&lt;figcaption&gt;</code> 内所有文本节点中的 <code>@N</code> 替换为 <code>" " + n</code>（即空格加编号）。</li>
+<li>表格同理</li>
+<li>替换文本的函数为 <code>replaceTextInNode()</code>
+<ul>
+<li>遍历 <code>root</code> 下的<strong>所有文本节点</strong>（<code>NodeFilter.SHOW_TEXT</code>），而不是直接用 <code>innerHTML</code> 或 <code>textContent</code> 整体替换。</li>
+<li>这样做的好处是<strong>只修改纯文本内容，不破坏 HTML 结构、不重新解析 DOM，也不会移除已绑定的事件监听器</strong>（因为 <code>innerHTML</code> 会清空并重建元素，导致事件丢失）。</li>
+<li>收集所有包含占位符的文本节点（<code>includes(placeholder)</code>），然后统一替换。</li>
+<li>替换过程
+<ul>
+<li>使用 <code>new RegExp(escapeRegExp(placeholder), 'g')</code> 进行全局替换。</li>
+<li><code>escapeRegExp</code> 用于转义占位符中的正则特殊字符（如 <code>.</code>、<code>*</code>、<code>+</code> 等），确保按字面意义匹配。</li>
+</ul></li>
+</ul></li>
+</ul>
+<h2 id="修改">修改</h2>
+<p>图表不用加类别 “fig-auto” 或 “tbl-auto” ，就默认对全部图表进行自动编号。正常应该就是这样，不存在哪个图表是人为要求不需要编号的。</p>
+<p>HTML 的图为</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">figure</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;flowchart.png&quot;</span> <span class="attr">alt</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">figcaption</span>&gt;</span></span><br><span class="line">    图 @N　GWAS分析标准流程<span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">    Figure @N　GWAS analysis workflow</span><br><span class="line">  <span class="tag">&lt;/<span class="name">figcaption</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">figure</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>HTML 中的表为</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">table</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">caption</span>&gt;</span></span><br><span class="line">    表 @N　所有性状显著位点和候选基因数目统计表<span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">    Table @N　Summary statistics of significant loci and candidate genes across all traits</span><br><span class="line">  <span class="tag">&lt;/<span class="name">caption</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">thead</span>&gt;</span>…<span class="tag">&lt;/<span class="name">thead</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">tbody</span>&gt;</span>…<span class="tag">&lt;/<span class="name">tbody</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>JS 代码为</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">  <span class="comment">/* ---------- 配置 ----------</span></span><br><span class="line"><span class="comment">   *  tokenFig / tokenTbl：和你 HTML 里的占位记号完全一致</span></span><br><span class="line"><span class="comment">   *  prefixZH / prefixEN 也可在这里统一改（如果你想中英文间距/格式更可控）</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">const</span> <span class="variable constant_">TOKEN_FIG</span> = <span class="string">&#x27;@N&#x27;</span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="variable constant_">TOKEN_TBL</span> = <span class="string">&#x27;@N&#x27;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* 工具：在 root 子树的所有文本节点里，把 token 替换为 replacement */</span></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">replaceTokenInTextNodes</span>(<span class="params">root, token, makeReplacement</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!root) <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">const</span> walker = <span class="variable language_">document</span>.<span class="title function_">createTreeWalker</span>(</span><br><span class="line">      root,</span><br><span class="line">      <span class="title class_">NodeFilter</span>.<span class="property">SHOW_TEXT</span>,</span><br><span class="line">      <span class="literal">null</span>,</span><br><span class="line">      <span class="literal">false</span></span><br><span class="line">    );</span><br><span class="line">    <span class="comment">// 先收集再改，避免在遍历中修改引起意外行为</span></span><br><span class="line">    <span class="keyword">const</span> hits = [];</span><br><span class="line">    <span class="keyword">while</span> (walker.<span class="title function_">nextNode</span>()) &#123;</span><br><span class="line">      <span class="keyword">const</span> node = walker.<span class="property">currentNode</span>;</span><br><span class="line">      <span class="keyword">if</span> (node.<span class="property">data</span>.<span class="title function_">includes</span>(token)) hits.<span class="title function_">push</span>(node);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> node <span class="keyword">of</span> hits) &#123;</span><br><span class="line">      <span class="comment">// 注意：这里只做纯文本替换，不碰 innerHTML，不破坏子元素</span></span><br><span class="line">      node.<span class="property">data</span> = node.<span class="property">data</span>.<span class="title function_">split</span>(token).<span class="title function_">join</span>(makeReplacement);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* ---- 1) 图编号 ----</span></span><br><span class="line"><span class="comment">   *  只处理“带 figcaption 的 figure”，避免把页面里非报告的 figure 也卷进来</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(<span class="string">&#x27;figure&#x27;</span>).<span class="title function_">forEach</span>(<span class="function">(<span class="params">fig, i</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> cap = fig.<span class="title function_">querySelector</span>(<span class="string">&#x27;:scope &gt; figcaption&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (!cap) <span class="keyword">return</span>;                       <span class="comment">// 没标题就不算“报告图”</span></span><br><span class="line">    <span class="keyword">const</span> n = i + <span class="number">1</span>;</span><br><span class="line">    <span class="comment">// 如果你只想在编号位填数字（前缀留在 HTML 里），用：</span></span><br><span class="line">    <span class="title function_">replaceTokenInTextNodes</span>(cap, <span class="variable constant_">TOKEN_FIG</span>, n);</span><br><span class="line">    <span class="comment">// 如果你宁愿把整个前缀也管起来（更严格），可以改成填整句：</span></span><br><span class="line">    <span class="comment">// replaceTokenInTextNodes(cap, TOKEN_FIG, &#x27;图 &#x27; + n);</span></span><br><span class="line">    <span class="comment">// replaceTokenInTextNodes(cap, TOKEN_FIG_EN, &#x27;Figure &#x27; + n);</span></span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* ---- 2) 表编号 ----</span></span><br><span class="line"><span class="comment">   *  &lt;caption&gt; 按规范必须是 &lt;table&gt; 的第一个子元素，我们直接取 caption</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(<span class="string">&#x27;table&#x27;</span>).<span class="title function_">forEach</span>(<span class="function">(<span class="params">tbl, i</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> cap = tbl.<span class="title function_">querySelector</span>(<span class="string">&#x27;:scope &gt; caption&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (!cap) <span class="keyword">return</span>;                       <span class="comment">// 没 caption 就不编</span></span><br><span class="line">    <span class="keyword">const</span> n = i + <span class="number">1</span>;</span><br><span class="line">    <span class="title function_">replaceTokenInTextNodes</span>(cap, <span class="variable constant_">TOKEN_TBL</span>, n);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;)();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>好家伙，给我的代码更稳健了。</p>
+<h3 id="修改的地方">修改的地方</h3>
+<p>HTML 代码</p>
+<ul>
+<li>不用特定加类别。</li>
+</ul>
+<p>JS 代码</p>
+<ul>
+<li><strong>不加类</strong>：选择器就是 <code>figure</code>/ <code>table</code>，全文档生效</li>
+<li><strong>不用 innerHTML</strong>：用 <code>document.createTreeWalker(..., NodeFilter.SHOW_TEXT)</code>只改 <code>.data</code>，不重建子树、不杀 <code>&lt;br&gt;</code>/<code>&lt;span&gt;</code>/图片引用</li>
+<li><strong><code>&lt;caption&gt;</code>的位置符合规范</strong>：<code>&lt;caption&gt;</code>必须是 <code>&lt;table&gt;</code>的第一子元素，所以我们用 <code>table &gt; caption</code>定位是合法且可靠的</li>
+<li>如果存在无标题的图表，自动编号会跳过这个图/表（所以就不会存在跳号的情况）。</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/cc458b03/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">JavaScript库-mathjax3使用笔记</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

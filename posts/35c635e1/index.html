@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">13.9k</span>
+            <span class="post-count">14k</span>
         </span>
     </span>
 
@@ -81,7 +81,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">54 分钟</span>
+            <span class="post-count">55 分钟</span>
         </span>
     </span>
 </div>
@@ -1861,8 +1861,13 @@
 <p>在“编辑站点”窗口中，点击左下角的 <strong>“高级(A)…”</strong> 按钮。</p>
 <p>设置如下，服务器响应超时改为 30秒；保活设置发送空SSH包，间隔秒数为 30秒。</p>
 <p><img src="4.png" /></p>
-<h1 id="报错解决思路">报错解决思路</h1>
-<p>进不去就是退出刷新一下。</p>
+<h1 id="问题及解决思路">问题及解决思路</h1>
+<h2 id="复制代码到命令行出现前缀0-和后缀1">复制代码到命令行出现前缀<code>0~</code> 和后缀<code>1~</code></h2>
+<p>原因：<strong>MobaXterm（发送端）按 xterm 规范粘贴时包了 [200<sub>/[201</sub>，但曙光云那头的 shell/readline 版本或配置接不住这个协议，转义序列被当普通字符回显，残成 0<sub>/1</sub>。</strong>（看不懂）</p>
+<p><strong>解决思路如下</strong>： 我就试了下面的临时救急的方法，有效。</p>
+<p><strong>临时救急</strong>（当前会话立即生效）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span> <span class="string">&#x27;\e[?2004l&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>这个之所以有效，是因为它让 MobaXterm <strong>别再发这对包装</strong>了——从源头把 <code>200~</code>/<code>201~</code>掐掉，自然就没有残骸。（还是看不懂）</p>
  
       <!-- reward -->
       
