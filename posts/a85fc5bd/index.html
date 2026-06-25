@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">5.1k</span>
+            <span class="post-count">5.2k</span>
         </span>
     </span>
 
@@ -77,7 +77,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">18 分钟</span>
+            <span class="post-count">19 分钟</span>
         </span>
     </span>
 </div>
@@ -122,7 +122,7 @@
 <h2 id="png-中的字体family参数"><code>png()</code> 中的字体（<code>family</code>参数）</h2>
 <p><code>png()</code> 设备的行为则与 <code>pdf()</code> 完全不同，它依赖操作系统来渲染文字。</p>
 <ul>
-<li><strong>可用字体</strong>：理论上，它能使用你<strong>操作系统安装的任意字体</strong>。在 Windows 上，它使用 GDI 引擎；在 Linux/macOS 上，如果使用 <code>type = "cairo"</code>（貌似这是默认值），则能访问系统的全部字体。</li>
+<li><strong>可用字体</strong>：理论上，它能使用你<strong>操作系统安装的任意字体</strong>。在 Windows 上，它使用 GDI 引擎；在 Linux/macOS 上，如果使用 <code>type = "cairo"</code>（Linux这是默认值; windows不是），则能访问系统的全部字体。</li>
 <li><strong>查看方式</strong>：最可靠的方法是使用第三方包来列出系统字体（查看方式下面会说）。</li>
 <li><strong>添加字体</strong>：在操作系统层面安装字体即可，无需在 R 中特别“添加”。</li>
 <li><strong>设置错误</strong>：如果指定的 <code>family</code> 在系统中不存在，<code>png()</code> <strong>也不会报错</strong>，而是会触发操作系统的<strong>字体回退机制</strong>，自动用一个相近的字体替代。所以有时指定了错误的字体名，图表仍能显示文字，但可能不是你想要的字体。</li>
@@ -372,19 +372,71 @@
 </table>
 <h1 id="另一种方法修改设备驱动为-cairo_pdf">另一种方法：修改设备驱动为 <code>cairo_pdf</code></h1>
 <p>在不使用 <code>showtext</code> 的情况下，只要将 <code>ggsave</code> 的图形设备换成支持 Cairo 渲染的 PDF 设备，它就能像 PNG 一样利用系统字体回显中文。</p>
-<p><strong>修改方式</strong>：在 <code>ggsave</code> 中显式指定 <code>device</code>：</p>
+<p><strong>修改方式</strong>：在 <code>ggsave</code> 中显式指定 <code>device</code>，并且先指定一个系统中存在的中文字体：</p>
+<p>这里注意删除 <code>dpi</code> 参数，保留 <code>dpi = 600</code> 这种参数可能会让 <code>cairo_pdf</code> 在内部进行不必要的位图预渲染或高分辨率计算，白白消耗内存。</p>
 <figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 把原来的 ggsave 改成这样（注意 file 扩展名为 .pdf）</span></span><br><span class="line">myplot <span class="operator">&lt;-</span> p <span class="operator">+</span> theme<span class="punctuation">(</span>text <span class="operator">=</span> element_text<span class="punctuation">(</span>family <span class="operator">=</span> <span class="string">&quot;SimSun&quot;</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line">ggsave<span class="punctuation">(</span>file <span class="operator">=</span> <span class="string">&quot;Sites_number.pdf&quot;</span><span class="punctuation">,</span> myplot<span class="punctuation">,</span> </span><br><span class="line">       width <span class="operator">=</span> <span class="number">6</span><span class="punctuation">,</span> height <span class="operator">=</span> <span class="number">4</span><span class="punctuation">,</span> </span><br><span class="line">       device <span class="operator">=</span> cairo_pdf<span class="punctuation">,</span>  <span class="comment"># 关键就在这里</span></span><br><span class="line">       <span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>如果采用底层画图代码，直接调用 <code>cairo_pdf()</code> 函数就行，用于替换 <code>pdf()</code>。</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cairo_pdf<span class="punctuation">(</span><span class="string">&quot;QQ-Plot.pdf&quot;</span><span class="punctuation">,</span> width <span class="operator">=</span> <span class="number">8</span><span class="punctuation">,</span> height <span class="operator">=</span> <span class="number">8</span><span class="punctuation">,</span> family <span class="operator">=</span> <span class="string">&quot;sans&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<h2 id="与-pdf-的比对">与 <code>pdf()</code> 的比对</h2>
+<p>在 R 语言中，<code>pdf()</code> 和 <code>cairo_pdf()</code> 虽然都是生成矢量图的设备，但它们的底层架构和渲染逻辑有显著差异，这直接导致了它们在处理大规模数据（如曼哈顿图）时内存消耗的不同。</p>
+<p><strong>核心区别：底层渲染引擎不同</strong></p>
+<ul>
+<li><strong>pdf()（原生设备）</strong>：这是 R 语言内置的原生图形设备。它直接通过 R 自身的底层代码生成 PostScript/PDF 指令。它的功能相对基础，主要专注于将绘图指令直接转化为矢量代码，中间环节较少。</li>
+<li><strong>cairo_pdf()（Cairo 引擎）</strong>：这是基于外部开源图形库 <strong>Cairo</strong> 的设备。Cairo 是一个功能极其强大的 2D 图形库，提供了更高级的图形渲染能力，例如高质量的抗锯齿、复杂的渐变填充、透明度（Alpha 通道）以及更广泛的 Unicode 字符（如中文）支持。</li>
+</ul>
+<p><strong>二者的优缺点对比</strong></p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 37%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>pdf()</code> (原生)</th>
+<th><code>cairo_pdf()</code> (Cairo)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>内存占用</strong></td>
+<td><strong>较低</strong>，适合超大规模数据</td>
+<td><strong>较高</strong>，处理海量点易爆内存</td>
+</tr>
+<tr>
+<td><strong>文本渲染</strong></td>
+<td>基础，跨平台中文易乱码</td>
+<td><strong>极佳</strong>，完美支持复杂 Unicode 和字体嵌入</td>
+</tr>
+<tr>
+<td><strong>高级特效</strong></td>
+<td>不支持透明度、复杂渐变</td>
+<td>支持透明度、抗锯齿、复杂混合</td>
+</tr>
+<tr>
+<td><strong>边界裁剪</strong></td>
+<td>严格遵循绘图区域边界</td>
+<td>偶尔出现线条/阴影溢出边界的问题</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>纯线条图、海量数据点、服务器环境</td>
+<td>需要精美排版、中文标签、复杂配色的图表</td>
+</tr>
+</tbody>
+</table>
+<p>我简单整理一下， <code>cairo_pdf()</code> 的优势主要是<strong>支持中文</strong>和<strong>透明度</strong>（alpha），但是主要缺点是<strong>非常占据内存</strong>。</p>
 <h2 id="字体回退">字体回退</h2>
 <p>这个好处是在 pdf 中还是文本对象，可以正常复制。而 showtext 是转变成了矢量化图像，不可选择和复制。另外<code>cairo_pdf()</code> <strong>具备字体回退机制</strong>。当指定的 <code>family</code> 不支持中文时，它会尝试自动寻找一个系统中已安装的合适字体来替代。</p>
 <p><code>cairo_pdf()</code> 回退原理：它使用 <strong>fontconfig</strong> 来查找和管理字体。当指定的字体缺失某个字符（如中文字符）时，fontconfig 会根据其规则和策略，自动从系统已安装的字体中，挑选一个能显示该字符的字体进行替换。这使得 <code>cairo_pdf()</code> 能支持更广泛的 UTF-8 字符。</p>
-<h3 id="关键注意事项">关键注意事项</h3>
 <p>虽然 <code>cairo_pdf()</code> 能回退，但在实际使用中有两个重要限制：</p>
 <ol type="1">
 <li><strong>回退依赖系统字体</strong>：<code>cairo_pdf()</code> 的字体查找<strong>仅限系统已安装的字体</strong>。如果系统缺乏任何包含中文字形的字体，回退机制将失效。</li>
 <li><strong>回退可能“全局化”</strong>：一个常见的副作用是，一旦 fontconfig 为了显示中文而启用了某个中文字体，这个字体可能会被用于渲染图表中的<strong>所有</strong>文本（包括英文）。这可能导致图表中英文的字体风格与预期不符。</li>
 </ol>
 <p>因此，<code>cairo_pdf()</code> 确实能像 <code>png()</code> 一样进行字体回退，甚至更智能。但为了获得最可控、最专业的输出效果，特别是对于有严格字体要求的科研图表，更推荐的做法是<strong>主动指定一个支持中文的字体</strong>。</p>
-<h2 id="优势">优势</h2>
+<h2 id="显示中文的优势">显示中文的优势</h2>
 <p>只要你是用 <code>cairo_pdf()</code> 生成的 PDF，对方无论用 Windows、macOS 还是 Linux，无论有没有安装对应的中文字体，<strong>打开后都能正常显示中文</strong>。</p>
 <p>为什么能这么确定？这要从 <code>cairo_pdf()</code> 的核心机制说起。</p>
 <p><code>cairo_pdf()</code> 之所以强大，是因为它默认采用了 <strong>“字体子集化嵌入”</strong> 技术。这意味着：</p>
@@ -435,34 +487,14 @@
 </tr>
 </tbody>
 </table>
-<h1 id="两种方法怎么选---用-cairo_pdf">两种方法怎么选 - 用 <code>cairo_pdf</code></h1>
+<h1 id="cairo_pdf-与-showtext-比对"><code>cairo_pdf</code> 与 <code>showtext</code> 比对</h1>
 <p><strong><code>cairo_pdf()</code> 是科研绘图的“正规军”，<code>showtext</code> 是解决特殊缺字体环境的“特种兵”。正常情况下，请坚定选择 <code>cairo_pdf()</code>，它更专业、更轻量、更符合学术出版规范。</strong></p>
 <p>无脑用 <code>cairo_pdf()</code>。<code>showtext</code> 可以作为“备胎”，仅在特定极端环境下使用。</p>
 <p>为什么这么选？下面我结合科研绘图的硬指标，为你进行深度拆解。</p>
-<h2 id="科研图片的命门文字必须可选可搜索">1. 科研图片的“命门”：文字必须可选可搜索</h2>
-<p>在学术投稿中，PDF 通常用于生成高分辨率预览图或直接用于出版。</p>
 <ul>
 <li><strong><code>cairo_pdf()</code> 生成的是“真·文本”</strong>：它嵌入字体子集，但文字在 PDF 里依然保留为 <strong>“文本对象（Text Object）”</strong>。这意味着，编辑或审稿人可以用鼠标<strong>选中、复制</strong>你图里的“染色体”三个字；文献数据库抓取 PDF 时，也能提取出你的图例文字。这是学术出版最规范的做法。</li>
 <li><strong><code>showtext</code> 生成的是“假·文本”（轮廓路径）</strong>：它将文字全部转成了<strong>“贝塞尔曲线（多边形）”</strong>。在 PDF 里，这些文字在视觉上没问题，但在软件层面，它们是一堆图形，<strong>不可选中、不可复制、不可搜索</strong>。如果你的图例被出版社系统 OCR（光学字符识别）或索引，<code>showtext</code> 出来的东西是盲文。</li>
 </ul>
-<h2 id="后续转换-pngcairo_pdf-更省心质量更稳">2. 后续转换 PNG：<code>cairo_pdf()</code> 更省心、质量更稳</h2>
-<p>既然你提到“后续可能会将 PDF 转为 PNG”，那这里有一个很多人踩过的坑：</p>
-<ul>
-<li><strong><code>cairo_pdf()</code> + Ghostscript/ImageMagick 转换</strong>：因为 PDF 里存的是标准文本和嵌入字体，转换工具（如 <code>pdftoppm</code>）在渲染时，能直接识别出这些文字并以极高的精度栅格化，抗锯齿效果很好。<strong>无需额外设置</strong>。</li>
-<li><strong><code>showtext</code> + 转换</strong>：因为文字是“多边形”，转换工具需要去渲染复杂的几何路径。这通常没问题，但如果你在 <code>ggsave</code> 或 <code>showtext_opts()</code> 中没有<strong>正确设置参数</strong>，转换时可能会出现文字边缘毛刺、粗细不一的情况。</li>
-</ul>
-<h2 id="性能与文件大小">3. 性能与文件大小</h2>
-<ul>
-<li><strong><code>cairo_pdf()</code></strong>：将字体子集化嵌入，文件体积非常小（通常几十 KB），且生成速度极快。</li>
-<li><strong><code>showtext</code></strong>：将成千上万个汉字轮廓拆解成成千上万条 tiny 的 <code>move to</code>、<code>line to</code> 路径。如果一张图里标注较多，<code>showtext</code> 生成的 PDF 文件可能从几十 KB 膨胀到 <strong>几十 MB</strong>，这会严重影响你插入 Word 或 LaTeX 时的编译速度。</li>
-</ul>
-<hr />
-<h2 id="什么情况下才用-showtext">🚨 什么情况下才用 <code>showtext</code>？</h2>
-<p><code>showtext</code> 也有它的“高光时刻”，只在以下两种情况下它才是必选项：</p>
-<ol type="1">
-<li><strong>你想用极其小众的 Google Fonts（如手写艺术字）</strong>，而系统没装，你又不想折腾系统字体安装。</li>
-<li><strong>你跑在极其精简的 Linux Docker 容器里</strong>，连 Cairo 库版本都老掉牙，且无法安装系统中文字体，但你手头有 <code>.ttf</code> 文件可以随代码一起带走。</li>
-</ol>
  
       <!-- reward -->
       

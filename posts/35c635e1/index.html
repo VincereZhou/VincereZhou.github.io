@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">14k</span>
+            <span class="post-count">14.2k</span>
         </span>
     </span>
 
@@ -1863,11 +1863,20 @@
 <p><img src="4.png" /></p>
 <h1 id="问题及解决思路">问题及解决思路</h1>
 <h2 id="复制代码到命令行出现前缀0-和后缀1">复制代码到命令行出现前缀<code>0~</code> 和后缀<code>1~</code></h2>
-<p>原因：<strong>MobaXterm（发送端）按 xterm 规范粘贴时包了 [200<sub>/[201</sub>，但曙光云那头的 shell/readline 版本或配置接不住这个协议，转义序列被当普通字符回显，残成 0<sub>/1</sub>。</strong>（看不懂）</p>
-<p><strong>解决思路如下</strong>： 我就试了下面的临时救急的方法，有效。</p>
+<p>在 MobaXterm 中复制粘贴代码时出现 <code>0~</code> 和 <code>1~</code> 这样的前后缀，通常是因为<strong>“括号粘贴模式”（Bracketed Paste Mode）</strong>或<strong>终端的本地回显/编辑设置</strong>冲突导致的。这种机制原本是为了防止粘贴多行代码时被意外执行，但在某些情况下会附加控制字符。</p>
+<p><strong>解决思路如下</strong>：</p>
+<p><strong>检查并修改 MobaXterm 配置文件（永久生效）</strong></p>
+<p>如果通过界面修改后，每次重新打开仍然出现该问题，可以直接修改配置文件：</p>
+<ol type="1">
+<li><p><strong>彻底关闭</strong> MobaXterm 软件。</p></li>
+<li><p>找到配置文件路径（通常在 <code>C:\Users\&lt;你的用户名&gt;\AppData\Roaming\MobaXterm\MobaXterm.ini</code>）。</p></li>
+<li><p>使用记事本打开该文件，找到 [MottyOptions] 或 [Configuration] 节点，添加或修改以下配置（我没看到这行，后面我看也没有找到这两个节点，我是直接放到了文件最后面，我也不确信管不管用）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LocalEcho=0</span><br><span class="line">LocalEdit=0</span><br></pre></td></tr></table></figure></li>
+<li><p>保存文件后重新打开 MobaXterm。</p></li>
+</ol>
 <p><strong>临时救急</strong>（当前会话立即生效）：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span> <span class="string">&#x27;\e[?2004l&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>这个之所以有效，是因为它让 MobaXterm <strong>别再发这对包装</strong>了——从源头把 <code>200~</code>/<code>201~</code>掐掉，自然就没有残骸。（还是看不懂）</p>
+<p>注：如果后续恢复正常，说明是服务器端的 Bash/Zsh 开启了括号粘贴模式。若希望永久关闭，可将上述命令追加到服务器的 ~/.bashrc 或 ~/.zshrc 文件中。</p>
  
       <!-- reward -->
       
