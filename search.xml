@@ -1,6 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>康某森公司还我血汗钱</title>
+    <url>/posts/4aec5ad2/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>康某森公司，快还我血汗钱！！！</p>
+<span id="more"></span>
+<p>康某森公司长期拖欠我工资！！！</p>
+<p>因为长期拖欠工资不发，我因为经济和心理双重因素从康某森公司离职。离职时签的协议将我拖欠的工资分为三期支付，但从第一期就没有正常支付。</p>
+<p>仲裁调解后，还是分为三期给我支付，时间相当于离职协议整体都向后拖了一个月。并且公司不同意在调解书上签“一期不支付，之后可以直接执行所有剩下的欠款”类似的内容，让我后续只能一期期地去申请强制执行。之后第一期在我的催促下确实支付给我了，但从第二期就开始不付了，只能申请强制执行。</p>
+<p>截至目前，尚未支付我的最后两期的钱相当于我5个多月的工资。我长这么大，从来没有损失过这么多钱！请注意，这是我的劳动报酬，不是金融理财！</p>
+<p>立此贴为证！</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>图片从pdf转为png</title>
+    <url>/posts/816a7470/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>将 PDF 文件转换为 PNG 格式，在 R 和 Python 中都有很成熟的解决方案。这里我的目的是把 PDF 的一整页转为图片，而不是提取 PDF 中的图片。</p>
+<span id="more"></span>
+<h1 id="r-语言解决方案">📊 R 语言解决方案</h1>
+<p>在 R 中，最推荐的方法是使用 <strong><code>pdftools</code></strong> 包，它基于 <code>libpoppler</code> 库，能高质量地渲染 PDF 页面。</p>
+<ol type="1">
+<li><p><strong>安装与加载</strong></p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">install.packages<span class="punctuation">(</span><span class="string">&quot;pdftools&quot;</span><span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>pdftools<span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">    </span><br><span class="line">2.  **方法一：`pdf_convert()` - 批量转换页面**</span><br><span class="line">    这是最直接的方法，可以一次性将 PDF 的指定页面转换为 PNG 图片。（下面的参数就是需要设置的参数，其他参数不用设置）</span><br><span class="line">    </span><br><span class="line">    ```r</span><br><span class="line">    # 转换 PDF 的第 1 到 3 页为 PNG，默认保存在工作目录，（会生成 xxx_1.png）</span><br><span class="line">pdf_convert(&quot;your_file.pdf&quot;, pages = 1:3, format = &quot;png&quot;, dpi = 150)</span><br><span class="line">    </span><br><span class="line">    # 转换所有页面</span><br><span class="line">    pdf_convert(&quot;your_file.pdf&quot;, format = &quot;png&quot;, dpi = 150)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>pages</code>: 指定要转换的页面，<code>NULL</code> 表示所有页面。</li>
+</ul></li>
+</ol>
+<ul>
+<li><code>dpi</code>: 控制输出图片的分辨率，默认是 72，可根据需要调高。</li>
+</ul>
+<ol start="3" type="1">
+<li><p><strong>方法二：<code>pdf_render_page()</code> + <code>png::writePNG()</code> - 精细控制</strong>
+此方法先将 PDF 页面渲染为位图数组，再写入 PNG 文件，适合需要进一步处理图像数据的场景。</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">library<span class="punctuation">(</span>png<span class="punctuation">)</span> <span class="comment"># 用于写入 PNG</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 渲染 PDF 的第一页为一个位图数组</span></span><br><span class="line">bitmap <span class="operator">&lt;-</span> pdf_render_page<span class="punctuation">(</span><span class="string">&quot;your_file.pdf&quot;</span><span class="punctuation">,</span> page <span class="operator">=</span> <span class="number">1</span><span class="punctuation">,</span> dpi <span class="operator">=</span> <span class="number">300</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将位图数组保存为 PNG 文件</span></span><br><span class="line">writePNG<span class="punctuation">(</span>bitmap<span class="punctuation">,</span> <span class="string">&quot;output_page_1.png&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>实际上<code>pdf_convert()</code> 在底层本质上是对 <code>pdf_render_page()</code> 的循环封装。</p>
+<p>当你调用 <code>pdf_convert(pages = 1:3)</code> 时，它在内部执行了：</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 伪代码示意</span></span><br><span class="line"><span class="keyword">for</span> <span class="punctuation">(</span>i <span class="keyword">in</span> <span class="number">1</span><span class="operator">:</span><span class="number">3</span><span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">  bitmap <span class="operator">&lt;-</span> pdf_render_page<span class="punctuation">(</span>file<span class="punctuation">,</span> page <span class="operator">=</span> i<span class="punctuation">,</span> dpi <span class="operator">=</span> dpi<span class="punctuation">)</span></span><br><span class="line">  writePNG<span class="punctuation">(</span>bitmap<span class="punctuation">,</span> paste0<span class="punctuation">(</span><span class="string">&quot;page_&quot;</span><span class="punctuation">,</span> i<span class="punctuation">,</span> <span class="string">&quot;.png&quot;</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>所以直接使用 <code>pdf_convert()</code> 函数即可。</p>
+<h2 id="示例代码">示例代码</h2>
+<p>将工作目录下全部 pdf 转为同名的 png 的示例代码如下</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">library<span class="punctuation">(</span>pdftools<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">pdf_files <span class="operator">&lt;-</span> list.files<span class="punctuation">(</span>pattern <span class="operator">=</span> <span class="string">&quot;\\.pdf$&quot;</span><span class="punctuation">,</span> ignore.case <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> <span class="punctuation">(</span>pdf_file <span class="keyword">in</span> pdf_files<span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">  cat<span class="punctuation">(</span><span class="string">&quot;正在转换:&quot;</span><span class="punctuation">,</span> pdf_file<span class="punctuation">,</span> <span class="string">&quot;\n&quot;</span><span class="punctuation">)</span></span><br><span class="line">  </span><br><span class="line">  tryCatch<span class="punctuation">(</span><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="comment"># 先正常转换（会生成 xxx_1.png）</span></span><br><span class="line">    png_files <span class="operator">&lt;-</span> pdf_convert<span class="punctuation">(</span></span><br><span class="line">      pdf <span class="operator">=</span> pdf_file<span class="punctuation">,</span></span><br><span class="line">      format <span class="operator">=</span> <span class="string">&quot;png&quot;</span><span class="punctuation">,</span></span><br><span class="line">      dpi <span class="operator">=</span> <span class="number">300</span><span class="punctuation">,</span></span><br><span class="line">      antialias <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span></span><br><span class="line">      opw <span class="operator">=</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">      upw <span class="operator">=</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">      verbose <span class="operator">=</span> <span class="literal">TRUE</span></span><br><span class="line">    <span class="punctuation">)</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 重命名：去掉 _1</span></span><br><span class="line">    <span class="keyword">for</span> <span class="punctuation">(</span>png_file <span class="keyword">in</span> png_files<span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">      new_name <span class="operator">&lt;-</span> sub<span class="punctuation">(</span><span class="string">&quot;_1\\.png$&quot;</span><span class="punctuation">,</span> <span class="string">&quot;.png&quot;</span><span class="punctuation">,</span> png_file<span class="punctuation">)</span></span><br><span class="line">      <span class="keyword">if</span> <span class="punctuation">(</span>file.exists<span class="punctuation">(</span>new_name<span class="punctuation">)</span><span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">        file.remove<span class="punctuation">(</span>new_name<span class="punctuation">)</span>  <span class="comment"># 如果目标文件已存在，先删除</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">      file.rename<span class="punctuation">(</span>png_file<span class="punctuation">,</span> new_name<span class="punctuation">)</span></span><br><span class="line">      cat<span class="punctuation">(</span><span class="string">&quot;✅ 重命名:&quot;</span><span class="punctuation">,</span> png_file<span class="punctuation">,</span> <span class="string">&quot;-&gt;&quot;</span><span class="punctuation">,</span> new_name<span class="punctuation">,</span> <span class="string">&quot;\n&quot;</span><span class="punctuation">)</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">    cat<span class="punctuation">(</span><span class="string">&quot;\n&quot;</span><span class="punctuation">)</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span> error <span class="operator">=</span> <span class="keyword">function</span><span class="punctuation">(</span>e<span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">    cat<span class="punctuation">(</span><span class="string">&quot;❌ 转换失败:&quot;</span><span class="punctuation">,</span> e<span class="operator">$</span>message<span class="punctuation">,</span> <span class="string">&quot;\n\n&quot;</span><span class="punctuation">)</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">)</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line"></span><br><span class="line">cat<span class="punctuation">(</span><span class="string">&quot;===== 全部完成 =====\n&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="python-语言解决方案">🐍 Python 语言解决方案</h1>
+<p>Python 中有多种库可以实现，这里介绍两种最常用的。</p>
+<p>我这里使用了方案一 <code>pdf2image</code> + <code>poppler</code> ，方案二没试。</p>
+<h2 id="方案一使用-pdf2image-poppler">方案一：使用 <code>pdf2image</code> + <code>poppler</code></h2>
+<p><code>pdf2image</code> 是一个专门用于将 PDF 转换为图像的库，底层同样依赖 <code>poppler</code>。这个包是一个“包装器”，本身不包含 PDF 渲染能力，必须调用系统安装的 <strong>Poppler</strong> 工具集来完成转换。这导致了安装步骤的复杂化。</p>
+<ol type="1">
+<li><p><strong>安装</strong></p>
+<p>用conda 安装 <code>poppler</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install -c conda-forge poppler</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>安装 <code>pdf2image</code> （我这里也是用的conda）</p>
+<pre><code><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">pip install pdf2image</span><br></pre></td></tr></table></figure></code></pre>
+<ol start="2" type="1">
+<li><p><strong>转换代码</strong></p>
+<p>一般网页展示，150 dpi 就够了。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pdf2image <span class="keyword">import</span> convert_from_path</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果 poppler 不在系统 PATH 中，需要指定路径</span></span><br><span class="line"><span class="comment"># images = convert_from_path(&#x27;your_file.pdf&#x27;, poppler_path=r&#x27;C:\path\to\poppler\bin&#x27;)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换 PDF 的所有页面，输出为一个列表，其中包含了 PDF 每一页对应的图像对象。</span></span><br><span class="line">images = convert_from_path(<span class="string">&#x27;your_file.pdf&#x27;</span>, dpi=<span class="number">150</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 逐页保存为 PNG</span></span><br><span class="line"><span class="keyword">for</span> i, image <span class="keyword">in</span> <span class="built_in">enumerate</span>(images):</span><br><span class="line">    image.save(<span class="string">f&#x27;output_page_<span class="subst">&#123;i+<span class="number">1</span>&#125;</span>.png&#x27;</span>, <span class="string">&#x27;PNG&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>如果只转换第一页</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pdf2image <span class="keyword">import</span> convert_from_path</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只转换第一页，DPI=150</span></span><br><span class="line">images = convert_from_path(<span class="string">&#x27;Sites_density.pdf&#x27;</span>, dpi=<span class="number">150</span>, first_page=<span class="number">1</span>, last_page=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保存第一页为 PNG</span></span><br><span class="line">images[<span class="number">0</span>].save(<span class="string">&#x27;Sites_density.png&#x27;</span>, <span class="string">&#x27;PNG&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="方案二使用-pymupdf-fitz">方案二：使用 <code>PyMuPDF</code> (fitz)</h2>
+<p><code>PyMuPDF</code> 是一个功能强大的 PDF 处理库，速度很快，且无需额外安装系统依赖。</p>
+<p>这个我还没有测试。</p>
+<ol type="1">
+<li><p><strong>安装</strong>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install PyMuPDF</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>转换代码</strong>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> fitz</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">pdf_document = fitz.<span class="built_in">open</span>(<span class="string">&quot;your_file.pdf&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> page_num <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(pdf_document)):</span><br><span class="line">    page = pdf_document[page_num]</span><br><span class="line">    <span class="comment"># 设置缩放系数，提高图片质量 (1.3333 对应 96 DPI 左右)</span></span><br><span class="line">    zoom = <span class="number">1.3333</span></span><br><span class="line">    mat = fitz.Matrix(zoom, zoom)</span><br><span class="line">    pix = page.get_pixmap(matrix=mat)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 保存为 PNG</span></span><br><span class="line">    output_path = <span class="string">f&quot;output_page_<span class="subst">&#123;page_num+<span class="number">1</span>&#125;</span>.png&quot;</span></span><br><span class="line">    pix.save(output_path)</span><br><span class="line"></span><br><span class="line">pdf_document.close()</span><br></pre></td></tr></table></figure>
+在这个例子中，<code>zoom</code> 参数控制输出图片的分辨率，数值越大，图片越清晰，文件也越大。</p></li>
+</ol>
+<h1 id="方案对比与选择建议">⚖️ 方案对比与选择建议</h1>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">维度</th>
+<th style="text-align: left;">R (<code>pdftools</code>)</th>
+<th style="text-align: left;">Python (<code>pdf2image</code>)</th>
+<th style="text-align: left;">Python (<code>PyMuPDF</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>易用性</strong></td>
+<td style="text-align: left;">⭐⭐⭐⭐⭐ (函数直接，开箱即用)</td>
+<td style="text-align: left;">⭐⭐⭐⭐ (需额外安装poppler)</td>
+<td style="text-align: left;">⭐⭐⭐⭐⭐ (纯Python库，安装简单)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>性能</strong></td>
+<td style="text-align: left;">快</td>
+<td style="text-align: left;">中等</td>
+<td style="text-align: left;">非常快</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>依赖</strong></td>
+<td style="text-align: left;">无特殊系统依赖</td>
+<td style="text-align: left;">需要系统安装 <code>poppler</code></td>
+<td style="text-align: left;">无特殊系统依赖</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>适用场景</strong></td>
+<td style="text-align: left;">R 语言环境，批量转换 PDF 页面</td>
+<td style="text-align: left;">Python 环境，对 <code>poppler</code> 熟悉</td>
+<td style="text-align: left;">Python 环境，追求高性能和简单部署</td>
+</tr>
+</tbody>
+</table>
+<p><strong>简单总结：</strong></p>
+<ul>
+<li>如果你在 <strong>R</strong> 环境下工作，<strong><code>pdftools</code></strong> 是最自然、最高效的选择。</li>
+<li>如果你在 <strong>Python</strong> 环境下工作：
+<ul>
+<li>追求<strong>简单部署和快速开发</strong>，<strong><code>PyMuPDF</code></strong> 是首选。</li>
+<li>如果偏好<strong>专门</strong>的 PDF 转图像工具，可以考虑 <strong><code>pdf2image</code></strong>。</li>
+</ul></li>
+</ul>
+<p>需要注意的是，以上方法都是将 <strong>PDF 的整个页面</strong>渲染为图片。如果你的 PDF 内部包含独立的图片，并希望将其提取出来，则需要使用不同的方法，例如 R 的 <code>pdfimager</code> 包或 Python 的 <code>PyMuPDF</code> 提取图片功能。</p>
+]]></content>
+  </entry>
+  <entry>
     <title>图片生成格式选择-矢量图还是位图</title>
     <url>/posts/5765f179/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>生成图片时矢量图和位图的选择。</p>
@@ -6986,11 +7112,11 @@ y_{\text{final}} = \beta_0 + \beta_1 \cdot \hat{y}_{\text{Lasso}} + \beta_2 \cdo
     <url>/posts/6cf6116d/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>YAML的全称是 “YAML Ain’t Markup Language”（YAML 不是一种标记语言）。它是一种以<strong>数据</strong>为中心、面向人类的<strong>数据序列化格式</strong>，设计上追求简洁和强大，常被用作配置文件（如Docker Compose、Kubernetes）或数据交换语言。它的语法非常直观，使用缩进来表示层级，因此学习起来并不困难。</p>
 <span id="more"></span>
-<p>YAML的全称是 “YAML Ain’t Markup Language”（YAML 不是一种标记语言）。它是一种以<strong>数据</strong>为中心、面向人类的<strong>数据序列化格式</strong>，设计上追求简洁和强大，常被用作配置文件（如Docker Compose、Kubernetes）或数据交换语言。它的语法非常直观，使用缩进来表示层级，因此学习起来并不困难。</p>
 <h1 id="yaml语法详解">📖 YAML语法详解</h1>
 <p>YAML的核心在于用它提供的几种数据类型来表达各种复杂的数据结构。</p>
 <h2 id="基础语法规则">1. 基础语法规则</h2>
 <ul>
+<li>对象键值对使用冒号结构表示 <strong>key: value</strong>，冒号后面要加一个空格。</li>
 <li><strong>大小写敏感</strong>，并<strong>使用缩进</strong>来表示层级关系。</li>
 <li><strong>缩进必须使用空格，不能使用Tab键</strong>。推荐使用2个空格作为一级缩进。</li>
 <li>用 <code>#</code> 符号添加<strong>注释</strong>，注释会被解析器忽略。</li>

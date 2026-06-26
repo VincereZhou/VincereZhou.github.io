@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    图片从pdf转为png |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-图片从pdf转为png"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  图片从pdf转为png
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/816a7470/" class="article-date">
+  <time datetime="2026-06-26T10:48:20.000Z" itemprop="datePublished">2026-06-26</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">5 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>将 PDF 文件转换为 PNG 格式，在 R 和 Python 中都有很成熟的解决方案。这里我的目的是把 PDF 的一整页转为图片，而不是提取 PDF 中的图片。</p>
+<span id="more"></span>
+<h1 id="r-语言解决方案">📊 R 语言解决方案</h1>
+<p>在 R 中，最推荐的方法是使用 <strong><code>pdftools</code></strong> 包，它基于 <code>libpoppler</code> 库，能高质量地渲染 PDF 页面。</p>
+<ol type="1">
+<li><p><strong>安装与加载</strong></p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">install.packages<span class="punctuation">(</span><span class="string">&quot;pdftools&quot;</span><span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>pdftools<span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">    </span><br><span class="line">2.  **方法一：`pdf_convert()` - 批量转换页面**</span><br><span class="line">    这是最直接的方法，可以一次性将 PDF 的指定页面转换为 PNG 图片。（下面的参数就是需要设置的参数，其他参数不用设置）</span><br><span class="line">    </span><br><span class="line">    ```r</span><br><span class="line">    # 转换 PDF 的第 1 到 3 页为 PNG，默认保存在工作目录，（会生成 xxx_1.png）</span><br><span class="line">pdf_convert(&quot;your_file.pdf&quot;, pages = 1:3, format = &quot;png&quot;, dpi = 150)</span><br><span class="line">    </span><br><span class="line">    # 转换所有页面</span><br><span class="line">    pdf_convert(&quot;your_file.pdf&quot;, format = &quot;png&quot;, dpi = 150)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>pages</code>: 指定要转换的页面，<code>NULL</code> 表示所有页面。</li>
+</ul></li>
+</ol>
+<ul>
+<li><code>dpi</code>: 控制输出图片的分辨率，默认是 72，可根据需要调高。</li>
+</ul>
+<ol start="3" type="1">
+<li><p><strong>方法二：<code>pdf_render_page()</code> + <code>png::writePNG()</code> - 精细控制</strong>
+此方法先将 PDF 页面渲染为位图数组，再写入 PNG 文件，适合需要进一步处理图像数据的场景。</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">library<span class="punctuation">(</span>png<span class="punctuation">)</span> <span class="comment"># 用于写入 PNG</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 渲染 PDF 的第一页为一个位图数组</span></span><br><span class="line">bitmap <span class="operator">&lt;-</span> pdf_render_page<span class="punctuation">(</span><span class="string">&quot;your_file.pdf&quot;</span><span class="punctuation">,</span> page <span class="operator">=</span> <span class="number">1</span><span class="punctuation">,</span> dpi <span class="operator">=</span> <span class="number">300</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将位图数组保存为 PNG 文件</span></span><br><span class="line">writePNG<span class="punctuation">(</span>bitmap<span class="punctuation">,</span> <span class="string">&quot;output_page_1.png&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>实际上<code>pdf_convert()</code> 在底层本质上是对 <code>pdf_render_page()</code> 的循环封装。</p>
+<p>当你调用 <code>pdf_convert(pages = 1:3)</code> 时，它在内部执行了：</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 伪代码示意</span></span><br><span class="line"><span class="keyword">for</span> <span class="punctuation">(</span>i <span class="keyword">in</span> <span class="number">1</span><span class="operator">:</span><span class="number">3</span><span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">  bitmap <span class="operator">&lt;-</span> pdf_render_page<span class="punctuation">(</span>file<span class="punctuation">,</span> page <span class="operator">=</span> i<span class="punctuation">,</span> dpi <span class="operator">=</span> dpi<span class="punctuation">)</span></span><br><span class="line">  writePNG<span class="punctuation">(</span>bitmap<span class="punctuation">,</span> paste0<span class="punctuation">(</span><span class="string">&quot;page_&quot;</span><span class="punctuation">,</span> i<span class="punctuation">,</span> <span class="string">&quot;.png&quot;</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>所以直接使用 <code>pdf_convert()</code> 函数即可。</p>
+<h2 id="示例代码">示例代码</h2>
+<p>将工作目录下全部 pdf 转为同名的 png 的示例代码如下</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">library<span class="punctuation">(</span>pdftools<span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line">pdf_files <span class="operator">&lt;-</span> list.files<span class="punctuation">(</span>pattern <span class="operator">=</span> <span class="string">&quot;\\.pdf$&quot;</span><span class="punctuation">,</span> ignore.case <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> <span class="punctuation">(</span>pdf_file <span class="keyword">in</span> pdf_files<span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">  cat<span class="punctuation">(</span><span class="string">&quot;正在转换:&quot;</span><span class="punctuation">,</span> pdf_file<span class="punctuation">,</span> <span class="string">&quot;\n&quot;</span><span class="punctuation">)</span></span><br><span class="line">  </span><br><span class="line">  tryCatch<span class="punctuation">(</span><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="comment"># 先正常转换（会生成 xxx_1.png）</span></span><br><span class="line">    png_files <span class="operator">&lt;-</span> pdf_convert<span class="punctuation">(</span></span><br><span class="line">      pdf <span class="operator">=</span> pdf_file<span class="punctuation">,</span></span><br><span class="line">      format <span class="operator">=</span> <span class="string">&quot;png&quot;</span><span class="punctuation">,</span></span><br><span class="line">      dpi <span class="operator">=</span> <span class="number">300</span><span class="punctuation">,</span></span><br><span class="line">      antialias <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">,</span></span><br><span class="line">      opw <span class="operator">=</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">      upw <span class="operator">=</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">      verbose <span class="operator">=</span> <span class="literal">TRUE</span></span><br><span class="line">    <span class="punctuation">)</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 重命名：去掉 _1</span></span><br><span class="line">    <span class="keyword">for</span> <span class="punctuation">(</span>png_file <span class="keyword">in</span> png_files<span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">      new_name <span class="operator">&lt;-</span> sub<span class="punctuation">(</span><span class="string">&quot;_1\\.png$&quot;</span><span class="punctuation">,</span> <span class="string">&quot;.png&quot;</span><span class="punctuation">,</span> png_file<span class="punctuation">)</span></span><br><span class="line">      <span class="keyword">if</span> <span class="punctuation">(</span>file.exists<span class="punctuation">(</span>new_name<span class="punctuation">)</span><span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">        file.remove<span class="punctuation">(</span>new_name<span class="punctuation">)</span>  <span class="comment"># 如果目标文件已存在，先删除</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">      file.rename<span class="punctuation">(</span>png_file<span class="punctuation">,</span> new_name<span class="punctuation">)</span></span><br><span class="line">      cat<span class="punctuation">(</span><span class="string">&quot;✅ 重命名:&quot;</span><span class="punctuation">,</span> png_file<span class="punctuation">,</span> <span class="string">&quot;-&gt;&quot;</span><span class="punctuation">,</span> new_name<span class="punctuation">,</span> <span class="string">&quot;\n&quot;</span><span class="punctuation">)</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">    cat<span class="punctuation">(</span><span class="string">&quot;\n&quot;</span><span class="punctuation">)</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span> error <span class="operator">=</span> <span class="keyword">function</span><span class="punctuation">(</span>e<span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">    cat<span class="punctuation">(</span><span class="string">&quot;❌ 转换失败:&quot;</span><span class="punctuation">,</span> e<span class="operator">$</span>message<span class="punctuation">,</span> <span class="string">&quot;\n\n&quot;</span><span class="punctuation">)</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">)</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line"></span><br><span class="line">cat<span class="punctuation">(</span><span class="string">&quot;===== 全部完成 =====\n&quot;</span><span class="punctuation">)</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="python-语言解决方案">🐍 Python 语言解决方案</h1>
+<p>Python 中有多种库可以实现，这里介绍两种最常用的。</p>
+<p>我这里使用了方案一 <code>pdf2image</code> + <code>poppler</code> ，方案二没试。</p>
+<h2 id="方案一使用-pdf2image-poppler">方案一：使用 <code>pdf2image</code> + <code>poppler</code></h2>
+<p><code>pdf2image</code> 是一个专门用于将 PDF 转换为图像的库，底层同样依赖 <code>poppler</code>。这个包是一个“包装器”，本身不包含 PDF 渲染能力，必须调用系统安装的 <strong>Poppler</strong> 工具集来完成转换。这导致了安装步骤的复杂化。</p>
+<ol type="1">
+<li><p><strong>安装</strong></p>
+<p>用conda 安装 <code>poppler</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c conda-forge poppler</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>安装 <code>pdf2image</code> （我这里也是用的conda）</p>
+<pre><code><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install pdf2image</span><br></pre></td></tr></table></figure></code></pre>
+<ol start="2" type="1">
+<li><p><strong>转换代码</strong></p>
+<p>一般网页展示，150 dpi 就够了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pdf2image <span class="keyword">import</span> convert_from_path</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果 poppler 不在系统 PATH 中，需要指定路径</span></span><br><span class="line"><span class="comment"># images = convert_from_path(&#x27;your_file.pdf&#x27;, poppler_path=r&#x27;C:\path\to\poppler\bin&#x27;)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换 PDF 的所有页面，输出为一个列表，其中包含了 PDF 每一页对应的图像对象。</span></span><br><span class="line">images = convert_from_path(<span class="string">&#x27;your_file.pdf&#x27;</span>, dpi=<span class="number">150</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 逐页保存为 PNG</span></span><br><span class="line"><span class="keyword">for</span> i, image <span class="keyword">in</span> <span class="built_in">enumerate</span>(images):</span><br><span class="line">    image.save(<span class="string">f&#x27;output_page_<span class="subst">&#123;i+<span class="number">1</span>&#125;</span>.png&#x27;</span>, <span class="string">&#x27;PNG&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>如果只转换第一页</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pdf2image <span class="keyword">import</span> convert_from_path</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只转换第一页，DPI=150</span></span><br><span class="line">images = convert_from_path(<span class="string">&#x27;Sites_density.pdf&#x27;</span>, dpi=<span class="number">150</span>, first_page=<span class="number">1</span>, last_page=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保存第一页为 PNG</span></span><br><span class="line">images[<span class="number">0</span>].save(<span class="string">&#x27;Sites_density.png&#x27;</span>, <span class="string">&#x27;PNG&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="方案二使用-pymupdf-fitz">方案二：使用 <code>PyMuPDF</code> (fitz)</h2>
+<p><code>PyMuPDF</code> 是一个功能强大的 PDF 处理库，速度很快，且无需额外安装系统依赖。</p>
+<p>这个我还没有测试。</p>
+<ol type="1">
+<li><p><strong>安装</strong>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install PyMuPDF</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>转换代码</strong>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> fitz</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">pdf_document = fitz.<span class="built_in">open</span>(<span class="string">&quot;your_file.pdf&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> page_num <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(pdf_document)):</span><br><span class="line">    page = pdf_document[page_num]</span><br><span class="line">    <span class="comment"># 设置缩放系数，提高图片质量 (1.3333 对应 96 DPI 左右)</span></span><br><span class="line">    zoom = <span class="number">1.3333</span></span><br><span class="line">    mat = fitz.Matrix(zoom, zoom)</span><br><span class="line">    pix = page.get_pixmap(matrix=mat)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 保存为 PNG</span></span><br><span class="line">    output_path = <span class="string">f&quot;output_page_<span class="subst">&#123;page_num+<span class="number">1</span>&#125;</span>.png&quot;</span></span><br><span class="line">    pix.save(output_path)</span><br><span class="line"></span><br><span class="line">pdf_document.close()</span><br></pre></td></tr></table></figure>
+在这个例子中，<code>zoom</code> 参数控制输出图片的分辨率，数值越大，图片越清晰，文件也越大。</p></li>
+</ol>
+<h1 id="方案对比与选择建议">⚖️ 方案对比与选择建议</h1>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">维度</th>
+<th style="text-align: left;">R (<code>pdftools</code>)</th>
+<th style="text-align: left;">Python (<code>pdf2image</code>)</th>
+<th style="text-align: left;">Python (<code>PyMuPDF</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>易用性</strong></td>
+<td style="text-align: left;">⭐⭐⭐⭐⭐ (函数直接，开箱即用)</td>
+<td style="text-align: left;">⭐⭐⭐⭐ (需额外安装poppler)</td>
+<td style="text-align: left;">⭐⭐⭐⭐⭐ (纯Python库，安装简单)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>性能</strong></td>
+<td style="text-align: left;">快</td>
+<td style="text-align: left;">中等</td>
+<td style="text-align: left;">非常快</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>依赖</strong></td>
+<td style="text-align: left;">无特殊系统依赖</td>
+<td style="text-align: left;">需要系统安装 <code>poppler</code></td>
+<td style="text-align: left;">无特殊系统依赖</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>适用场景</strong></td>
+<td style="text-align: left;">R 语言环境，批量转换 PDF 页面</td>
+<td style="text-align: left;">Python 环境，对 <code>poppler</code> 熟悉</td>
+<td style="text-align: left;">Python 环境，追求高性能和简单部署</td>
+</tr>
+</tbody>
+</table>
+<p><strong>简单总结：</strong></p>
+<ul>
+<li>如果你在 <strong>R</strong> 环境下工作，<strong><code>pdftools</code></strong> 是最自然、最高效的选择。</li>
+<li>如果你在 <strong>Python</strong> 环境下工作：
+<ul>
+<li>追求<strong>简单部署和快速开发</strong>，<strong><code>PyMuPDF</code></strong> 是首选。</li>
+<li>如果偏好<strong>专门</strong>的 PDF 转图像工具，可以考虑 <strong><code>pdf2image</code></strong>。</li>
+</ul></li>
+</ul>
+<p>需要注意的是，以上方法都是将 <strong>PDF 的整个页面</strong>渲染为图片。如果你的 PDF 内部包含独立的图片，并希望将其提取出来，则需要使用不同的方法，例如 R 的 <code>pdfimager</code> 包或 Python 的 <code>PyMuPDF</code> 提取图片功能。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/4aec5ad2/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">康某森公司还我血汗钱</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
