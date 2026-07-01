@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.3k</span>
+            <span class="post-count">2.1k</span>
         </span>
     </span>
 
@@ -77,7 +77,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">5 分钟</span>
+            <span class="post-count">8 分钟</span>
         </span>
     </span>
 </div>
@@ -150,7 +150,22 @@
 <blockquote>
 <p>更直白地说：<strong>它不是一个复杂模型，就是一个“REF 查表 + 等位基因匹配/互补匹配 + 二义性判断”的过程。</strong></p>
 </blockquote>
-<hr />
+<h2 id="什么时候会出现-mismatch">什么时候会出现 mismatch？</h2>
+<p>下面看一下 <strong>mismatch</strong> 这种异常可能有哪些情况出现</p>
+<p>首先是当参考基因组 REF=N 这种未知碱基或不确定碱基时算 <strong>mismatch</strong>（如果参考基因组上没有这个物理位置，提取不到这个位置的 REF 碱基应该也算）。</p>
+<p>当 REF 时正常的 ACGT 碱基时，什么情况会出现 <strong>mismatch</strong> 呢？</p>
+<p>先复习一下基础知识。</p>
+<blockquote>
+<p><em>碱基</em>：腺嘌呤（A）、鸟嘌呤（G）、胞嘧啶（C）、胸腺嘧啶（T）（DNA）；尿嘧啶（U）（RNA）。</p>
+<p><em>配对</em>：A=T（两条链间两个氢键），G≡C（三个氢键）。在RNA中，A=U。</p>
+<p><em>转换</em>：嘌呤变为嘌呤（A/G）或嘧啶变为嘧啶（C/T）。即，环结构保持不变。因为化学结构接近，出现比例更高。</p>
+<p><em>颠换</em>：嘌呤变为嘧啶，或反之（A/C，A/T，G/C，G/T）。即，环结构发生改变。结构差异大，相对少见。</p>
+</blockquote>
+<p>但是对于这里比对而言，应该分为下面2种情况：</p>
+<ol type="1">
+<li>bim文件中SNP变异 非 A/T 或 C/G ，例如 A/G ，此时无论参考基因组 REF 是哪一个碱基，必然与 A1 或 A2 中某一个碱基相同或互补。</li>
+<li>bim文件中SNP变异 是 A/T 或 C/G ，这种情况两个碱基互补，举例 A/T ，此时正常来说，基因组只可能是 A 或 T，而且无法区分链，即无法判断是否翻转；如果参考基因组是 G 或 C ，就不符合常理了，说明基因型和参考基因组二者不匹配，属于异常情况（报 mismatch）。</li>
+</ol>
 <h1 id="输出文件">输出文件</h1>
 <p>默认输出目录类似 <code>snpflip_output/</code>，里面常见：</p>
 <ul>
@@ -184,6 +199,19 @@
 <li>更稳健，如果出现不符合正则的染色体，程序也不会莫名报错退出，而只是剔除这个染色体继续分析。</li>
 </ol>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">convert_fa_chromosome_names</span>(<span class="params">fasta_dict</span>):</span><br><span class="line"></span><br><span class="line">    result = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> fasta_dict.keys():</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> _is_valid_chromosome(k):</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        std_name = _convert_fa_name(k)</span><br><span class="line">        <span class="keyword">if</span> std_name <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        result[std_name] = fasta_dict[k]</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_is_valid_chromosome</span>(<span class="params">name</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> c <span class="keyword">in</span> <span class="string">&quot;_.&quot;</span>:</span><br><span class="line">        <span class="keyword">if</span> c <span class="keyword">in</span> name.split(<span class="literal">None</span>, <span class="number">1</span>)[<span class="number">0</span>]:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_convert_fa_name</span>(<span class="params">name</span>):</span><br><span class="line"></span><br><span class="line">    <span class="comment"># ✅ 关键修改：加入 W 和 Z 和 MT</span></span><br><span class="line">    <span class="comment"># ✅ 去掉历史遗留的 (?:T)? 后缀</span></span><br><span class="line">    bim_name = re.<span class="built_in">compile</span>(<span class="string">r&quot;(chr)?(?P&lt;chr_symbol&gt;\d+|X|Y|M|MT|W|Z)&quot;</span>)</span><br><span class="line">    m = bim_name.<span class="keyword">match</span>(name)</span><br><span class="line">    <span class="keyword">if</span> m <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    <span class="keyword">return</span> m.group(<span class="string">&quot;chr_symbol&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="想法两个参考基因组的碱基互补是否表示翻转">想法：两个参考基因组的碱基互补是否表示翻转？</h1>
+<p>答案是并不一定，下面是 AI 的回答，意思就是有可能旧版这个位置测错了，又或者这个位置由于存在多态性，两次选择作为 REF 的碱基不一样。</p>
+<blockquote>
+<p>在从旧版参考基因组（如 GRCh37）升级到新版（如 GRCh38）的过程中，科学家不仅会调整染色体结构，还会<strong>修复测序错误、补充新的测序数据</strong>。</p>
+<ul>
+<li><strong>情况 A（真翻转）</strong>：某个区域的 DNA 在两个版本间发生了倒位（Inversion）。此时，新版的序列是旧版的反向互补。</li>
+<li><strong>情况 B（假翻转/仅碱基更新）</strong>：某个位点没有发生倒位，物理方向没变。但是科学家发现旧版参考基因组在这个位置测错了（比如旧版是 A，新版修正为 T），或者这个位置存在多态性，新版选择了一个不同的碱基作为参考。</li>
+</ul>
+</blockquote>
+<p>那应该怎么看？如果真的要这么看的话，就要看前后这一段序列是否都发生了翻转，才能确定是不是真的翻转。</p>
+<blockquote>
+<p>我们不能只看“单点”的碱基是不是互补，而必须提取这个位点<strong>前后几十到上百个碱基（侧翼序列）</strong>进行整体比对。只有当一大段序列都变成了反向互补时，我们才能拍板确认：“这里确实发生了物理方向的翻转！”</p>
+</blockquote>
  
       <!-- reward -->
       

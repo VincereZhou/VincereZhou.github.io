@@ -72,7 +72,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">14.2k</span>
+            <span class="post-count">14.3k</span>
         </span>
     </span>
 
@@ -104,8 +104,8 @@
 <li><strong>文件管理</strong>：查看、上传、下载文件</li>
 <li><strong>命令行</strong> : 打开一个命令行脚本，这是登录节点，可以运行一些简单的 linux 命令</li>
 </ul>
-<p>现在我一进入服务器，第一步就是设置环境，如下</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">module purge</span><br><span class="line">conda activate zhouziwen</span><br><span class="line">bin=~/zhouziwen/bin</span><br></pre></td></tr></table></figure>
+<p>现在我一进入服务器，第一步就是设置环境，如下（设置了一下动态链接库的路径，避免因为系统的C/C++库太旧造成的问题）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">module purge</span><br><span class="line">export LD_LIBRARY_PATH=~/miniconda3/envs/zhouziwen/lib:$LD_LIBRARY_PATH</span><br><span class="line">conda activate zhouziwen</span><br><span class="line">bin=~/zhouziwen/bin</span><br></pre></td></tr></table></figure>
 <h1 id="批量提交作业">批量提交作业</h1>
 <p>分析需要使用 <strong>SLURM</strong> 调度系统，作业（<strong>job</strong>）就是是你在超算上<strong>从“申请资源”到“跑完程序”的整个任务过程</strong>。</p>
 <p>SLURM 是<strong>全球超算界的“普通话”</strong>，就像 Linux 系统里的 <code>ls</code>、<code>cd</code>命令一样，它是一个<strong>通用的、开源的作业调度系统</strong>。你学到的 SLURM 知识（<code>sbatch</code>, <code>squeue</code>等），换到国内外绝大多数超算中心（如清华、科大、天河二号、阿里云等）都能直接通用。</p>

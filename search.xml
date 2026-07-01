@@ -9,7 +9,7 @@
 <p>因为长期拖欠工资不发，我因为经济和心理双重因素从康某森公司离职。离职时签的协议将我拖欠的工资分为三期支付，但从第一期就没有正常支付。</p>
 <p>仲裁调解后，还是分为三期给我支付，时间相当于离职协议整体都向后拖了一个月。并且公司不同意在调解书上签“一期不支付，之后可以直接执行所有剩下的欠款”类似的内容，让我后续只能一期期地去申请强制执行。之后第一期在我的催促下确实支付给我了，但从第二期就开始不付了，只能申请强制执行。</p>
 <p>截至目前，尚未支付我的最后两期的钱相当于我5个多月的工资。我长这么大，从来没有损失过这么多钱！请注意，这是我的劳动报酬，不是金融理财！</p>
-<p>立此贴为证！</p>
+<p>从仲裁到强制执行，法律已经给了明确的答案。写这篇帖子的初衷，不是为了宣泄情绪，而是依法催告康某森公司正视法律义务，尽快支付拖欠的工资。劳动成果不容践踏，司法权威不容藐视。只要我的欠款一日未清，此帖便一日不删。望公司尊重法律，尊重员工的合法权益。</p>
 ]]></content>
   </entry>
   <entry>
@@ -1377,6 +1377,7 @@
 <p>✅ 推荐你在转之前清理一下：</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">df1 = df1.fillna(<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">dup_info = df1.to_dict(<span class="string">&#x27;records&#x27;</span>)</span><br></pre></td></tr></table></figure>
 <p>这样模板里就永远是空字符串，而不是 <code>nan</code>。</p>
+<p>最好还是改成单个空格，这样可以避免因“空单元格”引起的排版异常（不然就要设置 CSS）。</p>
 <h3 id="数据框内容为空会怎么样">数据框内容为空会怎么样？</h3>
 <p><code>df1.to_dict('records')</code>在空数据框时，会返回一个空列表 <code>[]</code>。包括有列标题但是没有数据，完全没有列的情况均会返回一个空列表。</p>
 <h2 id="两种访问变量属性语法比较">两种访问变量属性语法比较</h2>
@@ -7688,7 +7689,22 @@ y_{\text{final}} = \beta_0 + \beta_1 \cdot \hat{y}_{\text{Lasso}} + \beta_2 \cdo
 <blockquote>
 <p>更直白地说：<strong>它不是一个复杂模型，就是一个“REF 查表 + 等位基因匹配/互补匹配 + 二义性判断”的过程。</strong></p>
 </blockquote>
-<hr />
+<h2 id="什么时候会出现-mismatch">什么时候会出现 mismatch？</h2>
+<p>下面看一下 <strong>mismatch</strong> 这种异常可能有哪些情况出现</p>
+<p>首先是当参考基因组 REF=N 这种未知碱基或不确定碱基时算 <strong>mismatch</strong>（如果参考基因组上没有这个物理位置，提取不到这个位置的 REF 碱基应该也算）。</p>
+<p>当 REF 时正常的 ACGT 碱基时，什么情况会出现 <strong>mismatch</strong> 呢？</p>
+<p>先复习一下基础知识。</p>
+<blockquote>
+<p><em>碱基</em>：腺嘌呤（A）、鸟嘌呤（G）、胞嘧啶（C）、胸腺嘧啶（T）（DNA）；尿嘧啶（U）（RNA）。</p>
+<p><em>配对</em>：A=T（两条链间两个氢键），G≡C（三个氢键）。在RNA中，A=U。</p>
+<p><em>转换</em>：嘌呤变为嘌呤（A/G）或嘧啶变为嘧啶（C/T）。即，环结构保持不变。因为化学结构接近，出现比例更高。</p>
+<p><em>颠换</em>：嘌呤变为嘧啶，或反之（A/C，A/T，G/C，G/T）。即，环结构发生改变。结构差异大，相对少见。</p>
+</blockquote>
+<p>但是对于这里比对而言，应该分为下面2种情况：</p>
+<ol type="1">
+<li>bim文件中SNP变异 非 A/T 或 C/G ，例如 A/G ，此时无论参考基因组 REF 是哪一个碱基，必然与 A1 或 A2 中某一个碱基相同或互补。</li>
+<li>bim文件中SNP变异 是 A/T 或 C/G ，这种情况两个碱基互补，举例 A/T ，此时正常来说，基因组只可能是 A 或 T，而且无法区分链，即无法判断是否翻转；如果参考基因组是 G 或 C ，就不符合常理了，说明基因型和参考基因组二者不匹配，属于异常情况（报 mismatch）。</li>
+</ol>
 <h1 id="输出文件">输出文件</h1>
 <p>默认输出目录类似 <code>snpflip_output/</code>，里面常见：</p>
 <ul>
@@ -7722,6 +7738,19 @@ y_{\text{final}} = \beta_0 + \beta_1 \cdot \hat{y}_{\text{Lasso}} + \beta_2 \cdo
 <li>更稳健，如果出现不符合正则的染色体，程序也不会莫名报错退出，而只是剔除这个染色体继续分析。</li>
 </ol>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">convert_fa_chromosome_names</span>(<span class="params">fasta_dict</span>):</span><br><span class="line"></span><br><span class="line">    result = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> fasta_dict.keys():</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> _is_valid_chromosome(k):</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        std_name = _convert_fa_name(k)</span><br><span class="line">        <span class="keyword">if</span> std_name <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        result[std_name] = fasta_dict[k]</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_is_valid_chromosome</span>(<span class="params">name</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> c <span class="keyword">in</span> <span class="string">&quot;_.&quot;</span>:</span><br><span class="line">        <span class="keyword">if</span> c <span class="keyword">in</span> name.split(<span class="literal">None</span>, <span class="number">1</span>)[<span class="number">0</span>]:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_convert_fa_name</span>(<span class="params">name</span>):</span><br><span class="line"></span><br><span class="line">    <span class="comment"># ✅ 关键修改：加入 W 和 Z 和 MT</span></span><br><span class="line">    <span class="comment"># ✅ 去掉历史遗留的 (?:T)? 后缀</span></span><br><span class="line">    bim_name = re.<span class="built_in">compile</span>(<span class="string">r&quot;(chr)?(?P&lt;chr_symbol&gt;\d+|X|Y|M|MT|W|Z)&quot;</span>)</span><br><span class="line">    m = bim_name.<span class="keyword">match</span>(name)</span><br><span class="line">    <span class="keyword">if</span> m <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    <span class="keyword">return</span> m.group(<span class="string">&quot;chr_symbol&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="想法两个参考基因组的碱基互补是否表示翻转">想法：两个参考基因组的碱基互补是否表示翻转？</h1>
+<p>答案是并不一定，下面是 AI 的回答，意思就是有可能旧版这个位置测错了，又或者这个位置由于存在多态性，两次选择作为 REF 的碱基不一样。</p>
+<blockquote>
+<p>在从旧版参考基因组（如 GRCh37）升级到新版（如 GRCh38）的过程中，科学家不仅会调整染色体结构，还会<strong>修复测序错误、补充新的测序数据</strong>。</p>
+<ul>
+<li><strong>情况 A（真翻转）</strong>：某个区域的 DNA 在两个版本间发生了倒位（Inversion）。此时，新版的序列是旧版的反向互补。</li>
+<li><strong>情况 B（假翻转/仅碱基更新）</strong>：某个位点没有发生倒位，物理方向没变。但是科学家发现旧版参考基因组在这个位置测错了（比如旧版是 A，新版修正为 T），或者这个位置存在多态性，新版选择了一个不同的碱基作为参考。</li>
+</ul>
+</blockquote>
+<p>那应该怎么看？如果真的要这么看的话，就要看前后这一段序列是否都发生了翻转，才能确定是不是真的翻转。</p>
+<blockquote>
+<p>我们不能只看“单点”的碱基是不是互补，而必须提取这个位点<strong>前后几十到上百个碱基（侧翼序列）</strong>进行整体比对。只有当一大段序列都变成了反向互补时，我们才能拍板确认：“这里确实发生了物理方向的翻转！”</p>
+</blockquote>
 ]]></content>
   </entry>
   <entry>
@@ -9515,8 +9544,8 @@ G_{s} &amp;=\frac{1}{p} \sum_{i=1}^{p} \frac{1}{v_{x_{i}}}\left(\mathrm{x}_{i}-1
 <li><strong>文件管理</strong>：查看、上传、下载文件</li>
 <li><strong>命令行</strong> : 打开一个命令行脚本，这是登录节点，可以运行一些简单的 linux 命令</li>
 </ul>
-<p>现在我一进入服务器，第一步就是设置环境，如下</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">module purge</span><br><span class="line">conda activate zhouziwen</span><br><span class="line">bin=~/zhouziwen/bin</span><br></pre></td></tr></table></figure>
+<p>现在我一进入服务器，第一步就是设置环境，如下（设置了一下动态链接库的路径，避免因为系统的C/C++库太旧造成的问题）</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">module purge</span><br><span class="line">export LD_LIBRARY_PATH=~/miniconda3/envs/zhouziwen/lib:$LD_LIBRARY_PATH</span><br><span class="line">conda activate zhouziwen</span><br><span class="line">bin=~/zhouziwen/bin</span><br></pre></td></tr></table></figure>
 <h1 id="批量提交作业">批量提交作业</h1>
 <p>分析需要使用 <strong>SLURM</strong> 调度系统，作业（<strong>job</strong>）就是是你在超算上<strong>从“申请资源”到“跑完程序”的整个任务过程</strong>。</p>
 <p>SLURM 是<strong>全球超算界的“普通话”</strong>，就像 Linux 系统里的 <code>ls</code>、<code>cd</code>命令一样，它是一个<strong>通用的、开源的作业调度系统</strong>。你学到的 SLURM 知识（<code>sbatch</code>, <code>squeue</code>等），换到国内外绝大多数超算中心（如清华、科大、天河二号、阿里云等）都能直接通用。</p>
@@ -22124,7 +22153,9 @@ C_{r}^{(t)} = \frac{\|\mathbf{r-Ab^{(t)}}\|}{\|\mathbf{r}\|} &lt; \varepsilon
     <url>/posts/80b4ed31/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>将 kegg 数据库下载到本地，避免因为无法连接到 kegg 网页而无法分析。</p>
 <span id="more"></span>
-<h1 id="创建">创建</h1>
+<h1 id="安装r包-createkeggdb">安装R包 createKEGGdb</h1>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">remotes<span class="operator">::</span>install_github<span class="punctuation">(</span><span class="string">&quot;YuLab-SMU/createKEGGdb&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<h1 id="创建本地库和分析">创建本地库和分析</h1>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">library(createKEGGdb)</span><br><span class="line"></span><br><span class="line">org = &quot;gmx&quot;</span><br><span class="line"></span><br><span class="line">createKEGGdb::create_kegg_db(org) </span><br><span class="line"></span><br><span class="line">#file.rename(&quot;./KEGG.db_1.0.tar.gz&quot;, sprintf(&quot;./KEGG.db_1.0_%s.tar.gz&quot;, org))</span><br></pre></td></tr></table></figure>
 <p>然后安装这个包</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">install.packages(&quot;KEGG.db_1.0.tar.gz&quot;, type=&#x27;source&#x27;, repos = NULL)</span><br><span class="line"></span><br><span class="line">library(KEGG.db)</span><br></pre></td></tr></table></figure>
