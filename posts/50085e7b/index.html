@@ -10,7 +10,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    归档 |  
+    基因组数据格式BED文件格式 |  
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -41,246 +41,212 @@
       
     <main class="content on">
       <section class="outer">
-  
-  
-  <article class="articles">
+  <article
+  id="post-基因组数据格式BED文件格式"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
     
-    
-    <h1 class="page-type-title">归档</h1>
-    
-    
-  
-  
-  
-  
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2022" class="archive-year">2022</a>
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  基因组数据格式BED文件格式
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/50085e7b/" class="article-date">
+  <time datetime="2026-07-10T12:01:44.000Z" itemprop="datePublished">2026-07-10</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">4 分钟</span>
+        </span>
+    </span>
+</div>
+ 
     </div>
-    <div class="archives">
       
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/4e1b8d12/" class="archive-article-date">
-  <time datetime="2022-05-11T14:34:17.000Z" itemprop="datePublished">05/11</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/4e1b8d12/"
-    >证明 row rank = column rank 及 rank(AA&#39;) = rank(A&#39;A) = rank(A)</a> 
-</h2>
- 
+    <div class="tocbot"></div>
 
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/930f86ce/" class="archive-article-date">
-  <time datetime="2022-05-11T14:32:27.000Z" itemprop="datePublished">05/11</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/930f86ce/"
-    >证明det(AB)=det(A)det(B)</a> 
-</h2>
- 
 
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/c511f635/" class="archive-article-date">
-  <time datetime="2022-05-11T14:27:51.000Z" itemprop="datePublished">05/11</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/c511f635/"
-    >内积与角度及正交</a> 
-</h2>
- 
 
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/ae89860e/" class="archive-article-date">
-  <time datetime="2022-05-01T09:53:39.000Z" itemprop="datePublished">05/01</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/ae89860e/"
-    >MCMC算法</a> 
-</h2>
- 
 
-    </header>
-    
-    
-  </div>
-</article>
-      
   
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/a6f7095/" class="archive-article-date">
-  <time datetime="2022-04-30T01:59:29.000Z" itemprop="datePublished">04/30</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
        
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/a6f7095/"
-    >方差组分估计的普遍观点与启发</a> 
-</h2>
+  <p><strong>BED (Browser Extensible Data) 格式</strong>是一种广泛使用的、基于文本的基因组数据格式，用于定义和注释基因组上的特定区域。</p>
+<p>它最初由UCSC基因组浏览器（UCSC Genome Browser）为可视化基因组注释而开发，如今已成为生物信息学领域的实际标准。</p>
+<span id="more"></span>
+<h1 id="核心概念与字段">核心概念与字段</h1>
+<p>BED格式的核心是<strong>用坐标来定义基因组上的特征</strong>，如基因、调控元件或测序峰。一个BED文件由多行组成，每行代表一个基因组区域（feature）。其核心是<strong>3个强制字段</strong>：</p>
+<ol type="1">
+<li><strong>chrom</strong>: 染色体或序列的名称（例如 <code>chr1</code>, <code>chrX</code>, <code>scaffold10671</code>）。</li>
+<li><strong>start</strong>: 区域<strong>起始位置</strong>，坐标从 <strong>0</strong> 开始计数。</li>
+<li><strong>end</strong>: 区域<strong>结束位置</strong>，坐标从 <strong>1</strong> 开始计数，且该位置的碱基<strong>不包含</strong>在区域内。</li>
+</ol>
+<blockquote>
+<p><strong>关键规则</strong>：BED区域的长度 = <code>end - start</code>。例如，<code>start=9, end=20</code> 代表从第10到第20个碱基，长度为11。这种“左闭右开”的坐标体系是使用BED格式时最常见的错误来源。</p>
+<p>相比于正常的1-based的闭区间，BED 的 start = 1-based位置 − 1，end 保持和 1-based 的 end 一致。</p>
+</blockquote>
+<h1 id="可选的扩展字段">可选的扩展字段</h1>
+<p>在3个强制字段之后，还可以添加最多9个标准的可选字段，以提供更多信息。使用这些字段时必须按顺序，即如果使用了第N个字段，则它之前的所有字段也必须存在。</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 7%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">位置</th>
+<th style="text-align: left;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>name</strong></td>
+<td style="text-align: left;">第4列</td>
+<td style="text-align: left;">为该区域定义一个名称标签，用于在浏览器中显示。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>score</strong></td>
+<td style="text-align: left;">第5列</td>
+<td style="text-align: left;">一个0-1000的分数，用于在UCSC浏览器中表示灰度或颜色深浅。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>strand</strong></td>
+<td style="text-align: left;">第6列</td>
+<td style="text-align: left;">定义链的方向，用 <code>+</code>（正链）或 <code>-</code>（负链）表示。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>thickStart</strong></td>
+<td style="text-align: left;">第7列</td>
+<td style="text-align: left;">特征绘制为<strong>粗体</strong>的起始位置（例如基因显示中的起始密码子）。。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>thickEnd</strong></td>
+<td style="text-align: left;">第8列</td>
+<td style="text-align: left;">特征绘制为<strong>粗体</strong>的结束位置（例如基因显示中的终止密码子）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>itemRgb</strong></td>
+<td style="text-align: left;">第9列</td>
+<td style="text-align: left;">用RGB值（如 <code>255,0,0</code>）为浏览器中的区域指定颜色。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>blockCount</strong></td>
+<td style="text-align: left;">第10列</td>
+<td style="text-align: left;">该区域包含的“块”（如外显子）的数量。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>blockSizes</strong></td>
+<td style="text-align: left;">第11列</td>
+<td style="text-align: left;">以逗号分隔的列表，表示每个块的大小。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>blockStarts</strong></td>
+<td style="text-align: left;">第12列</td>
+<td style="text-align: left;">以逗号分隔的列表，表示每个块的起始位置（相对于<code>start</code>字段的偏移）。列表项数应与 <code>blockCount</code> 对应。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>其中，第7至第12列主要用于定义由多个外显子构成的复杂基因结构（即BED12格式）</strong>。如果存在 7 - 12 列，则第12列<strong>第一个块的起始值必须为 0</strong>，最后一个块的 <code>起始位置 + 块大小</code> 必须等于 <code>chromEnd</code>。块之间不能重叠。</p>
+<h1 id="重要规则与常见变体">重要规则与常见变体</h1>
+<ul>
+<li><strong>字段一致性</strong>：在一个BED文件中，所有行的列数必须相同。</li>
+<li><strong>文件头部</strong>：文件可以包含以 <code>browser</code> 或 <code>track</code> 开头的注释行，为浏览器提供显示指引。</li>
+<li><strong>常用变体</strong>：
+<ul>
+<li><strong>BED3</strong>：仅包含3个强制字段。</li>
+<li><strong>BED4</strong>：包含3个强制字段 + <code>name</code>。</li>
+<li><strong>BED6</strong>：包含前6个标准字段（3个强制 + <code>name</code>, <code>score</code>, <code>strand</code>），这是最常用的格式之一。</li>
+<li><strong>BED12</strong>：包含全部12个字段。</li>
+<li><strong>BED3+ / BED6+</strong>：指在标准字段后，还可以添加任意数量的用户自定义列。</li>
+</ul></li>
+</ul>
+<p>示例如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">track name=pairedReads description=&quot;Clone Paired Reads&quot; useScore=1</span><br><span class="line">chr22 1000 5000 cloneA 960 + 1000 5000 0 2 567,488, 0,3512</span><br><span class="line">chr22 2000 6000 cloneB 900 - 2000 6000 0 2 433,399, 0,3601</span><br></pre></td></tr></table></figure>
+<h1 id="相关工具">相关工具</h1>
+<p>BED格式的流行也催生了强大的分析工具生态：</p>
+<ul>
+<li><strong>BEDTools</strong>：一个功能强大的命令行工具套件，被誉为基因组区间分析的“瑞士军刀”。它可以高效地执行<strong>交集、并集、覆盖度计算、合并、补集</strong>等多种操作。</li>
+<li><strong>UCSC Genome Browser</strong>：BED格式的原始和主要应用平台，用于数据可视化。</li>
+<li><strong>bigBed</strong>：对于非常大的BED文件（通常超过50MB），可以转换为二进制的bigBed格式，以提高基因组浏览器的加载和显示效率。</li>
+</ul>
+<p>总而言之，BED格式以其<strong>简单、灵活</strong>的特点，成为了存储和交换基因组区间信息的首选格式。</p>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li>https://genome.ucsc.edu/FAQ/FAQformat.html#format1</li>
+</ol>
  
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/e0b3b4ee/" class="archive-article-date">
-  <time datetime="2022-04-09T06:41:14.000Z" itemprop="datePublished">04/09</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/e0b3b4ee/"
-    >基因组选择模型介绍下</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/97b48478/" class="archive-article-date">
-  <time datetime="2022-04-09T06:28:49.000Z" itemprop="datePublished">04/09</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/97b48478/"
-    >基因组选择模型介绍上</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/3fef4efc/" class="archive-article-date">
-  <time datetime="2022-03-29T15:00:02.000Z" itemprop="datePublished">03/29</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/3fef4efc/"
-    >GWAS分析中的多重校正方法</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/de96141/" class="archive-article-date">
-  <time datetime="2022-03-29T14:54:24.000Z" itemprop="datePublished">03/29</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/de96141/"
-    >TOP与BOT链的划分</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/posts/ea64e7f3/" class="archive-article-date">
-  <time datetime="2022-03-03T12:07:55.000Z" itemprop="datePublished">03/03</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/posts/ea64e7f3/"
-    >近交系数及A逆的计算</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
+      <!-- reward -->
       
     </div>
-  </div>
-  
-  
-
-  
-  <nav class="page-nav">
     
-    <a class="extend prev" rel="prev" href="/archives/page/15/">上一页</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/14/">14</a><a class="page-number" href="/archives/page/15/">15</a><span class="page-number current">16</span><a class="page-number" href="/archives/page/17/">17</a><a class="page-number" href="/archives/page/18/">18</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/23/">23</a><a class="extend next" rel="next" href="/archives/page/17/">下一页</a>
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/57016660/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            转基因组版本chain文件格式
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/9d6bb500/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">非模式动物go和kegg富集分析</div>
+      </a>
+    
   </nav>
+
   
+   
+     
+</article>
+
 </section>
       <footer class="footer">
   <div class="outer">
@@ -441,6 +407,23 @@
 <script src="/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">

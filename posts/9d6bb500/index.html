@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    非模式动物go和kegg富集分析 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-非模式动物go和kegg富集分析"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  非模式动物go和kegg富集分析
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/9d6bb500/" class="article-date">
+  <time datetime="2026-07-10T11:58:21.000Z" itemprop="datePublished">2026-07-10</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.9k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">7 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>GO 和 KEGG 分析思路，包括模式生物、非模式生物的分析。总体来说，非模式生物还是很难确保能做 GO 和 KEGG 分析，一般必须同时有 OrgDb 数据库以及在 KEGG 官网上存在“三字母缩写”（但是好像哪怕存在“三字母缩写”，也可能其pathway相关信息是空的）。</p>
+<span id="more"></span>
+<h1 id="模式生物和非模式生物的划分">模式生物和非模式生物的划分</h1>
+<p>在GO/KEGG富集分析的语境下，“模式生物”和“非模式生物”的划分，<strong>核心并不在于生物学上是否“经典”，而在于该物种是否拥有由权威数据库（如NCBI、KEGG、GO Consortium）直接维护的、标准化的、完整的高质量功能注释数据库。</strong></p>
+<p>简单来说，<strong>这是一个“生物信息学资源”概念，而非纯粹的“生物学分类”概念。</strong></p>
+<p>为了让你更清晰，我们可以从GO和KEGG分析的具体操作层面来定义：</p>
+<p><strong>具体的划分标准</strong></p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 42%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">评判维度</th>
+<th style="text-align: left;">模式生物（生信角度）</th>
+<th style="text-align: left;">非模式生物（生信角度）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>GO分析（OrgDb）</strong></td>
+<td style="text-align: left;">Bioconductor官方仓库中有<strong>预构建好的</strong><code>org.xxx.eg.db</code>包，可直接安装使用。</td>
+<td style="text-align: left;">没有预构建的OrgDb包，需要通过<code>AnnotationHub</code>下载、或自己用<code>AnnotationForge</code>构建。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>KEGG分析（通路）</strong></td>
+<td style="text-align: left;">KEGG数据库为其分配了<strong>专属的三字母物种缩写</strong>（如<code>hsa</code>、<code>mmu</code>），且该物种的基因与通路对应关系被详细人工/自动维护。</td>
+<td style="text-align: left;">没有专属缩写，或虽然有缩写但注释极不完整。</td>
+</tr>
+</tbody>
+</table>
+<p>弄清楚这个定义，你就能理解为什么之前回复中提到了不同的操作路径：</p>
+<ul>
+<li><strong>如果你是“模式生物”</strong>：直接一行代码 <code>library(org.Hs.eg.db)</code> 即可，非常省事。</li>
+<li><strong>如果你是“非模式生物”</strong>：
+<ul>
+<li>做<strong>GO分析</strong>：必须走<code>AnnotationHub</code>远程下载，或者自建数据库的路线。</li>
+<li>做<strong>KEGG分析</strong>：没有官方的“三字母缩写”就没法做（除非自己从头创建数据库）。</li>
+</ul></li>
+</ul>
+<blockquote>
+<p><strong>有“org包”和“三字母缩写”的就是生信意义上的模式生物；缺任何一个，实际操作时就要按非模式生物的“绕路”方法来处理。</strong></p>
+</blockquote>
+<h1 id="模式生物分析">模式生物分析</h1>
+<p>具体教程见参考文献1的网址，这里已经说得很详细了，我就不赘述了。</p>
+<p>这里给出2个官方网址，列出了可以分析的物种</p>
+<ul>
+<li><p><strong>Bioconductor</strong> 中所有可用的<strong>GO数据库</strong>R包（OrgDb 数据库）：http://bioconductor.org/packages/release/BiocViews.html#___OrgDb</p>
+<p>这个数据库的作用是 2 个：</p>
+<ol type="1">
+<li><p>基因编号对应和转换：这是OrgDb最基础的功能。它可以将基因的<strong>中心标识符</strong>（通常是Entrez Gene ID，纯数字，不同物种编号不同）与多种其他常用的标识符关联起来。例如：</p>
+<ul>
+<li><p>基因符号 (Gene Symbol)，如 <code>TP53</code></p></li>
+<li><p>Ensembl ID</p></li>
+<li><p>RefSeq ID</p></li>
+<li><p>UCSC ID</p></li>
+</ul></li>
+<li><p>GO分析注释信息</p></li>
+</ol></li>
+<li><p>所有kegg可用的物种简称：https://www.genome.jp/kegg/catalog/org_list.html</p>
+<p>从这个网页中获取物种缩写（如<code>'hsa'</code>），默认通过这个参数去在线获取 KEGG 的注释信息</p></li>
+</ul>
+<p>注意：kegg 分析虽然看上去不用 OrgDb 数据库 ，但是由于 kegg 分析分析也使用 Entrez Gene ID，因此也还是需要 OrgDb 数据库的转换基因编号的功能。因此正常来说，没有 OrgDb 数据库就无法做富集分析。</p>
+<h2 id="创建kegg本地数据库">创建kegg本地数据库</h2>
+<p>由于KEGG默认是在线联网分析的，因此有时候可能因为网络问题或网站问题而无法分析。</p>
+<p>因此将 KEGG 数据库下载下来分析是更稳定的做法。</p>
+<h3 id="单个物种">单个物种</h3>
+<p>参考之前博客：<a href="https://vincere.fun/posts/80b4ed31/">创建kegg本地数据库</a></p>
+<h3 id="全部物种"><del>全部物种</del></h3>
+<p>参考文献3的网址。</p>
+<p>下载全部物种的kegg数据库，由指定的物种改为 “all” 即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">library(createKEGGdb)</span><br><span class="line"></span><br><span class="line">create_kegg_db(&quot;all&quot;)</span><br></pre></td></tr></table></figure>
+<p>最后补充一点：有一些物种信息，虽然KEGG的物种列表（http://rest.kegg.jp/list/organism）里有，但是对应的pathway相关信息其实是没有的，这种情况程序会自动跳过。另外，网络或者服务器问题，以至于数据没下载下来，也会出现同样情况。</p>
+<p>报错，单个物种可以，所有物种不行。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&gt; create_kegg_db(&quot;all&quot;)</span><br><span class="line">Reading KEGG annotation online:</span><br><span class="line"></span><br><span class="line">Reading KEGG annotation online:</span><br><span class="line"></span><br><span class="line">fail to download KEGG data...</span><br><span class="line">Error in nrow(KEGGPATHID2EXTID) : object &#x27;KEGGPATHID2EXTID&#x27; not found</span><br><span class="line">In addition: Warning message:</span><br><span class="line">In download.file(url, method = method, ...) :</span><br><span class="line">  cannot open URL &#x27;https://rest.kegg.jp/list/organism&#x27;: HTTP status was &#x27;400 Bad Request&#x27;</span><br></pre></td></tr></table></figure>
+<p>可能的原因：</p>
+<ol type="1">
+<li><p><strong>请求过于庞大</strong>
+<code>"all"</code> 会尝试从 <code>https://rest.kegg.jp/list/organism</code> 获取 <strong>所有物种的列表</strong>（约数千条），然后为每个物种构建一个完整的 KEGG 数据库。这个请求数据量较大，KEGG 服务器对批量下载有严格限制，容易触发 <code>400 Bad Request</code>（通常代表请求被拒绝或格式不正确）。</p></li>
+<li><p><strong>createKEGGdb 的实现缺陷</strong>
+该包已多年未更新，其内部对 <code>"all"</code> 的处理可能没有遵循 KEGG 最新的 API 规范（例如分页、限速等），导致服务器直接拒绝。</p></li>
+</ol>
+<p>还是得逐个物种按需下载。</p>
+<h1 id="非模式生物分析">非模式生物分析</h1>
+<h2 id="思路1下载orgdb">思路1：下载OrgDb</h2>
+<p>对于非模式物种，可以使用<code>AnnotationHub</code>包来在线检索并下载其注释信息（OrgDb）</p>
+<p>代码示例如下</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加载数据库</span></span><br><span class="line">library<span class="punctuation">(</span>AnnotationHub<span class="punctuation">)</span></span><br><span class="line">hub <span class="operator">&lt;-</span> AnnotationHub<span class="punctuation">(</span><span class="punctuation">)</span> <span class="comment">#较慢</span></span><br><span class="line">query<span class="punctuation">(</span>hub<span class="punctuation">,</span> <span class="string">&quot;capra_aegagrus_hircus&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>使用<code>query</code>在我们制作的<code>OrgDB --&gt; hub</code>里面找到物种相关的数据库（采用<strong>物种拉丁文名称</strong>）。</p>
+<p>在输出结果中查找数据库的后缀为必须为 <code>eg.sqlite</code>的结果，举例如下（格式一般为 <code>org.物种名.eg.sqlite</code>）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">    query(hub, <span class="string">&quot;capra_aegagrus_hircus&quot;</span>)</span></span><br><span class="line">AnnotationHub with 1 record</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">snapshotDate(): 2021-10-20</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">names(): AH96553</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$dataprovider</span>: ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$species</span>: Capra aegagrus_hircus</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$rdataclass</span>: OrgDb</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$rdatadateadded</span>: 2021-10-13</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$title</span>: org.Capra_aegagrus_hircus.eg.sqlite</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$description</span>: NCBI gene ID based annotations about Capra aegagrus_hircus</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$taxonomyid</span>: 9925</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$genome</span>: NCBI genomes</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$sourcetype</span>: NCBI/UniProt</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$sourceurl</span>: ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/, ftp://ftp.uniprot.org/p...</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$sourcesize</span>: NA</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$tags</span>: c(<span class="string">&quot;NCBI&quot;</span>, <span class="string">&quot;Gene&quot;</span>, <span class="string">&quot;Annotation&quot;</span>)</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">retrieve record with <span class="string">&#x27;object[[&quot;AH96553&quot;]]&#x27;</span></span></span><br></pre></td></tr></table></figure>
+<p>更好的办法是，先限制数据库类型为 OrgDb，这样找出的结果就全部是 OrgDb 数据库</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">org <span class="operator">&lt;-</span> hub<span class="punctuation">[</span>hub<span class="operator">$</span>rdataclass<span class="operator">==</span><span class="string">&quot;OrgDb&quot;</span><span class="punctuation">,</span><span class="punctuation">]</span></span><br><span class="line">query<span class="punctuation">(</span>org<span class="punctuation">,</span> <span class="string">&quot;capra_aegagrus_hircus&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>然后复制这个数据库前面的编号，用下面代码获取这个数据库</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db &lt;- hub[[&quot;AH107469&quot;]]</span><br></pre></td></tr></table></figure>
+<p>之后使用 <code>OrgDB</code> 的时候直接调用这个数据库即可，和正常一样，也就是所有 <code>OrgDB</code> 参数设为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OrgDb=db</span><br></pre></td></tr></table></figure>
+<p>但是 KEGG 没有办法，KEGG 官网如果没有物种编号就是没法弄。</p>
+<h2 id="思路2自建go和kegg数据库">思路2：自建GO和KEGG数据库</h2>
+<p>当目标物种在公共数据库中完全缺乏注释时，可以采用此方法。</p>
+<ol type="1">
+<li><strong>获取蛋白质序列</strong>：从NCBI等数据库下载目标物种的蛋白质组序列。</li>
+<li><strong>功能注释</strong>：使用<strong>eggNOG-mapper</strong>在线工具对蛋白质序列进行功能注释。它会通过序列比对，为你的基因分配GO术语和KEGG直系同源物（KO）编号。</li>
+<li><strong>构建本地数据库</strong>：利用R包<code>AnnotationForge</code>，根据eggNOG-mapper的注释结果，构建属于该物种自己的OrgDb注释包。之后就可以用这个自建的OrgDb进行富集分析了。</li>
+</ol>
+<p>具体教程见参考文献2的网址，挺复杂的，这是纯生信的内容了，我还没有试过。</p>
+<h2 id="思路3在线工具网站">思路3：在线工具（网站）</h2>
+<p>一些网站可以做 go/kegg 分析，但是我看物种都很有限，没啥用。</p>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li>https://zhuanlan.zhihu.com/p/377356510</li>
+<li>https://zhuanlan.zhihu.com/p/389005258</li>
+<li>https://mp.weixin.qq.com/s/PwrdQAkG3pTlwMB6Mj8wXQ</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/50085e7b/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            基因组数据格式BED文件格式
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/816a7470/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">图片从pdf转为png</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

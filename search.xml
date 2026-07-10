@@ -13,6 +13,555 @@
 ]]></content>
   </entry>
   <entry>
+    <title>crossmap转基因组版本</title>
+    <url>/posts/9df7ea16/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h1 id="安装">安装</h1>
+<p>可以用 conda 或 pip 安装</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda install -c bioconda crossmap</span><br></pre></td></tr></table></figure>
+<p>从v0.7.0版本开始，主程序 CrossMap.py 已更名为 CrossMap，原因是pyproject.toml下脚本名称使用“.”存在限制。为保持向后兼容性，请在您的~/.bashrc文件中添加以下行：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">alias CrossMap.py=&#x27;CrossMap&#x27;</span><br></pre></td></tr></table></figure>
+<h1 id="输入文件">输入文件</h1>
+<h2 id="chain文件">Chain文件</h2>
+<p>格式见之前博客</p>
+<h2 id="用户输入文件">用户输入文件</h2>
+<p>CrossMap 支持下面的格式，一般用 BED 。</p>
+<ul>
+<li>BAM, CRAM, or SAM</li>
+<li>BED or BED-like formats (The BED file must contain at least the fields: chrom, start, and end.)</li>
+<li>Wiggle (variableStep, fixedStep, and bedGraph formats are supported.)</li>
+<li>BigWig</li>
+<li>GFF or GTF</li>
+<li>VCF</li>
+<li>GVCF</li>
+<li>MAF</li>
+</ul>
+<h1 id="输出文件">输出文件</h1>
+<p>输出文件格式取决于输入文件</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 83%" />
+</colgroup>
+<thead>
+<tr>
+<th>Input Format</th>
+<th>Output Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BED</td>
+<td>BED (genome coordinates will be updated)</td>
+</tr>
+<tr>
+<td>BAM</td>
+<td>BAM (genome coordinates, header section, all SAM flags, and insert sizes will be updated)</td>
+</tr>
+<tr>
+<td>CRAM</td>
+<td>BAM (requires <code>pysam &gt;= 0.8.2</code>)</td>
+</tr>
+<tr>
+<td>SAM</td>
+<td>SAM (genome coordinates, header section, all SAM flags, and insert sizes will be updated)</td>
+</tr>
+<tr>
+<td>Wiggle</td>
+<td>BigWig</td>
+</tr>
+<tr>
+<td>BigWig</td>
+<td>BigWig</td>
+</tr>
+<tr>
+<td>GFF</td>
+<td>GFF (genome coordinates will be updated to the target assembly)</td>
+</tr>
+<tr>
+<td>GTF</td>
+<td>GTF (genome coordinates will be updated to the target assembly)</td>
+</tr>
+<tr>
+<td>VCF</td>
+<td>VCF (header section, genome coordinates, and reference alleles will be updated)</td>
+</tr>
+<tr>
+<td>GVCF</td>
+<td>GVCF (header section, genome coordinates, and reference alleles will be updated)</td>
+</tr>
+<tr>
+<td>MAF</td>
+<td>MAF (genome coordinates and reference alleles will be updated)</td>
+</tr>
+</tbody>
+</table>
+<h1 id="用法">用法</h1>
+<h2 id="转换-bed-格式文件">转换 BED 格式文件</h2>
+<p><strong>BED（Browser Extensible Data，浏览器可扩展数据）文件</strong>是一个制表符分隔的文本文件，用于描述基因组区域或基因注释信息。每一行代表一个特征，可包含 <strong>3 至 12 列</strong>。</p>
+<p><strong>CrossMap</strong> 通过更新染色体和坐标信息，同时保留其他字段不变，实现 BED 文件在不同参考基因组版本之间的转换。</p>
+<ul>
+<li>对于<strong>少于 12 列</strong>的 BED 文件，仅更新染色体和坐标字段（不对吧，下面说了会更新链信息）。</li>
+<li>对于<strong>12 列</strong>的 BED 文件，除以下列外，其余所有列均会更新（一般提供不了完整的12列）：
+<ul>
+<li>第 4 列：特征名称（feature name）</li>
+<li>第 5 列：得分（score）</li>
+<li>第 9 列：RGB 显示颜色（RGB display color）</li>
+</ul></li>
+</ul>
+<p>源基因组区域若映射到目标基因组的<strong>多个位置</strong>，则会被拆分为多个独立的条目。</p>
+<h3 id="输入输出">输入输出</h3>
+<p>标准 BED 文件有 12列，但是 CrossMap 也支持 BED-like 文件（就是不是标准12列），如下</p>
+<blockquote>
+<p><strong>BED3:</strong> first three columns — <code>chrom</code>, <code>start</code>, <code>end</code></p>
+<p><strong>BED6:</strong> first six columns — <code>chrom</code>, <code>start</code>, <code>end</code>, <code>name</code>, <code>score</code>, <code>strand</code></p>
+<p><strong>Other BED-like formats:</strong> between 3 and 12 columns, where extra columns are arbitrary</p>
+</blockquote>
+<p>注意事项：</p>
+<blockquote>
+<ol type="1">
+<li>对于类似BED的格式，<strong>CrossMap仅更新chrom、start、end和strand字段</strong>，其余所有列原样保留。</li>
+<li>以<code>#</code>、<code>browser</code>或<code>track</code>开头的行将被忽略。</li>
+<li>列数少于三列的行将被跳过。</li>
+<li>第2列和第3列必须是整数。</li>
+<li>若未提供链(strand)信息，则默认假定为<code>+</code>链。</li>
+<li>对于标准的12列BED文件，如果任一外显子块无法唯一比对，则整条记录将被跳过。</li>
+<li>输入文件<code>input_chain_file</code>和<code>input_bed_file</code>可以是普通文件或压缩文件（扩展名如<code>.gz</code>、<code>.Z</code>、<code>.z</code>、<code>.bz</code>、<code>.bz2</code>、<code>.bzip2</code>），也可以是本地或远程URL。</li>
+<li>若未指定<code>output_file</code>，CrossMap会将结果输出到控制台；此时，原始（未转换）条目也会一并输出。</li>
+<li>如果某个输入区域无法连续地比对到目标参考基因组，则该区域会被拆分。</li>
+<li><code>*.unmap</code>文件包含无法明确转换的条目。</li>
+</ol>
+</blockquote>
+<p>按照我个人的理解，如果采用 BED6 格式，则最后2列应该这么设置</p>
+<ul>
+<li><strong>score列</strong> ：全部设为0，CrossMap不会使用或修改这一列，没用。</li>
+<li><strong>strand列</strong> ：按照实际情况填写，重测序下机数据统一使用 + 链（因为肯定和其使用的参考基因组的 forward链一致）</li>
+</ul>
+<p>CrossMap 软件会基于 chain 文件的 qStrand (查询链方向) 字段来决定是否翻转 BED6 格式中的链信息。如果 qStrand 为 - ，则链信息（+/-）会翻转。理由如下</p>
+<blockquote>
+<p>CrossMap 处理 BED6 格式时，会根据比对情况自动调整链信息。其核心逻辑是：</p>
+<ul>
+<li>如果 chain 文件中对应区域的 <code>qStrand</code> 为 <strong>-</strong>，则表示查询序列（即你的 BED 文件所在的原始基因组）在比对到目标基因组时发生了<strong>反向互补（reverse complement）</strong>，也就是发生了倒位（inversion）。</li>
+<li>此时，为了准确反映该区域在目标基因组上的真实方向，CrossMap <strong>会翻转</strong> BED6 记录中的链信息（<code>+</code> 变 <code>-</code>，<code>-</code> 变 <code>+</code>）。</li>
+</ul>
+<p>如果 <code>qStrand</code> 为 <code>+</code>，则表示方向一致，链信息保持不变。</p>
+<p>这个机制确保了转换后 BED 文件中的链信息能准确代表该区域在新基因组上的实际方向。</p>
+</blockquote>
+<h3 id="命令">命令</h3>
+<p>转换 bed 文件使用 <code>CrossMap bed</code> 命令，使用帮助见 <code>CrossMap bed -h</code>，如下。这基本很清晰了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">usage: CrossMap bed [-h] [--chromid &#123;a,s,l&#125;] [--unmap-file UNMAP_FILE]</span><br><span class="line">                    input.chain input.bed [out_bed]</span><br><span class="line"></span><br><span class="line">positional arguments:</span><br><span class="line">  input.chain           Chain file</span><br><span class="line">                        (https://genome.ucsc.edu/goldenPath/help/chain.html)</span><br><span class="line">                        Describes pairwise alignments between two genomes.</span><br><span class="line">                        The chain file may be plain text or compressed</span><br><span class="line">                        (.gz, .Z, .z, .bz, .bz2, .bzip2).</span><br><span class="line"></span><br><span class="line">  input.bed             Input BED file. The first 3 columns must be</span><br><span class="line">                        “chrom”, “start”, and “end”.</span><br><span class="line">                        Supports plain text, compressed (.gz, .bz2, etc.),</span><br><span class="line">                        or URL sources (http://, https://, ftp://).</span><br><span class="line">                        Compressed remote files are not supported.</span><br><span class="line"></span><br><span class="line">  out_bed               Output BED file.</span><br><span class="line">                        If omitted, CrossMap writes to STDOUT.</span><br><span class="line"></span><br><span class="line">options:</span><br><span class="line">  -h, --help            Show this help message and exit</span><br><span class="line">  --chromid &#123;a,s,l&#125;     Style of chromosome IDs:</span><br><span class="line">                          a = as-is</span><br><span class="line">                          l = long style (e.g., &quot;chr1&quot;, &quot;chrX&quot;)</span><br><span class="line">                          s = short style (e.g., &quot;1&quot;, &quot;X&quot;)</span><br><span class="line">  --unmap-file UNMAP_FILE</span><br><span class="line">                        File to save unmapped entries.</span><br><span class="line">                        Ignored if [out_bed] is not provided.</span><br></pre></td></tr></table></figure>
+<p>简单举例</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CrossMap bed GRCh37_to_GRCh38.chain.gz Test1.hg19.bed output.hg38</span><br></pre></td></tr></table></figure>
+<p>如果输入序列不能匹配到目标序列的一段连续序列，那么输出结果会自动拆分，举例如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cat</span> Test2.hg19.bed</span></span><br><span class="line">chr20  21106623   21227258</span><br><span class="line">chr22  30792929   30821291</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">CrossMap bed GRCh37_to_GRCh38.chain.gz Test2.hg19.bed</span></span><br><span class="line">2024-01-12 08:53:10 [INFO]  Read the chain file &quot;GRCh37_to_GRCh38.chain.gz&quot;</span><br><span class="line">chr20  21106623   21227258  (split.1:chr20:21106623:21144549:+)  chr20  21125982  21163908</span><br><span class="line">chr20  21106623   21227258  (split.2:chr20:21144549:21176014:+)  chr20  21163909  21195374</span><br><span class="line">chr20  21106623   21227258  (split.3:chr20:21176014:21186161:+)  chr20  21195375  21205522</span><br><span class="line">chr20  21106623   21227258  (split.4:chr20:21186161:21227258:+)  chr20  21205523  21246620</span><br><span class="line">chr22  30792929   30821291  (split.1:chr22:30792929:30819612:+)  chr22  30396940  30423623</span><br><span class="line">chr22  30792929   30821291  (split.2:chr22:30819615:30821291:+)  chr22  30423627  30425303</span><br></pre></td></tr></table></figure>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li>https://crossmap.readthedocs.io/en/latest/#</li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>转基因组版本chain文件格式</title>
+    <url>/posts/57016660/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p><code>chain</code> 文件的格式由UCSC基因组浏览器定义。它的每一行都包含关于两个基因组版本（“目标” <code>t</code> 和 “查询” <code>q</code>）之间比对关系的详细信息。</p>
+<span id="more"></span>
+<p>基于 UCSC 的官方文档，<code>chain</code> 文件是一种用于描述<strong>两个序列之间比对关系</strong>的格式，其核心特点是<strong>允许在两条序列上同时存在空位（gaps）</strong>。这种格式设计得非常紧凑（deliberately quite dense），旨在高效记录复杂的基因组重排信息。</p>
+<p>在UCSC的<code>chain</code>文件中，<strong>目标序列（Target）</strong>和<strong>查询序列（Query）</strong>是一对非常重要的概念，它们的定义完全取决于你<strong>转换的方向</strong>。</p>
+<h1 id="两个序列的定义">两个序列的定义</h1>
+<p>简单来说，<code>chain</code> 文件是<strong>有方向性的</strong>，它描述的是如何将“查询序列”上的坐标映射到“目标序列”上。</p>
+<ul>
+<li><strong>查询序列 (Query, qName)</strong>：指<strong>你当前手头数据所在的基因组版本</strong>，也就是<strong>被转换的源头</strong>。</li>
+<li><strong>目标序列 (Target, tName)</strong>：指<strong>你希望转换到的那个基因组版本</strong>，也就是<strong>转换的目的地</strong>。</li>
+</ul>
+<h1 id="文件整体结构">文件整体结构</h1>
+<p>一个标准的 <code>chain</code> 文件由若干个“链” (chain) 组成，每个链的结构如下：
+1. <strong>一个头部行 (Header Line)</strong>：以 <code>chain</code> 关键字开头，包含11个必填属性。
+2. <strong>一个或多个比对数据行 (Alignment Data Lines)</strong>：描述具体的区块比对信息。
+3. <strong>一个空行 (Blank Line)</strong>：作为当前链的结束符。</p>
+<h1 id="例子">例子</h1>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chain 4900 chrY 58368225 + 25985403 25985638 chr5 151006098 - 43257292 43257528 1</span><br><span class="line"> 9       1       0</span><br><span class="line"> 10      0       5</span><br><span class="line"> 61      4       0</span><br><span class="line"> 16      0       4</span><br><span class="line"> 42      3       0</span><br><span class="line"> 16      0       8</span><br><span class="line"> 14      1       0</span><br><span class="line"> 3       7       0</span><br><span class="line"> 48</span><br><span class="line"></span><br><span class="line"> chain 4900 chrY 58368225 + 25985406 25985566 chr5 151006098 - 43549808 43549970 2</span><br><span class="line"> 16      0       2</span><br><span class="line"> 60      4       0</span><br><span class="line"> 10      0       4</span><br><span class="line"> 70</span><br></pre></td></tr></table></figure>
+<h1 id="头部行-header-line-详解">头部行 (Header Line) 详解</h1>
+<p>头部行包含了两个序列的基本信息和整体比对概况，格式为一行包含12个字段。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">字段</th>
+<th style="text-align: left;">名称</th>
+<th style="text-align: left;">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;"><code>chain</code></td>
+<td style="text-align: left;">固定关键字，标识头部行的开始。</td>
+</tr>
+<tr>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;"><code>score</code></td>
+<td style="text-align: left;">链的比对得分，用于衡量比对质量。</td>
+</tr>
+<tr>
+<td style="text-align: left;">3</td>
+<td style="text-align: left;"><code>tName</code></td>
+<td style="text-align: left;"><strong>目标序列</strong> (target/reference) 的染色体名称。</td>
+</tr>
+<tr>
+<td style="text-align: left;">4</td>
+<td style="text-align: left;"><code>tSize</code></td>
+<td style="text-align: left;"><strong>目标序列</strong>的染色体总长度。</td>
+</tr>
+<tr>
+<td style="text-align: left;">5</td>
+<td style="text-align: left;"><code>tStrand</code></td>
+<td style="text-align: left;"><strong>目标序列</strong>的链方向（<code>+</code> 或 <code>-</code>）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">6</td>
+<td style="text-align: left;"><code>tStart</code></td>
+<td style="text-align: left;">比对区域在<strong>目标序列</strong>上的起始位置（0-based）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">7</td>
+<td style="text-align: left;"><code>tEnd</code></td>
+<td style="text-align: left;">比对区域在<strong>目标序列</strong>上的结束位置（0-based）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">8</td>
+<td style="text-align: left;"><code>qName</code></td>
+<td style="text-align: left;"><strong>查询序列</strong> (query) 的染色体名称。</td>
+</tr>
+<tr>
+<td style="text-align: left;">9</td>
+<td style="text-align: left;"><code>qSize</code></td>
+<td style="text-align: left;"><strong>查询序列</strong>的染色体总长度。</td>
+</tr>
+<tr>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;"><code>qStrand</code></td>
+<td style="text-align: left;"><strong>查询序列</strong>的链方向（<code>+</code> 或 <code>-</code>）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">11</td>
+<td style="text-align: left;"><code>qStart</code></td>
+<td style="text-align: left;">比对区域在<strong>查询序列</strong>上的起始位置（0-based）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">12</td>
+<td style="text-align: left;"><code>qEnd</code></td>
+<td style="text-align: left;">比对区域在<strong>查询序列</strong>上的结束位置（0-based）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">13</td>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">链的唯一标识符（应该就是从1开始进行编号）。</td>
+</tr>
+</tbody>
+</table>
+<p>注意这里的序列起始位置和终止位置是<strong>0-based</strong>的左闭右开的区间，比如某条染色体前100个碱基的起始位置是0，终止位置是 100 （不包括 100）。下一段100个碱基的起始位置和终止位置是 100 和 200 。（转为常规的 1-based 的闭区间就是起始位置 + 1，终止位置不变）</p>
+<h2 id="tstrand-和-qstrand-的准确定义"><code>tStrand</code> 和 <code>qStrand</code> 的准确定义</h2>
+<p>这两个字段分别记录了<strong>目标序列（Target）</strong>和<strong>查询序列（Query）</strong> 中，<strong>用于比对的该条序列</strong>相对于其自身参考基因组正链的方向。</p>
+<ul>
+<li><p><strong>tStrand (目标链方向)</strong>：表示在<strong>目标基因组（新版本）</strong>上，与查询序列比对的这一部分序列，是来自目标基因组的正链（<code>+</code>）还是负链（<code>-</code>）。</p>
+<blockquote>
+<p><strong>关键事实</strong>：在 UCSC 提供的绝大多数 <code>chain</code> 文件中，<code>tStrand</code> <strong>几乎总是 +</strong>。因为目标序列通常是组装好的参考基因组，而参考基因组序列文件（FASTA）默认存储的就是正链（+）的信息。</p>
+</blockquote></li>
+<li><p><strong>qStrand (查询链方向)</strong>：表示在<strong>查询基因组（旧版本）</strong>上，与目标序列比对的这一部分序列，是来自查询基因组的正链（<code>+</code>）还是负链（<code>-</code>）。</p>
+<blockquote>
+<p>这是决定是否翻转的核心开关。如果 <code>qStrand</code> 为 <code>-</code>，说明在旧版本中，该区域是通过<strong>反向互补</strong>后才与新版比对上的。</p>
+</blockquote></li>
+</ul>
+<p><strong>当 qStrand 与 tStrand 的符号不一致（相反）时，即判定该位点/区域发生了链翻转。</strong></p>
+<p>由于实际使用的 <code>chain</code> 文件中 <code>tStrand</code> 几乎恒为 <code>+</code>，所以判定规则在绝大多数情况下可简化为：</p>
+<blockquote>
+<p><strong>如果 qStrand 为 -，则发生链翻转（需要 flip）；如果 qStrand 为 +，则没有翻转。</strong></p>
+</blockquote>
+<h2 id="坐标转换和示例">坐标转换和示例</h2>
+<p>当 <code>qStrand</code> 为 <code>-</code> 时，表示比对发生在查询序列的反向链上。此时，<code>qStart</code> 和 <code>qEnd</code> 是反向链上的坐标。要获得其在正链上对应的坐标，需要进行转换。</p>
+<p>官方文档给出了一个从 hg38 转换到 mm10 的例子 (hg38ToMm10.over.chain.gz)：
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chain 442878230 chr1 248956422 + 158547112 207360161 chr1 195471971 - 21022354 65032227 5</span><br></pre></td></tr></table></figure>
+在这个例子中，<code>qStrand</code> 为 <code>-</code>。要计算在 mm10 正链上的坐标，使用以下公式：
+- <strong>mm10Start</strong> = <code>qSize</code> - <code>qEnd</code> = 195471971 - 65032227 = <strong>130439744</strong>
+- <strong>mm10End</strong> = <code>qSize</code> - <code>qStart</code> = 195471971 - 21022354 = <strong>174449617</strong></p>
+<p>我感觉这里有个 bug 或者说笔误，从 chain 文件名称来看，这个例子应该是从 hg38（查询序列） 转到 mm10 （目标序列）。所以这里查询序列是 hg38 ，上面说的由于 <code>qStrand</code> 为 <code>-</code>，计算应该是说的是在 hg38 正链上的坐标才对（而不是 mm10 ）。</p>
+<p>chain文件名称 UCSC 的说明文件中内容如下，作为佐证。</p>
+<blockquote>
+<p>The file names reflect the assembly conversion data contained within
+in the format <db1>To<Db2>.over.chain.gz. For example, a file named
+mm10ToHg19.over.chain.gz file contains the liftOver data needed to
+convert mm10 (Mouse GRCm38) coordinates to hg19 (Human GRCh37).</p>
+</blockquote>
+<h1 id="比对数据行-alignment-data-lines-详解">比对数据行 (Alignment Data Lines) 详解</h1>
+<p>头部行之后，跟着一行或多行数据，用于描述具体的比对区块（blocks）。这些行通常包含三个数字：</p>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 90%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">字段</th>
+<th style="text-align: left;">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>size</code></td>
+<td style="text-align: left;">当前<strong>无空位比对区块</strong> (ungapped alignment) 的大小。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dt</code></td>
+<td style="text-align: left;">当前区块结束到<strong>下一个区块开始</strong>之间，在<strong>目标序列</strong>上的距离（即目标序列上的空位大小）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dq</code></td>
+<td style="text-align: left;">当前区块结束到<strong>下一个区块开始</strong>之间，在<strong>查询序列</strong>上的距离（即查询序列上的空位大小）。</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>注意</strong>：比对数据行的<strong>最后一行</strong>只有一个数字，即最后一个无空位比对区块的 <code>size</code> 值。</p>
+</blockquote>
+<h1 id="总结">总结</h1>
+<p><code>chain</code> 文件通过<strong>头部行</strong>定义了两个序列的基本信息和整体比对方向，并通过后续的<strong>数据行</strong>精确记录了每个共线性区块（block）的大小以及区块间的间隙（gap）。这种设计使得它能够高效、精确地描述从简单易位到复杂倒位、重复等多种基因组结构变异。</p>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li><p>https://genome.ucsc.edu/goldenPath/help/chain.html</p></li>
+<li><p>https://biojuse.com/2025/02/12/VCF%20%E6%96%87%E4%BB%B6%E8%BD%AC%E5%9D%90%E6%A0%87%E7%9A%84%E6%96%B9%E6%B3%95%E6%B1%87%E6%80%BB%E5%8F%8A%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/</p></li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>基因组数据格式BED文件格式</title>
+    <url>/posts/50085e7b/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p><strong>BED (Browser Extensible Data) 格式</strong>是一种广泛使用的、基于文本的基因组数据格式，用于定义和注释基因组上的特定区域。</p>
+<p>它最初由UCSC基因组浏览器（UCSC Genome Browser）为可视化基因组注释而开发，如今已成为生物信息学领域的实际标准。</p>
+<span id="more"></span>
+<h1 id="核心概念与字段">核心概念与字段</h1>
+<p>BED格式的核心是<strong>用坐标来定义基因组上的特征</strong>，如基因、调控元件或测序峰。一个BED文件由多行组成，每行代表一个基因组区域（feature）。其核心是<strong>3个强制字段</strong>：</p>
+<ol type="1">
+<li><strong>chrom</strong>: 染色体或序列的名称（例如 <code>chr1</code>, <code>chrX</code>, <code>scaffold10671</code>）。</li>
+<li><strong>start</strong>: 区域<strong>起始位置</strong>，坐标从 <strong>0</strong> 开始计数。</li>
+<li><strong>end</strong>: 区域<strong>结束位置</strong>，坐标从 <strong>1</strong> 开始计数，且该位置的碱基<strong>不包含</strong>在区域内。</li>
+</ol>
+<blockquote>
+<p><strong>关键规则</strong>：BED区域的长度 = <code>end - start</code>。例如，<code>start=9, end=20</code> 代表从第10到第20个碱基，长度为11。这种“左闭右开”的坐标体系是使用BED格式时最常见的错误来源。</p>
+<p>相比于正常的1-based的闭区间，BED 的 start = 1-based位置 − 1，end 保持和 1-based 的 end 一致。</p>
+</blockquote>
+<h1 id="可选的扩展字段">可选的扩展字段</h1>
+<p>在3个强制字段之后，还可以添加最多9个标准的可选字段，以提供更多信息。使用这些字段时必须按顺序，即如果使用了第N个字段，则它之前的所有字段也必须存在。</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 7%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">位置</th>
+<th style="text-align: left;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>name</strong></td>
+<td style="text-align: left;">第4列</td>
+<td style="text-align: left;">为该区域定义一个名称标签，用于在浏览器中显示。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>score</strong></td>
+<td style="text-align: left;">第5列</td>
+<td style="text-align: left;">一个0-1000的分数，用于在UCSC浏览器中表示灰度或颜色深浅。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>strand</strong></td>
+<td style="text-align: left;">第6列</td>
+<td style="text-align: left;">定义链的方向，用 <code>+</code>（正链）或 <code>-</code>（负链）表示。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>thickStart</strong></td>
+<td style="text-align: left;">第7列</td>
+<td style="text-align: left;">特征绘制为<strong>粗体</strong>的起始位置（例如基因显示中的起始密码子）。。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>thickEnd</strong></td>
+<td style="text-align: left;">第8列</td>
+<td style="text-align: left;">特征绘制为<strong>粗体</strong>的结束位置（例如基因显示中的终止密码子）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>itemRgb</strong></td>
+<td style="text-align: left;">第9列</td>
+<td style="text-align: left;">用RGB值（如 <code>255,0,0</code>）为浏览器中的区域指定颜色。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>blockCount</strong></td>
+<td style="text-align: left;">第10列</td>
+<td style="text-align: left;">该区域包含的“块”（如外显子）的数量。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>blockSizes</strong></td>
+<td style="text-align: left;">第11列</td>
+<td style="text-align: left;">以逗号分隔的列表，表示每个块的大小。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>blockStarts</strong></td>
+<td style="text-align: left;">第12列</td>
+<td style="text-align: left;">以逗号分隔的列表，表示每个块的起始位置（相对于<code>start</code>字段的偏移）。列表项数应与 <code>blockCount</code> 对应。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>其中，第7至第12列主要用于定义由多个外显子构成的复杂基因结构（即BED12格式）</strong>。如果存在 7 - 12 列，则第12列<strong>第一个块的起始值必须为 0</strong>，最后一个块的 <code>起始位置 + 块大小</code> 必须等于 <code>chromEnd</code>。块之间不能重叠。</p>
+<h1 id="重要规则与常见变体">重要规则与常见变体</h1>
+<ul>
+<li><strong>字段一致性</strong>：在一个BED文件中，所有行的列数必须相同。</li>
+<li><strong>文件头部</strong>：文件可以包含以 <code>browser</code> 或 <code>track</code> 开头的注释行，为浏览器提供显示指引。</li>
+<li><strong>常用变体</strong>：
+<ul>
+<li><strong>BED3</strong>：仅包含3个强制字段。</li>
+<li><strong>BED4</strong>：包含3个强制字段 + <code>name</code>。</li>
+<li><strong>BED6</strong>：包含前6个标准字段（3个强制 + <code>name</code>, <code>score</code>, <code>strand</code>），这是最常用的格式之一。</li>
+<li><strong>BED12</strong>：包含全部12个字段。</li>
+<li><strong>BED3+ / BED6+</strong>：指在标准字段后，还可以添加任意数量的用户自定义列。</li>
+</ul></li>
+</ul>
+<p>示例如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">track name=pairedReads description=&quot;Clone Paired Reads&quot; useScore=1</span><br><span class="line">chr22 1000 5000 cloneA 960 + 1000 5000 0 2 567,488, 0,3512</span><br><span class="line">chr22 2000 6000 cloneB 900 - 2000 6000 0 2 433,399, 0,3601</span><br></pre></td></tr></table></figure>
+<h1 id="相关工具">相关工具</h1>
+<p>BED格式的流行也催生了强大的分析工具生态：</p>
+<ul>
+<li><strong>BEDTools</strong>：一个功能强大的命令行工具套件，被誉为基因组区间分析的“瑞士军刀”。它可以高效地执行<strong>交集、并集、覆盖度计算、合并、补集</strong>等多种操作。</li>
+<li><strong>UCSC Genome Browser</strong>：BED格式的原始和主要应用平台，用于数据可视化。</li>
+<li><strong>bigBed</strong>：对于非常大的BED文件（通常超过50MB），可以转换为二进制的bigBed格式，以提高基因组浏览器的加载和显示效率。</li>
+</ul>
+<p>总而言之，BED格式以其<strong>简单、灵活</strong>的特点，成为了存储和交换基因组区间信息的首选格式。</p>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li>https://genome.ucsc.edu/FAQ/FAQformat.html#format1</li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>非模式动物go和kegg富集分析</title>
+    <url>/posts/9d6bb500/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>GO 和 KEGG 分析思路，包括模式生物、非模式生物的分析。总体来说，非模式生物还是很难确保能做 GO 和 KEGG 分析，一般必须同时有 OrgDb 数据库以及在 KEGG 官网上存在“三字母缩写”（但是好像哪怕存在“三字母缩写”，也可能其pathway相关信息是空的）。</p>
+<span id="more"></span>
+<h1 id="模式生物和非模式生物的划分">模式生物和非模式生物的划分</h1>
+<p>在GO/KEGG富集分析的语境下，“模式生物”和“非模式生物”的划分，<strong>核心并不在于生物学上是否“经典”，而在于该物种是否拥有由权威数据库（如NCBI、KEGG、GO Consortium）直接维护的、标准化的、完整的高质量功能注释数据库。</strong></p>
+<p>简单来说，<strong>这是一个“生物信息学资源”概念，而非纯粹的“生物学分类”概念。</strong></p>
+<p>为了让你更清晰，我们可以从GO和KEGG分析的具体操作层面来定义：</p>
+<p><strong>具体的划分标准</strong></p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 42%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">评判维度</th>
+<th style="text-align: left;">模式生物（生信角度）</th>
+<th style="text-align: left;">非模式生物（生信角度）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>GO分析（OrgDb）</strong></td>
+<td style="text-align: left;">Bioconductor官方仓库中有<strong>预构建好的</strong><code>org.xxx.eg.db</code>包，可直接安装使用。</td>
+<td style="text-align: left;">没有预构建的OrgDb包，需要通过<code>AnnotationHub</code>下载、或自己用<code>AnnotationForge</code>构建。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>KEGG分析（通路）</strong></td>
+<td style="text-align: left;">KEGG数据库为其分配了<strong>专属的三字母物种缩写</strong>（如<code>hsa</code>、<code>mmu</code>），且该物种的基因与通路对应关系被详细人工/自动维护。</td>
+<td style="text-align: left;">没有专属缩写，或虽然有缩写但注释极不完整。</td>
+</tr>
+</tbody>
+</table>
+<p>弄清楚这个定义，你就能理解为什么之前回复中提到了不同的操作路径：</p>
+<ul>
+<li><strong>如果你是“模式生物”</strong>：直接一行代码 <code>library(org.Hs.eg.db)</code> 即可，非常省事。</li>
+<li><strong>如果你是“非模式生物”</strong>：
+<ul>
+<li>做<strong>GO分析</strong>：必须走<code>AnnotationHub</code>远程下载，或者自建数据库的路线。</li>
+<li>做<strong>KEGG分析</strong>：没有官方的“三字母缩写”就没法做（除非自己从头创建数据库）。</li>
+</ul></li>
+</ul>
+<blockquote>
+<p><strong>有“org包”和“三字母缩写”的就是生信意义上的模式生物；缺任何一个，实际操作时就要按非模式生物的“绕路”方法来处理。</strong></p>
+</blockquote>
+<h1 id="模式生物分析">模式生物分析</h1>
+<p>具体教程见参考文献1的网址，这里已经说得很详细了，我就不赘述了。</p>
+<p>这里给出2个官方网址，列出了可以分析的物种</p>
+<ul>
+<li><p><strong>Bioconductor</strong> 中所有可用的<strong>GO数据库</strong>R包（OrgDb 数据库）：http://bioconductor.org/packages/release/BiocViews.html#___OrgDb</p>
+<p>这个数据库的作用是 2 个：</p>
+<ol type="1">
+<li><p>基因编号对应和转换：这是OrgDb最基础的功能。它可以将基因的<strong>中心标识符</strong>（通常是Entrez Gene ID，纯数字，不同物种编号不同）与多种其他常用的标识符关联起来。例如：</p>
+<ul>
+<li><p>基因符号 (Gene Symbol)，如 <code>TP53</code></p></li>
+<li><p>Ensembl ID</p></li>
+<li><p>RefSeq ID</p></li>
+<li><p>UCSC ID</p></li>
+</ul></li>
+<li><p>GO分析注释信息</p></li>
+</ol></li>
+<li><p>所有kegg可用的物种简称：https://www.genome.jp/kegg/catalog/org_list.html</p>
+<p>从这个网页中获取物种缩写（如<code>'hsa'</code>），默认通过这个参数去在线获取 KEGG 的注释信息</p></li>
+</ul>
+<p>注意：kegg 分析虽然看上去不用 OrgDb 数据库 ，但是由于 kegg 分析分析也使用 Entrez Gene ID，因此也还是需要 OrgDb 数据库的转换基因编号的功能。因此正常来说，没有 OrgDb 数据库就无法做富集分析。</p>
+<h2 id="创建kegg本地数据库">创建kegg本地数据库</h2>
+<p>由于KEGG默认是在线联网分析的，因此有时候可能因为网络问题或网站问题而无法分析。</p>
+<p>因此将 KEGG 数据库下载下来分析是更稳定的做法。</p>
+<h3 id="单个物种">单个物种</h3>
+<p>参考之前博客：<a href="https://vincere.fun/posts/80b4ed31/">创建kegg本地数据库</a></p>
+<h3 id="全部物种"><del>全部物种</del></h3>
+<p>参考文献3的网址。</p>
+<p>下载全部物种的kegg数据库，由指定的物种改为 “all” 即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">library(createKEGGdb)</span><br><span class="line"></span><br><span class="line">create_kegg_db(&quot;all&quot;)</span><br></pre></td></tr></table></figure>
+<p>最后补充一点：有一些物种信息，虽然KEGG的物种列表（http://rest.kegg.jp/list/organism）里有，但是对应的pathway相关信息其实是没有的，这种情况程序会自动跳过。另外，网络或者服务器问题，以至于数据没下载下来，也会出现同样情况。</p>
+<p>报错，单个物种可以，所有物种不行。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt; create_kegg_db(&quot;all&quot;)</span><br><span class="line">Reading KEGG annotation online:</span><br><span class="line"></span><br><span class="line">Reading KEGG annotation online:</span><br><span class="line"></span><br><span class="line">fail to download KEGG data...</span><br><span class="line">Error in nrow(KEGGPATHID2EXTID) : object &#x27;KEGGPATHID2EXTID&#x27; not found</span><br><span class="line">In addition: Warning message:</span><br><span class="line">In download.file(url, method = method, ...) :</span><br><span class="line">  cannot open URL &#x27;https://rest.kegg.jp/list/organism&#x27;: HTTP status was &#x27;400 Bad Request&#x27;</span><br></pre></td></tr></table></figure>
+<p>可能的原因：</p>
+<ol type="1">
+<li><p><strong>请求过于庞大</strong>
+<code>"all"</code> 会尝试从 <code>https://rest.kegg.jp/list/organism</code> 获取 <strong>所有物种的列表</strong>（约数千条），然后为每个物种构建一个完整的 KEGG 数据库。这个请求数据量较大，KEGG 服务器对批量下载有严格限制，容易触发 <code>400 Bad Request</code>（通常代表请求被拒绝或格式不正确）。</p></li>
+<li><p><strong>createKEGGdb 的实现缺陷</strong>
+该包已多年未更新，其内部对 <code>"all"</code> 的处理可能没有遵循 KEGG 最新的 API 规范（例如分页、限速等），导致服务器直接拒绝。</p></li>
+</ol>
+<p>还是得逐个物种按需下载。</p>
+<h1 id="非模式生物分析">非模式生物分析</h1>
+<h2 id="思路1下载orgdb">思路1：下载OrgDb</h2>
+<p>对于非模式物种，可以使用<code>AnnotationHub</code>包来在线检索并下载其注释信息（OrgDb）</p>
+<p>代码示例如下</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 加载数据库</span></span><br><span class="line">library<span class="punctuation">(</span>AnnotationHub<span class="punctuation">)</span></span><br><span class="line">hub <span class="operator">&lt;-</span> AnnotationHub<span class="punctuation">(</span><span class="punctuation">)</span> <span class="comment">#较慢</span></span><br><span class="line">query<span class="punctuation">(</span>hub<span class="punctuation">,</span> <span class="string">&quot;capra_aegagrus_hircus&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>使用<code>query</code>在我们制作的<code>OrgDB --&gt; hub</code>里面找到物种相关的数据库（采用<strong>物种拉丁文名称</strong>）。</p>
+<p>在输出结果中查找数据库的后缀为必须为 <code>eg.sqlite</code>的结果，举例如下（格式一般为 <code>org.物种名.eg.sqlite</code>）</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">    query(hub, <span class="string">&quot;capra_aegagrus_hircus&quot;</span>)</span></span><br><span class="line">AnnotationHub with 1 record</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">snapshotDate(): 2021-10-20</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">names(): AH96553</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$dataprovider</span>: ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$species</span>: Capra aegagrus_hircus</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$rdataclass</span>: OrgDb</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$rdatadateadded</span>: 2021-10-13</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$title</span>: org.Capra_aegagrus_hircus.eg.sqlite</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$description</span>: NCBI gene ID based annotations about Capra aegagrus_hircus</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$taxonomyid</span>: 9925</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$genome</span>: NCBI genomes</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$sourcetype</span>: NCBI/UniProt</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$sourceurl</span>: ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/, ftp://ftp.uniprot.org/p...</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$sourcesize</span>: NA</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$tags</span>: c(<span class="string">&quot;NCBI&quot;</span>, <span class="string">&quot;Gene&quot;</span>, <span class="string">&quot;Annotation&quot;</span>)</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">retrieve record with <span class="string">&#x27;object[[&quot;AH96553&quot;]]&#x27;</span></span></span><br></pre></td></tr></table></figure>
+<p>更好的办法是，先限制数据库类型为 OrgDb，这样找出的结果就全部是 OrgDb 数据库</p>
+<figure class="highlight r"><table><tr><td class="code"><pre><span class="line">org <span class="operator">&lt;-</span> hub<span class="punctuation">[</span>hub<span class="operator">$</span>rdataclass<span class="operator">==</span><span class="string">&quot;OrgDb&quot;</span><span class="punctuation">,</span><span class="punctuation">]</span></span><br><span class="line">query<span class="punctuation">(</span>org<span class="punctuation">,</span> <span class="string">&quot;capra_aegagrus_hircus&quot;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>然后复制这个数据库前面的编号，用下面代码获取这个数据库</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">db &lt;- hub[[&quot;AH107469&quot;]]</span><br></pre></td></tr></table></figure>
+<p>之后使用 <code>OrgDB</code> 的时候直接调用这个数据库即可，和正常一样，也就是所有 <code>OrgDB</code> 参数设为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">OrgDb=db</span><br></pre></td></tr></table></figure>
+<p>但是 KEGG 没有办法，KEGG 官网如果没有物种编号就是没法弄。</p>
+<h2 id="思路2自建go和kegg数据库">思路2：自建GO和KEGG数据库</h2>
+<p>当目标物种在公共数据库中完全缺乏注释时，可以采用此方法。</p>
+<ol type="1">
+<li><strong>获取蛋白质序列</strong>：从NCBI等数据库下载目标物种的蛋白质组序列。</li>
+<li><strong>功能注释</strong>：使用<strong>eggNOG-mapper</strong>在线工具对蛋白质序列进行功能注释。它会通过序列比对，为你的基因分配GO术语和KEGG直系同源物（KO）编号。</li>
+<li><strong>构建本地数据库</strong>：利用R包<code>AnnotationForge</code>，根据eggNOG-mapper的注释结果，构建属于该物种自己的OrgDb注释包。之后就可以用这个自建的OrgDb进行富集分析了。</li>
+</ol>
+<p>具体教程见参考文献2的网址，挺复杂的，这是纯生信的内容了，我还没有试过。</p>
+<h2 id="思路3在线工具网站">思路3：在线工具（网站）</h2>
+<p>一些网站可以做 go/kegg 分析，但是我看物种都很有限，没啥用。</p>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li>https://zhuanlan.zhihu.com/p/377356510</li>
+<li>https://zhuanlan.zhihu.com/p/389005258</li>
+<li>https://mp.weixin.qq.com/s/PwrdQAkG3pTlwMB6Mj8wXQ</li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
     <title>图片从pdf转为png</title>
     <url>/posts/816a7470/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>将 PDF 文件转换为 PNG 格式，在 R 和 Python 中都有很成熟的解决方案。这里我的目的是把 PDF 的一整页转为图片，而不是提取 PDF 中的图片。</p>
@@ -9596,7 +10145,9 @@ G_{s} &amp;=\frac{1}{p} \sum_{i=1}^{p} \frac{1}{v_{x_{i}}}\left(\mathrm{x}_{i}-1
 <p><strong>作用</strong>：告诉计算节点，资源到位后，具体要加载什么软件、激活什么环境、运行什么程序。</p></li>
 </ol>
 <p>运行程序，需要使用提交任务的脚本，相应的脚本示例如下，命名为<strong>c.slurm</strong>。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">#SBATCH -J zhouziwen                     # 作业的名称 可根据需要自行命名</span><br><span class="line">#SBATCH -p xhacnormalb                      # 在指定分区中分配资源，根据所拥有的资源修改</span><br><span class="line">#SBATCH --ntasks=1                         # 整个作业只分配 1 个 task（任务/进程）</span><br><span class="line">#SBATCH --cpus-per-task=1                  # CPU核心数目，变量 $SLURM_CPUS_PER_TASK</span><br><span class="line"></span><br><span class="line">export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK # OpenMP 的线程数目</span><br><span class="line"></span><br><span class="line">module purge</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line">echo &quot;[INFO] Job started at $(date)&quot;</span><br><span class="line">echo &quot;[INFO] Using $SLURM_CPUS_PER_TASK CPUs&quot;</span><br><span class="line"></span><br><span class="line"># 分析内容</span><br><span class="line"></span><br><span class="line">echo &quot;[INFO] Job finished at $(date)&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>必须先创建 <code>log</code> 文件夹，即</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">mkdir ./log</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">#SBATCH -J zhouziwen                     # 作业的名称 可根据需要自行命名</span><br><span class="line">#SBATCH -p xhacnormalb                      # 在指定分区中分配资源，根据所拥有的资源修改</span><br><span class="line">#SBATCH --ntasks=1                         # 整个作业只分配 1 个 task（任务/进程）</span><br><span class="line">#SBATCH --cpus-per-task=1                  # CPU核心数目，变量 $SLURM_CPUS_PER_TASK</span><br><span class="line">#SBATCH -o log/slurm-%j.out</span><br><span class="line">#SBATCH -e log/slurm-%j.out   # 指向和 -o 完全相同的文件</span><br><span class="line"></span><br><span class="line">export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK # OpenMP 的线程数目</span><br><span class="line"></span><br><span class="line">module purge</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line">echo &quot;[INFO] Job started at $(date)&quot;</span><br><span class="line">echo &quot;[INFO] Using $SLURM_CPUS_PER_TASK CPUs&quot;</span><br><span class="line"></span><br><span class="line"># 分析内容</span><br><span class="line"></span><br><span class="line">echo &quot;[INFO] Job finished at $(date)&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>对于脚本内容，下面会有进一步的解释。</p>
 <h2 id="提交脚本">提交脚本</h2>
 <p>提交作业。</p>

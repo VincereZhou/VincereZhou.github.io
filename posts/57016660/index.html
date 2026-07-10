@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    转基因组版本chain文件格式 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-转基因组版本chain文件格式"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  转基因组版本chain文件格式
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/57016660/" class="article-date">
+  <time datetime="2026-07-10T12:02:41.000Z" itemprop="datePublished">2026-07-10</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.7k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">6 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p><code>chain</code> 文件的格式由UCSC基因组浏览器定义。它的每一行都包含关于两个基因组版本（“目标” <code>t</code> 和 “查询” <code>q</code>）之间比对关系的详细信息。</p>
+<span id="more"></span>
+<p>基于 UCSC 的官方文档，<code>chain</code> 文件是一种用于描述<strong>两个序列之间比对关系</strong>的格式，其核心特点是<strong>允许在两条序列上同时存在空位（gaps）</strong>。这种格式设计得非常紧凑（deliberately quite dense），旨在高效记录复杂的基因组重排信息。</p>
+<p>在UCSC的<code>chain</code>文件中，<strong>目标序列（Target）</strong>和<strong>查询序列（Query）</strong>是一对非常重要的概念，它们的定义完全取决于你<strong>转换的方向</strong>。</p>
+<h1 id="两个序列的定义">两个序列的定义</h1>
+<p>简单来说，<code>chain</code> 文件是<strong>有方向性的</strong>，它描述的是如何将“查询序列”上的坐标映射到“目标序列”上。</p>
+<ul>
+<li><strong>查询序列 (Query, qName)</strong>：指<strong>你当前手头数据所在的基因组版本</strong>，也就是<strong>被转换的源头</strong>。</li>
+<li><strong>目标序列 (Target, tName)</strong>：指<strong>你希望转换到的那个基因组版本</strong>，也就是<strong>转换的目的地</strong>。</li>
+</ul>
+<h1 id="文件整体结构">文件整体结构</h1>
+<p>一个标准的 <code>chain</code> 文件由若干个“链” (chain) 组成，每个链的结构如下：
+1. <strong>一个头部行 (Header Line)</strong>：以 <code>chain</code> 关键字开头，包含11个必填属性。
+2. <strong>一个或多个比对数据行 (Alignment Data Lines)</strong>：描述具体的区块比对信息。
+3. <strong>一个空行 (Blank Line)</strong>：作为当前链的结束符。</p>
+<h1 id="例子">例子</h1>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">chain 4900 chrY 58368225 + 25985403 25985638 chr5 151006098 - 43257292 43257528 1</span><br><span class="line"> 9       1       0</span><br><span class="line"> 10      0       5</span><br><span class="line"> 61      4       0</span><br><span class="line"> 16      0       4</span><br><span class="line"> 42      3       0</span><br><span class="line"> 16      0       8</span><br><span class="line"> 14      1       0</span><br><span class="line"> 3       7       0</span><br><span class="line"> 48</span><br><span class="line"></span><br><span class="line"> chain 4900 chrY 58368225 + 25985406 25985566 chr5 151006098 - 43549808 43549970 2</span><br><span class="line"> 16      0       2</span><br><span class="line"> 60      4       0</span><br><span class="line"> 10      0       4</span><br><span class="line"> 70</span><br></pre></td></tr></table></figure>
+<h1 id="头部行-header-line-详解">头部行 (Header Line) 详解</h1>
+<p>头部行包含了两个序列的基本信息和整体比对概况，格式为一行包含12个字段。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">字段</th>
+<th style="text-align: left;">名称</th>
+<th style="text-align: left;">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;"><code>chain</code></td>
+<td style="text-align: left;">固定关键字，标识头部行的开始。</td>
+</tr>
+<tr>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;"><code>score</code></td>
+<td style="text-align: left;">链的比对得分，用于衡量比对质量。</td>
+</tr>
+<tr>
+<td style="text-align: left;">3</td>
+<td style="text-align: left;"><code>tName</code></td>
+<td style="text-align: left;"><strong>目标序列</strong> (target/reference) 的染色体名称。</td>
+</tr>
+<tr>
+<td style="text-align: left;">4</td>
+<td style="text-align: left;"><code>tSize</code></td>
+<td style="text-align: left;"><strong>目标序列</strong>的染色体总长度。</td>
+</tr>
+<tr>
+<td style="text-align: left;">5</td>
+<td style="text-align: left;"><code>tStrand</code></td>
+<td style="text-align: left;"><strong>目标序列</strong>的链方向（<code>+</code> 或 <code>-</code>）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">6</td>
+<td style="text-align: left;"><code>tStart</code></td>
+<td style="text-align: left;">比对区域在<strong>目标序列</strong>上的起始位置（0-based）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">7</td>
+<td style="text-align: left;"><code>tEnd</code></td>
+<td style="text-align: left;">比对区域在<strong>目标序列</strong>上的结束位置（0-based）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">8</td>
+<td style="text-align: left;"><code>qName</code></td>
+<td style="text-align: left;"><strong>查询序列</strong> (query) 的染色体名称。</td>
+</tr>
+<tr>
+<td style="text-align: left;">9</td>
+<td style="text-align: left;"><code>qSize</code></td>
+<td style="text-align: left;"><strong>查询序列</strong>的染色体总长度。</td>
+</tr>
+<tr>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;"><code>qStrand</code></td>
+<td style="text-align: left;"><strong>查询序列</strong>的链方向（<code>+</code> 或 <code>-</code>）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">11</td>
+<td style="text-align: left;"><code>qStart</code></td>
+<td style="text-align: left;">比对区域在<strong>查询序列</strong>上的起始位置（0-based）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">12</td>
+<td style="text-align: left;"><code>qEnd</code></td>
+<td style="text-align: left;">比对区域在<strong>查询序列</strong>上的结束位置（0-based）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">13</td>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">链的唯一标识符（应该就是从1开始进行编号）。</td>
+</tr>
+</tbody>
+</table>
+<p>注意这里的序列起始位置和终止位置是<strong>0-based</strong>的左闭右开的区间，比如某条染色体前100个碱基的起始位置是0，终止位置是 100 （不包括 100）。下一段100个碱基的起始位置和终止位置是 100 和 200 。（转为常规的 1-based 的闭区间就是起始位置 + 1，终止位置不变）</p>
+<h2 id="tstrand-和-qstrand-的准确定义"><code>tStrand</code> 和 <code>qStrand</code> 的准确定义</h2>
+<p>这两个字段分别记录了<strong>目标序列（Target）</strong>和<strong>查询序列（Query）</strong> 中，<strong>用于比对的该条序列</strong>相对于其自身参考基因组正链的方向。</p>
+<ul>
+<li><p><strong>tStrand (目标链方向)</strong>：表示在<strong>目标基因组（新版本）</strong>上，与查询序列比对的这一部分序列，是来自目标基因组的正链（<code>+</code>）还是负链（<code>-</code>）。</p>
+<blockquote>
+<p><strong>关键事实</strong>：在 UCSC 提供的绝大多数 <code>chain</code> 文件中，<code>tStrand</code> <strong>几乎总是 +</strong>。因为目标序列通常是组装好的参考基因组，而参考基因组序列文件（FASTA）默认存储的就是正链（+）的信息。</p>
+</blockquote></li>
+<li><p><strong>qStrand (查询链方向)</strong>：表示在<strong>查询基因组（旧版本）</strong>上，与目标序列比对的这一部分序列，是来自查询基因组的正链（<code>+</code>）还是负链（<code>-</code>）。</p>
+<blockquote>
+<p>这是决定是否翻转的核心开关。如果 <code>qStrand</code> 为 <code>-</code>，说明在旧版本中，该区域是通过<strong>反向互补</strong>后才与新版比对上的。</p>
+</blockquote></li>
+</ul>
+<p><strong>当 qStrand 与 tStrand 的符号不一致（相反）时，即判定该位点/区域发生了链翻转。</strong></p>
+<p>由于实际使用的 <code>chain</code> 文件中 <code>tStrand</code> 几乎恒为 <code>+</code>，所以判定规则在绝大多数情况下可简化为：</p>
+<blockquote>
+<p><strong>如果 qStrand 为 -，则发生链翻转（需要 flip）；如果 qStrand 为 +，则没有翻转。</strong></p>
+</blockquote>
+<h2 id="坐标转换和示例">坐标转换和示例</h2>
+<p>当 <code>qStrand</code> 为 <code>-</code> 时，表示比对发生在查询序列的反向链上。此时，<code>qStart</code> 和 <code>qEnd</code> 是反向链上的坐标。要获得其在正链上对应的坐标，需要进行转换。</p>
+<p>官方文档给出了一个从 hg38 转换到 mm10 的例子 (hg38ToMm10.over.chain.gz)：
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chain 442878230 chr1 248956422 + 158547112 207360161 chr1 195471971 - 21022354 65032227 5</span><br></pre></td></tr></table></figure>
+在这个例子中，<code>qStrand</code> 为 <code>-</code>。要计算在 mm10 正链上的坐标，使用以下公式：
+- <strong>mm10Start</strong> = <code>qSize</code> - <code>qEnd</code> = 195471971 - 65032227 = <strong>130439744</strong>
+- <strong>mm10End</strong> = <code>qSize</code> - <code>qStart</code> = 195471971 - 21022354 = <strong>174449617</strong></p>
+<p>我感觉这里有个 bug 或者说笔误，从 chain 文件名称来看，这个例子应该是从 hg38（查询序列） 转到 mm10 （目标序列）。所以这里查询序列是 hg38 ，上面说的由于 <code>qStrand</code> 为 <code>-</code>，计算应该是说的是在 hg38 正链上的坐标才对（而不是 mm10 ）。</p>
+<p>chain文件名称 UCSC 的说明文件中内容如下，作为佐证。</p>
+<blockquote>
+<p>The file names reflect the assembly conversion data contained within
+in the format <db1>To<Db2>.over.chain.gz. For example, a file named
+mm10ToHg19.over.chain.gz file contains the liftOver data needed to
+convert mm10 (Mouse GRCm38) coordinates to hg19 (Human GRCh37).</p>
+</blockquote>
+<h1 id="比对数据行-alignment-data-lines-详解">比对数据行 (Alignment Data Lines) 详解</h1>
+<p>头部行之后，跟着一行或多行数据，用于描述具体的比对区块（blocks）。这些行通常包含三个数字：</p>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 90%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">字段</th>
+<th style="text-align: left;">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>size</code></td>
+<td style="text-align: left;">当前<strong>无空位比对区块</strong> (ungapped alignment) 的大小。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dt</code></td>
+<td style="text-align: left;">当前区块结束到<strong>下一个区块开始</strong>之间，在<strong>目标序列</strong>上的距离（即目标序列上的空位大小）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dq</code></td>
+<td style="text-align: left;">当前区块结束到<strong>下一个区块开始</strong>之间，在<strong>查询序列</strong>上的距离（即查询序列上的空位大小）。</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>注意</strong>：比对数据行的<strong>最后一行</strong>只有一个数字，即最后一个无空位比对区块的 <code>size</code> 值。</p>
+</blockquote>
+<h1 id="总结">总结</h1>
+<p><code>chain</code> 文件通过<strong>头部行</strong>定义了两个序列的基本信息和整体比对方向，并通过后续的<strong>数据行</strong>精确记录了每个共线性区块（block）的大小以及区块间的间隙（gap）。这种设计使得它能够高效、精确地描述从简单易位到复杂倒位、重复等多种基因组结构变异。</p>
+<h1 id="参考文献">参考文献</h1>
+<ol type="1">
+<li><p>https://genome.ucsc.edu/goldenPath/help/chain.html</p></li>
+<li><p>https://biojuse.com/2025/02/12/VCF%20%E6%96%87%E4%BB%B6%E8%BD%AC%E5%9D%90%E6%A0%87%E7%9A%84%E6%96%B9%E6%B3%95%E6%B1%87%E6%80%BB%E5%8F%8A%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/</p></li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/9df7ea16/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            crossmap转基因组版本
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/50085e7b/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">基因组数据格式BED文件格式</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
