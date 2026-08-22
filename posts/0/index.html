@@ -59,7 +59,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.6k</span>
+            <span class="post-count">3.3k</span>
         </span>
     </span>
 
@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">10 分钟</span>
+            <span class="post-count">13 分钟</span>
         </span>
     </span>
 </div>
@@ -95,6 +95,30 @@
 </blockquote>
 <p>个人倾向于使用 Miniconda</p>
 <h1 id="miniconda-安装">miniconda 安装</h1>
+<p><a target="_blank" rel="noopener" href="https://docs.anaconda.net.cn/miniconda/install/#quick-command-line-install">官网</a> 安装指南如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p ~/miniconda3</span><br><span class="line">wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh</span><br><span class="line">bash ~/miniconda3/miniconda.sh</span><br></pre></td></tr></table></figure>
+<p>原本这里执行静默安装，但是我看这样安装不会加入 <code>.bashrc</code> 中的环境变量，还是手动安装好。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>执行效果</strong>：脚本会将 Miniconda 的所有文件解压到 <code>~/miniconda3</code>，并将其 <code>bin</code> 目录添加到当前 shell 的 <code>PATH</code>（但不会永久生效，需要后续初始化）。整个过程<strong>没有任何输出</strong>（除非出错），适合后台运行。</p>
+</blockquote>
+<h2 id="centos-7系统的做法">CentOS 7系统的做法</h2>
+<p>遭遇报错</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">bash ~/miniconda3/miniconda.sh</span></span><br><span class="line">Installer requires GLIBC &gt;=2.28, but system has 2.17.</span><br></pre></td></tr></table></figure>
+<p>问题根源：GLIBC 版本不兼容</p>
+<ul>
+<li><strong>你的系统</strong>：GLIBC 版本是 <strong>2.17</strong>。GLIBC（GNU C 库）是 Linux 系统的核心底层库，其版本与系统高度绑定。</li>
+<li><strong>新版 Miniconda</strong>：从某个版本开始，其安装程序要求 <strong>GLIBC &gt;= 2.28</strong>。</li>
+<li><strong>矛盾点</strong>：CentOS 7 的最高 GLIBC 版本就是 2.17，无法直接满足新版安装程序的需求。</li>
+</ul>
+<p>解决方案：安装旧版 Miniconda</p>
+<ol type="1">
+<li><p><strong>确定兼容版本</strong>：官方建议，选择 <strong>2023 年及以前</strong>的版本。具体来说，<code>Miniconda3-py39_23.5.2-0</code> 是一个被广泛验证可行的版本。</p></li>
+<li><p><strong>执行安装命令</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 下载兼容的旧版安装脚本</span></span><br><span class="line">wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.5.2-0-Linux-x86_64.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 执行安装 (注意：将路径替换为你实际的安装目录)</span></span><br><span class="line">bash Miniconda3-py39_23.5.2-0-Linux-x86_64.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. (可选) 删除安装脚本</span></span><br><span class="line"><span class="comment"># rm Miniconda3-py39_23.5.2-0-Linux-x86_64.sh</span></span><br><span class="line"><span class="built_in">mv</span> Miniconda3-py39_23.5.2-0-Linux-x86_64.sh ~/miniconda3</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>这样安装的 Miniconda 基础环境是 Python 3.9，但你后续完全可以创建 Python 3.10、3.11 等更高版本的虚拟环境，不受任何影响。</p>
+<h2 id="我之前的做法">我之前的做法</h2>
 <p>先下载一个 bash 脚本</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
 <p>如果 <code>wget</code> 不行，可以尝试使用 <code>curl</code> 进行下载，或者手动下载然后上传到服务器</p>
@@ -110,9 +134,11 @@
 <p>安装完成后刷新一下环境变了，通过查看 conda 版本确定是否安装成功。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">source ~/.bashrc</span><br><span class="line">conda --version</span><br></pre></td></tr></table></figure>
 <h1 id="添加-channel">添加 channel</h1>
-<p>清华大学的 Conda 镜像源包含了许多常用的包和工具，您可以通过以下命令将其添加为 Conda 的默认 Channel。</p>
-<p>执行以下命令将清华镜像源添加到 Conda 配置中：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 1. 生成 .condarc 配置文件（若不存在）</span><br><span class="line">conda config --set show_channel_urls yes</span><br><span class="line"></span><br><span class="line"># 2. 添加清华镜像源</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/</span><br><span class="line"></span><br><span class="line"># 3. 设置优先级（可选）</span><br><span class="line">conda config --set channel_priority flexible</span><br></pre></td></tr></table></figure>
+<p><code>defaults</code> 和 <code>conda-forge</code> 是 Conda 生态中最核心的两个包通道（Channel），你可以把它们理解为 <strong>“软件源”或“应用商店”</strong>。</p>
+<p>它们最核心的区别在于：<strong>defaults 是 Anaconda 公司官方维护的“稳定、精选”源；而 conda-forge 是社区驱动的、包更多、更新更快的“社区宝库”</strong>。</p>
+<p>二者可能不兼容，因此我这里去除了 <code>defaults</code> ，只保留 <code>conda-forge</code> 。</p>
+<p>为了避免以后每次安装都要敲 <code>-c conda-forge -c bioconda</code>，你可以在登录节点执行一次永久配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># 清空现有频道列表</span><br><span class="line"># 如果第一次运行会报错，采用第二行命令</span><br><span class="line">conda config --remove-key channels</span><br><span class="line"># conda config --set channels &quot;&quot;</span><br><span class="line"></span><br><span class="line"># 1. 添加 conda-forge 并设为最高优先级（必须最先添加，因为越后添加优先级越高）</span><br><span class="line">conda config --add channels bioconda      # 中间</span><br><span class="line">conda config --add channels conda-forge   # 最前面（最高优先级）</span><br><span class="line"></span><br><span class="line"># 2. 开启严格优先级（Strict）——这是关键，能彻底避免此类冲突</span><br><span class="line">conda config --set channel_priority strict</span><br><span class="line"></span><br><span class="line"># 3. 必须手动删掉 defaults，不然我试过了 defaults 一直在</span><br><span class="line">conda config --remove channels defaults     # 有就删，没有会报 not in channels 可忽略</span><br><span class="line">conda config --show channels # 确认删除</span><br><span class="line"></span><br><span class="line"># 4. （可选但强烈推荐）切换至 libmamba 求解器以提升速度</span><br><span class="line"># 这就和 mamba 完全一样了，mamba 内核也是libmamba</span><br><span class="line">conda install -n base conda-libmamba-solver</span><br><span class="line">conda config --set solver libmamba</span><br><span class="line">conda config --show solver # 确认默认求解器</span><br></pre></td></tr></table></figure>
 <p>通过运行以下命令来查看当前 Conda 配置的 Channels：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda config --show channels</span><br></pre></td></tr></table></figure>
 <p>通过下面的命令可以一键删除所有已添加的频道（包括镜像源），恢复默认的 <code>defaults</code> 频道。</p>
@@ -166,6 +192,12 @@
 </tr>
 </tbody>
 </table>
+<h1 id="安装包时指定-channels">安装包时指定 channels</h1>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ conda install scipy --channel conda-forge --channel bioconda</span><br></pre></td></tr></table></figure>
+<p>优先级从左到右递减</p>
+<blockquote>
+<p>Priority decreases from left to right - the first argument is higher priority than the second.</p>
+</blockquote>
 <h1 id="更新-python-其它软件通用">更新 python （其它软件通用）</h1>
 <p>安装 conda 会自带 python ，应该是 conda 能支持的最新的</p>
 <ol type="1">

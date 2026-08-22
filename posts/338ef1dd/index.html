@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    残差连接解决梯度消失的原因 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-残差连接解决梯度消失的原因"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  残差连接解决梯度消失的原因
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/338ef1dd/" class="article-date">
+  <time datetime="2026-08-22T12:45:30.000Z" itemprop="datePublished">2026-08-22</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">8 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>记录 deepseek 的回答，让我看懂了残差连接解决梯度消失的原因，能不能解决梯度爆炸不清楚，没太搞懂，不过我的感觉是对梯度爆炸没啥用。</p>
+<span id="more"></span>
+<h1 id="问题1为什么残差连接能解决梯度消失爆炸">问题1：为什么残差连接能解决梯度消失/爆炸</h1>
+<h2 id="deepseek-回答">deepseek 回答</h2>
+<p>这个问题问到了深度学习的“灵魂”层面。残差连接（Residual Connection）之所以能成为ResNet乃至现代大模型（Transformer）的基石，核心在于它<strong>彻底改变了信息传播的数学路径</strong>。</p>
+<p>为了让你彻底听懂，我们把“梯度消失/爆炸”的本质和残差连接的“物理破解法”拆开看：</p>
+<h3 id="梯度消失爆炸的本质连乘效应九九八十一难">1. 梯度消失/爆炸的本质：连乘效应（“九九八十一难”）</h3>
+<p>在没有残差连接的传统深层网络中，输入 $ x $ 要经过很多层才能变成输出 $ y $，比如：
+<span class="math display">\[
+y = F_3(F_2(F_1(x)))
+\]</span></p>
+<p>在反向传播时，根据链式法则，损失 $ L $ 对输入 $ x $ 的梯度是<strong>一系列矩阵导数的连乘</strong>：
+<span class="math display">\[
+\frac{\partial L}{\partial x} = \frac{\partial L}{\partial y} \cdot \frac{\partial F_3}{\partial F_2} \cdot \frac{\partial F_2}{\partial F_1} \cdot \frac{\partial F_1}{\partial x}
+\]</span></p>
+<ul>
+<li><strong>消失</strong>：如果每一项的模都小于 1（比如 0.9），连乘 100 次后，$ 0.9^{100}  $。</li>
+<li><strong>爆炸</strong>：如果每一项的模都大于 1（比如 1.1），连乘 100 次后，$ 1.1^{100}  $ 多。
+深度越大，这种连乘效应越致命。</li>
+</ul>
+<hr />
+<h3 id="残差连接的数学破局化乘法为加法">2. 残差连接的数学“破局”：化乘法为加法</h3>
+<p>残差连接把公式改成了这样（假设 $ F $ 是你要学的那几层变换）：
+<span class="math display">\[
+y = F(x) + x
+\]</span></p>
+<p>此时反向传播求梯度时，变成了：
+<span class="math display">\[
+\frac{\partial y}{\partial x} = \frac{\partial F(x)}{\partial x} + \mathbf{1}
+\]</span>
+（这里的 $  $ 是单位矩阵，代表恒等映射）</p>
+<p><strong>看这个加号（+）！</strong> 现在梯度由两部分组成：</p>
+<ol type="1">
+<li><strong>$  $</strong>（主干路径，依然可能很小或很大）。</li>
+<li><strong>$  $</strong>（短路路径，永远是 1）。</li>
+</ol>
+<hr />
+<h3 id="为什么能解决梯度消失保底机制">3. 为什么能解决“梯度消失”？（“保底机制”）</h3>
+<p>如果网络很深，训练初期 $ F $ 学得不好，导致 $  $ 变得极其微小（趋近于 0）。</p>
+<ul>
+<li><strong>普通网络</strong>：梯度就真的变成 0 了，浅层参数彻底停止更新。</li>
+<li><strong>残差网络</strong>：梯度等于 $ 0 +  = 1 $。<strong>梯度至少还有一个“1”可以传回去！</strong></li>
+</ul>
+<p>这就好比给信息流加了一条 <strong>“高速公路”</strong> 或 <strong>“紧急救生通道”</strong>。无论主路堵得多么水泄不通（梯度消失），急救车（梯度）总能通过旁边的直通车道把信号传回浅层，确保浅层网络至少能收到更新指令，不会“饿死”。</p>
+<hr />
+<h3 id="为什么能缓解梯度爆炸分流泄洪">4. 为什么能缓解“梯度爆炸”？（“分流泄洪”）</h3>
+<p>如果网络设计不当或学习率太大，导致 $  $ 变得极其巨大（比如 10）。</p>
+<ul>
+<li><strong>普通网络</strong>：梯度爆炸，参数瞬间飞 NaN（Not a Number）。</li>
+<li><strong>残差网络</strong>：梯度是 $ 10 + 1 = 11 <span class="math inline">\(，虽然也变大了，但**它避免了“指数级放大”**。
+  - 在深层网络中，残差把梯度对深度的依赖从 **\)</span> W^L <span class="math inline">\(（幂级）** 降为了 **\)</span> W^i $（加和级）**。极端大的数值会在求和中被一定程度地稀释和抑制，不再像普通网络那样呈指数级失控。</li>
+</ul>
+<hr />
+<h3 id="一个秒懂的生活类比">5. 一个秒懂的生活类比</h3>
+<ul>
+<li><p><strong>没有残差网络</strong>：像一条<strong>只允许单行的盘山公路</strong>（每一层都必须走）。如果路上有一辆车抛锚（梯度消失），后面整条路全堵死（更新传不下去）。如果有一辆车失控加速（梯度爆炸），整条路连环追尾（参数爆炸）。</p></li>
+<li><p><strong>有残差网络</strong>：像<strong>旁边紧贴着一条笔直的国道</strong>（恒等映射）。国道没有红绿灯，永远畅通（梯度永远能直接传回）。主干道堵车或飙车，都不影响国道上的物流（基础梯度信号），网络总能获得稳定的反馈。</p></li>
+</ul>
+<hr />
+<h3 id="结合你的-pytorch-代码怎么写">6. 结合你的 PyTorch 代码（怎么写）</h3>
+<p>你在 <code>forward</code> 里看到的就是这个“加号”：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ResidualBlock</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, channels</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.conv1 = nn.Conv2d(channels, channels, <span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        self.conv2 = nn.Conv2d(channels, channels, <span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        self.relu = nn.ReLU()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="comment"># 残差核心：将输入 x 直接加到卷积输出上</span></span><br><span class="line">        out = self.conv2(self.relu(self.conv1(x)))</span><br><span class="line">        out = out + x  <span class="comment"># 👈 就是这个加法操作，物理上实现了梯度直达</span></span><br><span class="line">        out = self.relu(out)</span><br><span class="line">        <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+<p><strong>一句话总结：</strong><br />
+残差连接并没有消灭梯度消失，而是通过 <strong>“短接 + 加法”</strong> 在反向传播链中强行插入了一个 <strong>“1”</strong>。这个“1”确保了无论网络多深，深层梯度都能以“最坏保底”的方式无损地传回浅层，从而让几百上千层的网络能够稳定训练。这就是你将来要接触的大模型（GPT、ViT、扩散模型）都能跑得动的底层物理学基础。😎</p>
+<h1 id="问题2还是不懂梯度消失或爆炸指的是浅层网络的参数吧反向传播时它们距离-loss-最远但是残差连接-y-fx-x-这里-y-是深层网络不是浅层网络啊">问题2：还是不懂，梯度消失或爆炸指的是浅层网络的参数吧，反向传播时它们距离 loss 最远。但是残差连接 y = F(X) + x 这里 y 是深层网络，不是浅层网络啊</h1>
+<h2 id="deepseek-回答-1">deepseek 回答</h2>
+<p>这个问题问得太好了，直接点中了初学者最容易产生“时空错乱”的地方。你的逻辑完全正确：<strong>正向传播时，<code>y</code> 确实是深层网络的输出；但梯度消失/爆炸发生在反向传播时，是从 <code>y</code> 往 <code>x</code>（浅层）走的。</strong></p>
+<p>我们换个视角，<strong>站在“反向传播”的队列里</strong>来看，你瞬间就懂了。</p>
+<hr />
+<h3 id="反向传播的逆行路线">1. 反向传播的“逆行”路线</h3>
+<p>假设损失函数是 $ L $，反向传播时，梯度信号从 $ L $ 出发，<strong>倒着往回走</strong>。</p>
+<p>当它走到你写的这一层时：
+<span class="math display">\[
+y = F(x) + x
+\]</span>
+在这一刻，<strong><code>y</code> 是“上游”（靠近损失），<code>x</code> 是“下游”（靠近浅层输入）</strong>。</p>
+<p>现在，我们要计算损失 $ L $ 对浅层输入 $ x $ 的导数（即梯度），根据链式法则：
+<span class="math display">\[
+\frac{\partial L}{\partial x} = \frac{\partial L}{\partial y} \cdot \frac{\partial y}{\partial x}
+\]</span></p>
+<p>由于 $ y = F(x) + x $，对 $ x $ 求导得到：
+<span class="math display">\[
+\frac{\partial y}{\partial x} = \frac{\partial F(x)}{\partial x} + 1
+\]</span></p>
+<p>把公式代进去：
+<span class="math display">\[
+\frac{\partial L}{\partial x} = \frac{\partial L}{\partial y} \cdot \left( \frac{\partial F(x)}{\partial x} + 1 \right)
+\]</span></p>
+<hr />
+<h3 id="拆开看浅层网络收到了两份快递">2. 拆开看：浅层网络收到了“两份快递”</h3>
+<p>我们把上面的乘法拆开：
+<span class="math display">\[
+\frac{\partial L}{\partial x} = \underbrace{\frac{\partial L}{\partial y} \cdot \frac{\partial F(x)}{\partial x}}_{\text{快递 A（危险路径）}} + \underbrace{\frac{\partial L}{\partial y} \cdot 1}_{\text{快递 B（保命路径）}}
+\]</span></p>
+<ul>
+<li><strong>快递 A（危险路径）</strong>：它需要穿过 $ F(x) $ 内部的那些卷积层、全连接层。这一段路极其凶险（连乘很多梯度），等它送到浅层时，可能已经变成 0（消失）或无限大（爆炸）了。</li>
+<li><strong>快递 B（保命路径）</strong>：它<strong>直接从 <code>y</code> 跳到了 <code>x</code></strong>！因为乘以 1，这束梯度信号被完完整整、原封不动地送到了浅层网络手中。</li>
+</ul>
+<p><strong>回答你的核心疑问</strong>：<br />
+虽然 <code>y</code> 是深层输出，<strong>但在反向传播时，<code>y</code> 的梯度（$ L/y $）通过“+1”这条捷径，瞬间跨越了所有中间层，直接空降到了浅层的 <code>x</code> 那里。</strong> 浅层参数拿到的梯度里，始终包含这份“无损直达”的保底信号。</p>
+<hr />
+<h3 id="用消防通道来打比方">3. 用“消防通道”来打比方</h3>
+<ul>
+<li><strong>没有残差</strong>：楼里只有一条狭窄的旋转楼梯（深层网络）。消防员（梯度）从顶楼（损失）往下冲，每下一层（经过一层）都会有人堵路（梯度连乘），等冲到一楼（浅层），人已经累死或挤散了（梯度消失）。</li>
+<li><strong>有残差连接</strong>：楼里<strong>额外建了一根垂直的消防滑梯</strong>（恒等映射 +1）。滑梯的入口在顶楼（<code>y</code>），出口直达一楼（<code>x</code>）。无论中间楼层（<code>F(x)</code>）怎么着火、怎么堵路，消防员（梯度）随时可以跳进滑梯，<strong>从顶楼瞬间滑到底楼</strong>，毫发无伤。浅层网络接到这部分“生力军”信号，就能正常更新了。</li>
+</ul>
+<hr />
+<h3 id="结合你的-pytorch-代码看反向流">4. 结合你的 PyTorch 代码看反向流</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">    out = self.conv2(self.relu(self.conv1(x)))  <span class="comment"># F(x)</span></span><br><span class="line">    out = out + x  <span class="comment"># 这里是 y = F(x) + x</span></span><br><span class="line">    <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+<p>在反向传播时（<code>loss.backward()</code>）：
+1. 梯度传回 <code>out</code>（即 <code>y</code>）。
+2. 遇到 <code>out + x</code> 这个加法节点，梯度会<strong>分流</strong>：
+- 一路钻进 <code>out</code>（也就是 <code>F(x)</code>），艰难地穿过 <code>conv2</code>、<code>conv1</code> 去更新它们的权重（这条路可能消失）。
+- 另一路直接通过加法节点的“直连通道”，毫不费力地传到 <code>x</code>，进而传到 <code>x</code> 之前的更浅层网络。</p>
+<p><strong>结论</strong>：正是因为 <code>y</code> 是深层输出，而 <code>∂y/∂x = 1</code>，所以<strong>距离最远的浅层网络，获得了最无障碍的梯度直达通道</strong>。这就是残差网络能把层数堆到几千层，而普通网络堆到 20 层就崩盘的物理学核心。😉</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/f5133831/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">BN层的作用</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

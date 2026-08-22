@@ -13,6 +13,355 @@
 ]]></content>
   </entry>
   <entry>
+    <title>残差连接解决梯度消失的原因</title>
+    <url>/posts/338ef1dd/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>记录 deepseek 的回答，让我看懂了残差连接解决梯度消失的原因，能不能解决梯度爆炸不清楚，没太搞懂，不过我的感觉是对梯度爆炸没啥用。</p>
+<span id="more"></span>
+<h1 id="问题1为什么残差连接能解决梯度消失爆炸">问题1：为什么残差连接能解决梯度消失/爆炸</h1>
+<h2 id="deepseek-回答">deepseek 回答</h2>
+<p>这个问题问到了深度学习的“灵魂”层面。残差连接（Residual Connection）之所以能成为ResNet乃至现代大模型（Transformer）的基石，核心在于它<strong>彻底改变了信息传播的数学路径</strong>。</p>
+<p>为了让你彻底听懂，我们把“梯度消失/爆炸”的本质和残差连接的“物理破解法”拆开看：</p>
+<h3 id="梯度消失爆炸的本质连乘效应九九八十一难">1. 梯度消失/爆炸的本质：连乘效应（“九九八十一难”）</h3>
+<p>在没有残差连接的传统深层网络中，输入 $ x $ 要经过很多层才能变成输出 $ y $，比如：
+<span class="math display">\[
+y = F_3(F_2(F_1(x)))
+\]</span></p>
+<p>在反向传播时，根据链式法则，损失 $ L $ 对输入 $ x $ 的梯度是<strong>一系列矩阵导数的连乘</strong>：
+<span class="math display">\[
+\frac{\partial L}{\partial x} = \frac{\partial L}{\partial y} \cdot \frac{\partial F_3}{\partial F_2} \cdot \frac{\partial F_2}{\partial F_1} \cdot \frac{\partial F_1}{\partial x}
+\]</span></p>
+<ul>
+<li><strong>消失</strong>：如果每一项的模都小于 1（比如 0.9），连乘 100 次后，$ 0.9^{100}  $。</li>
+<li><strong>爆炸</strong>：如果每一项的模都大于 1（比如 1.1），连乘 100 次后，$ 1.1^{100}  $ 多。
+深度越大，这种连乘效应越致命。</li>
+</ul>
+<hr />
+<h3 id="残差连接的数学破局化乘法为加法">2. 残差连接的数学“破局”：化乘法为加法</h3>
+<p>残差连接把公式改成了这样（假设 $ F $ 是你要学的那几层变换）：
+<span class="math display">\[
+y = F(x) + x
+\]</span></p>
+<p>此时反向传播求梯度时，变成了：
+<span class="math display">\[
+\frac{\partial y}{\partial x} = \frac{\partial F(x)}{\partial x} + \mathbf{1}
+\]</span>
+（这里的 $  $ 是单位矩阵，代表恒等映射）</p>
+<p><strong>看这个加号（+）！</strong> 现在梯度由两部分组成：</p>
+<ol type="1">
+<li><strong>$  $</strong>（主干路径，依然可能很小或很大）。</li>
+<li><strong>$  $</strong>（短路路径，永远是 1）。</li>
+</ol>
+<hr />
+<h3 id="为什么能解决梯度消失保底机制">3. 为什么能解决“梯度消失”？（“保底机制”）</h3>
+<p>如果网络很深，训练初期 $ F $ 学得不好，导致 $  $ 变得极其微小（趋近于 0）。</p>
+<ul>
+<li><strong>普通网络</strong>：梯度就真的变成 0 了，浅层参数彻底停止更新。</li>
+<li><strong>残差网络</strong>：梯度等于 $ 0 +  = 1 $。<strong>梯度至少还有一个“1”可以传回去！</strong></li>
+</ul>
+<p>这就好比给信息流加了一条 <strong>“高速公路”</strong> 或 <strong>“紧急救生通道”</strong>。无论主路堵得多么水泄不通（梯度消失），急救车（梯度）总能通过旁边的直通车道把信号传回浅层，确保浅层网络至少能收到更新指令，不会“饿死”。</p>
+<hr />
+<h3 id="为什么能缓解梯度爆炸分流泄洪">4. 为什么能缓解“梯度爆炸”？（“分流泄洪”）</h3>
+<p>如果网络设计不当或学习率太大，导致 $  $ 变得极其巨大（比如 10）。</p>
+<ul>
+<li><strong>普通网络</strong>：梯度爆炸，参数瞬间飞 NaN（Not a Number）。</li>
+<li><strong>残差网络</strong>：梯度是 $ 10 + 1 = 11 <span class="math inline">\(，虽然也变大了，但**它避免了“指数级放大”**。
+  - 在深层网络中，残差把梯度对深度的依赖从 **\)</span> W^L <span class="math inline">\(（幂级）** 降为了 **\)</span> W^i $（加和级）**。极端大的数值会在求和中被一定程度地稀释和抑制，不再像普通网络那样呈指数级失控。</li>
+</ul>
+<hr />
+<h3 id="一个秒懂的生活类比">5. 一个秒懂的生活类比</h3>
+<ul>
+<li><p><strong>没有残差网络</strong>：像一条<strong>只允许单行的盘山公路</strong>（每一层都必须走）。如果路上有一辆车抛锚（梯度消失），后面整条路全堵死（更新传不下去）。如果有一辆车失控加速（梯度爆炸），整条路连环追尾（参数爆炸）。</p></li>
+<li><p><strong>有残差网络</strong>：像<strong>旁边紧贴着一条笔直的国道</strong>（恒等映射）。国道没有红绿灯，永远畅通（梯度永远能直接传回）。主干道堵车或飙车，都不影响国道上的物流（基础梯度信号），网络总能获得稳定的反馈。</p></li>
+</ul>
+<hr />
+<h3 id="结合你的-pytorch-代码怎么写">6. 结合你的 PyTorch 代码（怎么写）</h3>
+<p>你在 <code>forward</code> 里看到的就是这个“加号”：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ResidualBlock</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, channels</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.conv1 = nn.Conv2d(channels, channels, <span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        self.conv2 = nn.Conv2d(channels, channels, <span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        self.relu = nn.ReLU()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="comment"># 残差核心：将输入 x 直接加到卷积输出上</span></span><br><span class="line">        out = self.conv2(self.relu(self.conv1(x)))</span><br><span class="line">        out = out + x  <span class="comment"># 👈 就是这个加法操作，物理上实现了梯度直达</span></span><br><span class="line">        out = self.relu(out)</span><br><span class="line">        <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+<p><strong>一句话总结：</strong><br />
+残差连接并没有消灭梯度消失，而是通过 <strong>“短接 + 加法”</strong> 在反向传播链中强行插入了一个 <strong>“1”</strong>。这个“1”确保了无论网络多深，深层梯度都能以“最坏保底”的方式无损地传回浅层，从而让几百上千层的网络能够稳定训练。这就是你将来要接触的大模型（GPT、ViT、扩散模型）都能跑得动的底层物理学基础。😎</p>
+<h1 id="问题2还是不懂梯度消失或爆炸指的是浅层网络的参数吧反向传播时它们距离-loss-最远但是残差连接-y-fx-x-这里-y-是深层网络不是浅层网络啊">问题2：还是不懂，梯度消失或爆炸指的是浅层网络的参数吧，反向传播时它们距离 loss 最远。但是残差连接 y = F(X) + x 这里 y 是深层网络，不是浅层网络啊</h1>
+<h2 id="deepseek-回答-1">deepseek 回答</h2>
+<p>这个问题问得太好了，直接点中了初学者最容易产生“时空错乱”的地方。你的逻辑完全正确：<strong>正向传播时，<code>y</code> 确实是深层网络的输出；但梯度消失/爆炸发生在反向传播时，是从 <code>y</code> 往 <code>x</code>（浅层）走的。</strong></p>
+<p>我们换个视角，<strong>站在“反向传播”的队列里</strong>来看，你瞬间就懂了。</p>
+<hr />
+<h3 id="反向传播的逆行路线">1. 反向传播的“逆行”路线</h3>
+<p>假设损失函数是 $ L $，反向传播时，梯度信号从 $ L $ 出发，<strong>倒着往回走</strong>。</p>
+<p>当它走到你写的这一层时：
+<span class="math display">\[
+y = F(x) + x
+\]</span>
+在这一刻，<strong><code>y</code> 是“上游”（靠近损失），<code>x</code> 是“下游”（靠近浅层输入）</strong>。</p>
+<p>现在，我们要计算损失 $ L $ 对浅层输入 $ x $ 的导数（即梯度），根据链式法则：
+<span class="math display">\[
+\frac{\partial L}{\partial x} = \frac{\partial L}{\partial y} \cdot \frac{\partial y}{\partial x}
+\]</span></p>
+<p>由于 $ y = F(x) + x $，对 $ x $ 求导得到：
+<span class="math display">\[
+\frac{\partial y}{\partial x} = \frac{\partial F(x)}{\partial x} + 1
+\]</span></p>
+<p>把公式代进去：
+<span class="math display">\[
+\frac{\partial L}{\partial x} = \frac{\partial L}{\partial y} \cdot \left( \frac{\partial F(x)}{\partial x} + 1 \right)
+\]</span></p>
+<hr />
+<h3 id="拆开看浅层网络收到了两份快递">2. 拆开看：浅层网络收到了“两份快递”</h3>
+<p>我们把上面的乘法拆开：
+<span class="math display">\[
+\frac{\partial L}{\partial x} = \underbrace{\frac{\partial L}{\partial y} \cdot \frac{\partial F(x)}{\partial x}}_{\text{快递 A（危险路径）}} + \underbrace{\frac{\partial L}{\partial y} \cdot 1}_{\text{快递 B（保命路径）}}
+\]</span></p>
+<ul>
+<li><strong>快递 A（危险路径）</strong>：它需要穿过 $ F(x) $ 内部的那些卷积层、全连接层。这一段路极其凶险（连乘很多梯度），等它送到浅层时，可能已经变成 0（消失）或无限大（爆炸）了。</li>
+<li><strong>快递 B（保命路径）</strong>：它<strong>直接从 <code>y</code> 跳到了 <code>x</code></strong>！因为乘以 1，这束梯度信号被完完整整、原封不动地送到了浅层网络手中。</li>
+</ul>
+<p><strong>回答你的核心疑问</strong>：<br />
+虽然 <code>y</code> 是深层输出，<strong>但在反向传播时，<code>y</code> 的梯度（$ L/y $）通过“+1”这条捷径，瞬间跨越了所有中间层，直接空降到了浅层的 <code>x</code> 那里。</strong> 浅层参数拿到的梯度里，始终包含这份“无损直达”的保底信号。</p>
+<hr />
+<h3 id="用消防通道来打比方">3. 用“消防通道”来打比方</h3>
+<ul>
+<li><strong>没有残差</strong>：楼里只有一条狭窄的旋转楼梯（深层网络）。消防员（梯度）从顶楼（损失）往下冲，每下一层（经过一层）都会有人堵路（梯度连乘），等冲到一楼（浅层），人已经累死或挤散了（梯度消失）。</li>
+<li><strong>有残差连接</strong>：楼里<strong>额外建了一根垂直的消防滑梯</strong>（恒等映射 +1）。滑梯的入口在顶楼（<code>y</code>），出口直达一楼（<code>x</code>）。无论中间楼层（<code>F(x)</code>）怎么着火、怎么堵路，消防员（梯度）随时可以跳进滑梯，<strong>从顶楼瞬间滑到底楼</strong>，毫发无伤。浅层网络接到这部分“生力军”信号，就能正常更新了。</li>
+</ul>
+<hr />
+<h3 id="结合你的-pytorch-代码看反向流">4. 结合你的 PyTorch 代码看反向流</h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">    out = self.conv2(self.relu(self.conv1(x)))  <span class="comment"># F(x)</span></span><br><span class="line">    out = out + x  <span class="comment"># 这里是 y = F(x) + x</span></span><br><span class="line">    <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+<p>在反向传播时（<code>loss.backward()</code>）：
+1. 梯度传回 <code>out</code>（即 <code>y</code>）。
+2. 遇到 <code>out + x</code> 这个加法节点，梯度会<strong>分流</strong>：
+- 一路钻进 <code>out</code>（也就是 <code>F(x)</code>），艰难地穿过 <code>conv2</code>、<code>conv1</code> 去更新它们的权重（这条路可能消失）。
+- 另一路直接通过加法节点的“直连通道”，毫不费力地传到 <code>x</code>，进而传到 <code>x</code> 之前的更浅层网络。</p>
+<p><strong>结论</strong>：正是因为 <code>y</code> 是深层输出，而 <code>∂y/∂x = 1</code>，所以<strong>距离最远的浅层网络，获得了最无障碍的梯度直达通道</strong>。这就是残差网络能把层数堆到几千层，而普通网络堆到 20 层就崩盘的物理学核心。😉</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>BN层的作用</title>
+    <url>/posts/f5133831/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>BN 层（Batch Normalization）在深度学习中被誉为“神之一手”，它的作用远不止“加速训练”这么简单。结合你刚刚写过的代码（<code>Conv -&gt; BN -&gt; Tanh</code>），我把它的核心作用拆解为 <strong>4 个层次</strong>，并特别解释为什么你的代码里 BN 必须放在 Tanh 前面。</p>
+<p>记录 deepseek 的回答。</p>
+<span id="more"></span>
+<hr />
+<h3 id="核心作用一加速收敛允许使用更大的学习率">1. 核心作用一：加速收敛（允许使用更大的学习率）</h3>
+<p>这是 BN 最直接的工程价值。</p>
+<ul>
+<li><strong>问题</strong>：没有 BN 时，深层网络随着权重更新，输入的分布会不断漂移（比如一会儿全正，一会儿全负）。如果学习率太大，梯度容易爆炸；学习率太小，收敛又太慢。</li>
+<li><strong>BN 的解法</strong>：BN 强制把每一层的输出拉回 <strong>均值为 0、方差为 1</strong> 的标准正态分布。这相当于给每一层都装了一个“稳压器”，让数据永远处于一个稳定的量级。</li>
+<li><strong>结果</strong>：你可以放心地把学习率调大（比如从 0.01 调到 0.1），模型依然稳如泰山，训练时间大幅缩短。</li>
+</ul>
+<hr />
+<h3 id="核心作用二缓解梯度消失尤其针对你代码中的-tanh">2. 核心作用二：缓解梯度消失（尤其针对你代码中的 Tanh）</h3>
+<p>结合你上一轮的代码：
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">out = self.conv1_batchnorm(self.conv1(x))  <span class="comment"># BN 在这里</span></span><br><span class="line">out = F.max_pool2d(torch.tanh(out), <span class="number">2</span>)     <span class="comment"># Tanh 在这里</span></span><br></pre></td></tr></table></figure>
+你的顺序是 <strong>Conv -&gt; BN -&gt; Tanh</strong>。这个顺序至关重要！</p>
+<ul>
+<li><strong>Tanh 的致命弱点</strong>：当输入值很大（&gt;3）或很小（&lt;-3）时，Tanh 函数进入“饱和区”，导数为 0，梯度传不过去（梯度消失）。</li>
+<li><strong>BN 的拯救</strong>：BN 在进入 Tanh <strong>之前</strong>，强行把数值压缩到 <code>0</code> 附近（均值 0，方差 1）。而在 <code>0</code> 附近，Tanh 几乎是线性的（导数接近 1）。</li>
+<li><strong>结论</strong>：BN 确保了 <strong>Tanh 永远活在“舒适区”</strong>，永远不会因为数值太大而“躺平”（梯度变零）。这就是为什么你现在写的这个网络，即使用了 Tanh，也能正常训练几十层。</li>
+</ul>
+<hr />
+<h3 id="核心作用三轻微的正则化减少过拟合">3. 核心作用三：轻微的正则化（减少过拟合）</h3>
+<p>BN 在计算均值和方差时，是基于 <strong>当前批次（Batch）</strong> 的数据进行的。</p>
+<ul>
+<li>不同批次的均值和方差天然带有微小的随机波动（噪声）。</li>
+<li>这种噪声会随着网络传播，相当于给模型的训练过程引入了轻微的“扰动”。</li>
+<li><strong>效果</strong>：这种扰动起到了类似 Dropout 的正则化作用，让模型不那么依赖某几个特定的特征，从而<strong>略微抑制过拟合</strong>。因此，现在的很多网络在使用 BN 后，可以适当减少 Dropout 的强度甚至去掉 Dropout。</li>
+</ul>
+<hr />
+<h3 id="核心作用四降低对权重初始化的敏感性">4. 核心作用四：降低对权重初始化的敏感性</h3>
+<p>你之前在 ResBlock 里看到手动写了 <code>kaiming_normal_</code> 初始化。那是为了专门配合 ReLU。</p>
+<ul>
+<li>如果没有 BN，你必须非常小心地初始化权重（太大会爆炸，太小会消失）。如果初始化得不好，模型甚至直接无法收敛。</li>
+<li>有了 BN，无论初始权重是偏大还是偏小，BN 都会在第一次前向传播时立刻把数据拉回标准分布。</li>
+<li><strong>结论</strong>：BN 让你对初始化没那么“洁癖”了，即使随便用一种通用的初始化（如默认的 <code>randn</code>），模型通常也能跑起来。</li>
+</ul>
+<hr />
+<h3 id="进阶澄清bn-并不完全是为了解决internal-covariate-shift内部协变量偏移">5. 进阶澄清：BN 并不完全是为了解决“Internal Covariate Shift”（内部协变量偏移）</h3>
+<p>这是学术界的一个小八卦，但对你理解 BN 很有帮助：</p>
+<ul>
+<li>BN 原论文提出的动机是“解决内部协变量偏移（ICS）”。</li>
+<li>但后来的深入研究（MIT 等机构）发现，BN 之所以效果好，<strong>不是因为消除了 ICS</strong>，而是因为 <strong>它让损失函数（Loss Landscape）变得更平滑了</strong>。</li>
+<li>通俗理解：没有 BN 时，损失函数表面像“锯齿山”，到处都是陡峭的悬崖（梯度爆炸）或盆底（梯度消失），优化器寸步难行。加了 BN 后，表面变成了“平缓丘陵”，优化器可以大步流星地跑下山。这也是为什么它允许使用更大学习率的底层物理原因。</li>
+</ul>
+<hr />
+<h3 id="总结一张图记住-bn-的作用">总结：一张图记住 BN 的作用</h3>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 12%" />
+<col style="width: 66%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">作用维度</th>
+<th style="text-align: left;">关键词</th>
+<th style="text-align: left;">对你的代码的直接意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>训练速度</strong></td>
+<td style="text-align: left;">油门</td>
+<td style="text-align: left;">允许调大学习率，快速收敛</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>梯度健康</strong></td>
+<td style="text-align: left;">救生员</td>
+<td style="text-align: left;">把数值拉回 0 附近，拯救你的 <code>Tanh</code> 避免饱和</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>防止过拟合</strong></td>
+<td style="text-align: left;">免疫针</td>
+<td style="text-align: left;">批次的随机噪声带来轻微正则化</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>容错率</strong></td>
+<td style="text-align: left;">万能插头</td>
+<td style="text-align: left;">不管权重初始化好赖，BN 都能兜底</td>
+</tr>
+</tbody>
+</table>
+<p>最后，回到你刚写的 <code>NetBatchNorm</code>，你这一步走得非常标准——<strong>Conv -&gt; BN -&gt; Activation</strong> 是现代卷积网络（如 ResNet、VGG-BN）最通用、最稳健的数据流动顺序。👍</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>numpy广播规则</title>
+    <url>/posts/315c0f08/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>解释一下 numpy 广播规则，这是一个之前很容易混淆的点，而且很多资料我感觉完全没解释清楚。</p>
+<span id="more"></span>
+<h1 id="广播规则">广播规则</h1>
+<p>结合官方网址（网址1）的资料和 AI 的解释，我整理的一般的广播规则如下（和官网意思一下，我觉得下面这样写更好理解）</p>
+<ol type="1">
+<li>如果两个数组的维度数不同，将维度较小的那个数组的形状在<strong>前面</strong>（左边）补1，直到两数组维度相同。</li>
+<li>对于每个维度，从最右边的维度开始比对，<strong>如果两数组在该维度上的大小相等，或者其中一个数组在该维度上的大小为1</strong>，则这两个数组在该维度上是兼容的。</li>
+<li>如果两个数组在所有维度上都兼容，则它们可以广播。</li>
+<li>广播后，每个数组的形状将取两个数组在每个维度上的最大值。</li>
+<li>在任何一个维度上，如果一个数组的大小为1，而另一个大于1，则将该维度大小为1的数组拉伸（复制）到与另一个数组相同的大小。</li>
+</ol>
+<p>如果不能广播，则会给出下面的报错提示</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ValueError: operands could <span class="keyword">not</span> be broadcast together</span><br></pre></td></tr></table></figure>
+<p>例如，如果你有一个 256×256×3 的 RGB 值数组，并希望将图像中每个颜色分别按不同值进行缩放，你可以将图像乘以一个包含三个值的一维数组。根据广播规则对这些数组的后向轴大小进行对齐后，可以看出它们是兼容的：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Image  (3d array): 256 x 256 x 3</span><br><span class="line">Scale  (1d array):             3</span><br><span class="line">Result (3d array): 256 x 256 x 3</span><br></pre></td></tr></table></figure>
+<p>当比较的两个维度中有一个为1时，就使用另一个维度。换句话说，大小为1的维度会被拉伸或“复制”以匹配另一个。</p>
+<p>在以下示例中，数组A和B的轴长度均为1，在广播操作期间被扩展为更大的尺寸：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">A      (4d array):  8 x 1 x 6 x 1</span><br><span class="line">B      (3d array):      7 x 1 x 5</span><br><span class="line">Result (4d array):  8 x 7 x 6 x 5</span><br></pre></td></tr></table></figure>
+<h1 id="更多例子">更多例子</h1>
+<p>1d数组 和 2d数组的广播举例如下</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = np.array([[ <span class="number">0.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>],</span><br><span class="line">              [<span class="number">10.0</span>, <span class="number">10.0</span>, <span class="number">10.0</span>],</span><br><span class="line">              [<span class="number">20.0</span>, <span class="number">20.0</span>, <span class="number">20.0</span>],</span><br><span class="line">              [<span class="number">30.0</span>, <span class="number">30.0</span>, <span class="number">30.0</span>]])</span><br><span class="line">b = np.array([<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>])</span><br><span class="line">a + b</span><br></pre></td></tr></table></figure>
+<p>输出为</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">array([[  1.,   2.,   3.],</span><br><span class="line">        [11.,  12.,  13.],</span><br><span class="line">        [21.,  22.,  23.],</span><br><span class="line">        [31.,  32.,  33.]])</span><br></pre></td></tr></table></figure>
+<p>一个错误例子为</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">b = np.array([<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>, <span class="number">4.0</span>])</span><br><span class="line">a + b</span><br></pre></td></tr></table></figure>
+<p>报错信息为</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ValueError: operands could not be broadcast together with shapes (4,3) (4,) </span><br></pre></td></tr></table></figure>
+<p>下面是这两个例子的广播示意图</p>
+<p><img src="1.png" /></p>
+<p><img src="2.png" /></p>
+<p>这里和数组的存储顺序无关（默认按行存储，也就是 C 顺序），下面按照该 F 顺序也是一样的</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = np.array([[ <span class="number">0.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>],</span><br><span class="line">              [<span class="number">10.0</span>, <span class="number">10.0</span>, <span class="number">10.0</span>],</span><br><span class="line">              [<span class="number">20.0</span>, <span class="number">20.0</span>, <span class="number">20.0</span>],</span><br><span class="line">              [<span class="number">30.0</span>, <span class="number">30.0</span>, <span class="number">30.0</span>]], order=<span class="string">&#x27;F&#x27;</span>)</span><br><span class="line">b = np.array([<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>], order=<span class="string">&#x27;F&#x27;</span>)</span><br><span class="line">a + b</span><br></pre></td></tr></table></figure>
+<p>甚至我测试一个数组按 C 顺序，一个按 F 顺序，都可以。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = np.array([[ <span class="number">0.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>],</span><br><span class="line">              [<span class="number">10.0</span>, <span class="number">10.0</span>, <span class="number">10.0</span>],</span><br><span class="line">              [<span class="number">20.0</span>, <span class="number">20.0</span>, <span class="number">20.0</span>],</span><br><span class="line">              [<span class="number">30.0</span>, <span class="number">30.0</span>, <span class="number">30.0</span>]], order=<span class="string">&#x27;F&#x27;</span>)</span><br><span class="line">b = np.array([<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>])</span><br><span class="line">c = a + b</span><br><span class="line"><span class="built_in">print</span>(c)</span><br><span class="line"><span class="built_in">print</span>(c.flags[<span class="string">&#x27;F_CONTIGUOUS&#x27;</span>])</span><br></pre></td></tr></table></figure>
+<p>输出如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[[ 1.  2.  3.]</span><br><span class="line"> [11. 12. 13.]</span><br><span class="line"> [21. 22. 23.]</span><br><span class="line"> [31. 32. 33.]]</span><br><span class="line">True</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>内存顺序（C 还是 F）只影响数据在内存里的物理排布，不影响广播。</p>
+<p>那 <code>order</code> 在什么情况下才有影响？</p>
+<p><code>order</code> 只在两件事上有实质影响 ：</p>
+<p><strong>1. 性能 / 缓存局部性</strong>：NumPy 的 ufunc 底层是 C 循环，遍历顺序如果和内存布局匹配，缓存命中率高、速度快；不匹配则慢。但对 <code>a + b</code> 这种小规模运算，肉眼感知不到差别。</p>
+<p><strong>2. 某些就地操作（in-place）可能触发复制</strong>：NumPy 2.x 对内存布局不兼容的就地广播赋值会更严格，有时静默复制 。但你这里是 <code>a + b</code> 产生新数组，不是 <code>a += b</code> 这种就地写回，所以不涉及。</p>
+<blockquote>
+<p>💡 一句话：<strong>广播的合法性由 shape 决定，order 只影响底层遍历效率</strong>。两个数组一个 C、一个 F，只要 shape 兼容，运算就合法，结果也正确；NumPy 会通过各自的 stride 信息去正确的内存位置取数，不需要你干预 。</p>
+</blockquote>
+<p>所以你完全可以放心混用——在实际项目中，从 HDF5 文件读进来的 Fortran 顺序数组，和内存里默认的 C 顺序数组直接相加，是再常见不过的场景。</p>
+</blockquote>
+<p>广播提供了对两个数组进行外积（或其他任何外运算）的便捷方法。以下示例展示了两个一维数组的外加法运算：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = np.array([<span class="number">0.0</span>, <span class="number">10.0</span>, <span class="number">20.0</span>, <span class="number">30.0</span>])</span><br><span class="line">b = np.array([<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>])</span><br><span class="line">a.reshape(<span class="number">4</span>,<span class="number">1</span>) + b</span><br></pre></td></tr></table></figure>
+<p>输出为</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">array([[ 1.,  2.,  3.],</span><br><span class="line">       [11., 12., 13.],</span><br><span class="line">       [21., 22., 23.],</span><br><span class="line">       [31., 32., 33.]])</span><br></pre></td></tr></table></figure>
+<p><img src="3.png" /></p>
+<h1 id="参考资料">参考资料</h1>
+<ol type="1">
+<li>https://numpy.org/doc/2.0/user/basics.broadcasting.html</li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>win11报错应用程序控制策略已阻止此文件</title>
+    <url>/posts/4fb6c0f1/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>最近win11电脑频繁报错应用程序控制策略已阻止此文件，记录一下解决过程。</p>
+<span id="more"></span>
+<p>准确说，<strong>这不是普通的”Win11 问题”，而是 Windows 的应用程序控制策略（AppLocker / Windows Defender 应用程序控制 / 智能应用控制）主动拦截了 PyTorch 的 <code>shm.dll</code></strong>。错误码 4551 的本质是：文件物理存在、依赖齐全，但被系统安全机制判定为”不可信二进制”而拒绝加载。</p>
+<p>你这个情况在 Windows 11（尤其是 25H2 版本）上特别常见——微软把企业级的 Smart App Control 下沉到了家庭版/专业版，而 PyTorch 的 wheel 包未经 WHQL 签名，它的 DLL 会被当成”不受信任”拦截掉。</p>
+<h2 id="解决方案按推荐顺序从最安全到最强硬">🔧 解决方案（按推荐顺序，从最安全到最强硬）</h2>
+<h3 id="第一步解除文件锁定-加-windows-安全排除项最推荐零风险">第一步：解除文件锁定 + 加 Windows 安全排除项（最推荐，零风险）</h3>
+<p>Windows 对”从网络下载或从其他设备复制”的文件会打上标记，需要先解锁：</p>
+<ol type="1">
+<li><p><strong>解除 NTFS 锁定标记</strong>：
+以管理员身份打开 PowerShell，执行：
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">Unblock-File</span> <span class="literal">-Path</span> <span class="string">&quot;C:\software\miniconda\miniconda3\Lib\site-packages\torch\lib\shm.dll&quot;</span></span><br></pre></td></tr></table></figure>
+如果整个 torch 目录都被锁，可以对目录递归处理。</p></li>
+<li><p><strong>把 torch 目录加入 Windows 安全中心排除项</strong>：</p>
+<ul>
+<li>打开 <strong>设置 → 隐私和安全性 → Windows 安全中心 → 病毒和威胁防护</strong></li>
+<li>点击 <strong>管理设置</strong></li>
+<li>找到 <strong>添加或删除排除项 → 添加排除项 → 文件夹</strong></li>
+<li>选择：<code>C:\software\miniconda\miniconda3\Lib\site-packages\torch</code></li>
+</ul>
+<p>或者用 PowerShell 一键添加：
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">Add-MpPreference</span> <span class="literal">-ExclusionPath</span> <span class="string">&quot;C:\software\miniconda\miniconda3\Lib\site-packages\torch&quot;</span></span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h3 id="第二步关闭智能应用控制smart-app-control">第二步：关闭智能应用控制（Smart App Control）</h3>
+<p>如果第一步不行，大概率是 Win11 的 Smart App Control 在拦：</p>
+<ul>
+<li><strong>设置 → 隐私和安全性 → Windows 安全中心 → 应用和浏览器控制 → 智能应用控制设置</strong></li>
+<li>选择 <strong>关闭</strong></li>
+</ul>
+<blockquote>
+<p>⚠️ 注意：家庭版关闭后<strong>将无法重新启用</strong>，除非重置系统。如果你只是个人开发机，关掉无妨；如果是企业/学校电脑，走第四步。</p>
+</blockquote>
+<p>也可以用注册表强制关闭（管理员 PowerShell）：
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">reg add <span class="string">&quot;HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy&quot;</span> /v <span class="string">&quot;VerifiedAndReputablePolicyState&quot;</span> /t REG_DWORD /d <span class="number">0</span> /f</span><br></pre></td></tr></table></figure>
+重启后生效。</p>
+<blockquote>
+<p>⚠️ <strong>千万不要做的事</strong>：从网上随便下载 <code>shm.dll</code> 替换！PyTorch 的 DLL 必须从官方 wheel 包来，手动下载的 DLL 不仅版本不匹配，还可能带恶意代码。要修复就 <code>pip uninstall torch</code> 后重装。</p>
+</blockquote>
+<p>如果你试完第一步和第二步还是不行，把你的 Windows 具体版本号（设置 → 系统 → 关于 里看）和 <code>Get-CimInstance -ClassName Win32_DeviceGuard</code> 的输出发给我，我能更精准判断是哪一种策略在拦。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>shapeit4环境问题报错解决</title>
+    <url>/posts/2e5c9b85/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>记录一次因为环境问题（C++ 库 boost 1.85）导致的 shapit4 报错的问题的解决过程。</p>
+<span id="more"></span>
+<h1 id="问题">问题</h1>
+<p>运行 shapeit4 报错</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">shapeit4: error while loading shared libraries: libboost_iostreams.so.1.85.0: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
+<p>AI 说是没有 boost 1.85</p>
+<h1 id="临时环境重装-boost">临时环境重装 boost</h1>
+<p>在临时环境 zhouziwen_test 安装 boost ，这样哪怕崩了也没有啥损失。在主环境里要是崩了，或者盲目升级或降级可能会导致其他依赖 boost 的软件无法使用。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">激活你的环境</span></span><br><span class="line">conda activate zhouziwen_test</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装指定版本的 Boost（Conda Forge 有 1.85.0）</span></span><br><span class="line">conda install -c conda-forge boost=1.85.0</span><br></pre></td></tr></table></figure>
+<p>现在还没有下载成功。conda 解析环境失败，静默退出了。就没有下面的内容了。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda create -n shapeit4 -c bioconda shapeit4=4.2.2 python=3.10</span></span><br><span class="line">Collecting package metadata (current_repodata.json): done</span><br><span class="line">Solving environment: unsuccessful attempt using repodata from current_repodata.json, retrying with next repodata source.</span><br><span class="line">Collecting package metadata (repodata.json): done</span><br><span class="line">Solving environment: \ </span><br></pre></td></tr></table></figure>
+<p>如果上一步成功了，然后查看有没有这个共享库</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">ls $CONDA_PREFIX/lib/libboost_iostreams.so*</span><br></pre></td></tr></table></figure>
+<p>如果有的话，将这个路径加到共享库路径中</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">module purge </span><br><span class="line">export LD_LIBRARY_PATH=~/miniconda3/envs/zhouziwen_test/lib:$LD_LIBRARY_PATH</span><br><span class="line">export LD_LIBRARY_PATH=~/miniconda3/envs/zhouziwen/lib:$LD_LIBRARY_PATH</span><br><span class="line">conda activate zhouziwen</span><br></pre></td></tr></table></figure>
+<p>然后跑一下 shapeit4 看看</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">shapeit4</span><br></pre></td></tr></table></figure>
+<h1 id="最终解决重建一个shapeit的虚拟环境">最终解决：重建一个shapeit的虚拟环境</h1>
+<p>直接创建一个虚拟环境 （<strong>Conda 的求解进程被系统“静默终止”了</strong>，只能用 mamba ，mamba 很快 ）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mamba create -n shapeit4 -c conda-forge -c bioconda shapeit4=4.2.2</span><br></pre></td></tr></table></figure>
+<h1 id="经验">经验</h1>
+<h2 id="用好-mamba">用好 mamba</h2>
+<ol type="1">
+<li>conda 的 <strong>base 环境必须安装 mamba</strong> 。并且<code>base</code> 环境除了 <code>conda</code>、<code>mamba</code> 及其自身依赖外，<strong>不应安装任何其他软件包</strong>。</li>
+<li><code>base</code> 环境中严禁混用 conda 和 mamba 。在 <code>base</code> 环境中，只使用 <code>conda</code> 来安装或更新 <code>mamba</code> 本身</li>
+<li>对于你通过 <code>conda create</code> 或 <code>mamba create</code> 创建的所有其他环境（如 <code>shapeit4</code>），<code>conda</code> 和 <code>mamba</code> 的命令是<strong>完全等价且可互换的</strong>。可以<strong>混用</strong>，但是由于 mamba 更快，推荐统一使用 mamba 进行包的安装、更新和删除。</li>
+</ol>
+<h2 id="遇到环境问题怎么办">遇到环境问题怎么办</h2>
+<ol type="1">
+<li>最好新建一个虚拟环境来解决，或者也可以尝试在一个临时环境解决。就是不要在自己的工作的主环境来弄，崩了重新来麻烦。</li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
     <title>crossmap转基因组版本</title>
     <url>/posts/9df7ea16/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>crossmap 软件转基因组版本。</p>
@@ -17729,8 +18078,10 @@ emWeight=NULL)</p>
 <p>首先尝试使用 conda 安装，发现安装了 shapeit5 以后就没法安装 shapeit4 了（因为附属软件的版本冲突），但是在一个虚拟环境中安装成功了。</p>
 <p>手动编译安装教程参考<a href="https://zhuanlan.zhihu.com/p/87668128">shapeit4 安装</a>（通道 channels 需要有 <code>conda-forge</code> 和 <code>bioconda</code>）</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda search shapeit4</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda install shapeit4=4.2.2 <span class="comment"># 安装失败</span></span></span><br></pre></td></tr></table></figure>
+<p>直接创建一个虚拟环境 （<strong>Conda 的求解进程被系统“静默终止”了</strong>，只能用 mamba ，mamba 很快 ）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mamba create -n shapeit4 -c conda-forge -c bioconda shapeit4=4.2.2</span><br></pre></td></tr></table></figure>
 <p>安装完之后查看一下</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda list | grep <span class="string">&quot;shapeit&quot;</span></span></span><br><span class="line">shapeit4                  4.2.2 </span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda activate shapeit4</span><br><span class="line">shapeit4 --help</span><br></pre></td></tr></table></figure>
 <p>安装后的 shapeit4 在虚拟环境下面的目录</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> shapeit4</span></span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/envs/R4.1.0/bin/shapeit4</span><br></pre></td></tr></table></figure>
 <p>我尝试在 base 环境下回退版本失败，懒得卸载重装 conda 了，于是给上面的 shapeit4 创建一个软链接</p>
@@ -21130,6 +21481,30 @@ _{0} = $$</p>
 </blockquote>
 <p>个人倾向于使用 Miniconda</p>
 <h1 id="miniconda-安装">miniconda 安装</h1>
+<p><a href="https://docs.anaconda.net.cn/miniconda/install/#quick-command-line-install">官网</a> 安装指南如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">mkdir -p ~/miniconda3</span><br><span class="line">wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh</span><br><span class="line">bash ~/miniconda3/miniconda.sh</span><br></pre></td></tr></table></figure>
+<p>原本这里执行静默安装，但是我看这样安装不会加入 <code>.bashrc</code> 中的环境变量，还是手动安装好。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>执行效果</strong>：脚本会将 Miniconda 的所有文件解压到 <code>~/miniconda3</code>，并将其 <code>bin</code> 目录添加到当前 shell 的 <code>PATH</code>（但不会永久生效，需要后续初始化）。整个过程<strong>没有任何输出</strong>（除非出错），适合后台运行。</p>
+</blockquote>
+<h2 id="centos-7系统的做法">CentOS 7系统的做法</h2>
+<p>遭遇报错</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">bash ~/miniconda3/miniconda.sh</span></span><br><span class="line">Installer requires GLIBC &gt;=2.28, but system has 2.17.</span><br></pre></td></tr></table></figure>
+<p>问题根源：GLIBC 版本不兼容</p>
+<ul>
+<li><strong>你的系统</strong>：GLIBC 版本是 <strong>2.17</strong>。GLIBC（GNU C 库）是 Linux 系统的核心底层库，其版本与系统高度绑定。</li>
+<li><strong>新版 Miniconda</strong>：从某个版本开始，其安装程序要求 <strong>GLIBC &gt;= 2.28</strong>。</li>
+<li><strong>矛盾点</strong>：CentOS 7 的最高 GLIBC 版本就是 2.17，无法直接满足新版安装程序的需求。</li>
+</ul>
+<p>解决方案：安装旧版 Miniconda</p>
+<ol type="1">
+<li><p><strong>确定兼容版本</strong>：官方建议，选择 <strong>2023 年及以前</strong>的版本。具体来说，<code>Miniconda3-py39_23.5.2-0</code> 是一个被广泛验证可行的版本。</p></li>
+<li><p><strong>执行安装命令</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 1. 下载兼容的旧版安装脚本</span></span><br><span class="line">wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.5.2-0-Linux-x86_64.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 执行安装 (注意：将路径替换为你实际的安装目录)</span></span><br><span class="line">bash Miniconda3-py39_23.5.2-0-Linux-x86_64.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. (可选) 删除安装脚本</span></span><br><span class="line"><span class="comment"># rm Miniconda3-py39_23.5.2-0-Linux-x86_64.sh</span></span><br><span class="line"><span class="built_in">mv</span> Miniconda3-py39_23.5.2-0-Linux-x86_64.sh ~/miniconda3</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>这样安装的 Miniconda 基础环境是 Python 3.9，但你后续完全可以创建 Python 3.10、3.11 等更高版本的虚拟环境，不受任何影响。</p>
+<h2 id="我之前的做法">我之前的做法</h2>
 <p>先下载一个 bash 脚本</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
 <p>如果 <code>wget</code> 不行，可以尝试使用 <code>curl</code> 进行下载，或者手动下载然后上传到服务器</p>
@@ -21145,9 +21520,11 @@ _{0} = $$</p>
 <p>安装完成后刷新一下环境变了，通过查看 conda 版本确定是否安装成功。</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">source ~/.bashrc</span><br><span class="line">conda --version</span><br></pre></td></tr></table></figure>
 <h1 id="添加-channel">添加 channel</h1>
-<p>清华大学的 Conda 镜像源包含了许多常用的包和工具，您可以通过以下命令将其添加为 Conda 的默认 Channel。</p>
-<p>执行以下命令将清华镜像源添加到 Conda 配置中：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 1. 生成 .condarc 配置文件（若不存在）</span><br><span class="line">conda config --set show_channel_urls yes</span><br><span class="line"></span><br><span class="line"># 2. 添加清华镜像源</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/</span><br><span class="line"></span><br><span class="line"># 3. 设置优先级（可选）</span><br><span class="line">conda config --set channel_priority flexible</span><br></pre></td></tr></table></figure>
+<p><code>defaults</code> 和 <code>conda-forge</code> 是 Conda 生态中最核心的两个包通道（Channel），你可以把它们理解为 <strong>“软件源”或“应用商店”</strong>。</p>
+<p>它们最核心的区别在于：<strong>defaults 是 Anaconda 公司官方维护的“稳定、精选”源；而 conda-forge 是社区驱动的、包更多、更新更快的“社区宝库”</strong>。</p>
+<p>二者可能不兼容，因此我这里去除了 <code>defaults</code> ，只保留 <code>conda-forge</code> 。</p>
+<p>为了避免以后每次安装都要敲 <code>-c conda-forge -c bioconda</code>，你可以在登录节点执行一次永久配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 清空现有频道列表</span><br><span class="line"># 如果第一次运行会报错，采用第二行命令</span><br><span class="line">conda config --remove-key channels</span><br><span class="line"># conda config --set channels &quot;&quot;</span><br><span class="line"></span><br><span class="line"># 1. 添加 conda-forge 并设为最高优先级（必须最先添加，因为越后添加优先级越高）</span><br><span class="line">conda config --add channels bioconda      # 中间</span><br><span class="line">conda config --add channels conda-forge   # 最前面（最高优先级）</span><br><span class="line"></span><br><span class="line"># 2. 开启严格优先级（Strict）——这是关键，能彻底避免此类冲突</span><br><span class="line">conda config --set channel_priority strict</span><br><span class="line"></span><br><span class="line"># 3. 必须手动删掉 defaults，不然我试过了 defaults 一直在</span><br><span class="line">conda config --remove channels defaults     # 有就删，没有会报 not in channels 可忽略</span><br><span class="line">conda config --show channels # 确认删除</span><br><span class="line"></span><br><span class="line"># 4. （可选但强烈推荐）切换至 libmamba 求解器以提升速度</span><br><span class="line"># 这就和 mamba 完全一样了，mamba 内核也是libmamba</span><br><span class="line">conda install -n base conda-libmamba-solver</span><br><span class="line">conda config --set solver libmamba</span><br><span class="line">conda config --show solver # 确认默认求解器</span><br></pre></td></tr></table></figure>
 <p>通过运行以下命令来查看当前 Conda 配置的 Channels：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">conda config --show channels</span><br></pre></td></tr></table></figure>
 <p>通过下面的命令可以一键删除所有已添加的频道（包括镜像源），恢复默认的 <code>defaults</code> 频道。</p>
@@ -21201,6 +21578,12 @@ _{0} = $$</p>
 </tr>
 </tbody>
 </table>
+<h1 id="安装包时指定-channels">安装包时指定 channels</h1>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ conda install scipy --channel conda-forge --channel bioconda</span><br></pre></td></tr></table></figure>
+<p>优先级从左到右递减</p>
+<blockquote>
+<p>Priority decreases from left to right - the first argument is higher priority than the second.</p>
+</blockquote>
 <h1 id="更新-python-其它软件通用">更新 python （其它软件通用）</h1>
 <p>安装 conda 会自带 python ，应该是 conda 能支持的最新的</p>
 <ol type="1">

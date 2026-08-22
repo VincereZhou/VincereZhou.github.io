@@ -160,8 +160,10 @@
 <p>首先尝试使用 conda 安装，发现安装了 shapeit5 以后就没法安装 shapeit4 了（因为附属软件的版本冲突），但是在一个虚拟环境中安装成功了。</p>
 <p>手动编译安装教程参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/87668128">shapeit4 安装</a>（通道 channels 需要有 <code>conda-forge</code> 和 <code>bioconda</code>）</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda search shapeit4</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda install shapeit4=4.2.2 <span class="comment"># 安装失败</span></span></span><br></pre></td></tr></table></figure>
+<p>直接创建一个虚拟环境 （<strong>Conda 的求解进程被系统“静默终止”了</strong>，只能用 mamba ，mamba 很快 ）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mamba create -n shapeit4 -c conda-forge -c bioconda shapeit4=4.2.2</span><br></pre></td></tr></table></figure>
 <p>安装完之后查看一下</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda list | grep <span class="string">&quot;shapeit&quot;</span></span></span><br><span class="line">shapeit4                  4.2.2 </span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda activate shapeit4</span><br><span class="line">shapeit4 --help</span><br></pre></td></tr></table></figure>
 <p>安装后的 shapeit4 在虚拟环境下面的目录</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> shapeit4</span></span><br><span class="line">/mnt/data/zhouziwen/lib/miniconda3/envs/R4.1.0/bin/shapeit4</span><br></pre></td></tr></table></figure>
 <p>我尝试在 base 环境下回退版本失败，懒得卸载重装 conda 了，于是给上面的 shapeit4 创建一个软链接</p>
