@@ -1635,14 +1635,14 @@ d(A, B) = \frac{1}{N} \sum_{a \in A} \min_{b \in B} ||a - b||
 </ul>
 <p><strong>具体计算过程</strong>：</p>
 <ol type="1">
-<li>假设输入一个 48 维的向量 <span class="math display">\[X\]</span>（形状 [48]）（或后续阶段的 96、192、384）。</li>
-<li>计算 Q、K、V 时，会使用三个矩阵 <span class="math display">\[W_Q, W_K, W_V\]</span>（形状为 [48, 768]）进行乘法：
+<li>假设输入一个 48 维的向量 <span class="math inline">\(X\)</span>（形状 [48]）（或后续阶段的 96、192、384）。</li>
+<li>计算 Q、K、V 时，会使用三个矩阵 <span class="math inline">\(W_Q, W_K, W_V\)</span>（形状为 [48, 768]）进行乘法：
 <ul>
-<li><span class="math display">\[Q = X \cdot W_Q\]</span>，得到形状 [768]。</li>
+<li><span class="math inline">\(Q = X \cdot W_Q\)</span>，得到形状 [768]。</li>
 <li>同理 K、V 也变为 768 维。</li>
 </ul></li>
-<li>在 768 维空间里计算点积注意力（<span class="math display">\[Q \cdot K^T\]</span>）。</li>
-<li>注意力结果会通过另一个线性层 <span class="math display">\[W_O\]</span>（形状 [768, 48]），映射回 48 维，作为该块的输出。</li>
+<li>在 768 维空间里计算点积注意力（<span class="math inline">\(Q \cdot K^T\)</span>）。</li>
+<li>注意力结果会通过另一个线性层 <span class="math inline">\(W_O\)</span>（形状 [768, 48]），映射回 48 维，作为该块的输出。</li>
 </ol>
 <h2 id="数据集与模型集成dataset-and-model-ensembling">3.4 数据集与模型集成（Dataset and Model Ensembling）</h2>
 <p>BraTS 挑战赛旨在通过提供带有医生标注的体素级真实标签的 3D MRI 数据集，来评估脑肿瘤语义分割的最先进方法 [6, 29, 5, 3, 4]。BraTS 2021 挑战赛的训练数据集包含 <strong>1251 例</strong>受试者，每例包含四种 3D MRI 模态：a) 原生 T1，b) 增强后 T1 加权（T1Gd），c) T2 加权（T2），以及 d) T2 液体衰减反转恢复（T2-FLAIR）。这些数据经过刚体对齐，并重采样至 <span class="math inline">\(1 \times 1 \times 1\)</span> mm 的各向同性分辨率，且已完成去颅骨处理。输入图像尺寸为 <span class="math inline">\(240 \times 240 \times 155\)</span>。数据收集自多个机构，使用多种 MRI 扫描仪。</p>
