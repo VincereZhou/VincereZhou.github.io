@@ -68,7 +68,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.8k</span>
+            <span class="post-count">1.9k</span>
         </span>
     </span>
 
@@ -137,11 +137,13 @@
 <p>论文里，他们将原始图像从 <code>1024×1024</code> （假设对应某个体素间距）降为 <code>256×256×128</code>，这就是典型的4倍下采样。</p>
 <p>在代码层面，有两种等效的实现思路：</p>
 <ul>
-<li><p><strong>思路A（通过间距驱动）</strong>：如果你想让图像缩小4倍，就把新间距设置为旧间距的4倍。
-[
- =  =  = 256
-]</p></li>
-<li><p><strong>思路B（直接指定尺寸）</strong>：在ITK中，你也可以直接通过 <code>SetSize([256, 256, 128])</code> 强行指定输出尺寸。此时，ITK会自动反算出一个新的间距，使物理范围不变，这也叫下采样。</p></li>
+<li><strong>思路A（通过间距驱动）</strong>：如果你想让图像缩小4倍，就把新间距设置为旧间距的4倍。</li>
+</ul>
+<p><span class="math display">\[
+\text{新尺寸} = \frac{\text{旧尺寸} \times \text{旧间距}}{\text{新间距}} = \frac{1024 \times S}{4S} = 256
+\]</span></p>
+<ul>
+<li><strong>思路B（直接指定尺寸）</strong>：在ITK中，你也可以直接通过 <code>SetSize([256, 256, 128])</code> 强行指定输出尺寸。此时，ITK会自动反算出一个新的间距，使物理范围不变，这也叫下采样。</li>
 </ul>
 <hr />
 <h3 id="严格意义上的下采样其实包含一步预处理防锯齿">2. 严格意义上的“下采样”其实包含一步预处理（防锯齿）</h3>
