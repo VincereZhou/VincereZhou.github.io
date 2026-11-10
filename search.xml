@@ -856,14 +856,16 @@
 <p>输入文件2：6a参考基因组 fasta ，格式 fa.gz
 输入文件3：7b参考基因组 fasta ，格式 fa.gz</p>
 <p>输出文件： 输入文件1后面增加4列 ref_6a， alt_6a 和 ref_7b， alt_7b</p>
-<p>脚本逻辑，以 6a 为例，7b同理
-1. 如果 SNP_6a 为空，则 ref_6a 和 val_6a 均为空，continue
-2. 如果 SNP_6a 不为空，提取6a参考基因组相应位点(SNP_6a)的碱基，即 ref_6a，下面开始提取 val_6a
+<p>脚本逻辑，以 6a 为例，7b同理</p>
+<ol type="1">
+<li>如果 SNP_6a 为空，则 ref_6a 和 val_6a 均为空，continue</li>
+<li>如果 SNP_6a 不为空，提取6a参考基因组相应位点(SNP_6a)的碱基，即 ref_6a，下面开始提取 val_6a
 2.1 优先比较相同参考基因组的2个碱基，如果 geno_alleles_6a 不为空字符串，提取geno_alleles_6a的两个碱基，与 ref_6a 比较。如果 ref_6a 在这两个碱基中，则另一个为 val_6a ；否则 val_6a 为空字符串
 2.2 如果 geno_alleles_6a 为空但 geno_alleles_7b 不为空：
 2.2.1 提取 geno_alleles_7b 的两个碱基，与 ref_6a 比较。如果 ref_6a 在这两个碱基中，则另一个为 val_6a
 2.2.2 不然对 geno_alleles_7b 的两个碱基进行翻转，再次比较，如果 ref_6a 在这两个碱基中，则另一个为 val_6a<br />
-2.2.3 还不行则 val_6a 为空</p>
+2.2.3 还不行则 val_6a 为空</li>
+</ol>
 <p>注意：fasta 文件较大，请使用专业包来从fasta文件中提取ref碱基，提高效率！</p>
 <h1 id="ai答复">AI答复</h1>
 <p>下面给你一个<strong>用 pysam 的 Python 脚本</strong>。<code>pysam.FastaFile</code> 底层是 htslib/samtools faidx，支持对大参考基因组做<strong>随机访问</strong>，比反复读整个 fasta 快很多。</p>
