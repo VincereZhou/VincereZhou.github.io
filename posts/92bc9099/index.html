@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    深度学习训练模型时确认GPU饱和 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-深度学习训练模型时确认GPU饱和"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  深度学习训练模型时确认GPU饱和
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/92bc9099/" class="article-date">
+  <time datetime="2026-11-10T06:31:43.000Z" itemprop="datePublished">2026-11-10</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.7k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">6 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>训练模型时一个重点的点是确保GPU饱和，没有”偷懒“。</p>
+<span id="more"></span>
+<h1 id="确认gpu饱和的一般做法">确认GPU饱和的一般做法</h1>
+<p>一旦训练开始，我们要确保我们正按预期使用手头的计算资源。一个简单的方法来判断瓶颈是在数据加载还是计算上，是等待脚本开始训练（寻找类似 <code>E1 Training 16/7750, done at...</code> 的输出）几秒钟后，然后同时检查 <code>top</code> 和 <code>nvidia-smi</code>：</p>
+<ul>
+<li>如果 8 个 Python 工作进程（对应 <code>num_workers</code> 参数）消耗 &gt;80% 的 CPU，那么缓存可能需要准备（我们知道这里是因为我们确保了这个项目的实现中没有 CPU 瓶颈；这通常并不成立）。</li>
+<li>如果 <code>nvidia-smi</code> 报告 <code>GPU-Util</code> &gt; 80%，说明你正在饱和你的 GPU。</li>
+</ul>
+<p>我们的意图是<strong>让 GPU 饱和</strong>；我们希望尽可能多地利用它的计算能力来快速完成 epoch。单个 NVIDIA GTX 1080 Ti 应该在 15 分钟内完成一个 epoch。由于我们的模型相对简单，CPU 预处理不需要太多，CPU 不太可能成为瓶颈。当处理具有更大深度（或更多所需计算）的模型时，处理每个批次所需的时间会更长，这会增加我们在 GPU 工作用完之前可以进行的 CPU 处理量，从而让 GPU 持续有活干。</p>
+<blockquote>
+<p>这段话其实揭示了深度学习训练中一个非常经典的<strong>流水线（Pipeline）瓶颈问题</strong>：</p>
+<h4 id="什么是gpu-饱和-gpu-saturated">1. 什么是“GPU 饱和 (GPU Saturated)”？</h4>
+<p>在理想状态下，GPU 应该 100% 都在做矩阵乘法等计算。但在实际训练中，GPU 经常需要“等” CPU：</p>
+<ul>
+<li><strong>CPU 的工作</strong>：从硬盘读取图片、解码、做数据增强（裁剪、翻转等）、转成 Tensor。</li>
+<li><strong>GPU 的工作</strong>：接收 Tensor，进行前向传播和反向传播。
+如果 CPU 处理数据的速度 <strong>慢于</strong> GPU 消耗数据的速度，GPU 就会停下来等 CPU，这时候 GPU 的利用率就会掉到 50% 甚至更低，这就是<strong>没有饱和</strong>。</li>
+</ul>
+<h4 id="为什么简单模型容易遇到-cpu-瓶颈">2. 为什么“简单模型”容易遇到 CPU 瓶颈？</h4>
+<p>文中提到 <em>“Since our model is relatively simple…”</em>
+如果模型很小（比如只有几层全连接），GPU 可能 1 毫秒就算完一个 batch。如果此时 CPU 预处理需要 2 毫秒，GPU 就有 1 毫秒在发呆。模型越简单，GPU 算得越快，对 CPU 的预处理速度要求就越高。</p>
+<h4 id="为什么复杂模型反而不容易遇到-cpu-瓶颈">3. 为什么“复杂模型”反而不容易遇到 CPU 瓶颈？</h4>
+<p>这是这段话最精彩的反直觉部分：<em>“When working with models with greater depth…”</em>
+如果你换了一个超大模型（比如 ResNet-152 或 Transformer），GPU 算一个 batch 需要 100 毫秒。
+这时候，哪怕 CPU 预处理还是需要 2 毫秒，在这 100 毫秒的漫长等待期里，CPU 早就把接下来几十个 batch 的数据都准备好了。<strong>GPU 越慢，给 CPU 留出的“准备时间”就越长</strong>，CPU 反而不容易成为瓶颈了。</p>
+</blockquote>
+<h2 id="国产显卡怎么查看gpu使用率">国产显卡怎么查看GPU使用率</h2>
+<p>国产卡/异构 AI 加速卡<strong>没有统一的 <code>nvidia-smi</code></strong>，每家驱动栈自带一套 SMI 工具。</p>
+<p>这里我用的是海光的DCU，因此主要关注它的。</p>
+<h3 id="华为昇腾-ascend-npu-npu-smi">华为昇腾 Ascend NPU → <code>npu-smi</code></h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">npu-smi info                       <span class="comment"># 总览：型号/健康/温度/功耗/HBM/AI Core 利用率</span></span><br><span class="line">watch -n 1 npu-smi info            <span class="comment"># 刷利用率</span></span><br><span class="line">npu-smi info -t usages -i 0        <span class="comment"># 单卡细分：HBM 用量、AICore/AIVector/AICPU 利用率、带宽</span></span><br><span class="line">npu-smi info -t proc   -i 0        <span class="comment"># 谁在占卡</span></span><br><span class="line">npu-smi info -t common -i 0        <span class="comment"># 温度/ freq/ 健康</span></span><br></pre></td></tr></table></figure>
+<p>注意昇腾把“显存”叫 <strong>HBM Usage</strong>、“算力”拆成 <strong>AICore/AIVector/AICPU Usage</strong>、还有 <strong>HBM Bandwidth Usage</strong>，不是单个 GPU-Util 。深一点用 <code>msprof</code> 做 kernel 级 profiler 。</p>
+<h3 id="寒武纪-mlu-cnmon">寒武纪 MLU → <code>cnmon</code></h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cnmon                              <span class="comment"># 总览，输出几乎照搬 nvidia-smi 的列</span></span><br><span class="line">cnmon -c 0                         <span class="comment"># 指定卡</span></span><br><span class="line">cnmon -r -t 1000                   <span class="comment"># 每 1s 刷一次</span></span><br><span class="line">cnmon info -m                      <span class="comment"># 显存</span></span><br><span class="line">cnmon proc                         <span class="comment"># 进程级显存</span></span><br></pre></td></tr></table></figure>
+<p><code>Utilization(%)</code> 就是 MLU 算力利用率、<code>Memory Usage</code> 是显存，训练时常驻看这俩 。</p>
+<h3 id="海光-dcu-amd-系-hy-smi-rocm-smi">海光 DCU / AMD 系 → <code>hy-smi</code> / <code>rocm-smi</code></h3>
+<p>海光 DCU 是 ROCm 分支，工具名可能叫 <code>hy-smi</code>（路径常是 <code>/opt/hyhal/bin/hy-smi</code>）或 <code>dcu-smi</code> ：
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hy-smi                <span class="comment"># 类 nvidia-smi 总览</span></span><br><span class="line">hy-smi -u --showhcuutil --showmemuse -P -t   <span class="comment"># 利用率/显存/功耗/温度</span></span><br><span class="line">hy-smi --showpids     <span class="comment"># 进程</span></span><br><span class="line">watch -n 1 hy-smi  <span class="comment"># 每隔1秒刷新一次</span></span><br></pre></td></tr></table></figure>
+纯 AMD/ROCm 卡用 <code>rocm-smi -u --showmemuse --showpids</code> 。</p>
+<p>海光 DCU 里“GPU”被叫成 <strong>HCU（Hygon Compute Unit）</strong>，所以 <code>hy-smi</code> 概览里 <code>HCU%</code> 就是你要的“显卡利用率”，不是 <code>VRAM%</code>。判断训练饱不饱和，盯 <strong>HCU% / CU 占用 + 功耗 + 显存</strong> 这三组，别被显存占满骗了。</p>
+<h4 id="概览里先认列默认-hy-smi-输出">概览里先认列（默认 <code>hy-smi</code> 输出）</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">HCU  Temp  AvgPwr  Perf  PwrCap  VRAM%  HCU%  Mode</span><br><span class="line">0    61C   108W    auto  400W    87%    92%   Normal</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>HCU%</strong>：计算单元活跃率，等价于 N 卡 GPU-Util，训练饱和看它</li>
+<li><strong>VRAM%</strong>：显存占用率，占满只代表仓库大、不代表在算</li>
+<li><strong>AvgPwr / PwrCap</strong>：实时功耗 / 功耗上限；饱和时功耗会顶到比较高、不会一直躺平在百瓦级</li>
+<li><strong>Temp / Perf</strong>：温度、自动调频档，长期低温低功耗 + 低 HCU% = 没吃饱</li>
+</ul>
+<h4 id="训练时怎么盯饱和度可抄命令">训练时怎么盯饱和度（可抄命令）</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">watch -n1 hy-smi                 <span class="comment"># 概览，看 HCU% 是不是贴 80–95%</span></span><br><span class="line">hy-smi -u --showhcuutil --showcuutil   <span class="comment"># HCU 活跃时间占比 + CU(波前)占用率</span></span><br><span class="line">hy-smi --showmemuse --showmemavailable <span class="comment"># 显存用了多少、还剩多少</span></span><br><span class="line">hy-smi --showpids               <span class="comment"># 哪些进程在吃这张卡</span></span><br><span class="line"><span class="comment"># 滚动采样单卡 利用率+功耗，写日志</span></span><br><span class="line">hy-smi -idmon 0 -sdmon pu -ddmon 1 -fdmon hcu_train.log</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>--showhcuutil</code>：HCU 在采样窗内干活的时间占比，最像 N 卡 util</li>
+<li><code>--showcuutil</code>：CU 占用 / 波前占用率，更深一层看 SIMD 宽利用够不够</li>
+</ul>
+<h2 id="怎么判饱不饱和">怎么判“饱不饱和”</h2>
+<ul>
+<li><strong>HCU% 稳定 80%+ 且 AvgPwr 接近该卡 TDP 的 70–90%、VRAM 稳住不抖</strong> → 卡在算，饱和</li>
+<li><strong>HCU% 忽高忽低、AvgPwr 起不来、但 VRAM 占着</strong> → 在等数据，瓶颈在 CPU 预处理 / DataLoader / 缓存没接好，不是 DCU 算不动——正好接你前面 LunaDataset 那个语境</li>
+<li><strong>VRAM% 90%+ 但 HCU% 接近 0、且显存曲线来回抖</strong> → 显存碎碎念 / 频繁申请释放，不是计算饱和</li>
+<li>小模型大 batch 还喂不饱 HCU% → 提高 batch / 叠 AUG / 把 <code>num_workers</code> 拉起来，让 CPU 别拖后腿</li>
+</ul>
+<blockquote>
+<p>经验线：迁移/训练文里把 <strong>DCU(HCU) Util &gt;80%</strong> 当计算饱和参考，但别死磕 95%；HCU% 能稳在 80 上下、功耗温度随负载走，就算吃满了。真要算子级看哪段 kernel 空转，用 DTK 自带的 <code>rocprof --stats</code> 扒 CSV。</p>
+</blockquote>
+<p>如果你跑的是多卡 DDP，每张卡的 HCU% 要分开看，<code>hy-smi -idmon 0,1,2,3 -sdmon u</code> 把多卡 util 同屏滚出来，某张卡掉到 30% 其余 90% 就是通信/切分不均。</p>
+<h3 id="摩尔线程-壁仞-昆仑芯-其他">摩尔线程 / 壁仞 / 昆仑芯 / 其他</h3>
+<ul>
+<li>摩尔线程 MUSA → <code>mthreads-gmi</code></li>
+<li>壁仞 → <code>birensmi</code></li>
+<li>百度昆仑 XPU → <code>xpu-smi</code></li>
+<li>这类卡参数各走各的，但一般都有 <code>info / -i 0 / watch</code> 式用法，没文档就 <code>-h</code> 看子命令。</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/ba80fddd/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            transformer论文学习
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/d8eea808/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">numpy中axis参数如何理解</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    记录一下从fasta提取ref碱基和比对提取alt碱基的过程 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-记录一下从fasta提取ref碱基和比对提取alt碱基的过程"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  记录一下从fasta提取ref碱基和比对提取alt碱基的过程
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/95f9d788/" class="article-date">
+  <time datetime="2026-11-10T07:08:43.000Z" itemprop="datePublished">2026-11-10</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">6 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>记录一下这个过程，后续可以复用。</p>
+<span id="more"></span>
+<h1 id="需求">需求</h1>
+<p>写个脚本，提取2个参考基因组 6a 和 7b 的 ref 和 alt 碱基
+输入文件1格式：前两列的SNP名称均为 chrom_position ，分别是 6a 和 7b 的SNP (chrom_pos, 1_index)，隔，空字符串表示缺失。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SNP_6a	SNP_7b	geno_alleles_6a	geno_alleles_7b</span><br><span class="line">10_11127142	10_10700428	T/C	T/C</span><br><span class="line">10_13026587	10_12598321	A/G	A/G</span><br><span class="line">10_12625800	10_12196013		A/G</span><br><span class="line">10_12678847	10_12249356	A/G	A/G</span><br></pre></td></tr></table></figure>
+<p>输入文件2：6a参考基因组 fasta ，格式 fa.gz
+输入文件3：7b参考基因组 fasta ，格式 fa.gz</p>
+<p>输出文件： 输入文件1后面增加4列 ref_6a， alt_6a 和 ref_7b， alt_7b</p>
+<p>脚本逻辑，以 6a 为例，7b同理
+1. 如果 SNP_6a 为空，则 ref_6a 和 val_6a 均为空，continue
+2. 如果 SNP_6a 不为空，提取6a参考基因组相应位点(SNP_6a)的碱基，即 ref_6a，下面开始提取 val_6a
+2.1 优先比较相同参考基因组的2个碱基，如果 geno_alleles_6a 不为空字符串，提取geno_alleles_6a的两个碱基，与 ref_6a 比较。如果 ref_6a 在这两个碱基中，则另一个为 val_6a ；否则 val_6a 为空字符串
+2.2 如果 geno_alleles_6a 为空但 geno_alleles_7b 不为空：
+2.2.1 提取 geno_alleles_7b 的两个碱基，与 ref_6a 比较。如果 ref_6a 在这两个碱基中，则另一个为 val_6a
+2.2.2 不然对 geno_alleles_7b 的两个碱基进行翻转，再次比较，如果 ref_6a 在这两个碱基中，则另一个为 val_6a<br />
+2.2.3 还不行则 val_6a 为空</p>
+<p>注意：fasta 文件较大，请使用专业包来从fasta文件中提取ref碱基，提高效率！</p>
+<h1 id="ai答复">AI答复</h1>
+<p>下面给你一个<strong>用 pysam 的 Python 脚本</strong>。<code>pysam.FastaFile</code> 底层是 htslib/samtools faidx，支持对大参考基因组做<strong>随机访问</strong>，比反复读整个 fasta 快很多。</p>
+<hr />
+<h2 id="一坐标说明">一、坐标说明</h2>
+<p><code>snp_id = chrom_position</code>，1-based。</p>
+<p>pysam 里：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fa.fetch(chrom, pos-1, pos)   # 取 1-based pos 这一位</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="二脚本add_ref_alt.py">二、脚本：<code>add_ref_alt.py</code></h2>
+<p>我略微调整了一点</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> pysam</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">parse_alleles</span>(<span class="params">s</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;&#x27;T/C&#x27; -&gt; [&#x27;T&#x27;,&#x27;C&#x27;]；空/非法返回 []&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> s <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> []</span><br><span class="line">    s = s.strip()</span><br><span class="line">    <span class="keyword">if</span> s == <span class="string">&quot;&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> []</span><br><span class="line">    parts = s.split(<span class="string">&quot;/&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(parts) != <span class="number">2</span>:</span><br><span class="line">        <span class="keyword">return</span> []</span><br><span class="line">    a, b = parts[<span class="number">0</span>].strip(), parts[<span class="number">1</span>].strip()</span><br><span class="line">    <span class="keyword">if</span> a == <span class="string">&quot;&quot;</span> <span class="keyword">or</span> b == <span class="string">&quot;&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> []</span><br><span class="line">    <span class="keyword">return</span> [a, b]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pick_alt</span>(<span class="params">ref, alleles</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    给定 ref 和两个等位基因 alleles=[a,b]</span></span><br><span class="line"><span class="string">    如果 ref 在 alleles 中，返回另一个；否则返回 &#x27;&#x27;</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> ref <span class="keyword">in</span> alleles:</span><br><span class="line">        <span class="keyword">for</span> a <span class="keyword">in</span> alleles:</span><br><span class="line">            <span class="keyword">if</span> a != ref:</span><br><span class="line">                <span class="keyword">return</span> a</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">revcomp</span>(<span class="params">s</span>):</span><br><span class="line">    tbl = <span class="built_in">str</span>.maketrans(<span class="string">&quot;ACGTacgt&quot;</span>, <span class="string">&quot;TGCAtgca&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> s.translate(tbl)[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_ref</span>(<span class="params">fa, snp_id</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    snp_id = chrom_pos (1-based)</span></span><br><span class="line"><span class="string">    返回大写 ref 碱基；解析失败返回 &#x27;&#x27;</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> snp_id <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    snp_id = snp_id.strip()</span><br><span class="line">    <span class="keyword">if</span> snp_id == <span class="string">&quot;&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    chrom, _, pos = snp_id.partition(<span class="string">&quot;_&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> pos == <span class="string">&quot;&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        pos = <span class="built_in">int</span>(pos)</span><br><span class="line">    <span class="keyword">except</span> ValueError:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        base = fa.fetch(chrom, pos - <span class="number">1</span>, pos) <span class="comment"># 0-based 半开区间 [start, end)</span></span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> base.upper()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">resolve_alt</span>(<span class="params">fa, snp_id, geno_same, geno_other</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    以 6a 为例：</span></span><br><span class="line"><span class="string">    - ref 来自 6a 参考基因组</span></span><br><span class="line"><span class="string">    - 优先用 geno_alleles_6a</span></span><br><span class="line"><span class="string">    - 没有则用 geno_alleles_7b，原方向不行就翻转后再比</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    ref = get_ref(fa, snp_id)</span><br><span class="line">    <span class="keyword">if</span> ref == <span class="string">&quot;&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    alleles_same = parse_alleles(geno_same)</span><br><span class="line">    alleles_other = parse_alleles(geno_other)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2.1 同参考基因组有 alleles</span></span><br><span class="line">    <span class="keyword">if</span> alleles_same:</span><br><span class="line">        alt = pick_alt(ref, alleles_same)</span><br><span class="line">        <span class="keyword">return</span> ref, alt</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2.2 同参考基因组为空，用另一个基因组的 alleles</span></span><br><span class="line">    <span class="keyword">if</span> alleles_other:</span><br><span class="line">        alt = pick_alt(ref, alleles_other)</span><br><span class="line">        <span class="keyword">if</span> alt != <span class="string">&quot;&quot;</span>:</span><br><span class="line">            <span class="keyword">return</span> ref, alt</span><br><span class="line">        <span class="comment"># 2.2.2 翻转后再比</span></span><br><span class="line">        alt = pick_alt(ref, [revcomp(a) <span class="keyword">for</span> a <span class="keyword">in</span> alleles_other])</span><br><span class="line">        <span class="keyword">return</span> ref, alt</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 都没有</span></span><br><span class="line">    <span class="keyword">return</span> ref, <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>(<span class="params">in_file, fa6a_path, fa7b_path, out_file</span>):</span><br><span class="line">    fa6a = pysam.FastaFile(fa6a_path)</span><br><span class="line">    fa7b = pysam.FastaFile(fa7b_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(in_file) <span class="keyword">as</span> fin, <span class="built_in">open</span>(out_file, <span class="string">&quot;w&quot;</span>) <span class="keyword">as</span> fout:</span><br><span class="line">        header = fin.readline().rstrip(<span class="string">&quot;\n&quot;</span>).split(<span class="string">&quot;\t&quot;</span>)</span><br><span class="line">        <span class="comment"># 原表头 + 4 列</span></span><br><span class="line">        fout.write(<span class="string">&quot;\t&quot;</span>.join(header + [<span class="string">&quot;ref_6a&quot;</span>, <span class="string">&quot;alt_6a&quot;</span>, <span class="string">&quot;ref_7b&quot;</span>, <span class="string">&quot;alt_7b&quot;</span>]) + <span class="string">&quot;\n&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        j = <span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> fin:</span><br><span class="line">            j += <span class="number">1</span></span><br><span class="line">            line = line.rstrip(<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> line == <span class="string">&quot;&quot;</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            cols = line.split(<span class="string">&quot;\t&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 防止列数不足</span></span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(cols) &lt; <span class="number">4</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Error: <span class="subst">&#123;j&#125;</span> row in <span class="subst">&#123;in_file&#125;</span> has not 4 columns&quot;</span>, file=sys.stderr)</span><br><span class="line">                sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">            snp_6a, snp_7b, geno_6a, geno_7b = cols[<span class="number">0</span>], cols[<span class="number">1</span>], cols[<span class="number">2</span>], cols[<span class="number">3</span>]</span><br><span class="line"></span><br><span class="line">            <span class="comment"># ---- 6a ----</span></span><br><span class="line">            <span class="keyword">if</span> snp_6a.strip() == <span class="string">&quot;&quot;</span>:</span><br><span class="line">                ref_6a, alt_6a = <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                ref_6a, alt_6a = resolve_alt(fa6a, snp_6a, geno_6a, geno_7b)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># ---- 7b ----</span></span><br><span class="line">            <span class="keyword">if</span> snp_7b.strip() == <span class="string">&quot;&quot;</span>:</span><br><span class="line">                ref_7b, alt_7b = <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                ref_7b, alt_7b = resolve_alt(fa7b, snp_7b, geno_7b, geno_6a)</span><br><span class="line"></span><br><span class="line">            fout.write(</span><br><span class="line">                <span class="string">&quot;\t&quot;</span>.join(cols)</span><br><span class="line">                + <span class="string">&quot;\t&quot;</span> + ref_6a</span><br><span class="line">                + <span class="string">&quot;\t&quot;</span> + alt_6a</span><br><span class="line">                + <span class="string">&quot;\t&quot;</span> + ref_7b</span><br><span class="line">                + <span class="string">&quot;\t&quot;</span> + alt_7b</span><br><span class="line">                + <span class="string">&quot;\n&quot;</span></span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">    fa6a.close()</span><br><span class="line">    fa7b.close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(sys.argv) != <span class="number">5</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Usage: python add_ref_alt.py input.tsv ref6a.fa.gz ref7b.fa.gz out.tsv&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    main(sys.argv[<span class="number">1</span>], sys.argv[<span class="number">2</span>], sys.argv[<span class="number">3</span>], sys.argv[<span class="number">4</span>])</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="三运行前准备---fasta-处理">三、运行前准备 - fasta 处理</h2>
+<p><strong>fasta 如果是压缩格式，必须是 BGZF 压缩 ，不能是普通 <code>gzip</code>压缩格式。</strong></p>
+<p>判断是不是 BGZF 。下面代码是 htslib 自带判断，最靠谱。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">htsfile 6a.fa.gz</span><br></pre></td></tr></table></figure>
+<p>输出示例：</p>
+<ul>
+<li><p><strong>BGZF</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">6a.fa.gz: BGZF compressed data</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>普通 gzip</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">6a.fa.gz: gzip compressed data</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>转换代码如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gunzip ref6a.fa.gz          # 如果是普通 gzip</span><br><span class="line">bgzip ref6a.fa</span><br><span class="line">samtools faidx ref6a.fa.gz</span><br></pre></td></tr></table></figure>
+<p><code>pysam</code> 需要 fasta 有 <code>.fai</code> 索引；第一次运行会自动建，也可以手动建：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">samtools faidx ref6a.fa.gz</span><br><span class="line">samtools faidx ref7b.fa.gz</span><br></pre></td></tr></table></figure>
+<p>安装一下 pysam 包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mamba install pysam</span><br></pre></td></tr></table></figure>
+<p>运行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python add_ref_alt.py snps.tsv ref6a.fa.gz ref7b.fa.gz snps_with_refalt.tsv</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="四你给的例子逻辑验证">四、你给的例子逻辑验证</h2>
+<p>输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">10_11127142	10_10700428	T/C	T/C</span><br><span class="line">10_13026587	10_12598321	A/G	A/G</span><br><span class="line">10_12625800	10_12196013		A/G</span><br><span class="line">10_12678847	10_12249356	A/G	A/G</span><br></pre></td></tr></table></figure>
+<p>处理规则完全按你写的：</p>
+<ol type="1">
+<li><code>SNP_6a</code> 空 → <code>ref_6a/alt_6a</code> 空</li>
+<li><code>SNP_6a</code> 非空 → 取参考碱基</li>
+<li><code>geno_alleles_6a</code> 非空 → ref 在 <code>{a,b}</code> 中，另一个就是 alt</li>
+<li><code>geno_alleles_6a</code> 空但 <code>geno_alleles_7b</code> 非空 → 先用 7b alleles 比；不行就 reverse-complement 再比；还不行 alt 空</li>
+</ol>
+<hr />
+<h2 id="五可选增强如果你后面要扩展">五、可选增强（如果你后面要扩展）</h2>
+<ul>
+<li>支持多等位 <code>A/C/G</code></li>
+<li>ref 和 alleles 大小写统一 + N 处理</li>
+<li>用 <code>pyfaidx</code> 代替 pysam（接口更像 dict）</li>
+<li>输出 alt 为空时打 reason：<code>no_alleles / ref_not_in_alleles / rc_fail</code></li>
+</ul>
+<p>如果你愿意，我可以再帮你写一个 <strong>bedtools getfasta + awk</strong> 版本，或者把 alt 为空的原因也写进输出里。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/8eefb5de/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            scnet购买并使用gpu资源
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/1b7059a9/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">win11禁止系统更新</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

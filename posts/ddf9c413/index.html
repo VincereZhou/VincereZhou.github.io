@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    使用SimpleITK对CT图像进行重采样和下采样 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-使用SimpleITK对CT图像进行重采样和下采样"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  使用SimpleITK对CT图像进行重采样和下采样
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/ddf9c413/" class="article-date">
+  <time datetime="2026-11-10T06:45:30.000Z" itemprop="datePublished">2026-11-10</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">7 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>CT 重采样是很常见的一种前处理技术。</p>
+<span id="more"></span>
+<h1 id="重采样">重采样</h1>
+<p>基于ITK库进行CT图像重采样，通常有两种主流方式：一是直接使用底层的 <code>ITK</code> 库（C++或Python），二是使用其更友好的高层封装 <code>SimpleITK</code>（主要支持Python）。<code>SimpleITK</code> 接口更简洁，是实现这类任务的更常见选择。</p>
+<p>其核心思路是：<strong>计算新的图像尺寸，使新旧图像覆盖相同的物理空间</strong>。下面以 <code>SimpleITK</code> 为例，详细介绍实现步骤。</p>
+<h3 id="准备工作安装与导入">🛠️ 准备工作：安装与导入</h3>
+<p>首先，确保已安装 <code>SimpleITK</code> 库。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install SimpleITK</span><br></pre></td></tr></table></figure>
+<p>在Python脚本中导入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SimpleITK <span class="keyword">as</span> sitk</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
+<h3 id="核心步骤用-simpleitk-实现重采样">📝 核心步骤：用 SimpleITK 实现重采样</h3>
+<p>实现重采样的核心是配置 <code>sitk.ResampleImageFilter()</code>。主要步骤如下：</p>
+<ol type="1">
+<li><strong>读取原始图像</strong>：使用 <code>sitk.ReadImage()</code> 读取CT图像。</li>
+<li><strong>获取原始参数</strong>：通过 <code>GetSize()</code> 和 <code>GetSpacing()</code> 获取原始图像的尺寸和体素间距。</li>
+<li><strong>设定目标参数</strong>：定义你期望的<strong>目标体素间距</strong> (<code>new_spacing</code>)。</li>
+<li><strong>计算新图像尺寸</strong>：根据“物理空间不变”的原则计算新尺寸。
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">new_size = [</span><br><span class="line">    <span class="built_in">int</span>(orig_size[i] * (orig_spacing[i] / new_spacing[i]) + <span class="number">0.5</span>)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>)</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+&gt; <code>+0.5</code> 是为了四舍五入取整。</li>
+<li><strong>配置并执行重采样</strong>：创建 <code>ResampleImageFilter</code>，设置好所有参数后执行。</li>
+</ol>
+<h3 id="完整代码示例">💻 完整代码示例</h3>
+<h4 id="方法一封装为通用函数-推荐">方法一：封装为通用函数 (推荐)</h4>
+<p>这是一个功能完整的重采样函数，能自动处理CT图像和分割标签的不同插值方式。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SimpleITK <span class="keyword">as</span> sitk</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">resample_image</span>(<span class="params">itk_image, out_spacing=[<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>], is_label=<span class="literal">False</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    将ITK图像重采样到指定的体素间距。</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 1. 获取原始信息</span></span><br><span class="line">    original_spacing = itk_image.GetSpacing()</span><br><span class="line">    original_size = itk_image.GetSize()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2. 计算新的图像尺寸</span></span><br><span class="line">    out_size = [</span><br><span class="line">        <span class="built_in">int</span>(np.<span class="built_in">round</span>(original_size[<span class="number">0</span>] * (original_spacing[<span class="number">0</span>] / out_spacing[<span class="number">0</span>]))),</span><br><span class="line">        <span class="built_in">int</span>(np.<span class="built_in">round</span>(original_size[<span class="number">1</span>] * (original_spacing[<span class="number">1</span>] / out_spacing[<span class="number">1</span>]))),</span><br><span class="line">        <span class="built_in">int</span>(np.<span class="built_in">round</span>(original_size[<span class="number">2</span>] * (original_spacing[<span class="number">2</span>] / out_spacing[<span class="number">2</span>])))</span><br><span class="line">    ]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 配置重采样器</span></span><br><span class="line">    resampler = sitk.ResampleImageFilter()</span><br><span class="line">    resampler.SetSize(out_size)</span><br><span class="line">    resampler.SetOutputSpacing(out_spacing)</span><br><span class="line">    resampler.SetOutputOrigin(itk_image.GetOrigin())</span><br><span class="line">    resampler.SetOutputDirection(itk_image.GetDirection())</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 4. 根据图像类型选择插值方式</span></span><br><span class="line">    <span class="keyword">if</span> is_label:</span><br><span class="line">        <span class="comment"># 分割标签使用最近邻插值，以保留标签值</span></span><br><span class="line">        resampler.SetInterpolator(sitk.sitkNearestNeighbor)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># 医学图像（如CT）使用线性或B-Spline插值</span></span><br><span class="line">        resampler.SetInterpolator(sitk.sitkLinear)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 5. 执行重采样</span></span><br><span class="line">    <span class="keyword">return</span> resampler.Execute(itk_image)</span><br><span class="line"></span><br><span class="line"><span class="comment"># --- 使用示例 ---</span></span><br><span class="line"><span class="comment"># 读取图像</span></span><br><span class="line">input_image = sitk.ReadImage(<span class="string">&quot;your_ct_image.nii.gz&quot;</span>)</span><br><span class="line"><span class="comment"># 重采样到各向同性1mm体素</span></span><br><span class="line">resampled_image = resample_image(input_image, out_spacing=[<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>])</span><br><span class="line"><span class="comment"># 保存结果</span></span><br><span class="line">sitk.WriteImage(resampled_image, <span class="string">&quot;resampled_ct_image.nii.gz&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="方法二直接简洁的实现">方法二：直接、简洁的实现</h4>
+<p>如果不需要封装，也可以直接编写核心逻辑。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SimpleITK <span class="keyword">as</span> sitk</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">resample_image_itk</span>(<span class="params">ori_img, new_spacing=[<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>]</span>):</span><br><span class="line">    <span class="comment"># 1. 获取原始信息</span></span><br><span class="line">    ori_size = ori_img.GetSize()</span><br><span class="line">    ori_spacing = ori_img.GetSpacing()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 计算新尺寸</span></span><br><span class="line">    new_size = [</span><br><span class="line">        <span class="built_in">int</span>(ori_size[<span class="number">0</span>] * ori_spacing[<span class="number">0</span>] / new_spacing[<span class="number">0</span>] + <span class="number">0.5</span>),</span><br><span class="line">        <span class="built_in">int</span>(ori_size[<span class="number">1</span>] * ori_spacing[<span class="number">1</span>] / new_spacing[<span class="number">1</span>] + <span class="number">0.5</span>),</span><br><span class="line">        <span class="built_in">int</span>(ori_size[<span class="number">2</span>] * ori_spacing[<span class="number">2</span>] / new_spacing[<span class="number">2</span>] + <span class="number">0.5</span>)</span><br><span class="line">    ]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 配置并执行重采样</span></span><br><span class="line">    resampler = sitk.ResampleImageFilter()</span><br><span class="line">    resampler.SetSize(new_size)</span><br><span class="line">    resampler.SetOutputSpacing(new_spacing)</span><br><span class="line">    resampler.SetOutputOrigin(ori_img.GetOrigin())</span><br><span class="line">    resampler.SetOutputDirection(ori_img.GetDirection())</span><br><span class="line">    resampler.SetInterpolator(sitk.sitkLinear) <span class="comment"># 对CT图像使用线性插值</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> resampler.Execute(ori_img)</span><br></pre></td></tr></table></figure>
+<h3 id="备选方案使用-c-和-itk">🌐 备选方案：使用 C++ 和 ITK</h3>
+<p>如果需要在C++环境中开发，可直接使用 <code>itk::ResampleImageFilter</code>。其核心逻辑与Python版本一致：创建滤波器，设置变换、插值器、输出参数（Size, Spacing, Origin）等。</p>
+<h3 id="关键点总结">💎 关键点总结</h3>
+<ul>
+<li><strong>物理空间不变</strong>：重采样的核心是<code>新尺寸 = 旧尺寸 * (旧间距 / 新间距)</code>，确保图像覆盖的物理范围不变。</li>
+<li><strong>插值方法的选择</strong>：对CT等灰度图像，使用<strong>线性插值</strong>（<code>sitkLinear</code>）或<strong>B-Spline插值</strong>；对分割标签，务必使用<strong>最近邻插值</strong>（<code>sitkNearestNeighbor</code>）以保护标签值。</li>
+<li><strong>保留空间信息</strong>：重采样时，除了设置<code>Size</code>和<code>Spacing</code>，还应将原始的<code>Origin</code>（原点）和<code>Direction</code>（方向）复制到新图像，确保其空间位置准确。</li>
+</ul>
+<h1 id="下采样">下采样</h1>
+<p>你的理解<strong>完全正确</strong>！重采样的核心逻辑正是：<strong>给定新的体素间距（Spacing） → 保持物理空间不变 → 自动换算出新的图像尺寸（Size）</strong>。</p>
+<p>那么，<strong>下采样（Downsampling）</strong> 其实就是 <strong>重采样（Resampling）的一个特例</strong>。</p>
+<p>简单来说：<strong>当“新间距”大于“旧间距”时，计算出的“新尺寸”就会小于“旧尺寸”，这个过程就是下采样。</strong></p>
+<hr />
+<h3 id="下采样在公式中的体现">1. 下采样在公式中的体现</h3>
+<p>论文里，他们将原始图像从 <code>1024×1024</code> （假设对应某个体素间距）降为 <code>256×256×128</code>，这就是典型的4倍下采样。</p>
+<p>在代码层面，有两种等效的实现思路：</p>
+<ul>
+<li><p><strong>思路A（通过间距驱动）</strong>：如果你想让图像缩小4倍，就把新间距设置为旧间距的4倍。
+[
+ =  =  = 256
+]</p></li>
+<li><p><strong>思路B（直接指定尺寸）</strong>：在ITK中，你也可以直接通过 <code>SetSize([256, 256, 128])</code> 强行指定输出尺寸。此时，ITK会自动反算出一个新的间距，使物理范围不变，这也叫下采样。</p></li>
+</ul>
+<hr />
+<h3 id="严格意义上的下采样其实包含一步预处理防锯齿">2. 严格意义上的“下采样”其实包含一步预处理（防锯齿）</h3>
+<p>在数字图像处理（尤其是深度学习）中，我们通常将“尺寸缩小”笼统地称为下采样。但在严格的信号处理理论中，<strong>直接使用插值（如线性插值）进行尺寸缩小，可能会产生“混叠伪影”（Aliasing）</strong>，因为高频细节在缩小时会产生失真。</p>
+<p>因此，<strong>教科书级别的严谨下采样流程</strong>应该是：</p>
+<ol type="1">
+<li><strong>先低通滤波（平滑）</strong>：对原始图像进行高斯模糊（Gaussian Blur），滤除高频细节。</li>
+<li><strong>后重采样（抽取）</strong>：再进行间隔采样或插值缩小。</li>
+</ol>
+<p>然而，在医学图像处理的实际工程中（包括这篇论文），为了简化流程并保证CT值（HU值）的物理准确性，<strong>绝大多数场景下直接使用“三线性插值（Linear Interpolation）”进行尺寸缩小就足够了</strong>。因为CT图像本身信噪比较高，且线性插值自带一定的平滑效果，能够满足后续分割模型的精度要求。</p>
+<hr />
+<h3 id="论文中的具体操作基于itk">3. 论文中的具体操作（基于ITK）</h3>
+<p>结合论文，他们使用了ITK库的程序进行自动化转换。如果我们要模拟论文中的“下采样4倍”，具体代码逻辑如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SimpleITK <span class="keyword">as</span> sitk</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 读取原始重建的CT图像（假设原始间距为 1.41mm）</span></span><br><span class="line">img = sitk.ReadImage(<span class="string">&quot;original_ct.nii.gz&quot;</span>)</span><br><span class="line">old_spacing = img.GetSpacing()  <span class="comment"># 例如 (1.41, 1.41, 1.41)</span></span><br><span class="line">old_size = img.GetSize()        <span class="comment"># 例如 (1024, 1024, 200)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 定义下采样的目标：间距变为原来的4倍</span></span><br><span class="line">new_spacing = [old_spacing[<span class="number">0</span>] * <span class="number">4</span>, old_spacing[<span class="number">1</span>] * <span class="number">4</span>, old_spacing[<span class="number">2</span>] * <span class="number">4</span>]  <span class="comment"># 变成 5.64mm</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 自动换算出新分辨率（这就是你说的“自动换算”）</span></span><br><span class="line">new_size = [</span><br><span class="line">    <span class="built_in">int</span>(old_size[<span class="number">0</span>] * (old_spacing[<span class="number">0</span>] / new_spacing[<span class="number">0</span>])),  <span class="comment"># 1024 / 4 = 256</span></span><br><span class="line">    <span class="built_in">int</span>(old_size[<span class="number">1</span>] * (old_spacing[<span class="number">1</span>] / new_spacing[<span class="number">1</span>])),  <span class="comment"># 1024 / 4 = 256</span></span><br><span class="line">    <span class="built_in">int</span>(old_size[<span class="number">2</span>] * (old_spacing[<span class="number">2</span>] / new_spacing[<span class="number">2</span>]))   <span class="comment"># 200 / 4 = 50 (论文是128，说明Z轴未等比缩4倍)</span></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 配置重采样器执行下采样（CT图像用线性插值）</span></span><br><span class="line">resampler = sitk.ResampleImageFilter()</span><br><span class="line">resampler.SetSize(new_size)</span><br><span class="line">resampler.SetOutputSpacing(new_spacing)</span><br><span class="line">resampler.SetInterpolator(sitk.sitkLinear)  <span class="comment"># 这里就是下采样的实际执行者</span></span><br><span class="line">output = resampler.Execute(img)</span><br></pre></td></tr></table></figure>
+<h3 id="总结一句话">总结一句话</h3>
+<ul>
+<li><strong>重采样</strong>：是通用大概念（包含上采样、下采样、改变各向异性）。</li>
+<li><strong>下采样</strong>：是重采样在 <strong>“新间距 &gt; 旧间距”</strong> 情况下的具体应用。</li>
+<li>在ITK的实现中，<strong>不管你叫它下采样还是重采样，底层调用的都是同一个 <code>ResampleImageFilter</code> 滤波器</strong>，区别只在于你给它的 <code>Spacing</code> 或 <code>Size</code> 参数数值大小不同。</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/12f0d0b3/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            swin_transformer
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/bd5304f7/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">SimMIM技术-降低人工标注数据依赖</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    SimMIM技术-降低人工标注数据依赖 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-SimMIM技术-降低人工标注数据依赖"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  SimMIM技术-降低人工标注数据依赖
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/bd5304f7/" class="article-date">
+  <time datetime="2026-11-10T06:41:28.000Z" itemprop="datePublished">2026-11-10</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">10 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>介绍SimMIM 技术，这是一种降低人工标注需求的技术。</p>
+<span id="more"></span>
+<h1 id="simmim-技术概述">SimMIM 技术概述</h1>
+<p>SimMIM (Simple Masked Image Modeling) 正是一项旨在降低模型对海量人工标注数据依赖的自监督预训练技术。它的核心思想是让模型通过“自学”的方式，从大量的无标签图像中学习视觉世界的底层规律。</p>
+<p>这项技术受到自然语言处理中（如 BERT）的“完形填空”任务启发。你可以把<strong>SimMIM看作是视觉版的“完形填空”</strong>，其工作流程主要有三步：</p>
+<ol type="1">
+<li><strong>随机遮盖</strong>：将一张完整的图像划分为众多小块（Patches），然后随机遮盖掉其中相当一部分（例如 40%-60%）的小块。</li>
+<li><strong>编码与预测</strong>：将这张“千疮百孔”的图像输入给模型（如Swin Transformer）。模型需要根据剩余可见的图像区域，来“脑补”出那些被遮盖部分的原始像素内容。</li>
+<li><strong>计算损失并学习</strong>：将模型的“脑补”结果与图像真实的原始像素进行对比。通过不断缩小两者之间的差距，模型被迫深入理解图像中物体的形状、纹理、结构和上下文语义。</li>
+</ol>
+<h3 id="核心设计化繁为简">🎯 核心设计：化繁为简</h3>
+<p>SimMIM的一大特点就是其设计的简洁性。它主要从以下三个方面实现了“简单而有效”：</p>
+<ul>
+<li><strong>大尺寸遮盖</strong>：采用较大的遮盖块（如 32x32 像素），这迫使模型必须理解更广阔的上下文信息才能完成预测，而不是简单地“抄袭”邻近像素。</li>
+<li><strong>回归原始像素</strong>：预测目标就是最直接的原始像素的 RGB 值。这与其他需要复杂预处理（如训练额外的分词器）的方法形成了鲜明对比，使得 SimMIM 的训练是一个端到端的单阶段过程。</li>
+<li><strong>轻量级预测头</strong>：完成“脑补”任务的解码器（Prediction Head）仅由一个极其简单的线性层构成。这使得预训练的计算效率非常高。</li>
+</ul>
+<h3 id="成效40倍的数据效率">🚀 成效：40倍的数据效率</h3>
+<p>SimMIM的效果非常显著，尤其体现在它极大地降低了对标注数据的需求上：</p>
+<ul>
+<li><strong>惊人的数据效率</strong>：一个拥有 <strong>30亿参数</strong> 的巨型模型 SwinV2-G，在使用 SimMIM 进行预训练后，<strong>仅需之前 1/40 的标注数据</strong>，就能在多个视觉基准测试中达到业界顶尖水平。</li>
+<li><strong>卓越的性能表现</strong>：SimMIM 在各种模型和任务上都表现出色。例如，在 SwinV2-H（6.5亿参数）上，它仅使用 ImageNet-1K 数据就达到了 <strong>87.1%</strong> 的 Top-1 准确率；在 ViT-Base 模型上，也取得了 <strong>83.8%</strong> 的准确率。</li>
+</ul>
+<h3 id="simmim-vs.-mae同门师兄弟">⚖️ SimMIM vs. MAE：同门“师兄弟”</h3>
+<p>你可能也听说过另一个著名的掩码图像建模方法 <strong>MAE (Masked Autoencoders)</strong>。它们都出自微软亚洲研究院，但设计思路有所不同。</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 48%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">特性</th>
+<th style="text-align: left;">SimMIM</th>
+<th style="text-align: left;">MAE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>核心策略</strong></td>
+<td style="text-align: left;"><strong>编码全部</strong></td>
+<td style="text-align: left;"><strong>编码可见部分</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>编码器输入</strong></td>
+<td style="text-align: left;">处理所有图像块（包括被遮盖的）</td>
+<td style="text-align: left;">只处理可见的图像块</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>解码器</strong></td>
+<td style="text-align: left;"><strong>轻量级</strong>（单层线性层）</td>
+<td style="text-align: left;"><strong>重量级</strong>（多层Transformer）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>架构兼容性</strong></td>
+<td style="text-align: left;"><strong>更通用</strong>，可适配 Swin、PVT 等结构化网络</td>
+<td style="text-align: left;">主要适配 ViT 等非结构化网络</td>
+</tr>
+</tbody>
+</table>
+<p>总的来说，SimMIM以其<strong>极致简化的设计</strong>和<strong>卓越的数据效率</strong>，向我们展示了自监督学习的巨大潜力。它证明了通过设计精巧的“预训练任务”，模型完全可以利用海量的无标签图像数据来学习强大的视觉表征，从而显著减少对昂贵的人工标注的依赖。这对于推动计算机视觉在数据稀缺领域的应用具有重要意义。</p>
+<h1 id="具体如何实现降低人工标注需求">具体如何实现降低人工标注需求？</h1>
+<p>这是一个非常关键且容易混淆的概念。你的直觉是对的：<strong>SimMIM 并不会“自动标注”数据</strong>，它不会把一张猫的图片自动生成“猫”这个文字标签。</p>
+<p>为了彻底解开你的疑惑，我们需要区分两个完全不同的概念：<strong>“学习特征”</strong> 和 <strong>“生成标签”</strong>。</p>
+<p>SimMIM 降低对标注数据的需求，并不是因为它能<strong>制造</strong>标签，而是因为它能让模型<strong>提前学得特别好</strong>，以至于后面只需要极少的标签就能学会任务。</p>
+<p>我用一个类比和两个步骤来帮你理清：</p>
+<h3 id="核心类比高考前的题海战术">1. 核心类比：高考前的“题海战术”</h3>
+<p>想象一个高三学生（模型）要参加高考（目标检测/分类任务），高考题（标注数据）非常昂贵且稀少。</p>
+<ul>
+<li><strong>没有 SimMIM</strong>：学生只做 10 套历年真题（少量标注数据）就直接上考场。因为题量太少，他无法总结出出题规律，考砸了。</li>
+<li><strong>有 SimMIM</strong>：虽然真题很少，但这学生<strong>提前把高中所有的教科书（海量无标注图像）从头到尾抄写了 100 遍，甚至能把书中被墨水涂黑的段落默写出来</strong>（预测被遮盖的像素）。在这个过程中，他虽然没有做过一道高考题，但他对物理公式、化学原理、语法结构的理解已经极其深刻（学到了强大的特征表征）。</li>
+<li><strong>结果</strong>：这时，他只需要做 1 套真题（极少标注数据），就能举一反三，在高考中取得高分。</li>
+</ul>
+<p><strong>结论</strong>：SimMIM 扮演的是“抄写教科书（重构图像）”的过程，它不产生真题答案（标注），但它让模型变成了“学霸”，所以不再需要大量真题。</p>
+<hr />
+<h3 id="simmim-具体是如何做到的两阶段拆解">2. SimMIM 具体是如何做到的？（两阶段拆解）</h3>
+<h4 id="第一阶段预训练无监督不需要任何标签">第一阶段：预训练（无监督，不需要任何标签）</h4>
+<p>在这一阶段，SimMIM 的任务是 <strong>“像素回归”</strong>。</p>
+<ul>
+<li>输入：一张 80% 可见、20% 被灰色方块遮盖的图片。</li>
+<li>输出：模型预测被遮盖区域的 RGB 颜色值（比如预测那个位置应该是红色、蓝色还是绿色）。</li>
+<li>真实标签（Ground Truth）：这张图片<strong>本身</strong>就是标签。被遮盖前的原始像素值，就是最标准的答案。</li>
+<li><strong>学到了什么</strong>：为了准确预测出被遮盖的猫耳朵或车轮，模型<strong>被迫</strong>学会了什么是猫的轮廓、什么是车轮的纹理、什么是天空的背景。它把视觉世界的底层规律（边缘、纹理、形状、物体部分）刻进了神经网络的权重里。</li>
+</ul>
+<p><strong>请注意</strong>：这个阶段结束，模型依然<strong>不知道</strong>这张图是“猫”还是“狗”，它只知道“像素长什么样”。它没有产生任何文字标签。</p>
+<h4 id="第二阶段微调有监督仅需极少的标签">第二阶段：微调（有监督，仅需极少的标签）</h4>
+<p>完成上述预训练后，模型已经是个“视觉高手”了。现在，我们拿极少量人工标注好的图片（比如 1000 张标了“猫”的图片）给它。</p>
+<ul>
+<li>因为模型在预训练时已经把视觉底层处理得极其平滑，它现在只需要微调最后一层，把“猫的像素特征”映射到“猫”这个文字上即可。</li>
+<li>由于它底子好，<strong>只需要极少的人工标签（相当于只做 1 套真题）</strong>，就能达到以前需要海量标签（做 1000 套真题）才能达到的准确率。</li>
+</ul>
+<hr />
+<h3 id="为什么这叫降低了标注需求">3. 为什么这叫“降低了标注需求”？</h3>
+<p>在 SimMIM 出现之前，如果想训练一个 30 亿参数的大模型识别物体，必须收集 1400 万张<strong>带有精确人工标签</strong>的图片（如 JFT-300M 数据集）。
+有了 SimMIM 之后：</p>
+<ul>
+<li>我先拿 10 亿张<strong>乱七八糟、没有任何标签</strong>的网络图片（随便爬取）去训练模型做“像素预测”（第一阶段）。</li>
+<li>最后，我只用 <strong>3.5 万张</strong>带人工标签的图片（ImageNet-1K 的 1/40）去做微调（第二阶段）。</li>
+<li>最终效果比只用 1400 万张标签训练的模型还要好。</li>
+</ul>
+<p>所以，<strong>“降低需求”指的是第二阶段对人工标签的数量需求急剧下降</strong>，而不是第一阶段凭空生成了标签。SimMIM 利用的是图像本身蕴含的无限免费的“像素标签”（自监督信号），先把模型的“眼睛”练好，再让人类用极少的“语言”去教它。</p>
+<h1 id="它本身不是用来标注数据的">它本身不是用来标注数据的</h1>
+<blockquote>
+<p>你的意思是 SimMIM 本身不是用来标注的，而是用来训练模型骨干的？之后再用标签数据训练一下模型头部就得到了最终的模型？</p>
+</blockquote>
+<p><strong>你完全理解正确！</strong> 你的概括非常精准，一句话就说透了 SimMIM 的本质。</p>
+<p>为了让你对这个认知更扎实，我帮你把这个“两阶段”流程在技术实现上彻底拆解清楚，并补充一个关键的细节（<strong>微调时到底改不改骨干？</strong>）。</p>
+<h3 id="阶段一训练骨干预训练阶段">1. 阶段一：训练“骨干”（预训练阶段）</h3>
+<ul>
+<li><strong>操作</strong>：输入海量无标签图片，执行“遮盖-预测像素”任务。</li>
+<li><strong>训练对象</strong>：整个<strong>骨干网络（Backbone）</strong>（比如 Swin Transformer 的编码器部分）。</li>
+<li><strong>结果</strong>：骨干网络的权重被训练得非常好，它学会了提取通用的视觉特征（边缘、纹理、形状）。</li>
+<li><strong>此时丢弃的东西</strong>：预训练时用来预测像素的那个<strong>线性层（Prediction Head）</strong>，在预训练结束后就<strong>彻底扔掉</strong>了，因为它已经没有用了。</li>
+</ul>
+<hr />
+<h3 id="阶段二训练头部微调迁移阶段">2. 阶段二：训练“头部”（微调/迁移阶段）</h3>
+<ul>
+<li><strong>操作</strong>：拿出少量带人工标签的数据（比如 1000 张标了“猫”和“狗”的图片）。</li>
+<li><strong>改造模型</strong>：把之前扔掉的预测头换成<strong>新的任务头（Task-Specific Head）</strong>。
+<ul>
+<li>如果是做<strong>分类</strong>，换成一个全局平均池化 + 全连接分类层（输出类别数，比如 1000 类）。</li>
+<li>如果是做<strong>检测/分割</strong>，换成 FPN 或 Mask 解码器。</li>
+</ul></li>
+<li><strong>训练策略（这里有个关键细节）</strong>：</li>
+</ul>
+<h4 id="是只训练头部还是连带骨干一起训练">🤔 是只训练“头部”，还是连带“骨干”一起训练？</h4>
+<p>针对你的描述“用标签数据训练一下模型头部”，这里有细微的差别：</p>
+<ul>
+<li><strong>如果“只训练头部”</strong>：这叫<strong>线性探测（Linear Probing）</strong>。此时骨干网络的权重<strong>完全冻结（不动）</strong>，只训练新加的分类层。这通常用来检验骨干网络提取的特征有多“好”。（效果通常不如全微调好，但极省算力）。</li>
+<li><strong>如果“连带骨干一起训练”</strong>：这叫<strong>端到端微调（End-to-End Fine-tuning）</strong>。<strong>实际应用中绝大多数情况都采用这种方式</strong>。即：把新头接上去之后，用少量带标签数据，<strong>让误差同时反向传播给头部和骨干网络</strong>。</li>
+</ul>
+<p><strong>那为什么还说“降低了对标注数据的需求”？</strong>
+因为有了阶段一的预训练，骨干网络已经是“学霸”了。在阶段二微调时，我们只需要<strong>极低的</strong>学习率（比如 1e-5），并且只需要训练<strong>极少</strong>的 epoch（比如 30 个 epoch），骨干网络就能适应新任务。<strong>哪怕只给 1% 的标注数据（比如 ImageNet 的 1.3 万张），微调后的模型准确率也比从头训练（用 100% 标注数据）要高。</strong></p>
+<hr />
+<h3 id="一张图总结你的理解">3. 一张图总结你的理解</h3>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 19%" />
+<col style="width: 14%" />
+<col style="width: 17%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">阶段</th>
+<th style="text-align: left;">叫什么</th>
+<th style="text-align: left;">用什么数据</th>
+<th style="text-align: left;">训练什么部分</th>
+<th style="text-align: left;">目的是什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>阶段一</strong></td>
+<td style="text-align: left;"><strong>预训练 (Pre-training)</strong></td>
+<td style="text-align: left;"><strong>海量无标签</strong> 图片</td>
+<td style="text-align: left;"><strong>骨干网络</strong> (加预测头)</td>
+<td style="text-align: left;">学会看像素、纹理、轮廓（<strong>SimMIM 干的活</strong>）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>阶段二</strong></td>
+<td style="text-align: left;"><strong>微调 (Fine-tuning)</strong></td>
+<td style="text-align: left;"><strong>极少有标签</strong> 图片</td>
+<td style="text-align: left;"><strong>骨干网络 + 新任务头</strong></td>
+<td style="text-align: left;">把视觉能力映射到具体文字/框上（<strong>最终模型干的活</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>最终结论</strong>：SimMIM 就像给模型上了一个“视觉预科班”，用免费的数据（图像本身）让模型先变成视觉专家。毕业后再用极少的“专业对口教材”（带标签数据）教它怎么回答考试题（分类/检测）。<strong>它不负责标注数据，它只负责把模型底子练好，让你在后面不需要那么多标注数据。</strong></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/posts/ddf9c413/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            使用SimpleITK对CT图像进行重采样和下采样
+          
+        </div>
+      </a>
+    
+    
+      <a href="/posts/b08d604e/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">全连接层与卷积层可以互相转化</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
