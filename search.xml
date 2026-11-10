@@ -850,13 +850,14 @@
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>记录一下这个过程，后续可以复用。</p>
 <span id="more"></span>
 <h1 id="需求">需求</h1>
-<p>写个脚本，提取2个参考基因组 6a 和 7b 的 ref 和 alt 碱基
-输入文件1格式：前两列的SNP名称均为 chrom_position ，分别是 6a 和 7b 的SNP (chrom_pos, 1_index)，隔，空字符串表示缺失。</p>
+<p>写个脚本，提取2个参考基因组 6a 和 7b 的 ref 和 alt 碱基</p>
+<p>输入文件1格式：前两列的SNP名称均为 chrom_position ，分别是 6a 和 7b 的SNP (chrom_pos, 1_index)，隔，空字符串表示缺失。</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SNP_6a	SNP_7b	geno_alleles_6a	geno_alleles_7b</span><br><span class="line">10_11127142	10_10700428	T/C	T/C</span><br><span class="line">10_13026587	10_12598321	A/G	A/G</span><br><span class="line">10_12625800	10_12196013		A/G</span><br><span class="line">10_12678847	10_12249356	A/G	A/G</span><br></pre></td></tr></table></figure>
-<p>输入文件2：6a参考基因组 fasta ，格式 fa.gz
-输入文件3：7b参考基因组 fasta ，格式 fa.gz</p>
+<p>输入文件2：6a参考基因组 fasta ，格式 fa.gz</p>
+<p>输入文件3：7b参考基因组 fasta ，格式 fa.gz</p>
 <p>输出文件： 输入文件1后面增加4列 ref_6a， alt_6a 和 ref_7b， alt_7b</p>
 <p>脚本逻辑，以 6a 为例，7b同理</p>
+<blockquote>
 <ol type="1">
 <li>如果 SNP_6a 为空，则 ref_6a 和 val_6a 均为空，continue</li>
 <li>如果 SNP_6a 不为空，提取6a参考基因组相应位点(SNP_6a)的碱基，即 ref_6a，下面开始提取 val_6a
@@ -866,6 +867,7 @@
 2.2.2 不然对 geno_alleles_7b 的两个碱基进行翻转，再次比较，如果 ref_6a 在这两个碱基中，则另一个为 val_6a<br />
 2.2.3 还不行则 val_6a 为空</li>
 </ol>
+</blockquote>
 <p>注意：fasta 文件较大，请使用专业包来从fasta文件中提取ref碱基，提高效率！</p>
 <h1 id="ai答复">AI答复</h1>
 <p>下面给你一个<strong>用 pysam 的 Python 脚本</strong>。<code>pysam.FastaFile</code> 底层是 htslib/samtools faidx，支持对大参考基因组做<strong>随机访问</strong>，比反复读整个 fasta 快很多。</p>
