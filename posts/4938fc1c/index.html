@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta name="baidu-site-verification" content="codeva-NSg7ynviLa" />
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    软件minimap2 |  
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/images/mojie.jpg" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-软件minimap2"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  软件minimap2
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/posts/4938fc1c/" class="article-date">
+  <time datetime="2026-11-10T09:24:06.000Z" itemprop="datePublished">2026-11-10</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">5 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>之前查了一下 minimap2 的官方文档，但是没有整理，下面内容是让AI自动写的。</p>
+<span id="more"></span>
+<h1 id="minimap2-使用文档">minimap2 使用文档</h1>
+<blockquote>
+<p>minimap2：高效序列比对工具，适用于长读长（ONT / PacBio）、短读长、组装比对、RNA 剪接比对、读段重叠检测。<br />
+默认输出 PAF，可输出 SAM；基于 minimizer 索引，速度快、内存友好。</p>
+</blockquote>
+<p>官方仓库：https://github.com/lh3/minimap2</p>
+<hr />
+<h2 id="安装">1. 安装</h2>
+<h3 id="源码编译">源码编译</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/lh3/minimap2</span><br><span class="line"><span class="built_in">cd</span> minimap2</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<h3 id="conda">conda</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install -c bioconda minimap2</span><br></pre></td></tr></table></figure>
+<h3 id="验证">验证</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 --version</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="基本思想">2. 基本思想</h2>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">参考序列（target） → 建索引</span><br><span class="line">查询序列（query）  → 比对到参考</span><br></pre></td></tr></table></figure>
+<ul>
+<li>输入：FASTA / FASTQ（支持 gzip）</li>
+<li>输出：
+<ul>
+<li>默认：PAF（轻量比对格式）</li>
+<li><code>-a</code>：SAM</li>
+<li><code>-c</code>：带 CIGAR 的 PAF</li>
+</ul></li>
+</ul>
+<p>最小示例：
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 ref.fa query.fq &gt; approx.paf</span><br></pre></td></tr></table></figure></p>
+<hr />
+<h2 id="索引推荐先建">3. 索引（推荐先建）</h2>
+<p>对大参考基因组，重复比对时先建索引可大幅节省时间。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建索引</span></span><br><span class="line">minimap2 -d ref.mmi ref.fa</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用索引比对</span></span><br><span class="line">minimap2 -ax map-ont ref.mmi reads.fq.gz &gt; aln.sam</span><br></pre></td></tr></table></figure>
+<p>注意：
+- 索引一旦建成，<code>-k/-w/-H/-I</code> 等索引参数<strong>不能改</strong>
+- 不同数据类型建议建不同索引</p>
+<hr />
+<h2 id="常用-preset核心">4. 常用 Preset（核心）</h2>
+<blockquote>
+<p>规则：<code>-x</code> 放前面，后面参数会覆盖 preset 内部设置</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ONT 长读长</td>
+<td><code>-ax map-ont</code></td>
+</tr>
+<tr>
+<td>PacBio CLR</td>
+<td><code>-ax map-pb</code></td>
+</tr>
+<tr>
+<td>PacBio HiFi</td>
+<td><code>-ax map-hifi</code></td>
+</tr>
+<tr>
+<td>高质量 ONT（Q20+）</td>
+<td><code>-ax lr:hq</code></td>
+</tr>
+<tr>
+<td>Illumina 短读长</td>
+<td><code>-ax sr</code></td>
+</tr>
+<tr>
+<td>组装比对（近缘，~0.1% 差异）</td>
+<td><code>-ax asm5</code></td>
+</tr>
+<tr>
+<td>组装比对（~1% 差异）</td>
+<td><code>-ax asm10</code></td>
+</tr>
+<tr>
+<td>组装比对（几个百分点差异）</td>
+<td><code>-ax asm20</code></td>
+</tr>
+<tr>
+<td>RNA 长读长剪接</td>
+<td><code>-ax splice</code></td>
+</tr>
+<tr>
+<td>高质量 RNA 长读长</td>
+<td><code>-ax splice:hq</code></td>
+</tr>
+<tr>
+<td>读段自重叠（ONT）</td>
+<td><code>-x ava-ont</code></td>
+</tr>
+<tr>
+<td>读段自重叠（PacBio）</td>
+<td><code>-x ava-pb</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="典型实战命令">5. 典型实战命令</h2>
+<h3 id="ont-基因组读段比对">5.1 ONT 基因组读段比对</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -t 16 -ax map-ont ref.mmi ont.reads.fq.gz &gt; aln.sam</span><br><span class="line">samtools <span class="built_in">sort</span> -o aln.bam aln.sam</span><br><span class="line">samtools index aln.bam</span><br></pre></td></tr></table></figure>
+<h3 id="pacbio-hifi">5.2 PacBio HiFi</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -t 16 -ax map-hifi ref.fa hifi.fq.gz &gt; aln.sam</span><br></pre></td></tr></table></figure>
+<h3 id="短读长双端">5.3 短读长（双端）</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -t 16 -ax sr ref.fa r1.fq.gz r2.fq.gz &gt; aln.sam</span><br></pre></td></tr></table></figure>
+<h3 id="组装比对到参考">5.4 组装比对到参考</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -ax asm10 ref.fa assembly.fa &gt; asm.paf</span><br></pre></td></tr></table></figure>
+<h3 id="组装间互相比对">5.5 组装间互相比对</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -ax asm20 ref.fa query_assembly.fa &gt; asm.paf</span><br></pre></td></tr></table></figure>
+<h3 id="rna-剪接比对">5.6 RNA 剪接比对</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 未知链</span></span><br><span class="line">minimap2 -ax splice ref.fa cdna.fq &gt; rna.sam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 已知正义链（Iso-seq / cDNA）</span></span><br><span class="line">minimap2 -ax splice -uf ref.fa iso.fq &gt; rna.sam</span><br></pre></td></tr></table></figure>
+<h3 id="读段重叠检测">5.7 读段重叠检测</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -x ava-ont reads.fq reads.fq &gt; ovlp.paf</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="输出格式">6. 输出格式</h2>
+<h3 id="paf默认12-列">6.1 PAF（默认，12 列）</h3>
+<table>
+<thead>
+<tr>
+<th>列</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Query 名</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Query 长度</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Query 起始（0-based）</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Query 结束</td>
+</tr>
+<tr>
+<td>5</td>
+<td>链方向（+/-）</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Target 名</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Target 长度</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Target 起始</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Target 结束</td>
+</tr>
+<tr>
+<td>10</td>
+<td>匹配碱基数</td>
+</tr>
+<tr>
+<td>11</td>
+<td>比对块长度（含 gap）</td>
+</tr>
+<tr>
+<td>12</td>
+<td>比对质量 0–255</td>
+</tr>
+</tbody>
+</table>
+<p>常见可选 tag：
+- <code>cg</code>：CIGAR
+- <code>NM</code>：错配+gap 数
+- <code>cs</code>：差异字符串（变异检测用）
+- <code>dv</code>：近似碱基分歧度
+- <code>tp</code>：P/S（primary/secondary）</p>
+<p>带 CIGAR 的 PAF：
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -cx map-ont ref.fa reads.fq &gt; aln.paf</span><br></pre></td></tr></table></figure></p>
+<h3 id="sam">6.2 SAM</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -ax map-ont ref.fa reads.fq &gt; aln.sam</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="常用参数">7. 常用参数</h2>
+<h3 id="通用">通用</h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-t</code></td>
+<td>线程数</td>
+</tr>
+<tr>
+<td><code>-a</code></td>
+<td>输出 SAM</td>
+</tr>
+<tr>
+<td><code>-c</code></td>
+<td>PAF 中输出 CIGAR</td>
+</tr>
+<tr>
+<td><code>-d</code></td>
+<td>输出索引文件 <code>.mmi</code></td>
+</tr>
+<tr>
+<td><code>-o</code></td>
+<td>输出文件</td>
+</tr>
+<tr>
+<td><code>-Q</code></td>
+<td>忽略质量值</td>
+</tr>
+<tr>
+<td><code>-N</code></td>
+<td>次要比对条数（默认 5）</td>
+</tr>
+<tr>
+<td><code>--cs</code></td>
+<td>输出差异字符串（变异用）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="索引">索引</h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>默认</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-k</code></td>
+<td>15</td>
+<td>minimizer k-mer 长度</td>
+</tr>
+<tr>
+<td><code>-w</code></td>
+<td>10</td>
+<td>minimizer 窗口</td>
+</tr>
+<tr>
+<td><code>-H</code></td>
+<td>关</td>
+<td>同聚物压缩（HPC）</td>
+</tr>
+<tr>
+<td><code>-I</code></td>
+<td>4G</td>
+<td>索引内存上限</td>
+</tr>
+</tbody>
+</table>
+<h3 id="比对调优">比对调优</h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-p</code></td>
+<td>次要比对分数比例阈值</td>
+</tr>
+<tr>
+<td><code>-r</code></td>
+<td>chaining 带宽</td>
+</tr>
+<tr>
+<td><code>-g</code></td>
+<td>最大 gap</td>
+</tr>
+<tr>
+<td><code>--mask-level</code></td>
+<td>重叠屏蔽比例</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="性能建议">8. 性能建议</h2>
+<h3 id="hpc-集群环境">HPC / 集群环境</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -t 32 -ax map-ont ref.mmi reads.fq.gz \</span><br><span class="line">  | samtools <span class="built_in">sort</span> -@ 8 -o aln.bam</span><br></pre></td></tr></table></figure>
+<ul>
+<li>大基因组：先建索引</li>
+<li>多样本：共用同一个 <code>.mmi</code></li>
+<li>内存受限：降低 <code>-I</code>，配合 <code>--split-prefix</code></li>
+<li>不需要碱基级比对：用 PAF，不加 <code>-a/-c</code></li>
+</ul>
+<h3 id="不输出碱基比对最快">不输出碱基比对（最快）</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minimap2 -x asm10 ref.fa qry.fa &gt; aln.paf</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="典型流程长读长-bam">9. 典型流程：长读长 → BAM</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env bash</span></span><br><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"></span><br><span class="line">REF=ref.fa</span><br><span class="line">READS=ont.fq.gz</span><br><span class="line">THREADS=16</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 建索引（只需一次）</span></span><br><span class="line">minimap2 -t <span class="variable">$THREADS</span> -d ref.mmi <span class="variable">$REF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 比对</span></span><br><span class="line">minimap2 -t <span class="variable">$THREADS</span> -ax map-ont ref.mmi <span class="variable">$READS</span> &gt; aln.sam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 排序建索引</span></span><br><span class="line">samtools <span class="built_in">sort</span> -@ <span class="variable">$THREADS</span> -o aln.bam aln.sam</span><br><span class="line">samtools index aln.bam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 统计</span></span><br><span class="line">samtools flagstat aln.bam</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="常见坑">10. 常见坑</h2>
+<ol type="1">
+<li><strong>preset 选错</strong>
+<ul>
+<li>ONT 别用 <code>map-pb</code></li>
+<li>HiFi 别用 <code>map-ont</code></li>
+</ul></li>
+<li><strong>索引参数不能改</strong>
+<ul>
+<li>建索引后换 <code>-k/-w</code> 无效</li>
+</ul></li>
+<li><strong>PAF 没有 CIGAR</strong>
+<ul>
+<li>需要 CIGAR：加 <code>-c</code> 或 <code>-a</code></li>
+</ul></li>
+<li><strong>多分片索引影响 MAPQ</strong>
+<ul>
+<li>大参考降低 <code>-I</code> 会触发多分片索引，MAPQ 可能不准</li>
+</ul></li>
+<li><strong>RNA 比对没开 splice</strong>
+<ul>
+<li>基因组 preset 不会识别内含子</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="一句话速查">11. 一句话速查</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建索引</span></span><br><span class="line">minimap2 -d ref.mmi ref.fa</span><br><span class="line"></span><br><span class="line"><span class="comment"># ONT</span></span><br><span class="line">minimap2 -ax map-ont ref.mmi reads.fq.gz &gt; aln.sam</span><br><span class="line"></span><br><span class="line"><span class="comment"># HiFi</span></span><br><span class="line">minimap2 -ax map-hifi ref.mmi reads.fq.gz &gt; aln.sam</span><br><span class="line"></span><br><span class="line"><span class="comment"># 组装</span></span><br><span class="line">minimap2 -x asm10 ref.fa asm.fa &gt; aln.paf</span><br><span class="line"></span><br><span class="line"><span class="comment"># RNA</span></span><br><span class="line">minimap2 -ax splice ref.fa cdna.fq &gt; rna.sam</span><br></pre></td></tr></table></figure>
+<h1 id="参考资料">参考资料</h1>
+<ol type="1">
+<li>https://github.com/lh3/minimap2</li>
+<li>https://deepwiki.com/lh3/minimap2/2.1-input-and-output-formats</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/posts/18192b85/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">软件3D_Slicer</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2026
+        <i class="ri-heart-fill heart_icon"></i> Vincere Zhou
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+	</ul>
+    <script type="text/javascript">			
+        function show_runtime() {
+            window.setTimeout("show_runtime()", 1000);
+            X = new Date("08/15/2019 21:50:56");
+            Y = new Date();
+            T = (Y.getTime() - X.getTime());
+            M = 24 * 60 * 60 * 1000;
+            a = T / M;
+            A = Math.floor(a);
+            b = (a - A) * 24;
+            B = Math.floor(b);
+            c = (b - B) * 60;
+            C = Math.floor((b - B) * 60);
+            D = Math.floor((c - C) * 60);
+            runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+        }
+        show_runtime();
+    </script>
+
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/mojie.jpg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/weixinpay.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+
+    
+  </div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300,"hOffset":80,"vOffset":-70},"mobile":{"show":false,"scale":0.5},"log":false});</script></body>
+
+</html>
